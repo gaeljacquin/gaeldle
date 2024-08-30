@@ -8,13 +8,13 @@ export interface classicSlice {
   info: {
     [key: string]: unknown;
   };
-  totalAttempts: number;
-  attemptsLeft: number;
+  lives: number;
+  livesLeft: number;
   guesses: Game[];
   played: boolean;
   won: boolean;
   date: Date;
-  updateAttempts: () => void;
+  updateLives: () => void;
   updateGuesses: (arg0: Game | null) => void;
   markAsPlayed: () => void;
   markAsWon: () => void;
@@ -26,24 +26,24 @@ export interface classicSlice {
 }
 
 export const defaultClassic = {
-  name: "Fire Emblem: Awakening",
-  igdbId: 1443,
-  imageUrl: "https://images.igdb.com/igdb/image/upload/t_720p/co668y.webp",
+  name: "",
+  igdbId: 0,
+  imageUrl: "/placeholder.jpg",
   info: null,
-  totalAttempts: 5,
-  attemptsLeft: 5,
+  lives: 0,
+  livesLeft: 0,
   guesses: [],
   played: false,
   won: false,
-  date: "2024-08-25T19:43:04.202Z",
-  pixelation: 20,
-  pixelationStep: 4,
+  date: "",
+  pixelation: 0,
+  pixelationStep: 0,
 };
 
 const createClassicSlice = (set: (arg0: unknown) => void) => ({
   ...defaultClassic,
-  updateAttempts: () =>
-    set((state: classicSlice) => ({ attemptsLeft: state.attemptsLeft - 1 })),
+  updateLives: () =>
+    set((state: classicSlice) => ({ livesLeft: state.livesLeft - 1 })),
   updateGuesses: (guess: Game) =>
     set((state: classicSlice) => ({ guesses: [...state.guesses, guess] })),
   markAsPlayed: () => {
@@ -60,9 +60,21 @@ const createClassicSlice = (set: (arg0: unknown) => void) => ({
     set({ pixelation: 0 });
   },
   setGotd: (gotd: Gotd) => {
-    const { igdbId, games } = gotd;
+    console.log(gotd);
+    const { igdbId, games, modes } = gotd;
     const { name, imageUrl, info } = games;
-    set({ name, igdbId, imageUrl, info });
+    const { label, lives, pixelation, pixelationStep } = modes;
+    set({
+      name,
+      igdbId,
+      imageUrl,
+      info,
+      label,
+      lives,
+      livesLeft: lives,
+      pixelation,
+      pixelationStep,
+    });
   },
 });
 

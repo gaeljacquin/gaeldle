@@ -7,8 +7,8 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import useGaeldleStore from '@/stores/gaeldle-store';
-import useClassicStore from '@/stores/classic/store';
-import { classicSlice } from '@/stores/classic/slice';
+import useClassicStore from '@/stores/classic-store';
+import { classicSlice } from '@/stores/classic-slice';
 import { gamesSlice } from '@/stores/games-slice';
 import { Button } from "@/components/ui/button"
 import {
@@ -42,6 +42,7 @@ import { Games } from "@/types/game";
 type ClassicProps = {
   gotd: Gotd
   getGamesAction: () => Promise<Games>
+  newGotd: boolean
 }
 
 const FormSchema = z.object({
@@ -55,11 +56,11 @@ const FormSchema = z.object({
   })
 })
 
-export default function Classic({ gotd, getGamesAction }: ClassicProps) {
+export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps) {
   const classicSliceState = useClassicStore() as classicSlice;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
-  const { attemptsLeft, totalAttempts, updateAttempts, updateGuesses, name, igdbId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, markAsWon, setGotd } = classicSliceState;
+  const { livesLeft, lives, updateLives, updateGuesses, name, igdbId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, markAsWon, setGotd } = classicSliceState;
   const { setGames, games } = gamesSliceState;
   const { modes } = modesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
@@ -78,9 +79,9 @@ export default function Classic({ gotd, getGamesAction }: ClassicProps) {
     let classes = "-mt-3 -mb-7"
 
     if (!played) {
-      text = `${attemptsLeft} `;
+      text = `${livesLeft} `;
 
-      if (attemptsLeft == 1) {
+      if (livesLeft == 1) {
         text += 'life'
       } else {
         text += 'lives'
@@ -102,10 +103,10 @@ export default function Classic({ gotd, getGamesAction }: ClassicProps) {
 
   function onSkip() {
     updateGuesses(null)
-    updateAttempts()
+    updateLives()
     setPixelation()
 
-    if (attemptsLeft === 1) { // not zero because updateAttempts is async
+    if (livesLeft === 1) { // not zero because updateLives is async
       markAsPlayed()
       removePixelation()
     }
@@ -122,11 +123,11 @@ export default function Classic({ gotd, getGamesAction }: ClassicProps) {
       markAsPlayed()
       removePixelation()
     } else {
-      updateAttempts()
+      updateLives()
       updateGuesses(data.game)
       setPixelation()
 
-      if (attemptsLeft === 1) { // not zero because updateAttempts is async
+      if (livesLeft === 1) { // not zero because updateLives is async
         markAsPlayed()
         removePixelation()
       }
@@ -145,8 +146,14 @@ export default function Classic({ gotd, getGamesAction }: ClassicProps) {
 
     fetchGames();
 
-    void setGotd(gotd);
-  }, [gotd, setGotd, setGames, getGamesAction])
+    if (newGotd) {
+      useClassicStore.persist.clearStorage();
+    }
+
+    if (gotd) {
+      void setGotd(gotd);
+    }
+  }, [gotd, setGotd, setGames, getGamesAction, newGotd]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -187,7 +194,7 @@ export default function Classic({ gotd, getGamesAction }: ClassicProps) {
 
         <div className="w-full max-w-md flex flex-col items-center space-y-8 mt-4">
           {
-            pixelation !== 0 ?
+            !played ?
               <PixelatedImage
                 imageUrl={imageUrl}
                 width={imgWidth}
@@ -201,6 +208,7 @@ export default function Classic({ gotd, getGamesAction }: ClassicProps) {
                 width={imgWidth}
                 height={imgHeight}
                 alt={imgAlt}
+                priority
               />
           }
 
@@ -212,11 +220,11 @@ export default function Classic({ gotd, getGamesAction }: ClassicProps) {
           </div>
 
           <div className="flex justify-center space-x-2">
-            {Array.from({ length: totalAttempts }).map((_, index) => (
+            {Array.from({ length: lives }).map((_, index) => (
               <Heart
                 key={index}
-                className={`w-6 h-6 ${index < attemptsLeft ? 'text-red-600' : ''}`}
-                fill={index < attemptsLeft ? 'currentColor' : 'none'}
+                className={`w-6 h-6 ${index < livesLeft ? 'text-red-600' : ''}`}
+                fill={index < livesLeft ? 'currentColor' : 'none'}
               />
             ))}
           </div>

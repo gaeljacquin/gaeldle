@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import createClassicSlice from "@/stores/classic/slice";
+import createClassicSlice from "@/stores/classic-slice";
 
 const useClassicStore = create(
   persist(

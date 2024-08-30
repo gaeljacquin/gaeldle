@@ -110,6 +110,11 @@ const config = {
           dark: "#c8009a",
           light: "#F48FB1",
         },
+        "gael-yellow": {
+          DEFAULT: "#FFDD00",
+          dark: "#d4eb00",
+          light: "#eeff14",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

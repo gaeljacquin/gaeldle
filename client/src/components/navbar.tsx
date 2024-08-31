@@ -47,13 +47,11 @@ export default function Navbar({ getModesAction }: NavbarProps) {
   }
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
-      <nav className="container mx-auto px-4 py-3 md:py-4">
+    <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-600">
+      <nav className="container mx-auto px-4 py-2 md:py-3 backdrop-filter backdrop-blur-md">
         <div className="flex items-center justify-between">
           <div className="w-16 h-auto">
-            <Link href="https://gaeljacquin.com">
-              <LottieDynamic loop={false} />
-            </Link>
+            <LottieDynamic loop={false} />
           </div>
           <div className="hidden md:flex space-x-4">
             {navLink("/", "Home")}

@@ -67,3 +67,30 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .shadow-animate {
+    box-shadow: 0px 0px 10px 5px #48abe0;
+    animation: shadows 1.5s infinite;
+  }
+
+  .shadow-animate-2 {
+    box-shadow: 0px 0px 10px 5px #48abe0;
+    animation: shadows 1.5s forwards;
+  }
+
+  @keyframes shadows {
+    0% {
+      box-shadow: 0px 0px 10px 5px #48abe0;
+    }
+    50% {
+      box-shadow: 0px 0px 10px 5px blueviolet;
+    }
+    75% {
+      box-shadow: 0px 0px 10px 5px rebeccapurple;
+    }
+    100% {
+      box-shadow: 0px 0px 10px 5px #48abe0;
+    }
+  }
+}

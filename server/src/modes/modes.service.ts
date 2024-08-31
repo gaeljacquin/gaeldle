@@ -17,9 +17,8 @@ export class ModesService {
       try {
         const modes2 = JSON.stringify(
           await this.prisma.modes.findMany({
-            // temporary hard-coding
             where: {
-              id: 1,
+              active: true,
             },
             omit: {
               createdAt: true,
@@ -44,5 +43,36 @@ export class ModesService {
     }
 
     return modes ?? null;
+  }
+
+  async findOne(id) {
+    const key = 'modes';
+    const modes = await this.redisService.getData(key);
+    let mode;
+
+    if (!modes) {
+      mode = await this.prisma.modes.findFirstOrThrow({
+        where: {
+          id: id,
+          active: true,
+        },
+        omit: {
+          createdAt: true,
+          updatedAt: true,
+        },
+        include: {
+          levels: {
+            select: {
+              level: true,
+              label: true,
+            },
+          },
+        },
+      });
+    } else {
+      mode = modes.find((mode) => mode.id === id);
+    }
+
+    return mode ?? null;
   }
 }

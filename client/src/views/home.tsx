@@ -14,17 +14,24 @@ import DisplayCountdown from "@/components/display-countdown"
 import Placeholders from "./placeholders"
 import useGaeldleStore from "@/stores/gaeldle-store"
 import { modesSlice } from "@/stores/modes-slice"
+import { useState } from "react"
+import Transition from "@/components/transition"
 
 export default function Home() {
   const modesSliceState = useGaeldleStore() as modesSlice;
   const { modes } = modesSliceState;
+  const [transition, setTransition] = useState(false)
 
   if (!modes) {
     return <Placeholders />
   }
 
+  if (transition) {
+    return <Transition />
+  }
+
   return (
-    modes &&
+    modes && !transition &&
     <main className="flex-grow flex flex-col items-center space-y-8 p-4">
       <div>
         <p className="text-2xl">A Wordle clone inspired by <Link className="text-gael-blue hover:text-gael-blue-dark hover:underline" href="https://gamedle.wtf" target="_blank">Gamedle</Link></p>
@@ -42,11 +49,14 @@ export default function Home() {
                     <li key={mode + '-' + index} className="flex items-center">
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <Link className="w-full" href={`${mode.mode}`}>
-                            <Button className={`w-full ${mode.levels.classNames} shadow-animate`}>
+                          <Button
+                            onClick={() => setTransition(true)}
+                            className={`w-full ${mode.levels.classNames} shadow-animate`}
+                          >
+                            <Link className="w-full" href={`${mode.mode}`}>
                               {mode.label}
-                            </Button>
-                          </Link>
+                            </Link>
+                          </Button>
                         </HoverCardTrigger>
                         <HoverCardContent className="w-80">
                           <div className="flex justify-between space-x-4">
@@ -82,11 +92,14 @@ export default function Home() {
                     <li key={mode + '-' + index} className="flex items-center">
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <Link className="w-full" href={`${mode.mode}`}>
-                            <Button className={`w-full ${mode.levels.classNames} shadow-animate`}>
+                          <Button
+                            onClick={() => setTransition(true)}
+                            className={`w-full ${mode.levels.classNames} shadow-animate`}
+                          >
+                            <Link className="w-full" href={`${mode.mode}`}>
                               {mode.label}
-                            </Button>
-                          </Link>
+                            </Link>
+                          </Button>
                         </HoverCardTrigger>
                         <HoverCardContent className="w-80">
                           <div className="flex justify-between space-x-4">

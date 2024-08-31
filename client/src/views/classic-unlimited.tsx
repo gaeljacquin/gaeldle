@@ -1,13 +1,13 @@
 'use client';
 
 import Image from "next/image";
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Check, ChevronsUpDown, Heart } from 'lucide-react'
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import useGaeldleStore from '@/stores/gaeldle-store';
-import useClassicStore, { classicStore } from '@/stores/classic-store';
+import useClassicUnlimitedStore, { classicUnlimitedStore } from '@/stores/classic-unlimited-store';
 import { gamesSlice } from '@/stores/games-slice';
 import { Button } from "@/components/ui/button"
 import {
@@ -37,11 +37,11 @@ import { Gotd } from '@/types/gotd';
 import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
 import { Games } from "@/types/game";
+import { comingSoon } from "@/constants/text";
 
-type ClassicProps = {
-  gotd: Gotd
+type ClassicUnlimitedProps = {
+  getRandomGameAction: () => Promise<Gotd>
   getGamesAction: () => Promise<Games>
-  newGotd: boolean
 }
 
 const FormSchema = z.object({
@@ -55,20 +55,19 @@ const FormSchema = z.object({
   })
 })
 
-export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps) {
-  const classicSliceState = useClassicStore() as classicStore;
+export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }: ClassicUnlimitedProps) {
+  const classicUnlimitedSliceState = useClassicUnlimitedStore() as classicUnlimitedStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
-  const { livesLeft, lives, updateLives, updateGuesses, name, igdbId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, markAsWon, setGotd } = classicSliceState;
+  const { livesLeft, lives, updateLives, updateGuesses, name, igdbId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, markAsWon, setRandomGame } = classicUnlimitedSliceState;
   const { setGames, games } = gamesSliceState;
   const { modes } = modesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState<string>('');
-  const mode = modes?.find(val => val.id === 1); // temporary hard-coding
+  const mode = modes?.find(val => val.id === 5); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
-  const imgAlt = `Game of the Day - ${mode?.label}`;
+  const imgAlt = mode ? mode.label : 'Random cover';
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -135,53 +134,43 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
     form.reset();
   }
 
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const games = await getGamesAction();
-        setGames(games);
-      } catch (error) {
-        console.error('Failed to fetch games:', error);
-      }
-    };
+  const fetchRandomGame = useCallback(async () => {
+    try {
+      const game = await getRandomGameAction();
+      setRandomGame(game);
+    } catch (error) {
+      console.error('Failed to fetch game:', error);
+    }
+  }, [getRandomGameAction, setRandomGame]);
 
+  const fetchGames = useCallback(async () => {
+    try {
+      const games = await getGamesAction();
+      setGames(games);
+    } catch (error) {
+      console.error('Failed to fetch games:', error);
+    }
+  }, [getGamesAction, setGames]);
+
+  async function newGame() {
+    form.reset();
+    fetchRandomGame();
+  }
+
+  useEffect(() => {
     fetchGames();
-
-    if (newGotd) {
-      useClassicStore.persist.clearStorage();
-    }
-
-    if (gotd) {
-      void setGotd(gotd);
-    }
-  }, [gotd, setGotd, setGames, getGamesAction, newGotd]);
+  }, [fetchGames]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date();
-      const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
-      const timeDiff = nextDay.getTime() - now.getTime();
+    fetchRandomGame();
+  }, [fetchRandomGame]);
 
-      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-
-      setTimeRemaining(`Next game in ${hours}h ${minutes}m ${seconds}s`);
-
-      if (timeDiff < 0) {
-        setTimeRemaining("Next game will be available shortly 🤩");
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  if (!(games && gotd)) {
+  if (!(games && igdbId)) {
     return <Placeholders />
   }
 
   return (
-    games && gotd &&
+    games && igdbId &&
     <>
       <main className="flex-grow flex flex-col items-center space-y-8 p-4">
         <div className="max-w-3xl mx-auto -mt-5 text-center">
@@ -204,16 +193,22 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
                 alt={imgAlt}
               />
               :
-              <Image
-                src={imageUrl}
-                width={imgWidth}
-                height={imgHeight}
-                alt={imgAlt}
-                priority
-              />
+              <>
+                <Image
+                  src={imageUrl}
+                  width={imgWidth}
+                  height={imgHeight}
+                  alt={imgAlt}
+                  priority
+                />
+                <Button
+                  onClick={() => newGame()}
+                  className="flex-1 bg-gael-purple hover:bg-gael-purple-dark"
+                >
+                  New Game
+                </Button>
+              </>
           }
-
-          {process.env.NODE_ENV === 'development' && <Button onClick={() => form.reset()}>Clear Form</Button>}
 
           <div className="text-lg text-center">
             <p className="text-lg -mt-2 mb-5">
@@ -347,9 +342,7 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
         </div>
 
         <div className="max-w-3xl mx-auto -mt-5 text-center">
-          <p className="text-md font-semibold">{timeRemaining}</p>
-          <br />
-          <p>More game modes coming soon!</p>
+          <p>{comingSoon}</p>
         </div>
       </main >
     </>

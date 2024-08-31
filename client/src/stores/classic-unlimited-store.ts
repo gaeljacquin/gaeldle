@@ -1,7 +1,10 @@
+import { create } from "zustand";
+
 import { Game } from "@/types/game";
 import { Gotd } from "@/types/gotd";
+import { Mode } from "@/types/mode";
 
-export interface classicSlice {
+export interface classicUnlimitedStore {
   name: string;
   igdbId: number;
   imageUrl: string;
@@ -22,10 +25,10 @@ export interface classicSlice {
   pixelationStep: number;
   setPixelation: () => void;
   removePixelation: () => void;
-  setGotd: (arg0: Gotd) => void;
+  setRandomGame: (arg0: Gotd) => void;
 }
 
-export const defaultClassic = {
+export const defaultClassicUnlimited = {
   name: "",
   igdbId: 0,
   imageUrl: "/placeholder.jpg",
@@ -40,12 +43,16 @@ export const defaultClassic = {
   pixelationStep: 0,
 };
 
-const createClassicSlice = (set: (arg0: unknown) => void) => ({
-  ...defaultClassic,
+const useClassicUnlimitedStore = create((set: (arg0: unknown) => void) => ({
+  ...defaultClassicUnlimited,
   updateLives: () =>
-    set((state: classicSlice) => ({ livesLeft: state.livesLeft - 1 })),
+    set((state: classicUnlimitedStore) => ({
+      livesLeft: state.livesLeft - 1,
+    })),
   updateGuesses: (guess: Game) =>
-    set((state: classicSlice) => ({ guesses: [...state.guesses, guess] })),
+    set((state: classicUnlimitedStore) => ({
+      guesses: [...state.guesses, guess],
+    })),
   markAsPlayed: () => {
     set({ played: true });
   },
@@ -53,17 +60,15 @@ const createClassicSlice = (set: (arg0: unknown) => void) => ({
     set({ won: true });
   },
   setPixelation: () =>
-    set((state: classicSlice) => ({
+    set((state: classicUnlimitedStore) => ({
       pixelation: state.pixelation - state.pixelationStep,
     })),
   removePixelation: () => {
     set({ pixelation: 0 });
   },
-  setGotd: (gotd: Gotd) => {
-    console.log(gotd);
-    const { igdbId, games, modes } = gotd;
-    const { name, imageUrl, info } = games;
-    const { label, lives, pixelation, pixelationStep } = modes;
+  setRandomGame: (randomGame: Gotd) => {
+    const { igdbId, imageUrl, info, name, mode } = randomGame;
+    const { label, lives, pixelation, pixelationStep } = mode;
     set({
       name,
       igdbId,
@@ -74,8 +79,11 @@ const createClassicSlice = (set: (arg0: unknown) => void) => ({
       livesLeft: lives,
       pixelation,
       pixelationStep,
+      played: false,
+      won: false,
+      guesses: [],
     });
   },
-});
+}));
 
-export default createClassicSlice;
+export default useClassicUnlimitedStore;

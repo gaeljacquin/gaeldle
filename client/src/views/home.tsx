@@ -6,6 +6,8 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
+import Dev from "@/components/dev"
+import { comingSoon } from "@/constants/text"
 
 export default function Home() {
   return (
@@ -64,9 +66,20 @@ export default function Home() {
             <div className="mt-5">
               <ul className="mt-4 space-y-6">
                 <li className="flex items-center">
-                  <Button className="w-full bg-gael-red hover:bg-gael-red-dark" disabled>
-                    Classic Unlimited
-                  </Button>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Link className="w-full" href="/classic-unlimited">
+                        <Button className="w-full bg-gael-green hover:bg-gael-green-dark shadow-animate">
+                          Classic Unlimited
+                        </Button>
+                      </Link>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                      <div className="flex justify-between space-x-4">
+                        <p>Guess the games by their cover</p>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
                 </li>
                 <li className="flex items-center">
                   <Button className="w-full bg-gael-red hover:bg-gael-red-dark" disabled>
@@ -106,7 +119,10 @@ export default function Home() {
             <Badge className="text-md bg-yellow-600 hover:bg-yellow-600">Moderate</Badge>
             <Badge className="text-md bg-gael-red hover:bg-gael-red">Hard</Badge>
           </div>
-          <p className="text-xl">More game modes and features coming soon!</p>
+
+          <p className="text-xl">{comingSoon}</p>
+
+          <Dev />
         </div>
       </div>
     </main>

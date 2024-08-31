@@ -18,7 +18,10 @@ export class ModesService {
         const modes2 = JSON.stringify(
           await this.prisma.modes.findMany({
             where: {
-              active: true,
+              hidden: false,
+              categories: {
+                active: true,
+              },
             },
             omit: {
               createdAt: true,
@@ -27,11 +30,21 @@ export class ModesService {
             include: {
               levels: {
                 select: {
+                  id: true,
                   level: true,
+                  label: true,
+                  classNames: true,
+                },
+              },
+              categories: {
+                select: {
+                  id: true,
+                  category: true,
                   label: true,
                 },
               },
             },
+            orderBy: [{ categoryId: 'asc' }, { ordinal: 'asc' }],
           }),
         );
 
@@ -51,10 +64,11 @@ export class ModesService {
     let mode;
 
     if (!modes) {
-      mode = await this.prisma.modes.findFirstOrThrow({
+      mode = await this.prisma.modes.findUniqueOrThrow({
         where: {
           id: id,
           active: true,
+          hidden: false,
         },
         omit: {
           createdAt: true,

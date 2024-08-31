@@ -37,6 +37,8 @@ import { Gotd } from '@/types/gotd';
 import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
 import { Games } from "@/types/game";
+import DisplayCountdown from "@/components/display-countdown";
+import { comingSoon } from "@/constants/text";
 
 type ClassicProps = {
   gotd: Gotd
@@ -64,7 +66,6 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
   const { modes } = modesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState<string>('');
   const mode = modes?.find(val => val.id === 1); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
@@ -156,26 +157,6 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
     }
   }, [gotd, setGotd, setGames, getGamesAction, newGotd]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date();
-      const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
-      const timeDiff = nextDay.getTime() - now.getTime();
-
-      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-
-      setTimeRemaining(`Next game in ${hours}h ${minutes}m ${seconds}s`);
-
-      if (timeDiff < 0) {
-        setTimeRemaining("Next game will be available shortly 🤩");
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   if (!(games && gotd)) {
     return <Placeholders />
   }
@@ -212,8 +193,6 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
                 priority
               />
           }
-
-          {process.env.NODE_ENV === 'development' && <Button onClick={() => form.reset()}>Clear Form</Button>}
 
           <div className="text-lg text-center">
             <p className="text-lg -mt-2 mb-5">
@@ -347,10 +326,16 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
         </div>
 
         <div className="max-w-3xl mx-auto -mt-5 text-center">
-          <p className="text-md font-semibold">{timeRemaining}</p>
+          <DisplayCountdown />
           <br />
-          <p>More game modes coming soon!</p>
+          <p>{comingSoon}</p>
         </div>
+
+        {process.env.NODE_ENV === 'development' &&
+          <>
+            <Button onClick={() => form.reset()}>Clear Form</Button>
+          </>
+        }
       </main >
     </>
   )

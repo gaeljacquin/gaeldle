@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/hover-card"
 import Dev from "@/components/dev"
 import { comingSoon } from "@/constants/text"
+import DisplayCountdown from "@/components/display-countdown"
 
 export default function Home() {
   return (
@@ -21,7 +22,7 @@ export default function Home() {
             <div className="px-3 py-1 text-lg text-white border-2 border-gael-purple bg-gradient-to-r from-gael-pink to-gael-purple rounded-full inline-block absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
               Daily Modes
             </div>
-            <div className="mt-5">
+            <div className="mt-5 text-center">
               <ul className="mt-4 space-y-6">
                 <li className="flex items-center">
                   <HoverCard>
@@ -55,6 +56,10 @@ export default function Home() {
                   </Button>
                 </li>
               </ul>
+
+              <div className="mt-5">
+                <DisplayCountdown />
+              </div>
             </div>
             <div className="mt-6">
             </div>

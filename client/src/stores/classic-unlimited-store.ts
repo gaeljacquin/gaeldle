@@ -1,8 +1,7 @@
 import { create } from "zustand";
 
-import { Game } from "@/types/game";
+import { Game, Games } from "@/types/game";
 import { Gotd } from "@/types/gotd";
-import { Mode } from "@/types/mode";
 
 export interface classicUnlimitedStore {
   name: string;
@@ -13,12 +12,14 @@ export interface classicUnlimitedStore {
   };
   lives: number;
   livesLeft: number;
-  guesses: Game[];
+  guesses: Games;
   played: boolean;
   won: boolean;
   date: Date;
-  updateLives: () => void;
+  updateLivesLeft: () => void;
   updateGuesses: (arg0: Game | null) => void;
+  getLivesLeft: () => number;
+  getGuesses: () => Games;
   markAsPlayed: () => void;
   markAsWon: () => void;
   pixelation: number;
@@ -43,47 +44,51 @@ export const defaultClassicUnlimited = {
   pixelationStep: 0,
 };
 
-const useClassicUnlimitedStore = create((set: (arg0: unknown) => void) => ({
-  ...defaultClassicUnlimited,
-  updateLives: () =>
-    set((state: classicUnlimitedStore) => ({
-      livesLeft: state.livesLeft - 1,
-    })),
-  updateGuesses: (guess: Game) =>
-    set((state: classicUnlimitedStore) => ({
-      guesses: [...state.guesses, guess],
-    })),
-  markAsPlayed: () => {
-    set({ played: true });
-  },
-  markAsWon: () => {
-    set({ won: true });
-  },
-  setPixelation: () =>
-    set((state: classicUnlimitedStore) => ({
-      pixelation: state.pixelation - state.pixelationStep,
-    })),
-  removePixelation: () => {
-    set({ pixelation: 0 });
-  },
-  setRandomGame: (randomGame: Gotd) => {
-    const { igdbId, imageUrl, info, name, mode } = randomGame;
-    const { label, lives, pixelation, pixelationStep } = mode;
-    set({
-      name,
-      igdbId,
-      imageUrl,
-      info,
-      label,
-      lives,
-      livesLeft: lives,
-      pixelation,
-      pixelationStep,
-      played: false,
-      won: false,
-      guesses: [],
-    });
-  },
-}));
+const useClassicUnlimitedStore = create(
+  (set: (arg0: unknown) => void, get: () => unknown) => ({
+    ...defaultClassicUnlimited,
+    updateLivesLeft: () =>
+      set((state: classicUnlimitedStore) => ({
+        livesLeft: state.livesLeft - 1,
+      })),
+    updateGuesses: (guess: Game) =>
+      set((state: classicUnlimitedStore) => ({
+        guesses: [...state.guesses, guess],
+      })),
+    getLivesLeft: () => (get() as { livesLeft: number }).livesLeft,
+    getGuesses: () => (get() as { guesses: Games }).guesses,
+    markAsPlayed: () => {
+      set({ played: true });
+    },
+    markAsWon: () => {
+      set({ won: true });
+    },
+    setPixelation: () =>
+      set((state: classicUnlimitedStore) => ({
+        pixelation: state.pixelation - state.pixelationStep,
+      })),
+    removePixelation: () => {
+      set({ pixelation: 0 });
+    },
+    setRandomGame: (randomGame: Gotd) => {
+      const { igdbId, imageUrl, info, name, mode } = randomGame;
+      const { label, lives, pixelation, pixelationStep } = mode;
+      set({
+        name,
+        igdbId,
+        imageUrl,
+        info,
+        label,
+        lives,
+        livesLeft: lives,
+        pixelation,
+        pixelationStep,
+        played: false,
+        won: false,
+        guesses: [],
+      });
+    },
+  })
+);
 
 export default useClassicUnlimitedStore;

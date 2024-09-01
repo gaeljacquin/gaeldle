@@ -1,15 +1,16 @@
 'use client';
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from 'react'
-import { Check, ChevronsUpDown, Heart } from 'lucide-react'
-import { z } from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useCallback, useEffect, useState } from 'react';
+import { Check, ChevronsUpDown, Heart } from 'lucide-react';
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import io from 'socket.io-client';
 import useGaeldleStore from '@/stores/gaeldle-store';
 import useClassicUnlimitedStore, { classicUnlimitedStore } from '@/stores/classic-unlimited-store';
 import { gamesSlice } from '@/stores/games-slice';
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -38,6 +39,7 @@ import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
 import { Games } from "@/types/game";
 import { comingSoon } from "@/constants/text";
+import { UnlimitedStats } from "@/types/unlimited-stats";
 
 type ClassicUnlimitedProps = {
   getRandomGameAction: () => Promise<Gotd>
@@ -53,17 +55,19 @@ const FormSchema = z.object({
       required_error: "Please select a game",
     }),
   })
-})
+});
+const socket = io(`${process.env.serverUrl}`);
 
 export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }: ClassicUnlimitedProps) {
   const classicUnlimitedSliceState = useClassicUnlimitedStore() as classicUnlimitedStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
-  const { livesLeft, lives, updateLives, updateGuesses, name, igdbId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, markAsWon, setRandomGame } = classicUnlimitedSliceState;
+  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, name, igdbId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, markAsWon, setRandomGame } = classicUnlimitedSliceState;
   const { setGames, games } = gamesSliceState;
   const { modes } = modesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
+  const [skipGamePopoverOpen, setSkipGamePopoverOpen] = useState(false);
   const mode = modes?.find(val => val.id === 5); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
@@ -99,14 +103,25 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
     return <p className={classes}>{text}</p>
   }
 
+  function saveUnlimitedStats(data: UnlimitedStats) {
+    socket.emit('saveUnlimitedStats', data);
+  }
+
   function onSkip() {
     updateGuesses(null)
-    updateLives()
+    updateLivesLeft()
     setPixelation()
 
-    if (livesLeft === 1) { // not zero because updateLives is async
+    if (getLivesLeft() === 0) {
       markAsPlayed()
       removePixelation()
+      saveUnlimitedStats({
+        igdbId,
+        modeId: mode!.id,
+        attempts: getGuesses().length,
+        guesses: getGuesses(),
+        found: false,
+      })
     }
   }
 
@@ -120,14 +135,28 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
       markAsWon()
       markAsPlayed()
       removePixelation()
+      saveUnlimitedStats({
+        igdbId,
+        modeId: mode!.id,
+        attempts: Math.min(guesses.length + 1, lives),
+        guesses: getGuesses(),
+        found: true,
+      })
     } else {
-      updateLives()
+      updateLivesLeft()
       updateGuesses(data.game)
       setPixelation()
 
-      if (livesLeft === 1) { // not zero because updateLives is async
+      if (getLivesLeft() === 0) {
         markAsPlayed()
         removePixelation()
+        saveUnlimitedStats({
+          igdbId,
+          modeId: mode!.id,
+          attempts: getGuesses().length,
+          guesses: getGuesses(),
+          found: false,
+        })
       }
     }
 
@@ -165,6 +194,26 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
     fetchRandomGame();
   }, [fetchRandomGame]);
 
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    socket.on('message', (message: string) => {
+      console.log('Message from server:', message);
+    });
+
+    socket.on('error', (message: string) => {
+      console.log('Message from server:', message);
+    });
+
+    return () => {
+      socket.off('connect');
+      socket.off('message');
+    };
+
+  }, []);
+
   if (!(games && igdbId)) {
     return <Placeholders />
   }
@@ -193,21 +242,13 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
                 alt={imgAlt}
               />
               :
-              <>
-                <Image
-                  src={imageUrl}
-                  width={imgWidth}
-                  height={imgHeight}
-                  alt={imgAlt}
-                  priority
-                />
-                <Button
-                  onClick={() => newGame()}
-                  className="flex-1 bg-gael-purple hover:bg-gael-purple-dark"
-                >
-                  New Game
-                </Button>
-              </>
+              <Image
+                src={imageUrl}
+                width={imgWidth}
+                height={imgHeight}
+                alt={imgAlt}
+                priority
+              />
           }
 
           <div className="text-lg text-center">
@@ -226,6 +267,39 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
               />
             ))}
           </div>
+
+          {played ? (
+            <Button
+              onClick={() => newGame()}
+              className="flex-1 bg-gael-purple hover:bg-gael-purple-dark"
+            >
+              New Game
+            </Button>
+          ) : (
+            <Popover open={skipGamePopoverOpen} onOpenChange={setSkipGamePopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  className="flex-1 bg-gael-purple hover:bg-gael-purple-dark"
+                >
+                  Skip Game
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] text-center">
+                <div className="space-y-2">
+                  <h4 className="font-medium leading-none">Are you sure?</h4>
+                </div>
+                <div className="space-y-2 mt-3">
+                  <Button
+                    onClick={() => { newGame(); setSkipGamePopoverOpen(false) }}
+                    className="w-full bg-gael-purple hover:bg-gael-purple-dark"
+                  >
+                    Yes
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col items-center space-y-4">

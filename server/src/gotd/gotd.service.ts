@@ -25,7 +25,6 @@ export class GotdService {
         gotd2 = JSON.stringify(
           await this.prisma.gotd.findFirst({
             omit: {
-              id: true,
               createdAt: true,
               updatedAt: true,
             },

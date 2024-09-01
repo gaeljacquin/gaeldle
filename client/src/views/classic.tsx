@@ -37,10 +37,11 @@ import Placeholders from '@/views/placeholders'
 import { Gotd } from '@/types/gotd';
 import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
-import { Games } from "@/types/game";
+import { Games } from "@/types/games";
 import DisplayCountdown from "@/components/display-countdown";
 import { comingSoon } from "@/constants/text";
 import { DailyStats } from "@/types/daily-stats";
+import { Mode } from "@/types/modes";
 
 type ClassicProps = {
   gotd: Gotd
@@ -69,7 +70,7 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
   const { modes } = modesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
-  const mode = modes?.find(val => val.id === 1); // temporary hard-coding
+  const mode = modes?.find((val: Mode) => val.id === 1); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
   const imgAlt = `Game of the Day - ${mode?.label}`;

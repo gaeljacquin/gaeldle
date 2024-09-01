@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsArray,
 } from 'class-validator';
-import { Games } from '~/types/game';
+import { Games } from '~/types/games';
 
 export class CreateUnlimitedStatsDto {
   @IsNumber()

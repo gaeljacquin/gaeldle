@@ -14,6 +14,7 @@ export type Mode = {
   pixelationStep: number;
   levels: Levels;
   types: Categories;
+  isNew: boolean;
 };
 
 export type Modes = Mode[];

@@ -1,4 +1,4 @@
-import { Games } from "./game";
+import { Games } from "./games";
 
 export type DailyStats = {
   gotdId: number;

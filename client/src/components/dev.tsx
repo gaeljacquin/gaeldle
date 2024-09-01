@@ -4,10 +4,42 @@ import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import { Loader2 } from 'lucide-react'
 import { Button } from "./ui/button"
+import ModesDrawer from './modes-drawer';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 
 const simulateFetch = () => new Promise(resolve => setTimeout(resolve, 3000));
 
 const socket = io(`${process.env.serverUrl}`);
+
+function TestDrawer() {
+  return (
+    <Drawer>
+      <DrawerTrigger>Open</DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>Are you absolutely sure?</DrawerTitle>
+          <DrawerDescription>This action cannot be undone.</DrawerDescription>
+        </DrawerHeader>
+        <DrawerFooter>
+          <Button>Submit</Button>
+          <DrawerClose>
+            <Button variant="outline">Cancel</Button>
+          </DrawerClose>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
 
 export default function Dev() {
   const [isLoading, setIsLoading] = useState(false)
@@ -39,34 +71,34 @@ export default function Dev() {
     real: false,
   }
 
-  useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to server');
-    });
+  // useEffect(() => {
+  //   socket.on('connect', () => {
+  //     console.log('Connected to server');
+  //   });
 
-    socket.on('message', (data: string) => {
-      console.log('Message from server:', data);
-      setMessage(data);
-    });
+  //   socket.on('message', (data: string) => {
+  //     console.log('Message from server:', data);
+  //     setMessage(data);
+  //   });
 
-    socket.on('error', (data: string) => {
-      console.log('Message from server:', data);
-      setMessage(data);
-    });
+  //   socket.on('error', (data: string) => {
+  //     console.log('Message from server:', data);
+  //     setMessage(data);
+  //   });
 
-    return () => {
-      socket.off('connect');
-      socket.off('message');
-    };
-  }, []);
+  //   return () => {
+  //     socket.off('connect');
+  //     socket.off('message');
+  //   };
+  // }, []);
 
-  const saveDailyStats = () => {
-    socket.emit('saveDailyStats', testDailyStats);
-  };
+  // const saveDailyStats = () => {
+  //   socket.emit('saveDailyStats', testDailyStats);
+  // };
 
-  const saveUnlimitedStats = () => {
-    socket.emit('saveUnlimitedStats', testUnlimitedStats);
-  };
+  // const saveUnlimitedStats = () => {
+  //   socket.emit('saveUnlimitedStats', testUnlimitedStats);
+  // };
 
   return process.env.NODE_ENV === 'development' && (
     <div className="mt-10 mb-10">
@@ -88,15 +120,17 @@ export default function Dev() {
         </div>
       )}
 
-      <div className='mt-5'>
+      {/* <div className='mt-5'>
         <Button onClick={saveDailyStats}>Save Daily Stats</Button>
         <p>Message from server: {message}</p>
-      </div>
+      </div> */}
 
-      <div className='mt-5'>
+      {/* <div className='mt-5'>
         <Button onClick={saveUnlimitedStats}>Save Unlimited Stats</Button>
         <p>Message from server: {message}</p>
-      </div>
+      </div> */}
+
+      <TestDrawer />
     </div>
   )
 }

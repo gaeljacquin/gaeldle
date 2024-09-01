@@ -37,9 +37,10 @@ import Placeholders from '@/views/placeholders'
 import { Gotd } from '@/types/gotd';
 import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
-import { Games } from "@/types/game";
+import { Games } from "@/types/games";
 import { comingSoon } from "@/constants/text";
 import { UnlimitedStats } from "@/types/unlimited-stats";
+import { Mode } from "@/types/modes";
 
 type ClassicUnlimitedProps = {
   getRandomGameAction: () => Promise<Gotd>
@@ -68,7 +69,7 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
   const [skipGamePopoverOpen, setSkipGamePopoverOpen] = useState(false);
-  const mode = modes?.find(val => val.id === 5); // temporary hard-coding
+  const mode = modes?.find((val: Mode) => val.id === 5); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
   const imgAlt = mode ? mode.label : 'Random cover';

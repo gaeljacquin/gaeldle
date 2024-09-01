@@ -1,5 +1,5 @@
-import { Game } from "./game";
-import { Mode } from "./mode";
+import { Game } from "./games";
+import { Mode } from "./modes";
 
 export type Gotd = {
   [key: string]: Game &

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { Game, Games } from "@/types/game";
+import { Game, Games } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 
 export interface classicStore {

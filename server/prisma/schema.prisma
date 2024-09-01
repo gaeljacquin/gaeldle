@@ -106,6 +106,7 @@ model modes {
   categoryId          Int?              @map("category_id")
   hidden              Boolean           @default(false)
   ordinal             Int               @default(1)
+  isNew               Boolean           @default(true)
   gotd                gotd[]
   categories          categories?       @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "modes_category_fkey")
   levels              levels            @relation(fields: [levelId], references: [id], onDelete: NoAction, onUpdate: NoAction)

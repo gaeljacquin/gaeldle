@@ -7,7 +7,8 @@ import { usePathname } from 'next/navigation';
 import LottieDynamic from '@/components/lottie-dynamic';
 import useGaeldleStore from "@/stores/gaeldle-store";
 import { modesSlice } from "@/stores/modes-slice";
-import { Modes } from '@/types/mode';
+import { Modes } from '@/types/modes';
+import ModesDrawer from './modes-drawer';
 
 type NavbarProps = {
   getModesAction: () => Promise<Modes>
@@ -15,9 +16,9 @@ type NavbarProps = {
 
 export default function Navbar({ getModesAction }: NavbarProps) {
   const pathname = usePathname();
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const modesSliceState = useGaeldleStore() as modesSlice;
   const { setModes } = modesSliceState;
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
     const fetchModes = async () => {
@@ -54,6 +55,7 @@ export default function Navbar({ getModesAction }: NavbarProps) {
             <LottieDynamic loop={false} />
           </div>
           <div className="hidden md:flex space-x-4">
+            {pathname !== '/' && <ModesDrawer />}
             {navLink("/", "Home")}
           </div>
           <button

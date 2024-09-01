@@ -1,4 +1,4 @@
-import { Games } from "@/types/game";
+import { Games } from "@/types/games";
 
 export interface gamesSlice {
   games: Games;

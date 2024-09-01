@@ -17,7 +17,7 @@ import Levels from "./levels"
 export default function ModesDrawer() {
   return (
     <Drawer>
-      <DrawerTrigger asChild className="hover:text-gael-blue">Modes</DrawerTrigger>
+      <DrawerTrigger className="hover:text-gael-blue">Modes</DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle className="text-center">Game Modes</DrawerTitle>
@@ -29,7 +29,13 @@ export default function ModesDrawer() {
             <Levels />
           </>
           <DrawerClose asChild>
-            <Button variant="outline">Close</Button>
+            <div className="mx-auto w-full max-w-sm flex justify-center">
+              <Button
+                variant="outline"
+              >
+                Close
+              </Button>
+            </div>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

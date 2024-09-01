@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { GotdService } from './gotd.service';
 
 @Controller('gotd')
@@ -8,5 +8,10 @@ export class GotdController {
   @Get(':modeId')
   findIt(@Param('modeId', ParseIntPipe) modeId: number) {
     return this.gotdService.findIt(modeId);
+  }
+
+  @Post('refresh/:modeId')
+  updateIt(@Param('modeId', ParseIntPipe) modeId: number) {
+    return this.gotdService.refreshIt(modeId);
   }
 }

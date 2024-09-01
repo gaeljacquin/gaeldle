@@ -24,4 +24,8 @@ export class RedisRepository {
   async hmset(key: string, data: any[]): Promise<void> {
     await this.redisClient.hmset(key, data);
   }
+
+  async exists(key: string): Promise<boolean> {
+    return Boolean(await this.redisClient.exists(key));
+  }
 }

@@ -18,4 +18,8 @@ export class RedisService {
     const hashData = Object.entries(data).flat();
     await this.redisRepository.hmset(key, hashData);
   }
+
+  async deleteKey(key: string): Promise<void> {
+    await this.redisRepository.delete(key);
+  }
 }

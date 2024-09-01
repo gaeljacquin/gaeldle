@@ -17,7 +17,7 @@ const inter = Inter({
 
 export const metadata = {
   title: 'Gaeldle',
-  description: 'Heavily inspired by Gamedle!',
+  description: 'A Wordle clone inspired by Gamedle',
 }
 
 export default function RootLayout({

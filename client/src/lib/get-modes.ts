@@ -1,6 +1,6 @@
 "use server";
 
-import { Modes } from "@/types/mode";
+import { Modes } from "@/types/modes";
 
 export default async function getModes() {
   const response = await fetch(`${process.env.serverUrl}/modes`);

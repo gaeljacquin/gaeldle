@@ -1,4 +1,4 @@
-import { Modes } from "@/types/mode";
+import { Modes } from "@/types/modes";
 
 export interface modesSlice {
   modes: Modes;

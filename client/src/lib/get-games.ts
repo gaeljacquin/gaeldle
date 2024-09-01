@@ -1,6 +1,6 @@
 "use server";
 
-import { Games } from "@/types/game";
+import { Games } from "@/types/games";
 
 export async function getGames() {
   const response = await fetch(`${process.env.serverUrl}/games`);

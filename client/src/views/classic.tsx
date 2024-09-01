@@ -6,6 +6,7 @@ import { Check, ChevronsUpDown, Heart } from 'lucide-react'
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import io from 'socket.io-client';
 import useGaeldleStore from '@/stores/gaeldle-store';
 import useClassicStore, { classicStore } from '@/stores/classic-store';
 import { gamesSlice } from '@/stores/games-slice';
@@ -36,9 +37,11 @@ import Placeholders from '@/views/placeholders'
 import { Gotd } from '@/types/gotd';
 import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
-import { Games } from "@/types/game";
+import { Games } from "@/types/games";
 import DisplayCountdown from "@/components/display-countdown";
 import { comingSoon } from "@/constants/text";
+import { DailyStats } from "@/types/daily-stats";
+import { Mode } from "@/types/modes";
 
 type ClassicProps = {
   gotd: Gotd
@@ -55,18 +58,19 @@ const FormSchema = z.object({
       required_error: "Please select a game",
     }),
   })
-})
+});
+const socket = io(`${process.env.serverUrl}`);
 
 export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps) {
   const classicSliceState = useClassicStore() as classicStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
-  const { livesLeft, lives, updateLives, updateGuesses, name, igdbId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, markAsWon, setGotd } = classicSliceState;
+  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, name, igdbId, gotdId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setGotd } = classicSliceState;
   const { setGames, games } = gamesSliceState;
   const { modes } = modesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
-  const mode = modes?.find(val => val.id === 1); // temporary hard-coding
+  const mode = modes?.find((val: Mode) => val.id === 1); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
   const imgAlt = `Game of the Day - ${mode?.label}`;
@@ -81,7 +85,7 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
     if (!played) {
       text = `${livesLeft} `;
 
-      if (livesLeft == 1) {
+      if (livesLeft === 1) {
         text += 'life'
       } else {
         text += 'lives'
@@ -101,14 +105,26 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
     return <p className={classes}>{text}</p>
   }
 
+
+  function saveDailyStats(data: DailyStats) {
+    socket.emit('saveDailyStats', data);
+  }
+
   function onSkip() {
     updateGuesses(null)
-    updateLives()
+    updateLivesLeft()
     setPixelation()
 
-    if (livesLeft === 1) { // not zero because updateLives is async
+    if (getLivesLeft() === 0) {
       markAsPlayed()
       removePixelation()
+      saveDailyStats({
+        gotdId,
+        modeId: mode!.id,
+        attempts: getGuesses().length,
+        guesses: getGuesses(),
+        found: false,
+      })
     }
   }
 
@@ -122,14 +138,28 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
       markAsWon()
       markAsPlayed()
       removePixelation()
+      saveDailyStats({
+        gotdId,
+        modeId: mode!.id,
+        attempts: Math.min(guesses.length + 1, lives),
+        guesses,
+        found: true,
+      })
     } else {
-      updateLives()
+      updateLivesLeft()
       updateGuesses(data.game)
       setPixelation()
 
-      if (livesLeft === 1) { // not zero because updateLives is async
+      if (getLivesLeft() === 0) {
         markAsPlayed()
         removePixelation()
+        saveDailyStats({
+          gotdId,
+          modeId: mode!.id,
+          attempts: getGuesses().length,
+          guesses: getGuesses(),
+          found: false,
+        })
       }
     }
 
@@ -156,6 +186,28 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
       void setGotd(gotd);
     }
   }, [gotd, setGotd, setGames, getGamesAction, newGotd]);
+
+  useEffect(() => {
+    if (!getPlayed()) {
+      console.log('not played yet');
+      socket.on('connect', () => {
+        console.log('Connected to server');
+      });
+
+      socket.on('message', (message: string) => {
+        console.log('Message from server:', message);
+      });
+
+      socket.on('error', (message: string) => {
+        console.log('Message from server:', message);
+      });
+
+      return () => {
+        socket.off('connect');
+        socket.off('message');
+      };
+    }
+  }, [getPlayed]);
 
   if (!(games && gotd)) {
     return <Placeholders />

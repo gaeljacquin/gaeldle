@@ -16,7 +16,10 @@ import { CreateUnlimitedStatsDto } from '~/src/unlimited-stats/dto/create-unlimi
 
 @WebSocketGateway({
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: [
+      new RegExp('^https://.*gaeldle.*\\.vercel\\.app$'),
+      process.env.CLIENT_URL,
+    ],
     methods: 'GET,POST,PATCH,PUT',
     credentials: false,
   },

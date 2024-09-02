@@ -1,26 +1,40 @@
 import { ServiceUnavailableException, Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
-import { RedisService } from '~/src/redis/redis.service';
 import currentDay from '~/utils/get-current-day';
+import { upstashRedisInit } from '~/utils/upstash-redis';
 
 @Injectable()
 export class GotdService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly redisService: RedisService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findIt(modeId: number) {
     try {
-      const key = await this.findKey(modeId);
-      let gotd = await this.redisService.getData(key);
-      let gotd2;
+      let key = await this.findKey(modeId);
 
-      if (!gotd) {
-        gotd2 = JSON.stringify(await this.dbFindGotd(modeId));
-        gotd = JSON.parse(gotd2);
-        await this.redisService.setData(key, gotd2);
+      if (
+        process.env.NODE_ENV === 'dev' ||
+        process.env.NODE_ENV === 'development'
+      ) {
+        key += '_dev';
       }
+
+      let gotd = await fetch(
+        `${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`,
+        upstashRedisInit,
+      );
+      let gotd2 = await (await gotd.json()).result;
+
+      if (!gotd2) {
+        gotd2 = JSON.stringify(await this.dbFindGotd(modeId));
+        await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
+          method: 'POST',
+          ...upstashRedisInit,
+          body: gotd2,
+        });
+      }
+
+      gotd = JSON.parse(gotd2);
+
       return gotd ?? null;
     } catch (error) {
       console.error('Failed to fetch game of the day: ', error);
@@ -34,7 +48,14 @@ export class GotdService {
         id: modeId,
       },
     });
-    const key = 'gotd_' + mode.mode;
+    let key = 'gotd_' + mode.mode;
+
+    if (
+      process.env.NODE_ENV === 'dev' ||
+      process.env.NODE_ENV === 'development'
+    ) {
+      key += '_dev';
+    }
 
     return key;
   }
@@ -42,7 +63,11 @@ export class GotdService {
   async refreshIt(modeId) {
     const key = await this.findKey(modeId);
     const gotd = await this.dbFindGotd(modeId);
-    await this.redisService.setData(key, JSON.stringify(gotd));
+    await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
+      method: 'POST',
+      ...upstashRedisInit,
+      body: JSON.stringify(gotd),
+    });
   }
 
   async dbFindGotd(modeId: number) {

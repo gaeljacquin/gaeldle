@@ -1,23 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
-import { RedisService } from '~/src/redis/redis.service';
 import { ModesService } from '~/src/modes/modes.service';
+import { upstashRedisInit } from '~/utils/upstash-redis';
 
 @Injectable()
 export class GamesService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly redisService: RedisService,
     private readonly modesService: ModesService,
   ) {}
 
   async findAll() {
-    const key = 'games';
-    let games = await this.redisService.getData(key);
+    let key = 'games';
 
-    if (!games) {
+    if (
+      process.env.NODE_ENV === 'dev' ||
+      process.env.NODE_ENV === 'development'
+    ) {
+      key += '_dev';
+    }
+
+    let games = await fetch(
+      `${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`,
+      upstashRedisInit,
+    );
+    let games2 = await (await games.json()).result;
+
+    if (!games2) {
       try {
-        const games2 = JSON.stringify(
+        games2 = JSON.stringify(
           await this.prisma.games.findMany({
             select: {
               igdbId: true,
@@ -28,23 +39,40 @@ export class GamesService {
             },
           }),
         );
-        games = JSON.parse(games2);
-        await this.redisService.setData(key, games2);
+
+        await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
+          method: 'POST',
+          ...upstashRedisInit,
+          body: games2,
+        });
       } catch (error) {
         console.error('Failed to fetch games: ', error);
       }
     }
 
+    games = JSON.parse(games2);
+
     return games ?? null;
   }
 
   async findOneRandom(modeId) {
-    const key = 'games-alt';
-    let games = await this.redisService.getData(key);
-    let games2;
+    let key = 'games-alt';
+
+    if (
+      process.env.NODE_ENV === 'dev' ||
+      process.env.NODE_ENV === 'development'
+    ) {
+      key += '_dev';
+    }
+
+    let games = await fetch(
+      `${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`,
+      upstashRedisInit,
+    );
+    let games2 = await (await games.json()).result;
     let game;
 
-    if (!games) {
+    if (!games2) {
       try {
         games2 = JSON.stringify(
           await this.prisma.$queryRaw`
@@ -57,19 +85,23 @@ export class GamesService {
           `,
         );
         games = JSON.parse(games2);
-        await this.redisService.setData(key, games2);
+        await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
+          method: 'POST',
+          ...upstashRedisInit,
+          body: games2,
+        });
         game = games[0];
       } catch (error) {
         console.error('Failed to fetch games: ', error);
       }
     } else {
-      const randomIndex = Math.floor(Math.random() * games.length);
-      game = games[randomIndex];
+      const games3 = JSON.parse(games2);
+      const randomIndex = Math.floor(Math.random() * games3.length);
+      game = games3[randomIndex];
     }
 
     const mode = await this.modesService.findOne(modeId);
     game['mode'] = mode;
-    // await this.redisService.setData('random-game', JSON.stringify(game));
 
     return game ?? null;
   }

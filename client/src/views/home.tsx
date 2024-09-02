@@ -8,6 +8,7 @@ import { modesSlice } from "@/stores/modes-slice"
 import Modes from "@/components/modes"
 import Levels from "@/components/levels"
 import MainDev from "@/components/dev/main-dev"
+import ComingSoon from "@/components/coming-soon"
 
 export default function Home() {
   const modesSliceState = useGaeldleStore() as modesSlice;
@@ -26,11 +27,8 @@ export default function Home() {
       <div className="container px-4 md:px-6">
         <Modes />
         <Levels />
-        <div className="mt-10 text-center">
-          <p className="text-xl">{comingSoon}</p>
-
-          <MainDev />
-        </div>
+        <ComingSoon />
+        <MainDev />
       </div>
     </main>
   )

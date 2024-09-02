@@ -41,6 +41,7 @@ import { Games } from "@/types/games";
 import { comingSoon } from "@/constants/text";
 import { UnlimitedStats } from "@/types/unlimited-stats";
 import { Mode } from "@/types/modes";
+import ComingSoon from "@/components/coming-soon";
 
 type ClassicUnlimitedProps = {
   getRandomGameAction: () => Promise<Gotd>
@@ -416,9 +417,7 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
           </div>
         </div>
 
-        <div className="max-w-3xl mx-auto -mt-5 text-center">
-          <p>{comingSoon}</p>
-        </div>
+        <ComingSoon />
       </main >
     </>
   )

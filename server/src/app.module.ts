@@ -12,6 +12,8 @@ import { StatsGateway } from './stats/stats.gateway';
 import { UnlimitedStatsModule } from './unlimited-stats/unlimited-stats.module';
 import { DailyStatsService } from './daily-stats/daily-stats.service';
 import { UnlimitedStatsService } from './unlimited-stats/unlimited-stats.service';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { UnlimitedStatsService } from './unlimited-stats/unlimited-stats.service
     UnlimitedStatsModule,
     GotdModule,
     ModesModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController, ModesController],
   providers: [

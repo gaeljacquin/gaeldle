@@ -9,15 +9,7 @@ export class GotdService {
 
   async findIt(modeId: number) {
     try {
-      let key = await this.findKey(modeId);
-
-      if (
-        process.env.NODE_ENV === 'dev' ||
-        process.env.NODE_ENV === 'development'
-      ) {
-        key += '_dev';
-      }
-
+      const key = await this.findKey(modeId);
       let gotd = await fetch(
         `${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`,
         upstashRedisInit,

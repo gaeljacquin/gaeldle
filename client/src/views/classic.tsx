@@ -39,7 +39,6 @@ import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
 import { Games } from "@/types/games";
 import DisplayCountdown from "@/components/display-countdown";
-import { comingSoon } from "@/constants/text";
 import { DailyStats } from "@/types/daily-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
@@ -190,7 +189,6 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
 
   useEffect(() => {
     if (!getPlayed()) {
-      console.log('not played yet');
       socket.on('connect', () => {
         console.log('Connected to server');
       });

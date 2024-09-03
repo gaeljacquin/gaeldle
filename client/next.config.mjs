@@ -2,6 +2,7 @@
 const nextConfig = {
   env: {
     serverUrl: `${process.env.SERVER_URL}`,
+    smashQuizUrl: `${process.env.NEXT_PUBLIC_SMASH_QUIZ_URL}`,
   },
   images: {
     remotePatterns: [

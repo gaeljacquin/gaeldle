@@ -25,7 +25,7 @@ export default function ModesDrawer() {
         </DrawerHeader>
         <DrawerFooter>
           <>
-            <Modes />
+            <Modes isInDrawer={true} />
             <Levels />
           </>
           <DrawerClose asChild>

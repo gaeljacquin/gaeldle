@@ -12,6 +12,7 @@ import {
 import { Mode } from "@/types/modes";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { DrawerClose } from "@/components/ui/drawer"
 
 type generateButtonProps = {
   label: string
@@ -22,7 +23,11 @@ type generateButtonProps = {
   buttonKey: string
 }
 
-export default function Modes() {
+type ModesProps = {
+  isInDrawer: boolean
+}
+
+export default function Modes({ isInDrawer }: ModesProps) {
   const modesSliceState = useGaeldleStore() as modesSlice;
   const { modes } = modesSliceState;
   const [clickedButton, setClickedButton] = useState<string | null>(null)
@@ -41,6 +46,20 @@ export default function Modes() {
     const isClicked = clickedButton === buttonKey
     const isDisabled = clickedButton !== null
 
+    const buttonMarkup = () => {
+      return (
+        <Button
+          className={`w-full ${classNames} ${isNew && 'shadow-animate'} ${isDisabled && !isClicked ? 'cursor-not-allowed' : ''}`}
+          onClick={() => handleClick(buttonKey)}
+          disabled={isClicked}
+          aria-disabled={isDisabled && !isClicked}
+        >
+          {isClicked && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {label}
+        </Button>
+      )
+    }
+
     return (
       <TooltipProvider>
         <Tooltip>
@@ -50,15 +69,13 @@ export default function Modes() {
               href={`/${slug}`}
               aria-disabled={isDisabled && !isClicked}
             >
-              <Button
-                className={`w-full ${classNames} ${isNew && 'shadow-animate'} ${isDisabled && !isClicked ? 'cursor-not-allowed' : ''}`}
-                onClick={() => handleClick(buttonKey)}
-                disabled={isClicked}
-                aria-disabled={isDisabled && !isClicked}
-              >
-                {isClicked && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {label}
-              </Button>
+              {isInDrawer ? (
+                <DrawerClose asChild>
+                  {buttonMarkup()}
+                </DrawerClose>
+              ) :
+                buttonMarkup()
+              }
             </Link>
           </TooltipTrigger>
           <TooltipContent>
@@ -78,7 +95,7 @@ export default function Modes() {
         <div className="mt-5 text-center">
           <ul className="mt-4 space-y-6">
             {modes.filter((mode: Mode) => mode.categoryId === 1).map((mode: Mode, index: number) => {
-              const buttonKey = generateButtonKey(mode.mode, index)
+              const buttonKey = generateButtonKey(mode.mode, index);
 
               return mode.active ? (
                 <li key={mode.mode + '-' + index} className="flex items-center">

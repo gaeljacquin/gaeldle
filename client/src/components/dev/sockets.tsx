@@ -59,7 +59,7 @@ export default function Sockets() {
   };
 
   return (
-    <>
+    <div className='mt-5'>
       <div className='mt-5'>
         <Button onClick={saveDailyStats}>Save Daily Stats</Button>
         <p>Message from server: {message}</p>
@@ -69,6 +69,6 @@ export default function Sockets() {
         <Button onClick={saveUnlimitedStats}>Save Unlimited Stats</Button>
         <p>Message from server: {message}</p>
       </div>
-    </>
+    </div>
   )
 }

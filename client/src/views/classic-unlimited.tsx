@@ -38,9 +38,9 @@ import { Gotd } from '@/types/gotd';
 import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
 import { Games } from "@/types/games";
-import { comingSoon } from "@/constants/text";
 import { UnlimitedStats } from "@/types/unlimited-stats";
 import { Mode } from "@/types/modes";
+import ComingSoon from "@/components/coming-soon";
 
 type ClassicUnlimitedProps = {
   getRandomGameAction: () => Promise<Gotd>
@@ -269,38 +269,14 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
             ))}
           </div>
 
-          {played ? (
+          {played && (
             <Button
               onClick={() => newGame()}
               className="flex-1 bg-gael-purple hover:bg-gael-purple-dark"
             >
               New Game
             </Button>
-          ) : (
-            <Popover open={skipGamePopoverOpen} onOpenChange={setSkipGamePopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  className="flex-1 bg-gael-purple hover:bg-gael-purple-dark"
-                >
-                  Skip Game
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[200px] text-center">
-                <div className="space-y-2">
-                  <h4 className="font-medium leading-none">Are you sure?</h4>
-                </div>
-                <div className="space-y-2 mt-3">
-                  <Button
-                    onClick={() => { newGame(); setSkipGamePopoverOpen(false) }}
-                    className="w-full bg-gael-purple hover:bg-gael-purple-dark"
-                  >
-                    Yes
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
           )}
-
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col items-center space-y-4">
@@ -416,9 +392,7 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
           </div>
         </div>
 
-        <div className="max-w-3xl mx-auto -mt-5 text-center">
-          <p>{comingSoon}</p>
-        </div>
+        <ComingSoon />
       </main >
     </>
   )

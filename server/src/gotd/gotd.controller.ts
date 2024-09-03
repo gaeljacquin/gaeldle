@@ -1,5 +1,13 @@
-import { Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { GotdService } from './gotd.service';
+import { JwtAuthGuard } from '@/src/auth/jwt-auth.guard';
 
 @Controller('gotd')
 export class GotdController {
@@ -10,6 +18,7 @@ export class GotdController {
     return this.gotdService.findIt(modeId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('refresh/:modeId')
   updateIt(@Param('modeId', ParseIntPipe) modeId: number) {
     return this.gotdService.refreshIt(modeId);

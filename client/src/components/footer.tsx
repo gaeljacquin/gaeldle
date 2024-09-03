@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import LottieDynamic from '@/components/lottie-dynamic';
+import { currentYear } from '@/constants/date';
 
 export default function Footer() {
   return (
@@ -11,7 +12,7 @@ export default function Footer() {
           <span className="w-12">
             <LottieDynamic loop={true} />
           </span>
-          <p className="mt-4 text-sm text-gray-500 sm:pl-4 sm:mt-0">2024 - All rights go to the rightful owners - no copyright infringement intended.</p>
+          <p className="mt-4 text-sm text-gray-500 sm:pl-4 sm:mt-0">&copy; 2024{currentYear !== 2024 && `-${currentYear}`} <span className="text-gael-green">Gaël Jacquin</span>. All rights reserved.</p>
           <span className="inline-flex justify-center mt-4 space-x-5 sm:ml-auto sm:mt-0 sm:justify-start">
             {/* <Link href="https://gaeljacquin.com" target="_blank" className="flex justify-center items-center text-gray-600 hover:text-gray-900 bg-white hover:bg-white-100 rounded-full border border-gray-200 hover:border-gray-400 shadow transition duration-150 ease-in-out" aria-label="Personal Website">
               <Image

@@ -39,9 +39,9 @@ import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
 import { Games } from "@/types/games";
 import DisplayCountdown from "@/components/display-countdown";
-import { comingSoon } from "@/constants/text";
 import { DailyStats } from "@/types/daily-stats";
 import { Mode } from "@/types/modes";
+import ComingSoon from "@/components/coming-soon";
 
 type ClassicProps = {
   gotd: Gotd
@@ -189,7 +189,6 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
 
   useEffect(() => {
     if (!getPlayed()) {
-      console.log('not played yet');
       socket.on('connect', () => {
         console.log('Connected to server');
       });
@@ -379,9 +378,9 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
 
         <div className="max-w-3xl mx-auto -mt-5 text-center">
           <DisplayCountdown />
-          <br />
-          <p>{comingSoon}</p>
         </div>
+
+        <ComingSoon />
 
         {process.env.NODE_ENV === 'development' &&
           <>

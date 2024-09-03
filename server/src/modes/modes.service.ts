@@ -1,21 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
-import { RedisService } from '~/src/redis/redis.service';
+import { upstashRedisInit } from '~/utils/upstash-redis';
 
 @Injectable()
 export class ModesService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly redisService: RedisService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
-    const key = 'modes';
-    let modes = await this.redisService.getData(key);
+    let key = 'modes';
 
-    if (!modes) {
+    if (
+      process.env.NODE_ENV === 'dev' ||
+      process.env.NODE_ENV === 'development'
+    ) {
+      key += '_dev';
+    }
+
+    let modes = await fetch(
+      `${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`,
+      upstashRedisInit,
+    );
+    let modes2 = await (await modes.json()).result;
+
+    if (!modes2) {
       try {
-        const modes2 = JSON.stringify(
+        modes2 = JSON.stringify(
           await this.prisma.modes.findMany({
             where: {
               hidden: false,
@@ -48,22 +57,39 @@ export class ModesService {
           }),
         );
 
-        modes = JSON.parse(modes2);
-        await this.redisService.setData(key, modes2);
+        await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
+          method: 'POST',
+          ...upstashRedisInit,
+          body: modes2,
+        });
       } catch (error) {
         console.error('Failed to fetch modes: ', error);
       }
     }
 
+    modes = JSON.parse(modes2);
+
     return modes ?? null;
   }
 
   async findOne(id) {
-    const key = 'modes';
-    const modes = await this.redisService.getData(key);
+    let key = 'modes';
+
+    if (
+      process.env.NODE_ENV === 'dev' ||
+      process.env.NODE_ENV === 'development'
+    ) {
+      key += '_dev';
+    }
+
+    const modes = await fetch(
+      `${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`,
+      upstashRedisInit,
+    );
+    const modes2 = await (await modes.json()).result;
     let mode;
 
-    if (!modes) {
+    if (!modes2) {
       mode = await this.prisma.modes.findUniqueOrThrow({
         where: {
           id: id,
@@ -84,7 +110,8 @@ export class ModesService {
         },
       });
     } else {
-      mode = modes.find((mode) => mode.id === id);
+      const modes3 = JSON.parse(modes2);
+      mode = modes3.find((mode) => mode.id === id);
     }
 
     return mode ?? null;

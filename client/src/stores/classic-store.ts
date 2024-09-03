@@ -30,6 +30,7 @@ export interface classicStore {
   setPixelation: () => void;
   removePixelation: () => void;
   setGotd: (arg0: Gotd) => void;
+  resetPlay: () => void;
 }
 
 export const defaultClassic = {
@@ -88,6 +89,9 @@ const useClassicStore = create(
           pixelation,
           pixelationStep,
         });
+      },
+      resetPlay: () => {
+        set({ played: false, won: false, guesses: [] });
       },
     }),
     { name: "classic-gaeldle-store" }

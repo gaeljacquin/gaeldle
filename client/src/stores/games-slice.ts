@@ -6,12 +6,7 @@ export interface gamesSlice {
 }
 
 export const defaultGamesSlice = {
-  games: [
-    {
-      name: "Fire Emblem: Awakening",
-      igdbId: 1443,
-    },
-  ],
+  games: [],
 };
 
 const createGamesSlice = (set: (arg0: unknown) => void) => ({

@@ -16,7 +16,7 @@ interface CountdownProviderProps {
 }
 
 export const CountdownProvider: FC<CountdownProviderProps> = ({ children }) => {
-  const [countdownRemaining, setCountdownRemaining] = useState("");
+  const [countdownRemaining, setCountdownRemaining] = useState("Next round...");
 
   useEffect(() => {
     const interval = setInterval(() => {

@@ -68,7 +68,6 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
   const { modes } = modesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
-  const [skipGamePopoverOpen, setSkipGamePopoverOpen] = useState(false);
   const mode = modes?.find((val: Mode) => val.id === 5); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;

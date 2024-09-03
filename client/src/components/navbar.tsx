@@ -9,6 +9,7 @@ import useGaeldleStore from "@/stores/gaeldle-store";
 import { modesSlice } from "@/stores/modes-slice";
 import { Modes } from '@/types/modes';
 import ModesDrawer from './modes-drawer';
+import AboutDialog from './about-dialog';
 
 type NavbarProps = {
   getModesAction: () => Promise<Modes>
@@ -56,6 +57,7 @@ export default function Navbar({ getModesAction }: NavbarProps) {
           </div>
           <div className="hidden md:flex space-x-4">
             {pathname !== '/' && <ModesDrawer />}
+            <AboutDialog />
             {navLink("/", "Home")}
           </div>
           <button

@@ -38,7 +38,6 @@ import { Gotd } from '@/types/gotd';
 import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
 import { Games } from "@/types/games";
-import { comingSoon } from "@/constants/text";
 import { UnlimitedStats } from "@/types/unlimited-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";

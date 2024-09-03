@@ -65,7 +65,7 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
   const classicSliceState = useClassicStore() as classicStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
-  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, name, igdbId, gotdId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setGotd } = classicSliceState;
+  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, name, igdbId, gotdId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay } = classicSliceState;
   const { setGames, games } = gamesSliceState;
   const { modes } = modesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
@@ -179,13 +179,14 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
     fetchGames();
 
     if (newGotd) {
+      resetPlay();
       useClassicStore.persist.clearStorage();
     }
 
     if (gotd) {
       void setGotd(gotd);
     }
-  }, [gotd, setGotd, setGames, getGamesAction, newGotd]);
+  }, [gotd, setGotd, setGames, getGamesAction, newGotd, resetPlay]);
 
   useEffect(() => {
     if (!getPlayed()) {

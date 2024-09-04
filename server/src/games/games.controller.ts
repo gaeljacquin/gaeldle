@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { GamesService } from './games.service';
 
 @Controller('games')
@@ -7,10 +7,5 @@ export class GamesController {
   @Get()
   findAll() {
     return this.gamesService.findAll();
-  }
-
-  @Get('/random/:modeId')
-  findOneRandom(@Param('modeId', ParseIntPipe) modeId: number) {
-    return this.gamesService.findOneRandom(modeId);
   }
 }

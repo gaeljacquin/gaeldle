@@ -56,33 +56,26 @@ export class ModesService {
   }
 
   async findOne(id) {
-    const modes = await this.findAll();
-    let mode;
-
-    if (!modes) {
-      mode = await this.prisma.modes.findUniqueOrThrow({
-        where: {
-          id: id,
-          active: true,
-          hidden: false,
-        },
-        omit: {
-          createdAt: true,
-          updatedAt: true,
-        },
-        include: {
-          levels: {
-            select: {
-              level: true,
-              label: true,
-            },
+    const mode = await this.prisma.modes.findUniqueOrThrow({
+      where: {
+        id: id,
+        active: true,
+        hidden: false,
+      },
+      omit: {
+        createdAt: true,
+        updatedAt: true,
+      },
+      include: {
+        levels: {
+          select: {
+            level: true,
+            label: true,
           },
         },
-      });
-    } else {
-      mode = modes.find((mode) => mode.id === id);
-    }
+      },
+    });
 
-    return mode ?? null;
+    return mode;
   }
 }

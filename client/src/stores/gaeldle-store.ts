@@ -2,12 +2,14 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import createGamesSlice from "@/stores/games-slice";
 import createModesSlice from "@/stores/modes-slice";
+import createClassicUnlimitedSlice from "@/stores/classic-unlimited-slice";
 
 const useGaeldleStore = create(
   persist(
-    (config) => ({
-      ...createGamesSlice(config),
-      ...createModesSlice(config),
+    (get, set) => ({
+      ...createGamesSlice(get, set),
+      ...createModesSlice(get),
+      ...createClassicUnlimitedSlice(get, set),
     }),
     { name: "main-gaeldle-store" }
   )

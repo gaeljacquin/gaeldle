@@ -1,14 +1,14 @@
 'use client';
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, ChevronsUpDown, Heart } from 'lucide-react';
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import io from 'socket.io-client';
 import useGaeldleStore from '@/stores/gaeldle-store';
-import useClassicUnlimitedStore, { classicUnlimitedStore } from '@/stores/classic-unlimited-store';
+import { classicUnlimitedSlice } from '@/stores/classic-unlimited-slice';
 import { gamesSlice } from '@/stores/games-slice';
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +34,6 @@ import {
 import { cn } from "@/lib/utils"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
-import { Gotd } from '@/types/gotd';
 import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
 import { Games } from "@/types/games";
@@ -43,7 +42,6 @@ import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
 
 type ClassicUnlimitedProps = {
-  getRandomGameAction: () => Promise<Gotd>
   getGamesAction: () => Promise<Games>
 }
 
@@ -59,12 +57,29 @@ const FormSchema = z.object({
 });
 const socket = io(`${process.env.serverUrl}`);
 
-export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }: ClassicUnlimitedProps) {
-  const classicUnlimitedSliceState = useClassicUnlimitedStore() as classicUnlimitedStore;
+export default function ClassicUnlimited({ getGamesAction }: ClassicUnlimitedProps) {
+  const classicUnlimitedSliceState = useGaeldleStore() as classicUnlimitedSlice;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
-  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, name, igdbId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, markAsWon, setRandomGame } = classicUnlimitedSliceState;
-  const { setGames, games } = gamesSliceState;
+  const {
+    livesLeft,
+    lives,
+    updateLivesLeft,
+    updateGuesses,
+    getLivesLeft,
+    getGuesses,
+    game,
+    played,
+    won,
+    guesses,
+    pixelation,
+    setPixelation,
+    removePixelation,
+    markAsPlayed,
+    markAsWon,
+    setRandomGame,
+  } = classicUnlimitedSliceState;
+  const { setGames, getGames, games } = gamesSliceState;
   const { modes } = modesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
@@ -116,7 +131,7 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
       markAsPlayed()
       removePixelation()
       saveUnlimitedStats({
-        igdbId,
+        igdbId: game.igdbId,
         modeId: mode!.id,
         attempts: getGuesses().length,
         guesses: getGuesses(),
@@ -131,12 +146,12 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
       return false;
     }
 
-    if (data.game.igdbId === igdbId) {
+    if (data.game.igdbId === game.igdbId) {
       markAsWon()
       markAsPlayed()
       removePixelation()
       saveUnlimitedStats({
-        igdbId,
+        igdbId: game.igdbId,
         modeId: mode!.id,
         attempts: Math.min(guesses.length + 1, lives),
         guesses: getGuesses(),
@@ -151,7 +166,7 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
         markAsPlayed()
         removePixelation()
         saveUnlimitedStats({
-          igdbId,
+          igdbId: game.igdbId,
           modeId: mode!.id,
           attempts: getGuesses().length,
           guesses: getGuesses(),
@@ -163,36 +178,25 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
     form.reset();
   }
 
-  const fetchRandomGame = useCallback(async () => {
-    try {
-      const game = await getRandomGameAction();
-      setRandomGame(game);
-    } catch (error) {
-      console.error('Failed to fetch game:', error);
-    }
-  }, [getRandomGameAction, setRandomGame]);
-
-  const fetchGames = useCallback(async () => {
-    try {
-      const games = await getGamesAction();
-      setGames(games);
-    } catch (error) {
-      console.error('Failed to fetch games:', error);
-    }
-  }, [getGamesAction, setGames]);
-
   async function newGame() {
     form.reset();
-    fetchRandomGame();
+    const games = getGames();
+    await setRandomGame(games);
   }
 
   useEffect(() => {
-    fetchGames();
-  }, [fetchGames]);
+    const fetchGames = async () => {
+      try {
+        const games = await getGamesAction();
+        setGames(games);
+        setRandomGame(games);
+      } catch (error) {
+        console.error('Failed to fetch games:', error);
+      }
+    };
 
-  useEffect(() => {
-    fetchRandomGame();
-  }, [fetchRandomGame]);
+    fetchGames();
+  }, [getGamesAction, setGames, setRandomGame]);
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -214,28 +218,26 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
 
   }, []);
 
-  if (!(games && igdbId)) {
+  if (!(game && mode)) {
     return <Placeholders />
   }
 
   return (
-    games && igdbId &&
+    game && mode &&
     <>
       <main className="flex-grow flex flex-col items-center space-y-8 p-4">
         <div className="max-w-3xl mx-auto -mt-5 text-center">
-          {mode &&
-            <>
-              <p className="text-xl font-semibold">{mode.label}</p>
-              <p className="text-xl font-semibold">{mode.description}</p>
-            </>
-          }
+          <>
+            <p className="text-xl font-semibold">{mode.label}</p>
+            <p className="text-xl font-semibold">{mode.description}</p>
+          </>
         </div>
 
         <div className="w-full max-w-md flex flex-col items-center space-y-8 mt-4">
           {
             !played ?
               <PixelatedImage
-                imageUrl={imageUrl}
+                imageUrl={game.imageUrl}
                 width={imgWidth}
                 height={imgHeight}
                 pixelationFactor={pixelation}
@@ -243,7 +245,7 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
               />
               :
               <Image
-                src={imageUrl}
+                src={game.imageUrl}
                 width={imgWidth}
                 height={imgHeight}
                 alt={imgAlt}
@@ -253,7 +255,7 @@ export default function ClassicUnlimited({ getRandomGameAction, getGamesAction }
 
           <div className="text-lg text-center">
             <p className="text-lg -mt-2 mb-5">
-              {played ? `${name}` : `🤔`}
+              {played ? `${game.name}` : `🤔`}
             </p>
             {_()}
           </div>

@@ -20,6 +20,8 @@ export class GamesService {
         select: {
           igdbId: true,
           name: true,
+          info: true,
+          imageUrl: true,
         },
         orderBy: {
           name: 'asc',
@@ -36,36 +38,5 @@ export class GamesService {
     }
 
     return games ?? null;
-  }
-
-  async findOneRandom(modeId) {
-    const key = keyNameByEnv('games2');
-    let games;
-    let game;
-
-    try {
-      games = await this.prisma.$queryRaw`
-            SELECT igdb_id AS "igdbId", name, info, image_url AS "imageUrl"
-            FROM
-              games
-            ORDER BY
-              RANDOM()
-            ;
-          `;
-
-      await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
-        method: 'POST',
-        ...upstashRedisInit,
-        body: JSON.stringify(games),
-      });
-
-      const mode = await this.modesService.findOne(modeId);
-      game = games[0];
-      game['mode'] = mode;
-    } catch (error) {
-      console.error('Failed to fetch games: ', error);
-    }
-
-    return game ?? null;
   }
 }

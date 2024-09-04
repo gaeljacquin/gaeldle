@@ -1,10 +1,12 @@
 import {
   Controller,
   Get,
-  // Param,
-  // ParseIntPipe,
+  Param,
+  ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ModesService } from './modes.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('modes')
 export class ModesController {
@@ -14,8 +16,9 @@ export class ModesController {
     return this.modesService.findAll();
   }
 
-  // @Get(':modeId')
-  // findOne(@Param('modeId', ParseIntPipe) modeId: number) {
-  //   return this.modesService.findOne(modeId);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Get(':modeId')
+  findOne(@Param('modeId', ParseIntPipe) modeId: number) {
+    return this.modesService.findOne(modeId);
+  }
 }

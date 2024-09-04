@@ -30,8 +30,9 @@ const PixelatedImage = ({ imageUrl, pixelationFactor, alt, width, height }: Pixe
         }
       };
     };
+
     loadImage();
-  }, [imageUrl, pixelationFactor]);
+  }, [imageUrl, pixelationFactor, loading]);
 
   return (
     <div>

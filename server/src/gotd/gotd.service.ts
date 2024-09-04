@@ -2,6 +2,7 @@ import { ServiceUnavailableException, Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
 import currentDay from '~/utils/get-current-day';
 import { upstashRedisInit } from '~/utils/upstash-redis';
+import keyNameByEnv from '~/utils/key-name-env';
 
 @Injectable()
 export class GotdService {
@@ -10,22 +11,13 @@ export class GotdService {
   async findIt(modeId: number) {
     try {
       const key = await this.findKey(modeId);
-      let gotd = await fetch(
-        `${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`,
-        upstashRedisInit,
-      );
-      let gotd2 = await (await gotd.json()).result;
+      const gotd = await this.dbFindGotd(modeId);
 
-      if (!gotd2) {
-        gotd2 = JSON.stringify(await this.dbFindGotd(modeId));
-        await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
-          method: 'POST',
-          ...upstashRedisInit,
-          body: gotd2,
-        });
-      }
-
-      gotd = JSON.parse(gotd2);
+      await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
+        method: 'POST',
+        ...upstashRedisInit,
+        body: JSON.stringify(gotd),
+      });
 
       return gotd ?? null;
     } catch (error) {
@@ -40,14 +32,7 @@ export class GotdService {
         id: modeId,
       },
     });
-    let key = 'gotd_' + mode.mode;
-
-    if (
-      process.env.NODE_ENV === 'dev' ||
-      process.env.NODE_ENV === 'development'
-    ) {
-      key += '_dev';
-    }
+    const key = keyNameByEnv('gotd_' + mode.mode);
 
     return key;
   }
@@ -55,6 +40,7 @@ export class GotdService {
   async refreshIt(modeId) {
     const key = await this.findKey(modeId);
     const gotd = await this.dbFindGotd(modeId);
+
     await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
       method: 'POST',
       ...upstashRedisInit,

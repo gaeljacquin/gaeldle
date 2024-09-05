@@ -43,7 +43,7 @@ export function keyNameByEnv(key: string) {
   return key;
 }
 
-export function myhostname(_: string) {
+export function myhostname() {
   let hostname = "";
 
   if (process.env.NODE_ENV === "development") {
@@ -52,7 +52,7 @@ export function myhostname(_: string) {
     hostname += "https://";
   }
 
-  hostname += _;
+  hostname += process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL;
 
   return hostname;
 }

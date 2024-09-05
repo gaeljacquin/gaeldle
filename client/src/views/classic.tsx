@@ -76,7 +76,7 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-  const hostname = myhostname(`${process.env.NEXT_PUBLIC_VERCEL_URL}`);
+  const hostname = myhostname();
   const ably = new Ably.Realtime({ authUrl: `${hostname}/api/ably`, authMethod: 'GET' });
   const channel = ably.channels.get('dailyStats');
   const _ = () => {

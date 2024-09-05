@@ -13,7 +13,7 @@
 // //   return res.json();
 // // }
 
-// const hostname = myhostname(`${process.env.NEXT_PUBLIC_VERCEL_URL}`);
+// const hostname = myhostname();
 // const ably = new Ably.Realtime({ authUrl: `${hostname}/api/ably`, authMethod: 'GET' });
 // // const ably = new Ably.Realtime({ authUrl: `http://localhost:8080/ably/token`, authMethod: 'GET' });
 

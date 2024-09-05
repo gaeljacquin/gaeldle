@@ -42,3 +42,17 @@ export function keyNameByEnv(key: string) {
 
   return key;
 }
+
+export function myhostname(_: string) {
+  let hostname = "";
+
+  if (process.env.NODE_ENV === "development") {
+    hostname += "http://";
+  } else {
+    hostname += "https://";
+  }
+
+  hostname += _;
+
+  return hostname;
+}

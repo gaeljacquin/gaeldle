@@ -31,7 +31,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+import { cn, myhostname } from "@/lib/utils"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
 import { victoryText, gameOverText } from '@/lib/constants';
@@ -89,7 +89,7 @@ export default function ClassicUnlimited({ getGamesAction }: ClassicUnlimitedPro
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-  const hostname = process.env.NEXT_PUBLIC_VERCEL_ENV;
+  const hostname = myhostname(`${process.env.NEXT_PUBLIC_VERCEL_URL}`);
   const ably = new Ably.Realtime({ authUrl: `${hostname}/api/ably`, authMethod: 'GET' });
   const channel = ably.channels.get('unlimitedStats');
   const _ = () => {

@@ -44,35 +44,35 @@ model roles {
 
 model daily_stats {
   Id            Int       @id @default(autoincrement())
-  gotdId        Int?      @map("gotd_id")
+  gotdId        Int       @map("gotd_id")
   attempts      Int
   guesses       Json[]
   found         Boolean   @default(false)
   userId        Int?      @map("user_id")
-  modeId        Int?      @map("mode_id")
+  modeId        Int       @map("mode_id")
   info          Json?
   createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
   real          Boolean   @default(true)
-  gotd          gotd?     @relation(fields: [gotdId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "daily_stats_gotd_fk")
-  modes         modes?    @relation(fields: [modeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gotd          gotd      @relation(fields: [gotdId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "daily_stats_gotd_fk")
+  modes         modes     @relation(fields: [modeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users         users?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model unlimited_stats {
   Id          Int       @id @default(autoincrement())
-  igdbId      Int?      @map("idgb_id")
+  igdbId      Int       @map("igdb_id")
   attempts    Int
   guesses     Json[]
   found       Boolean   @default(false)
   userId      Int?      @map("user_id")
-  modeId      Int?      @map("mode_id")
+  modeId      Int       @map("mode_id")
   info        Json?
   createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
   real        Boolean   @default(true)
-  games       games?    @relation(fields: [igdbId], references: [igdbId], onDelete: NoAction, onUpdate: NoAction, map: "unlimited_stats_igdb_fk")
-  modes       modes?    @relation(fields: [modeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  games       games     @relation(fields: [igdbId], references: [igdbId], onDelete: NoAction, onUpdate: NoAction, map: "unlimited_stats_igdb_fk")
+  modes       modes     @relation(fields: [modeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users       users?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 

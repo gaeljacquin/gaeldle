@@ -21,7 +21,7 @@ export default async function getModes() {
       data = await response.json();
     }
   } catch (error) {
-    console.log("Something went wrong: ", error);
+    console.error("Something went wrong: ", error);
   }
 
   return data as Modes;

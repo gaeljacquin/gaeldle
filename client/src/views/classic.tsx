@@ -6,7 +6,7 @@ import { Check, ChevronsUpDown, Heart } from 'lucide-react'
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import io from 'socket.io-client';
+import Ably from 'ably';
 import useGaeldleStore from '@/stores/gaeldle-store';
 import useClassicStore, { classicStore } from '@/stores/classic-store';
 import { gamesSlice } from '@/stores/games-slice';
@@ -59,7 +59,6 @@ const FormSchema = z.object({
     }),
   })
 });
-const socket = io(`${process.env.serverUrl}`);
 
 export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps) {
   const classicSliceState = useClassicStore() as classicStore;
@@ -77,7 +76,9 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-
+  const hostname = process.env.VERCEL_URL ?? `http://localhost:${process.env.port}`;
+  const ably = new Ably.Realtime({ authUrl: `${hostname}/api/ably`, authMethod: 'GET' });
+  const channel = ably.channels.get('dailyStats');
   const _ = () => {
     let text = ""
     let classes = "-mt-3 -mb-7"
@@ -107,7 +108,7 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
 
 
   function saveDailyStats(data: DailyStats) {
-    socket.emit('saveDailyStats', data);
+    channel.publish('saveDailyStats', data);
   }
 
   function onSkip() {
@@ -190,24 +191,15 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
 
   useEffect(() => {
     if (!getPlayed()) {
-      socket.on('connect', () => {
-        console.log('Connected to server');
-      });
-
-      socket.on('message', (message: string) => {
-        console.log('Message from server:', message);
-      });
-
-      socket.on('error', (message: string) => {
-        console.log('Message from server:', message);
+      channel.subscribe('dailyStatsSaved', (message) => {
+        console.info('Received data:', message.data);
       });
 
       return () => {
-        socket.off('connect');
-        socket.off('message');
+        channel.unsubscribe();
       };
     }
-  }, [getPlayed]);
+  }, [getPlayed, channel]);
 
   if (!(games && gotd)) {
     return <Placeholders />

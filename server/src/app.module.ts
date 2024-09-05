@@ -14,6 +14,8 @@ import { DailyStatsService } from './daily-stats/daily-stats.service';
 import { UnlimitedStatsService } from './unlimited-stats/unlimited-stats.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { AblyService } from './ably/ably.service';
+import { AblyController } from './ably/ably.controller';
 
 @Module({
   imports: [
@@ -25,7 +27,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     UsersModule,
   ],
-  controllers: [AppController, ModesController],
+  controllers: [AppController, ModesController, AblyController],
   providers: [
     AppService,
     PrismaService,
@@ -33,6 +35,7 @@ import { UsersModule } from './users/users.module';
     StatsGateway,
     DailyStatsService,
     UnlimitedStatsService,
+    AblyService,
   ],
 })
 export class AppModule {}

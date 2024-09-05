@@ -19,7 +19,7 @@ export class DailyStatsService {
   }
 
   update(id: number, data) {
-    console.log(data);
+    console.info(data);
     return `This action updates a #${id} daily_stat`;
   }
 

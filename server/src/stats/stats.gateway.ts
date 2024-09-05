@@ -1,69 +1,40 @@
-import { Logger } from '@nestjs/common';
-import {
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import * as Ably from 'ably';
 
 import { DailyStatsService } from '~/src/daily-stats/daily-stats.service';
 import { UnlimitedStatsService } from '~/src/unlimited-stats/unlimited-stats.service';
-import { CreateDailyStatsDto } from '~/src/daily-stats/dto/create-daily-stats.dto';
-import { CreateUnlimitedStatsDto } from '~/src/unlimited-stats/dto/create-unlimited-stats.dto';
 
-@WebSocketGateway({
-  cors: {
-    origin: [
-      new RegExp('^https://.*gaeldle.*\\.vercel\\.app$'),
-      process.env.CLIENT_URL,
-    ],
-    methods: 'GET,POST,PATCH,PUT',
-    credentials: false,
-  },
-})
-export class StatsGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
-  private readonly logger = new Logger(StatsGateway.name);
+@Injectable()
+export class StatsGateway implements OnModuleInit {
+  private ably: Ably.Realtime;
+
   constructor(
     private readonly dailyStatsService: DailyStatsService,
     private readonly unlimitedStatsService: UnlimitedStatsService,
-  ) {}
-
-  @WebSocketServer() io: Server;
-
-  afterInit() {
-    this.logger.log('Daily stats gateway initialized');
+  ) {
+    this.ably = new Ably.Realtime(`${process.env.ABLY_API_KEY}`);
   }
 
-  handleConnection(client: Socket) {
-    const { sockets } = this.io.sockets;
-
-    this.logger.log(`Client id: ${client.id} connected`);
-    this.logger.debug(`Number of connected clients: ${sockets.size}`);
+  onModuleInit() {
+    this.subscribeDailyStats();
+    this.subscribeUnlimitedStats();
   }
 
-  handleDisconnect(client: Socket) {
-    this.logger.log(`Client id:${client.id} disconnected`);
+  private subscribeDailyStats() {
+    const channel = this.ably.channels.get('dailyStats');
+    channel.subscribe(async (message) => {
+      console.info('Received daily stats:', message);
+      const data = message.data;
+      await this.dailyStatsService.create(data);
+    });
   }
 
-  @SubscribeMessage('saveDailyStats')
-  async handleDailyStats(client: Socket, data: CreateDailyStatsDto) {
-    this.logger.log(`Message received from client id: ${client.id}`);
-    this.logger.debug(`Payload: ${data}`);
-    await this.dailyStatsService.create(data);
-    client.emit('message', 'ok');
-    return;
-  }
-  @SubscribeMessage('saveUnlimitedStats')
-  async handleUnlimitedStats(client: Socket, data: CreateUnlimitedStatsDto) {
-    this.logger.log(`Message received from client id: ${client.id}`);
-    this.logger.debug(`Payload: ${data}`);
-    await this.unlimitedStatsService.create(data);
-    client.emit('message', 'ok');
-    return;
+  private subscribeUnlimitedStats() {
+    const channel = this.ably.channels.get('unlimitedStats');
+    channel.subscribe(async (message) => {
+      console.info('Received unlimited stats:', message);
+      const data = message.data;
+      await this.unlimitedStatsService.create(data);
+    });
   }
 }

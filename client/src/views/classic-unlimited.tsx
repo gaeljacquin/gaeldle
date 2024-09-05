@@ -6,7 +6,7 @@ import { Check, ChevronsUpDown, Heart } from 'lucide-react';
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import io from 'socket.io-client';
+import Ably from 'ably';
 import useGaeldleStore from '@/stores/gaeldle-store';
 import { classicUnlimitedSlice } from '@/stores/classic-unlimited-slice';
 import { gamesSlice } from '@/stores/games-slice';
@@ -55,7 +55,6 @@ const FormSchema = z.object({
     }),
   })
 });
-const socket = io(`${process.env.serverUrl}`);
 
 export default function ClassicUnlimited({ getGamesAction }: ClassicUnlimitedProps) {
   const classicUnlimitedSliceState = useGaeldleStore() as classicUnlimitedSlice;
@@ -90,7 +89,9 @@ export default function ClassicUnlimited({ getGamesAction }: ClassicUnlimitedPro
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-
+  const hostname = process.env.VERCEL_URL ?? `http://localhost:${process.env.port}`;
+  const ably = new Ably.Realtime({ authUrl: `${hostname}/api/ably`, authMethod: 'GET' });
+  const channel = ably.channels.get('unlimitedStats');
   const _ = () => {
     let text = ""
     let classes = "-mt-3 -mb-7"
@@ -119,7 +120,7 @@ export default function ClassicUnlimited({ getGamesAction }: ClassicUnlimitedPro
   }
 
   function saveUnlimitedStats(data: UnlimitedStats) {
-    socket.emit('saveUnlimitedStats', data);
+    channel.publish('saveUnlimitedStats', data);
   }
 
   function onSkip() {
@@ -199,24 +200,14 @@ export default function ClassicUnlimited({ getGamesAction }: ClassicUnlimitedPro
   }, [getGamesAction, setGames, setRandomGame]);
 
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to server');
-    });
-
-    socket.on('message', (message: string) => {
-      console.log('Message from server:', message);
-    });
-
-    socket.on('error', (message: string) => {
-      console.log('Message from server:', message);
+    channel.subscribe('unlimitedStatsSaved', (message) => {
+      console.info('Received data:', message.data);
     });
 
     return () => {
-      socket.off('connect');
-      socket.off('message');
+      channel.unsubscribe();
     };
-
-  }, []);
+  }, [channel]);
 
   if (!(game && mode)) {
     return <Placeholders />

@@ -19,7 +19,7 @@ export class UnlimitedStatsService {
   }
 
   update(id: number, data) {
-    console.log(data);
+    console.info(data);
     return `This action updates a #${id} unlimited_stat`;
   }
 

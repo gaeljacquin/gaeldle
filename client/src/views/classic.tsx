@@ -6,7 +6,6 @@ import { Check, ChevronsUpDown, Heart } from 'lucide-react'
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import Ably from 'ably';
 import useGaeldleStore from '@/stores/gaeldle-store';
 import useClassicStore, { classicStore } from '@/stores/classic-store';
 import { gamesSlice } from '@/stores/games-slice';
@@ -31,7 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { cn, myhostname } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
 import { Gotd } from '@/types/gotd';
@@ -42,6 +41,7 @@ import DisplayCountdown from "@/components/display-countdown";
 import { DailyStats } from "@/types/daily-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
+import ablyInit from "@/lib/ably-init";
 
 type ClassicProps = {
   gotd: Gotd
@@ -76,9 +76,7 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-  const hostname = myhostname();
-  const ably = new Ably.Realtime({ authUrl: `${hostname}/api/ably`, authMethod: 'GET' });
-  const channel = ably.channels.get('dailyStats');
+  const channel = ablyInit('dailyStats');
   const _ = () => {
     let text = ""
     let classes = "-mt-3 -mb-7"

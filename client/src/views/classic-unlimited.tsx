@@ -6,7 +6,6 @@ import { Check, ChevronsUpDown, Heart } from 'lucide-react';
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Ably from 'ably';
 import useGaeldleStore from '@/stores/gaeldle-store';
 import { classicUnlimitedSlice } from '@/stores/classic-unlimited-slice';
 import { gamesSlice } from '@/stores/games-slice';
@@ -31,7 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { cn, myhostname } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
 import { victoryText, gameOverText } from '@/lib/constants';
@@ -40,6 +39,7 @@ import { Games } from "@/types/games";
 import { UnlimitedStats } from "@/types/unlimited-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
+import ablyInit from "@/lib/ably-init";
 
 type ClassicUnlimitedProps = {
   getGamesAction: () => Promise<Games>
@@ -89,9 +89,7 @@ export default function ClassicUnlimited({ getGamesAction }: ClassicUnlimitedPro
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-  const hostname = myhostname();
-  const ably = new Ably.Realtime({ authUrl: `${hostname}/api/ably`, authMethod: 'GET' });
-  const channel = ably.channels.get('unlimitedStats');
+  const channel = ablyInit('unlimitedStats');
   const _ = () => {
     let text = ""
     let classes = "-mt-3 -mb-7"

@@ -52,11 +52,7 @@ const FormSchema = z.object({
   })
 });
 
-type ClassicProps = {
-  channelName: string
-}
-
-export default function Classic({ channelName }: ClassicProps) {
+export default function Classic() {
   const classicSliceState = useClassicStore() as classicStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
@@ -68,6 +64,7 @@ export default function Classic({ channelName }: ClassicProps) {
   const mode = modes?.find((val: Mode) => val.id === 1); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
+  const channelName = "dailyStats";
   const imgAlt = `Game of the Day - ${mode?.label}`;
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),

@@ -10,7 +10,7 @@ export default async function Page() {
   return (
     <>
       <AblyInit channelName={channelName}>
-        <Classic channelName={channelName} />
+        <Classic />
       </AblyInit>
     </>
   )

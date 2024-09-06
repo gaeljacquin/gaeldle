@@ -51,11 +51,7 @@ const FormSchema = z.object({
   })
 });
 
-type ClassicUnlimitedProps = {
-  channelName: string
-}
-
-export default function ClassicUnlimited({ channelName }: ClassicUnlimitedProps) {
+export default function ClassicUnlimited() {
   const classicUnlimitedSliceState = useGaeldleStore() as classicUnlimitedSlice;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
@@ -84,6 +80,7 @@ export default function ClassicUnlimited({ channelName }: ClassicUnlimitedProps)
   const mode = modes?.find((val: Mode) => val.id === 5); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
+  const channelName = "unlimitedStats";
   const imgAlt = mode ? mode.label : 'Random cover';
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),

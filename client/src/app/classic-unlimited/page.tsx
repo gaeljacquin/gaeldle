@@ -9,8 +9,8 @@ export default async function Page() {
 
   return (
     <>
-      <AblyInit channelName="unlimitedStats">
-        <ClassicUnlimited channelName={channelName} />
+      <AblyInit channelName={channelName}>
+        <ClassicUnlimited />
       </AblyInit>
     </>
   )

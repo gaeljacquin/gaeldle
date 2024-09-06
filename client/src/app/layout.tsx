@@ -7,7 +7,6 @@ import { Analytics } from "@vercel/analytics/react";
 import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
 import TextSpecial from '@/components/text-special';
-import getModes from '@/lib/get-modes';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -29,7 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} font-inter antialiased bg-white text-gray-900 tracking-tight`}>
         <div className="flex flex-col min-h-screen">
-          <Navbar getModesAction={getModes} />
+          <Navbar />
           <div className="text-center mt-10">
             <div className="max-w-3xl mx-auto">
               <h1 className="text-5xl md:text-6xl font-extrabold mb-4">

@@ -33,21 +33,13 @@ import {
 import { cn } from "@/lib/utils"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
-import { Gotd } from '@/types/gotd';
 import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
-import { Games } from "@/types/games";
 import DisplayCountdown from "@/components/display-countdown";
 import { DailyStats } from "@/types/daily-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
 import ablyInit from "@/lib/ably-init";
-
-type ClassicProps = {
-  gotd: Gotd
-  getGamesAction: () => Promise<Games>
-  newGotd: boolean
-}
 
 const FormSchema = z.object({
   game: z.object({
@@ -60,7 +52,7 @@ const FormSchema = z.object({
   })
 });
 
-export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps) {
+export default function Classic() {
   const classicSliceState = useClassicStore() as classicStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
@@ -103,7 +95,6 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
 
     return <p className={classes}>{text}</p>
   }
-
 
   function saveDailyStats(data: DailyStats) {
     channel.publish('saveDailyStats', data);
@@ -168,24 +159,34 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const games = await getGamesAction();
+        const res = await fetch('/api/games');
+        const games = await res.json()
         setGames(games);
       } catch (error) {
         console.error('Failed to fetch games:', error);
       }
     };
 
+    const fetchGotd = async () => {
+      try {
+        const res = await fetch('/api/gotd-classic');
+        const { gotd, newGotd } = await res.json()
+        if (newGotd) {
+          resetPlay();
+          useClassicStore.persist.clearStorage();
+        }
+
+        if (gotd) {
+          void setGotd(gotd);
+        }
+      } catch (error) {
+        console.error('Failed to set gotd (classic):', error);
+      }
+    };
+
     fetchGames();
-
-    if (newGotd) {
-      resetPlay();
-      useClassicStore.persist.clearStorage();
-    }
-
-    if (gotd) {
-      void setGotd(gotd);
-    }
-  }, [gotd, setGotd, setGames, getGamesAction, newGotd, resetPlay]);
+    fetchGotd();
+  }, [setGotd, setGames, resetPlay]);
 
   useEffect(() => {
     if (!getPlayed()) {
@@ -199,12 +200,12 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
     }
   }, [getPlayed, channel]);
 
-  if (!(games && gotd)) {
+  if (!(games && gotdId && mode)) {
     return <Placeholders />
   }
 
   return (
-    games && gotd && mode &&
+    games && gotdId && mode &&
     <>
       <div className="flex flex-col min-h-screen">
         <main className="flex-grow container mx-auto px-4">

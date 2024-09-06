@@ -35,15 +35,10 @@ import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
 import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
-import { Games } from "@/types/games";
 import { UnlimitedStats } from "@/types/unlimited-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
 import ablyInit from "@/lib/ably-init";
-
-type ClassicUnlimitedProps = {
-  getGamesAction: () => Promise<Games>
-}
 
 const FormSchema = z.object({
   game: z.object({
@@ -56,7 +51,7 @@ const FormSchema = z.object({
   })
 });
 
-export default function ClassicUnlimited({ getGamesAction }: ClassicUnlimitedProps) {
+export default function ClassicUnlimited() {
   const classicUnlimitedSliceState = useGaeldleStore() as classicUnlimitedSlice;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
@@ -186,7 +181,8 @@ export default function ClassicUnlimited({ getGamesAction }: ClassicUnlimitedPro
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const games = await getGamesAction();
+        const res = await fetch('/api/games');
+        const games = await res.json()
         setGames(games);
         setRandomGame(games);
       } catch (error) {
@@ -195,7 +191,7 @@ export default function ClassicUnlimited({ getGamesAction }: ClassicUnlimitedPro
     };
 
     fetchGames();
-  }, [getGamesAction, setGames, setRandomGame]);
+  }, [setGames, setRandomGame]);
 
   useEffect(() => {
     channel.subscribe('unlimitedStatsSaved', (message) => {

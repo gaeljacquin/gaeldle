@@ -2,16 +2,19 @@ import { Modes } from "@/types/modes";
 
 export interface modesSlice {
   modes: Modes;
-  setModes: (arg0: Modes) => void;
+  fetchModes: () => void;
 }
 
 export const defaultModesSlice = {
-  modes: [],
+  modes: null,
 };
 
 const createModesSlice = (set: (arg0: unknown) => void) => ({
   ...defaultModesSlice,
-  setModes: (modes: Modes) => {
+  fetchModes: async () => {
+    const res = await fetch("/api/modes");
+    const modes = await res.json();
+
     set({ modes });
   },
 });

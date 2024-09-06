@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { GamesModule } from './games/games.module';
 import { DailyStatsModule } from './daily-stats/daily-stats.module';
 import { GotdModule } from './gotd/gotd.module';
-import { PrismaService } from '~/src/prisma/prisma.service';
 import { ModesController } from './modes/modes.controller';
 import { ModesService } from './modes/modes.service';
 import { ModesModule } from './modes/modes.module';
@@ -16,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AblyService } from './ably/ably.service';
 import { AblyController } from './ably/ably.controller';
+import { DrizzleService, DrizzleProvider } from '~/src/drizzle/service';
 
 @Module({
   imports: [
@@ -30,7 +30,8 @@ import { AblyController } from './ably/ably.controller';
   controllers: [AppController, ModesController, AblyController],
   providers: [
     AppService,
-    PrismaService,
+    DrizzleService,
+    DrizzleProvider,
     ModesService,
     StatsGateway,
     DailyStatsService,

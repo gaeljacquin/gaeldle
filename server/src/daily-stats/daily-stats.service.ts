@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '~/src/prisma/prisma.service';
+import { DrizzleService } from '~/src/drizzle/service';
+import { dailyStats } from '~/src/drizzle/schema';
 import { CreateDailyStatsDto } from './dto/create-daily-stats.dto';
 
 @Injectable()
 export class DailyStatsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly drizzle: DrizzleService) {}
 
   create(data: CreateDailyStatsDto) {
-    return this.prisma.daily_stats.create({ data });
+    return this.drizzle.db.insert(dailyStats).values(data);
   }
 
   async findAll() {

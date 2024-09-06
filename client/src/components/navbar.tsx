@@ -7,32 +7,18 @@ import { usePathname } from 'next/navigation';
 import LottieDynamic from '@/components/lottie-dynamic';
 import useGaeldleStore from "@/stores/gaeldle-store";
 import { modesSlice } from "@/stores/modes-slice";
-import { Modes } from '@/types/modes';
 import ModesDrawer from './modes-drawer';
 import AboutDialog from './about-dialog';
 
-type NavbarProps = {
-  getModesAction: () => Promise<Modes>
-}
-
-export default function Navbar({ getModesAction }: NavbarProps) {
+export default function Navbar() {
   const pathname = usePathname();
   const modesSliceState = useGaeldleStore() as modesSlice;
-  const { setModes } = modesSliceState;
+  const { fetchModes } = modesSliceState;
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
-    const fetchModes = async () => {
-      try {
-        const modes = await getModesAction();
-        setModes(modes);
-      } catch (error) {
-        console.error('Failed to fetch modes:', error);
-      }
-    };
-
     fetchModes();
-  }, [setModes, getModesAction]);
+  }, [fetchModes]);
 
   const navLink = (path: string, text: string) => {
     const markup = (

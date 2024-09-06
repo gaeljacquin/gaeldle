@@ -14,6 +14,7 @@ export class AblyService {
       clientId: '*',
     });
     const generatedToken = await this.ably.auth.requestToken(tokenRequest);
+    console.log('there');
 
     return generatedToken;
   }

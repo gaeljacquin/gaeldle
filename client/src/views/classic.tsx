@@ -6,7 +6,6 @@ import { Check, ChevronsUpDown, Heart } from 'lucide-react'
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import Ably from 'ably';
 import useGaeldleStore from '@/stores/gaeldle-store';
 import useClassicStore, { classicStore } from '@/stores/classic-store';
 import { gamesSlice } from '@/stores/games-slice';
@@ -31,23 +30,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { cn, myhostname } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
-import { Gotd } from '@/types/gotd';
 import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
-import { Games } from "@/types/games";
 import DisplayCountdown from "@/components/display-countdown";
 import { DailyStats } from "@/types/daily-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
-
-type ClassicProps = {
-  gotd: Gotd
-  getGamesAction: () => Promise<Games>
-  newGotd: boolean
-}
+import { useChannel } from 'ably/react';
 
 const FormSchema = z.object({
   game: z.object({
@@ -60,7 +52,7 @@ const FormSchema = z.object({
   })
 });
 
-export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps) {
+export default function Classic() {
   const classicSliceState = useClassicStore() as classicStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
@@ -72,13 +64,14 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
   const mode = modes?.find((val: Mode) => val.id === 1); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
+  const channelName = "dailyStats";
   const imgAlt = `Game of the Day - ${mode?.label}`;
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-  const hostname = myhostname();
-  const ably = new Ably.Realtime({ authUrl: `${hostname}/api/ably`, authMethod: 'GET' });
-  const channel = ably.channels.get('dailyStats');
+  const { channel } = useChannel(channelName, (message) => {
+    console.info(message)
+  });
   const _ = () => {
     let text = ""
     let classes = "-mt-3 -mb-7"
@@ -105,7 +98,6 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
 
     return <p className={classes}>{text}</p>
   }
-
 
   function saveDailyStats(data: DailyStats) {
     channel.publish('saveDailyStats', data);
@@ -170,24 +162,34 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const games = await getGamesAction();
+        const res = await fetch('/api/games');
+        const games = await res.json()
         setGames(games);
       } catch (error) {
         console.error('Failed to fetch games:', error);
       }
     };
 
+    const fetchGotd = async () => {
+      try {
+        const res = await fetch('/api/gotd-classic');
+        const { gotd, newGotd } = await res.json()
+        if (newGotd) {
+          resetPlay();
+          useClassicStore.persist.clearStorage();
+        }
+
+        if (gotd) {
+          void setGotd(gotd);
+        }
+      } catch (error) {
+        console.error('Failed to set gotd (classic):', error);
+      }
+    };
+
     fetchGames();
-
-    if (newGotd) {
-      resetPlay();
-      useClassicStore.persist.clearStorage();
-    }
-
-    if (gotd) {
-      void setGotd(gotd);
-    }
-  }, [gotd, setGotd, setGames, getGamesAction, newGotd, resetPlay]);
+    fetchGotd();
+  }, [setGotd, setGames, resetPlay]);
 
   useEffect(() => {
     if (!getPlayed()) {
@@ -201,186 +203,196 @@ export default function Classic({ gotd, getGamesAction, newGotd }: ClassicProps)
     }
   }, [getPlayed, channel]);
 
-  if (!(games && gotd)) {
+  if (!(games && gotdId && mode)) {
     return <Placeholders />
   }
 
   return (
-    games && gotd &&
+    games && gotdId && mode &&
     <>
-      <main className="flex-grow flex flex-col items-center space-y-8 p-4">
-        <div className="max-w-3xl mx-auto -mt-5 text-center">
-          {mode &&
-            <>
-              <p className="text-xl font-semibold">{mode.label}</p>
-              <p className="text-xl font-semibold">{mode.description}</p>
-            </>
-          }
-        </div>
-
-        <div className="w-full max-w-md flex flex-col items-center space-y-8 mt-4">
-          {
-            !played ?
-              <PixelatedImage
-                imageUrl={imageUrl}
-                width={imgWidth}
-                height={imgHeight}
-                pixelationFactor={pixelation}
-                alt={imgAlt}
-              />
-              :
-              <Image
-                src={imageUrl}
-                width={imgWidth}
-                height={imgHeight}
-                alt={imgAlt}
-                priority
-              />
-          }
-
-          <div className="text-lg text-center">
-            <p className="text-lg -mt-2 mb-5">
-              {played ? `${name}` : `🤔`}
-            </p>
-            {_()}
+      <div className="flex flex-col min-h-screen">
+        <main className="flex-grow container mx-auto px-4">
+          <div className="mb-8 text-xl text-center font-semibold">
+            <p>{mode.label}</p>
+            <p>{mode.description}</p>
           </div>
 
-          <div className="flex justify-center space-x-2">
-            {Array.from({ length: lives }).map((_, index) => (
-              <Heart
-                key={index}
-                className={`w-6 h-6 ${index < livesLeft ? 'text-red-600' : ''}`}
-                fill={index < livesLeft ? 'currentColor' : 'none'}
-              />
-            ))}
-          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === 'development' && "border border-gray-200 "}`}>
+              {
+                !played ?
+                  <PixelatedImage
+                    imageUrl={imageUrl}
+                    width={imgWidth}
+                    height={imgHeight}
+                    pixelationFactor={pixelation}
+                    alt={imgAlt}
+                  />
+                  :
+                  <Image
+                    placeholder='empty'
+                    src={imageUrl}
+                    width={imgWidth}
+                    height={imgHeight}
+                    style={{ objectFit: "contain", width: "auto", height: "auto" }}
+                    alt={imgAlt}
+                    priority
+                  />
+              }
+            </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col items-center space-y-4">
-              <FormField
-                control={form.control}
-                name="game"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <Popover open={gameMenuOpen} onOpenChange={() => { setGameMenuOpen(!gameMenuOpen); form.clearErrors("game") }} >
+            <div className={`flex flex-col items-center text-center p-6 rounded-lg bg-white shadow-sm relative ${process.env.NODE_ENV === 'development' && "border border-gray-200 "}`}>
+              <>
+                <div className="text-lg text-center">
+                  <p className="mb-5">
+                    {played ? `${name}` : `🤔`}
+                  </p>
+                  {_()}
+                </div>
+
+                <div className="flex justify-center space-x-2 mt-8">
+                  {Array.from({ length: lives }).map((_, index) => (
+                    <Heart
+                      key={index}
+                      className={`w-6 h-6 ${index < livesLeft ? 'text-red-600' : ''}`}
+                      fill={index < livesLeft ? 'currentColor' : 'none'}
+                    />
+                  ))}
+                </div>
+              </>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col items-center space-y-4 mt-8">
+                  <FormField
+                    control={form.control}
+                    name="game"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <Popover open={gameMenuOpen} onOpenChange={() => { setGameMenuOpen(!gameMenuOpen); form.clearErrors("game") }} >
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-[420px] justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                                disabled={played}
+                              >
+                                {field.value
+                                  ? games.find(
+                                    (game) => game.igdbId === field.value.igdbId
+                                  )?.name
+                                  : "Select game"
+                                }
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[420px] p-0" side="bottom" align="start">
+                            <Command onClick={() => { form.clearErrors("game") }}>
+                              <CommandInput placeholder="Search game..." />
+                              <CommandList>
+                                <CommandEmpty>No game found</CommandEmpty>
+                                <CommandGroup>
+                                  {games.map((game) => (
+                                    <CommandItem
+                                      key={game.igdbId}
+                                      value={game.name}
+                                      onSelect={(selectedIgdbId) => {
+                                        if (parseInt(selectedIgdbId, 10) === field.value?.igdbId) {
+                                          form.reset();
+                                        } else {
+                                          form.setValue("game", game);
+                                          setGameMenuOpen(false);
+                                        }
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          field.value?.igdbId && game.igdbId === field.value.igdbId
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      {game.name}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex space-x-4 w-full">
+                    <Popover open={skipPopoverOpen} onOpenChange={setSkipPopoverOpen}>
                       <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className={cn(
-                              "w-[420px] justify-between",
-                              !field.value && "text-muted-foreground"
-                            )}
-                            disabled={played}
-                          >
-                            {field.value
-                              ? games.find(
-                                (game) => game.igdbId === field.value.igdbId
-                              )?.name
-                              : "Select game"
-                            }
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </FormControl>
+                        <Button
+                          className="flex-1 bg-gael-blue hover:bg-gael-blue-dark"
+                          disabled={played}
+                        >
+                          Skip
+                        </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[420px] p-0" side="top" align="start">
-                        <Command onClick={() => { form.clearErrors("game") }}>
-                          <CommandInput placeholder="Search game..." />
-                          <CommandList>
-                            <CommandEmpty>No game found</CommandEmpty>
-                            <CommandGroup>
-                              {games.map((game) => (
-                                <CommandItem
-                                  key={game.igdbId}
-                                  value={game.name}
-                                  onSelect={(selectedIgdbId) => {
-                                    if (parseInt(selectedIgdbId, 10) === field.value?.igdbId) {
-                                      form.reset();
-                                    } else {
-                                      form.setValue("game", game);
-                                      setGameMenuOpen(false);
-                                    }
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      field.value?.igdbId && game.igdbId === field.value.igdbId
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                  {game.name}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
+                      <PopoverContent className="w-[200px] text-center">
+                        <div className="space-y-2">
+                          <h4 className="font-medium leading-none">Are you sure?</h4>
+                        </div>
+                        <div className="space-y-2 mt-3">
+                          <Button
+                            onClick={(e) => { e.preventDefault(); onSkip(); setSkipPopoverOpen(false) }}
+                            className="w-full bg-gael-blue hover:bg-gael-blue-dark"
+                          >
+                            Yes
+                          </Button>
+                        </div>
                       </PopoverContent>
                     </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex space-x-4 w-full">
-                <Popover open={skipPopoverOpen} onOpenChange={setSkipPopoverOpen}>
-                  <PopoverTrigger asChild>
                     <Button
-                      className="flex-1 bg-gael-blue hover:bg-gael-blue-dark"
+                      type="submit"
+                      className="flex-1 bg-gael-green hover:bg-gael-green-dark"
                       disabled={played}
                     >
-                      Skip
+                      Guess
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[200px] text-center">
-                    <div className="space-y-2">
-                      <h4 className="font-medium leading-none">Are you sure?</h4>
-                    </div>
-                    <div className="space-y-2 mt-3">
-                      <Button
-                        onClick={(e) => { e.preventDefault(); onSkip(); setSkipPopoverOpen(false) }}
-                        className="w-full bg-gael-blue hover:bg-gael-blue-dark"
-                      >
-                        Yes
-                      </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-                <Button
-                  type="submit"
-                  className="flex-1 bg-gael-green hover:bg-gael-green-dark"
-                  disabled={played}
-                >
-                  Guess
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </div>
+                  </div>
+                </form>
+              </Form>
 
-        <div className="w-full max-w-md flex flex-col">
-          <div className="mt-2" aria-live="polite">
-            {guesses.map((game, index) => (
-              <div key={(game ? game.igdbId + '-guessed-' : 'skipped-') + index} className="p-2 bg-gael-red text-white rounded border border-3">
-                {game ? game.name : 'SKIPPED'}
+              <div className="w-full max-w-md flex flex-col">
+                <div className="mt-4" aria-live="polite">
+                  {guesses.map((game, index) => (
+                    <div key={(game ? game.igdbId + '-guessed-' : 'skipped-') + index} className="p-2 bg-gael-red text-white rounded border border-3">
+                      {game ? game.name : 'SKIPPED'}
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+
+              <div className={`absolute bottom-0 left-0 right-0 p-4 rounded-b-lg ${process.env.NODE_ENV === 'development' && "bg-gray-100 border-t border-gray-200"}`}>
+                {process.env.NODE_ENV === 'development' &&
+                  <div className="mb-5">
+                    <Button onClick={() => form.reset()}>Clear Form</Button>
+                  </div>
+                }
+
+                <div className="max-w-3xl mx-auto mt-10 text-center">
+                  <DisplayCountdown />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="max-w-3xl mx-auto -mt-5 text-center">
-          <DisplayCountdown />
-        </div>
-
-        <ComingSoon />
-
-        {process.env.NODE_ENV === 'development' &&
-          <>
-            <Button onClick={() => form.reset()}>Clear Form</Button>
-          </>
-        }
-      </main >
+          <div className="mt-20">
+            <ComingSoon />
+          </div>
+        </main>
+      </div>
     </>
   )
 }

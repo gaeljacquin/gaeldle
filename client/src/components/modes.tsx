@@ -13,6 +13,7 @@ import { Mode } from "@/types/modes";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { DrawerClose } from "@/components/ui/drawer"
+import Placeholders from "@/views/placeholders";
 
 type generateButtonProps = {
   label: string
@@ -86,7 +87,12 @@ export default function Modes({ isInDrawer }: ModesProps) {
     )
   }
 
+  if (!modes) {
+    return <Placeholders />
+  }
+
   return (
+    modes &&
     <div className="grid grid-cols-1 gap-6 mt-8 md:grid-cols-3 md:gap-8">
       <div className="relative flex flex-col p-6 bg-white shadow-lg rounded-lg dark:bg-zinc-850 justify-between border-2 border-gael-purple">
         <div className="px-3 py-1 text-lg text-white border-2 border-gael-purple bg-gradient-to-r from-gael-pink to-gael-purple rounded-full inline-block absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">

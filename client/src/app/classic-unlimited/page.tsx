@@ -1,9 +1,17 @@
+import dynamic from 'next/dynamic'
 import ClassicUnlimited from '@/views/classic-unlimited';
 
 export default async function Page() {
+  const AblyInit = dynamic(() => import('@/views/ably-init'), {
+    ssr: false,
+  })
+  const channelName = "unlimitedStats";
+
   return (
     <>
-      <ClassicUnlimited />
+      <AblyInit channelName="unlimitedStats">
+        <ClassicUnlimited channelName={channelName} />
+      </AblyInit>
     </>
   )
 }

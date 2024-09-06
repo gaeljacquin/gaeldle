@@ -38,7 +38,7 @@ import { modesSlice } from "@/stores/modes-slice";
 import { UnlimitedStats } from "@/types/unlimited-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
-import ablyInit from "@/lib/ably-init";
+import { useChannel } from 'ably/react';
 
 const FormSchema = z.object({
   game: z.object({
@@ -51,7 +51,11 @@ const FormSchema = z.object({
   })
 });
 
-export default function ClassicUnlimited() {
+type ClassicUnlimitedProps = {
+  channelName: string
+}
+
+export default function ClassicUnlimited({ channelName }: ClassicUnlimitedProps) {
   const classicUnlimitedSliceState = useGaeldleStore() as classicUnlimitedSlice;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
@@ -84,7 +88,9 @@ export default function ClassicUnlimited() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-  const channel = ablyInit('unlimitedStats');
+  const { channel } = useChannel(channelName, (message) => {
+    console.info(message)
+  });
   const _ = () => {
     let text = ""
     let classes = "-mt-3 -mb-7"
@@ -288,7 +294,7 @@ export default function ClassicUnlimited() {
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
-                          <PopoverContent className="w-[420px] p-0" side="top" align="start">
+                          <PopoverContent className="w-[420px] p-0" side="bottom" align="start">
                             <Command onClick={() => { form.clearErrors("game") }}>
                               <CommandInput placeholder="Search game..." />
                               <CommandList>

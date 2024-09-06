@@ -39,7 +39,7 @@ import DisplayCountdown from "@/components/display-countdown";
 import { DailyStats } from "@/types/daily-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
-import ablyInit from "@/lib/ably-init";
+import { useChannel } from 'ably/react';
 
 const FormSchema = z.object({
   game: z.object({
@@ -52,7 +52,11 @@ const FormSchema = z.object({
   })
 });
 
-export default function Classic() {
+type ClassicProps = {
+  channelName: string
+}
+
+export default function Classic({ channelName }: ClassicProps) {
   const classicSliceState = useClassicStore() as classicStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
@@ -68,7 +72,9 @@ export default function Classic() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-  const channel = ablyInit('dailyStats');
+  const { channel } = useChannel(channelName, (message) => {
+    console.info(message)
+  });
   const _ = () => {
     let text = ""
     let classes = "-mt-3 -mb-7"

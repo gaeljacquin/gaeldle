@@ -1,14 +1,15 @@
-import { NextResponse } from "next/server";
+import Ably from "ably";
+
+// ensure Vercel doesn't cache the result of this route,
+// as otherwise the token request data will eventually become outdated
+// and we won't be able to authenticate on the client side
+export const revalidate = 0;
 
 export async function GET() {
-  const response = await fetch(`${process.env.serverUrl}/ably/gen`, {
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.bearerToken}`,
-    },
+  const client = new Ably.Rest(`${process.env.ablyApiKey}`);
+  const tokenRequestData = await client.auth.createTokenRequest({
+    clientId: "*",
   });
-  const data = await response.json();
 
-  return NextResponse.json(data);
+  return Response.json(tokenRequestData);
 }

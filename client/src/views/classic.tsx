@@ -233,9 +233,11 @@ export default function Classic({ channelName }: ClassicProps) {
                   />
                   :
                   <Image
+                    placeholder='empty'
                     src={imageUrl}
                     width={imgWidth}
                     height={imgHeight}
+                    style={{ objectFit: "contain", width: "auto", height: "auto" }}
                     alt={imgAlt}
                     priority
                   />

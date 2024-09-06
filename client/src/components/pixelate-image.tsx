@@ -41,9 +41,11 @@ const PixelatedImage = ({ imageUrl, pixelationFactor, alt, width, height }: Pixe
       ) : (
         <Image
           src={pixelatedSrc}
-          alt={alt}
           width={width}
           height={height}
+          style={{ objectFit: "contain", width: "auto", height: "auto" }}
+          alt={alt}
+          priority
         />
       )}
     </div>

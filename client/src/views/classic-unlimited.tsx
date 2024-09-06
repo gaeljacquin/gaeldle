@@ -236,9 +236,11 @@ export default function ClassicUnlimited({ channelName }: ClassicUnlimitedProps)
                   />
                   :
                   <Image
+                    placeholder='empty'
                     src={game.imageUrl}
                     width={imgWidth}
                     height={imgHeight}
+                    style={{ objectFit: "contain", width: "auto", height: "auto" }}
                     alt={imgAlt}
                     priority
                   />

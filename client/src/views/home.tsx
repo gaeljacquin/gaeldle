@@ -6,7 +6,6 @@ import useGaeldleStore from "@/stores/gaeldle-store"
 import { modesSlice } from "@/stores/modes-slice"
 import Modes from "@/components/modes"
 import Levels from "@/components/levels"
-import MainDev from "@/components/dev/main-dev"
 import ComingSoon from "@/components/coming-soon"
 
 export default function Home() {
@@ -33,7 +32,6 @@ export default function Home() {
         <Modes isInDrawer={false} />
         <Levels />
         <ComingSoon />
-        <MainDev />
       </div>
     </main>
   )

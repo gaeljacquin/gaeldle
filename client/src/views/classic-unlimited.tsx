@@ -33,12 +33,12 @@ import {
 import { cn } from "@/lib/utils"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
-import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
 import { UnlimitedStats } from "@/types/unlimited-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
 import { useChannel } from 'ably/react';
+import LivesLeftComp from "@/components/lives-left";
 
 const FormSchema = z.object({
   game: z.object({
@@ -88,32 +88,6 @@ export default function ClassicUnlimited() {
   const { channel } = useChannel(channelName, (message) => {
     console.info(message)
   });
-  const _ = () => {
-    let text = ""
-    let classes = "-mt-3 -mb-7"
-
-    if (!played) {
-      text = `${livesLeft} `;
-
-      if (livesLeft == 1) {
-        text += 'life'
-      } else {
-        text += 'lives'
-      }
-
-      text += ' remaining'
-    } else {
-      if (won) {
-        text = victoryText
-      } else {
-        text = gameOverText
-      }
-
-      classes += " text-xl font-semibold"
-    }
-
-    return <p className={classes}>{text}</p>
-  }
 
   function saveUnlimitedStats(data: UnlimitedStats) {
     channel.publish('saveUnlimitedStats', data);
@@ -182,19 +156,10 @@ export default function ClassicUnlimited() {
   }
 
   useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const res = await fetch('/api/games');
-        const games = await res.json()
-        setGames(games);
-        setRandomGame(games);
-      } catch (error) {
-        console.error('Failed to fetch games:', error);
-      }
-    };
-
-    fetchGames();
-  }, [setGames, setRandomGame]);
+    setGames();
+    const games = getGames();
+    setRandomGame(games);
+  }, [setGames, getGames, setRandomGame]);
 
   useEffect(() => {
     channel.subscribe('unlimitedStatsSaved', (message) => {
@@ -250,7 +215,8 @@ export default function ClassicUnlimited() {
                   <p className="mb-5">
                     {played ? `${game.name}` : `🤔`}
                   </p>
-                  {_()}
+
+                  <LivesLeftComp played={played} won={won} livesLeft={livesLeft} />
                 </div>
 
                 <div className="flex justify-center space-x-2 mt-8">

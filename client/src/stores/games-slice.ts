@@ -2,7 +2,7 @@ import { Games } from "@/types/games";
 
 export interface gamesSlice {
   games: Games;
-  setGames: (arg0: Games) => void;
+  setGames: () => void;
   getGames: () => Games;
 }
 
@@ -15,7 +15,9 @@ const createGamesSlice = (
   get: () => unknown
 ) => ({
   ...defaultGamesSlice,
-  setGames: (games: Games) => {
+  setGames: async () => {
+    const res = await fetch("/api/games");
+    const games = await res.json();
     set({ games });
   },
   getGames: () => (get() as { games: Games }).games,

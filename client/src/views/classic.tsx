@@ -40,6 +40,7 @@ import { DailyStats } from "@/types/daily-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
 import { useChannel } from 'ably/react';
+import LivesLeftComp from "@/components/lives-left";
 
 const FormSchema = z.object({
   game: z.object({
@@ -160,16 +161,6 @@ export default function Classic() {
   }
 
   useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const res = await fetch('/api/games');
-        const games = await res.json()
-        setGames(games);
-      } catch (error) {
-        console.error('Failed to fetch games:', error);
-      }
-    };
-
     const fetchGotd = async () => {
       try {
         const res = await fetch('/api/gotd-classic');
@@ -187,7 +178,7 @@ export default function Classic() {
       }
     };
 
-    fetchGames();
+    setGames();
     fetchGotd();
   }, [setGotd, setGames, resetPlay]);
 
@@ -247,7 +238,8 @@ export default function Classic() {
                   <p className="mb-5">
                     {played ? `${name}` : `🤔`}
                   </p>
-                  {_()}
+
+                  <LivesLeftComp played={played} won={won} livesLeft={livesLeft} />
                 </div>
 
                 <div className="flex justify-center space-x-2 mt-8">

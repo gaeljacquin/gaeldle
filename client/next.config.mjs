@@ -6,7 +6,6 @@ const nextConfig = {
     upstashRedisRestToken: `${process.env.UPSTASH_REDIS_REST_TOKEN}`,
     smashQuizUrl: `${process.env.NEXT_PUBLIC_SMASH_QUIZ_URL}`,
     bearerToken: `${process.env.BEARER_TOKEN}`,
-    ablyApiKey: `${process.env.ABLY_API_KEY}`,
     port: `${process.env.PORT ?? "3000"}`,
   },
   images: {

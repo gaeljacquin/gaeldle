@@ -1,11 +1,12 @@
 'use client';
 
 import Image from "next/image";
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { Check, ChevronsUpDown, Heart } from 'lucide-react'
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import io, { Socket } from 'socket.io-client';
 import useGaeldleStore from '@/stores/gaeldle-store';
 import useClassicStore, { classicStore } from '@/stores/classic-store';
 import { gamesSlice } from '@/stores/games-slice';
@@ -38,7 +39,6 @@ import DisplayCountdown from "@/components/display-countdown";
 import { DailyStats } from "@/types/daily-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
-import { useChannel } from 'ably/react';
 import LivesLeftComp from "@/components/lives-left";
 
 const FormSchema = z.object({
@@ -49,51 +49,35 @@ const FormSchema = z.object({
     name: z.string({
       required_error: "Please select a game",
     }),
-  })
+  }),
 });
 
 export default function Classic() {
   const classicSliceState = useClassicStore() as classicStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const modesSliceState = useGaeldleStore() as modesSlice;
-  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, name, igdbId, gotdId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay } = classicSliceState;
+  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName } = classicSliceState;
   const { setGames, games } = gamesSliceState;
   const { modes } = modesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
-  const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
   const mode = modes?.find((val: Mode) => val.id === 1); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
-  const channelName = "dailyStats";
   const imgAlt = `Game of the Day - ${mode?.label}`;
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-  const { channel } = useChannel(channelName, (message) => {
-    console.info(message)
-  });
+  const socketRef = useRef<Socket | null>(null);
 
-  function saveDailyStats(data: DailyStats) {
-    channel.publish('saveDailyStats', data);
+  if (!socketRef.current) {
+    socketRef.current = io(`${process.env.serverUrl}`);
   }
 
-  function onSkip() {
-    updateGuesses(null)
-    updateLivesLeft()
-    setPixelation()
+  const socket = socketRef.current!
 
-    if (getLivesLeft() === 0) {
-      markAsPlayed()
-      removePixelation()
-      saveDailyStats({
-        gotdId,
-        modeId: mode!.id,
-        attempts: getGuesses().length,
-        guesses: getGuesses(),
-        found: false,
-      })
-    }
-  }
+  const saveDailyStats = useCallback((data: DailyStats) => {
+    socket.emit('daily-stats', data);
+  }, [socket]);
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     if (guesses.some(guess => guess && guess.igdbId == data.game.igdbId)) {
@@ -101,20 +85,25 @@ export default function Classic() {
       return false;
     }
 
-    if (data.game.igdbId === igdbId) {
+    updateLivesLeft();
+    socket.emit('classic', { game: data.game, livesLeft: getLivesLeft() });
+  }
+
+  const checkAnswer = useCallback((answer: boolean) => {
+    if (answer) {
       markAsWon()
       markAsPlayed()
       removePixelation()
       saveDailyStats({
         gotdId,
         modeId: mode!.id,
-        attempts: Math.min(guesses.length + 1, lives),
+        attempts: Math.min(getGuesses().length + 1, lives),
         guesses,
         found: true,
       })
     } else {
-      updateLivesLeft()
-      updateGuesses(data.game)
+      const { igdbId, name } = form.getValues().game
+      updateGuesses({ igdbId, name })
       setPixelation()
 
       if (getLivesLeft() === 0) {
@@ -131,13 +120,14 @@ export default function Classic() {
     }
 
     form.reset();
-  }
+  }, [form, markAsWon, markAsPlayed, removePixelation, saveDailyStats, gotdId, mode, getGuesses, lives, guesses, updateGuesses, setPixelation, getLivesLeft])
 
   useEffect(() => {
     const fetchGotd = async () => {
       try {
         const res = await fetch('/api/gotd-classic');
-        const { gotd, newGotd } = await res.json()
+        const { gotd, newGotd } = await res.json();
+
         if (newGotd) {
           resetPlay();
           useClassicStore.persist.clearStorage();
@@ -157,15 +147,26 @@ export default function Classic() {
 
   useEffect(() => {
     if (!getPlayed()) {
-      channel.subscribe('dailyStatsSaved', (message) => {
-        console.info('Received data:', message.data);
+      socket.on('connect', () => {
+        console.info('Connected to WebSocket server');
+      });
+
+      socket.on('classic-response', (data: { clientId: string, answer: boolean, name: string }) => {
+        checkAnswer(data.answer);
+        setName(data.name);
+      });
+
+      socket.on('daily-stats-response', (data: { message: string }) => {
+        console.info(data.message);
       });
 
       return () => {
-        channel.unsubscribe();
+        socket.off('connect');
+        socket.off('classic-response');
+        socket.off('daily-stats-response');
       };
     }
-  }, [getPlayed, channel]);
+  }, [getPlayed, socket, checkAnswer, setName]);
 
   if (!(games && gotdId && mode)) {
     return <Placeholders />
@@ -209,7 +210,7 @@ export default function Classic() {
               <>
                 <div className="text-lg text-center">
                   <p className="mb-5">
-                    {played ? `${name}` : `🤔`}
+                    {played ? `${getName()}` : `🤔`}
                   </p>
 
                   <LivesLeftComp played={played} won={won} livesLeft={livesLeft} />
@@ -295,32 +296,9 @@ export default function Classic() {
                     )}
                   />
                   <div className="flex space-x-4 w-full">
-                    <Popover open={skipPopoverOpen} onOpenChange={setSkipPopoverOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          className="flex-1 bg-gael-blue hover:bg-gael-blue-dark"
-                          disabled={played}
-                        >
-                          Skip
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[200px] text-center">
-                        <div className="space-y-2">
-                          <h4 className="font-medium leading-none">Are you sure?</h4>
-                        </div>
-                        <div className="space-y-2 mt-3">
-                          <Button
-                            onClick={(e) => { e.preventDefault(); onSkip(); setSkipPopoverOpen(false) }}
-                            className="w-full bg-gael-blue hover:bg-gael-blue-dark"
-                          >
-                            Yes
-                          </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
                     <Button
                       type="submit"
-                      className="flex-1 bg-gael-green hover:bg-gael-green-dark"
+                      className="flex-1 bg-gael-green hover:bg-gael-green-dark mt-5 mb-5"
                       disabled={played}
                     >
                       Guess

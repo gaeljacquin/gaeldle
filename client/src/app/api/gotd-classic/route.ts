@@ -15,14 +15,18 @@ export async function GET() {
   gotd = JSON.parse(await (await data.json()).result);
 
   if (!gotd) {
-    console.log("there");
     data = await fetch(`${process.env.serverUrl}/gotd/1`, {
       cache: "no-store",
     });
     gotd = await data.json();
   }
 
+  const { imageUrl } = gotd.games;
+  const { modeId, modes, id } = gotd;
   newGotd = checkNewGotd(gotd.scheduled);
 
-  return NextResponse.json({ gotd, newGotd });
+  return NextResponse.json({
+    gotd: { id, modeId, modes, imageUrl },
+    newGotd,
+  });
 }

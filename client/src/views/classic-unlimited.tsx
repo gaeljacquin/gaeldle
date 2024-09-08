@@ -37,7 +37,6 @@ import { modesSlice } from "@/stores/modes-slice";
 import { UnlimitedStats } from "@/types/unlimited-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
-import { useChannel } from 'ably/react';
 import LivesLeftComp from "@/components/lives-left";
 
 const FormSchema = z.object({
@@ -80,17 +79,13 @@ export default function ClassicUnlimited() {
   const mode = modes?.find((val: Mode) => val.id === 5); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
-  const channelName = "unlimitedStats";
   const imgAlt = mode ? mode.label : 'Random cover';
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-  const { channel } = useChannel(channelName, (message) => {
-    console.info(message)
-  });
 
   function saveUnlimitedStats(data: UnlimitedStats) {
-    channel.publish('saveUnlimitedStats', data);
+    // channel.publish('saveUnlimitedStats', data);
   }
 
   function onSkip() {
@@ -161,15 +156,15 @@ export default function ClassicUnlimited() {
     setRandomGame(games);
   }, [setGames, getGames, setRandomGame]);
 
-  useEffect(() => {
-    channel.subscribe('unlimitedStatsSaved', (message) => {
-      console.info('Received data:', message.data);
-    });
+  // useEffect(() => {
+  //   channel.subscribe('unlimitedStatsSaved', (message) => {
+  //     console.info('Received data:', message.data);
+  //   });
 
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [channel]);
+  //   return () => {
+  //     channel.unsubscribe();
+  //   };
+  // }, [channel]);
 
   if (!(game && mode)) {
     return <Placeholders />

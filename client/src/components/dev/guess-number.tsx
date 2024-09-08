@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react';
-import { useChannel } from 'ably/react';
+import { useEffect, useRef, useState } from 'react';
+import io, { Socket } from 'socket.io-client';
 import { Button } from "@/components/ui/button"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
@@ -16,35 +16,48 @@ import {
 import { Input } from '@/components/ui/input';
 
 const FormSchema = z.object({
-  gnumber: z.string().transform((val) => parseInt(val, 10)).refine((val) => val >= 1, { message: "Number must be at least 1" }).refine((val) => val <= 100, { message: "Number must be at most 100" })
+  gnumber: z.coerce.number()
 });
 
 export default function GuessNumber() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-  });
-  const channelName = "gnumber";
-  const { channel } = useChannel(channelName, (message) => {
-    console.info(message)
+    defaultValues: {
+      gnumber: 0,
+    },
   });
 
   function transmitNumber(data: unknown) {
-    channel.publish('transmitNumber', data);
+    socket.emit('message', { data });
   }
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
+    console.log(data)
     transmitNumber(data);
   }
 
+  const socketRef = useRef<Socket | null>(null);
+
+  if (!socketRef.current) {
+    socketRef.current = io(`${process.env.serverUrl}`);
+  }
+
+  const socket = socketRef.current!
+
   useEffect(() => {
-    channel.subscribe('returnNumber', (message) => {
-      console.info('Received data:', message.data);
+    socket.on('connect', () => {
+      console.log('Connected to WebSocket server');
+    });
+
+    socket.on('response', (data: unknown) => {
+      console.dir(data)
     });
 
     return () => {
-      channel.unsubscribe();
+      socket.off('connect');
+      socket.off('response');
     };
-  }, [channel]);
+  }, [socket]);
 
   return (
     <>

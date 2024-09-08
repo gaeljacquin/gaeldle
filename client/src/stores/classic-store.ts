@@ -5,13 +5,9 @@ import { Game, Games } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 
 export interface classicStore {
-  name: string;
-  igdbId: number;
   gotdId: number;
   imageUrl: string;
-  info: {
-    [key: string]: unknown;
-  };
+  name: string;
   lives: number;
   livesLeft: number;
   guesses: Game[];
@@ -30,15 +26,15 @@ export interface classicStore {
   setPixelation: () => void;
   removePixelation: () => void;
   setGotd: (arg0: Gotd) => void;
+  getName: () => string;
+  setName: (arg0: string) => void;
   resetPlay: () => void;
 }
 
 export const defaultClassic = {
-  name: "",
-  igdbId: 0,
   gotdId: 0,
   imageUrl: "/placeholder.jpg",
-  info: null,
+  name: "",
   lives: 0,
   livesLeft: 0,
   guesses: [],
@@ -74,15 +70,11 @@ const useClassicStore = create(
         set({ pixelation: 0 });
       },
       setGotd: (gotd: Gotd) => {
-        const { igdbId, games, modes, id } = gotd;
-        const { name, imageUrl, info } = games;
+        const { imageUrl, modes, id } = gotd;
         const { label, lives, pixelation, pixelationStep } = modes;
         set({
-          name,
-          igdbId,
           gotdId: id,
           imageUrl,
-          info,
           label,
           lives,
           livesLeft: lives,
@@ -90,6 +82,10 @@ const useClassicStore = create(
           pixelationStep,
         });
       },
+      setName: (name: string) => {
+        set({ name });
+      },
+      getName: () => (get() as { name: string }).name,
       resetPlay: () => {
         set({ played: false, won: false, guesses: [] });
       },

@@ -16,28 +16,33 @@ import {
 import { Input } from '@/components/ui/input';
 
 const FormSchema = z.object({
-  gnumber: z.string().transform((val) => parseInt(val, 10)).refine((val) => val >= 1, { message: "Number must be at least 1" }).refine((val) => val <= 100, { message: "Number must be at most 100" })
+  gnumber: z.coerce.number(),
 });
 
 export default function GuessNumber() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      gnumber: 0,
+    },
   });
   const channelName = "gnumber";
   const { channel } = useChannel(channelName, (message) => {
     console.info(message)
   });
+  console.log('uwu')
 
   function transmitNumber(data: unknown) {
-    channel.publish('transmitNumber', data);
+    channel.publish('submitGuess', data);
   }
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     transmitNumber(data);
+    console.log('there')
   }
 
   useEffect(() => {
-    channel.subscribe('returnNumber', (message) => {
+    channel.subscribe('guess-response', (message) => {
       console.info('Received data:', message.data);
     });
 
@@ -58,7 +63,6 @@ export default function GuessNumber() {
                 <FormControl>
                   <Input
                     type="number"
-                    className="input"
                     placeholder="Enter a number"
                     {...field}
                   />

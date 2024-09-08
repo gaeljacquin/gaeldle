@@ -1,19 +1,16 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import * as Ably from 'ably';
 
+import { AblyService } from '~/src/ably/ably.service';
 import { DailyStatsService } from '~/src/daily-stats/daily-stats.service';
 import { UnlimitedStatsService } from '~/src/unlimited-stats/unlimited-stats.service';
 
 @Injectable()
 export class StatsGateway implements OnModuleInit {
-  private ably: Ably.Realtime;
-
   constructor(
     private readonly dailyStatsService: DailyStatsService,
     private readonly unlimitedStatsService: UnlimitedStatsService,
-  ) {
-    this.ably = new Ably.Realtime(`${process.env.ABLY_API_KEY}`);
-  }
+    private readonly ablyService: AblyService,
+  ) {}
 
   onModuleInit() {
     this.subscribeDailyStats();
@@ -21,7 +18,7 @@ export class StatsGateway implements OnModuleInit {
   }
 
   private subscribeDailyStats() {
-    const channel = this.ably.channels.get('dailyStats');
+    const channel = this.ablyService.ably.channels.get('dailyStats');
     channel.subscribe(async (message) => {
       console.info('Received daily stats:', message);
       const data = message.data;
@@ -30,7 +27,7 @@ export class StatsGateway implements OnModuleInit {
   }
 
   private subscribeUnlimitedStats() {
-    const channel = this.ably.channels.get('unlimitedStats');
+    const channel = this.ablyService.ably.channels.get('unlimitedStats');
     channel.subscribe(async (message) => {
       console.info('Received unlimited stats:', message);
       const data = message.data;

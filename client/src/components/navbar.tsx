@@ -42,7 +42,7 @@ export default function Navbar() {
             <LottieDynamic loop={false} />
           </div>
           <div className="hidden md:flex space-x-4">
-            {pathname !== '/' && <ModesDrawer />}
+            {/* {pathname !== '/' && <ModesDrawer />} */}
             <AboutDialog />
             {navLink("/", "Home")}
           </div>

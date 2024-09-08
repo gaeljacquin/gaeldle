@@ -3,7 +3,7 @@ import * as Ably from 'ably';
 
 @Injectable()
 export class AblyService {
-  private ably: Ably.Realtime;
+  public ably: Ably.Realtime;
 
   constructor() {
     this.ably = new Ably.Realtime({ key: `${process.env.ABLY_API_KEY}` });

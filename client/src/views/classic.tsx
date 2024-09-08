@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Check, ChevronsUpDown, Heart } from 'lucide-react'
 import { z } from "zod"
 import { useForm } from "react-hook-form"
@@ -30,16 +30,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+import { cn, keyNameByEnv } from "@/lib/utils"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
-import { victoryText, gameOverText } from '@/lib/constants';
 import { modesSlice } from "@/stores/modes-slice";
 import DisplayCountdown from "@/components/display-countdown";
 import { DailyStats } from "@/types/daily-stats";
 import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
 import { useChannel } from 'ably/react';
+import { Game } from "@/types/games";
 import LivesLeftComp from "@/components/lives-left";
 
 const FormSchema = z.object({
@@ -62,10 +62,12 @@ export default function Classic() {
   const { modes } = modesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
+  const [currentGuess, setCurrentGuess] = useState<Game | null>(null);
   const mode = modes?.find((val: Mode) => val.id === 1); // temporary hard-coding
   const imgWidth = 600;
   const imgHeight = 600;
-  const channelName = "dailyStats";
+  const channelName = keyNameByEnv("gotdClassic");
+  console.log('ably 2: ', channelName)
   const imgAlt = `Game of the Day - ${mode?.label}`;
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -73,36 +75,41 @@ export default function Classic() {
   const { channel } = useChannel(channelName, (message) => {
     console.info(message)
   });
-  const _ = () => {
-    let text = ""
-    let classes = "-mt-3 -mb-7"
 
-    if (!played) {
-      text = `${livesLeft} `;
-
-      if (livesLeft === 1) {
-        text += 'life'
-      } else {
-        text += 'lives'
-      }
-
-      text += ' remaining'
-    } else {
-      if (won) {
-        text = victoryText
-      } else {
-        text = gameOverText
-      }
-
-      classes += " text-xl font-semibold"
-    }
-
-    return <p className={classes}>{text}</p>
-  }
-
-  function saveDailyStats(data: DailyStats) {
+  const saveDailyStats = useCallback((data: DailyStats) => {
     channel.publish('saveDailyStats', data);
-  }
+  }, [channel])
+
+  const checkResults = useCallback((answer: boolean) => {
+    if (answer) {
+      markAsWon()
+      markAsPlayed()
+      removePixelation()
+      saveDailyStats({
+        gotdId,
+        modeId: mode!.id,
+        attempts: Math.min(guesses.length + 1, lives),
+        guesses,
+        found: true,
+      })
+    } else {
+      updateLivesLeft()
+      updateGuesses(currentGuess)
+      setPixelation()
+
+      if (getLivesLeft() === 0) {
+        markAsPlayed()
+        removePixelation()
+        saveDailyStats({
+          gotdId,
+          modeId: mode!.id,
+          attempts: getGuesses().length,
+          guesses: getGuesses(),
+          found: false,
+        })
+      }
+    }
+  }, [currentGuess, getGuesses, getLivesLeft, gotdId, guesses, lives, markAsPlayed, markAsWon, mode, removePixelation, saveDailyStats, setPixelation, updateGuesses, updateLivesLeft])
 
   function onSkip() {
     updateGuesses(null)
@@ -127,72 +134,28 @@ export default function Classic() {
       form.setError('game', { type: 'custom', message: `Already guessed` });
       return false;
     }
-
-    if (data.game.igdbId === igdbId) {
-      markAsWon()
-      markAsPlayed()
-      removePixelation()
-      saveDailyStats({
-        gotdId,
-        modeId: mode!.id,
-        attempts: Math.min(guesses.length + 1, lives),
-        guesses,
-        found: true,
-      })
-    } else {
-      updateLivesLeft()
-      updateGuesses(data.game)
-      setPixelation()
-
-      if (getLivesLeft() === 0) {
-        markAsPlayed()
-        removePixelation()
-        saveDailyStats({
-          gotdId,
-          modeId: mode!.id,
-          attempts: getGuesses().length,
-          guesses: getGuesses(),
-          found: false,
-        })
-      }
-    }
-
+    const guess = data.game
+    // setCurrentGuess(guess);
+    channel.publish('submitGuess', guess);
     form.reset();
   }
 
   useEffect(() => {
-    const fetchGotd = async () => {
-      try {
-        const res = await fetch('/api/gotd-classic');
-        const { gotd, newGotd } = await res.json()
-        if (newGotd) {
-          resetPlay();
-          useClassicStore.persist.clearStorage();
-        }
-
-        if (gotd) {
-          void setGotd(gotd);
-        }
-      } catch (error) {
-        console.error('Failed to set gotd (classic):', error);
-      }
-    };
-
     setGames();
-    fetchGotd();
-  }, [setGotd, setGames, resetPlay]);
+  }, [setGames]);
 
-  useEffect(() => {
-    if (!getPlayed()) {
-      channel.subscribe('dailyStatsSaved', (message) => {
-        console.info('Received data:', message.data);
-      });
+  // useEffect(() => {
+  //   // if (!getPlayed()) {
+  //   channel.subscribe('return-event', (message) => {
+  //     // checkResults(message.answer);
+  //     console.info('Return data: ', message);
+  //   });
 
-      return () => {
-        channel.unsubscribe();
-      };
-    }
-  }, [getPlayed, channel]);
+  //   return () => {
+  //     channel.unsubscribe();
+  //   };
+  //   // }
+  // }, [channel, checkResults]);
 
   if (!(games && gotdId && mode)) {
     return <Placeholders />

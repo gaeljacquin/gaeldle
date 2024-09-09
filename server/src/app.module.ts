@@ -14,6 +14,8 @@ import { DailyStatsService } from './daily-stats/daily-stats.service';
 import { UnlimitedStatsService } from './unlimited-stats/unlimited-stats.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { UnlimitedGateway } from './unlimited/unlimited.gateway';
+import { GamesService } from './games/games.service';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { UsersModule } from './users/users.module';
     StatsGateway,
     DailyStatsService,
     UnlimitedStatsService,
+    UnlimitedGateway,
+    GamesService,
   ],
 })
 export class AppModule {}

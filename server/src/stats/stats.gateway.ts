@@ -22,17 +22,17 @@ export class StatsGateway
 
   @WebSocketServer() server: Server;
 
-  afterInit(server: Server) {
-    console.log('WebSocket server initialized: ', server);
+  afterInit() {
+    console.log('WebSocket server initialized (stats)');
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    console.log(`Client connected: ${client.id}`);
+    console.log(`Client connected (stats): ${client.id}`);
     console.log('args: ', args);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    console.log(`Client disconnected (stats): ${client.id}`);
   }
 
   @SubscribeMessage('daily-stats')
@@ -45,14 +45,14 @@ export class StatsGateway
     });
   }
 
-  @SubscribeMessage('unlimited-stats')
-  async handleUnlimitedStats(client: Socket, message): Promise<void> {
-    const clientId = client.id;
-    console.info('Received unlimited stats:', message);
-    const data = message.data;
-    await this.unlimitedStatsService.create(data);
-    client.emit('unlimited-stats-response', {
-      message: `Saved unlimited stats for ${clientId}`,
-    });
-  }
+  // @SubscribeMessage('unlimited-stats')
+  // async handleUnlimitedStats(client: Socket, message): Promise<void> {
+  //   const clientId = client.id;
+  //   console.info('Received unlimited stats:', message);
+  //   const data = message.data;
+  //   await this.unlimitedStatsService.create(data);
+  //   client.emit('unlimited-stats-response', {
+  //     message: `Saved unlimited stats for ${clientId}`,
+  //   });
+  // }
 }

@@ -73,8 +73,7 @@ export default function Classic() {
     socketRef.current = io(`${process.env.serverUrl}`);
   }
 
-  const socket = socketRef.current!
-
+  const socket = socketRef.current!;
   const saveDailyStats = useCallback((data: DailyStats) => {
     socket.emit('daily-stats', data);
   }, [socket]);

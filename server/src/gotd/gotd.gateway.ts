@@ -20,8 +20,8 @@ export class GotdGateway
 
   private gotdClassic;
 
-  afterInit(server: Server) {
-    console.log('WebSocket server initialized: ', server);
+  afterInit() {
+    console.log('WebSocket server initialized');
     this.gotdClassic = this.gotdService.findIt(1);
   }
 

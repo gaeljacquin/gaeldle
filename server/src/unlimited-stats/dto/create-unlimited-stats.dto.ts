@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsArray,
 } from 'class-validator';
-import { Games } from '~/types/games';
+import { Guesses } from '~/types/games';
 
 export class CreateUnlimitedStatsDto {
   @IsNumber()
@@ -22,7 +22,7 @@ export class CreateUnlimitedStatsDto {
   attempts: number;
 
   @IsArray()
-  guesses: Games;
+  guesses: Guesses;
 
   @IsBoolean()
   @IsNotEmpty()

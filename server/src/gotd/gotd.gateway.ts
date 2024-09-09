@@ -8,6 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GotdService } from '~/src/gotd/gotd.service';
+import { Game } from '~/types/games';
 import cors from '~/utils/cors';
 
 @WebSocketGateway({ cors })
@@ -18,11 +19,10 @@ export class GotdGateway
 
   @WebSocketServer() server: Server;
 
-  private gotdClassic;
+  private cMap = new Map<string, Game>();
 
   afterInit() {
     console.log('WebSocket server initialized');
-    this.gotdClassic = this.gotdService.findIt(1);
   }
 
   handleConnection(client: Socket, ...args: any[]) {
@@ -36,8 +36,13 @@ export class GotdGateway
 
   @SubscribeMessage('classic')
   async handleClassic(client: Socket, data): Promise<void> {
+    if (!this.cMap.has(client.id)) {
+      const gotdClassic = (await this.gotdService.findIt(1)) as Game;
+      this.cMap.set(client.id, gotdClassic);
+    }
+
     const clientId = client.id;
-    const gotd = await this.gotdClassic;
+    const gotd = this.cMap.get(clientId);
     const igdbId = gotd.igdbId;
     const check = data.game.igdbId;
     const livesLeft = data.livesLeft;
@@ -45,7 +50,8 @@ export class GotdGateway
     let name = '';
 
     if (answer || livesLeft === 0) {
-      name = gotd.games.name;
+      name = gotd.name;
+      this.cMap.delete(clientId);
     }
 
     client.emit('classic-response', {

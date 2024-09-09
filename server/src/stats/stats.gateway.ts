@@ -1,40 +1,58 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import * as Ably from 'ably';
-
+import {
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+  OnGatewayInit,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 import { DailyStatsService } from '~/src/daily-stats/daily-stats.service';
 import { UnlimitedStatsService } from '~/src/unlimited-stats/unlimited-stats.service';
+import cors from '~/utils/cors';
 
-@Injectable()
-export class StatsGateway implements OnModuleInit {
-  private ably: Ably.Realtime;
-
+@WebSocketGateway({ cors })
+export class StatsGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   constructor(
     private readonly dailyStatsService: DailyStatsService,
     private readonly unlimitedStatsService: UnlimitedStatsService,
-  ) {
-    this.ably = new Ably.Realtime(`${process.env.ABLY_API_KEY}`);
+  ) {}
+
+  @WebSocketServer() server: Server;
+
+  afterInit() {
+    console.log('WebSocket server initialized (stats)');
   }
 
-  onModuleInit() {
-    this.subscribeDailyStats();
-    this.subscribeUnlimitedStats();
+  handleConnection(client: Socket, ...args: any[]) {
+    console.log(`Client connected (stats): ${client.id}`);
+    console.log('args: ', args);
   }
 
-  private subscribeDailyStats() {
-    const channel = this.ably.channels.get('dailyStats');
-    channel.subscribe(async (message) => {
-      console.info('Received daily stats:', message);
-      const data = message.data;
-      await this.dailyStatsService.create(data);
+  handleDisconnect(client: Socket) {
+    console.log(`Client disconnected (stats): ${client.id}`);
+  }
+
+  @SubscribeMessage('daily-stats')
+  async handleDailyStats(client: Socket, data): Promise<void> {
+    const clientId = client.id;
+    console.info('Received daily stats:', data);
+    await this.dailyStatsService.create(data);
+    client.emit('daily-stats-response', {
+      message: `Saved daily stats for ${clientId}`,
     });
   }
 
-  private subscribeUnlimitedStats() {
-    const channel = this.ably.channels.get('unlimitedStats');
-    channel.subscribe(async (message) => {
-      console.info('Received unlimited stats:', message);
-      const data = message.data;
-      await this.unlimitedStatsService.create(data);
-    });
-  }
+  // @SubscribeMessage('unlimited-stats')
+  // async handleUnlimitedStats(client: Socket, message): Promise<void> {
+  //   const clientId = client.id;
+  //   console.info('Received unlimited stats:', message);
+  //   const data = message.data;
+  //   await this.unlimitedStatsService.create(data);
+  //   client.emit('unlimited-stats-response', {
+  //     message: `Saved unlimited stats for ${clientId}`,
+  //   });
+  // }
 }

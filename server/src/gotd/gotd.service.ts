@@ -11,13 +11,24 @@ export class GotdService {
   async findIt(modeId: number) {
     try {
       const key = await this.findKey(modeId);
-      const gotd = await this.dbFindGotd(modeId);
+      let gotd;
+      const gotdCached = await fetch(
+        `${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`,
+        {
+          method: 'GET',
+          ...upstashRedisInit,
+        },
+      );
+      gotd = JSON.parse((await gotdCached.json()).result);
 
-      await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
-        method: 'POST',
-        ...upstashRedisInit,
-        body: JSON.stringify(gotd),
-      });
+      if (!gotd) {
+        gotd = await this.dbFindGotd(modeId);
+        await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
+          method: 'POST',
+          ...upstashRedisInit,
+          body: JSON.stringify(gotd),
+        });
+      }
 
       return gotd ?? null;
     } catch (error) {

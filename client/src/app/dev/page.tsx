@@ -1,9 +1,9 @@
-import Classic from '@/views/classic'
+import Dev from '@/views/dev'
 
 export default async function Page() {
   return (
     <>
-      <Classic />
+      <Dev />
     </>
   )
 }

@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-import { Game, Games } from "@/types/games";
+import { Game, Games, Guess, Guesses } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 
 export interface classicStore {
@@ -10,12 +9,12 @@ export interface classicStore {
   name: string;
   lives: number;
   livesLeft: number;
-  guesses: Game[];
+  guesses: Guesses;
   played: boolean;
   won: boolean;
   date: Date;
   updateLivesLeft: () => void;
-  updateGuesses: (arg0: Game | null) => void;
+  updateGuesses: (arg0: Guess | null) => void;
   getLivesLeft: () => number;
   getGuesses: () => Games;
   markAsPlayed: () => void;

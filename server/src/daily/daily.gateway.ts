@@ -7,22 +7,26 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { DailyStatsService } from '~/src/daily-stats/daily-stats.service';
 import { GotdService } from '~/src/gotd/gotd.service';
 import { Game } from '~/types/games';
 import cors from '~/utils/cors';
 
 @WebSocketGateway({ cors })
-export class GotdGateway
+export class DailyGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private readonly gotdService: GotdService) {}
+  constructor(
+    private readonly dailyStatsService: DailyStatsService,
+    private readonly gotdService: GotdService,
+  ) {}
 
   @WebSocketServer() server: Server;
 
   private cMap = new Map<string, Game>();
 
   afterInit() {
-    console.log('WebSocket server initialized');
+    console.log('WebSocket server initialized (daily)');
   }
 
   handleConnection(client: Socket, ...args: any[]) {
@@ -34,14 +38,25 @@ export class GotdGateway
     console.log(`Client disconnected: ${client.id}`);
   }
 
+  @SubscribeMessage('daily-stats')
+  async handleDailyStats(client: Socket, data): Promise<void> {
+    const clientId = client.id;
+    console.info('Received daily stats:', data);
+    await this.dailyStatsService.create(data);
+    client.emit('daily-stats-response', {
+      message: `Saved daily stats for ${clientId}`,
+    });
+  }
+
   @SubscribeMessage('classic')
   async handleClassic(client: Socket, data): Promise<void> {
-    if (!this.cMap.has(client.id)) {
+    const clientId = client.id;
+
+    if (!this.cMap.has(clientId)) {
       const gotdClassic = (await this.gotdService.findIt(1)) as Game;
       this.cMap.set(client.id, gotdClassic);
     }
 
-    const clientId = client.id;
     const gotd = this.cMap.get(clientId);
     const igdbId = gotd.igdbId;
     const check = data.game.igdbId;

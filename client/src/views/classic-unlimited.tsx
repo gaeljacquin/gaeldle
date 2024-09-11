@@ -8,7 +8,7 @@
 // import { zodResolver } from "@hookform/resolvers/zod";
 // import io, { Socket } from 'socket.io-client';
 // import useGaeldleStore from '@/stores/gaeldle-store';
-// import { classicUnlimitedSlice } from '@/stores/classic-unlimited-slice';
+// import { ClassicUnlimitedSlice } from '@/stores/classic-unlimited-slice';
 // import { gamesSlice } from '@/stores/games-slice';
 // import { Button } from "@/components/ui/button";
 // import {
@@ -39,6 +39,7 @@
 // import { Mode, Modes } from "@/types/modes";
 // import ComingSoon from "@/components/coming-soon";
 // import LivesLeftComp from "@/components/lives-left";
+// import { Game } from "@/types/games";
 
 // const FormSchema = z.object({
 //   game: z.object({
@@ -52,10 +53,12 @@
 // });
 
 // export default function ClassicUnlimited() {
-//   const classicUnlimitedSliceState = useGaeldleStore() as classicUnlimitedSlice;
+//   const classicUnlimitedSliceState = useGaeldleStore() as ClassicUnlimitedSlice;
 //   const gamesSliceState = useGaeldleStore() as gamesSlice;
 //   const modesSliceState = useGaeldleStore() as modesSlice;
 //   const {
+//     name,
+//     igdbId,
 //     imageUrl,
 //     livesLeft,
 //     lives,
@@ -71,12 +74,13 @@
 //     removePixelation,
 //     markAsPlayed,
 //     markAsWon,
-//     setRandomGame,
-//     setImageUrl,
 //     getName,
 //     setName,
 //     getIgdbId,
 //     setIgdbId,
+//     getImageUrl,
+//     setImageUrl,
+//     setLives,
 //   } = classicUnlimitedSliceState;
 //   const { setGames, games } = gamesSliceState;
 //   const { modes } = modesSliceState;
@@ -89,6 +93,7 @@
 //     resolver: zodResolver(FormSchema),
 //   });
 //   const socketRef = useRef<Socket | null>(null);
+//   void setLives(mode?.lives ?? 0)
 
 //   if (!socketRef.current) {
 //     socketRef.current = io(`${process.env.serverUrl}`);
@@ -115,10 +120,10 @@
 //       markAsPlayed()
 //       removePixelation()
 //       saveUnlimitedStats({
-//         igdbId: getIgdbId(),
+//         igdbId,
 //         modeId: mode!.id,
 //         attempts: Math.min(guesses.length + 1, lives),
-//         guesses: getGuesses(),
+//         guesses,
 //         found: true,
 //       })
 //     } else {
@@ -130,17 +135,17 @@
 //         markAsPlayed()
 //         removePixelation()
 //         saveUnlimitedStats({
-//           igdbId: getIgdbId(),
+//           igdbId,
 //           modeId: mode!.id,
-//           attempts: getGuesses().length,
-//           guesses: getGuesses(),
+//           attempts: guesses.length,
+//           guesses: guesses,
 //           found: false,
 //         })
 //       }
 //     }
 
 //     form.reset();
-//   }, [form, markAsWon, markAsPlayed, removePixelation, saveUnlimitedStats, mode, guesses.length, lives, getGuesses, updateGuesses, setPixelation, getLivesLeft, getIgdbId])
+//   }, [form, markAsWon, markAsPlayed, removePixelation, saveUnlimitedStats, igdbId, mode, guesses, lives, updateGuesses, setPixelation, getLivesLeft])
 
 //   async function newGame() {
 //     form.reset();
@@ -150,33 +155,35 @@
 //     const fetchGames = async () => {
 //       try {
 //         setGames();
-//         setRandomGame();
 //       } catch (error) {
 //         console.error('Failed to fetch games:', error);
 //       }
 //     };
 
 //     fetchGames();
-//   }, [setGames, setRandomGame]);
+
+//   }, [setGames]);
 
 //   useEffect(() => {
+//     console.log('there')
 //     socket.on('connect', () => {
 //       console.info('Connected to WebSocket server');
 //     });
 
-//     socket.on('classic-unlimited-response', (data: { clientId: string, answer: boolean, name: string, idgbId: number }) => {
+//     socket.on('cu-response', (data: { clientId: string, answer: boolean, game: Game }) => {
 //       console.info(data);
 //       checkAnswer(data.answer);
-//       setName(data.name);
-//       setIgdbId(data.idgbId);
+//       setName(data.game.name)
+//       setIgdbId(data.game.igdbId)
 //     });
 
 //     socket.on('unlimited-stats-response', (data: { message: string }) => {
 //       console.info(data.message);
 //     });
 
-//     socket.on('cu-data', (data: { imageUrl: string }) => {
-//       setImageUrl(data.imageUrl);
+//     socket.on('cu-image-url', (data: { imageUrl: string }) => {
+//       void setImageUrl(data.imageUrl);
+//       console.log(data.imageUrl)
 //     });
 
 //     return () => {
@@ -185,14 +192,15 @@
 //       socket.off('unlimited-stats-response');
 //       socket.off('cu-image-url');
 //     };
-//   }, [socket, checkAnswer, setName, setImageUrl, setIgdbId]);
+//   }, [checkAnswer, setIgdbId, setImageUrl, setName, socket]);
 
 //   if (!(imageUrl && mode)) {
 //     return <Placeholders />
 //   }
 
 //   return (
-//     imageUrl && mode &&
+//     getImageUrl() &&
+//     // mode &&
 //     <>
 //       <div className="flex flex-col min-h-screen">
 //         <main className="flex-grow container mx-auto px-4">

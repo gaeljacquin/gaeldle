@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
 import { upstashRedisInit } from '~/utils/upstash-redis';
 import keyNameByEnv from '~/utils/key-name-env';
-// import shuffleList from '~/utils/shuffle-list';
 
 @Injectable()
 export class GamesService {
@@ -52,11 +51,4 @@ export class GamesService {
 
     return games;
   }
-
-  // async findOneRandom() {
-  //   const games = await this.findAll();
-  //   const shuffledGames = shuffleList(games);
-
-  //   return shuffledGames[0];
-  // }
 }

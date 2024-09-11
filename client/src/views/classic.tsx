@@ -150,9 +150,10 @@ export default function Classic() {
         console.info('Connected to WebSocket server');
       });
 
-      socket.on('classic-response', (data: { clientId: string, answer: boolean, name: string }) => {
+      socket.on('daily-res-1', (data: { clientId: string, answer: boolean, name: string }) => {
         checkAnswer(data.answer);
         setName(data.name);
+        console.log(data);
       });
 
       socket.on('daily-stats-response', (data: { message: string }) => {
@@ -161,11 +162,11 @@ export default function Classic() {
 
       return () => {
         socket.off('connect');
-        socket.off('classic-response');
+        socket.off('daily-res-1');
         socket.off('daily-stats-response');
       };
     }
-  }, [getPlayed, socket, checkAnswer, setName]);
+  }, [getPlayed, socket, checkAnswer, setName, mode]);
 
   if (!(games && gotdId && mode)) {
     return <Placeholders />

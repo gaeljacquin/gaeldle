@@ -23,19 +23,20 @@ export class DailyGateway
 
   @WebSocketServer() server: Server;
 
-  private cMap = new Map<string, Game>();
+  private classicMap = new Map<string, Game>();
+  private artworkMap = new Map<string, Game>();
 
   afterInit() {
-    console.log('WebSocket server initialized (daily)');
+    console.info('WebSocket server initialized (daily)');
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    console.log(`Client connected: ${client.id}`);
-    console.log('args: ', args);
+    console.info(`Client connected: ${client.id}`);
+    console.info('args: ', args);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    console.info(`Client disconnected: ${client.id}`);
   }
 
   @SubscribeMessage('daily-stats')
@@ -50,26 +51,40 @@ export class DailyGateway
 
   @SubscribeMessage('classic')
   async handleClassic(client: Socket, data): Promise<void> {
+    void this.gameLogic(client, 1, this.classicMap, data);
+  }
+
+  @SubscribeMessage('artwork')
+  async handleArtwork(client: Socket, data): Promise<void> {
+    void this.gameLogic(client, 2, this.artworkMap, data);
+  }
+
+  private async gameLogic(
+    client: Socket,
+    modeId: number,
+    modeMap: Map<string, Game>,
+    data,
+  ) {
     const clientId = client.id;
 
-    if (!this.cMap.has(clientId)) {
-      const gotdClassic = (await this.gotdService.findIt(1)) as Game;
-      this.cMap.set(client.id, gotdClassic);
+    if (!modeMap.has(clientId)) {
+      const gotd = await this.gotdService.findIt(modeId);
+      modeMap.set(client.id, gotd);
     }
 
-    const gotd = this.cMap.get(clientId);
+    const gotd = modeMap.get(clientId);
     const igdbId = gotd.igdbId;
     const check = data.game.igdbId;
     const livesLeft = data.livesLeft;
     const answer = check === igdbId;
-    let name = '';
+    let name = null;
 
     if (answer || livesLeft === 0) {
-      name = gotd.name;
-      this.cMap.delete(clientId);
+      name = gotd.games.name;
+      modeMap.delete(clientId);
     }
 
-    client.emit('classic-response', {
+    client.emit(`daily-res-${modeId}`, {
       clientId,
       answer,
       name,
@@ -78,7 +93,7 @@ export class DailyGateway
 
   // @SubscribeMessage('message')
   // handleMessage(client: Socket, data: unknown): void {
-  //   console.log(`Received message from client: ${client.id}`);
+  //   console.info(`Received message from client: ${client.id}`);
   //   const response = `Hello, you sent -> ${data}`;
   //   client.emit('response', { clientId: client.id, response });
   // }

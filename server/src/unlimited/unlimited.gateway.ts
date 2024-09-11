@@ -28,14 +28,14 @@ export class UnlimitedGateway
   private gamesLength: number;
 
   async afterInit() {
-    console.log('WebSocket server initialized (unlimited)');
+    console.info('WebSocket server initialized (unlimited)');
     this.games = await this.gamesService.findAll();
     this.gamesLength = this.games.length;
   }
 
   async handleConnection(client: Socket, ...args: any[]) {
-    console.log(`Client connected (unlimited): ${client.id}`);
-    console.log('args: ', args);
+    console.info(`Client connected (unlimited): ${client.id}`);
+    console.info('args: ', args);
 
     if (!this.cuMap.has(client.id)) {
       const cuIndex = Math.floor(Math.random() * this.gamesLength);
@@ -49,7 +49,7 @@ export class UnlimitedGateway
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected (unlimited): ${client.id}`);
+    console.info(`Client disconnected (unlimited): ${client.id}`);
     this.cuMap.delete(client.id);
   }
 

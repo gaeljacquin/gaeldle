@@ -17,6 +17,8 @@ model games {
   createdAt         DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime?         @default(now()) @map("updated_at") @db.Timestamptz(6)
   imageUrl          String?           @map("image_url") @db.VarChar
+  artworks          Json?
+  keywords          Json?
   gotd              gotd[]
   unlimited_stats   unlimited_stats[]
 }
@@ -28,6 +30,7 @@ model gotd {
   updatedAt         DateTime?         @default(now()) @map("updated_at") @db.Timestamptz(6)
   modeId            Int               @map("mode_id")
   scheduled         DateTime?         @default(dbgenerated("(timezone('EST'::text, (CURRENT_DATE + '1 day'::interval)))::timestamp without time zone")) @db.Timestamptz(6)
+  info              Json?
   games             games?            @relation(fields: [igdbId], references: [igdbId], onDelete: NoAction, onUpdate: NoAction, map: "gotd_igdb_fk")
   modes             modes             @relation(fields: [modeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   daily_stats       daily_stats[]

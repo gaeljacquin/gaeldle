@@ -8,14 +8,15 @@ import { PrismaService } from '~/src/prisma/prisma.service';
 import { ModesController } from './modes/modes.controller';
 import { ModesService } from './modes/modes.service';
 import { ModesModule } from './modes/modes.module';
-import { StatsGateway } from './stats/stats.gateway';
 import { UnlimitedStatsModule } from './unlimited-stats/unlimited-stats.module';
 import { DailyStatsService } from './daily-stats/daily-stats.service';
 import { UnlimitedStatsService } from './unlimited-stats/unlimited-stats.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { UnlimitedGateway } from './unlimited/unlimited.gateway';
+// import { UnlimitedGateway } from './unlimited/unlimited.gateway';
 import { GamesService } from './games/games.service';
+import { DailyGateway } from './daily/daily.gateway';
+import { GotdService } from './gotd/gotd.service';
 
 @Module({
   imports: [
@@ -32,11 +33,12 @@ import { GamesService } from './games/games.service';
     AppService,
     PrismaService,
     ModesService,
-    StatsGateway,
     DailyStatsService,
     UnlimitedStatsService,
-    UnlimitedGateway,
+    // UnlimitedGateway,
     GamesService,
+    DailyGateway,
+    GotdService,
   ],
 })
 export class AppModule {}

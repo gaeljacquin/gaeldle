@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import { Game, Games, Guess, Guesses } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 
-export interface classicStore {
+export interface artworkStore {
   gotdId: number;
   imageUrl: string;
   name: string;
@@ -30,7 +30,7 @@ export interface classicStore {
   resetPlay: () => void;
 }
 
-export const defaultClassic = {
+export const defaultArtwork = {
   gotdId: 0,
   imageUrl: "/placeholder.jpg",
   name: "",
@@ -44,14 +44,14 @@ export const defaultClassic = {
   pixelationStep: 0,
 };
 
-const useClassicStore = create(
+const useArtworkStore = create(
   persist(
     (set: (arg0: unknown) => void, get: () => unknown) => ({
-      ...defaultClassic,
+      ...defaultArtwork,
       updateLivesLeft: () =>
-        set((state: classicStore) => ({ livesLeft: state.livesLeft - 1 })),
+        set((state: artworkStore) => ({ livesLeft: state.livesLeft - 1 })),
       updateGuesses: (guess: Game) =>
-        set((state: classicStore) => ({ guesses: [...state.guesses, guess] })),
+        set((state: artworkStore) => ({ guesses: [...state.guesses, guess] })),
       getLivesLeft: () => (get() as { livesLeft: number }).livesLeft,
       getGuesses: () => (get() as { guesses: Games }).guesses,
       markAsPlayed: () => {
@@ -62,7 +62,7 @@ const useClassicStore = create(
         set({ won: true });
       },
       setPixelation: () =>
-        set((state: classicStore) => ({
+        set((state: artworkStore) => ({
           pixelation: state.pixelation - state.pixelationStep,
         })),
       removePixelation: () => {
@@ -89,8 +89,8 @@ const useClassicStore = create(
         set({ played: false, won: false, guesses: [] });
       },
     }),
-    { name: "classic-gaeldle-store" }
+    { name: "artwork-gaeldle-store" }
   )
 );
 
-export default useClassicStore;
+export default useArtworkStore;

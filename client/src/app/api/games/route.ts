@@ -20,7 +20,5 @@ export async function GET() {
     games = await data.json();
   }
 
-  console.log(games);
-
   return NextResponse.json(games);
 }

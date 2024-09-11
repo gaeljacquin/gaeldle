@@ -1,106 +1,113 @@
-// import { Game, Games } from "@/types/games";
-// import { Mode, Modes } from "@/types/modes";
-// import { modesSlice } from "./modes-slice";
+// import { Game, Guess, Guesses } from "@/types/games";
 
-// export interface classicUnlimitedSlice {
+// export interface ClassicUnlimitedSlice {
 //   name: string;
-//   imageUrl: string;
 //   igdbId: number;
+//   imageUrl: string;
 //   lives: number;
 //   livesLeft: number;
-//   guesses: Games;
+//   guesses: Guesses;
 //   played: boolean;
 //   won: boolean;
 //   date: Date;
 //   updateLivesLeft: () => void;
-//   updateGuesses: (arg0: Game | null) => void;
+//   updateGuesses: (arg0: Guess | null) => void;
 //   getLivesLeft: () => number;
-//   getGuesses: () => Games;
+//   getGuesses: () => Guesses;
 //   markAsPlayed: () => void;
 //   markAsWon: () => void;
 //   pixelation: number;
 //   pixelationStep: number;
 //   setPixelation: () => void;
 //   removePixelation: () => void;
-//   setRandomGame: () => void; // didn't rename it
 //   getName: () => string;
 //   setName: (arg0: string) => void;
-//   getImageUrl: () => string;
-//   setImageUrl: (arg0: string) => void;
 //   getIgdbId: () => number;
 //   setIgdbId: (arg0: number) => void;
+//   getImageUrl: () => string;
+//   setImageUrl: (arg0: string) => void;
+//   setLives: (arg0: number) => void;
 // }
 
 // export const defaultClassicUnlimited = {
-//   igdbId: 0,
 //   name: "",
+//   igdbId: 0,
 //   imageUrl: "",
 //   lives: 0,
 //   livesLeft: 0,
 //   guesses: [],
 //   played: false,
 //   won: false,
-//   date: "",
+//   date: new Date(),
 //   pixelation: 0,
 //   pixelationStep: 0,
 // };
 
 // const createClassicUnlimitedSlice = (
-//   set: (arg0: unknown) => void,
-//   get: () => unknown
+//   set: (arg0: ClassicUnlimitedSlice | unknown) => void,
+//   get: () => ClassicUnlimitedSlice
 // ) => ({
 //   ...defaultClassicUnlimited,
-//   updateLivesLeft: () =>
-//     set((state: classicUnlimitedSlice) => ({
-//       livesLeft: state.livesLeft - 1,
-//     })),
-//   updateGuesses: (guess: Game) =>
-//     set((state: classicUnlimitedSlice) => ({
-//       guesses: [...state.guesses, guess],
-//     })),
-//   getLivesLeft: () => (get() as { livesLeft: number }).livesLeft,
-//   getGuesses: () => (get() as { guesses: Games }).guesses,
+//   updateLivesLeft: () => {
+//     const { livesLeft } = get();
+
+//     set({ livesLeft: livesLeft - 1 });
+//   },
+//   updateGuesses: (guess: Guess | null) => {
+//     const { guesses } = get();
+
+//     set({ guesses: [...guesses, guess] });
+//   },
+//   getLivesLeft: () => {
+//     const { livesLeft } = get();
+
+//     return livesLeft;
+//   },
+//   getGuesses: () => {
+//     const { guesses } = get();
+
+//     return guesses;
+//   },
 //   markAsPlayed: () => {
 //     set({ played: true });
 //   },
 //   markAsWon: () => {
 //     set({ won: true });
 //   },
-//   setPixelation: () =>
-//     set((state: classicUnlimitedSlice) => ({
-//       pixelation: state.pixelation - state.pixelationStep,
-//     })),
+//   setPixelation: () => {
+//     const { pixelation, pixelationStep } = get();
+
+//     set({ pixelation: pixelation - pixelationStep });
+//   },
 //   removePixelation: () => {
 //     set({ pixelation: 0 });
 //   },
-//   setRandomGame: () => {
-//     set((state: classicUnlimitedSlice & modesSlice) => {
-//       const { lives, pixelation, pixelationStep } =
-//         state.modes.find((val: Mode) => val.id === 5) ?? {};
-
-//       return {
-//         lives,
-//         livesLeft: lives,
-//         pixelation,
-//         pixelationStep,
-//         played: false,
-//         won: false,
-//         guesses: [],
-//       };
-//     });
+//   setLives: (lives: number) => {
+//     set({ lives });
 //   },
-//   getName: () => (get() as { name: string }).name,
+//   getName: () => {
+//     const { name } = get();
+
+//     return name;
+//   },
 //   setName: (name: string) => {
 //     set({ name });
 //   },
-//   getImageUrl: () => (get() as { imageUrl: string }).imageUrl,
-//   setImageUrl: (imageUrl: string) => {
-//     console.log(imageUrl);
-//     set({ imageUrl });
+//   getIgdbId: () => {
+//     const { igdbId } = get();
+
+//     return igdbId;
 //   },
-//   getIgdbId: () => (get() as { igdbId: number }).igdbId,
 //   setIgdbId: (igdbId: number) => {
 //     set({ igdbId });
+//   },
+//   getImageUrl: () => {
+//     const { imageUrl } = get();
+
+//     return imageUrl;
+//   },
+//   setImageUrl: (imageUrl: string) => {
+//     set({ imageUrl });
 //   },
 // });
 

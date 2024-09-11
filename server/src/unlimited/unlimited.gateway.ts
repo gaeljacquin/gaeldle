@@ -1,76 +1,92 @@
-import {} from // OnGatewayConnection,
-// OnGatewayDisconnect,
-// OnGatewayInit,
-// SubscribeMessage,
-// WebSocketGateway,
-// WebSocketServer,
-'@nestjs/websockets';
-// import { Server, Socket } from 'socket.io';
-// import cors from '~/utils/cors';
+import {
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { UnlimitedStatsService } from '~/src/unlimited-stats/unlimited-stats.service';
 import { GamesService } from '../games/games.service';
-// import { Game } from '~/types/games';
+import { Game, Games } from '~/types/games';
+import cors from '~/utils/cors';
 
-// @WebSocketGateway({ cors })
-// implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-export class UnlimitedGateway {
-  constructor(private readonly gamesService: GamesService) {}
+@WebSocketGateway({ cors })
+export class UnlimitedGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
+  constructor(
+    private readonly gamesService: GamesService,
+    private readonly unlimitedStatsService: UnlimitedStatsService,
+  ) {}
 
-  // @WebSocketServer() server: Server;
+  @WebSocketServer() server: Server;
 
-  // private cuMap = new Map<string, Game>();
-  // private randomGame;
+  private cuMap = new Map<string, Game>();
+  private games: Games;
+  private gamesLength: number;
 
-  // afterInit() {
-  //   console.log('WebSocket server initialized (unlimited)');
-  //   this.randomGame = this.gamesService.findOneRandom();
-  // }
+  async afterInit() {
+    console.info('WebSocket server initialized (unlimited)');
+    this.games = await this.gamesService.findAll();
+    this.gamesLength = this.games.length;
+  }
 
-  // async handleConnection(client: Socket, ...args: any[]) {
-  //   console.log(`Client connected (unlimited): ${client.id}`);
-  //   console.log('args: ', args);
+  async handleConnection(client: Socket, ...args: any[]) {
+    console.info(`Client connected (unlimited): ${client.id}`);
+    console.info('args: ', args);
 
-  //   if (!this.cuMap.has(client.id)) {
-  //     const randomGame = await this.randomGame;
-  //     this.cuMap.set(client.id, randomGame);
-  //     client.emit('cu-data', {
-  //       imageUrl: randomGame.imageUrl,
-  //     });
-  //   }
-  // }
+    if (!this.cuMap.has(client.id)) {
+      const cuIndex = Math.floor(Math.random() * this.gamesLength);
+      const cuGame = this.games[cuIndex] as Game;
+      this.cuMap.set(client.id, cuGame);
 
-  // handleDisconnect(client: Socket) {
-  //   console.log(`Client disconnected (unlimited): ${client.id}`);
-  //   this.cuMap.delete(client.id);
-  // }
+      client.emit('cu-image-url', {
+        imageUrl: cuGame.imageUrl,
+      });
+    }
+  }
 
-  // @SubscribeMessage('classic-unlimited')
-  // async handleClassicUnlimited(client: Socket, data): Promise<void> {
-  //   // console.log(client.id);
-  //   // console.log(data);
-  //   const clientId = client.id;
-  //   const randomGame = this.cuMap.get(clientId);
-  //   // console.log(randomGame);
-  //   const check = data.game.igdbId;
-  //   const livesLeft = data.livesLeft;
-  //   // console.log(check);
-  //   // console.log(livesLeft);
-  //   const answer = check === randomGame.igdbId;
-  //   let name = '';
-  //   let igdbId = 0;
+  handleDisconnect(client: Socket) {
+    console.info(`Client disconnected (unlimited): ${client.id}`);
+    this.cuMap.delete(client.id);
+  }
 
-  //   if (answer || livesLeft === 0) {
-  //     name = randomGame.name;
-  //     igdbId = randomGame.igdbId;
-  //     // this.cuMap.delete(clientId);
-  //     this.randomGame = this.gamesService.findOneRandom();
-  //     this.cuMap.set(clientId, this.randomGame);
-  //   }
+  @SubscribeMessage('unlimited-stats')
+  async handleUnlimitedStats(client: Socket, message): Promise<void> {
+    const clientId = client.id;
+    console.info('Received unlimited stats:', message);
+    const data = message.data;
+    await this.unlimitedStatsService.create(data);
+    client.emit('unlimited-stats-response', {
+      message: `Saved unlimited stats for ${clientId}`,
+    });
+  }
 
-  //   client.emit('classic-unlimtied-response', {
-  //     clientId,
-  //     answer,
-  //     name,
-  //     igdbId,
-  //   });
-  // }
+  @SubscribeMessage('classic-unlimited')
+  async handleClassicUnlimited(client: Socket, data): Promise<void> {
+    const clientId = client.id;
+    const cuGame = this.cuMap.get(clientId);
+    let name = '';
+    let igdbId = 0;
+    const check = data.game.igdbId;
+    const livesLeft = data.livesLeft;
+    const answer = check === cuGame.igdbId;
+
+    if (answer || livesLeft === 0) {
+      name = cuGame.name;
+      igdbId = cuGame.igdbId;
+      this.cuMap.delete(clientId);
+    }
+
+    client.emit('cu-response', {
+      clientId,
+      answer,
+      game: {
+        name,
+        igdbId,
+      },
+    });
+  }
 }

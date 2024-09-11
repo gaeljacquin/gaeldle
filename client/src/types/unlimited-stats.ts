@@ -1,10 +1,10 @@
-import { Games } from "./games";
+import { Guesses } from "./games";
 
 export type UnlimitedStats = {
   igdbId: number;
   modeId: number;
   attempts: number;
-  guesses: Games;
+  guesses: Guesses;
   found: boolean;
   info?: unknown[];
 };

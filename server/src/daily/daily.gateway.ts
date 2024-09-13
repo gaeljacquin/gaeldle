@@ -9,6 +9,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { DailyStatsService } from '~/src/daily-stats/daily-stats.service';
 import { GotdService } from '~/src/gotd/gotd.service';
+import { Others } from '~/types/other';
 import cors from '~/utils/cors';
 import { ModeMap } from '~/utils/mode-map';
 
@@ -80,7 +81,7 @@ export class DailyGateway
 
     const gotd = modeMap.get(clientId);
     const igdbIdToday = gotd.igdbId;
-    const keywords = gotd.games.keywords as { [key: string]: unknown }[];
+    const keywords = gotd.games.keywords as Others;
     const igdbId = data.game.igdbId;
     const lives = gotd.modes.lives;
     const livesLeft = data.livesLeft;

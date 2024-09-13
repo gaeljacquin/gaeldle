@@ -83,8 +83,7 @@ export default function Keywords() {
       return false;
     }
 
-    updateLivesLeft();
-    socket.emit('keywords', { game: data.game, livesLeft: getLivesLeft() });
+    socket.emit('keywords', { game: data.game, livesLeft: getLivesLeft() - 1 });
   }
 
   const checkAnswer = useCallback((answer: boolean, keyword: string) => {
@@ -99,8 +98,9 @@ export default function Keywords() {
         found: true,
       })
     } else {
-      const { igdbId, name } = form.getValues().game
-      updateGuesses({ igdbId, name })
+      const { igdbId, name } = form.getValues().game;
+      updateGuesses({ igdbId, name });
+      updateLivesLeft();
 
       if (getLivesLeft() === 0) {
         markAsPlayed()
@@ -117,7 +117,7 @@ export default function Keywords() {
     }
 
     form.reset();
-  }, [form, markAsWon, markAsPlayed, saveDailyStats, gotdId, mode, getGuesses, lives, guesses, updateGuesses, getLivesLeft, updateKeywords])
+  }, [form, markAsWon, markAsPlayed, saveDailyStats, gotdId, mode, getGuesses, lives, guesses, updateGuesses, updateLivesLeft, getLivesLeft, updateKeywords])
 
   useEffect(() => {
     const fetchGotd = async () => {
@@ -130,7 +130,7 @@ export default function Keywords() {
           useKeywordsStore.persist.clearStorage();
         }
 
-        if (gotd) {
+        if (gotd && !getPlayed()) {
           void setGotd(gotd);
         }
       } catch (error) {
@@ -140,7 +140,7 @@ export default function Keywords() {
 
     setGames();
     fetchGotd();
-  }, [setGotd, setGames, resetPlay]);
+  }, [setGotd, setGames, resetPlay, getPlayed]);
 
   useEffect(() => {
     if (!getPlayed()) {

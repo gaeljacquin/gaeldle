@@ -84,8 +84,7 @@ export default function Artwork() {
       return false;
     }
 
-    updateLivesLeft();
-    socket.emit('artwork', { game: data.game, livesLeft: getLivesLeft() });
+    socket.emit('artwork', { game: data.game, livesLeft: getLivesLeft() - 1 });
   }
 
   const checkAnswer = useCallback((answer: boolean) => {
@@ -101,9 +100,10 @@ export default function Artwork() {
         found: true,
       })
     } else {
-      const { igdbId, name } = form.getValues().game
-      updateGuesses({ igdbId, name })
-      setPixelation()
+      const { igdbId, name } = form.getValues().game;
+      updateGuesses({ igdbId, name });
+      setPixelation();
+      updateLivesLeft();
 
       if (getLivesLeft() === 0) {
         markAsPlayed()
@@ -119,7 +119,7 @@ export default function Artwork() {
     }
 
     form.reset();
-  }, [form, markAsWon, markAsPlayed, removePixelation, saveDailyStats, gotdId, mode, getGuesses, lives, guesses, updateGuesses, setPixelation, getLivesLeft])
+  }, [form, markAsWon, markAsPlayed, removePixelation, saveDailyStats, gotdId, mode, getGuesses, lives, guesses, updateGuesses, setPixelation, updateLivesLeft, getLivesLeft])
 
   useEffect(() => {
     const fetchGotd = async () => {
@@ -132,7 +132,7 @@ export default function Artwork() {
           useArtworkStore.persist.clearStorage();
         }
 
-        if (gotd) {
+        if (gotd && !getPlayed()) {
           void setGotd(gotd);
         }
       } catch (error) {
@@ -142,7 +142,7 @@ export default function Artwork() {
 
     setGames();
     fetchGotd();
-  }, [setGotd, setGames, resetPlay]);
+  }, [setGotd, setGames, resetPlay, getPlayed]);
 
   useEffect(() => {
     if (!getPlayed()) {

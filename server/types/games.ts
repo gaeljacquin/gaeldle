@@ -1,4 +1,5 @@
 import { Modes } from './modes';
+import { Other, Others } from './other';
 
 export type Guess = {
   igdbId: number;
@@ -6,11 +7,11 @@ export type Guess = {
 };
 
 export type Game = Guess & {
-  games: { [key: string]: unknown };
+  games: Other;
   imageUrl: string;
-  info: { [key: string]: unknown };
+  info: Other;
   modes: Modes;
-  keywords: { [key: string]: unknown }[];
+  keywords: Others;
 };
 
 export type Guesses = (Guess | null)[];

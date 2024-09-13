@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
 import { upstashRedisInit } from '~/utils/upstash-redis';
-import keyNameByEnv from '~/utils/key-name-env';
+import { genKey } from '~/utils/env-checks';
 
 @Injectable()
 export class GamesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
-    const key = keyNameByEnv('games');
+    const key = genKey('games');
     let games;
 
     try {

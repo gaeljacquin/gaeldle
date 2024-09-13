@@ -124,7 +124,7 @@ export default function Artwork() {
   useEffect(() => {
     const fetchGotd = async () => {
       try {
-        const res = await fetch('/api/gotd-artwork');
+        const res = await fetch('/api/artwork');
         const { gotd, newGotd } = await res.json();
 
         if (newGotd) {

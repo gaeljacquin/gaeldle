@@ -124,7 +124,7 @@ export default function Classic() {
   useEffect(() => {
     const fetchGotd = async () => {
       try {
-        const res = await fetch('/api/gotd-classic');
+        const res = await fetch('/api/classic');
         const { gotd, newGotd } = await res.json();
 
         if (newGotd) {

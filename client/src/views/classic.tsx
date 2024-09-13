@@ -153,7 +153,6 @@ export default function Classic() {
       socket.on('daily-res-1', (data: { clientId: string, answer: boolean, name: string }) => {
         checkAnswer(data.answer);
         setName(data.name);
-        console.log(data);
       });
 
       socket.on('daily-stats-response', (data: { message: string }) => {

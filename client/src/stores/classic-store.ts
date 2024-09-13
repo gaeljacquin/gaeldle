@@ -48,10 +48,14 @@ const useClassicStore = create(
   persist(
     (set: (arg0: unknown) => void, get: () => unknown) => ({
       ...defaultClassic,
-      updateLivesLeft: () =>
-        set((state: classicStore) => ({ livesLeft: state.livesLeft - 1 })),
-      updateGuesses: (guess: Game) =>
-        set((state: classicStore) => ({ guesses: [...state.guesses, guess] })),
+      updateLivesLeft: () => {
+        const livesLeft = (get() as { livesLeft: number }).livesLeft;
+        set({ livesLeft: livesLeft - 1 });
+      },
+      updateGuesses: (guess: Game) => {
+        const guesses = (get() as { guesses: Guesses }).guesses;
+        set({ guesses: [...guesses, guess] });
+      },
       getLivesLeft: () => (get() as { livesLeft: number }).livesLeft,
       getGuesses: () => (get() as { guesses: Games }).guesses,
       markAsPlayed: () => {

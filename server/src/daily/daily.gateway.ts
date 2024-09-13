@@ -25,6 +25,7 @@ export class DailyGateway
 
   private classicMap = new ModeMap();
   private artworkMap = new ModeMap();
+  private keywordsMap = new ModeMap();
 
   afterInit() {
     console.info('WebSocket server initialized (daily)');
@@ -59,6 +60,11 @@ export class DailyGateway
     void this.gameLogic(client, 2, this.artworkMap, data);
   }
 
+  @SubscribeMessage('keywords')
+  async handleKeywords(client: Socket, data): Promise<void> {
+    void this.gameLogic(client, 3, this.keywordsMap, data);
+  }
+
   private async gameLogic(
     client: Socket,
     modeId: number,
@@ -73,21 +79,38 @@ export class DailyGateway
     }
 
     const gotd = modeMap.get(clientId);
-    const igdbId = gotd.igdbId;
-    const check = data.game.igdbId;
+    const igdbIdToday = gotd.igdbId;
+    const keywords = gotd.games.keywords as { [key: string]: unknown }[];
+    const igdbId = data.game.igdbId;
+    const lives = gotd.modes.lives;
     const livesLeft = data.livesLeft;
-    const answer = check === igdbId;
+    const answer = igdbId === igdbIdToday;
     let name = null;
+    let nextKeyword = null;
+    let imageUrl = '';
 
     if (answer || livesLeft === 0) {
       name = gotd.games.name;
+      imageUrl = gotd.games.imageUrl as string;
       modeMap.delete(clientId);
+    }
+
+    if (modeId === 3 && !answer) {
+      if (livesLeft === 1) {
+        const t1 = keywords.slice(lives - livesLeft);
+        const t2 = t1.map((item) => item.name);
+        nextKeyword = t2.join(',');
+      } else {
+        nextKeyword = keywords[lives - livesLeft].name;
+      }
     }
 
     client.emit(`daily-res-${modeId}`, {
       clientId,
       answer,
       name,
+      imageUrl,
+      keyword: nextKeyword,
     });
   }
 

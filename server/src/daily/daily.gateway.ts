@@ -9,8 +9,8 @@ import {
 import { Server, Socket } from 'socket.io';
 import { DailyStatsService } from '~/src/daily-stats/daily-stats.service';
 import { GotdService } from '~/src/gotd/gotd.service';
-import { Game } from '~/types/games';
 import cors from '~/utils/cors';
+import { ModeMap } from '~/utils/mode-map';
 
 @WebSocketGateway({ cors })
 export class DailyGateway
@@ -23,8 +23,8 @@ export class DailyGateway
 
   @WebSocketServer() server: Server;
 
-  private classicMap = new Map<string, Game>();
-  private artworkMap = new Map<string, Game>();
+  private classicMap = new ModeMap();
+  private artworkMap = new ModeMap();
 
   afterInit() {
     console.info('WebSocket server initialized (daily)');
@@ -62,7 +62,7 @@ export class DailyGateway
   private async gameLogic(
     client: Socket,
     modeId: number,
-    modeMap: Map<string, Game>,
+    modeMap: ModeMap,
     data,
   ) {
     const clientId = client.id;

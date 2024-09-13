@@ -3,7 +3,7 @@ import { checkNewGotd, keyNameByEnv } from "@/lib/utils";
 import { upstashRedisInit } from "@/lib/upstash-redis";
 
 export async function GET() {
-  const key = keyNameByEnv("gotd_artwork");
+  const key = keyNameByEnv("artwork");
   let data;
   let gotd;
   let newGotd = false;

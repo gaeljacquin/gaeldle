@@ -43,7 +43,7 @@ export class GotdService {
         id: modeId,
       },
     });
-    const key = genKey('gotd_' + mode.mode);
+    const key = genKey(mode.mode);
 
     return key;
   }

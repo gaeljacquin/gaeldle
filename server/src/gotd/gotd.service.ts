@@ -94,4 +94,42 @@ export class GotdService {
 
     return gotd;
   }
+
+  async findItDev(modeId: number) {
+    const gotd = await this.dbFindGotdDev(modeId);
+    return gotd ?? null;
+  }
+
+  async dbFindGotdDev(modeId: number) {
+    const gotd = await this.prisma.gotd.findFirst({
+      omit: {
+        createdAt: true,
+        updatedAt: true,
+      },
+      include: {
+        games: {
+          omit: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        modes: {
+          select: {
+            mode: true,
+            label: true,
+            lives: true,
+            pixelation: true,
+            pixelationStep: true,
+          },
+        },
+      },
+      where: {
+        id: -1,
+        modeId: modeId,
+      },
+    });
+
+    return gotd;
+  }
 }

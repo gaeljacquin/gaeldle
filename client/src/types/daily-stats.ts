@@ -7,4 +7,5 @@ export type DailyStats = {
   guesses: Guesses;
   found: boolean;
   info?: unknown[];
+  real?: boolean;
 };

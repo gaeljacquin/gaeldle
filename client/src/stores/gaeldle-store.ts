@@ -8,9 +8,9 @@ import createModesSlice from "@/stores/modes-slice";
 
 const useGaeldleStore = create(
   persist(
-    (get, set) => ({
-      ...createGamesSlice(get, set),
-      ...createModesSlice(get),
+    (set, get) => ({
+      ...createGamesSlice(set, get),
+      ...createModesSlice(set, get),
       // ...createClassicUnlimitedSlice(set, get as () => ClassicUnlimitedSlice),
     }),
     { name: "main-gaeldle-store" }

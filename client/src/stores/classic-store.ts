@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Game, Games, Guess, Guesses } from "@/types/games";
 import { Gotd } from "@/types/gotd";
+import { Mode } from "@/types/modes";
 
 export interface classicStore {
   gotdId: number;
@@ -13,6 +14,8 @@ export interface classicStore {
   played: boolean;
   won: boolean;
   date: Date;
+  mode: Mode;
+  getGotdId: () => number;
   updateLivesLeft: () => void;
   updateGuesses: (arg0: Guess | null) => void;
   getLivesLeft: () => number;
@@ -42,12 +45,14 @@ export const defaultClassic = {
   date: "",
   pixelation: 0,
   pixelationStep: 0,
+  mode: null,
 };
 
 const useClassicStore = create(
   persist(
     (set: (arg0: unknown) => void, get: () => unknown) => ({
       ...defaultClassic,
+      getGotdId: () => (get() as { gotdId: number }).gotdId,
       updateLivesLeft: () => {
         const livesLeft = (get() as { livesLeft: number }).livesLeft;
         set({ livesLeft: livesLeft - 1 });
@@ -77,6 +82,7 @@ const useClassicStore = create(
       setGotd: (gotd: Gotd) => {
         const { imageUrl, modes, id } = gotd;
         const { label, lives, pixelation, pixelationStep } = modes;
+        set({ mode: modes });
         set({
           gotdId: id,
           imageUrl,

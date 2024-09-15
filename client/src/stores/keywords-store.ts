@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Game, Games, Guess, Guesses } from "@/types/games";
 import { Gotd } from "@/types/gotd";
+import { Mode } from "@/types/modes";
 
 export interface keywordsStore {
   gotdId: number;
@@ -15,6 +16,8 @@ export interface keywordsStore {
   won: boolean;
   date: Date;
   numKeywords: number;
+  mode: Mode;
+  getGotdId: () => number;
   updateLivesLeft: () => void;
   updateGuesses: (arg0: Guess | null) => void;
   getLivesLeft: () => number;
@@ -42,12 +45,14 @@ export const defaultKeywords = {
   won: false,
   date: "",
   numKeywords: 0,
+  mode: null,
 };
 
 const useKeywordsStore = create(
   persist(
     (set: (arg0: unknown) => void, get: () => unknown) => ({
       ...defaultKeywords,
+      getGotdId: () => (get() as { gotdId: number }).gotdId,
       updateLivesLeft: () => {
         const livesLeft = (get() as { livesLeft: number }).livesLeft;
         set({ livesLeft: livesLeft - 1 });
@@ -77,6 +82,7 @@ const useKeywordsStore = create(
       setGotd: (gotd: Gotd) => {
         const { keyword, modes, id, numKeywords } = gotd;
         const { label, lives } = modes;
+        set({ mode: modes });
         set({
           gotdId: id,
           keywords: [keyword],

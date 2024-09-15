@@ -68,17 +68,15 @@ export class GotdService {
         games: {
           omit: {
             id: true,
+            info: true,
             createdAt: true,
             updatedAt: true,
           },
         },
         modes: {
-          select: {
-            mode: true,
-            label: true,
-            lives: true,
-            pixelation: true,
-            pixelationStep: true,
+          omit: {
+            createdAt: true,
+            updatedAt: true,
           },
         },
       },

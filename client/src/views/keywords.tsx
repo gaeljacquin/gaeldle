@@ -2,33 +2,26 @@
 
 import Image from "next/image";
 import { useEffect, useCallback } from 'react'
-import { Heart } from 'lucide-react'
 import useGaeldleStore from '@/stores/gaeldle-store';
 import useKeywordsStore, { keywordsStore } from '@/stores/keywords-store';
 import { gamesSlice } from '@/stores/games-slice';
 import { Button } from "@/components/ui/button"
 import Placeholders from '@/views/placeholders'
-import { modesSlice } from "@/stores/modes-slice";
 import DisplayCountdown from "@/components/display-countdown";
 import { DailyStats } from "@/types/daily-stats";
-import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
 import LivesLeftComp from "@/components/lives-left";
 import ModesHeader from "@/components/modes-header";
 import GamesForm from "@/components/games-form";
 import { GamesFormInit, imgAlt, imgHeight, imgWidth, SocketInit } from "@/lib/constants";
-import gSocket from "@/lib/gsocket";
 import { CheckAnswerType } from "@/types/check-answer";
 import Hearts from "@/components/hearts";
 
 export default function Keywords() {
   const keywordsSliceState = useKeywordsStore() as keywordsStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
-  const modesSliceState = useGaeldleStore() as modesSlice;
-  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, keywords, imageUrl, setImageUrl, numKeywords, updateKeywords, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName } = keywordsSliceState;
+  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, keywords, imageUrl, getGotdId, setImageUrl, numKeywords, updateKeywords, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName, mode } = keywordsSliceState;
   const { setGames, games } = gamesSliceState;
-  const { modes } = modesSliceState;
-  const mode = modes?.find((val: Mode) => val.id === 3); // temporary hard-coding
   const form = GamesFormInit();
   const socket = SocketInit();
   const readySetGo = games && gotdId && mode
@@ -43,7 +36,7 @@ export default function Keywords() {
       markAsPlayed()
       saveDailyStats({
         gotdId,
-        modeId: mode!.id,
+        modeId: mode?.id,
         attempts: Math.min(getGuesses().length + 1, lives),
         guesses,
         found: true,
@@ -57,7 +50,7 @@ export default function Keywords() {
         markAsPlayed()
         saveDailyStats({
           gotdId,
-          modeId: mode!.id,
+          modeId: mode?.id,
           attempts: getGuesses().length,
           guesses: getGuesses(),
           found: false,
@@ -81,7 +74,7 @@ export default function Keywords() {
           useKeywordsStore.persist.clearStorage();
         }
 
-        if (gotd && !getPlayed()) {
+        if (gotd && (newGotd || !getGotdId())) {
           void setGotd(gotd);
         }
       } catch (error) {
@@ -91,11 +84,29 @@ export default function Keywords() {
 
     setGames();
     fetchGotd();
-  }, [setGotd, setGames, resetPlay, getPlayed]);
+  }, [setGotd, setGames, resetPlay, getPlayed, getGotdId]);
 
   useEffect(() => {
     if (!getPlayed()) {
-      gSocket(socket, 'daily-res-1', 'daily-stats-response', checkAnswer, { setName, setImageUrl })
+      socket.on('connect', () => {
+        console.info('Connected to WebSocket server');
+      });
+
+      socket.on('daily-res-3', (data: { clientId: string, answer: boolean, name: string, [key: string]: unknown }) => {
+        checkAnswer(data.answer, (data.keyword) as string);
+        setName(data.name);
+        setImageUrl(data.imageUrl as string);
+      });
+
+      socket.on('daily-stats-response', (data: { message: string }) => {
+        console.info(data.message);
+      });
+
+      return () => {
+        socket.off('connect');
+        socket.off('daily-res-3');
+        socket.off('daily-stats-response');
+      };
     }
   }, [getPlayed, socket, checkAnswer, setName, mode, setImageUrl]);
 
@@ -125,7 +136,7 @@ export default function Keywords() {
                   priority
                 />
               }
-              <p className="mb-4 font-md font-light">1 keyword is revealed per guess. All keywords are revealed on the last guess.</p>
+              <p className="mb-4 font-md font-light">1 keyword is revealed per attempt. All keywords are revealed on the final attempt.</p>
               <p className="mb-4 font-md font-light">Today&apos;s game has <span className="font-bold">{numKeywords}</span> keywords</p>
               <div className="flex flex-wrap gap-3">
                 {keywords.map((keyword, index) => (
@@ -160,6 +171,7 @@ export default function Keywords() {
               <div className="w-full max-w-md flex flex-col">
                 <GamesForm
                   form={form}
+                  modeSlug={mode.mode}
                   guesses={guesses}
                   socket={socket}
                   getLivesLeft={getLivesLeft}

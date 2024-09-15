@@ -34,13 +34,14 @@ import { UseFormReturn } from 'react-hook-form';
 
 type GamesFormProps = {
   form: UseFormReturn<{ game: Guess }, any, undefined>
+  modeSlug: string
   guesses: Guesses
   socket: Socket
   getLivesLeft: () => number
   played: boolean
 }
 
-export default function GamesForm({ form, guesses, socket, getLivesLeft, played }: GamesFormProps) {
+export default function GamesForm({ form, modeSlug, guesses, socket, getLivesLeft, played }: GamesFormProps) {
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const { games } = gamesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
@@ -51,7 +52,7 @@ export default function GamesForm({ form, guesses, socket, getLivesLeft, played 
       return false;
     }
 
-    socket.emit('classic', { game: data.game, livesLeft: getLivesLeft() - 1 });
+    socket.emit(modeSlug, { game: data.game, livesLeft: getLivesLeft() - 1 });
   }
 
   return (

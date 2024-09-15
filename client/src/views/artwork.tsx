@@ -1,38 +1,27 @@
 'use client';
 
 import Image from "next/image";
-import { useEffect, useState, useRef, useCallback } from 'react'
-import { Heart } from 'lucide-react'
-import { z } from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import io, { Socket } from 'socket.io-client';
+import { useEffect, useCallback } from 'react'
 import useGaeldleStore from '@/stores/gaeldle-store';
 import useArtworkStore, { artworkStore } from '@/stores/artwork-store';
 import { gamesSlice } from '@/stores/games-slice';
 import { Button } from "@/components/ui/button"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
-import { modesSlice } from "@/stores/modes-slice";
 import DisplayCountdown from "@/components/display-countdown";
 import { DailyStats } from "@/types/daily-stats";
-import { Mode } from "@/types/modes";
 import ComingSoon from "@/components/coming-soon";
 import LivesLeftComp from "@/components/lives-left";
 import GamesForm from "@/components/games-form";
 import { GamesFormInit, imgAlt, imgHeight, imgWidth, SocketInit } from "@/lib/constants";
 import ModesHeader from "@/components/modes-header";
-import gSocket from "@/lib/gsocket";
 import Hearts from "@/components/hearts";
 
 export default function Artwork() {
   const artworkSliceState = useArtworkStore() as artworkStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
-  const modesSliceState = useGaeldleStore() as modesSlice;
-  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, pixelation, imageUrl, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName } = artworkSliceState;
+  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, pixelation, imageUrl, getGotdId, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName, mode } = artworkSliceState;
   const { setGames, games } = gamesSliceState;
-  const { modes } = modesSliceState;
-  const mode = modes?.find((val: Mode) => val.id === 2); // temporary hard-coding
   const form = GamesFormInit();
   const socket = SocketInit();
   const readySetGo = games && gotdId && mode
@@ -42,13 +31,18 @@ export default function Artwork() {
   }, [socket]);
 
   const checkAnswer = useCallback((answer: boolean) => {
+    console.log('there');
+    if (!form.getValues().game) {
+      return null;
+    }
+
     if (answer) {
       markAsWon()
       markAsPlayed()
       removePixelation()
       saveDailyStats({
         gotdId,
-        modeId: mode!.id,
+        modeId: mode.id,
         attempts: Math.min(getGuesses().length + 1, lives),
         guesses,
         found: true,
@@ -64,7 +58,7 @@ export default function Artwork() {
         removePixelation()
         saveDailyStats({
           gotdId,
-          modeId: mode!.id,
+          modeId: mode.id,
           attempts: getGuesses().length,
           guesses: getGuesses(),
           found: false,
@@ -86,7 +80,7 @@ export default function Artwork() {
           useArtworkStore.persist.clearStorage();
         }
 
-        if (gotd && !getPlayed()) {
+        if (gotd && (newGotd || !getGotdId())) {
           void setGotd(gotd);
         }
       } catch (error) {
@@ -96,11 +90,28 @@ export default function Artwork() {
 
     setGames();
     fetchGotd();
-  }, [setGotd, setGames, resetPlay, getPlayed]);
+  }, [setGotd, setGames, resetPlay, getPlayed, getGotdId]);
 
   useEffect(() => {
     if (!getPlayed()) {
-      gSocket(socket, 'daily-res-2', 'daily-stats-response', checkAnswer, { setName });
+      socket.on('connect', () => {
+        console.info('Connected to WebSocket server');
+      });
+
+      socket.on('daily-res-2', (data: { clientId: string, answer: boolean, name: string }) => {
+        checkAnswer(data.answer);
+        setName(data.name);
+      });
+
+      socket.on('daily-stats-response', (data: { message: string }) => {
+        console.info(data.message);
+      });
+
+      return () => {
+        socket.off('connect');
+        socket.off('daily-res-2');
+        socket.off('daily-stats-response');
+      };
     }
   }, [getPlayed, socket, checkAnswer, setName, mode]);
 
@@ -149,6 +160,7 @@ export default function Artwork() {
 
             <GamesForm
               form={form}
+              modeSlug={mode.mode}
               guesses={guesses}
               socket={socket}
               getLivesLeft={getLivesLeft}

@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { keyNameByEnv } from "@/lib/utils";
 import { upstashRedisInit } from "@/lib/upstash-redis";
 
 export async function GET() {
-  const key = keyNameByEnv("games");
+  const key = "games";
   let data;
   let games;
 

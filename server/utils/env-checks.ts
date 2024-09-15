@@ -7,12 +7,6 @@ function isDevMode() {
   );
 }
 
-export function genKey(key: string) {
-  key += isDevMode() ? '_dev' : '';
-
-  return key;
-}
-
 export function jwtAuthGuard() {
   return applyDecorators(...(isDevMode() ? [] : [UseGuards(JwtAuthGuard)]));
 }

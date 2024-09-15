@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+// import Image from 'next/image';
 
 import LottieDynamic from '@/components/lottie-dynamic';
 import { currentYear } from '@/constants/date';

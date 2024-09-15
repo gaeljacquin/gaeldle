@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
 import { upstashRedisInit } from '~/utils/upstash-redis';
-import { genKey } from '~/utils/env-checks';
 
 @Injectable()
 export class GamesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
-    const key = genKey('games');
+    const key = 'games';
     let games;
 
     try {
@@ -41,7 +40,6 @@ export class GamesService {
       select: {
         igdbId: true,
         name: true,
-        info: true,
         imageUrl: true,
       },
       orderBy: {

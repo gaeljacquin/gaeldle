@@ -96,23 +96,36 @@ export class DailyGateway
       modeMap.delete(clientId);
     }
 
-    if (modeId === 3 && !answer) {
-      if (livesLeft === 1) {
-        const t1 = keywords.slice(lives - livesLeft);
-        const t2 = t1.map((item) => item.name);
-        nextKeyword = t2.join(',');
-      } else {
-        nextKeyword = keywords[lives - livesLeft].name;
-      }
-    }
-
-    client.emit(`daily-res-${modeId}`, {
+    let emit = {
       clientId,
       answer,
       name,
       imageUrl,
-      keyword: nextKeyword,
-    });
+    };
+
+    switch (modeId) {
+      case 1:
+        break;
+      case 2:
+        break;
+      case 3:
+        if (!answer) {
+          if (livesLeft === 1) {
+            const t1 = keywords.slice(lives - livesLeft);
+            const t2 = t1.map((item) => item.name);
+            nextKeyword = t2.join(',');
+          } else {
+            nextKeyword = keywords[lives - livesLeft].name;
+          }
+        }
+
+        emit = { ...emit, ...{ keyword: nextKeyword } };
+        break;
+      case 4:
+        break;
+    }
+
+    client.emit(`daily-res-${modeId}`, emit);
   }
 
   // @SubscribeMessage('message')

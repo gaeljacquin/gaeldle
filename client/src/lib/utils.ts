@@ -34,11 +34,3 @@ export function checkNewGotd(date: Date) {
 
   return todayDate.getTime() !== checkDate.getTime();
 }
-
-export function keyNameByEnv(key: string) {
-  if (process.env.NODE_ENV === "development") {
-    key += "_dev";
-  }
-
-  return key;
-}

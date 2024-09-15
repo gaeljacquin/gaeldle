@@ -1,8 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import {
-  checkNewGotd,
-  // keyNameByEnv,
-} from "@/lib/utils";
+import { checkNewGotd } from "@/lib/utils";
 // import { upstashRedisInit } from "@/lib/upstash-redis";
 
 export async function GET(request: NextRequest) {
@@ -10,7 +7,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/api", request.url));
   }
 
-  // const key = keyNameByEnv("classic");
+  // const key = "classic";
   let data;
   let gotd;
   let newGotd = false;

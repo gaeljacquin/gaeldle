@@ -65,10 +65,12 @@ const useClassicStore = create(
       markAsWon: () => {
         set({ won: true });
       },
-      setPixelation: () =>
-        set((state: classicStore) => ({
-          pixelation: state.pixelation - state.pixelationStep,
-        })),
+      setPixelation: () => {
+        const pixelation = (get() as { pixelation: number }).pixelation;
+        const pixelationStep = (get() as { pixelationStep: number })
+          .pixelationStep;
+        set({ pixelation: pixelation - pixelationStep });
+      },
       removePixelation: () => {
         set({ pixelation: 0 });
       },

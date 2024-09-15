@@ -68,9 +68,10 @@ const useKeywordsStore = create(
       updateKeywords: (keyword: string | null) => {
         if (keyword) {
           const newKeywords = keyword.split(",");
-          set((state: keywordsStore) => ({
-            keywords: [...state.keywords, ...newKeywords],
-          }));
+          const keywords = (get() as { keywords: string[] }).keywords;
+          set({
+            keywords: [...keywords, ...newKeywords],
+          });
         }
       },
       setGotd: (gotd: Gotd) => {

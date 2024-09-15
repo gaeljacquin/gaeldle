@@ -3,7 +3,7 @@ import { checkNewGotd, genKey } from "@/lib/utils";
 import { upstashRedisInit } from "@/lib/upstash-redis";
 
 export async function GET() {
-  const key = genKey("artwork");
+  const key = genKey("specifications");
   let data;
   let gotd;
   let newGotd = false;
@@ -15,7 +15,7 @@ export async function GET() {
   gotd = JSON.parse(await (await data.json()).result);
 
   if (!gotd) {
-    data = await fetch(`${process.env.serverUrl}/gotd/2`, {
+    data = await fetch(`${process.env.serverUrl}/gotd/4`, {
       cache: "no-store",
       headers: {
         Authorization: `Bearer ${process.env.bearerToken}`,
@@ -24,12 +24,11 @@ export async function GET() {
     gotd = await data.json();
   }
 
-  const { imageUrl: artworkUrl } = gotd.info;
   const { modeId, modes, id } = gotd;
   newGotd = checkNewGotd(gotd.scheduled);
 
   return NextResponse.json({
-    gotd: { id, modeId, modes, artworkUrl },
+    gotd: { id, modeId, modes },
     newGotd,
   });
 }

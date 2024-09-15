@@ -1,5 +1,6 @@
 import { ServiceUnavailableException, Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
+import { genKey } from '~/utils/env-checks';
 import currentDay from '~/utils/get-current-day';
 import { upstashRedisInit } from '~/utils/upstash-redis';
 
@@ -42,7 +43,7 @@ export class GotdService {
         id: modeId,
       },
     });
-    const key = mode.mode;
+    const key = genKey(mode.mode);
 
     return key;
   }

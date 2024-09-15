@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
+import { genKey } from '~/utils/env-checks';
 import { upstashRedisInit } from '~/utils/upstash-redis';
 
 @Injectable()
@@ -7,7 +8,7 @@ export class GamesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
-    const key = 'games';
+    const key = genKey('games');
     let games;
 
     try {
@@ -21,7 +22,7 @@ export class GamesService {
       games = JSON.parse((await gamesCached.json()).result);
 
       if (!games) {
-        games = await this.dbFindGames();
+        games = await this.dbFindAll();
         await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
           method: 'POST',
           ...upstashRedisInit,
@@ -35,7 +36,7 @@ export class GamesService {
     return games ?? null;
   }
 
-  async dbFindGames() {
+  async dbFindAll() {
     const games = await this.prisma.games.findMany({
       select: {
         igdbId: true,
@@ -48,5 +49,21 @@ export class GamesService {
     });
 
     return games;
+  }
+
+  async dbFindOne(igdbId: number) {
+    const game = await this.prisma.games.findFirstOrThrow({
+      omit: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        info: true,
+      },
+      where: {
+        igdbId: igdbId,
+      },
+    });
+
+    return game;
   }
 }

@@ -9,9 +9,11 @@ import {
 import { Server, Socket } from 'socket.io';
 import { DailyStatsService } from '~/src/daily-stats/daily-stats.service';
 import { GotdService } from '~/src/gotd/gotd.service';
+import { GamesService } from '~/src/games/games.service';
 import { Others } from '~/types/other';
 import cors from '~/utils/cors';
 import { ModeMap } from '~/utils/mode-map';
+import { bgCorrect, bgIncorrect, bgPartial } from '~/utils/constants';
 
 @WebSocketGateway({ cors })
 export class DailyGateway
@@ -20,6 +22,7 @@ export class DailyGateway
   constructor(
     private readonly dailyStatsService: DailyStatsService,
     private readonly gotdService: GotdService,
+    private readonly gamesService: GamesService,
   ) {}
 
   @WebSocketServer() server: Server;
@@ -27,6 +30,7 @@ export class DailyGateway
   private classicMap = new ModeMap();
   private artworkMap = new ModeMap();
   private keywordsMap = new ModeMap();
+  private specificationsMap = new ModeMap();
 
   afterInit() {
     console.info('WebSocket server initialized (daily)');
@@ -66,6 +70,11 @@ export class DailyGateway
     void this.gameLogic(client, 3, this.keywordsMap, data);
   }
 
+  @SubscribeMessage('specifications')
+  async handleSpecifications(client: Socket, data): Promise<void> {
+    void this.gameLogic(client, 4, this.specificationsMap, data);
+  }
+
   private async gameLogic(
     client: Socket,
     modeId: number,
@@ -86,6 +95,7 @@ export class DailyGateway
     const lives = gotd.modes.lives;
     const livesLeft = data.livesLeft;
     const answer = igdbId === igdbIdToday;
+    const game = await this.gamesService.dbFindOne(igdbId);
     let name = null;
     let nextKeyword = null;
     let imageUrl = '';
@@ -122,10 +132,120 @@ export class DailyGateway
         emit = { ...emit, ...{ keyword: nextKeyword } };
         break;
       case 4:
+        const specs = await this.checkSpecs(game, igdbIdToday);
+        emit = { ...emit, ...{ specs } };
         break;
     }
 
     client.emit(`daily-res-${modeId}`, emit);
+  }
+
+  private async checkSpecs(game, igdbIdToday) {
+    const gotd = await this.gamesService.dbFindOne(igdbIdToday);
+    const gameInitialReleaseYear = game.release_dates.reduce(
+      (min, current) => (current.y < min ? current.y : min),
+      game.release_dates[0].y,
+    );
+    const gotdInitialReleaseYear = (
+      gotd.release_dates as { y: number; [key: string]: unknown }[]
+    ).reduce(
+      (min, current) => (current.y < min ? current.y : min),
+      gotd.release_dates[0].y,
+    );
+    const specs = {
+      imageUrl: game.imageUrl,
+      platforms: {
+        values: game.platforms?.map((item) => item.name),
+        specscn: this.compare(game.platforms, gotd.platforms),
+      },
+      genres: {
+        values: game.genres?.map((item) => item.name),
+        specscn: this.compare(game.genres, gotd.genres),
+      },
+      themes: {
+        values: game.themes?.map((item) => item.name),
+        specscn: this.compare(game.themes, gotd.themes),
+      },
+      release_dates: {
+        value: gameInitialReleaseYear, // return initial release year if multi-platform
+        specscn:
+          gameInitialReleaseYear === gotdInitialReleaseYear
+            ? bgCorrect
+            : bgIncorrect,
+        arrowDir:
+          gameInitialReleaseYear === gotdInitialReleaseYear
+            ? ''
+            : gameInitialReleaseYear > gotdInitialReleaseYear
+              ? 'down'
+              : 'up',
+      },
+      game_modes: {
+        values: game.game_modes?.map((item) => item.name),
+        specscn: this.compare(game.game_modes, gotd.game_modes),
+      },
+      game_engines: {
+        values: game.game_engines?.map((item) => item.name),
+        specscn: this.compare(game.game_engines, gotd.game_engines),
+      },
+      player_perspectives: {
+        values: game.player_perspectives?.map((item) => item.name),
+        specscn: this.compare(
+          game.player_perspectives,
+          gotd.player_perspectives,
+        ),
+      },
+    };
+
+    return specs;
+  }
+
+  private compare(game, gotd): string {
+    function extractIds(mylist): number[] {
+      if (!mylist) {
+        return [];
+      }
+
+      return mylist
+        .filter((obj) => obj.hasOwnProperty('id'))
+        .map((obj) => obj.id);
+    }
+
+    function isSubset(game, gotd): boolean {
+      return game.every((id) => gotd.includes(id));
+    }
+
+    function isPartialSubset(game, gotd): boolean {
+      return game.some((id) => gotd.includes(id));
+    }
+
+    const gameIdList = extractIds(game);
+    const gotdIdList = extractIds(gotd);
+
+    if (gameIdList.length === 0 || gotdIdList.length === 0) {
+      return bgIncorrect;
+    }
+
+    if (JSON.stringify(gameIdList) === JSON.stringify(gotdIdList)) {
+      return bgCorrect;
+    }
+
+    if (isSubset(gameIdList, gotdIdList)) {
+      return bgPartial;
+    }
+
+    if (isSubset(gotdIdList, gameIdList)) {
+      return bgPartial;
+    }
+
+    if (isPartialSubset(gameIdList, gotdIdList)) {
+      return bgPartial;
+    }
+
+    if (isPartialSubset(gotdIdList, gameIdList)) {
+      return bgPartial;
+    }
+
+    return bgIncorrect;
   }
 
   // @SubscribeMessage('message')

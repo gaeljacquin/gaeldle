@@ -1,39 +1,39 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Game, Games, Guess, Guesses } from "@/types/games";
+import { Game, Games, GuessWithSpecs } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 import { Mode } from "@/types/modes";
 
-export interface classicStore {
+export interface specificationsStore {
   gotdId: number;
   imageUrl: string;
   name: string;
   lives: number;
   livesLeft: number;
-  guesses: Guesses;
+  guesses: GuessWithSpecs[];
   played: boolean;
   won: boolean;
   date: Date;
+  summary: Partial<GuessWithSpecs>;
   mode: Mode;
   getGotdId: () => number;
   updateLivesLeft: () => void;
-  updateGuesses: (arg0: Guess | null) => void;
+  updateGuesses: (arg0: GuessWithSpecs | null) => void;
   getLivesLeft: () => number;
-  getGuesses: () => Games;
+  getGuesses: () => GuessWithSpecs[];
   markAsPlayed: () => void;
   markAsWon: () => void;
   getPlayed: () => boolean;
-  pixelation: number;
-  pixelationStep: number;
-  setPixelation: () => void;
-  removePixelation: () => void;
   setGotd: (arg0: Gotd) => void;
+  setImageUrl: (arg0: string) => void;
   getName: () => string;
   setName: (arg0: string) => void;
+  getSummary: () => Partial<GuessWithSpecs>;
+  setSummary: (arg0: Partial<GuessWithSpecs>) => void;
   resetPlay: () => void;
 }
 
-export const defaultClassic = {
+export const defaultSpecifications = {
   gotdId: 0,
   imageUrl: "/placeholder.jpg",
   name: "",
@@ -42,27 +42,35 @@ export const defaultClassic = {
   guesses: [],
   played: false,
   won: false,
+  summary: {
+    franchises: null,
+    game_engines: null,
+    game_modes: null,
+    genres: null,
+    platforms: null,
+    player_perspectives: null,
+    release_dates: null,
+    themes: null,
+  },
   date: "",
-  pixelation: 0,
-  pixelationStep: 0,
   mode: null,
 };
 
-const useClassicStore = create(
+const useSpecificationsStore = create(
   persist(
     (set: (arg0: unknown) => void, get: () => unknown) => ({
-      ...defaultClassic,
+      ...defaultSpecifications,
       getGotdId: () => (get() as { gotdId: number }).gotdId,
       updateLivesLeft: () => {
         const livesLeft = (get() as { livesLeft: number }).livesLeft;
         set({ livesLeft: livesLeft - 1 });
       },
-      updateGuesses: (guess: Game) => {
-        const guesses = (get() as { guesses: Guesses }).guesses;
-        set({ guesses: [...guesses, guess] });
+      updateGuesses: (guess: GuessWithSpecs) => {
+        const guesses = (get() as { guesses: GuessWithSpecs[] }).guesses;
+        set({ guesses: [guess, ...guesses] });
       },
       getLivesLeft: () => (get() as { livesLeft: number }).livesLeft,
-      getGuesses: () => (get() as { guesses: Games }).guesses,
+      getGuesses: () => (get() as { guesses: GuessWithSpecs[] }).guesses,
       markAsPlayed: () => {
         set({ played: true });
       },
@@ -70,39 +78,40 @@ const useClassicStore = create(
       markAsWon: () => {
         set({ won: true });
       },
-      setPixelation: () => {
-        const pixelation = (get() as { pixelation: number }).pixelation;
-        const pixelationStep = (get() as { pixelationStep: number })
-          .pixelationStep;
-        set({ pixelation: pixelation - pixelationStep });
-      },
-      removePixelation: () => {
-        set({ pixelation: 0 });
-      },
       setGotd: (gotd: Gotd) => {
         const { imageUrl, modes, id } = gotd;
-        const { label, lives, pixelation, pixelationStep } = modes;
+        const { label, lives } = modes;
         set({
           gotdId: id,
           imageUrl,
           label,
           lives,
           livesLeft: lives,
-          pixelation,
-          pixelationStep,
           mode: modes,
         });
+      },
+      setImageUrl: (imageUrl: string) => {
+        set({ imageUrl });
       },
       setName: (name: string) => {
         set({ name });
       },
       getName: () => (get() as { name: string }).name,
+      setSummary: (summary: Partial<GuessWithSpecs>) => {
+        set({ summary });
+      },
+      getSummary: () => (get() as { summary: Partial<GuessWithSpecs> }).summary,
       resetPlay: () => {
-        set({ played: false, won: false, guesses: [] });
+        set({
+          played: false,
+          won: false,
+          guesses: [],
+          summary: defaultSpecifications.summary,
+        });
       },
     }),
-    { name: "classic-gaeldle-store" }
+    { name: "specifications-gaeldle-store" }
   )
 );
 
-export default useClassicStore;
+export default useSpecificationsStore;

@@ -1,20 +1,18 @@
 import { NextResponse } from "next/server";
-import { checkNewGotd } from "@/lib/utils";
+import { checkNewGotd, genKey } from "@/lib/utils";
 import { upstashRedisInit } from "@/lib/upstash-redis";
 
 export async function GET() {
-  const key = "keywords";
+  const key = genKey("keywords");
   let data;
   let gotd;
   let newGotd = false;
 
-  if (process.env.NODE_ENV !== "development") {
-    data = await fetch(`${process.env.upstashRedisRestUrl}/get/${key}`, {
-      cache: "no-store",
-      ...upstashRedisInit,
-    });
-    gotd = JSON.parse(await (await data.json()).result);
-  }
+  data = await fetch(`${process.env.upstashRedisRestUrl}/get/${key}`, {
+    cache: "no-store",
+    ...upstashRedisInit,
+  });
+  gotd = JSON.parse(await (await data.json()).result);
 
   if (!gotd) {
     data = await fetch(`${process.env.serverUrl}/gotd/3`, {

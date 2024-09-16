@@ -1,13 +1,8 @@
-import {
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { ModesService } from './modes.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { jwtAuthGuard } from '~/utils/env-checks';
 
+@jwtAuthGuard()
 @Controller('modes')
 export class ModesController {
   constructor(private readonly modesService: ModesService) {}
@@ -16,7 +11,6 @@ export class ModesController {
     return this.modesService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':modeId')
   findOne(@Param('modeId', ParseIntPipe) modeId: number) {
     return this.modesService.findOne(modeId);

@@ -1,11 +1,10 @@
 import { upstashRedisInit } from "@/lib/upstash-redis";
-import { keyNameByEnv } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   let response;
   let data;
-  const key = keyNameByEnv("modes");
+  const key = "modes";
 
   response = await fetch(`${process.env.upstashRedisRestUrl}/get/${key}`, {
     cache: "no-store",

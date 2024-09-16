@@ -6,7 +6,7 @@ import createModesSlice from "@/stores/modes-slice";
 
 const useClassicUnlimitedStore = create((set, get) => ({
   // ...createClassicUnlimitedSlice(set, get as () => ClassicUnlimitedSlice),
-  ...createModesSlice(get),
+  ...createModesSlice(set, get),
 }));
 
 export default useClassicUnlimitedStore;

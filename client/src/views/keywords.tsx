@@ -3,45 +3,40 @@
 import Image from "next/image";
 import { useEffect, useCallback } from 'react'
 import useGaeldleStore from '@/stores/gaeldle-store';
-import useClassicStore, { classicStore } from '@/stores/classic-store';
+import useKeywordsStore, { keywordsStore } from '@/stores/keywords-store';
 import { gamesSlice } from '@/stores/games-slice';
 import { Button } from "@/components/ui/button"
-import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
 import DisplayCountdown from "@/components/display-countdown";
 import { DailyStats } from "@/types/daily-stats";
 import ComingSoon from "@/components/coming-soon";
 import LivesLeftComp from "@/components/lives-left";
+import ModesHeader from "@/components/modes-header";
 import GamesForm from "@/components/games-form";
 import { GamesFormInit, imgAlt, imgHeight, imgWidth, SocketInit } from "@/lib/constants";
-import ModesHeader from "@/components/modes-header";
+import { CheckAnswerType } from "@/types/check-answer";
 import Hearts from "@/components/hearts";
 
-export default function Classic() {
-  const classicSliceState = useClassicStore() as classicStore;
+export default function Keywords() {
+  const keywordsSliceState = useKeywordsStore() as keywordsStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
-  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, pixelation, imageUrl, getGotdId, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName, mode } = classicSliceState;
+  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, keywords, imageUrl, getGotdId, setImageUrl, numKeywords, updateKeywords, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName, mode } = keywordsSliceState;
   const { setGames, games } = gamesSliceState;
   const form = GamesFormInit();
   const socket = SocketInit();
-  const readySetGo = games && gotdId && mode;
+  const readySetGo = games && gotdId && mode
 
   const saveDailyStats = useCallback((data: DailyStats) => {
     socket.emit('daily-stats', data);
   }, [socket]);
 
-  const checkAnswer = useCallback(async (answer: boolean) => {
-    if (!form.getValues().game) {
-      return null;
-    }
-
+  const checkAnswer: CheckAnswerType<string> = useCallback((answer: boolean, keyword: string) => {
     if (answer) {
       markAsWon()
       markAsPlayed()
-      removePixelation()
       saveDailyStats({
         gotdId,
-        modeId: mode.id,
+        modeId: mode?.id,
         attempts: Math.min(getGuesses().length + 1, lives),
         guesses,
         found: true,
@@ -49,41 +44,41 @@ export default function Classic() {
     } else {
       const { igdbId, name } = form.getValues().game;
       updateGuesses({ igdbId, name });
-      setPixelation();
       updateLivesLeft();
 
       if (getLivesLeft() === 0) {
         markAsPlayed()
-        removePixelation()
         saveDailyStats({
           gotdId,
-          modeId: mode.id,
+          modeId: mode?.id,
           attempts: getGuesses().length,
           guesses: getGuesses(),
           found: false,
         })
+      } else {
+        updateKeywords(keyword);
       }
     }
 
     form.reset();
-  }, [form, markAsWon, markAsPlayed, removePixelation, saveDailyStats, gotdId, mode, getGuesses, lives, guesses, updateGuesses, setPixelation, updateLivesLeft, getLivesLeft])
+  }, [form, markAsWon, markAsPlayed, saveDailyStats, gotdId, mode, getGuesses, lives, guesses, updateGuesses, updateLivesLeft, getLivesLeft, updateKeywords])
 
   useEffect(() => {
     const fetchGotd = async () => {
       try {
-        const res = await fetch('/api/classic');
+        const res = await fetch('/api/keywords');
         const { gotd, newGotd } = await res.json();
 
         if (newGotd) {
           resetPlay();
-          useClassicStore.persist.clearStorage();
+          useKeywordsStore.persist.clearStorage();
         }
 
         if (gotd && (newGotd || !getGotdId())) {
           void setGotd(gotd);
         }
       } catch (error) {
-        console.error('Failed to set gotd (classic):', error);
+        console.error('Failed to set gotd (keywords):', error);
       }
     };
 
@@ -97,9 +92,10 @@ export default function Classic() {
         console.info('Connected to WebSocket server');
       });
 
-      socket.on('daily-res-1', (data: { clientId: string, answer: boolean, name: string }) => {
-        checkAnswer(data.answer);
+      socket.on('daily-res-3', (data: { clientId: string, answer: boolean, name: string, [key: string]: unknown }) => {
+        checkAnswer(data.answer, (data.keyword) as string);
         setName(data.name);
+        setImageUrl(data.imageUrl as string);
       });
 
       socket.on('daily-stats-response', (data: { message: string }) => {
@@ -108,11 +104,11 @@ export default function Classic() {
 
       return () => {
         socket.off('connect');
-        socket.off('daily-res-1');
+        socket.off('daily-res-3');
         socket.off('daily-stats-response');
       };
     }
-  }, [getPlayed, socket, checkAnswer, setName, mode]);
+  }, [getPlayed, socket, checkAnswer, setName, mode, setImageUrl]);
 
   if (!readySetGo) {
     return <Placeholders />
@@ -128,24 +124,32 @@ export default function Classic() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === 'development' && "border border-gray-200 "}`}>
               {
-                !played ?
-                  <PixelatedImage
-                    imageUrl={imageUrl}
-                    width={imgWidth}
-                    height={imgHeight}
-                    pixelationFactor={pixelation}
-                    alt={imgAlt(mode.label)}
-                  />
-                  :
-                  <Image
-                    placeholder='empty'
-                    src={imageUrl}
-                    width={imgWidth}
-                    height={imgHeight}
-                    style={{ objectFit: "contain", width: "auto", height: "auto" }}
-                    alt={imgAlt(mode.label)}
-                    priority
-                  />
+                played &&
+                <Image
+                  placeholder='empty'
+                  src={imageUrl}
+                  width={imgWidth}
+                  height={imgHeight}
+                  style={{ objectFit: "contain", width: "auto", height: "auto" }}
+                  alt={imgAlt(mode?.label)}
+                  className="mb-8"
+                  priority
+                />
+              }
+              <p className="mb-4 font-md font-light">1 keyword is revealed per attempt. All keywords are revealed on the final attempt.</p>
+              <p className="mb-4 font-md font-light">Today&apos;s game has <span className="font-bold">{numKeywords}</span> keywords</p>
+              <div className="flex flex-wrap gap-3">
+                {keywords.map((keyword, index) => (
+                  <span key={keyword + '-' + index} className='bg-gael-purple text-white px-4 py-2 rounded-full text-md'>
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+              {
+                !played &&
+                <div
+                  style={{ width: imgWidth, height: imgHeight }}
+                />
               }
             </div>
 
@@ -164,14 +168,16 @@ export default function Classic() {
                 </div>
               </>
 
-              <GamesForm
-                form={form}
-                modeSlug={mode.mode}
-                guesses={guesses}
-                socket={socket}
-                getLivesLeft={getLivesLeft}
-                played={played}
-              />
+              <div className="w-full max-w-md flex flex-col">
+                <GamesForm
+                  form={form}
+                  modeSlug={mode.mode}
+                  guesses={guesses}
+                  socket={socket}
+                  getLivesLeft={getLivesLeft}
+                  played={played}
+                />
+              </div>
 
               <div className="w-full max-w-md flex flex-col">
                 <div className="mt-4" aria-live="polite">

@@ -2,7 +2,6 @@ import { ServiceUnavailableException, Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
 import currentDay from '~/utils/get-current-day';
 import { upstashRedisInit } from '~/utils/upstash-redis';
-import keyNameByEnv from '~/utils/key-name-env';
 
 @Injectable()
 export class GotdService {
@@ -43,7 +42,7 @@ export class GotdService {
         id: modeId,
       },
     });
-    const key = keyNameByEnv('gotd_' + mode.mode);
+    const key = mode.mode;
 
     return key;
   }
@@ -69,6 +68,45 @@ export class GotdService {
         games: {
           omit: {
             id: true,
+            info: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        modes: {
+          omit: {
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+      where: {
+        modeId: modeId,
+        scheduled: {
+          gte: currentDay.start,
+          lte: currentDay.end,
+        },
+      },
+    });
+
+    return gotd;
+  }
+
+  async findItDev(modeId: number) {
+    const gotd = await this.dbFindGotdDev(modeId);
+    return gotd ?? null;
+  }
+
+  async dbFindGotdDev(modeId: number) {
+    const gotd = await this.prisma.gotd.findFirst({
+      omit: {
+        createdAt: true,
+        updatedAt: true,
+      },
+      include: {
+        games: {
+          omit: {
+            id: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -84,11 +122,8 @@ export class GotdService {
         },
       },
       where: {
+        id: -1,
         modeId: modeId,
-        scheduled: {
-          gte: currentDay.start,
-          lte: currentDay.end,
-        },
       },
     });
 

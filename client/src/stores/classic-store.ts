@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Game, Games, Guess, Guesses } from "@/types/games";
 import { Gotd } from "@/types/gotd";
+import { Mode } from "@/types/modes";
 
 export interface classicStore {
   gotdId: number;
@@ -13,6 +14,8 @@ export interface classicStore {
   played: boolean;
   won: boolean;
   date: Date;
+  mode: Mode;
+  getGotdId: () => number;
   updateLivesLeft: () => void;
   updateGuesses: (arg0: Guess | null) => void;
   getLivesLeft: () => number;
@@ -42,16 +45,22 @@ export const defaultClassic = {
   date: "",
   pixelation: 0,
   pixelationStep: 0,
+  mode: null,
 };
 
 const useClassicStore = create(
   persist(
     (set: (arg0: unknown) => void, get: () => unknown) => ({
       ...defaultClassic,
-      updateLivesLeft: () =>
-        set((state: classicStore) => ({ livesLeft: state.livesLeft - 1 })),
-      updateGuesses: (guess: Game) =>
-        set((state: classicStore) => ({ guesses: [...state.guesses, guess] })),
+      getGotdId: () => (get() as { gotdId: number }).gotdId,
+      updateLivesLeft: () => {
+        const livesLeft = (get() as { livesLeft: number }).livesLeft;
+        set({ livesLeft: livesLeft - 1 });
+      },
+      updateGuesses: (guess: Game) => {
+        const guesses = (get() as { guesses: Guesses }).guesses;
+        set({ guesses: [...guesses, guess] });
+      },
       getLivesLeft: () => (get() as { livesLeft: number }).livesLeft,
       getGuesses: () => (get() as { guesses: Games }).guesses,
       markAsPlayed: () => {
@@ -61,16 +70,19 @@ const useClassicStore = create(
       markAsWon: () => {
         set({ won: true });
       },
-      setPixelation: () =>
-        set((state: classicStore) => ({
-          pixelation: state.pixelation - state.pixelationStep,
-        })),
+      setPixelation: () => {
+        const pixelation = (get() as { pixelation: number }).pixelation;
+        const pixelationStep = (get() as { pixelationStep: number })
+          .pixelationStep;
+        set({ pixelation: pixelation - pixelationStep });
+      },
       removePixelation: () => {
         set({ pixelation: 0 });
       },
       setGotd: (gotd: Gotd) => {
         const { imageUrl, modes, id } = gotd;
         const { label, lives, pixelation, pixelationStep } = modes;
+        set({ mode: modes });
         set({
           gotdId: id,
           imageUrl,

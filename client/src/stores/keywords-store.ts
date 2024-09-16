@@ -4,9 +4,10 @@ import { Game, Games, Guess, Guesses } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 import { Mode } from "@/types/modes";
 
-export interface artworkStore {
+export interface keywordsStore {
   gotdId: number;
   imageUrl: string;
+  keywords: string[];
   name: string;
   lives: number;
   livesLeft: number;
@@ -14,6 +15,7 @@ export interface artworkStore {
   played: boolean;
   won: boolean;
   date: Date;
+  numKeywords: number;
   mode: Mode;
   getGotdId: () => number;
   updateLivesLeft: () => void;
@@ -23,19 +25,18 @@ export interface artworkStore {
   markAsPlayed: () => void;
   markAsWon: () => void;
   getPlayed: () => boolean;
-  pixelation: number;
-  pixelationStep: number;
-  setPixelation: () => void;
-  removePixelation: () => void;
+  updateKeywords: (arg0: string | null) => void;
   setGotd: (arg0: Gotd) => void;
+  setImageUrl: (arg0: string) => void;
   getName: () => string;
   setName: (arg0: string) => void;
   resetPlay: () => void;
 }
 
-export const defaultArtwork = {
+export const defaultKeywords = {
   gotdId: 0,
   imageUrl: "/placeholder.jpg",
+  keywords: [],
   name: "",
   lives: 0,
   livesLeft: 0,
@@ -43,15 +44,14 @@ export const defaultArtwork = {
   played: false,
   won: false,
   date: "",
-  pixelation: 0,
-  pixelationStep: 0,
+  numKeywords: 0,
   mode: null,
 };
 
-const useArtworkStore = create(
+const useKeywordsStore = create(
   persist(
     (set: (arg0: unknown) => void, get: () => unknown) => ({
-      ...defaultArtwork,
+      ...defaultKeywords,
       getGotdId: () => (get() as { gotdId: number }).gotdId,
       updateLivesLeft: () => {
         const livesLeft = (get() as { livesLeft: number }).livesLeft;
@@ -70,39 +70,41 @@ const useArtworkStore = create(
       markAsWon: () => {
         set({ won: true });
       },
-      setPixelation: () => {
-        const pixelation = (get() as { pixelation: number }).pixelation;
-        const pixelationStep = (get() as { pixelationStep: number })
-          .pixelationStep;
-        set({ pixelation: pixelation - pixelationStep });
-      },
-      removePixelation: () => {
-        set({ pixelation: 0 });
+      updateKeywords: (keyword: string | null) => {
+        if (keyword) {
+          const newKeywords = keyword.split(",");
+          const keywords = (get() as { keywords: string[] }).keywords;
+          set({
+            keywords: [...keywords, ...newKeywords],
+          });
+        }
       },
       setGotd: (gotd: Gotd) => {
-        const { imageUrl, modes, id } = gotd;
-        const { label, lives, pixelation, pixelationStep } = modes;
+        const { keyword, modes, id, numKeywords } = gotd;
+        const { label, lives } = modes;
         set({ mode: modes });
         set({
           gotdId: id,
-          imageUrl,
+          keywords: [keyword],
           label,
           lives,
           livesLeft: lives,
-          pixelation,
-          pixelationStep,
+          numKeywords,
         });
+      },
+      setImageUrl: (imageUrl: string) => {
+        set({ imageUrl });
       },
       setName: (name: string) => {
         set({ name });
       },
       getName: () => (get() as { name: string }).name,
       resetPlay: () => {
-        set({ played: false, won: false, guesses: [] });
+        set({ ...defaultKeywords });
       },
     }),
-    { name: "artwork-gaeldle-store" }
+    { name: "keywords-gaeldle-store" }
   )
 );
 
-export default useArtworkStore;
+export default useKeywordsStore;

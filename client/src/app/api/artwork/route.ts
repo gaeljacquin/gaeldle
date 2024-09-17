@@ -8,11 +8,13 @@ export async function GET() {
   let gotd;
   let newGotd = false;
 
-  data = await fetch(`${process.env.upstashRedisRestUrl}/get/${key}`, {
-    cache: "no-store",
-    ...upstashRedisInit,
-  });
-  gotd = JSON.parse(await (await data.json()).result);
+  if (process.env.NODE_ENV !== "development") {
+    data = await fetch(`${process.env.upstashRedisRestUrl}/get/${key}`, {
+      cache: "no-store",
+      ...upstashRedisInit,
+    });
+    gotd = JSON.parse(await (await data.json()).result);
+  }
 
   if (!gotd) {
     data = await fetch(`${process.env.serverUrl}/gotd/2`, {
@@ -21,12 +23,12 @@ export async function GET() {
     gotd = await data.json();
   }
 
-  const { imageUrl } = gotd.info;
+  const { imageUrl: artworkUrl } = gotd.info;
   const { modeId, modes, id } = gotd;
   newGotd = checkNewGotd(gotd.scheduled);
 
   return NextResponse.json({
-    gotd: { id, modeId, modes, imageUrl },
+    gotd: { id, modeId, modes, artworkUrl },
     newGotd,
   });
 }

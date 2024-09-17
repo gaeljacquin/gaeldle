@@ -6,6 +6,7 @@ import { Mode } from "@/types/modes";
 
 export interface artworkStore {
   gotdId: number;
+  artworkUrl: string;
   imageUrl: string;
   name: string;
   lives: number;
@@ -28,6 +29,7 @@ export interface artworkStore {
   setPixelation: () => void;
   removePixelation: () => void;
   setGotd: (arg0: Gotd) => void;
+  setImageUrl: (arg0: string) => void;
   getName: () => string;
   setName: (arg0: string) => void;
   resetPlay: () => void;
@@ -35,6 +37,7 @@ export interface artworkStore {
 
 export const defaultArtwork = {
   gotdId: 0,
+  artworkUrl: "/placeholder.jpg",
   imageUrl: "/placeholder.jpg",
   name: "",
   lives: 0,
@@ -80,18 +83,21 @@ const useArtworkStore = create(
         set({ pixelation: 0 });
       },
       setGotd: (gotd: Gotd) => {
-        const { imageUrl, modes, id } = gotd;
+        const { artworkUrl, modes, id } = gotd;
         const { label, lives, pixelation, pixelationStep } = modes;
         set({ mode: modes });
         set({
           gotdId: id,
-          imageUrl,
+          artworkUrl,
           label,
           lives,
           livesLeft: lives,
           pixelation,
           pixelationStep,
         });
+      },
+      setImageUrl: (imageUrl: string) => {
+        set({ imageUrl });
       },
       setName: (name: string) => {
         set({ name });

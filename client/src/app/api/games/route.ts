@@ -6,11 +6,13 @@ export async function GET() {
   let data;
   let games;
 
-  data = await fetch(`${process.env.upstashRedisRestUrl}/get/${key}`, {
-    cache: "no-store",
-    ...upstashRedisInit,
-  });
-  games = JSON.parse(await (await data.json()).result);
+  if (process.env.NODE_ENV !== "development") {
+    data = await fetch(`${process.env.upstashRedisRestUrl}/get/${key}`, {
+      cache: "no-store",
+      ...upstashRedisInit,
+    });
+    games = JSON.parse(await (await data.json()).result);
+  }
 
   if (!games) {
     data = await fetch(`${process.env.serverUrl}/games`, {

@@ -21,12 +21,12 @@ export async function GET() {
     gotd = await data.json();
   }
 
-  const { imageUrl } = gotd.info;
+  const { imageUrl: artworkUrl } = gotd.info;
   const { modeId, modes, id } = gotd;
   newGotd = checkNewGotd(gotd.scheduled);
 
   return NextResponse.json({
-    gotd: { id, modeId, modes, imageUrl },
+    gotd: { id, modeId, modes, artworkUrl },
     newGotd,
   });
 }

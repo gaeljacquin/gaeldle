@@ -20,7 +20,7 @@ import Hearts from "@/components/hearts";
 export default function Artwork() {
   const artworkSliceState = useArtworkStore() as artworkStore;
   const gamesSliceState = useGaeldleStore() as gamesSlice;
-  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, pixelation, imageUrl, getGotdId, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName, mode } = artworkSliceState;
+  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, pixelation, artworkUrl, imageUrl, getGotdId, setImageUrl, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName, mode } = artworkSliceState;
   const { setGames, games } = gamesSliceState;
   const form = GamesFormInit();
   const socket = SocketInit();
@@ -98,9 +98,10 @@ export default function Artwork() {
         console.info('Connected to WebSocket server');
       });
 
-      socket.on('daily-res-2', (data: { clientId: string, answer: boolean, name: string }) => {
+      socket.on('daily-res-2', (data: { clientId: string, answer: boolean, name: string, [key: string]: unknown }) => {
         checkAnswer(data.answer);
         setName(data.name);
+        setImageUrl(data.imageUrl as string);
       });
 
       socket.on('daily-stats-response', (data: { message: string }) => {
@@ -113,7 +114,7 @@ export default function Artwork() {
         socket.off('daily-stats-response');
       };
     }
-  }, [getPlayed, socket, checkAnswer, setName, mode]);
+  }, [getPlayed, socket, checkAnswer, setName, mode, setImageUrl]);
 
   if (!readySetGo) {
     return <Placeholders />
@@ -129,22 +130,35 @@ export default function Artwork() {
           {
             !played ?
               <PixelatedImage
-                imageUrl={imageUrl}
+                imageUrl={artworkUrl}
                 width={imgWidth}
                 height={imgHeight}
                 pixelationFactor={pixelation}
                 alt={imgAlt(mode?.label)}
               />
               :
-              <Image
-                placeholder='empty'
-                src={imageUrl}
-                width={imgWidth}
-                height={imgHeight}
-                style={{ objectFit: "contain", width: "auto", height: "auto" }}
-                alt={imgAlt(mode?.label)}
-                priority
-              />
+              <div className="relative">
+                <Image
+                  placeholder='empty'
+                  src={artworkUrl}
+                  width={imgWidth}
+                  height={imgHeight}
+                  style={{ objectFit: "contain", width: "auto", height: "auto" }}
+                  alt={imgAlt(mode?.label)}
+                  priority
+                />
+                <div className="absolute -bottom-8 -left-8 transform rotate-12">
+                  <Image
+                    placeholder='empty'
+                    src={imageUrl}
+                    width={128}
+                    height={128}
+                    alt={imgAlt(mode?.label) + ' (Cover)'}
+                    className="rounded-md border-4 border-white shadow-lg"
+                    priority
+                  />
+                </div>
+              </div>
           }
 
           <div className="text-lg text-center">

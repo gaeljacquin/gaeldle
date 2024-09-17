@@ -35,8 +35,8 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-600">
-      <nav className="container mx-auto px-4 py-2 md:py-3 backdrop-filter backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-600 backdrop-filter backdrop-blur-md">
+      <nav className="container mx-auto px-4 py-2 md:py-3">
         <div className="flex items-center justify-between">
           <div className="w-16 h-auto">
             <LottieDynamic loop={false} />
@@ -56,6 +56,7 @@ export default function Navbar() {
         {isMenuOpen && (
           <div className="mt-4 md:hidden">
             <Link href="/" className="block py-2 text-gray-600 hover:text-gray-800">Home</Link>
+            <AboutDialog />
           </div>
         )}
       </nav>

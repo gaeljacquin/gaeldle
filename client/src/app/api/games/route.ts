@@ -17,6 +17,9 @@ export async function GET() {
   if (!games) {
     data = await fetch(`${process.env.serverUrl}/games`, {
       cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${process.env.bearerToken}`,
+      },
     });
     games = await data.json();
   }

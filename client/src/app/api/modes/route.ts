@@ -15,7 +15,11 @@ export async function GET() {
   }
 
   if (!data) {
-    response = await fetch(`${process.env.serverUrl}/modes`);
+    response = await fetch(`${process.env.serverUrl}/modes`, {
+      headers: {
+        Authorization: `Bearer ${process.env.bearerToken}`,
+      },
+    });
     data = await response.json();
   }
 

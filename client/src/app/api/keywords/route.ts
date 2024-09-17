@@ -19,6 +19,9 @@ export async function GET() {
   if (!gotd) {
     data = await fetch(`${process.env.serverUrl}/gotd/3`, {
       cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${process.env.bearerToken}`,
+      },
     });
     gotd = await data.json();
   }

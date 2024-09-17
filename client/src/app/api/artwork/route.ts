@@ -8,11 +8,13 @@ export async function GET() {
   let gotd;
   let newGotd = false;
 
-  data = await fetch(`${process.env.upstashRedisRestUrl}/get/${key}`, {
-    cache: "no-store",
-    ...upstashRedisInit,
-  });
-  gotd = JSON.parse(await (await data.json()).result);
+  if (process.env.NODE_ENV !== "development") {
+    data = await fetch(`${process.env.upstashRedisRestUrl}/get/${key}`, {
+      cache: "no-store",
+      ...upstashRedisInit,
+    });
+    gotd = JSON.parse(await (await data.json()).result);
+  }
 
   if (!gotd) {
     data = await fetch(`${process.env.serverUrl}/gotd/2`, {

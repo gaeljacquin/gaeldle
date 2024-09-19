@@ -1,6 +1,14 @@
-import { Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
-import { GotdService } from './gotd.service';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
+import { GotdService } from '~/src/gotd/gotd.service';
 import { jwtAuthGuard } from '~/utils/env-checks';
+import { CreateGotdDto } from '~/src/gotd/dto/create-gotd.dto';
 
 @jwtAuthGuard()
 @Controller('gotd')
@@ -15,6 +23,11 @@ export class GotdController {
   @Get('dev/:modeId')
   findItDev(@Param('modeId', ParseIntPipe) modeId: number) {
     return this.gotdService.findItDev(modeId);
+  }
+
+  @Post()
+  create(@Body() data: CreateGotdDto) {
+    return this.gotdService.create(data);
   }
 
   @Post('refresh/:modeId')

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
 import { genKey } from '~/utils/env-checks';
 import { upstashRedisInit } from '~/utils/upstash-redis';
+import { UpdateModesDto } from './dto/update-modes.dto';
 
 @Injectable()
 export class ModesService {
@@ -77,5 +78,22 @@ export class ModesService {
     });
 
     return mode;
+  }
+
+  async switch(id: number, data: UpdateModesDto) {
+    try {
+      const updates = {};
+      Object.keys(data).forEach((key) => {
+        updates[key] = data[key];
+      });
+
+      await this.prisma.modes.update({
+        where: { id },
+        data: updates,
+      });
+    } catch (error) {
+      console.error('Failed to update mode: ', error);
+      throw error;
+    }
   }
 }

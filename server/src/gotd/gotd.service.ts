@@ -3,6 +3,7 @@ import { PrismaService } from '~/src/prisma/prisma.service';
 import { genKey } from '~/utils/env-checks';
 import currentDay from '~/utils/get-current-day';
 import { upstashRedisInit } from '~/utils/upstash-redis';
+import { CreateGotdDto } from '~/src/gotd/dto/create-gotd.dto';
 
 @Injectable()
 export class GotdService {
@@ -129,5 +130,14 @@ export class GotdService {
     });
 
     return gotd;
+  }
+
+  async create(data: CreateGotdDto) {
+    try {
+      await this.prisma.gotd.create({ data });
+    } catch (error) {
+      console.error('Failed to create gotd: ', error);
+      throw error;
+    }
   }
 }

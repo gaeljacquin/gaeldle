@@ -19,7 +19,7 @@ export type Game = Guess & {
   involved_companies?: Others;
   platforms?: Others;
   player_perspectives?: Others;
-  release_dates?: string | number;
+  release_dates?: Others;
   themes?: Others;
 };
 

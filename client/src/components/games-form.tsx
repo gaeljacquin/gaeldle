@@ -39,9 +39,10 @@ type GamesFormProps = {
   socket: Socket
   getLivesLeft: () => number
   played: boolean
+  summaryTab?: boolean
 }
 
-export default function GamesForm({ form, modeSlug, guesses, socket, getLivesLeft, played }: GamesFormProps) {
+export default function GamesForm({ form, modeSlug, guesses, socket, getLivesLeft, played, summaryTab }: GamesFormProps) {
   const gamesSliceState = useGaeldleStore() as gamesSlice;
   const { games } = gamesSliceState;
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
@@ -73,7 +74,7 @@ export default function GamesForm({ form, modeSlug, guesses, socket, getLivesLef
                         "w-[420px] justify-between",
                         !field.value && "text-muted-foreground"
                       )}
-                      disabled={played}
+                      disabled={played || summaryTab}
                     >
                       {field.value
                         ? games.find(
@@ -128,7 +129,7 @@ export default function GamesForm({ form, modeSlug, guesses, socket, getLivesLef
           <Button
             type="submit"
             className="flex-1 bg-gael-green hover:bg-gael-green-dark mt-5 mb-5"
-            disabled={played}
+            disabled={played || summaryTab}
           >
             Guess
           </Button>

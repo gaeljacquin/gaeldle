@@ -3,9 +3,9 @@ import { checkNewGotd, genKey } from "@/lib/utils";
 import { upstashRedisInit } from "@/lib/upstash-redis";
 
 export async function GET() {
-  const slug = 1;
+  const slug = 4;
   const gSeconds = 10000;
-  const key = genKey("classic");
+  const key = genKey("specifications");
   let data;
   let gotd;
   let newGotd = false;
@@ -27,7 +27,7 @@ export async function GET() {
   } catch (error) {
     if (
       (error as Error).name === "AbortError" ||
-      (error as Error).name.includes("TypeError")
+      (error as Error).name === "TypeError"
     ) {
       data = await fetch(`${process.env.upstashRedisRestUrl}/get/${key}`, {
         cache: "no-store",
@@ -39,12 +39,11 @@ export async function GET() {
     }
   }
 
-  const { imageUrl } = gotd.games;
   const { modeId, modes, id } = gotd;
   newGotd = checkNewGotd(gotd.scheduled);
 
   return NextResponse.json({
-    gotd: { id, modeId, modes, imageUrl },
+    gotd: { id, modeId, modes },
     newGotd,
   });
 }

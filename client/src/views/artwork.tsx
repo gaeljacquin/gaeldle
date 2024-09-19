@@ -31,7 +31,6 @@ export default function Artwork() {
   }, [socket]);
 
   const checkAnswer = useCallback((answer: boolean) => {
-    console.log('there');
     if (!form.getValues().game) {
       return null;
     }

@@ -18,13 +18,15 @@ const nextConfig = {
     ],
   },
   async redirects() {
-    return [
-      {
-        source: "/classic-unlimited",
+    const inactiveModes = process.env.INACTIVE_MODES.split(",");
+
+    return Array.from(inactiveModes).map((mode) => {
+      return {
+        source: "/" + mode,
         destination: "/",
         permanent: true,
-      },
-    ];
+      };
+    });
   },
 };
 

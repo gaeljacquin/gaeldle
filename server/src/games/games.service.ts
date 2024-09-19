@@ -7,13 +7,14 @@ import { upstashRedisInit } from '~/utils/upstash-redis';
 export class GamesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private key = genKey('games');
+
   async findAll() {
-    const key = genKey('games');
     let games;
 
     try {
       const gamesCached = await fetch(
-        `${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`,
+        `${process.env.UPSTASH_REDIS_REST_URL}/get/${this.key}`,
         {
           method: 'GET',
           ...upstashRedisInit,
@@ -23,7 +24,7 @@ export class GamesService {
 
       if (!games) {
         games = await this.dbFindAll();
-        await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
+        await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${this.key}`, {
           method: 'POST',
           ...upstashRedisInit,
           body: JSON.stringify(games),

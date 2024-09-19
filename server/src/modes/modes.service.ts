@@ -8,8 +8,9 @@ import { UpdateModesDto } from './dto/update-modes.dto';
 export class ModesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private key = genKey('modes');
+
   async findAll() {
-    const key = genKey('modes');
     let modes;
 
     try {
@@ -44,11 +45,7 @@ export class ModesService {
         orderBy: [{ categoryId: 'asc' }, { ordinal: 'asc' }],
       });
 
-      await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
-        method: 'POST',
-        ...upstashRedisInit,
-        body: JSON.stringify(modes),
-      });
+      this.setCachedModes(modes);
     } catch (error) {
       console.error('Failed to fetch modes: ', error);
     }
@@ -91,9 +88,19 @@ export class ModesService {
         where: { id },
         data: updates,
       });
+
+      await this.findAll(); // refreshes cache
     } catch (error) {
       console.error('Failed to update mode: ', error);
       throw error;
     }
+  }
+
+  async setCachedModes(data) {
+    await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${this.key}`, {
+      method: 'POST',
+      ...upstashRedisInit,
+      body: JSON.stringify(data),
+    });
   }
 }

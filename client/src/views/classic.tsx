@@ -2,9 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useCallback } from 'react'
-import useGaeldleStore from '@/stores/gaeldle-store';
-import useClassicStore, { classicStore } from '@/stores/classic-store';
-import { gamesSlice } from '@/stores/games-slice';
+import zClassic from '@/stores/classic';
+import zGames from '@/stores/games';
 import { Button } from "@/components/ui/button"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
@@ -16,12 +15,16 @@ import GamesForm from "@/components/games-form";
 import { GamesFormInit, imgAlt, imgHeight, imgWidth, SocketInit } from "@/lib/constants";
 import ModesHeader from "@/components/modes-header";
 import Hearts from "@/components/hearts";
+import zModes from "~/src/stores/modes";
 
 export default function Classic() {
-  const classicSliceState = useClassicStore() as classicStore;
-  const gamesSliceState = useGaeldleStore() as gamesSlice;
-  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, pixelation, imageUrl, getGotdId, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName, mode } = classicSliceState;
-  const { setGames, games } = gamesSliceState;
+  const {
+    livesLeft, lives, gotdId, played, won, guesses, pixelation, imageUrl,
+    updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setName, getName,
+  } = zClassic();
+  const { games } = zGames();
+  const { getMode } = zModes();
+  const mode = getMode(1);
   const form = GamesFormInit();
   const socket = SocketInit();
   const readySetGo = games && gotdId && mode;
@@ -31,7 +34,7 @@ export default function Classic() {
   }, [socket]);
 
   const checkAnswer = useCallback(async (answer: boolean) => {
-    if (!form.getValues().game) {
+    if (!form.getValues().game || !mode) {
       return null;
     }
 
@@ -67,29 +70,6 @@ export default function Classic() {
 
     form.reset();
   }, [form, markAsWon, markAsPlayed, removePixelation, saveDailyStats, gotdId, mode, getGuesses, lives, guesses, updateGuesses, setPixelation, updateLivesLeft, getLivesLeft])
-
-  useEffect(() => {
-    const fetchGotd = async () => {
-      try {
-        const res = await fetch('/api/classic');
-        const { gotd, newGotd } = await res.json();
-
-        if (newGotd) {
-          resetPlay();
-          useClassicStore.persist.clearStorage();
-        }
-
-        if (gotd && (newGotd || !getGotdId())) {
-          void setGotd(gotd);
-        }
-      } catch (error) {
-        console.error('Failed to set gotd (classic):', error);
-      }
-    };
-
-    setGames();
-    fetchGotd();
-  }, [setGotd, setGames, resetPlay, getPlayed, getGotdId]);
 
   useEffect(() => {
     if (!getPlayed()) {

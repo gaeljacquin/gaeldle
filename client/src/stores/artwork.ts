@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Game, Games, Guess, Guesses } from "@/types/games";
+import { Guess, Guesses } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 import { Mode } from "@/types/modes";
+import getIt from "~/src/lib/get-it";
 
-export interface artworkStore {
+export interface ArtworkSlice {
   gotdId: number;
   artworkUrl: string;
   imageUrl: string;
@@ -14,28 +15,27 @@ export interface artworkStore {
   guesses: Guesses;
   played: boolean;
   won: boolean;
-  date: Date;
+  pixelation: number;
+  pixelationStep: number;
   mode: Mode;
-  getGotdId: () => number;
   updateLivesLeft: () => void;
   updateGuesses: (arg0: Guess | null) => void;
   getLivesLeft: () => number;
-  getGuesses: () => Games;
+  getGuesses: () => Guesses;
   markAsPlayed: () => void;
   markAsWon: () => void;
   getPlayed: () => boolean;
-  pixelation: number;
-  pixelationStep: number;
   setPixelation: () => void;
   removePixelation: () => void;
   setGotd: (arg0: Gotd) => void;
   setImageUrl: (arg0: string) => void;
   getName: () => string;
   setName: (arg0: string) => void;
+  fetchGotd: () => void;
   resetPlay: () => void;
 }
 
-export const defaultArtwork = {
+export const initialState = {
   gotdId: 0,
   artworkUrl: "/placeholder.jpg",
   imageUrl: "/placeholder.jpg",
@@ -45,38 +45,37 @@ export const defaultArtwork = {
   guesses: [],
   played: false,
   won: false,
-  date: "",
   pixelation: 0,
   pixelationStep: 0,
-  mode: null,
+  mode: null as unknown as Mode,
 };
 
-const useArtworkStore = create(
-  persist(
-    (set: (arg0: unknown) => void, get: () => unknown) => ({
-      ...defaultArtwork,
-      getGotdId: () => (get() as { gotdId: number }).gotdId,
+const useArtworkSlice = create(
+  persist<ArtworkSlice>(
+    (set, get) => ({
+      ...initialState,
       updateLivesLeft: () => {
-        const livesLeft = (get() as { livesLeft: number }).livesLeft;
+        const livesLeft = get().livesLeft;
         set({ livesLeft: livesLeft - 1 });
       },
-      updateGuesses: (guess: Game) => {
-        const guesses = (get() as { guesses: Guesses }).guesses;
-        set({ guesses: [...guesses, guess] });
+      updateGuesses: (guess: Guess | null) => {
+        const guesses = get().guesses;
+        if (guess) {
+          set({ guesses: [...guesses, guess] });
+        }
       },
-      getLivesLeft: () => (get() as { livesLeft: number }).livesLeft,
-      getGuesses: () => (get() as { guesses: Games }).guesses,
+      getLivesLeft: () => get().livesLeft,
+      getGuesses: () => get().guesses,
       markAsPlayed: () => {
         set({ played: true });
       },
-      getPlayed: () => (get() as { played: boolean }).played,
+      getPlayed: () => get().played,
       markAsWon: () => {
         set({ won: true });
       },
       setPixelation: () => {
-        const pixelation = (get() as { pixelation: number }).pixelation;
-        const pixelationStep = (get() as { pixelationStep: number })
-          .pixelationStep;
+        const pixelation = get().pixelation;
+        const pixelationStep = get().pixelationStep;
         set({ pixelation: pixelation - pixelationStep });
       },
       removePixelation: () => {
@@ -84,16 +83,15 @@ const useArtworkStore = create(
       },
       setGotd: (gotd: Gotd) => {
         const { artworkUrl, modes, id } = gotd;
-        const { label, lives, pixelation, pixelationStep } = modes;
-        set({ mode: modes });
+        const { lives, pixelation, pixelationStep } = modes;
         set({
           gotdId: id,
           artworkUrl,
-          label,
           lives,
           livesLeft: lives,
           pixelation,
           pixelationStep,
+          mode: modes,
         });
       },
       setImageUrl: (imageUrl: string) => {
@@ -102,13 +100,31 @@ const useArtworkStore = create(
       setName: (name: string) => {
         set({ name });
       },
-      getName: () => (get() as { name: string }).name,
+      getName: () => get().name,
+      fetchGotd: async () => {
+        try {
+          const res = await getIt("artwork");
+          const { gotd, newGotd } = await res.json();
+
+          if (newGotd) {
+            get().resetPlay();
+          }
+
+          if (gotd && (newGotd || !get().gotdId)) {
+            get().setGotd(gotd);
+          }
+        } catch (error) {
+          console.error("Failed to set gotd (artwork):", error);
+        }
+      },
       resetPlay: () => {
-        set({ played: false, won: false, guesses: [] });
+        set({ ...initialState });
       },
     }),
-    { name: "artwork-gaeldle-store" }
+    { name: "zartwork" }
   )
 );
 
-export default useArtworkStore;
+useArtworkSlice.getState().fetchGotd();
+
+export default useArtworkSlice;

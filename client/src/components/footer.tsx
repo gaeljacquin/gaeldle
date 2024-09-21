@@ -1,7 +1,9 @@
+"use client";
+
 import Link from 'next/link';
 
 import LottieDynamic from '@/components/lottie-dynamic';
-import { currentYear } from '@/constants/date';
+import { currentYear } from '~/src/lib/constants';
 
 export default function Footer() {
   return (

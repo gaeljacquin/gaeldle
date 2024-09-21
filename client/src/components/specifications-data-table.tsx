@@ -38,7 +38,7 @@ import {
 import { GuessWithSpecs, Spec, Specs } from "@/types/games"
 import GenArrow from "@/components/gen-arrow"
 import { bgCorrect, bgIncorrect, bgPartial, imgHeight, imgWidth } from "../lib/constants"
-import useSpecificationsStore, { specificationsStore } from "~/src/stores/specifications-store"
+import zSpecs from "~/src/stores/specifications"
 
 const columns: ColumnDef<GuessWithSpecs>[] = [
   {
@@ -264,8 +264,7 @@ export default function SpecificationsDataTable({ guesses }: { guesses: GuessWit
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
-  const specificationsSliceState = useSpecificationsStore() as specificationsStore;
-  const { getSummary, setSummary } = specificationsSliceState;
+  const { getSummary, setSummary } = zSpecs();
   const summary = getSummary();
   const table = useReactTable({
     data: guesses,

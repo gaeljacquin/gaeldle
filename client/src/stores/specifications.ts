@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Game, Games, GuessWithSpecs } from "@/types/games";
+import { GuessWithSpecs, Spec } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 import { Mode } from "@/types/modes";
+import getIt from "~/src/lib/get-it";
 
-export interface specificationsStore {
+export interface SpecificationsSlice {
   gotdId: number;
   imageUrl: string;
   name: string;
@@ -13,10 +14,8 @@ export interface specificationsStore {
   guesses: GuessWithSpecs[];
   played: boolean;
   won: boolean;
-  date: Date;
   summary: Partial<GuessWithSpecs>;
   mode: Mode;
-  getGotdId: () => number;
   updateLivesLeft: () => void;
   updateGuesses: (arg0: GuessWithSpecs | null) => void;
   getLivesLeft: () => number;
@@ -30,10 +29,11 @@ export interface specificationsStore {
   setName: (arg0: string) => void;
   getSummary: () => Partial<GuessWithSpecs>;
   setSummary: (arg0: Partial<GuessWithSpecs>) => void;
+  fetchGotd: () => void;
   resetPlay: () => void;
 }
 
-export const defaultSpecifications = {
+export const initialState = {
   gotdId: 0,
   imageUrl: "/placeholder.jpg",
   name: "",
@@ -43,48 +43,47 @@ export const defaultSpecifications = {
   played: false,
   won: false,
   summary: {
-    franchises: null,
-    game_engines: null,
-    game_modes: null,
-    genres: null,
-    platforms: null,
-    player_perspectives: null,
-    release_dates: null,
-    themes: null,
+    franchises: null as unknown as Spec,
+    game_engines: null as unknown as Spec,
+    game_modes: null as unknown as Spec,
+    genres: null as unknown as Spec,
+    platforms: null as unknown as Spec,
+    player_perspectives: null as unknown as Spec,
+    release_dates: null as unknown as Spec,
+    themes: null as unknown as Spec,
   },
-  date: "",
-  mode: null,
+  mode: null as unknown as Mode,
 };
 
-const useSpecificationsStore = create(
-  persist(
-    (set: (arg0: unknown) => void, get: () => unknown) => ({
-      ...defaultSpecifications,
-      getGotdId: () => (get() as { gotdId: number }).gotdId,
+const zSpecs = create(
+  persist<SpecificationsSlice>(
+    (set, get) => ({
+      ...initialState,
       updateLivesLeft: () => {
-        const livesLeft = (get() as { livesLeft: number }).livesLeft;
+        const livesLeft = get().livesLeft;
         set({ livesLeft: livesLeft - 1 });
       },
-      updateGuesses: (guess: GuessWithSpecs) => {
+      updateGuesses: (guess: GuessWithSpecs | null) => {
         const guesses = (get() as { guesses: GuessWithSpecs[] }).guesses;
-        set({ guesses: [guess, ...guesses] });
+        if (guess) {
+          set({ guesses: [guess, ...guesses] });
+        }
       },
-      getLivesLeft: () => (get() as { livesLeft: number }).livesLeft,
-      getGuesses: () => (get() as { guesses: GuessWithSpecs[] }).guesses,
+      getLivesLeft: () => get().livesLeft,
+      getGuesses: () => get().guesses,
       markAsPlayed: () => {
         set({ played: true });
       },
-      getPlayed: () => (get() as { played: boolean }).played,
+      getPlayed: () => get().played,
       markAsWon: () => {
         set({ won: true });
       },
       setGotd: (gotd: Gotd) => {
         const { imageUrl, modes, id } = gotd;
-        const { label, lives } = modes;
+        const { lives } = modes;
         set({
           gotdId: id,
           imageUrl,
-          label,
           lives,
           livesLeft: lives,
           mode: modes,
@@ -96,22 +95,35 @@ const useSpecificationsStore = create(
       setName: (name: string) => {
         set({ name });
       },
-      getName: () => (get() as { name: string }).name,
+      getName: () => get().name,
       setSummary: (summary: Partial<GuessWithSpecs>) => {
         set({ summary });
       },
       getSummary: () => (get() as { summary: Partial<GuessWithSpecs> }).summary,
+      fetchGotd: async () => {
+        try {
+          const res = await getIt("specifications");
+          const { gotd, newGotd } = await res.json();
+
+          if (newGotd) {
+            get().resetPlay();
+          }
+
+          if (gotd && (newGotd || !get().gotdId)) {
+            get().setGotd(gotd);
+          }
+        } catch (error) {
+          console.error("Failed to set gotd (specifications):", error);
+        }
+      },
       resetPlay: () => {
-        set({
-          played: false,
-          won: false,
-          guesses: [],
-          summary: defaultSpecifications.summary,
-        });
+        set({ ...initialState });
       },
     }),
-    { name: "specifications-gaeldle-store" }
+    { name: "zspecs" }
   )
 );
 
-export default useSpecificationsStore;
+zSpecs.getState().fetchGotd();
+
+export default zSpecs;

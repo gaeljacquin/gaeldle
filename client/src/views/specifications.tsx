@@ -2,15 +2,13 @@
 
 import Image from "next/image";
 import { useEffect, useCallback, useState } from 'react'
-import useGaeldleStore from '@/stores/gaeldle-store';
-import { gamesSlice } from '@/stores/games-slice';
 import { Button } from "@/components/ui/button"
 import Placeholders from '@/views/placeholders'
 import DisplayCountdown from "@/components/display-countdown";
 import { DailyStats } from "@/types/daily-stats";
 import ComingSoon from "@/components/coming-soon";
 import LivesLeftComp from "@/components/lives-left";
-import useSpecificationsStore, { specificationsStore } from "@/stores/specifications-store";
+import zSpecs from "@/stores/specifications";
 import { Specs } from "@/types/games";
 import GamesForm from "@/components/games-form";
 import Hearts from "@/components/hearts";
@@ -18,12 +16,17 @@ import { GamesFormInit, SocketInit } from "@/lib/constants";
 import SpecificationsDataTable from "@/components/specifications-data-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import SummaryDataTable from "@/components/summary-data-table";
+import zGames from "~/src/stores/games";
+import zModes from "~/src/stores/modes";
 
 export default function Specifications() {
-  const specificationsSliceState = useSpecificationsStore() as specificationsStore;
-  const gamesSliceState = useGaeldleStore() as gamesSlice;
-  const { name, livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, imageUrl, getGotdId, setImageUrl, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName, setSummary, mode } = specificationsSliceState;
-  const { setGames, games } = gamesSliceState;
+  const {
+    name, livesLeft, lives, gotdId, played, won, guesses, imageUrl,
+    updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, setImageUrl, markAsPlayed, getPlayed, markAsWon, setName, getName, setSummary,
+  } = zSpecs();
+  const { games } = zGames();
+  const { getMode } = zModes();
+  const mode = getMode(4);
   const [currentTab, setCurrentTab] = useState('guesses')
   const form = GamesFormInit();
   const socket = SocketInit();
@@ -77,29 +80,6 @@ export default function Specifications() {
 
     form.reset();
   }, [form, guesses, markAsWon, markAsPlayed, saveDailyStats, gotdId, mode, getGuesses, lives, updateGuesses, updateLivesLeft, getLivesLeft, setSummary])
-
-  useEffect(() => {
-    const fetchGotd = async () => {
-      try {
-        const res = await fetch('/api/specifications');
-        const { gotd, newGotd } = await res.json();
-
-        if (newGotd) {
-          resetPlay();
-          useSpecificationsStore.persist.clearStorage();
-        }
-
-        if (gotd && (newGotd || !getGotdId())) {
-          void setGotd(gotd);
-        }
-      } catch (error) {
-        console.error('Failed to set gotd (specifications):', error);
-      }
-    };
-
-    setGames();
-    fetchGotd();
-  }, [setGotd, setGames, resetPlay, getPlayed, getGotdId]);
 
   useEffect(() => {
     if (!getPlayed()) {

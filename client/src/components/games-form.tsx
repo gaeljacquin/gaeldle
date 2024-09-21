@@ -27,9 +27,8 @@ import {
 } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { FormSchema } from '@/lib/constants';
-import useGaeldleStore from '@/stores/gaeldle-store';
-import { gamesSlice } from '@/stores/games-slice';
-import { Guess, Guesses } from '@/types/games';
+import zGames from '@/stores/games';
+import { Game, Guess, Guesses } from '@/types/games';
 import { UseFormReturn } from 'react-hook-form';
 
 type GamesFormProps = {
@@ -43,8 +42,7 @@ type GamesFormProps = {
 }
 
 export default function GamesForm({ form, modeSlug, guesses, socket, getLivesLeft, played, summaryTab }: GamesFormProps) {
-  const gamesSliceState = useGaeldleStore() as gamesSlice;
-  const { games } = gamesSliceState;
+  const { games } = zGames();
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -78,7 +76,7 @@ export default function GamesForm({ form, modeSlug, guesses, socket, getLivesLef
                     >
                       {field.value
                         ? games.find(
-                          (game) => game.igdbId === field.value.igdbId
+                          (game: Game) => game.igdbId === field.value.igdbId
                         )?.name
                         : "Select game"
                       }
@@ -92,7 +90,7 @@ export default function GamesForm({ form, modeSlug, guesses, socket, getLivesLef
                     <CommandList>
                       <CommandEmpty>No game found</CommandEmpty>
                       <CommandGroup>
-                        {games.map((game) => (
+                        {games.map((game: Game) => (
                           <CommandItem
                             key={game.igdbId}
                             value={game.name}

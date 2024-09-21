@@ -1,5 +1,4 @@
-'use client'
-
+import dynamic from 'next/dynamic'
 import {
   Drawer,
   DrawerClose,
@@ -11,8 +10,11 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
-import Modes from "./modes"
-import Levels from "./levels"
+import Levels from "~/src/components/levels"
+
+const DynamicModes = dynamic(() => import('@/components/modes'), {
+  ssr: false,
+})
 
 export default function ModesDrawer() {
   return (
@@ -25,7 +27,7 @@ export default function ModesDrawer() {
         </DrawerHeader>
         <DrawerFooter>
           <>
-            <Modes isInDrawer={true} />
+            <DynamicModes isInDrawer={true} />
             <Levels />
           </>
           <DrawerClose asChild>

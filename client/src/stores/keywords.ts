@@ -99,13 +99,11 @@ const zKeywords = create(
       fetchGotd: async () => {
         try {
           const res = await getIt("keywords");
-          const { gotd, newGotd } = await res.json();
+          const { gotd } = await res.json();
+          const currentGotdId = get().gotdId;
 
-          if (newGotd) {
+          if (!currentGotdId || currentGotdId !== gotd.id) {
             get().resetPlay();
-          }
-
-          if (gotd && (newGotd || !get().gotdId)) {
             get().setGotd(gotd);
           }
         } catch (error) {
@@ -116,7 +114,7 @@ const zKeywords = create(
         set({ ...initialState });
       },
     }),
-    { name: "zkeyword" }
+    { name: "zkeywords" }
   )
 );
 

@@ -18,23 +18,6 @@ export function absoluteUrl(path: string) {
   return `${process.env.NEXT_PUBLIC_APP_URL}${path}`;
 }
 
-export function checkNewGotd(date: Date) {
-  const today = new Date();
-  const todayDate = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate()
-  );
-  const givenDate = new Date(date);
-  const checkDate = new Date(
-    givenDate.getFullYear(),
-    givenDate.getMonth(),
-    givenDate.getDate()
-  );
-
-  return todayDate.getTime() !== checkDate.getTime();
-}
-
 export function genKey(key: string) {
   if (process.env.NODE_ENV === "development") {
     key += "_dev";

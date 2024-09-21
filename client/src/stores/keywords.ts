@@ -5,7 +5,7 @@ import { Gotd } from "@/types/gotd";
 import { Mode } from "@/types/modes";
 import getIt from "~/src/lib/get-it";
 
-export interface KeywordsSlice {
+export interface ZKeywords {
   gotdId: number;
   imageUrl: string;
   keywords: string[];
@@ -48,7 +48,7 @@ export const initialState = {
 };
 
 const zKeywords = create(
-  persist<KeywordsSlice>(
+  persist<ZKeywords>(
     (set, get) => ({
       ...initialState,
       updateLivesLeft: () => {

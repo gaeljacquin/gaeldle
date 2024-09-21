@@ -5,7 +5,7 @@ import { Gotd } from "@/types/gotd";
 import { Mode } from "@/types/modes";
 import getIt from "~/src/lib/get-it";
 
-export interface ArtworkSlice {
+export interface ZArtwork {
   gotdId: number;
   artworkUrl: string;
   imageUrl: string;
@@ -51,7 +51,7 @@ export const initialState = {
 };
 
 const useArtworkSlice = create(
-  persist<ArtworkSlice>(
+  persist<ZArtwork>(
     (set, get) => ({
       ...initialState,
       updateLivesLeft: () => {

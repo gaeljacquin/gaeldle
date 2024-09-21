@@ -106,7 +106,7 @@ export default function Keywords() {
           <ModesHeader mode={mode} />
 
           <div className="grid md:grid-cols-2 gap-8">
-            <div className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === 'development' && "border border-gray-200 "}`}>
+            <div className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === 'development' && "border border-gray-200"}`}>
               {
                 played &&
                 <Image

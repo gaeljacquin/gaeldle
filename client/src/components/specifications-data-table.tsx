@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import {
   ColumnDef,
@@ -299,26 +299,31 @@ export default function SpecificationsDataTable({ guesses }: { guesses: GuessWit
   columnIds.map((columnId: string) => {
     const columnValues = getColumnValues(columnId);
 
-    if (!summary[columnId as keyof Specs]) {
-      (summary[columnId as keyof Specs] as Spec) = columnValues[0] as Spec
+    if (!getSummary()[columnId as keyof Specs]) {
+      setSummary({
+        ...summary,
+        [columnId as keyof Specs]: columnValues[0]
+      });
     } else {
       columnValues.map((columnValue: unknown) => {
         const spec: Spec = columnValue as Spec;
 
-        if ((summary[columnId as keyof Specs] as Spec).specscn === bgIncorrect && (
+        if ((getSummary()[columnId as keyof Specs] as Spec).specscn === bgIncorrect && (
           spec.specscn === bgPartial || spec.specscn === bgCorrect
         )) {
-          (summary[columnId as keyof Specs] as Spec) = spec;
-        } else if ((summary[columnId as keyof Specs] as Spec).specscn === bgPartial && spec.specscn === bgCorrect) {
-          (summary[columnId as keyof Specs] as Spec) = spec;
+          setSummary({
+            ...summary,
+            [columnId as keyof Specs]: spec
+          });
+        } else if ((getSummary()[columnId as keyof Specs] as Spec).specscn === bgPartial && spec.specscn === bgCorrect) {
+          setSummary({
+            ...summary,
+            [columnId as keyof Specs]: spec
+          });
         }
       })
     }
   })
-
-  useEffect(() => {
-    setSummary(summary);
-  }, [setSummary, summary])
 
   return (
     <div className="w-full">

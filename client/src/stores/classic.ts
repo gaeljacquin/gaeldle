@@ -5,7 +5,7 @@ import { Gotd } from "@/types/gotd";
 import { Mode } from "@/types/modes";
 import getIt from "~/src/lib/get-it";
 
-export interface ClassicSlice {
+export interface ZClassic {
   gotdId: number;
   imageUrl: string;
   name: string;
@@ -48,7 +48,7 @@ export const initialState = {
 };
 
 const zClassic = create(
-  persist<ClassicSlice>(
+  persist<ZClassic>(
     (set, get) => ({
       ...initialState,
       updateLivesLeft: () => {

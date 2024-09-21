@@ -5,7 +5,7 @@ import { Gotd } from "@/types/gotd";
 import { Mode } from "@/types/modes";
 import getIt from "~/src/lib/get-it";
 
-export interface SpecificationsSlice {
+export interface ZSpecs {
   gotdId: number;
   imageUrl: string;
   name: string;
@@ -56,7 +56,7 @@ export const initialState = {
 };
 
 const zSpecs = create(
-  persist<SpecificationsSlice>(
+  persist<ZSpecs>(
     (set, get) => ({
       ...initialState,
       updateLivesLeft: () => {

@@ -7,7 +7,6 @@ const nextConfig = {
     smashQuizUrl: `${process.env.NEXT_PUBLIC_SMASH_QUIZ_URL}`,
     bearerToken: `${process.env.BEARER_TOKEN}`,
     port: `${process.env.PORT ?? "3000"}`,
-    clientUrl: `${process.env.NEXT_PUBLIC_CLIENT_URL}`,
   },
   images: {
     remotePatterns: [

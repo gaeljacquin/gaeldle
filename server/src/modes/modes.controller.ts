@@ -24,11 +24,11 @@ export class ModesController {
     return this.modesService.findOne(modeId);
   }
 
-  @Post('switch/:modeId')
-  switch(
+  @Post('edit/:modeId')
+  myEdit(
     @Param('modeId', ParseIntPipe) modeId: number,
     @Body() data: UpdateModesDto,
   ) {
-    return this.modesService.switch(modeId, data);
+    return this.modesService.myEdit(modeId, data);
   }
 }

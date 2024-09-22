@@ -14,6 +14,7 @@ import { Others } from '~/types/other';
 import cors from '~/utils/cors';
 import { ModeMap } from '~/utils/mode-map';
 import { bgCorrect, bgIncorrect, bgPartial } from '~/utils/constants';
+import { Game } from '~/types/games';
 
 @WebSocketGateway({ cors })
 export class DailyGateway
@@ -88,7 +89,7 @@ export class DailyGateway
       modeMap.set(client.id, gotd);
     }
 
-    const gotd = modeMap.get(clientId);
+    const gotd = modeMap.get(clientId) as Game;
     const igdbIdToday = gotd.igdbId;
     const keywords = gotd.games.keywords as Others;
     const igdbId = data.game.igdbId;

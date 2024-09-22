@@ -11,6 +11,10 @@ export type Game = Guess & {
   imageUrl: string;
   artworkUrl?: string;
   modes?: Modes;
+  bgStatus?: string;
+  frd: number;
+  frdFormatted: string;
+  correctIndex?: number | null;
 };
 
 export type Spec = {

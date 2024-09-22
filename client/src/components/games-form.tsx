@@ -26,7 +26,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
-import { FormSchema } from '@/lib/constants';
+import { FormSchema, textAlreadyGuessed } from '@/lib/constants';
 import zGames from '@/stores/games';
 import { Game, Guess, Guesses } from '@/types/games';
 import { UseFormReturn } from 'react-hook-form';
@@ -47,7 +47,7 @@ export default function GamesForm({ form, modeSlug, guesses, socket, getLivesLef
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     if (guesses.some(guess => guess && guess.igdbId == data.game.igdbId)) {
-      form.setError('game', { type: 'custom', message: `Already guessed` });
+      form.setError('game', { type: 'custom', message: textAlreadyGuessed });
       return false;
     }
 

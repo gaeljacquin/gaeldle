@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 import { io } from "socket.io-client";
 import { Guess } from "@/types/games";
 import { Gotd } from "@/types/gotd";
@@ -96,8 +96,8 @@ const saveDailyStats = (data: DailyStats) => {
 };
 
 const zKeywords = create(
-  persist<ZKeywords>(
-    (set, get) => ({
+  persist(
+    devtools<ZKeywords>((set, get) => ({
       ...initialState,
       updateLivesLeft: () => {
         const livesLeft = get().livesLeft;
@@ -160,7 +160,7 @@ const zKeywords = create(
       resetPlay: () => {
         set({ ...initialState });
       },
-    }),
+    })),
     { name: "zkeywords" }
   )
 );

@@ -1,21 +1,16 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { Mode, Modes } from "@/types/modes";
+import { devtools, persist } from "zustand/middleware";
+import { Mode } from "@/types/modes";
+import { ZModes } from "@/types/zmodes";
 import getIt from "~/src/lib/get-it";
-
-export interface ModesSlice {
-  modes: Modes;
-  setModes: () => void;
-  getMode: (arg0: number) => Mode | undefined;
-}
 
 export const defaultModesSlice = {
   modes: [],
 };
 
 const zModes = create(
-  persist<ModesSlice>(
-    (set, get) => ({
+  persist(
+    devtools<ZModes>((set, get) => ({
       ...defaultModesSlice,
       setModes: async () => {
         const res = await getIt("modes");
@@ -29,7 +24,7 @@ const zModes = create(
 
         return mode;
       },
-    }),
+    })),
     { name: "zmodes" }
   )
 );

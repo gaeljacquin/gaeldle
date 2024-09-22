@@ -77,7 +77,7 @@ export class ModesService {
     return mode;
   }
 
-  async switch(id: number, data: UpdateModesDto) {
+  async myEdit(id: number, data: UpdateModesDto) {
     try {
       const updates = {};
       Object.keys(data).forEach((key) => {

@@ -75,7 +75,7 @@ export default function Keywords() {
                     {played ? `${getName()}` : `🤔`}
                   </p>
 
-                  <LivesLeftComp played={played} won={won} livesLeft={livesLeft} />
+                  <LivesLeftComp played={played} won={won} livesLeft={livesLeft} lives={lives} />
                 </div>
 
                 <div className="flex justify-center space-x-2 mt-8">

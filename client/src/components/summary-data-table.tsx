@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { GuessWithSpecs, Spec } from "@/types/games"
-import useSpecificationsStore, { specificationsStore } from "~/src/stores/specifications-store"
+import zSpecs from "~/src/stores/specifications"
 
 const columns: ColumnDef<Partial<GuessWithSpecs>>[] = [
   {
@@ -219,8 +219,7 @@ const columns: ColumnDef<Partial<GuessWithSpecs>>[] = [
 ]
 
 export default function SummaryDataTable() {
-  const specificationsSliceState = useSpecificationsStore() as specificationsStore;
-  const { getSummary } = specificationsSliceState;
+  const { getSummary } = zSpecs();
   const summary = getSummary()
   const table = useReactTable({
     data: [summary],

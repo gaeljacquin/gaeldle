@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { checkNewGotd, genKey } from "@/lib/utils";
+import { genKey } from "@/lib/utils";
 import { upstashRedisInit } from "@/lib/upstash-redis";
 
 export async function GET() {
@@ -8,7 +8,6 @@ export async function GET() {
   const key = genKey("specifications");
   let data;
   let gotd;
-  let newGotd = false;
 
   try {
     const controller = new AbortController();
@@ -40,10 +39,8 @@ export async function GET() {
   }
 
   const { modeId, modes, id } = gotd;
-  newGotd = checkNewGotd(gotd.scheduled);
 
   return NextResponse.json({
     gotd: { id, modeId, modes },
-    newGotd,
   });
 }

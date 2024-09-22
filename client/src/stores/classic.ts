@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Game, Games, Guess, Guesses } from "@/types/games";
+import { Guess, Guesses } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 import { Mode } from "@/types/modes";
+import getIt from "~/src/lib/get-it";
 
-export interface classicStore {
+export interface ZClassic {
   gotdId: number;
   imageUrl: string;
   name: string;
@@ -13,27 +14,26 @@ export interface classicStore {
   guesses: Guesses;
   played: boolean;
   won: boolean;
-  date: Date;
+  pixelation: number;
+  pixelationStep: number;
   mode: Mode;
-  getGotdId: () => number;
   updateLivesLeft: () => void;
   updateGuesses: (arg0: Guess | null) => void;
   getLivesLeft: () => number;
-  getGuesses: () => Games;
+  getGuesses: () => Guesses;
   markAsPlayed: () => void;
   markAsWon: () => void;
   getPlayed: () => boolean;
-  pixelation: number;
-  pixelationStep: number;
   setPixelation: () => void;
   removePixelation: () => void;
   setGotd: (arg0: Gotd) => void;
   getName: () => string;
   setName: (arg0: string) => void;
+  fetchGotd: () => void;
   resetPlay: () => void;
 }
 
-export const defaultClassic = {
+export const initialState = {
   gotdId: 0,
   imageUrl: "/placeholder.jpg",
   name: "",
@@ -42,38 +42,37 @@ export const defaultClassic = {
   guesses: [],
   played: false,
   won: false,
-  date: "",
   pixelation: 0,
   pixelationStep: 0,
-  mode: null,
+  mode: null as unknown as Mode,
 };
 
-const useClassicStore = create(
-  persist(
-    (set: (arg0: unknown) => void, get: () => unknown) => ({
-      ...defaultClassic,
-      getGotdId: () => (get() as { gotdId: number }).gotdId,
+const zClassic = create(
+  persist<ZClassic>(
+    (set, get) => ({
+      ...initialState,
       updateLivesLeft: () => {
-        const livesLeft = (get() as { livesLeft: number }).livesLeft;
+        const livesLeft = get().livesLeft;
         set({ livesLeft: livesLeft - 1 });
       },
-      updateGuesses: (guess: Game) => {
-        const guesses = (get() as { guesses: Guesses }).guesses;
-        set({ guesses: [...guesses, guess] });
+      updateGuesses: (guess: Guess | null) => {
+        const guesses = get().guesses;
+        if (guess) {
+          set({ guesses: [...guesses, guess] });
+        }
       },
-      getLivesLeft: () => (get() as { livesLeft: number }).livesLeft,
-      getGuesses: () => (get() as { guesses: Games }).guesses,
+      getLivesLeft: () => get().livesLeft,
+      getGuesses: () => get().guesses,
       markAsPlayed: () => {
         set({ played: true });
       },
-      getPlayed: () => (get() as { played: boolean }).played,
+      getPlayed: () => get().played,
       markAsWon: () => {
         set({ won: true });
       },
       setPixelation: () => {
-        const pixelation = (get() as { pixelation: number }).pixelation;
-        const pixelationStep = (get() as { pixelationStep: number })
-          .pixelationStep;
+        const pixelation = get().pixelation;
+        const pixelationStep = get().pixelationStep;
         set({ pixelation: pixelation - pixelationStep });
       },
       removePixelation: () => {
@@ -85,7 +84,7 @@ const useClassicStore = create(
         set({
           gotdId: id,
           imageUrl,
-          label,
+          name: label,
           lives,
           livesLeft: lives,
           pixelation,
@@ -96,13 +95,29 @@ const useClassicStore = create(
       setName: (name: string) => {
         set({ name });
       },
-      getName: () => (get() as { name: string }).name,
+      getName: () => get().name,
+      fetchGotd: async () => {
+        try {
+          const res = await getIt("classic");
+          const { gotd } = await res.json();
+          const currentGotdId = get().gotdId;
+
+          if (!currentGotdId || currentGotdId !== gotd.id) {
+            get().resetPlay();
+            get().setGotd(gotd);
+          }
+        } catch (error) {
+          console.error("Failed to set gotd (classic):", error);
+        }
+      },
       resetPlay: () => {
-        set({ played: false, won: false, guesses: [] });
+        set({ ...initialState });
       },
     }),
-    { name: "classic-gaeldle-store" }
+    { name: "zclassic" }
   )
 );
 
-export default useClassicStore;
+zClassic.getState().fetchGotd();
+
+export default zClassic;

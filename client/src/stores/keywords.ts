@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Game, Games, Guess, Guesses } from "@/types/games";
+import { Guess, Guesses } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 import { Mode } from "@/types/modes";
+import getIt from "~/src/lib/get-it";
 
-export interface keywordsStore {
+export interface ZKeywords {
   gotdId: number;
   imageUrl: string;
   keywords: string[];
@@ -14,14 +15,12 @@ export interface keywordsStore {
   guesses: Guesses;
   played: boolean;
   won: boolean;
-  date: Date;
   numKeywords: number;
   mode: Mode;
-  getGotdId: () => number;
   updateLivesLeft: () => void;
   updateGuesses: (arg0: Guess | null) => void;
   getLivesLeft: () => number;
-  getGuesses: () => Games;
+  getGuesses: () => Guesses;
   markAsPlayed: () => void;
   markAsWon: () => void;
   getPlayed: () => boolean;
@@ -30,10 +29,11 @@ export interface keywordsStore {
   setImageUrl: (arg0: string) => void;
   getName: () => string;
   setName: (arg0: string) => void;
+  fetchGotd: () => void;
   resetPlay: () => void;
 }
 
-export const defaultKeywords = {
+export const initialState = {
   gotdId: 0,
   imageUrl: "/placeholder.jpg",
   keywords: [],
@@ -43,37 +43,35 @@ export const defaultKeywords = {
   guesses: [],
   played: false,
   won: false,
-  date: "",
   numKeywords: 0,
-  mode: null,
+  mode: null as unknown as Mode,
 };
 
-const useKeywordsStore = create(
-  persist(
-    (set: (arg0: unknown) => void, get: () => unknown) => ({
-      ...defaultKeywords,
-      getGotdId: () => (get() as { gotdId: number }).gotdId,
+const zKeywords = create(
+  persist<ZKeywords>(
+    (set, get) => ({
+      ...initialState,
       updateLivesLeft: () => {
-        const livesLeft = (get() as { livesLeft: number }).livesLeft;
+        const livesLeft = get().livesLeft;
         set({ livesLeft: livesLeft - 1 });
       },
-      updateGuesses: (guess: Game) => {
-        const guesses = (get() as { guesses: Guesses }).guesses;
+      updateGuesses: (guess: Guess | null) => {
+        const guesses = get().guesses;
         set({ guesses: [...guesses, guess] });
       },
-      getLivesLeft: () => (get() as { livesLeft: number }).livesLeft,
-      getGuesses: () => (get() as { guesses: Games }).guesses,
+      getLivesLeft: () => get().livesLeft,
+      getGuesses: () => get().guesses,
       markAsPlayed: () => {
         set({ played: true });
       },
-      getPlayed: () => (get() as { played: boolean }).played,
+      getPlayed: () => get().played,
       markAsWon: () => {
         set({ won: true });
       },
       updateKeywords: (keyword: string | null) => {
         if (keyword) {
           const newKeywords = keyword.split(",");
-          const keywords = (get() as { keywords: string[] }).keywords;
+          const keywords = get().keywords;
           set({
             keywords: [...keywords, ...newKeywords],
           });
@@ -81,15 +79,14 @@ const useKeywordsStore = create(
       },
       setGotd: (gotd: Gotd) => {
         const { keyword, modes, id, numKeywords } = gotd;
-        const { label, lives } = modes;
-        set({ mode: modes });
+        const { lives } = modes;
         set({
           gotdId: id,
-          keywords: [keyword],
-          label,
+          keywords: [keyword ?? ""],
           lives,
           livesLeft: lives,
           numKeywords,
+          mode: modes,
         });
       },
       setImageUrl: (imageUrl: string) => {
@@ -98,13 +95,29 @@ const useKeywordsStore = create(
       setName: (name: string) => {
         set({ name });
       },
-      getName: () => (get() as { name: string }).name,
+      getName: () => get().name,
+      fetchGotd: async () => {
+        try {
+          const res = await getIt("keywords");
+          const { gotd } = await res.json();
+          const currentGotdId = get().gotdId;
+
+          if (!currentGotdId || currentGotdId !== gotd.id) {
+            get().resetPlay();
+            get().setGotd(gotd);
+          }
+        } catch (error) {
+          console.error("Failed to set gotd (keywords):", error);
+        }
+      },
       resetPlay: () => {
-        set({ ...defaultKeywords });
+        set({ ...initialState });
       },
     }),
-    { name: "keywords-gaeldle-store" }
+    { name: "zkeywords" }
   )
 );
 
-export default useKeywordsStore;
+zKeywords.getState().fetchGotd();
+
+export default zKeywords;

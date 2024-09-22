@@ -1,24 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { usePathname } from 'next/navigation';
 import LottieDynamic from '@/components/lottie-dynamic';
-import useGaeldleStore from "@/stores/gaeldle-store";
-import { modesSlice } from "@/stores/modes-slice";
 import ModesDrawer from './modes-drawer';
 import AboutDialog from './about-dialog';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const modesSliceState = useGaeldleStore() as modesSlice;
-  const { fetchModes } = modesSliceState;
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-
-  useEffect(() => {
-    fetchModes();
-  }, [fetchModes]);
 
   const navLink = (path: string, text: string) => {
     const markup = (

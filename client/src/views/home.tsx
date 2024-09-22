@@ -1,16 +1,18 @@
 'use client'
 
 import Link from "next/link"
-import Placeholders from "./placeholders"
-import useGaeldleStore from "@/stores/gaeldle-store"
-import { modesSlice } from "@/stores/modes-slice"
-import Modes from "@/components/modes"
+import Placeholders from "~/src/views/placeholders"
 import Levels from "@/components/levels"
 import ComingSoon from "@/components/coming-soon"
+import zModes from "@/stores/modes"
+import dynamic from 'next/dynamic'
+
+const DynamicModes = dynamic(() => import('@/components/modes'), {
+  ssr: false,
+})
 
 export default function Home() {
-  const modesSliceState = useGaeldleStore() as modesSlice;
-  const { modes } = modesSliceState;
+  const { modes } = zModes();
 
   if (!modes) {
     return <Placeholders />
@@ -29,7 +31,7 @@ export default function Home() {
         </p>
       </div>
       <div className="container px-4 md:px-6">
-        <Modes isInDrawer={false} />
+        <DynamicModes isInDrawer={false} />
         <Levels />
         <ComingSoon />
       </div>

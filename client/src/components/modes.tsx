@@ -1,8 +1,8 @@
+'use client'
+
 import Link from "next/link";
 import DisplayCountdown from "./display-countdown";
 import { Button } from "./ui/button";
-import useGaeldleStore from "@/stores/gaeldle-store";
-import { modesSlice } from "@/stores/modes-slice";
 import {
   Tooltip,
   TooltipContent,
@@ -14,6 +14,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { DrawerClose } from "@/components/ui/drawer"
 import Placeholders from "@/views/placeholders";
+import zModes from "~/src/stores/modes";
 
 type generateButtonProps = {
   label: string
@@ -29,8 +30,7 @@ type ModesProps = {
 }
 
 export default function Modes({ isInDrawer }: ModesProps) {
-  const modesSliceState = useGaeldleStore() as modesSlice;
-  const { modes } = modesSliceState;
+  const { modes } = zModes();
   const [clickedButton, setClickedButton] = useState<string | null>(null)
 
   const handleClick = (buttonKey: string) => {

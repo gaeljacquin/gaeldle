@@ -41,7 +41,7 @@ model gotd {
   scheduled   DateTime?     @default(dbgenerated("(timezone('EST'::text, (CURRENT_DATE + '1 day'::interval)))::timestamp without time zone")) @db.Timestamptz(6)
   info        Json?
   daily_stats daily_stats[]
-  games       games?        @relation(fields: [igdbId], references: [igdbId], onDelete: NoAction, onUpdate: NoAction, map: "gotd_igdb_fk")
+  games       games?        @relation(fields: [igdbId], references: [igdbId], onDelete: NoAction, map: "gotd_igdb_fk")
   modes       modes         @relation(fields: [modeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -66,7 +66,7 @@ model daily_stats {
   updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
   real      Boolean   @default(true)
   guesses   Json[]
-  gotd      gotd      @relation(fields: [gotdId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "daily_stats_gotd_fk")
+  gotd      gotd      @relation(fields: [gotdId], references: [id], onDelete: NoAction, map: "daily_stats_gotd_fk")
   modes     modes     @relation(fields: [modeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users     users?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -83,7 +83,7 @@ model unlimited_stats {
   updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
   real      Boolean   @default(true)
   guesses   Json[]
-  games     games     @relation(fields: [igdbId], references: [igdbId], onDelete: NoAction, onUpdate: NoAction, map: "unlimited_stats_igdb_fk")
+  games     games     @relation(fields: [igdbId], references: [igdbId], onDelete: NoAction, map: "unlimited_stats_igdb_fk")
   modes     modes     @relation(fields: [modeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users     users?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

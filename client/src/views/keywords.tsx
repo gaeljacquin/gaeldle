@@ -2,9 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useCallback } from 'react'
-import useGaeldleStore from '@/stores/gaeldle-store';
-import useKeywordsStore, { keywordsStore } from '@/stores/keywords-store';
-import { gamesSlice } from '@/stores/games-slice';
+import zKeywords from '@/stores/keywords';
+import zGames from '@/stores/games';
 import { Button } from "@/components/ui/button"
 import Placeholders from '@/views/placeholders'
 import DisplayCountdown from "@/components/display-countdown";
@@ -16,12 +15,16 @@ import GamesForm from "@/components/games-form";
 import { GamesFormInit, imgAlt, imgHeight, imgWidth, SocketInit } from "@/lib/constants";
 import { CheckAnswerType } from "@/types/check-answer";
 import Hearts from "@/components/hearts";
+import zModes from "~/src/stores/modes";
 
 export default function Keywords() {
-  const keywordsSliceState = useKeywordsStore() as keywordsStore;
-  const gamesSliceState = useGaeldleStore() as gamesSlice;
-  const { livesLeft, lives, updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, gotdId, played, won, guesses, keywords, imageUrl, getGotdId, setImageUrl, numKeywords, updateKeywords, markAsPlayed, getPlayed, markAsWon, setGotd, resetPlay, setName, getName, mode } = keywordsSliceState;
-  const { setGames, games } = gamesSliceState;
+  const {
+    livesLeft, lives, gotdId, played, won, guesses, keywords, imageUrl, numKeywords,
+    updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, setImageUrl, updateKeywords, markAsPlayed, getPlayed, markAsWon, setName, getName,
+  } = zKeywords();
+  const { games } = zGames();
+  const { getMode } = zModes();
+  const mode = getMode(3);
   const form = GamesFormInit();
   const socket = SocketInit();
   const readySetGo = games && gotdId && mode
@@ -31,6 +34,10 @@ export default function Keywords() {
   }, [socket]);
 
   const checkAnswer: CheckAnswerType<string> = useCallback((answer: boolean, keyword: string) => {
+    if (!form.getValues().game || !mode) {
+      return null;
+    }
+
     if (answer) {
       markAsWon()
       markAsPlayed()
@@ -62,29 +69,6 @@ export default function Keywords() {
 
     form.reset();
   }, [form, markAsWon, markAsPlayed, saveDailyStats, gotdId, mode, getGuesses, lives, guesses, updateGuesses, updateLivesLeft, getLivesLeft, updateKeywords])
-
-  useEffect(() => {
-    const fetchGotd = async () => {
-      try {
-        const res = await fetch('/api/keywords');
-        const { gotd, newGotd } = await res.json();
-
-        if (newGotd) {
-          resetPlay();
-          useKeywordsStore.persist.clearStorage();
-        }
-
-        if (gotd && (newGotd || !getGotdId())) {
-          void setGotd(gotd);
-        }
-      } catch (error) {
-        console.error('Failed to set gotd (keywords):', error);
-      }
-    };
-
-    setGames();
-    fetchGotd();
-  }, [setGotd, setGames, resetPlay, getPlayed, getGotdId]);
 
   useEffect(() => {
     if (!getPlayed()) {
@@ -122,7 +106,7 @@ export default function Keywords() {
           <ModesHeader mode={mode} />
 
           <div className="grid md:grid-cols-2 gap-8">
-            <div className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === 'development' && "border border-gray-200 "}`}>
+            <div className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === 'development' && "border border-gray-200"}`}>
               {
                 played &&
                 <Image

@@ -1,9 +1,13 @@
-import Classic from '@/views/classic'
+import dynamic from 'next/dynamic'
+
+const DynamicClassic = dynamic(() => import('@/views/classic'), {
+  ssr: false,
+})
 
 export default async function Page() {
   return (
     <>
-      <Classic />
+      <DynamicClassic />
     </>
   )
 }

@@ -1,9 +1,13 @@
-import Home from '@/views/home'
+import dynamic from 'next/dynamic'
 
-export default async function Page() {
+const DynamicHome = dynamic(() => import('@/views/home'), {
+  ssr: false,
+})
+
+export default function Page() {
   return (
     <>
-      <Home />
+      <DynamicHome />
     </>
   )
 }

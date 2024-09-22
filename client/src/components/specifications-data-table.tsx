@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import {
   ColumnDef,
@@ -38,7 +38,7 @@ import {
 import { GuessWithSpecs, Spec, Specs } from "@/types/games"
 import GenArrow from "@/components/gen-arrow"
 import { bgCorrect, bgIncorrect, bgPartial, imgHeight, imgWidth } from "../lib/constants"
-import useSpecificationsStore, { specificationsStore } from "~/src/stores/specifications-store"
+import zSpecs from "~/src/stores/specifications"
 
 const columns: ColumnDef<GuessWithSpecs>[] = [
   {
@@ -264,8 +264,7 @@ export default function SpecificationsDataTable({ guesses }: { guesses: GuessWit
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
-  const specificationsSliceState = useSpecificationsStore() as specificationsStore;
-  const { getSummary, setSummary } = specificationsSliceState;
+  const { getSummary, setSummary } = zSpecs();
   const summary = getSummary();
   const table = useReactTable({
     data: guesses,
@@ -300,26 +299,31 @@ export default function SpecificationsDataTable({ guesses }: { guesses: GuessWit
   columnIds.map((columnId: string) => {
     const columnValues = getColumnValues(columnId);
 
-    if (!summary[columnId as keyof Specs]) {
-      (summary[columnId as keyof Specs] as Spec) = columnValues[0] as Spec
+    if (!getSummary()[columnId as keyof Specs]) {
+      setSummary({
+        ...summary,
+        [columnId as keyof Specs]: columnValues[0]
+      });
     } else {
       columnValues.map((columnValue: unknown) => {
         const spec: Spec = columnValue as Spec;
 
-        if ((summary[columnId as keyof Specs] as Spec).specscn === bgIncorrect && (
+        if ((getSummary()[columnId as keyof Specs] as Spec).specscn === bgIncorrect && (
           spec.specscn === bgPartial || spec.specscn === bgCorrect
         )) {
-          (summary[columnId as keyof Specs] as Spec) = spec;
-        } else if ((summary[columnId as keyof Specs] as Spec).specscn === bgPartial && spec.specscn === bgCorrect) {
-          (summary[columnId as keyof Specs] as Spec) = spec;
+          setSummary({
+            ...summary,
+            [columnId as keyof Specs]: spec
+          });
+        } else if ((getSummary()[columnId as keyof Specs] as Spec).specscn === bgPartial && spec.specscn === bgCorrect) {
+          setSummary({
+            ...summary,
+            [columnId as keyof Specs]: spec
+          });
         }
       })
     }
   })
-
-  useEffect(() => {
-    setSummary(summary);
-  }, [setSummary, summary])
 
   return (
     <div className="w-full">

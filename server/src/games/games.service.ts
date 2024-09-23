@@ -58,7 +58,6 @@ export class GamesService {
         id: true,
         createdAt: true,
         updatedAt: true,
-        info: true,
       },
       where: {
         igdbId: igdbId,

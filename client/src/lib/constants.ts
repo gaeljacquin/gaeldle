@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import io, { Socket } from "socket.io-client";
 import { z } from "zod";
 
-const victoryText = "Victory! 😀";
+const victoryText = "You got it! 😀";
 const gameOverText = "Game over 😭";
 const imgWidth = 600;
 const imgHeight = 600;

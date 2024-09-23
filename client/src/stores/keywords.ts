@@ -1,37 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Guess, Guesses } from "@/types/games";
+import { io } from "socket.io-client";
+import { Guess } from "@/types/games";
 import { Gotd } from "@/types/gotd";
-import { Mode } from "@/types/modes";
 import getIt from "~/src/lib/get-it";
+import { ZKeywords } from "~/src/types/zkeywords";
+import { DailyStats } from "~/src/types/daily-stats";
 
-export interface ZKeywords {
-  gotdId: number;
-  imageUrl: string;
-  keywords: string[];
-  name: string;
-  lives: number;
-  livesLeft: number;
-  guesses: Guesses;
-  played: boolean;
-  won: boolean;
-  numKeywords: number;
-  mode: Mode;
-  updateLivesLeft: () => void;
-  updateGuesses: (arg0: Guess | null) => void;
-  getLivesLeft: () => number;
-  getGuesses: () => Guesses;
-  markAsPlayed: () => void;
-  markAsWon: () => void;
-  getPlayed: () => boolean;
-  updateKeywords: (arg0: string | null) => void;
-  setGotd: (arg0: Gotd) => void;
-  setImageUrl: (arg0: string) => void;
-  getName: () => string;
-  setName: (arg0: string) => void;
-  fetchGotd: () => void;
-  resetPlay: () => void;
-}
+const modeId = 3;
 
 export const initialState = {
   gotdId: 0,
@@ -44,7 +20,79 @@ export const initialState = {
   played: false,
   won: false,
   numKeywords: 0,
-  mode: null as unknown as Mode,
+};
+
+export const socket = io(`${process.env.serverUrl}`);
+
+const wsConnect = () => {
+  if (!zKeywords.getState().played) {
+    socket.on("connect", () => {
+      console.info("Connected to WebSocket server");
+    });
+
+    socket.on(
+      `daily-res-${modeId}`,
+      (data: {
+        clientId: string;
+        answer: boolean;
+        name: string;
+        guess: Guess;
+        [key: string]: unknown;
+      }) => {
+        checkAnswer(data.answer, data.guess, data.keyword as string);
+        zKeywords.setState({ name: data.name });
+        zKeywords.setState({ imageUrl: data.imageUrl as string });
+      }
+    );
+
+    socket.on("daily-stats-response", (data: { message: string }) => {
+      console.info(data.message);
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off(`daily-res-${modeId}`);
+      socket.off("daily-stats-response");
+    };
+  }
+};
+
+const checkAnswer = (answer: boolean, guess: Guess, keyword: string) => {
+  const getState = () => {
+    return zKeywords.getState();
+  };
+
+  if (answer) {
+    getState().markAsWon();
+    getState().markAsPlayed();
+    saveDailyStats({
+      gotdId: getState().gotdId,
+      modeId,
+      attempts: Math.min(getState().guesses.length + 1, getState().lives),
+      guesses: getState().guesses,
+      found: true,
+    });
+  } else {
+    getState().updateGuesses(guess);
+    getState().updateLivesLeft();
+
+    if (getState().livesLeft === 0) {
+      getState().markAsPlayed();
+      saveDailyStats({
+        gotdId: getState().gotdId,
+        modeId,
+        attempts: getState().guesses.length,
+        guesses: getState().guesses,
+        found: false,
+      });
+    } else {
+      getState().updateKeywords(keyword);
+    }
+  }
+};
+
+const saveDailyStats = (data: DailyStats) => {
+  socket.emit("daily-stats", data);
 };
 
 const zKeywords = create(
@@ -86,7 +134,6 @@ const zKeywords = create(
           lives,
           livesLeft: lives,
           numKeywords,
-          mode: modes,
         });
       },
       setImageUrl: (imageUrl: string) => {
@@ -119,5 +166,6 @@ const zKeywords = create(
 );
 
 zKeywords.getState().fetchGotd();
+wsConnect();
 
 export default zKeywords;

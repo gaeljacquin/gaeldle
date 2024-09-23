@@ -1,17 +1,15 @@
 'use client';
 
 import Image from "next/image";
-import { useEffect, useCallback } from 'react'
-import useArtworkSlice from '~/src/stores/artwork';
+import zArtwork, { socket } from '@/stores/artwork';
 import { Button } from "@/components/ui/button"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
 import DisplayCountdown from "@/components/display-countdown";
-import { DailyStats } from "@/types/daily-stats";
 import ComingSoon from "@/components/coming-soon";
 import LivesLeftComp from "@/components/lives-left";
 import GamesForm from "@/components/games-form";
-import { GamesFormInit, imgAlt, imgHeight, imgWidth, SocketInit } from "@/lib/constants";
+import { GamesFormInit, imgAlt, imgHeight, imgWidth } from "@/lib/constants";
 import ModesHeader from "@/components/modes-header";
 import Hearts from "@/components/hearts";
 import zGames from "~/src/stores/games";
@@ -20,80 +18,13 @@ import zModes from "~/src/stores/modes";
 export default function Artwork() {
   const {
     livesLeft, lives, gotdId, played, won, guesses, pixelation, artworkUrl, imageUrl,
-    updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, setImageUrl, setPixelation, removePixelation, markAsPlayed, getPlayed, markAsWon, setName, getName,
-  } = useArtworkSlice();
+    getLivesLeft, getName,
+  } = zArtwork();
   const { games } = zGames();
   const { getMode } = zModes();
   const mode = getMode(2);
   const form = GamesFormInit();
-  const socket = SocketInit();
   const readySetGo = games && gotdId && mode
-
-  const saveDailyStats = useCallback((data: DailyStats) => {
-    socket.emit('daily-stats', data);
-  }, [socket]);
-
-  const checkAnswer = useCallback((answer: boolean) => {
-    if (!form.getValues().game || !mode) {
-      return null;
-    }
-
-    if (answer) {
-      markAsWon()
-      markAsPlayed()
-      removePixelation()
-      saveDailyStats({
-        gotdId,
-        modeId: mode.id,
-        attempts: Math.min(getGuesses().length + 1, lives),
-        guesses,
-        found: true,
-      })
-    } else {
-      const { igdbId, name } = form.getValues().game;
-      updateGuesses({ igdbId, name });
-      setPixelation();
-      updateLivesLeft();
-
-      if (getLivesLeft() === 0) {
-        markAsPlayed()
-        removePixelation()
-        saveDailyStats({
-          gotdId,
-          modeId: mode.id,
-          attempts: getGuesses().length,
-          guesses: getGuesses(),
-          found: false,
-        })
-      }
-    }
-
-    form.reset();
-  }, [form, markAsWon, markAsPlayed, removePixelation, saveDailyStats, gotdId, mode, getGuesses, lives, guesses, updateGuesses, setPixelation, updateLivesLeft, getLivesLeft])
-
-  useEffect(() => {
-    if (!getPlayed()) {
-      socket.on('connect', () => {
-        console.info('Connected to WebSocket server');
-      });
-
-      socket.on('daily-res-2', (data: { clientId: string, answer: boolean, name: string, [key: string]: unknown }) => {
-        checkAnswer(data.answer);
-        setName(data.name);
-        setImageUrl(data.imageUrl as string);
-      });
-
-      socket.on('daily-stats-response', (data: { message: string }) => {
-        console.info(data.message);
-      });
-
-      return () => {
-        socket.off('connect');
-        socket.off('daily-res-2');
-        socket.off('daily-stats-response');
-      };
-    }
-  }, [getPlayed, socket, checkAnswer, setName, mode, setImageUrl]);
 
   if (!readySetGo) {
     return <Placeholders />

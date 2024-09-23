@@ -1,39 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Guess, Guesses } from "@/types/games";
+import { io } from "socket.io-client";
+import { Guess } from "@/types/games";
 import { Gotd } from "@/types/gotd";
-import { Mode } from "@/types/modes";
 import getIt from "~/src/lib/get-it";
+import { DailyStats } from "~/src/types/daily-stats";
+import { ZArtwork } from "~/src/types/zartwork";
 
-export interface ZArtwork {
-  gotdId: number;
-  artworkUrl: string;
-  imageUrl: string;
-  name: string;
-  lives: number;
-  livesLeft: number;
-  guesses: Guesses;
-  played: boolean;
-  won: boolean;
-  pixelation: number;
-  pixelationStep: number;
-  mode: Mode;
-  updateLivesLeft: () => void;
-  updateGuesses: (arg0: Guess | null) => void;
-  getLivesLeft: () => number;
-  getGuesses: () => Guesses;
-  markAsPlayed: () => void;
-  markAsWon: () => void;
-  getPlayed: () => boolean;
-  setPixelation: () => void;
-  removePixelation: () => void;
-  setGotd: (arg0: Gotd) => void;
-  setImageUrl: (arg0: string) => void;
-  getName: () => string;
-  setName: (arg0: string) => void;
-  fetchGotd: () => void;
-  resetPlay: () => void;
-}
+const modeId = 2;
 
 export const initialState = {
   gotdId: 0,
@@ -47,10 +21,81 @@ export const initialState = {
   won: false,
   pixelation: 0,
   pixelationStep: 0,
-  mode: null as unknown as Mode,
 };
 
-const useArtworkSlice = create(
+export const socket = io(`${process.env.serverUrl}`);
+
+const wsConnect = () => {
+  if (!zArtwork.getState().played) {
+    socket.on("connect", () => {
+      console.info("Connected to WebSocket server");
+    });
+
+    socket.on(
+      `daily-res-${modeId}`,
+      (data: {
+        clientId: string;
+        answer: boolean;
+        name: string;
+        guess: Guess;
+      }) => {
+        checkAnswer(data.answer, data.guess);
+        zArtwork.setState({ name: data.name });
+      }
+    );
+
+    socket.on("daily-stats-response", (data: { message: string }) => {
+      console.info(data.message);
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off(`daily-res-${modeId}`);
+      socket.off("daily-stats-response");
+    };
+  }
+};
+
+const checkAnswer = (answer: boolean, guess: Guess) => {
+  const getState = () => {
+    return zArtwork.getState();
+  };
+
+  if (answer) {
+    getState().markAsWon();
+    getState().markAsPlayed();
+    getState().removePixelation();
+    saveDailyStats({
+      gotdId: getState().gotdId,
+      modeId,
+      attempts: Math.min(getState().guesses.length + 1, getState().lives),
+      guesses: getState().guesses,
+      found: true,
+    });
+  } else {
+    getState().updateGuesses(guess);
+    getState().setPixelation();
+    getState().updateLivesLeft();
+
+    if (getState().livesLeft === 0) {
+      getState().markAsPlayed();
+      getState().removePixelation();
+      saveDailyStats({
+        gotdId: getState().gotdId,
+        modeId,
+        attempts: getState().guesses.length,
+        guesses: getState().guesses,
+        found: false,
+      });
+    }
+  }
+};
+
+const saveDailyStats = (data: DailyStats) => {
+  socket.emit("daily-stats", data);
+};
+
+const zArtwork = create(
   persist<ZArtwork>(
     (set, get) => ({
       ...initialState,
@@ -91,7 +136,6 @@ const useArtworkSlice = create(
           livesLeft: lives,
           pixelation,
           pixelationStep,
-          mode: modes,
         });
       },
       setImageUrl: (imageUrl: string) => {
@@ -123,6 +167,7 @@ const useArtworkSlice = create(
   )
 );
 
-useArtworkSlice.getState().fetchGotd();
+zArtwork.getState().fetchGotd();
+wsConnect();
 
-export default useArtworkSlice;
+export default zArtwork;

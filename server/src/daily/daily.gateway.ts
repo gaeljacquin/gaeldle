@@ -92,15 +92,18 @@ export class DailyGateway
     const igdbIdToday = gotd.igdbId;
     const keywords = gotd.games.keywords as Others;
     const igdbId = data.game.igdbId;
+    const name2 = data.game.name;
     const lives = gotd.modes.lives;
     const livesLeft = data.livesLeft;
     const answer = igdbId === igdbIdToday;
+    const finished = answer || livesLeft === 0;
+    const gameOver = !answer && livesLeft === 0;
     const game = await this.gamesService.dbFindOne(igdbId);
     let name = null;
     let nextKeyword = null;
     let imageUrl = '';
 
-    if (answer || livesLeft === 0) {
+    if (finished) {
       name = gotd.games.name;
       imageUrl = gotd.games.imageUrl as string;
       modeMap.delete(clientId);
@@ -111,6 +114,10 @@ export class DailyGateway
       answer,
       name,
       imageUrl,
+      guess: {
+        name: name2,
+        igdbId,
+      },
     };
 
     switch (modeId) {
@@ -132,67 +139,74 @@ export class DailyGateway
         emit = { ...emit, ...{ keyword: nextKeyword } };
         break;
       case 4:
-        const specs = await this.checkSpecs(game, igdbIdToday);
-        emit = { ...emit, ...{ specs } };
+        const specs = await this.checkSpecs(game, igdbIdToday, answer);
+        let specsFinal;
+
+        if (gameOver) {
+          specsFinal = await this.checkSpecs(gotd.games, igdbIdToday, true);
+        }
+
+        emit = { ...emit, ...{ specs }, ...{ specsFinal } };
         break;
     }
 
     client.emit(`daily-res-${modeId}`, emit);
   }
 
-  private async checkSpecs(game, igdbIdToday) {
+  private async checkSpecs(game, igdbIdToday, final = false) {
     const gotd = await this.gamesService.dbFindOne(igdbIdToday);
-    const gameInitialReleaseYear = game.release_dates.reduce(
-      (min, current) => (current.y < min ? current.y : min),
-      game.release_dates[0].y,
-    );
-    const gotdInitialReleaseYear = (
-      gotd.release_dates as { y: number; [key: string]: unknown }[]
-    ).reduce(
-      (min, current) => (current.y < min ? current.y : min),
-      gotd.release_dates[0].y,
-    );
+    const gameFirstReleaseYear = new Date(
+      game.info.first_release_date * 1000,
+    ).getFullYear();
+    const gotdFirstReleaseYear = new Date(
+      gotd.info['first_release_date'] * 1000,
+    ).getFullYear();
     const specs = {
       imageUrl: game.imageUrl,
       platforms: {
         values: game.platforms?.map((item) => item.name),
-        specscn: this.compare(game.platforms, gotd.platforms),
+        specscn: final
+          ? bgCorrect
+          : this.compare(game.platforms, gotd.platforms),
       },
       genres: {
         values: game.genres?.map((item) => item.name),
-        specscn: this.compare(game.genres, gotd.genres),
+        specscn: final ? bgCorrect : this.compare(game.genres, gotd.genres),
       },
       themes: {
         values: game.themes?.map((item) => item.name),
-        specscn: this.compare(game.themes, gotd.themes),
+        specscn: final ? bgCorrect : this.compare(game.themes, gotd.themes),
       },
       release_dates: {
-        value: gameInitialReleaseYear, // return initial release year if multi-platform
+        value: gameFirstReleaseYear, // return initial release year if multi-platform
         specscn:
-          gameInitialReleaseYear === gotdInitialReleaseYear
+          gameFirstReleaseYear === gotdFirstReleaseYear || final
             ? bgCorrect
             : bgIncorrect,
         arrowDir:
-          gameInitialReleaseYear === gotdInitialReleaseYear
+          gameFirstReleaseYear === gotdFirstReleaseYear
             ? ''
-            : gameInitialReleaseYear > gotdInitialReleaseYear
+            : gameFirstReleaseYear > gotdFirstReleaseYear
               ? 'down'
               : 'up',
       },
       game_modes: {
         values: game.game_modes?.map((item) => item.name),
-        specscn: this.compare(game.game_modes, gotd.game_modes),
+        specscn: final
+          ? bgCorrect
+          : this.compare(game.game_modes, gotd.game_modes),
       },
       game_engines: {
         values: game.game_engines?.map((item) => item.name),
-        specscn: this.compare(game.game_engines, gotd.game_engines),
+        specscn: final
+          ? bgCorrect
+          : this.compare(game.game_engines, gotd.game_engines),
       },
       player_perspectives: {
         values: game.player_perspectives?.map((item) => item.name),
-        specscn: this.compare(
-          game.player_perspectives,
-          gotd.player_perspectives,
-        ),
+        specscn: final
+          ? bgCorrect
+          : this.compare(game.player_perspectives, gotd.player_perspectives),
       },
     };
 

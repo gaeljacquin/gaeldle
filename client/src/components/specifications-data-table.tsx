@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import {
   ColumnDef,
@@ -285,7 +285,7 @@ export default function SpecificationsDataTable({ guesses }: { guesses: GuessWit
     },
   })
 
-  function getColumnValues(columnId: string) {
+  const getColumnValues = useCallback((columnId: string) => {
     const column = table.getColumn(columnId);
 
     if (!column) {
@@ -293,37 +293,40 @@ export default function SpecificationsDataTable({ guesses }: { guesses: GuessWit
     }
 
     return table.getRowModel().rows.map(row => row.getValue(columnId));
-  }
+  }, [table])
 
   const columnIds = table.getAllColumns().map(column => column.id);
-  columnIds.map((columnId: string) => {
-    const columnValues = getColumnValues(columnId);
 
-    if (!getSummary()[columnId as keyof Specs]) {
-      setSummary({
-        ...summary,
-        [columnId as keyof Specs]: columnValues[0]
-      });
-    } else {
-      columnValues.map((columnValue: unknown) => {
-        const spec: Spec = columnValue as Spec;
+  useEffect(() => {
+    columnIds.map((columnId: string) => {
+      const columnValues = getColumnValues(columnId);
 
-        if ((getSummary()[columnId as keyof Specs] as Spec).specscn === bgIncorrect && (
-          spec.specscn === bgPartial || spec.specscn === bgCorrect
-        )) {
-          setSummary({
-            ...summary,
-            [columnId as keyof Specs]: spec
-          });
-        } else if ((getSummary()[columnId as keyof Specs] as Spec).specscn === bgPartial && spec.specscn === bgCorrect) {
-          setSummary({
-            ...summary,
-            [columnId as keyof Specs]: spec
-          });
-        }
-      })
-    }
-  })
+      if (!getSummary()[columnId as keyof Specs]) {
+        setSummary({
+          ...summary,
+          [columnId as keyof Specs]: columnValues[0]
+        });
+      } else {
+        columnValues.map((columnValue: unknown) => {
+          const spec: Spec = columnValue as Spec;
+
+          if ((getSummary()[columnId as keyof Specs] as Spec).specscn === bgIncorrect && (
+            spec.specscn === bgPartial || spec.specscn === bgCorrect
+          )) {
+            setSummary({
+              ...summary,
+              [columnId as keyof Specs]: spec
+            });
+          } else if ((getSummary()[columnId as keyof Specs] as Spec).specscn === bgPartial && spec.specscn === bgCorrect) {
+            setSummary({
+              ...summary,
+              [columnId as keyof Specs]: spec
+            });
+          }
+        })
+      }
+    })
+  }, [columnIds, getColumnValues, getSummary, setSummary, summary])
 
   return (
     <div className="w-full">

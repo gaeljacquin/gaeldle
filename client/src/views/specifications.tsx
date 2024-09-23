@@ -1,109 +1,33 @@
 'use client'
 
 import Image from "next/image";
-import { useEffect, useCallback, useState } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import Placeholders from '@/views/placeholders'
 import DisplayCountdown from "@/components/display-countdown";
-import { DailyStats } from "@/types/daily-stats";
 import ComingSoon from "@/components/coming-soon";
 import LivesLeftComp from "@/components/lives-left";
-import zSpecs from "@/stores/specifications";
-import { Specs } from "@/types/games";
+import zSpecs, { socket } from "@/stores/specifications";
 import GamesForm from "@/components/games-form";
 import Hearts from "@/components/hearts";
-import { GamesFormInit, SocketInit } from "@/lib/constants";
 import SpecificationsDataTable from "@/components/specifications-data-table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SummaryDataTable from "@/components/summary-data-table";
 import zGames from "~/src/stores/games";
 import zModes from "~/src/stores/modes";
+import { GamesFormInit } from "~/src/lib/constants";
 
 export default function Specifications() {
   const {
     name, livesLeft, lives, gotdId, played, won, guesses, imageUrl,
-    updateLivesLeft, updateGuesses, getLivesLeft, getGuesses, setImageUrl, markAsPlayed, getPlayed, markAsWon, setName, getName, setSummary,
+    getLivesLeft, getName,
   } = zSpecs();
   const { games } = zGames();
   const { getMode } = zModes();
   const mode = getMode(4);
-  const [currentTab, setCurrentTab] = useState('guesses')
+  const [currentTab, setCurrentTab] = useState('guesses');
   const form = GamesFormInit();
-  const socket = SocketInit();
   const readySetGo = games && gotdId && mode;
-
-  const saveDailyStats = useCallback((data: DailyStats) => {
-    socket.emit('daily-stats', data);
-  }, [socket]);
-
-  const checkAnswer = useCallback((answer: boolean, specs: Specs) => {
-    if (!form.getValues().game) {
-      return null;
-    }
-
-    let dsGuesses;
-
-    if (answer) {
-      dsGuesses = guesses.map(({ igdbId, name }) => ({ igdbId, name }));
-      markAsWon()
-      markAsPlayed()
-      saveDailyStats({
-        gotdId,
-        modeId: mode!.id,
-        attempts: Math.min(getGuesses().length + 1, lives),
-        guesses: dsGuesses,
-        found: true,
-      })
-      setSummary(specs)
-    } else {
-      const { igdbId, name } = form.getValues().game;
-      updateGuesses({
-        igdbId,
-        name,
-        ...specs,
-      });
-      updateLivesLeft();
-
-      if (getLivesLeft() === 0) {
-        dsGuesses = getGuesses().map(({ igdbId, name }) => ({ igdbId, name }));
-        markAsPlayed()
-        saveDailyStats({
-          gotdId,
-          modeId: mode!.id,
-          attempts: getGuesses().length,
-          guesses: dsGuesses,
-          found: false,
-        })
-        setSummary(specs)
-      }
-    }
-
-    form.reset();
-  }, [form, guesses, markAsWon, markAsPlayed, saveDailyStats, gotdId, mode, getGuesses, lives, updateGuesses, updateLivesLeft, getLivesLeft, setSummary])
-
-  useEffect(() => {
-    if (!getPlayed()) {
-      socket.on('connect', () => {
-        console.info('Connected to WebSocket server');
-      });
-
-      socket.on('daily-res-4', (data: { clientId: string, answer: boolean, name: string, imageUrl: string, specs: Specs }) => {
-        checkAnswer(data.answer, data.specs);
-        setName(data.name);
-        setImageUrl(data.imageUrl);
-      });
-
-      socket.on('daily-stats-response', (data: { message: string }) => {
-        console.info(data.message);
-      });
-
-      return () => {
-        socket.off('connect');
-        socket.off('daily-res-4');
-        socket.off('daily-stats-response');
-      };
-    }
-  }, [getPlayed, socket, checkAnswer, setName, mode, setImageUrl]);
 
   if (!readySetGo) {
     return <Placeholders />
@@ -158,7 +82,7 @@ export default function Specifications() {
           </div>
         </div>
 
-        {guesses.length > 0 &&
+        {(guesses.length > 0 || won) &&
           <Tabs defaultValue="guesses" onValueChange={(value) => setCurrentTab(value)}>
             <div className="text-center">
               <TabsList>
@@ -168,7 +92,10 @@ export default function Specifications() {
             </div>
             <TabsContent value="guesses">
               <div className="flex flex-col items-center">
-                <SpecificationsDataTable guesses={guesses} />
+                {guesses.length > 0 ?
+                  <SpecificationsDataTable guesses={guesses} />
+                  : <p className="font-sm font-semibold mt-8">Flawless victory! 😎</p>
+                }
               </div>
             </TabsContent>
             <TabsContent value="summary">

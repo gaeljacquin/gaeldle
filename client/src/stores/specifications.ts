@@ -1,37 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { GuessWithSpecs, Spec } from "@/types/games";
+import { io } from "socket.io-client";
+import { Guess, GuessWithSpecs, Spec, Specs } from "@/types/games";
 import { Gotd } from "@/types/gotd";
-import { Mode } from "@/types/modes";
 import getIt from "~/src/lib/get-it";
+import { ZSpecs } from "~/src/types/zspecs";
+import { DailyStats } from "@/types/daily-stats";
 
-export interface ZSpecs {
-  gotdId: number;
-  imageUrl: string;
-  name: string;
-  lives: number;
-  livesLeft: number;
-  guesses: GuessWithSpecs[];
-  played: boolean;
-  won: boolean;
-  summary: Partial<GuessWithSpecs>;
-  mode: Mode;
-  updateLivesLeft: () => void;
-  updateGuesses: (arg0: GuessWithSpecs | null) => void;
-  getLivesLeft: () => number;
-  getGuesses: () => GuessWithSpecs[];
-  markAsPlayed: () => void;
-  markAsWon: () => void;
-  getPlayed: () => boolean;
-  setGotd: (arg0: Gotd) => void;
-  setImageUrl: (arg0: string) => void;
-  getName: () => string;
-  setName: (arg0: string) => void;
-  getSummary: () => Partial<GuessWithSpecs>;
-  setSummary: (arg0: Partial<GuessWithSpecs>) => void;
-  fetchGotd: () => void;
-  resetPlay: () => void;
-}
+const modeId = 4;
 
 export const initialState = {
   gotdId: 0,
@@ -52,7 +28,96 @@ export const initialState = {
     release_dates: null as unknown as Spec,
     themes: null as unknown as Spec,
   },
-  mode: null as unknown as Mode,
+};
+
+export const socket = io(`${process.env.serverUrl}`);
+
+const wsConnect = () => {
+  if (!zSpecs.getState().played) {
+    socket.on("connect", () => {
+      console.info("Connected to WebSocket server");
+    });
+
+    socket.on(
+      `daily-res-${modeId}`,
+      (data: {
+        clientId: string;
+        answer: boolean;
+        name: string;
+        imageUrl: string;
+        guess: Guess;
+        specs: Specs;
+        specsFinal?: Specs;
+      }) => {
+        checkAnswer(data.answer, data.guess, data.specs);
+        zSpecs.getState().setName(data.name);
+        zSpecs.getState().setImageUrl(data.imageUrl);
+        zSpecs.getState().setSummary(data.specs);
+        data.specsFinal && zSpecs.getState().setSummary(data.specsFinal);
+      }
+    );
+
+    socket.on("daily-stats-response", (data: { message: string }) => {
+      console.info(data.message);
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off(`daily-res-${modeId}`);
+      socket.off("daily-stats-response");
+    };
+  }
+};
+
+const checkAnswer = (answer: boolean, guess: Guess, specs: Specs) => {
+  const getState = () => {
+    return zSpecs.getState();
+  };
+
+  let dsGuesses;
+
+  if (answer) {
+    dsGuesses = getState().guesses.map(({ igdbId, name }) => ({
+      igdbId,
+      name,
+    }));
+    getState().markAsWon();
+    getState().markAsPlayed();
+    saveDailyStats({
+      gotdId: getState().gotdId,
+      modeId,
+      attempts: Math.min(getState().guesses.length + 1, getState().lives),
+      guesses: dsGuesses,
+      found: true,
+    });
+  } else {
+    const { igdbId, name } = guess;
+    getState().updateGuesses({
+      igdbId,
+      name,
+      ...specs,
+    });
+    getState().updateLivesLeft();
+
+    if (getState().livesLeft === 0) {
+      dsGuesses = getState().guesses.map(({ igdbId, name }) => ({
+        igdbId,
+        name,
+      }));
+      getState().markAsPlayed();
+      saveDailyStats({
+        gotdId: getState().gotdId,
+        modeId: modeId,
+        attempts: getState().guesses.length,
+        guesses: dsGuesses,
+        found: false,
+      });
+    }
+  }
+};
+
+const saveDailyStats = (data: DailyStats) => {
+  socket.emit("daily-stats", data);
 };
 
 const zSpecs = create(
@@ -86,7 +151,6 @@ const zSpecs = create(
           imageUrl,
           lives,
           livesLeft: lives,
-          mode: modes,
         });
       },
       setImageUrl: (imageUrl: string) => {
@@ -123,5 +187,6 @@ const zSpecs = create(
 );
 
 zSpecs.getState().fetchGotd();
+wsConnect();
 
 export default zSpecs;

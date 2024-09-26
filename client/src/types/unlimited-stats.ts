@@ -1,10 +1,13 @@
-import { Guesses } from "./games";
+import { Games } from "./games";
 
 export type UnlimitedStats = {
-  igdbId: number;
+  igdbId?: number;
   modeId: number;
   attempts: number;
-  guesses: Guesses;
   found: boolean;
-  info?: unknown[];
+  info?: unknown;
+};
+
+export type TriviaryStats = UnlimitedStats & {
+  guesses: Games[];
 };

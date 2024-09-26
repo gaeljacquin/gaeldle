@@ -1,12 +1,13 @@
-import { gameOverText, victoryText } from "@/lib/constants";
+import { textGameOver, textVictory, textFlawlessVictory } from "@/lib/constants";
 
 type LivesLeftCompProps = {
   played: boolean
   won: boolean
   livesLeft: number
+  lives: number
 }
 
-export default function LivesLeftComp({ played, won, livesLeft }: LivesLeftCompProps) {
+export default function LivesLeftComp({ played, won, livesLeft, lives }: LivesLeftCompProps) {
   let text = "";
   let classes = "-mt-3 -mb-7";
 
@@ -21,10 +22,12 @@ export default function LivesLeftComp({ played, won, livesLeft }: LivesLeftCompP
 
     text += " remaining";
   } else {
-    if (won) {
-      text = victoryText;
+    if (livesLeft === lives) {
+      text = textFlawlessVictory;
+    } else if (won) {
+      text = textVictory;
     } else {
-      text = gameOverText;
+      text = textGameOver;
     }
 
     classes += " text-xl font-semibold";

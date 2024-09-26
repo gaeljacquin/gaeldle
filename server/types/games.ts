@@ -21,6 +21,9 @@ export type Game = Guess & {
   player_perspectives?: Others;
   release_dates?: Others;
   themes?: Others;
+  frd?: number;
+  frdFormatted: string;
+  correctIndex?: number | null;
 };
 
 export type Guesses = (Guess | null)[];

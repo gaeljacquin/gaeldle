@@ -4,8 +4,9 @@ import { useForm } from "react-hook-form";
 import io, { Socket } from "socket.io-client";
 import { z } from "zod";
 
-const victoryText = "You got it! 😀";
-const gameOverText = "Game over 😭";
+const textVictory = "You got it! 😀";
+const textGameOver = "Game over 😭";
+const textFlawlessVictory = "Flawless victory! 😎";
 const imgWidth = 600;
 const imgHeight = 600;
 const imgAlt = (alt: string) => {
@@ -44,6 +45,16 @@ const SocketInit = () => {
 const bgIncorrect = "bg-gael-red";
 const bgPartial = "bg-yellow-600";
 const bgCorrect = "bg-gael-green";
+const bgOther1 = "bg-gael-blue";
+const bgOther2 = "bg-indigo-500";
+
+const cardImgSize = 128;
+const cardImgClasses = "w-full h-48 object-cover";
+
+const textSubmit = "Submit";
+const textAlreadyGuessed = "Already guessed";
+const textTryAgain = "Try again";
+const textStartingPosition = "Starting position";
 
 const currentDate = new Date();
 const currentYear = currentDate.getFullYear();
@@ -54,9 +65,22 @@ const differenceInMs = currentDate.getTime() - startDate.getTime();
 const differenceInYears = differenceInMs / (1000 * 60 * 60 * 24 * 365.25);
 const yoe = Math.floor(differenceInYears);
 
+// Badge groups
+const levels = [
+  { text: "Easy", backgroundClass: bgCorrect },
+  { text: "Moderate", backgroundClass: bgPartial },
+  { text: "Hard", backgroundClass: bgIncorrect },
+];
+const triviaryLegend = [
+  { text: "Incorrect", backgroundClass: bgIncorrect },
+  { text: "Found then moved", backgroundClass: bgPartial },
+  { text: "Correct", backgroundClass: bgCorrect },
+];
+
 export {
-  victoryText,
-  gameOverText,
+  textVictory,
+  textGameOver,
+  textFlawlessVictory,
   imgWidth,
   imgHeight,
   imgAlt,
@@ -66,6 +90,16 @@ export {
   bgIncorrect,
   bgPartial,
   bgCorrect,
+  bgOther1,
+  bgOther2,
   currentYear,
   yoe,
+  cardImgSize,
+  cardImgClasses,
+  textSubmit,
+  textAlreadyGuessed,
+  textTryAgain,
+  textStartingPosition,
+  levels,
+  triviaryLegend,
 };

@@ -10,7 +10,8 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
-import Levels from "~/src/components/levels"
+import MyBadgeGroup from "~/src/components/my-badge-group"
+import { levels } from '@/lib/constants'
 
 const DynamicModes = dynamic(() => import('@/components/modes'), {
   ssr: false,
@@ -28,7 +29,7 @@ export default function ModesDrawer() {
         <DrawerFooter>
           <>
             <DynamicModes isInDrawer={true} />
-            <Levels />
+            <MyBadgeGroup group={levels} />
           </>
           <DrawerClose asChild>
             <div className="mx-auto w-full max-w-sm flex justify-center">

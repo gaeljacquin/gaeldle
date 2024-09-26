@@ -10,4 +10,9 @@ export class GamesController {
   findAll() {
     return this.gamesService.findAll();
   }
+
+  @Get('/test')
+  findTest() {
+    return this.gamesService.dbFindRandom(10, 15);
+  }
 }

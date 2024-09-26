@@ -1,14 +1,14 @@
 'use client'
 
-import { CountdownProvider, useCountdown } from "@/contexts/countdownContext";
+import { CountdownProvider, useCountdown } from "@/contexts/countdown";
 
 const CountdownDisplay = () => {
-  const countdownRemaining = useCountdown();
+  const countdown = useCountdown();
 
   return (
     <>
       <p className="text-md font-semibold">
-        {countdownRemaining}
+        {countdown}
       </p>
     </>
   );

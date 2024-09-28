@@ -25,11 +25,7 @@ type generateButtonProps = {
   buttonKey: string
 }
 
-type ModesProps = {
-  isInDrawer: boolean
-}
-
-export default function Modes({ isInDrawer }: ModesProps) {
+export default function Modes() {
   const { modes } = zModes();
   const [clickedButton, setClickedButton] = useState<string | null>(null)
 
@@ -70,13 +66,7 @@ export default function Modes({ isInDrawer }: ModesProps) {
               href={`/${slug}`}
               aria-disabled={isDisabled && !isClicked}
             >
-              {isInDrawer ? (
-                <DrawerClose asChild>
-                  {buttonMarkup()}
-                </DrawerClose>
-              ) :
-                buttonMarkup()
-              }
+              {buttonMarkup()}
             </Link>
           </TooltipTrigger>
           <TooltipContent>

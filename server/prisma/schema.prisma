@@ -143,7 +143,7 @@ model categories {
   label       String?   @db.VarChar
   description String?   @db.VarChar
   active      Boolean   @default(false)
-  created_at  DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime? @default(now()) @db.Timestamptz(6)
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
   modes       modes[]
 }

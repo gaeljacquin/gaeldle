@@ -3,9 +3,9 @@ import { devtools, persist } from "zustand/middleware";
 import { io } from "socket.io-client";
 import { Guess, GuessWithSpecs, Spec, Specs } from "@/types/games";
 import { Gotd } from "@/types/gotd";
-import getIt from "~/src/lib/get-it";
 import { ZSpecs } from "~/src/types/zspecs";
 import { DailyStats } from "@/types/daily-stats";
+import { absoluteUrl } from "@/lib/client-constants";
 
 const modeId = 4;
 
@@ -166,7 +166,8 @@ const zSpecs = create(
       getSummary: () => get().summary,
       fetchGotd: async () => {
         try {
-          const res = await getIt("specifications");
+          const endpoint = absoluteUrl("/api/specifications");
+          const res = await fetch(endpoint);
           const { gotd } = await res.json();
           const currentGotdId = get().gotdId;
 

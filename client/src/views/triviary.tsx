@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation';
 import { useState } from "react"
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -21,18 +22,19 @@ import {
 } from "@/components/ui/collapsible"
 import GameCard from "@/components/game-card";
 import MyBadgeGroup from "~/src/components/my-badge-group"
-import { triviaryLegend } from '@/lib/constants'
+import { triviaryLegend } from '~/src/lib/client-constants'
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import LivesLeftComp from '@/components/lives-left';
 
 export default function Triviary() {
+  const pathname = usePathname();
   const {
     timeline, livesLeft, lives, played, won, goodTimeline, guesses, alreadyGuessed, submitButtonText, dummyOnLoad,
     updateTimeline, submitAnswer, setLastGuess, resetPlay,
   } = zTriviary();
-  const { getMode } = zModes();
-  const mode = getMode(8);
+  const { getModeBySlug } = zModes();
+  const mode = getModeBySlug(pathname);
   const [attemptsCollapsibleOpen, setAttemptsCollapsibleOpen] = useState(false)
   const readySetGo = mode && timeline.length > 0;
   const gameOver = played && !won;

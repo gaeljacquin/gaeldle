@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/hover-card"
 import { GuessWithSpecs, Spec, Specs } from "@/types/games"
 import GenArrow from "@/components/gen-arrow"
-import { bgCorrect, bgIncorrect, bgPartial, imgHeight, imgWidth } from "../lib/constants"
+import { bgCorrect, bgIncorrect, bgPartial, imgHeight, imgWidth } from "../lib/client-constants"
 import zSpecs from "~/src/stores/specifications"
 
 const columns: ColumnDef<GuessWithSpecs>[] = [

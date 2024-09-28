@@ -10,10 +10,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import zModes from "@/stores/modes"
+import zModes from "@/stores/modes";
+import zCategories from "@/stores/categories";
+import { Category } from "@/types/categories";
+import { Mode } from "@/types/modes";
 
 export default function ModesNav() {
   const { modes } = zModes();
+  const { categories } = zCategories();
 
   return (
     <DropdownMenu>
@@ -26,27 +30,23 @@ export default function ModesNav() {
         </Link>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Daily</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <Link href="/classic">Classic</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Link href="/keywords">Keywords</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Link href="/specifications">Specifications</Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuLabel>Unlimited</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <Link href="/triviary">Trivia (Release Date)</Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
+        {categories.map((category: Category) => (
+          category._count.modes > 0 &&
+          <div key={category.id}>
+            <DropdownMenuLabel>{category.label}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              {modes.filter((mode: Mode) => mode.categoryId === category.id).map((mode: Mode, index: number) => {
+                return (
+                  <DropdownMenuItem key={mode.mode + '-' + index}>
+                    <Link href={`/${mode.mode}`}>{mode.label}</Link>
+                  </DropdownMenuItem>
+                )
+              })}
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+          </div>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )

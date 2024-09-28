@@ -4,11 +4,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ExternalLinkIcon } from "@radix-ui/react-icons";
 import LottieDynamic from '@/components/lottie-dynamic';
-import { currentYear } from '~/src/lib/constants';
-
+import { currentYear } from '~/src/lib/client-constants';
+import zModes from "@/stores/modes";
+import zCategories from "@/stores/categories";
+import { Category } from "@/types/categories";
+import { Mode } from "@/types/modes";
 
 export default function Footer() {
   const pathname = usePathname();
+  const { modes } = zModes();
+  const { categories } = zCategories();
   const navLink = (path: string, text: string) => {
     const markup = (
       <Link
@@ -34,28 +39,21 @@ export default function Footer() {
             </li>
           </ul>
         </div>
-        <div className="grid gap-1">
-          <ul className="flex flex-col">
-            <h3 className="font-semibold">Daily Modes</h3>
-            <li>
-              {navLink("/classic", "Classic")}
-            </li>
-            <li>
-              {navLink("/keywords", "Keywords")}
-            </li>
-            <li>
-              {navLink("/specifications", "Specifications")}
-            </li>
-          </ul>
-        </div>
-        <div className="grid gap-1">
-          <ul className="flex flex-col">
-            <h3 className="font-semibold">Unlimited Modes</h3>
-            <li>
-              {navLink("/triviary", "Trivia (Release Date)")}
-            </li>
-          </ul>
-        </div>
+        {categories.map((category: Category) => (
+          category._count.modes > 0 &&
+          <div className="grid gap-1" key={category.id}>
+            <ul className="flex flex-col">
+              <h3 className="font-semibold">{category.label} Modes</h3>
+              {modes.filter((mode: Mode) => mode.categoryId === category.id).map((mode: Mode, index: number) => {
+                return (
+                  <li key={mode.mode + '-' + index}>
+                    {navLink(`/${mode.mode}`, mode.label)}
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ))}
         <div className="grid gap-1">
           <ul className="flex flex-col">
             <h3 className="font-semibold">Legal</h3>

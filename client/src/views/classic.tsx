@@ -1,6 +1,7 @@
 'use client';
 
 import Image from "next/image";
+import { usePathname } from 'next/navigation';
 import zClassic, { socket } from '@/stores/classic';
 import zGames from '@/stores/games';
 import { Button } from "@/components/ui/button"
@@ -10,19 +11,20 @@ import DisplayCountdown from "@/components/display-countdown";
 import ComingSoon from "@/components/coming-soon";
 import LivesLeftComp from "@/components/lives-left";
 import GamesForm from "@/components/games-form";
-import { GamesFormInit, imgAlt, imgHeight, imgWidth } from "@/lib/constants";
+import { GamesFormInit, imgAlt, imgHeight, imgWidth } from "~/src/lib/client-constants";
 import ModesHeader from "@/components/modes-header";
 import Hearts from "@/components/hearts";
 import zModes from "~/src/stores/modes";
 
 export default function Classic() {
+  const pathname = usePathname();
   const {
     livesLeft, lives, gotdId, played, won, guesses, pixelation, imageUrl,
     getLivesLeft, getName,
   } = zClassic();
   const { games } = zGames();
-  const { getMode } = zModes();
-  const mode = getMode(1);
+  const { getModeBySlug } = zModes();
+  const mode = getModeBySlug(pathname);
   const form = GamesFormInit();
   const readySetGo = games && gotdId && mode;
 

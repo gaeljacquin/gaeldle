@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { upstashRedisInit } from "@/lib/upstash-redis";
-import { genKey } from "~/src/lib/utils";
+import { getLastSegment, gSeconds, genKey } from "~/src/lib/server-constants";
 
-export async function GET() {
-  const slug = "modes";
-  const gSeconds = 10000;
-  const key = genKey(slug);
+export async function GET(request: Request) {
+  const lastSegment = getLastSegment(request.url);
+  const key = genKey(lastSegment);
   let response;
   let data;
 
@@ -13,7 +12,7 @@ export async function GET() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), gSeconds);
 
-    response = await fetch(`${process.env.serverUrl}/${slug}`, {
+    response = await fetch(`${process.env.serverUrl}/${lastSegment}`, {
       cache: "no-store",
       headers: {
         Authorization: `Bearer ${process.env.bearerToken}`,

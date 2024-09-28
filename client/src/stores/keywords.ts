@@ -3,9 +3,9 @@ import { devtools, persist } from "zustand/middleware";
 import { io } from "socket.io-client";
 import { Guess } from "@/types/games";
 import { Gotd } from "@/types/gotd";
-import getIt from "~/src/lib/get-it";
 import { ZKeywords } from "~/src/types/zkeywords";
 import { DailyStats } from "~/src/types/daily-stats";
+import { absoluteUrl } from "@/lib/client-constants";
 
 const modeId = 3;
 
@@ -145,7 +145,8 @@ const zKeywords = create(
       getName: () => get().name,
       fetchGotd: async () => {
         try {
-          const res = await getIt("keywords");
+          const endpoint = absoluteUrl("/api/keywords");
+          const res = await fetch(endpoint);
           const { gotd } = await res.json();
           const currentGotdId = get().gotdId;
 

@@ -2,25 +2,32 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { Mode } from "@/types/modes";
 import { ZModes } from "@/types/zmodes";
-import getIt from "~/src/lib/get-it";
+import { absoluteUrl } from "@/lib/client-constants";
 
-export const defaultModesSlice = {
+export const initialState = {
   modes: [],
 };
 
 const zModes = create(
   persist(
     devtools<ZModes>((set, get) => ({
-      ...defaultModesSlice,
+      ...initialState,
       setModes: async () => {
-        const res = await getIt("modes");
+        const endpoint = absoluteUrl("/api/modes");
+        const res = await fetch(endpoint);
         const modes = await res.json();
-
         set({ modes });
       },
       getMode: (modeId: number) => {
         const modes = get().modes;
         const mode = modes.find((val: Mode) => val.id === modeId);
+
+        return mode;
+      },
+      getModeBySlug: (path: string) => {
+        const modes = get().modes;
+        const slug = path.split("/")[1];
+        const mode = modes.find((val: Mode) => val.mode === slug);
 
         return mode;
       },

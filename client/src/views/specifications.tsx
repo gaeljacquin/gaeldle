@@ -1,6 +1,7 @@
 'use client'
 
 import Image from "next/image";
+import { usePathname } from 'next/navigation';
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import Placeholders from '@/views/placeholders'
@@ -15,16 +16,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SummaryDataTable from "@/components/summary-data-table";
 import zGames from "~/src/stores/games";
 import zModes from "~/src/stores/modes";
-import { GamesFormInit } from "~/src/lib/constants";
+import { GamesFormInit } from "~/src/lib/client-constants";
 
 export default function Specifications() {
+  const pathname = usePathname();
   const {
     name, livesLeft, lives, gotdId, played, won, guesses, imageUrl,
     getLivesLeft, getName,
   } = zSpecs();
   const { games } = zGames();
-  const { getMode } = zModes();
-  const mode = getMode(4);
+  const { getModeBySlug } = zModes();
+  const mode = getModeBySlug(pathname);
   const [currentTab, setCurrentTab] = useState('guesses');
   const form = GamesFormInit();
   const readySetGo = games && gotdId && mode;

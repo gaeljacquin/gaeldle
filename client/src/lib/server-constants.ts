@@ -8,10 +8,22 @@ function getLastSegment(requestUrl: string) {
   return lastSegment;
 }
 
-const start = new Date();
-const nextDay = new Date(start);
-nextDay.setDate(start.getDate() + 1);
-nextDay.setHours(0, 0, 0, 0);
+/** Timestamp start */
+const todayStart = new Date();
+todayStart.setHours(0, 0, 0, 0);
+
+const todayEnd = new Date();
+todayEnd.setHours(23, 59, 59, 999);
+
+const tomorrowStart = new Date(todayStart);
+tomorrowStart.setDate(todayStart.getDate() + 1);
+
+const tomorrowEnd = new Date(todayEnd);
+tomorrowEnd.setDate(todayEnd.getDate() + 1);
+
+const today = { start: todayStart, end: todayEnd };
+const tomorrow = { start: tomorrowStart, end: tomorrowEnd };
+/** Timestamp end */
 
 const genKey = (key: string) => {
   if (process.env.NODE_ENV === "development") {
@@ -21,4 +33,4 @@ const genKey = (key: string) => {
   return key;
 };
 
-export { gSeconds, getLastSegment, genKey, nextDay };
+export { gSeconds, getLastSegment, genKey, today, tomorrow };

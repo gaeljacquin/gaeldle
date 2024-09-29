@@ -29,7 +29,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="bg-gray-100 p-6 md:py-12 w-full dark:bg-gray-800">
+    <footer className="bottom-0 bg-gray-100 p-6 md:py-12 w-full dark:bg-gray-800">
       <div className="container max-w-7xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8 text-sm flex">
         <div className="grid gap-1">
           <ul className="flex flex-col">
@@ -52,7 +52,7 @@ export default function Footer() {
           <div className="grid gap-1" key={category.id}>
             <ul className="flex flex-col">
               <h3 className="font-semibold">{category.label} Modes</h3>
-              {modes.filter((mode: Mode) => mode.categoryId === category.id).map((mode: Mode, index: number) => {
+              {modes.filter((mode: Mode) => mode.categoryId === category.id && mode.active).map((mode: Mode, index: number) => {
                 return (
                   <li key={mode.mode + '-' + index}>
                     {navLink(`/${mode.mode}`, mode.label)}

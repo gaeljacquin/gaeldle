@@ -30,24 +30,31 @@ export default function ModesNav() {
         </Link>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        {categories.map((category: Category) => (
-          category._count.modes > 0 &&
-          <div key={category.id}>
-            <DropdownMenuLabel>{category.label}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              {modes.filter((mode: Mode) => mode.categoryId === category.id).map((mode: Mode, index: number) => {
-                return (
-                  <DropdownMenuItem key={mode.mode + '-' + index}>
-                    <Link href={`/${mode.mode}`}>{mode.label}</Link>
-                  </DropdownMenuItem>
-                )
-              })}
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-          </div>
-        ))}
+        {(() => {
+          const categoriesWithModes = categories.filter((category: Category) => category._count.modes > 0);
+          return categoriesWithModes.map((category: Category, index: number) => {
+            const isLast = index === categoriesWithModes.length - 1;
+
+            return (
+              <div key={category.id}>
+                <DropdownMenuLabel>{category.label}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  {modes.filter((mode: Mode) => mode.categoryId === category.id && mode.active).map((mode: Mode, index: number) => {
+                    return (
+                      <DropdownMenuItem key={mode.mode + '-' + index}>
+                        <Link href={`/${mode.mode}`}>{mode.label}</Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuGroup>
+                {!isLast && <DropdownMenuSeparator />}
+              </div>
+            );
+          });
+        })()}
       </DropdownMenuContent>
+
     </DropdownMenu>
   )
 }

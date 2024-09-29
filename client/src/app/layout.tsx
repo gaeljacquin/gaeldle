@@ -42,8 +42,8 @@ export default function RootLayout({
           {children}
           <SpeedInsights />
           <Analytics />
-          <DynamicFooter />
         </div>
+        <DynamicFooter />
       </body>
     </html>
   )

@@ -1,10 +1,9 @@
 import './globals.css'
 
 import { Inter } from 'next/font/google'
+import dynamic from 'next/dynamic'
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
-
-import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
 import TextSpecial from '@/components/text-special';
 
@@ -12,6 +11,10 @@ const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap'
+})
+
+const DynamicFooter = dynamic(() => import('@/components/footer'), {
+  ssr: false,
 })
 
 export const metadata = {
@@ -39,7 +42,7 @@ export default function RootLayout({
           {children}
           <SpeedInsights />
           <Analytics />
-          <Footer />
+          <DynamicFooter />
         </div>
       </body>
     </html>

@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { ZGames } from "@/types/zgames";
-import { absoluteUrl } from "@/lib/client-constants";
 
 export const initialState = {
   games: [],

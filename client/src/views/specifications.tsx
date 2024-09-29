@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import Placeholders from '@/views/placeholders'
 import DisplayCountdown from "@/components/display-countdown";
-import ComingSoon from "@/components/coming-soon";
 import LivesLeftComp from "@/components/lives-left";
 import zSpecs, { socket } from "@/stores/specifications";
 import GamesForm from "@/components/games-form";
@@ -118,10 +117,6 @@ export default function Specifications() {
           <div className="max-w-3xl mx-auto mt-10">
             <DisplayCountdown />
           </div>
-        </div>
-
-        <div className="mt-20">
-          <ComingSoon />
         </div>
       </main >
     </>

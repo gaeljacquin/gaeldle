@@ -37,6 +37,14 @@ export default function Footer() {
             <li>
               {navLink("/", "Home")}
             </li>
+            <li>
+              <Link href={`${process.env.smashQuizUrl}`} target="_blank">
+                <span className="flex">
+                  Smash Quiz
+                  <span className="ml-2"><ExternalLinkIcon /></span>
+                </span>
+              </Link>
+            </li>
           </ul>
         </div>
         {categories.map((category: Category) => (

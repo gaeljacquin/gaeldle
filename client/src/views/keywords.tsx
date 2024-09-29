@@ -7,7 +7,6 @@ import zGames from '@/stores/games';
 import { Button } from "@/components/ui/button"
 import Placeholders from '@/views/placeholders'
 import DisplayCountdown from "@/components/display-countdown";
-import ComingSoon from "@/components/coming-soon";
 import LivesLeftComp from "@/components/lives-left";
 import ModesHeader from "@/components/modes-header";
 import GamesForm from "@/components/games-form";
@@ -118,10 +117,6 @@ export default function Keywords() {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="mt-20">
-            <ComingSoon />
           </div>
         </main>
       </div>

@@ -13,7 +13,7 @@ const zModes = create(
     devtools<ZModes>((set, get) => ({
       ...initialState,
       setModes: async () => {
-        const endpoint = absoluteUrl("/api/modes");
+        const endpoint = "/api/modes";
         const res = await fetch(endpoint);
         const modes = await res.json();
         set({ modes });

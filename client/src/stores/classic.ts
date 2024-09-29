@@ -144,7 +144,7 @@ const zClassic = create(
       getName: () => get().name,
       fetchGotd: async () => {
         try {
-          const endpoint = absoluteUrl("/api/classic");
+          const endpoint = "/api/classic";
           const res = await fetch(endpoint);
           const { gotd } = await res.json();
           const currentGotdId = get().gotdId;

@@ -13,7 +13,7 @@ const zCategories = create(
     devtools<ZCategories>((set, get) => ({
       ...initialSate,
       setCategories: async () => {
-        const endpoint = absoluteUrl("/api/categories");
+        const endpoint = "/api/categories";
         const res = await fetch(endpoint);
         const categories = await res.json();
         set({ categories });

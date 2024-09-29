@@ -13,14 +13,14 @@ const nextDay = new Date(start);
 nextDay.setDate(start.getDate() + 1);
 nextDay.setHours(0, 0, 0, 0);
 
-function genKey(key: string) {
+const genKey = (key: string) => {
   if (process.env.NODE_ENV === "development") {
     key += "_dev";
   }
 
-  key += `-${nextDay}`;
+  key += `-${nextDay.toISOString().split("T")[0]}`;
 
   return key;
-}
+};
 
 export { gSeconds, getLastSegment, genKey };

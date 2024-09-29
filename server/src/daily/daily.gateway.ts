@@ -85,7 +85,7 @@ export class DailyGateway
     const clientId = client.id;
 
     if (!modeMap.has(clientId)) {
-      const gotd = await this.gotdService.findIt(modeId);
+      const gotd = await this.gotdService.findGotd(modeId);
       modeMap.set(client.id, gotd);
     }
 

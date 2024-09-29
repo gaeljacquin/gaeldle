@@ -1,4 +1,4 @@
-import { Categories } from "./categories";
+import { Category } from "./categories";
 import { Levels } from "./levels";
 
 export type Mode = {
@@ -13,7 +13,7 @@ export type Mode = {
   pixelation: number;
   pixelationStep: number;
   levels: Levels;
-  types: Categories;
+  types: Category;
   isNew: boolean;
 };
 

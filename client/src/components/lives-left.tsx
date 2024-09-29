@@ -1,4 +1,4 @@
-import { textGameOver, textVictory, textFlawlessVictory } from "@/lib/constants";
+import { textGameOver, textVictory, textFlawlessVictory } from "~/src/lib/client-constants";
 
 type LivesLeftCompProps = {
   played: boolean

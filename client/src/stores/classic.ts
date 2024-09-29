@@ -3,9 +3,9 @@ import { devtools, persist } from "zustand/middleware";
 import { io } from "socket.io-client";
 import { Guess, Guesses } from "@/types/games";
 import { Gotd } from "@/types/gotd";
-import getIt from "~/src/lib/get-it";
 import { DailyStats } from "~/src/types/daily-stats";
 import { ZClassic } from "~/src/types/zclassic";
+import { absoluteUrl } from "@/lib/client-constants";
 
 const modeId = 1;
 
@@ -144,7 +144,8 @@ const zClassic = create(
       getName: () => get().name,
       fetchGotd: async () => {
         try {
-          const res = await getIt("classic");
+          const endpoint = absoluteUrl("/api/classic");
+          const res = await fetch(endpoint);
           const { gotd } = await res.json();
           const currentGotdId = get().gotdId;
 

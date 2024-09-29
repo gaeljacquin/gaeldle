@@ -11,7 +11,7 @@ import {
   textStartingPosition,
   textSubmit,
   textTryAgain,
-} from "../lib/constants";
+} from "../lib/client-constants";
 import { time } from "console";
 
 const modeId = 8;
@@ -209,7 +209,6 @@ const zTriviary = create(
         socket.emit("triviary", emit);
       },
       setLastGuess: () => {
-        console.log("set last guess");
         const guesses = get().guesses;
         set({ timeline: guesses[0], alreadyGuessed: true });
       },

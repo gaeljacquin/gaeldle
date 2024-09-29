@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Game } from "~/src/types/games";
-import { cardImgSize, cardImgClasses } from "~/src/lib/constants";
+import { cardImgSize, cardImgClasses } from "~/src/lib/client-constants";
 
 type GameCardProps = {
   card: Partial<Game>;

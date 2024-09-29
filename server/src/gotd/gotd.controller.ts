@@ -17,7 +17,7 @@ export class GotdController {
 
   @Get(':modeId')
   findIt(@Param('modeId', ParseIntPipe) modeId: number) {
-    return this.gotdService.findIt(modeId);
+    return this.gotdService.findGotd(modeId);
   }
 
   @Get('dev/:modeId')
@@ -33,5 +33,15 @@ export class GotdController {
   @Post('refresh/:modeId')
   updateIt(@Param('modeId', ParseIntPipe) modeId: number) {
     return this.gotdService.refreshIt(modeId);
+  }
+
+  @Get('refresh/:modeId')
+  updateItDev(@Param('modeId', ParseIntPipe) modeId: number) {
+    return this.gotdService.refreshIt(modeId);
+  }
+
+  @Get('test/:modeId')
+  dbSetGotd(@Param('modeId', ParseIntPipe) modeId: number) {
+    return this.gotdService.setGotd(modeId);
   }
 }

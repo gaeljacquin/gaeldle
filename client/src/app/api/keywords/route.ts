@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { genKey } from "@/lib/utils";
 import { upstashRedisInit } from "@/lib/upstash-redis";
+import { getLastSegment, gSeconds, genKey } from "~/src/lib/server-constants";
 
-export async function GET() {
+export async function GET(request: Request) {
   const slug = 3;
-  const gSeconds = 10000;
-  const key = genKey("keywords");
+  const lastSegment = getLastSegment(request.url);
+  const key = genKey(lastSegment);
   let data;
   let gotd;
 

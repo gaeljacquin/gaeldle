@@ -26,7 +26,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
-import { FormSchema, textAlreadyGuessed } from '@/lib/constants';
+import { FormSchema, textAlreadyGuessed } from '~/src/lib/client-constants';
 import zGames from '@/stores/games';
 import { Game, Guess, Guesses } from '@/types/games';
 import { UseFormReturn } from 'react-hook-form';

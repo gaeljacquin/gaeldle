@@ -17,6 +17,8 @@ import { TriviaryGateway } from './triviary/triviary.gateway';
 import { GamesService } from './games/games.service';
 import { DailyGateway } from './daily/daily.gateway';
 import { GotdService } from './gotd/gotd.service';
+import { CategoriesModule } from './categories/categories.module';
+import { CategoriesService } from './categories/categories.service';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { GotdService } from './gotd/gotd.service';
     ModesModule,
     AuthModule,
     UsersModule,
+    CategoriesModule,
   ],
   controllers: [AppController, ModesController],
   providers: [
@@ -39,6 +42,7 @@ import { GotdService } from './gotd/gotd.service';
     GamesService,
     DailyGateway,
     GotdService,
+    CategoriesService,
   ],
 })
 export class AppModule {}

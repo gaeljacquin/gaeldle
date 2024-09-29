@@ -34,7 +34,7 @@ export class GotdService {
         id: modeId,
       },
     });
-    const key = genKey(mode.mode);
+    const key = genKey(mode.mode) + `-${nextDay.toISOString().split('T')[0]}`;
 
     return key;
   }

@@ -1,7 +1,6 @@
 import { applyDecorators, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '~/src/auth/jwt-auth.guard';
 import { Games } from '~/types/games';
-import { nextDay } from '~/utils/get-current-day';
 
 function isDevMode() {
   return (
@@ -15,7 +14,6 @@ export function jwtAuthGuard() {
 
 export function genKey(key: string) {
   key += isDevMode() ? '_dev' : '';
-  key += '-' + nextDay.toISOString().split('T')[0];
 
   return key;
 }

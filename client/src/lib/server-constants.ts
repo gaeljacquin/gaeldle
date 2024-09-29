@@ -18,9 +18,7 @@ const genKey = (key: string) => {
     key += "_dev";
   }
 
-  key += `-${nextDay.toISOString().split("T")[0]}`;
-
   return key;
 };
 
-export { gSeconds, getLastSegment, genKey };
+export { gSeconds, getLastSegment, genKey, nextDay };

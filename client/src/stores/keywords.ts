@@ -145,7 +145,7 @@ const zKeywords = create(
       getName: () => get().name,
       fetchGotd: async () => {
         try {
-          const endpoint = absoluteUrl("/api/keywords");
+          const endpoint = "/api/keywords";
           const res = await fetch(endpoint);
           const { gotd } = await res.json();
           const currentGotdId = get().gotdId;

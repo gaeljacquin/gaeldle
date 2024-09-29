@@ -166,7 +166,7 @@ const zSpecs = create(
       getSummary: () => get().summary,
       fetchGotd: async () => {
         try {
-          const endpoint = absoluteUrl("/api/specifications");
+          const endpoint = "/api/specifications";
           const res = await fetch(endpoint);
           const { gotd } = await res.json();
           const currentGotdId = get().gotdId;

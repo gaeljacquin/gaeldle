@@ -82,7 +82,7 @@ export class GamesService {
           to_char(to_timestamp((g.first_release_date)::bigint), 'YYYY-MM-DD') as "frdFormatted"
         FROM games g
         TABLESAMPLE BERNOULLI (${sampleSize})
-        WHERE first_release_date IS NOT NULL
+        WHERE g.first_release_date IS NOT NULL
         LIMIT ${numCards}
       ) sub
       ORDER BY sub.frd
@@ -104,8 +104,8 @@ export class GamesService {
           ((g.first_release_date)::int) AS frd,
           to_char(to_timestamp((g.first_release_date)::bigint), 'YYYY-MM-DD') as "frdFormatted"
         FROM games g
-        WHERE igdb_id = ANY(${testGameIgdbIds})
-        AND first_release_date IS NOT NULL
+        WHERE g.igdb_id = ANY(${testGameIgdbIds})
+        AND g.first_release_date IS NOT NULL
       ) sub
       ORDER BY sub.frd
     `;

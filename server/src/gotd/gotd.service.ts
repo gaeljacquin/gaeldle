@@ -1,41 +1,31 @@
 import { ServiceUnavailableException, Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
-import { genKey } from '~/utils/env-checks';
-import currentDay from '~/utils/get-current-day';
-import { upstashRedisInit } from '~/utils/upstash-redis';
+import { nextDay } from '~/utils/get-current-day';
 import { CreateGotdDto } from '~/src/gotd/dto/create-gotd.dto';
+import { genKey } from '~/utils/env-checks';
+import { upstashRedisInit } from '~/utils/upstash-redis';
 
 @Injectable()
 export class GotdService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findIt(modeId: number) {
-    try {
-      const key = await this.findKey(modeId);
-      let gotd;
-      const gotdCached = await fetch(
-        `${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`,
-        {
-          method: 'GET',
-          ...upstashRedisInit,
-        },
-      );
-      gotd = JSON.parse((await gotdCached.json()).result);
+  async refreshIt(modeId) {
+    const key = await this.findKey(modeId);
+    const gotd = await this.findGotd(modeId);
+    const hours = 6000 * 48; // 48 hours
 
-      if (!gotd) {
-        gotd = await this.dbFindGotd(modeId);
-        await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
-          method: 'POST',
-          ...upstashRedisInit,
-          body: JSON.stringify(gotd),
-        });
-      }
-
-      return gotd ?? null;
-    } catch (error) {
-      console.error('Failed to fetch game of the day: ', error);
-      return new ServiceUnavailableException();
+    if (!gotd) {
+      this.setGotd(modeId);
     }
+
+    await fetch(
+      `${process.env.UPSTASH_REDIS_REST_URL}/set/${key}?EX=${hours}`,
+      {
+        method: 'POST',
+        ...upstashRedisInit,
+        body: JSON.stringify(gotd),
+      },
+    );
   }
 
   async findKey(modeId) {
@@ -49,57 +39,90 @@ export class GotdService {
     return key;
   }
 
-  async refreshIt(modeId) {
-    const key = await this.findKey(modeId);
-    const gotd = await this.dbFindGotd(modeId);
+  async findGotd(modeId: number) {
+    let gotd;
 
-    await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
-      method: 'POST',
-      ...upstashRedisInit,
-      body: JSON.stringify(gotd),
-    });
+    try {
+      gotd = await this.prisma.gotd.findFirstOrThrow({
+        omit: {
+          createdAt: true,
+          updatedAt: true,
+        },
+        include: {
+          games: {
+            omit: {
+              id: true,
+              info: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
+          modes: {
+            omit: {
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
+        },
+        where: {
+          modeId: modeId,
+          scheduled: {
+            gte: nextDay,
+          },
+        },
+      });
+
+      return gotd;
+    } catch (error) {
+      console.error('Failed to fetch game of the day: ', error);
+      return new ServiceUnavailableException();
+    }
   }
 
-  async dbFindGotd(modeId: number) {
-    const gotd = await this.prisma.gotd.findFirst({
-      omit: {
-        createdAt: true,
-        updatedAt: true,
-      },
-      include: {
-        games: {
-          omit: {
-            id: true,
-            info: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        },
-        modes: {
-          omit: {
-            createdAt: true,
-            updatedAt: true,
-          },
-        },
+  async setGotd(modeId: number) {
+    const previousGotdIds = await this.prisma.gotd.findMany({
+      select: {
+        igdbId: true,
       },
       where: {
         modeId: modeId,
-        scheduled: {
-          gte: currentDay.start,
-          lte: currentDay.end,
-        },
       },
     });
+    const pgiList = previousGotdIds.map((item) => item.igdbId);
+    const nextGotd = await this.prisma.$queryRaw`
+        SELECT g.igdb_id AS "igdbId"
+        FROM games g
+        TABLESAMPLE BERNOULLI (10)
+        WHERE g.igdb_id != ANY(${pgiList})
+        LIMIT 1
+    `;
+    const data = {
+      igdbId: nextGotd[0].igdbId,
+      modeId,
+      scheduled: nextDay,
+    };
+    const newGotd = this.create(data);
 
-    return gotd;
+    return newGotd;
+  }
+
+  async create(data: CreateGotdDto) {
+    try {
+      const newGotd = await this.prisma.gotd.create({ data });
+
+      return newGotd;
+    } catch (error) {
+      console.error('Failed to create gotd: ', error);
+      throw error;
+    }
   }
 
   async findItDev(modeId: number) {
-    const gotd = await this.dbFindGotdDev(modeId);
-    return gotd ?? null;
+    const gotd = await this.findGotdDev(modeId);
+    return gotd;
   }
 
-  async dbFindGotdDev(modeId: number) {
+  async findGotdDev(modeId: number) {
     const gotd = await this.prisma.gotd.findFirst({
       omit: {
         createdAt: true,
@@ -130,14 +153,5 @@ export class GotdService {
     });
 
     return gotd;
-  }
-
-  async create(data: CreateGotdDto) {
-    try {
-      await this.prisma.gotd.create({ data });
-    } catch (error) {
-      console.error('Failed to create gotd: ', error);
-      throw error;
-    }
   }
 }

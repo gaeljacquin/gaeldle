@@ -15,7 +15,7 @@ export function jwtAuthGuard() {
 
 export function genKey(key: string) {
   key += isDevMode() ? '_dev' : '';
-  key += '-' + nextDay;
+  key += '-' + nextDay.toISOString().split('T')[0];
 
   return key;
 }

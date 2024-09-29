@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { Category } from "@/types/categories";
 import { ZCategories } from "@/types/zcategories";
-import { absoluteUrl } from "@/lib/client-constants";
 
 export const initialSate = {
   categories: [],

@@ -5,7 +5,6 @@ import { Guess } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 import { DailyStats } from "~/src/types/daily-stats";
 import { ZArtwork } from "~/src/types/zartwork";
-import { absoluteUrl } from "@/lib/client-constants";
 
 const modeId = 2;
 

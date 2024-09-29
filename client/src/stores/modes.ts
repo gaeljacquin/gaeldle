@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { Mode } from "@/types/modes";
 import { ZModes } from "@/types/zmodes";
-import { absoluteUrl } from "@/lib/client-constants";
 
 export const initialState = {
   modes: [],

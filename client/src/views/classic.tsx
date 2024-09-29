@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/views/placeholders'
 import DisplayCountdown from "@/components/display-countdown";
-import ComingSoon from "@/components/coming-soon";
 import LivesLeftComp from "@/components/lives-left";
 import GamesForm from "@/components/games-form";
 import { GamesFormInit, imgAlt, imgHeight, imgWidth } from "~/src/lib/client-constants";
@@ -109,10 +108,6 @@ export default function Classic() {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="mt-20">
-            <ComingSoon />
           </div>
         </main>
       </div>

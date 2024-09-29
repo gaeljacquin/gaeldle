@@ -31,7 +31,7 @@ export default function Modes() {
   const { categories } = zCategories();
   const [clickedButton, setClickedButton] = useState<string | null>(null);
   const readySetGo = modes && categories;
-  const mdGridColsClass = "md:grid-cols-" + (categories.length ?? 1);
+  const mdGridColsClass = "md:grid-cols-" + Math.max(categories.length, 1);
 
   const handleClick = (buttonKey: string) => {
     if (clickedButton === null) {
@@ -87,7 +87,7 @@ export default function Modes() {
 
   return (
     readySetGo &&
-    <div className={`grid grid-cols-1 gap-6 mt-8 ${mdGridColsClass} md:gap-8`}>
+    <div className={`grid sm:grid-cols-1 gap-6 mt-8 ${mdGridColsClass} md:gap-8`}>
       {categories.map((category: Category) => (
         <div key={category.id} className="relative flex flex-col p-6 bg-white shadow-lg rounded-lg dark:bg-zinc-850 justify-between border-2 border-gael-purple">
           <div className="px-3 py-1 text-lg text-white border-2 border-gael-purple bg-gradient-to-r from-gael-pink to-gael-purple rounded-full inline-block absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">

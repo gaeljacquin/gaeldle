@@ -6,7 +6,6 @@ import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { ChevronsUpDown } from "lucide-react"
-import ComingSoon from "@/components/coming-soon";
 import { Game, Games } from "~/src/types/games";
 import zModes from "~/src/stores/modes";
 import Placeholders from "~/src/views/placeholders";
@@ -206,10 +205,6 @@ export default function Triviary() {
               }
             </div>
           </main>
-
-          <div className="mt-20">
-            <ComingSoon />
-          </div>
         </div >
       </DndContext >
     </>

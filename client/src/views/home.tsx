@@ -3,7 +3,6 @@
 import Link from "next/link"
 import MyBadgeGroup from "~/src/components/my-badge-group"
 import { levels } from '~/src/lib/client-constants'
-import ComingSoon from "@/components/coming-soon"
 import Modes from "@/components/modes"
 import zModes from "@/stores/modes"
 import zCategories from "@/stores/categories"
@@ -45,7 +44,6 @@ export default function Home() {
       <div className="container px-4 md:px-6">
         <Modes />
         <MyBadgeGroup group={levels} />
-        <ComingSoon />
       </div>
     </main>
   )

@@ -1,29 +1,33 @@
-import { ServiceUnavailableException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
+import { ModesService } from '~/src/modes/modes.service';
 import { CreateGotdDto } from '~/src/gotd/dto/create-gotd.dto';
-import { genKey } from '~/utils/env-checks';
 import { upstashRedisInit } from '~/utils/upstash-redis';
-import { today, tomorrow } from '~/utils/constants';
+import { cacheDuration, today, tomorrow } from '~/utils/constants';
+import shuffleList from '~/utils/shuffle-list';
 
 @Injectable()
 export class GotdService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly modesService: ModesService,
+  ) {}
 
-  private hours = 6000 * 48; // 48 hours
-
-  async refreshIt(modeId) {
-    const key = await this.findKey(modeId, true);
-    const gotd = await this.findGotd(modeId);
+  async refreshGotd(modeId) {
+    const key = await this.modesService.findKey(modeId, true);
+    let gotd = await this.findGotd(modeId, true);
 
     if (!gotd) {
-      this.setGotd(modeId);
+      gotd = await this.setGotd(modeId);
     }
 
     this.setGotdCached(gotd, key);
+
+    return gotd;
   }
 
-  async findGotd(modeId: number) {
-    const key = await this.findKey(modeId);
+  async findGotd(modeId: number, future = false) {
+    const day = future ? tomorrow : today;
     let gotd;
 
     try {
@@ -41,7 +45,7 @@ export class GotdService {
               updatedAt: true,
             },
             where: {
-              ...(modeId === 3 ? { keywords: { not: null } } : {}),
+              ...(modeId === 2 ? { artworks: { not: null } } : undefined),
             },
           },
           modes: {
@@ -54,31 +58,20 @@ export class GotdService {
         where: {
           modeId: modeId,
           scheduled: {
-            gte: today.start,
-            lte: today.end,
+            gte: future ? day.start : undefined,
+            lte: day.end,
           },
         },
+        orderBy: {
+          scheduled: 'desc',
+        },
       });
-
-      this.setGotdCached(gotd, key);
-
-      return gotd;
     } catch (error) {
-      console.error('Failed to fetch game of the day: ', error);
-      return new ServiceUnavailableException();
+      !future && console.error('Failed to fetch game of the day: ', error);
+      return null;
     }
-  }
 
-  async findKey(modeId, future = false) {
-    const day = future ? tomorrow : today;
-    const mode = await this.prisma.modes.findFirst({
-      where: {
-        id: modeId,
-      },
-    });
-    const key = genKey(mode.mode) + `-${day.start.toISOString().split('T')[0]}`;
-
-    return key;
+    return gotd;
   }
 
   async setGotd(modeId: number) {
@@ -90,20 +83,43 @@ export class GotdService {
         modeId: modeId,
       },
     });
-    const pgiList = previousGotdIds.map((item) => item.igdbId);
-    const nextGotd = await this.prisma.$queryRaw`
-        SELECT g.igdb_id AS "igdbId"
-        FROM games g
-        TABLESAMPLE BERNOULLI (10)
-        WHERE g.igdb_id != ANY(${pgiList})
-        ${modeId === 3 ? 'AND keywords IS NOT NULL' : ''}
-        LIMIT 1
-    `;
+    const gotdIds = await this.prisma.games.findMany({
+      select: {
+        igdbId: true,
+        artworks: modeId === 2 ? true : undefined,
+      },
+      where: {
+        igdbId: {
+          notIn: previousGotdIds.map((row) => row.igdbId),
+        },
+        ...(modeId === 2 ? { artworks: { not: null } } : undefined),
+      },
+    });
+    const nextGotd = shuffleList(gotdIds)[0];
     const data = {
-      igdbId: nextGotd[0].igdbId,
+      igdbId: nextGotd.igdbId,
       modeId,
       scheduled: tomorrow.start,
     };
+
+    if (modeId === 2) {
+      const artworks = nextGotd.artworks;
+      const artwork = artworks
+        ? artworks[Math.floor(Math.random() * artworks.length)]
+        : null;
+      const info = {
+        imageUrl: artwork?.url.replace('t_thumb', 't_720p') ?? '',
+      };
+
+      if (info.imageUrl.startsWith('http')) {
+        info.imageUrl = `https${info.imageUrl.slice(4)}`;
+      } else if (!info.imageUrl.startsWith('https')) {
+        info.imageUrl = `https:${info.imageUrl}`;
+      }
+
+      data['info'] = info;
+    }
+
     const newGotd = this.create(data);
 
     return newGotd;
@@ -122,7 +138,7 @@ export class GotdService {
 
   async setGotdCached(gotd, key) {
     await fetch(
-      `${process.env.UPSTASH_REDIS_REST_URL}/set/${key}?EX=${this.hours}`,
+      `${process.env.UPSTASH_REDIS_REST_URL}/set/${key}?EX=${cacheDuration}`,
       {
         method: 'POST',
         ...upstashRedisInit,

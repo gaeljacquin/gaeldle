@@ -25,9 +25,9 @@ export class GotdController {
     return this.gotdService.create(data);
   }
 
-  @Post('refresh/:modeId')
+  @Get('refresh/:modeId')
   updateIt(@Param('modeId', ParseIntPipe) modeId: number) {
-    return this.gotdService.refreshIt(modeId);
+    return this.gotdService.refreshGotd(modeId);
   }
 
   @Get('test/:modeId')

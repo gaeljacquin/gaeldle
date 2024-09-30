@@ -61,10 +61,10 @@ export class DailyGateway
     void this.gameLogic(client, 1, this.classicMap, data);
   }
 
-  // @SubscribeMessage('artwork')
-  // async handleArtwork(client: Socket, data): Promise<void> {
-  //   void this.gameLogic(client, 2, this.artworkMap, data);
-  // }
+  @SubscribeMessage('artwork')
+  async handleArtwork(client: Socket, data): Promise<void> {
+    void this.gameLogic(client, 2, this.artworkMap, data);
+  }
 
   // @SubscribeMessage('keywords')
   // async handleKeywords(client: Socket, data): Promise<void> {

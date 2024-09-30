@@ -24,6 +24,8 @@ const today = { start: todayStart, end: todayEnd };
 const tomorrow = { start: tomorrowStart, end: tomorrowEnd };
 /** Timestamp end */
 
+const cacheDuration = 6000 * 48; // 48 hours
+
 export {
   bgIncorrect,
   bgPartial,
@@ -33,4 +35,5 @@ export {
   testGameIgdbIds,
   today,
   tomorrow,
+  cacheDuration,
 };

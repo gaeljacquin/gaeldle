@@ -3,6 +3,7 @@ import { PrismaService } from '~/src/prisma/prisma.service';
 import { genKey } from '~/utils/env-checks';
 import { upstashRedisInit } from '~/utils/upstash-redis';
 import { UpdateModesDto } from './dto/update-modes.dto';
+import { today, tomorrow } from '~/utils/constants';
 
 @Injectable()
 export class ModesService {
@@ -102,5 +103,17 @@ export class ModesService {
       ...upstashRedisInit,
       body: JSON.stringify(data),
     });
+  }
+
+  async findKey(modeId, future = false) {
+    const day = future ? tomorrow : today;
+    const mode = await this.prisma.modes.findFirst({
+      where: {
+        id: modeId,
+      },
+    });
+    const key = genKey(mode.mode) + `-${day.start.toISOString().split('T')[0]}`;
+
+    return key;
   }
 }

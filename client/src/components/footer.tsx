@@ -1,32 +1,26 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ExternalLinkIcon } from "@radix-ui/react-icons";
-import LottieDynamic from '@/components/lottie-dynamic';
-import { currentYear } from '~/src/lib/client-constants';
-import zModes from "@/stores/modes";
-import zCategories from "@/stores/categories";
-import { Category } from "@/types/categories";
-import { Mode } from "@/types/modes";
+import LottieDynamic from "@/components/lottie-dynamic";
+import { currentYear } from "~/src/lib/client-constants";
 
 export default function Footer() {
   const pathname = usePathname();
-  const { modes } = zModes();
-  const { categories } = zCategories();
   const navLink = (path: string, text: string) => {
     const markup = (
       <Link
         href={`${path}`}
-        className={`${path === pathname && 'text-gael-green'}`}
+        className={`${path === pathname && "text-gael-green"}`}
         onClick={path === pathname ? (e) => e.preventDefault() : () => null}
       >
         {text}
       </Link>
-    )
+    );
 
     return markup;
-  }
+  };
 
   return (
     <footer className="bottom-0 bg-gray-100 p-6 md:py-12 w-full dark:bg-gray-800">
@@ -34,43 +28,15 @@ export default function Footer() {
         <div className="grid gap-1">
           <ul className="flex flex-col">
             <h3 className="font-semibold">Quick Links</h3>
-            <li>
-              {navLink("/", "Home")}
-            </li>
-            <li>
-              <Link href={`${process.env.smashQuizUrl}`} target="_blank">
-                <span className="flex">
-                  Smash Quiz
-                  <span className="ml-2"><ExternalLinkIcon /></span>
-                </span>
-              </Link>
-            </li>
+            <li>{navLink("/", "Home")}</li>
+            <li>{navLink("/triviary", "Play")}</li>
           </ul>
         </div>
-        {categories.map((category: Category) => (
-          category._count.modes > 0 &&
-          <div className="grid gap-1" key={category.id}>
-            <ul className="flex flex-col">
-              <h3 className="font-semibold">{category.label} Modes</h3>
-              {modes.filter((mode: Mode) => mode.categoryId === category.id && mode.active).map((mode: Mode, index: number) => {
-                return (
-                  <li key={mode.mode + '-' + index}>
-                    {navLink(`/${mode.mode}`, mode.label)}
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        ))}
         <div className="grid gap-1">
           <ul className="flex flex-col">
             <h3 className="font-semibold">Legal</h3>
-            <li>
-              {navLink("/privacy", "Privacy Policy")}
-            </li>
-            <li>
-              {navLink("/tos", "Terms of Service")}
-            </li>
+            <li>{navLink("/privacy", "Privacy Policy")}</li>
+            <li>{navLink("/tos", "Terms of Service")}</li>
           </ul>
         </div>
         <div className="grid gap-1">
@@ -80,7 +46,9 @@ export default function Footer() {
               <Link href="https://linkedin.com/in/gaeljacquin" target="_blank">
                 <span className="flex">
                   LinkedIn
-                  <span className="ml-2"><ExternalLinkIcon /></span>
+                  <span className="ml-2">
+                    <ExternalLinkIcon />
+                  </span>
                 </span>
               </Link>
             </li>
@@ -88,7 +56,9 @@ export default function Footer() {
               <Link href="https://github.com/gaeljacquin" target="_blank">
                 <span className="flex">
                   GitHub
-                  <span className="ml-2"><ExternalLinkIcon /></span>
+                  <span className="ml-2">
+                    <ExternalLinkIcon />
+                  </span>
                 </span>
               </Link>
             </li>
@@ -97,21 +67,24 @@ export default function Footer() {
       </div>
       <div className="container max-w-7xl mt-8 flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <Link href="https://gaeljacquin.com" target="_blank" className="w-16 h-auto">
+          <Link
+            href="https://gaeljacquin.com"
+            target="_blank"
+            className="w-16 h-auto"
+          >
             <LottieDynamic loop={true} />
           </Link>
         </div>
         <p className="mt-4 text-sm text-gray-500 sm:pl-4 sm:mt-0">
-          &copy; 2024{currentYear !== 2024 && `-${currentYear}`}
-          {' '}
+          &copy; 2024{currentYear !== 2024 && `-${currentYear}`}{" "}
           <span className="text-gael-green hover:underline hover:text-gael-green-dark">
-            <Link href="https://gaeljacquin.com" target="_blank">Gaël Jacquin</Link>
+            <Link href="https://gaeljacquin.com" target="_blank">
+              Gaël Jacquin
+            </Link>
           </span>
-          .
-          {' '}
-          All rights reserved.
+          . All rights reserved.
         </p>
       </div>
     </footer>
-  )
+  );
 }

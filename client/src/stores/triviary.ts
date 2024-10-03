@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { io } from "socket.io-client";
-import { Game, Games, Guess } from "@/types/games";
+import { Games } from "@/types/games";
 import { ZTriviary } from "@/types/ztriviary";
 import { TriviaryStats } from "@/types/unlimited-stats";
 import {
@@ -11,8 +11,7 @@ import {
   textStartingPosition,
   textSubmit,
   textTryAgain,
-} from "../lib/client-constants";
-import { time } from "console";
+} from "@/lib/client-constants";
 
 const modeId = 8;
 
@@ -30,6 +29,11 @@ export const initialState = {
   played: false,
   won: false,
   dummyOnLoad: true,
+};
+
+const initialState2 = {
+  streak: 0,
+  maxStreak: 0,
 };
 
 type checkAnswerProps = {
@@ -82,6 +86,7 @@ const checkAnswer = (data: checkAnswerProps) => {
   if (answer) {
     getState().markAsPlayed();
     getState().markAsWon();
+    getState().setStreak(true);
     saveTriviaryStats({
       modeId,
       attempts: Math.min(getState().guesses.length + 1, getState().lives),
@@ -95,6 +100,7 @@ const checkAnswer = (data: checkAnswerProps) => {
 
     if (getState().livesLeft === 0) {
       getState().markAsPlayed();
+      getState().setStreak(false);
       setState({ goodTimeline });
       saveTriviaryStats({
         modeId,
@@ -105,6 +111,8 @@ const checkAnswer = (data: checkAnswerProps) => {
       });
     }
   }
+
+  getState().setMaxStreak();
 };
 
 const saveTriviaryStats = (data: TriviaryStats) => {
@@ -115,6 +123,7 @@ const zTriviary = create(
   persist(
     devtools<ZTriviary>((set, get) => ({
       ...initialState,
+      ...initialState2,
       updateLivesLeft: () => {
         const livesLeft = get().livesLeft;
         set({ livesLeft: livesLeft - 1 });
@@ -198,6 +207,8 @@ const zTriviary = create(
         set({ won: true });
       },
       getPlayed: () => get().played,
+      getStreak: () => get().streak,
+      getMaxStreak: () => get().maxStreak,
       resetPlay: () => {
         set({ ...initialState });
         socket.emit("init-triviary");
@@ -212,14 +223,22 @@ const zTriviary = create(
         const guesses = get().guesses;
         set({ timeline: guesses[0], alreadyGuessed: true });
       },
+      setStreak: (won: boolean) => {
+        const streak = won ? get().streak + 1 : 0;
+        set({ streak });
+      },
+      setMaxStreak: () => {
+        const maxStreak = Math.max(get().maxStreak, get().streak);
+        set({ maxStreak });
+      },
     })),
     {
       name: "ztriviary",
       partialize: (state) => {
-        const { lives, ...rest } = state;
+        const { lives, streak, maxStreak, ...rest } = state;
         void rest;
 
-        return { lives };
+        return { lives, streak, maxStreak };
       },
     }
   )

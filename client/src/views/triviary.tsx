@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/collapsible";
 import GameCard from "@/components/game-card";
 import MyBadgeGroup from "~/src/components/my-badge-group";
-import { triviaryLegend } from "~/src/lib/client-constants";
+import { streakCounters, triviaryLegend } from "~/src/lib/client-constants";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -52,6 +52,8 @@ export default function Triviary() {
     submitAnswer,
     setLastGuess,
     resetPlay,
+    getStreak,
+    getMaxStreak,
   } = zTriviary();
   const { getModeBySlug } = zModes();
   const mode = getModeBySlug(pathname);
@@ -90,7 +92,13 @@ export default function Triviary() {
                 />
               </div>
               <div className="flex justify-center space-x-2 -mt-2">
-                <MyBadgeGroup group={triviaryLegend} />
+                {gameOver || won ? (
+                  <MyBadgeGroup
+                    group={streakCounters(getStreak(), getMaxStreak())}
+                  />
+                ) : (
+                  <MyBadgeGroup group={triviaryLegend} />
+                )}
               </div>
 
               <div className="flex justify-center mt-5">

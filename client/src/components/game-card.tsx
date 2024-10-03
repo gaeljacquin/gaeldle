@@ -7,7 +7,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Game } from "~/src/types/games";
-import { cardImgSize, cardImgClasses } from "~/src/lib/client-constants";
+import {
+  cardImgSize,
+  cardImgClasses,
+  cardImgClassesAlt,
+} from "~/src/lib/client-constants";
 
 type GameCardProps = {
   card: Partial<Game>;
@@ -56,7 +60,8 @@ const GameCard = (props: GameCardProps) => {
               alt={card?.name ?? ""}
               width={cardImgSize * 2}
               height={cardImgSize * 2}
-              style={{ objectFit: "contain" }}
+              className={cardImgClassesAlt}
+              style={{ objectFit: "cover" }}
               priority
             />
             <p className="text-center text-sm font-semibold">{card?.name}</p>

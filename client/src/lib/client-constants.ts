@@ -50,6 +50,7 @@ const bgOther2 = "bg-indigo-500";
 
 const cardImgSize = 128;
 const cardImgClasses = "w-full h-48 object-cover";
+const cardImgClassesAlt = "w-full h-96 object-cover";
 
 const textSubmit = "Submit";
 const textAlreadyGuessed = "Already guessed";
@@ -76,6 +77,12 @@ const triviaryLegend = [
   { text: "Found then moved", backgroundClass: bgPartial },
   { text: "Correct", backgroundClass: bgCorrect },
 ];
+const streakCounters = (streak: number, maxStreak: number) => {
+  return [
+    { text: `Streak: ${streak}`, backgroundClass: bgOther1 },
+    { text: `Max Streak: ${maxStreak}`, backgroundClass: bgOther2 },
+  ];
+};
 
 export {
   textVictory,
@@ -102,4 +109,6 @@ export {
   textStartingPosition,
   levels,
   triviaryLegend,
+  streakCounters,
+  cardImgClassesAlt,
 };

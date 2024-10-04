@@ -68,7 +68,8 @@ export class GamesService {
     return game;
   }
 
-  async dbFindRandom(numCards: number, sampleSize: number) {
+  async dbFindRandom(numCards: number, sampleSize: number, exclude?: number[]) {
+    const excludeArray = exclude ? exclude : [];
     const data = await this.prisma.$queryRaw`
       SELECT
         sub.*
@@ -83,6 +84,7 @@ export class GamesService {
         FROM games g
         TABLESAMPLE BERNOULLI (${sampleSize})
         WHERE g.first_release_date IS NOT NULL
+        AND g.igdb_id != ANY(${excludeArray})
         LIMIT ${numCards}
       ) sub
       ORDER BY sub.frd

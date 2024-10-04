@@ -16,43 +16,52 @@ import {
 type GameCardProps = {
   card: Partial<Game>;
   showBar?: boolean;
+  showTooltip?: boolean;
 };
 
 const GameCard = (props: GameCardProps) => {
-  const { card, showBar = true } = props;
+  const { card, showBar = true, showTooltip = true } = props;
+
+  const daCard = () => {
+    return (
+      <Card
+        className="rounded-2xl overflow-x-auto shadow-md"
+        style={{ width: cardImgSize }}
+      >
+        <CardContent className="p-0">
+          <Image
+            src={card?.imageUrl ?? ""}
+            alt={card?.name ?? ""}
+            width={cardImgSize}
+            height={cardImgSize}
+            className={cardImgClasses}
+            style={{ objectFit: "cover" }}
+            priority
+          />
+          {showBar && (
+            <div className={`p-2 ${card?.bgStatus} text-center`}>
+              {card?.frdFormatted ? (
+                <p className="text-sm text-white font-semibold">
+                  {card?.frdFormatted}
+                </p>
+              ) : (
+                <p className="text-sm text-white font-semibold">?</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  if (!showTooltip) {
+    return daCard();
+  }
 
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Card
-            className="rounded-2xl overflow-x-auto shadow-md"
-            style={{ width: cardImgSize }}
-          >
-            <CardContent className="p-0">
-              <Image
-                src={card?.imageUrl ?? ""}
-                alt={card?.name ?? ""}
-                width={cardImgSize}
-                height={cardImgSize}
-                className={cardImgClasses}
-                style={{ objectFit: "cover" }}
-                priority
-              />
-              {showBar && (
-                <div className={`p-2 ${card?.bgStatus} text-center`}>
-                  {card?.frdFormatted ? (
-                    <p className="text-sm text-white font-semibold">
-                      {card?.frdFormatted}
-                    </p>
-                  ) : (
-                    <p className="text-sm text-white font-semibold">?</p>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{daCard()}</TooltipTrigger>
         <TooltipContent>
           <div>
             <Image

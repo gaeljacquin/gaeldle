@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import io, { Socket } from "socket.io-client";
 import { z } from "zod";
+import { Games } from "../types/games";
 
 const textVictory = "You got it! 😀";
 const textGameOver = "Game over 😭";
@@ -77,6 +78,10 @@ const triviaryLegend = [
   { text: "Found then moved", backgroundClass: bgPartial },
   { text: "Correct", backgroundClass: bgCorrect },
 ];
+const triviaryVer2Legend = [
+  { text: "Incorrect", backgroundClass: bgIncorrect },
+  { text: "Correct", backgroundClass: bgCorrect },
+];
 const streakCounters = (streak: number, maxStreak: number) => {
   return [
     { text: `Streak: ${streak}`, backgroundClass: bgOther1 },
@@ -111,4 +116,5 @@ export {
   triviaryLegend,
   streakCounters,
   cardImgClassesAlt,
+  triviaryVer2Legend,
 };

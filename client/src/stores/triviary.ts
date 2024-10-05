@@ -18,8 +18,6 @@ const modeId = 8;
 export const initialState = {
   lives: 0,
   livesLeft: 0,
-  cards: 0,
-  cardsLeft: 0,
   timeline: [],
   goodTimeline: [],
   timelineOnLoad: [],
@@ -45,7 +43,7 @@ type checkAnswerProps = {
 export const socket = io(`${process.env.serverUrl}`);
 
 const wsConnect = () => {
-  const { getState, setState } = zTriviary;
+  const { setState } = zTriviary;
 
   socket.on("connect", () => {
     console.info("Connected to WebSocket server");

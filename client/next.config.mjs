@@ -15,6 +15,11 @@ const nextConfig = {
         hostname: "images.igdb.com",
         pathname: "**",
       },
+      {
+        protocol: "https",
+        hostname: "fakeimg.pl",
+        pathname: "**",
+      },
     ],
   },
   async redirects() {

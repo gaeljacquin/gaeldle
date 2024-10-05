@@ -11,3 +11,5 @@ export type UnlimitedStats = {
 export type TriviaryStats = UnlimitedStats & {
   guesses: Games[];
 };
+
+export type Triviary2Stats = Pick<UnlimitedStats, "modeId" | "found" | "info">;

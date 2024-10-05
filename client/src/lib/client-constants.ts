@@ -78,7 +78,7 @@ const triviaryLegend = [
   { text: "Found then moved", backgroundClass: bgPartial },
   { text: "Correct", backgroundClass: bgCorrect },
 ];
-const triviaryVer2Legend = [
+const triviary2Legend = [
   { text: "Incorrect", backgroundClass: bgIncorrect },
   { text: "Correct", backgroundClass: bgCorrect },
 ];
@@ -116,5 +116,5 @@ export {
   triviaryLegend,
   streakCounters,
   cardImgClassesAlt,
-  triviaryVer2Legend,
+  triviary2Legend,
 };

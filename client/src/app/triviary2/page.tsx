@@ -1,13 +1,13 @@
 import dynamic from "next/dynamic";
 
-const DynamicTriviaryVer2 = dynamic(() => import("@/views/triviary-ver2"), {
+const DynamicTriviary2 = dynamic(() => import("~/src/views/triviary2"), {
   ssr: false,
 });
 
 export default async function Page() {
   return (
     <>
-      <DynamicTriviaryVer2 />
+      <DynamicTriviary2 />
     </>
   );
 }

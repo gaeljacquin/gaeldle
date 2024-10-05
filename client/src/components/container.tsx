@@ -4,7 +4,7 @@ import {
   horizontalListSortingStrategy,
   SortableContext,
 } from "@dnd-kit/sortable";
-import SortableItem from "./sortable-item2";
+import SortableItem2 from "./sortable-item2";
 
 type ContainerProps = {
   id: string;
@@ -13,7 +13,6 @@ type ContainerProps = {
 
 export default function Container(props: ContainerProps) {
   const { id, items } = props;
-
   const { setNodeRef } = useDroppable({
     id,
   });
@@ -24,11 +23,15 @@ export default function Container(props: ContainerProps) {
       items={items}
       strategy={horizontalListSortingStrategy}
     >
-      <div ref={setNodeRef}>
-        {items.map((item: number) => (
-          <SortableItem key={item ?? 0} id={item ?? 0} />
-        ))}
-      </div>
+      {items.map((item) => (
+        <div
+          ref={setNodeRef}
+          key={item}
+          className="flex items-center space-x-4"
+        >
+          <SortableItem2 id={item} />
+        </div>
+      ))}
     </SortableContext>
   );
 }

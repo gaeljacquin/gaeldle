@@ -29,7 +29,7 @@ export class TriviaryGateway
 
   @WebSocketServer() server: Server;
 
-  private triviary2Map = new ModeMap();
+  private triviaryMap = new ModeMap();
   private mode = this.modesService.findOne(8);
 
   async afterInit() {
@@ -45,15 +45,15 @@ export class TriviaryGateway
 
   handleDisconnect(client: Socket) {
     console.info(`Client disconnected (triviary): ${client.id}`);
-    this.triviary2Map.delete(client.id);
+    this.triviaryMap.delete(client.id);
   }
 
-  @SubscribeMessage('triviary2-stats')
+  @SubscribeMessage('triviary-stats')
   async handleTriviaryStats(client: Socket, data): Promise<void> {
     const clientId = client.id;
     console.info('Received triviary stats:', data);
     await this.unlimitedStatsService.create(data);
-    client.emit('triviary2-stats-res', {
+    client.emit('triviary-stats-res', {
       message: `Saved triviary stats for ${clientId}`,
     });
   }
@@ -61,7 +61,7 @@ export class TriviaryGateway
   @SubscribeMessage('triviary')
   async handleTriviary(client: Socket, data): Promise<void> {
     const clientId = client.id;
-    const games = this.triviary2Map.get(clientId);
+    const games = this.triviaryMap.get(clientId);
     const { timeline, livesLeft } = data;
     let answer = true;
 
@@ -108,7 +108,7 @@ export class TriviaryGateway
       };
     }
 
-    client.emit('triviary2-res', emit);
+    client.emit('triviary-res', emit);
   }
 
   @SubscribeMessage('init-triviary')
@@ -117,19 +117,15 @@ export class TriviaryGateway
     const sampleSize = (await this.mode).pixelation;
     const games = await getRandomGames(this.gamesService, numCards, sampleSize);
     let reshuffledGames = shuffleList(games);
-    reshuffledGames = reshuffledGames.map((game, index) => {
-      if (index === games.length - 1) {
-        const { frd, frdFormatted, ...rest } = game;
-        void frd, frdFormatted;
+    reshuffledGames = reshuffledGames.map((game) => {
+      const { frd, frdFormatted, ...rest } = game;
+      void frd, frdFormatted;
 
-        return { ...rest, bgStatus: bgOther1 };
-      }
-
-      return game;
+      return { ...rest, bgStatus: bgOther1 };
     });
-    this.triviary2Map.set(client.id, games);
+    this.triviaryMap.set(client.id, games);
 
-    client.emit('triviary2-init', {
+    client.emit('triviary-init', {
       games: reshuffledGames,
       mode: await this.mode,
     });

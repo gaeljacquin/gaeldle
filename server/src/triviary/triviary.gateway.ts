@@ -111,7 +111,7 @@ export class TriviaryGateway
     client.emit('triviary-res', emit);
   }
 
-  @SubscribeMessage('init-triviary')
+  @SubscribeMessage('triviary-init')
   async handleTriviaryInit(client) {
     const numCards = (await this.mode).pixelationStep;
     const sampleSize = (await this.mode).pixelation;
@@ -125,7 +125,7 @@ export class TriviaryGateway
     });
     this.triviaryMap.set(client.id, games);
 
-    client.emit('triviary-init', {
+    client.emit('triviary-init-res', {
       games: reshuffledGames,
       mode: await this.mode,
     });

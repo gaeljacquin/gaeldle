@@ -53,7 +53,7 @@ const wsConnect = () => {
     checkAnswer(data);
   });
 
-  socket.on("triviary-init", (data) => {
+  socket.on("triviary-init-res", (data) => {
     const mode = data.mode;
     let { lives, lives: livesLeft } = mode;
     setState({
@@ -71,7 +71,7 @@ const wsConnect = () => {
   return () => {
     socket.off("connect");
     socket.off(`triviary-res`);
-    socket.off(`triviary-init`);
+    socket.off(`triviary-init-res`);
     socket.off("triviary-stats-res");
   };
 };
@@ -209,7 +209,7 @@ const zTriviary = create(
       getMaxStreak: () => get().maxStreak,
       resetPlay: () => {
         set({ ...initialState });
-        socket.emit("init-triviary");
+        socket.emit("triviary-init");
       },
       submitAnswer: () => {
         const timeline = get().timeline;

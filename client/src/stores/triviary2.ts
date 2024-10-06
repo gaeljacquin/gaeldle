@@ -31,7 +31,7 @@ export const initialState = {
 };
 
 const initialState2 = {
-  maxStreak: 0,
+  bestStreak: 0,
 };
 
 type checkAnswerProps = {
@@ -65,7 +65,7 @@ const wsConnect = () => {
         info: {
           timeline: getState().timeline,
           streak: getState().streak,
-          maxStreak: getState().maxStreak,
+          bestStreak: getState().bestStreak,
         },
       });
     } else {
@@ -131,7 +131,7 @@ const checkAnswer = (data: checkAnswerProps) => {
   if (isTimelineSorted) {
     timeline[insertIndex].bgStatus = bgCorrect;
     getState().setStreak(true);
-    getState().setMaxStreak();
+    getState().setBestStreak();
     socket.emit("triviary2-next", {
       timelineIds: timeline.map((game) => game.igdbId),
     });
@@ -145,14 +145,14 @@ const checkAnswer = (data: checkAnswerProps) => {
     if (getState().livesLeft === 0) {
       getState().markAsPlayed();
       getState().setStreak(false);
-      getState().setMaxStreak();
+      getState().setBestStreak();
       saveTriviary2Stats({
         modeId,
         found: false,
         info: {
           timeline,
           streak: getState().streak,
-          maxStreak: getState().maxStreak,
+          bestStreak: getState().bestStreak,
         },
       });
     } else {
@@ -198,7 +198,7 @@ const zTriviary2 = create(
       },
       getPlayed: () => get().played,
       getStreak: () => get().streak,
-      getMaxStreak: () => get().maxStreak,
+      getBestStreak: () => get().bestStreak,
       getNextGame: () => get().nextGame,
       resetPlay: () => {
         set({ ...initialState });
@@ -208,9 +208,9 @@ const zTriviary2 = create(
         const streak = won ? get().streak + 1 : 0;
         set({ streak });
       },
-      setMaxStreak: () => {
-        const maxStreak = Math.max(get().maxStreak, get().streak);
-        set({ maxStreak });
+      setBestStreak: () => {
+        const bestStreak = Math.max(get().bestStreak, get().streak);
+        set({ bestStreak });
       },
       getContainers: () => get().containers,
       setContainersDragEnd: (props: setContainersDragEndProps) => {
@@ -322,10 +322,10 @@ const zTriviary2 = create(
     {
       name: "ztriviary2",
       partialize: (state) => {
-        const { lives, maxStreak, ...rest } = state;
+        const { lives, bestStreak, ...rest } = state;
         void rest;
 
-        return { lives, maxStreak };
+        return { lives, bestStreak };
       },
     }
   )

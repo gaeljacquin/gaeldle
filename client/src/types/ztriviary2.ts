@@ -6,13 +6,13 @@ export type ZTriviary2 = {
   nextGame: Partial<Game> | null;
   played: boolean;
   streak: number;
-  maxStreak: number;
+  bestStreak: number;
   timeline: Partial<Game>[];
   won: boolean;
   containers: ContainerType;
   shadowContainers: ContainerType;
   getLivesLeft: () => number;
-  getMaxStreak: () => number;
+  getBestStreak: () => number;
   getPlayed: () => boolean;
   getStreak: () => number;
   getTimeline: () => Partial<Game>[];
@@ -20,7 +20,7 @@ export type ZTriviary2 = {
   markAsPlayed: () => void;
   markAsWon: () => void;
   resetPlay: () => void;
-  setMaxStreak: () => void;
+  setBestStreak: () => void;
   setStreak: (arg0: boolean) => void;
   updateLivesLeft: () => void;
   getContainers: () => { [key: string]: number[] };

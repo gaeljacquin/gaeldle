@@ -31,7 +31,7 @@ export const initialState = {
 
 const initialState2 = {
   streak: 0,
-  maxStreak: 0,
+  bestStreak: 0,
 };
 
 type checkAnswerProps = {
@@ -110,7 +110,7 @@ const checkAnswer = (data: checkAnswerProps) => {
     }
   }
 
-  getState().setMaxStreak();
+  getState().setBestStreak();
 };
 
 const saveTriviaryStats = (data: TriviaryStats) => {
@@ -206,7 +206,7 @@ const zTriviary = create(
       },
       getPlayed: () => get().played,
       getStreak: () => get().streak,
-      getMaxStreak: () => get().maxStreak,
+      getBestStreak: () => get().bestStreak,
       resetPlay: () => {
         set({ ...initialState });
         socket.emit("triviary-init");
@@ -225,18 +225,18 @@ const zTriviary = create(
         const streak = won ? get().streak + 1 : 0;
         set({ streak });
       },
-      setMaxStreak: () => {
-        const maxStreak = Math.max(get().maxStreak, get().streak);
-        set({ maxStreak });
+      setBestStreak: () => {
+        const bestStreak = Math.max(get().bestStreak, get().streak);
+        set({ bestStreak });
       },
     })),
     {
       name: "ztriviary",
       partialize: (state) => {
-        const { lives, streak, maxStreak, ...rest } = state;
+        const { lives, streak, bestStreak, ...rest } = state;
         void rest;
 
-        return { lives, streak, maxStreak };
+        return { lives, streak, bestStreak };
       },
     }
   )

@@ -82,10 +82,10 @@ const triviary2Legend = [
   { text: "Incorrect", backgroundClass: bgIncorrect },
   { text: "Correct", backgroundClass: bgCorrect },
 ];
-const streakCounters = (streak: number, maxStreak: number) => {
+const streakCounters = (streak: number, bestStreak: number) => {
   return [
     { text: `Streak: ${streak}`, backgroundClass: bgOther1 },
-    { text: `Max Streak: ${maxStreak}`, backgroundClass: bgOther2 },
+    { text: `Best Streak: ${bestStreak}`, backgroundClass: bgOther2 },
   ];
 };
 

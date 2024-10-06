@@ -64,7 +64,7 @@ export default function AboutDialog() {
             </Link>
             .
           </p>
-          <p>
+          {/* <p>
             New games and artwork are picked daily from an ever-growing list of
             games. The list, cover images and artwork are sourced from{" "}
             <Link
@@ -75,7 +75,7 @@ export default function AboutDialog() {
               IGDB
             </Link>
             .
-          </p>
+          </p> */}
           <p>
             All rights go to the rightful owners - no copyright infringement
             intended.

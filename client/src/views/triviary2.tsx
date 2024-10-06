@@ -37,7 +37,7 @@ export default function TriviaryVer2() {
     won,
     resetPlay,
     getStreak,
-    getMaxStreak,
+    getBestStreak,
     setContainersDragEnd,
     setContainersDragOver,
     setContainersDragCancel,
@@ -109,7 +109,7 @@ export default function TriviaryVer2() {
               <div className="flex justify-center space-x-2 -mt-2">
                 {gameOver || won ? (
                   <MyBadgeGroup
-                    group={streakCounters(getStreak(), getMaxStreak())}
+                    group={streakCounters(getStreak(), getBestStreak())}
                   />
                 ) : (
                   <MyBadgeGroup group={triviary2Legend} />

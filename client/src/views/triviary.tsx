@@ -53,7 +53,7 @@ export default function Triviary() {
     setLastGuess,
     resetPlay,
     getStreak,
-    getMaxStreak,
+    getBestStreak,
   } = zTriviary();
   const { getModeBySlug } = zModes();
   const mode = getModeBySlug(pathname);
@@ -94,7 +94,7 @@ export default function Triviary() {
               <div className="flex justify-center space-x-2 -mt-2">
                 {gameOver || won ? (
                   <MyBadgeGroup
-                    group={streakCounters(getStreak(), getMaxStreak())}
+                    group={streakCounters(getStreak(), getBestStreak())}
                   />
                 ) : (
                   <MyBadgeGroup group={triviaryLegend} />

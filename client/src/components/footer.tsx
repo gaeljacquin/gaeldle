@@ -29,7 +29,8 @@ export default function Footer() {
           <ul className="flex flex-col">
             <h3 className="font-semibold">Quick Links</h3>
             <li>{navLink("/", "Home")}</li>
-            <li>{navLink("/triviary", "Play")}</li>
+            <li>{navLink("/triviary", "Trivia I")}</li>
+            <li>{navLink("/triviary2", "Trivia II")}</li>
           </ul>
         </div>
         <div className="grid gap-1">

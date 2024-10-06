@@ -9,13 +9,13 @@ export type ZTriviary = {
   livesLeft: number;
   played: boolean;
   streak: number;
-  maxStreak: number;
+  bestStreak: number;
   submitButtonText: string;
   timeline: Games;
   timelineOnLoad: Games;
   won: boolean;
   getLivesLeft: () => number;
-  getMaxStreak: () => number;
+  getBestStreak: () => number;
   getPlayed: () => boolean;
   getStreak: () => number;
   getTimeline: () => unknown[];
@@ -23,7 +23,7 @@ export type ZTriviary = {
   markAsWon: () => void;
   resetPlay: () => void;
   setLastGuess: () => void;
-  setMaxStreak: () => void;
+  setBestStreak: () => void;
   setStreak: (arg0: boolean) => void;
   submitAnswer: () => void;
   updateGuesses: (arg0: Games) => void;

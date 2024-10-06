@@ -38,11 +38,22 @@ export default function Home() {
             </Link>
           </p>
           <div className="flex justify-center">
-            <Link href="/triviary" className="max-w-xs w-full mt-5">
-              <Button className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold tracking-sm max-w-xs w-full">
-                Play
-              </Button>
-            </Link>
+            <ul className="mt-4 space-y-6 max-w-xs w-full">
+              <li>
+                <Link href="/triviary" className="max-w-xs w-full mt-5">
+                  <Button className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold tracking-sm max-w-xs w-full">
+                    Trivia I
+                  </Button>
+                </Link>
+              </li>
+              <li>
+                <Link href="/triviary2" className="max-w-xs w-full mt-5">
+                  <Button className="bg-gradient-to-r bg-gradient-to-r from-blue-500 to-teal-400 hover:bg-gradient-to-r hover:from-blue-700 hover:to-teal-600 text-white text-md font-semibold tracking-sm max-w-xs w-full">
+                    Trivia II
+                  </Button>
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
       </main>

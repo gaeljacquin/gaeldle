@@ -142,7 +142,13 @@ export default function TriviaryVer2() {
             </div>
           </div>
 
-          <DragOverlay adjustScale>
+          <DragOverlay
+            adjustScale
+            dropAnimation={{
+              duration: 500,
+              easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
+            }}
+          >
             {activeId ? <Item2 id={activeId ?? 0} isDragging /> : null}
           </DragOverlay>
         </DndContext>

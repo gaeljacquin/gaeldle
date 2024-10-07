@@ -89,6 +89,11 @@ const streakCounters = (streak: number, bestStreak: number) => {
   ];
 };
 
+const placeholderImage = {
+  url: "https://fakeimg.pl/512x720?text=?",
+  alt: "Placeholder Image",
+};
+
 export {
   textVictory,
   textGameOver,
@@ -117,4 +122,5 @@ export {
   streakCounters,
   cardImgClassesAlt,
   triviary2Legend,
+  placeholderImage,
 };

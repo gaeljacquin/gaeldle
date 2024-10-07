@@ -85,6 +85,7 @@ const checkAnswer = (data: checkAnswerProps) => {
     getState().markAsPlayed();
     getState().markAsWon();
     getState().setStreak(true);
+    getState().setBestStreak();
     saveTriviaryStats({
       modeId,
       attempts: Math.min(getState().guesses.length + 1, getState().lives),
@@ -95,6 +96,8 @@ const checkAnswer = (data: checkAnswerProps) => {
   } else {
     getState().updateGuesses(timeline);
     getState().updateLivesLeft();
+    getState().setBestStreak();
+    getState().setStreak(false);
 
     if (getState().livesLeft === 0) {
       getState().markAsPlayed();

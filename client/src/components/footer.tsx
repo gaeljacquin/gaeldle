@@ -31,6 +31,7 @@ export default function Footer() {
             <li>{navLink("/", "Home")}</li>
             <li>{navLink("/triviary", "Trivia I")}</li>
             <li>{navLink("/triviary2", "Trivia II")}</li>
+            <li>{navLink("/cover", "Cover")}</li>
           </ul>
         </div>
         <div className="grid gap-1">

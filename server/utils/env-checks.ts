@@ -21,8 +21,8 @@ export function genKey(key: string) {
 
 export async function getRandomGames(gamesService, numCards, sampleSize) {
   const games = (await (isDevMode()
-    ? gamesService.dbFindRandomDev(numCards)
-    : gamesService.dbFindRandom(numCards, sampleSize))) as Games;
+    ? gamesService.findRandomDev(numCards)
+    : gamesService.findRandom(numCards, sampleSize))) as Games;
 
   return games;
 }

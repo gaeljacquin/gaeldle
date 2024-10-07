@@ -6,6 +6,6 @@ export type DailyStats = {
   attempts: number;
   guesses: Guesses;
   found: boolean;
-  info?: unknown[];
+  info?: unknown;
   real?: boolean;
 };

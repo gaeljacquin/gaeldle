@@ -12,9 +12,9 @@ export type ZTriviary2 = {
   containers: ContainerType;
   shadowContainers: ContainerType;
   getLivesLeft: () => number;
+  getStreak: () => number;
   getBestStreak: () => number;
   getPlayed: () => boolean;
-  getStreak: () => number;
   getTimeline: () => Partial<Game>[];
   getNextGame: () => Partial<Game> | null;
   markAsPlayed: () => void;

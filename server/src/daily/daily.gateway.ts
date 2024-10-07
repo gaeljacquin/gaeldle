@@ -99,7 +99,7 @@ export class DailyGateway
     const answer = igdbId === igdbIdToday;
     const finished = answer || livesLeft === 0;
     const gameOver = !answer && livesLeft === 0;
-    const game = await this.gamesService.dbFindOne(igdbId);
+    const game = await this.gamesService.findOne(igdbId);
     let name = null;
     let nextKeyword = null;
     let imageUrl = '';
@@ -155,7 +155,7 @@ export class DailyGateway
   }
 
   private async checkSpecs(game, igdbIdToday, final = false) {
-    const gotd = await this.gamesService.dbFindOne(igdbIdToday);
+    const gotd = await this.gamesService.findOne(igdbIdToday);
     const gameFirstReleaseYear = new Date(
       game.info.first_release_date * 1000,
     ).getFullYear();

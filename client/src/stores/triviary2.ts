@@ -61,7 +61,7 @@ const wsConnect = () => {
       getState().markAsWon();
       saveTriviary2Stats({
         modeId,
-        found: false,
+        found: true,
         info: {
           timeline: getState().timeline,
           streak: getState().streak,
@@ -83,7 +83,7 @@ const wsConnect = () => {
     }
   });
 
-  socket.on("triviary2-init", (data) => {
+  socket.on("triviary2-init-res", (data) => {
     const mode = data.mode;
     const timelineGame = data.games[0];
     const nextGame = data.games[data.games.length - 1];
@@ -110,7 +110,7 @@ const wsConnect = () => {
 
   return () => {
     socket.off("connect");
-    socket.off(`triviary2-init`);
+    socket.off(`triviary2-init-res`);
     socket.off(`triviary2-check-res`);
     socket.off(`triviary2-next-res`);
     socket.off("triviary2-stats-res");
@@ -144,8 +144,8 @@ const checkAnswer = (data: checkAnswerProps) => {
 
     if (getState().livesLeft === 0) {
       getState().markAsPlayed();
-      getState().setStreak(false);
       getState().setBestStreak();
+      getState().setStreak(false);
       saveTriviary2Stats({
         modeId,
         found: false,
@@ -202,7 +202,7 @@ const zTriviary2 = create(
       getNextGame: () => get().nextGame,
       resetPlay: () => {
         set({ ...initialState });
-        socket.emit("init-triviary2");
+        socket.emit("triviary2-init");
       },
       setStreak: (won: boolean) => {
         const streak = won ? get().streak + 1 : 0;

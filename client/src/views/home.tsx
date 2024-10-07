@@ -28,14 +28,7 @@ export default function Home() {
             >
               Wordle
             </Link>{" "}
-            clone inspired by{" "}
-            <Link
-              className="text-gael-blue hover:text-gael-blue-dark hover:underline"
-              href="https://wikitrivia.tomjwatson.com/"
-              target="_blank"
-            >
-              Wiki Trivia
-            </Link>
+            clone
           </p>
           <div className="flex justify-center">
             <ul className="mt-4 space-y-6 max-w-xs w-full">
@@ -50,6 +43,13 @@ export default function Home() {
                 <Link href="/triviary2" className="max-w-xs w-full mt-5">
                   <Button className="bg-gradient-to-r bg-gradient-to-r from-blue-500 to-teal-400 hover:bg-gradient-to-r hover:from-blue-700 hover:to-teal-600 text-white text-md font-semibold tracking-sm max-w-xs w-full">
                     Trivia II
+                  </Button>
+                </Link>
+              </li>
+              <li>
+                <Link href="/cover" className="max-w-xs w-full mt-5">
+                  <Button className="bg-gradient-to-r from-gael-blue to-gael-green via-gael-pink hover:bg-gradient-to-r hover:from-gael-blue-dark hover:to-gael-green-dark hover:via-gael-pink-dark text-white text-md font-semibold tracking-sm max-w-xs w-full">
+                    Cover
                   </Button>
                 </Link>
               </li>

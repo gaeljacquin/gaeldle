@@ -15,7 +15,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-600 backdrop-filter backdrop-blur-md flex h-20 w-full shrink-0 items-center px-4 md:px-6">
-      <Link href="#" className="mr-6 flex h-16 w-16">
+      <Link href={pathname !== "/" ? "/" : "#"} className="mr-6 flex h-16 w-16">
         <LottieDynamic loop={false} />
         <span className="sr-only">Gaeldle</span>
       </Link>

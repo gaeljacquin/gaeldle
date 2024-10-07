@@ -14,14 +14,7 @@ import { ModeMap } from '~/utils/mode-map';
 import shuffleList from '~/utils/shuffle-list';
 import { ModesService } from '~/src/modes/modes.service';
 import { getRandomGame, getRandomGames } from '~/utils/env-checks';
-import {
-  bgCorrect,
-  bgIncorrect,
-  bgOther1,
-  bgOther2,
-  testGameIgdbIds,
-} from '~/utils/constants';
-import { Games } from '~/types/games';
+import { bgCorrect } from '~/utils/constants';
 
 @WebSocketGateway({ cors })
 export class Triviary2Gateway
@@ -45,7 +38,6 @@ export class Triviary2Gateway
   async handleConnection(client: Socket, ...args: any[]) {
     console.info(`Client connected (triviary2): ${client.id}`);
     console.info('args: ', args);
-
     this.handleTriviary2Init(client);
   }
 
@@ -85,6 +77,7 @@ export class Triviary2Gateway
 
     if (game) {
       const { frd, frdFormatted, ...rest } = game;
+      void frd, frdFormatted;
       nextGame = { ...rest };
       this.triviary2Map.set(clientId, game);
     }
@@ -93,7 +86,7 @@ export class Triviary2Gateway
     client.emit('triviary2-next-res', emit);
   }
 
-  @SubscribeMessage('init-triviary2')
+  @SubscribeMessage('triviary2-init')
   async handleTriviary2Init(client) {
     const numCards = (await this.mode).pixelationStep;
     const sampleSize = (await this.mode).pixelation;
@@ -104,13 +97,13 @@ export class Triviary2Gateway
         const { frd, frdFormatted, ...rest } = game;
         void frd, frdFormatted;
 
-        return { ...rest, bgStatus: bgOther1 };
+        return { ...rest };
+      } else {
+        return { ...game, bgStatus: bgCorrect };
       }
-
-      return game;
     });
     this.triviary2Map.set(client.id, games[games.length - 1]);
-    client.emit('triviary2-init', {
+    client.emit('triviary2-init-res', {
       games: reshuffledGames,
       mode: await this.mode,
     });

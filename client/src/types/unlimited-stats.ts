@@ -1,4 +1,4 @@
-import { Games } from "./games";
+import { Games, Guesses } from "./games";
 
 export type UnlimitedStats = {
   igdbId?: number;
@@ -10,6 +10,10 @@ export type UnlimitedStats = {
 
 export type TriviaryStats = UnlimitedStats & {
   guesses: Games[];
+};
+
+export type CoverStats = UnlimitedStats & {
+  guesses: Guesses;
 };
 
 export type Triviary2Stats = Pick<UnlimitedStats, "modeId" | "found" | "info">;

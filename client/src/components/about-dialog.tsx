@@ -52,7 +52,7 @@ export default function AboutDialog() {
               target="_blank"
               className="text-gael-blue hover:text-gael-blue-dark hover:underline"
             >
-              Gamedle (previously)
+              Gamedle
             </Link>
             , and{" "}
             <Link

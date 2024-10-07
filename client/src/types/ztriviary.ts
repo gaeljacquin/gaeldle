@@ -15,9 +15,9 @@ export type ZTriviary = {
   timelineOnLoad: Games;
   won: boolean;
   getLivesLeft: () => number;
+  getStreak: () => number;
   getBestStreak: () => number;
   getPlayed: () => boolean;
-  getStreak: () => number;
   getTimeline: () => unknown[];
   markAsPlayed: () => void;
   markAsWon: () => void;

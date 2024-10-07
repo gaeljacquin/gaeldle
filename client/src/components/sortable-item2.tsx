@@ -1,6 +1,6 @@
 "use client";
 
-import { CSSProperties, forwardRef, HTMLAttributes } from "react";
+import { CSSProperties } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import GameCard from "./game-card";

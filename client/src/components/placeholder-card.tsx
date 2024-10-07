@@ -6,6 +6,7 @@ import {
   bgOther2,
   bgOther1,
   cardImgClassesAlt,
+  placeholderImage,
 } from "~/src/lib/client-constants";
 
 const PlaceholderCard = () => {
@@ -16,8 +17,8 @@ const PlaceholderCard = () => {
     >
       <CardContent className="p-0">
         <Image
-          src="https://fakeimg.pl/512x720?text=?"
-          alt="Question Mark Placeholder Image"
+          src={`${placeholderImage.url}`}
+          alt={`${placeholderImage.alt}`}
           width={cardImgSize}
           height={cardImgSize}
           style={{ objectFit: "cover" }}

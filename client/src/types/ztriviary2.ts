@@ -5,6 +5,7 @@ export type ZTriviary2 = {
   livesLeft: number;
   nextGame: Partial<Game> | null;
   played: boolean;
+  attempts: number;
   streak: number;
   bestStreak: number;
   timeline: Partial<Game>[];

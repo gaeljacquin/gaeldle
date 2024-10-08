@@ -114,8 +114,7 @@ export class TriviaryGateway
   @SubscribeMessage('triviary-init')
   async handleTriviaryInit(client) {
     const numCards = (await this.mode).pixelationStep;
-    const sampleSize = (await this.mode).pixelation;
-    const games = await getRandomGames(this.gamesService, numCards, sampleSize);
+    const games = await getRandomGames(this.gamesService, numCards);
     let reshuffledGames = shuffleList(games);
     reshuffledGames = reshuffledGames.map((game) => {
       const { frd, frdFormatted, ...rest } = game;

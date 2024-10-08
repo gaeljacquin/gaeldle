@@ -15,5 +15,3 @@ export type TriviaryStats = UnlimitedStats & {
 export type CoverStats = UnlimitedStats & {
   guesses: Guesses;
 };
-
-export type Triviary2Stats = Pick<UnlimitedStats, "modeId" | "found" | "info">;

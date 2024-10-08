@@ -82,7 +82,11 @@ export default function TriviaryVer2() {
                       <PlaceholderCard />
                     </div>
                     <div className="absolute inset-0 flex justify-center items-center">
-                      <Container id="nextGame" items={containers.nextGame} />
+                      <Container
+                        id="nextGame"
+                        items={containers.nextGame}
+                        showTooltip={true}
+                      />
                     </div>
                   </div>
                 </div>
@@ -131,10 +135,14 @@ export default function TriviaryVer2() {
                 <div className="absolute top-1/2 left-0 w-full border-t border-slate-800 transform -translate-y-1/2" />
                 <div className="relative inset-0 flex justify-center items-center gap-4">
                   {activeId ? (
-                    <Container id="timeline" items={containers.timeline} />
+                    <Container
+                      id="timeline"
+                      items={containers.timeline}
+                      showTooltip={false}
+                    />
                   ) : (
                     containers.timeline.map((igdbId) => (
-                      <Item2 key={igdbId} id={igdbId} />
+                      <Item2 key={igdbId} id={igdbId} showTooltip={false} />
                     ))
                   )}
                 </div>

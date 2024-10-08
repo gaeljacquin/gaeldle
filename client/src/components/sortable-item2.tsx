@@ -12,10 +12,12 @@ type idgafProps = {
   isOpacityEnabled?: boolean;
   isDragging?: boolean;
   style?: object;
+  showTooltip?: boolean;
 };
 
 export function Item2(props: idgafProps) {
-  const { id, isOpacityEnabled, isDragging, style } = props;
+  const { id, isOpacityEnabled, isDragging, style, showTooltip } = props;
+  console.log("SortableItem2", props);
   const { timeline, nextGame } = zTriviary2();
   const card = timeline
     ? findCard(id, [...timeline, nextGame ? nextGame : {}])
@@ -31,7 +33,7 @@ export function Item2(props: idgafProps) {
   return (
     card && (
       <div style={styles}>
-        <GameCard card={card} showTooltip={false} />
+        <GameCard card={card} showTooltip={showTooltip} />
       </div>
     )
   );

@@ -89,8 +89,7 @@ export class Triviary2Gateway
   @SubscribeMessage('triviary2-init')
   async handleTriviary2Init(client) {
     const numCards = (await this.mode).pixelationStep;
-    const sampleSize = (await this.mode).pixelation;
-    const games = await getRandomGames(this.gamesService, numCards, sampleSize);
+    const games = await getRandomGames(this.gamesService, numCards);
     let reshuffledGames = shuffleList(games);
     reshuffledGames = games.map((game, index) => {
       if (index === games.length - 1) {

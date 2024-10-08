@@ -7,12 +7,13 @@ import {
   setContainersDragOverProps,
   ZTriviary2,
 } from "~/src/types/ztriviary2";
-import { Triviary2Stats } from "@/types/unlimited-stats";
+import { UnlimitedStats } from "@/types/unlimited-stats";
 import { bgCorrect, bgIncorrect, textSubmit } from "@/lib/client-constants";
 
 const modeId = 9;
 
 export const initialState = {
+  attempts: 0,
   streak: 0,
   containers: {
     nextGame: [0],
@@ -59,7 +60,7 @@ const wsConnect = () => {
     if (!nextGame) {
       getState().markAsPlayed();
       getState().markAsWon();
-      saveTriviary2Stats({
+      saveUnlimitedStats({
         modeId,
         found: true,
         info: {
@@ -67,6 +68,7 @@ const wsConnect = () => {
           streak: getState().streak,
           bestStreak: getState().bestStreak,
         },
+        attempts: getState().attempts,
       });
     } else {
       setState({
@@ -146,7 +148,7 @@ const checkAnswer = (data: checkAnswerProps) => {
       getState().markAsPlayed();
       getState().setBestStreak();
       getState().setStreak(false);
-      saveTriviary2Stats({
+      saveUnlimitedStats({
         modeId,
         found: false,
         info: {
@@ -154,6 +156,7 @@ const checkAnswer = (data: checkAnswerProps) => {
           streak: getState().streak,
           bestStreak: getState().bestStreak,
         },
+        attempts: getState().attempts,
       });
     } else {
       socket.emit("triviary2-next", {
@@ -175,7 +178,7 @@ const checkAnswer = (data: checkAnswerProps) => {
   });
 };
 
-const saveTriviary2Stats = (data: Triviary2Stats) => {
+const saveUnlimitedStats = (data: UnlimitedStats) => {
   socket.emit("triviary2-stats", data);
 };
 
@@ -215,9 +218,7 @@ const zTriviary2 = create(
       getContainers: () => get().containers,
       setContainersDragEnd: (props: setContainersDragEndProps) => {
         const { overContainer, activeIndex, overIndex, arrayMove } = props;
-        const containers = get().containers;
-        const timeline = get().timeline;
-        const nextGame = get().nextGame;
+        const { containers, timeline, nextGame, attempts } = get();
         const emit = { insertIndex: overIndex };
 
         if (overIndex === 0) {
@@ -238,6 +239,7 @@ const zTriviary2 = create(
           shadowContainers: containers,
           timeline,
           nextGame: null,
+          attempts: attempts + 1,
         });
         socket.emit("triviary2-check", emit);
       },

@@ -13,7 +13,6 @@ import cors from '~/utils/cors';
 import { ModeMap } from '~/utils/mode-map';
 import shuffleList from '~/utils/shuffle-list';
 import { ModesService } from '~/src/modes/modes.service';
-import { getRandomGames } from '~/utils/env-checks';
 import { bgCorrect, bgIncorrect, bgOther1, bgOther2 } from '~/utils/constants';
 import { Games } from '~/types/games';
 
@@ -39,7 +38,6 @@ export class TriviaryGateway
   async handleConnection(client: Socket, ...args: any[]) {
     console.info(`Client connected (triviary): ${client.id}`);
     console.info('args: ', args);
-
     this.handleTriviaryInit(client);
   }
 
@@ -114,7 +112,11 @@ export class TriviaryGateway
   @SubscribeMessage('triviary-init')
   async handleTriviaryInit(client) {
     const numCards = (await this.mode).pixelationStep;
-    const games = await getRandomGames(this.gamesService, numCards);
+    const sampleSize = (await this.mode).pixelation;
+    const games = (await this.gamesService.findRandom(
+      numCards,
+      sampleSize,
+    )) as Games;
     let reshuffledGames = shuffleList(games);
     reshuffledGames = reshuffledGames.map((game) => {
       const { frd, frdFormatted, ...rest } = game;

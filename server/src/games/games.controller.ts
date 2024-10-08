@@ -13,6 +13,6 @@ export class GamesController {
 
   @Get('/test')
   findTest() {
-    return this.gamesService.findRandom(10);
+    return this.gamesService.findRandom(10, 15);
   }
 }

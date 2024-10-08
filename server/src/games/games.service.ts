@@ -64,12 +64,12 @@ export class GamesService {
     return game;
   }
 
-  async findRandom(numCards: number) {
+  async findRandom(numCards: number, sampleSize: number) {
     const data = await this.prisma.$queryRaw`
       SELECT
         sub.*
       FROM (
-        SELECT DISTINCT ON (g.first_release_date)
+        SELECT
           g.igdb_id AS "igdbId", -- double quotes to retain case
           g.name,
           g.image_url AS "imageUrl",
@@ -77,8 +77,8 @@ export class GamesService {
           ((g.first_release_date)::int) AS frd,
           to_char(to_timestamp((g.first_release_date)::bigint), 'YYYY-MM-DD') as "frdFormatted"
         FROM games g
+        TABLESAMPLE BERNOULLI (${sampleSize})
         WHERE g.first_release_date IS NOT NULL
-        ORDER BY g.first_release_date, RANDOM()
         LIMIT ${numCards}
       ) sub
       ORDER BY sub.frd

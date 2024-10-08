@@ -57,18 +57,22 @@ export class CoverGateway
 
   @SubscribeMessage('cover')
   async handleCoverCheck(client: Socket, data): Promise<void> {
-    const { game: selectedGame } = data;
-    const { igdbId, name: name2 } = selectedGame;
+    const { game: selectedGame, livesLeft } = data;
+    const { igdbId: igdbId2, name: name2 } = selectedGame;
     const clientId = client.id;
     const game = this.coverMap.get(clientId) as Game;
-    const answer = game.igdbId === igdbId;
-    const name = answer ? game.name : '';
+    const answer = game.igdbId === igdbId2;
+    const finished = answer || livesLeft === 0;
+
+    const name = finished ? game.name : '';
+    const igdbId = finished ? game.igdbId : 0;
     const emit = {
       answer,
       name,
+      igdbId,
       guess: {
         name: name2,
-        igdbId,
+        igdbId: igdbId2,
       },
     };
     client.emit('cover-res', emit);

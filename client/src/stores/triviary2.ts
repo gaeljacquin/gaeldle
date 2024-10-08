@@ -147,7 +147,6 @@ const checkAnswer = (data: checkAnswerProps) => {
     if (getState().livesLeft === 0) {
       getState().markAsPlayed();
       getState().setBestStreak();
-      getState().setStreak(false);
       saveUnlimitedStats({
         modeId,
         found: false,

@@ -9,12 +9,12 @@ import { placeholderImage } from "../lib/client-constants";
 const modeId = 5;
 
 const initialState = {
-  streak: 0,
   igdbId: 0,
   imageUrl: placeholderImage.url,
   name: "",
   lives: 0,
   livesLeft: 0,
+  streak: 0,
   guesses: [],
   skipIgdbIds: [],
   played: false,
@@ -28,6 +28,13 @@ const initialState2 = {
   bestStreak: 0,
 };
 
+type checkAnswerProps = {
+  answer: boolean;
+  guess: Guess;
+  igdbId: number;
+  name: string;
+};
+
 export const socket = io(`${process.env.serverUrl}`);
 
 const wsConnect = () => {
@@ -38,8 +45,7 @@ const wsConnect = () => {
   });
 
   socket.on("cover-res", (data) => {
-    const { answer, guess } = data;
-    checkAnswer(answer, guess);
+    checkAnswer(data);
   });
 
   socket.on("cover-next-res", (data) => {
@@ -96,8 +102,9 @@ const wsConnect = () => {
   };
 };
 
-const checkAnswer = (answer: boolean, guess: Guess) => {
+const checkAnswer = ({ answer, ...props }: checkAnswerProps) => {
   const { getState, setState } = zCover;
+  const { guess, igdbId } = props;
 
   if (answer) {
     getState().markAsWon();
@@ -108,7 +115,7 @@ const checkAnswer = (answer: boolean, guess: Guess) => {
     const skipIgdbIds = getState().skipIgdbIds;
     skipIgdbIds.push(guess.igdbId);
     saveCoverStats({
-      igdbId: guess.igdbId,
+      igdbId,
       modeId,
       found: true,
       attempts: Math.min(getState().guesses.length + 1, getState().lives),
@@ -129,9 +136,8 @@ const checkAnswer = (answer: boolean, guess: Guess) => {
       getState().markAsPlayed();
       getState().removePixelation();
       getState().setBestStreak();
-      getState().setStreak(false);
       saveCoverStats({
-        igdbId: getState().igdbId,
+        igdbId,
         modeId,
         found: false,
         attempts: getState().guesses.length,

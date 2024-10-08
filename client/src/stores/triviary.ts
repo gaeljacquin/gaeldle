@@ -101,7 +101,6 @@ const checkAnswer = (data: checkAnswerProps) => {
 
     if (getState().livesLeft === 0) {
       getState().markAsPlayed();
-      getState().setStreak(false);
       setState({ goodTimeline });
       saveTriviaryStats({
         modeId,

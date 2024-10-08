@@ -1,5 +1,5 @@
 const bgIncorrect = 'bg-gael-red';
-const bgPartial = 'bg-yellow-600';
+const bgPartial = 'bg-gradient-to-r from-gael-blue to-gael-purple';
 const bgCorrect = 'bg-gael-green';
 const bgOther1 = 'bg-gael-blue';
 const bgOther2 = 'bg-indigo-500';
@@ -26,6 +26,10 @@ const tomorrow = { start: tomorrowStart, end: tomorrowEnd };
 
 const cacheDuration = 6000 * 48; // 48 hours
 
+const whichList = (list: unknown[]) => {
+  return list ?? [0];
+};
+
 export {
   bgIncorrect,
   bgPartial,
@@ -36,4 +40,5 @@ export {
   today,
   tomorrow,
   cacheDuration,
+  whichList,
 };

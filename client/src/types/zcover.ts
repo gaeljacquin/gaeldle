@@ -14,6 +14,7 @@ export type ZCover = {
   streak: number;
   bestStreak: number;
   skipIgdbIds: number[];
+  finito: boolean;
   updateLivesLeft: () => void;
   updateGuesses: (arg0: Guess | null) => void;
   getLivesLeft: () => number;

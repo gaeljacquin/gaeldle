@@ -44,7 +44,7 @@ const SocketInit = () => {
 };
 
 const bgIncorrect = "bg-gael-red";
-const bgPartial = "bg-yellow-600";
+const bgPartial = "bg-gradient-to-r from-gael-blue to-gael-purple";
 const bgCorrect = "bg-gael-green";
 const bgOther1 = "bg-gael-blue";
 const bgOther2 = "bg-indigo-500";

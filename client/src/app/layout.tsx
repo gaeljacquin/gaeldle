@@ -42,10 +42,12 @@ export default function RootLayout({
             </div>
           </div>
           {children}
-          <DynamicFooter />
-          <SpeedInsights />
-          <Analytics />
         </div>
+        <div className="mt-10 md:mt-24">
+          <DynamicFooter />
+        </div>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

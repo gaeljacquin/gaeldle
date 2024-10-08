@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import DisplayCountdown from "./display-countdown";
 import { Button } from "./ui/button";
 import {
   Tooltip,
@@ -14,9 +13,6 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import Placeholders from "@/views/placeholders";
 import zModes from "~/src/stores/modes";
-import zCategories from "@/stores/categories";
-import { Category } from "../types/categories";
-import { cn } from "@/lib/utils";
 
 type generateButtonProps = {
   label: string;
@@ -54,7 +50,7 @@ export default function Modes() {
     const buttonMarkup = () => {
       return (
         <Button
-          className={`w-full ${classNames} ${isDisabled && !isClicked ? "cursor-not-allowed" : ""}`}
+          className={`w-full shadow-lg ${classNames} ${isDisabled && !isClicked ? "cursor-not-allowed" : ""}`}
           onClick={() => handleClick(buttonKey)}
           disabled={isClicked}
           aria-disabled={isDisabled && !isClicked}

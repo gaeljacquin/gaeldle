@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Placeholders() {
   return (
@@ -7,8 +7,14 @@ export default function Placeholders() {
         <Skeleton className="h-64 w-full mx-auto mb-4" />
         <Skeleton className="h-12 w-3/4 mx-auto mb-4" />
         <Skeleton className="h-6 w-2/3 mx-auto mb-8" />
+        <Skeleton className="h-12 w-3/4 mx-auto mb-4" />
+        <Skeleton className="h-6 w-2/3 mx-auto mb-8" />
+        <Skeleton className="h-12 w-3/4 mx-auto mb-4" />
+        <Skeleton className="h-6 w-2/3 mx-auto mb-8" />
+        <Skeleton className="h-12 w-3/4 mx-auto mb-4" />
+        <Skeleton className="h-6 w-2/3 mx-auto mb-8" />
         <Skeleton className="h-10 w-40 mx-auto" />
       </section>
     </main>
-  )
+  );
 }

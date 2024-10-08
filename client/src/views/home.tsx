@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import zModes from "@/stores/modes";
 import zCategories from "@/stores/categories";
 import Placeholders from "@/views/placeholders";
-import { Button } from "../components/ui/button";
+
+const DynamicModes2 = dynamic(() => import("@/components/modes2"), {
+  ssr: false,
+});
 
 export default function Home() {
   const { modes } = zModes();
@@ -28,22 +32,9 @@ export default function Home() {
             >
               Wordle
             </Link>{" "}
-            clone inspired by{" "}
-            <Link
-              className="text-gael-blue hover:text-gael-blue-dark hover:underline"
-              href="https://wikitrivia.tomjwatson.com/"
-              target="_blank"
-            >
-              Wiki Trivia
-            </Link>
+            clone
           </p>
-          <div className="flex justify-center">
-            <Link href="/triviary" className="max-w-xs w-full mt-5">
-              <Button className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold tracking-sm max-w-xs w-full">
-                Play
-              </Button>
-            </Link>
-          </div>
+          <DynamicModes2 />
         </div>
       </main>
     )

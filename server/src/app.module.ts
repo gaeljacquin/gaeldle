@@ -19,6 +19,8 @@ import { GamesService } from './games/games.service';
 // import { GotdService } from './gotd/gotd.service';
 import { CategoriesModule } from './categories/categories.module';
 import { CategoriesService } from './categories/categories.service';
+import { Triviary2Gateway } from './triviary2/triviary2.gateway';
+import { CoverGateway } from './cover/cover.gateway';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { CategoriesService } from './categories/categories.service';
     // DailyGateway,
     // GotdService,
     CategoriesService,
+    Triviary2Gateway,
+    CoverGateway,
   ],
 })
 export class AppModule {}

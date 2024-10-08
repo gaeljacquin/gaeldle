@@ -120,6 +120,7 @@ model modes {
   hidden          Boolean           @default(false)
   ordinal         Int               @default(1)
   isNew           Boolean           @default(true)
+  classNames      String            @default("bg-gael-green hover:bg-gael-green") @map("class_names")
   daily_stats     daily_stats[]
   gotd            gotd[]
   categories      categories?       @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "modes_category_fkey")

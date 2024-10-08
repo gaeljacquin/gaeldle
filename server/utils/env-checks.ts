@@ -1,6 +1,7 @@
 import { applyDecorators, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '~/src/auth/jwt-auth.guard';
 import { Games } from '~/types/games';
+import { testGameIgdbIds } from './constants';
 
 function isDevMode() {
   return (
@@ -20,8 +21,19 @@ export function genKey(key: string) {
 
 export async function getRandomGames(gamesService, numCards, sampleSize) {
   const games = (await (isDevMode()
-    ? gamesService.dbFindRandomDev(numCards, sampleSize)
-    : gamesService.dbFindRandom(numCards, sampleSize))) as Games;
+    ? gamesService.findRandomDev(numCards)
+    : gamesService.findRandom(numCards, sampleSize))) as Games;
 
   return games;
+}
+
+export async function getRandomGame(gamesService, list) {
+  const daList = isDevMode()
+    ? testGameIgdbIds.filter((id) => !list.includes(id))
+    : list;
+  const game = await (isDevMode()
+    ? gamesService.findOneRandomDev(daList)
+    : gamesService.findOneRandom(daList));
+
+  return game;
 }

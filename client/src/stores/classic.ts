@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { io } from "socket.io-client";
-import { Guess, Guesses } from "@/types/games";
+import { Guess } from "@/types/games";
 import { Gotd } from "@/types/gotd";
 import { DailyStats } from "~/src/types/daily-stats";
 import { ZClassic } from "~/src/types/zclassic";

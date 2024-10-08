@@ -1,0 +1,34 @@
+import { Guesses, Guess } from "~/src/types/games";
+
+export type ZCover = {
+  igdbId: number;
+  imageUrl: string;
+  name: string;
+  lives: number;
+  livesLeft: number;
+  guesses: Guesses;
+  played: boolean;
+  won: boolean;
+  pixelation: number;
+  pixelationStep: number;
+  streak: number;
+  bestStreak: number;
+  skipIgdbIds: number[];
+  updateLivesLeft: () => void;
+  updateGuesses: (arg0: Guess | null) => void;
+  getLivesLeft: () => number;
+  getGuesses: () => Guesses;
+  getStreak: () => number;
+  getBestStreak: () => number;
+  markAsPlayed: () => void;
+  markAsWon: () => void;
+  getPlayed: () => boolean;
+  setPixelation: () => void;
+  removePixelation: () => void;
+  getName: () => string;
+  setName: (arg0: string) => void;
+  resetPlay: () => void;
+  continuePlay: () => void;
+  setBestStreak: () => void;
+  setStreak: (arg0: boolean) => void;
+};

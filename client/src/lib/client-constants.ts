@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import io, { Socket } from "socket.io-client";
 import { z } from "zod";
+import { Games } from "../types/games";
 
 const textVictory = "You got it! 😀";
 const textGameOver = "Game over 😭";
@@ -50,6 +51,7 @@ const bgOther2 = "bg-indigo-500";
 
 const cardImgSize = 128;
 const cardImgClasses = "w-full h-48 object-cover";
+const cardImgClassesAlt = "w-full h-96 object-cover";
 
 const textSubmit = "Submit";
 const textAlreadyGuessed = "Already guessed";
@@ -76,6 +78,21 @@ const triviaryLegend = [
   { text: "Found then moved", backgroundClass: bgPartial },
   { text: "Correct", backgroundClass: bgCorrect },
 ];
+const triviary2Legend = [
+  { text: "Incorrect", backgroundClass: bgIncorrect },
+  { text: "Correct", backgroundClass: bgCorrect },
+];
+const streakCounters = (streak: number, bestStreak: number) => {
+  return [
+    { text: `Streak: ${streak}`, backgroundClass: bgOther1 },
+    { text: `Best Streak: ${bestStreak}`, backgroundClass: bgOther2 },
+  ];
+};
+
+const placeholderImage = {
+  url: "https://fakeimg.pl/512x720?text=?",
+  alt: "Placeholder Image",
+};
 
 export {
   textVictory,
@@ -102,4 +119,8 @@ export {
   textStartingPosition,
   levels,
   triviaryLegend,
+  streakCounters,
+  cardImgClassesAlt,
+  triviary2Legend,
+  placeholderImage,
 };

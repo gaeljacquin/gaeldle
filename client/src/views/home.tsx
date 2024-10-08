@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import zModes from "@/stores/modes";
 import zCategories from "@/stores/categories";
 import Placeholders from "@/views/placeholders";
-import { Button } from "../components/ui/button";
+
+const DynamicModes2 = dynamic(() => import("@/components/modes2"), {
+  ssr: false,
+});
 
 export default function Home() {
   const { modes } = zModes();
@@ -30,31 +34,7 @@ export default function Home() {
             </Link>{" "}
             clone
           </p>
-          <div className="flex justify-center">
-            <ul className="mt-4 space-y-6 max-w-xs w-full">
-              <li>
-                <Link href="/triviary" className="max-w-xs w-full mt-5">
-                  <Button className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold tracking-sm max-w-xs w-full">
-                    Trivia I
-                  </Button>
-                </Link>
-              </li>
-              <li>
-                <Link href="/triviary2" className="max-w-xs w-full mt-5">
-                  <Button className="bg-gradient-to-r bg-gradient-to-r from-blue-500 to-teal-400 hover:bg-gradient-to-r hover:from-blue-700 hover:to-teal-600 text-white text-md font-semibold tracking-sm max-w-xs w-full">
-                    Trivia II
-                  </Button>
-                </Link>
-              </li>
-              <li>
-                <Link href="/cover" className="max-w-xs w-full mt-5">
-                  <Button className="bg-gradient-to-r from-gael-blue to-gael-green via-gael-pink hover:bg-gradient-to-r hover:from-gael-blue-dark hover:to-gael-green-dark hover:via-gael-pink-dark text-white text-md font-semibold tracking-sm max-w-xs w-full">
-                    Cover
-                  </Button>
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <DynamicModes2 />
         </div>
       </main>
     )

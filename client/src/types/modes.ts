@@ -15,6 +15,7 @@ export type Mode = {
   levels: Levels;
   types: Category;
   isNew: boolean;
+  classNames: string;
 };
 
 export type Modes = Mode[];

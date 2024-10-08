@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '~/src/prisma/prisma.service';
-import { bgCorrect, bgOther1, testGameIgdbIds } from '~/utils/constants';
+import { bgOther1, testGameIgdbIds, whichList } from '~/utils/constants';
 import { genKey } from '~/utils/env-checks';
 import { upstashRedisInit } from '~/utils/upstash-redis';
 
@@ -62,7 +62,7 @@ export class GamesService {
     return game;
   }
 
-  async findRandom(numCards: number, sampleSize: number, exclude?: number[]) {
+  async findRandom(numCards: number, sampleSize: number, idlist?: number[]) {
     const data = await this.prisma.$queryRaw`
       SELECT
         sub.*
@@ -77,11 +77,30 @@ export class GamesService {
         FROM games g
         TABLESAMPLE BERNOULLI (${sampleSize})
         WHERE g.first_release_date IS NOT NULL
-        AND g.igdb_id != ANY(${exclude ?? [0]})
+        AND g.igdb_id != ANY(${whichList(idlist)})
         LIMIT ${numCards}
       ) sub
       ORDER BY sub.frd
     `;
+
+    return data;
+  }
+
+  async findOneRandom(idlist?: number[]) {
+    const data = await this.prisma.$queryRaw`
+      SELECT
+        g.igdb_id AS "igdbId", -- double quotes to retain case
+        g.name,
+        g.image_url AS "imageUrl",
+        ${bgOther1} AS "bgStatus",
+        ((g.first_release_date)::int) AS frd,
+        to_char(to_timestamp((g.first_release_date)::bigint), 'YYYY-MM-DD') as "frdFormatted"
+      FROM games g
+      TABLESAMPLE BERNOULLI (5)
+      WHERE g.first_release_date IS NOT NULL
+      AND g.igdb_id != ANY(${whichList(idlist)})
+      LIMIT 1
+  `;
 
     return data;
   }
@@ -95,7 +114,7 @@ export class GamesService {
           g.igdb_id AS "igdbId",
           g.name,
           g.image_url AS "imageUrl",
-          ${bgCorrect} AS "bgStatus",
+          ${bgOther1} AS "bgStatus",
           ((g.first_release_date)::int) AS frd,
           to_char(to_timestamp((g.first_release_date)::bigint), 'YYYY-MM-DD') as "frdFormatted"
         FROM games g
@@ -104,13 +123,13 @@ export class GamesService {
         ORDER BY frd
         LIMIT ${numCards}
       ) sub
-      ORDER BY sub.frd DESC
+      ORDER BY sub.frd ASC
     `;
 
     return data;
   }
 
-  async findOneRandomDev(include?: number[]) {
+  async findOneRandomDev(idlist?: number[]) {
     const data = await this.prisma.$queryRaw`
         SELECT
           g.igdb_id AS "igdbId",
@@ -120,31 +139,13 @@ export class GamesService {
           ((g.first_release_date)::int) AS frd,
           to_char(to_timestamp((g.first_release_date)::bigint), 'YYYY-MM-DD') as "frdFormatted"
         FROM games g
-        WHERE g.igdb_id = ANY(${include})
-        -- WHERE g.igdb_id = 99999999
-        AND g.first_release_date IS NOT NULL
+        WHERE g.first_release_date IS NOT NULL
+        AND g.igdb_id != ANY(${whichList(idlist)})
+        AND g.igdb_id = ANY(${testGameIgdbIds})
+        -- AND g.igdb_id = 99999999
         ORDER BY RANDOM()
         LIMIT 1
     `;
-
-    return data;
-  }
-
-  async findOneRandom(exclude?: number[]) {
-    const data = await this.prisma.$queryRaw`
-      SELECT
-        g.igdb_id AS "igdbId", -- double quotes to retain case
-        g.name,
-        g.image_url AS "imageUrl",
-        ${bgOther1} AS "bgStatus",
-        ((g.first_release_date)::int) AS frd,
-        to_char(to_timestamp((g.first_release_date)::bigint), 'YYYY-MM-DD') as "frdFormatted"
-      FROM games g
-      TABLESAMPLE BERNOULLI (5)
-      WHERE g.first_release_date IS NOT NULL
-      AND g.igdb_id != ANY(${exclude ?? [0]})
-      LIMIT 1
-  `;
 
     return data;
   }

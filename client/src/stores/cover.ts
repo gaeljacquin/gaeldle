@@ -19,6 +19,7 @@ const initialState = {
   skipIgdbIds: [],
   played: false,
   won: false,
+  finito: false,
   pixelation: 0,
   pixelationStep: 0,
 };
@@ -46,7 +47,7 @@ const wsConnect = () => {
 
     if (!nextGame) {
       getState().markAsPlayed();
-      getState().markAsWon();
+      setState({ finito: true });
     } else {
       const { lives, pixelation, pixelationStep } = mode;
       const { imageUrl } = nextGame;

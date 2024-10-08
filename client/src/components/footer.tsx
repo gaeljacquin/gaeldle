@@ -13,7 +13,7 @@ export default function Footer() {
     const markup = (
       <Link
         href={`${path}`}
-        className={`${path === pathname && "underline"} text-sm font-light`}
+        className={`${path === pathname && "underline"} text-md font-light`}
         onClick={path === pathname ? (e) => e.preventDefault() : () => null}
         {...(external && { target: "_blank" })}
       >
@@ -32,20 +32,23 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bottom-0 bg-gradient-to-r from-blue-700 to-teal-600 text-white pt-8 pb-6">
+    <footer
+      role="contentinfo"
+      className="bottom-0 bg-gradient-to-r from-blue-700 to-teal-600 text-white pt-8 pb-6"
+    >
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap text-left lg:text-left w-full">
           <div className="w-full lg:w-full px-4">
             <div className="flex flex-wrap items-top mb-6">
               <div className="w-full md:w-3/12 px-4 mb-4 md:mb-0">
-                <span className="block text-md font-semibold mb-2">Links</span>
-                <ul className="list-unstyled">
+                <span className="block text-lg font-semibold mb-2">Links</span>
+                <ul className="list-unstyled space-y-4">
                   <li>{navLink("/", "Home")}</li>
                 </ul>
               </div>
               <div className="w-full md:w-3/12 px-4 mb-4 md:mb-0">
-                <span className="block text-md font-semibold mb-2">Modes</span>
-                <ul className="list-unstyled">
+                <span className="block text-lg font-semibold mb-2">Modes</span>
+                <ul className="list-unstyled space-y-4">
                   {modes &&
                     modes.map((mode) => (
                       <li key={mode.id}>
@@ -55,17 +58,17 @@ export default function Footer() {
                 </ul>
               </div>
               <div className="w-full md:w-3/12 px-4 mb-4 md:mb-0">
-                <span className="block text-md font-semibold mb-2">Legal</span>
-                <ul className="list-unstyled">
+                <span className="block text-lg font-semibold mb-2">Legal</span>
+                <ul className="list-unstyled space-y-4">
                   <li>{navLink("/privacy", "Privacy Policy")}</li>
                   <li>{navLink("/tos", "Terms of Service")}</li>
                 </ul>
               </div>
               <div className="w-full md:w-3/12 px-4 mb-4 md:mb-0">
-                <span className="block text-md font-semibold mb-2">
+                <span className="block text-lg font-semibold mb-2">
                   Socials
                 </span>
-                <ul className="list-unstyled">
+                <ul className="list-unstyled space-y-4">
                   <li>
                     {navLink(
                       "https://linkedin.com/in/gaeljacquin",

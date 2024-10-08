@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
 import Image from "next/image";
-import { usePathname } from 'next/navigation';
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import Placeholders from '@/views/placeholders'
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import Placeholders from "@/views/placeholders";
 import DisplayCountdown from "@/components/display-countdown";
 import LivesLeftComp from "@/components/lives-left";
 import zSpecs, { socket } from "@/stores/specifications";
@@ -20,33 +20,39 @@ import { GamesFormInit } from "~/src/lib/client-constants";
 export default function Specifications() {
   const pathname = usePathname();
   const {
-    name, livesLeft, lives, gotdId, played, won, guesses, imageUrl,
-    getLivesLeft, getName,
+    name,
+    livesLeft,
+    lives,
+    gotdId,
+    played,
+    won,
+    guesses,
+    imageUrl,
+    getLivesLeft,
+    getName,
   } = zSpecs();
   const { games } = zGames();
   const { getModeBySlug } = zModes();
   const mode = getModeBySlug(pathname);
-  const [currentTab, setCurrentTab] = useState('guesses');
+  const [currentTab, setCurrentTab] = useState("guesses");
   const form = GamesFormInit();
   const readySetGo = games && gotdId && mode;
 
   if (!readySetGo) {
-    return <Placeholders />
+    return <Placeholders />;
   }
 
   return (
-    readySetGo &&
-    <>
-      <main className="flex-grow flex flex-col items-center space-y-8">
+    readySetGo && (
+      <div className="flex-grow flex flex-col items-center space-y-8">
         <div className="mb-4 text-xl text-center font-semibold">
           <p>{mode.label}</p>
           <p>{mode.description}</p>
         </div>
-        {
-          played &&
+        {played && (
           <div className="w-full max-w-md flex flex-col items-center space-y-8 mt-4 border-2">
             <Image
-              placeholder='empty'
+              placeholder="empty"
               src={imageUrl}
               width={600}
               height={600}
@@ -55,22 +61,29 @@ export default function Specifications() {
               priority
             />
           </div>
-        }
+        )}
 
         <div className="grid md:grid-cols-2 gap-8 relative">
-          <div className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === 'development' && "border border-gray-200 "}`}>
-            <p className="mb-5">
-              {played ? `${getName()}` : `🤔`}
-            </p>
+          <div
+            className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === "development" && "border border-gray-200 "}`}
+          >
+            <p className="mb-5">{played ? `${getName()}` : `🤔`}</p>
 
-            <LivesLeftComp played={played} won={won} livesLeft={livesLeft} lives={lives} />
+            <LivesLeftComp
+              played={played}
+              won={won}
+              livesLeft={livesLeft}
+              lives={lives}
+            />
 
             <div className="flex justify-center space-x-2 mt-8">
               <Hearts lives={lives} livesLeft={livesLeft} />
             </div>
           </div>
 
-          <div className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === 'development' && "border border-gray-200 "}`}>
+          <div
+            className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === "development" && "border border-gray-200 "}`}
+          >
             <GamesForm
               form={form}
               modeSlug={mode.mode}
@@ -83,8 +96,11 @@ export default function Specifications() {
           </div>
         </div>
 
-        {(guesses.length > 0 || won) &&
-          <Tabs defaultValue="guesses" onValueChange={(value) => setCurrentTab(value)}>
+        {(guesses.length > 0 || won) && (
+          <Tabs
+            defaultValue="guesses"
+            onValueChange={(value) => setCurrentTab(value)}
+          >
             <div className="text-center">
               <TabsList>
                 <TabsTrigger value="guesses">Guesses</TabsTrigger>
@@ -93,10 +109,13 @@ export default function Specifications() {
             </div>
             <TabsContent value="guesses">
               <div className="flex flex-col items-center">
-                {guesses.length > 0 ?
+                {guesses.length > 0 ? (
                   <SpecificationsDataTable guesses={guesses} />
-                  : <p className="font-sm font-semibold mt-8">Flawless victory! 😎</p>
-                }
+                ) : (
+                  <p className="font-sm font-semibold mt-8">
+                    Flawless victory! 😎
+                  </p>
+                )}
               </div>
             </TabsContent>
             <TabsContent value="summary">
@@ -105,20 +124,20 @@ export default function Specifications() {
               </div>
             </TabsContent>
           </Tabs>
-        }
+        )}
 
         <div className="text-center">
-          {process.env.NODE_ENV === 'development' &&
+          {process.env.NODE_ENV === "development" && (
             <div className="mt-10 mb-5">
               <Button onClick={() => form.reset()}>Clear Form</Button>
             </div>
-          }
+          )}
 
           <div className="max-w-3xl mx-auto mt-10">
             <DisplayCountdown />
           </div>
         </div>
-      </main >
-    </>
-  )
+      </div>
+    )
+  );
 }

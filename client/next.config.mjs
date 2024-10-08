@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+import vercelToolbar from "@vercel/toolbar/plugins/next";
+
 const nextConfig = {
   env: {
     serverUrl: `${process.env.SERVER_URL}`,
@@ -35,4 +37,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default vercelToolbar()(nextConfig);

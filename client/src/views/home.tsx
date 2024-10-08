@@ -21,7 +21,10 @@ export default function Home() {
 
   return (
     readySetGo && (
-      <main className="flex-grow flex flex-col items-center space-y-8 p-4">
+      <div
+        role="main"
+        className="flex-grow flex flex-col items-center space-y-8 p-4"
+      >
         <div className="w-full space-y-4 text-center">
           <p className="text-2xl justify-center text-center">
             A gaming-themed{" "}
@@ -36,7 +39,7 @@ export default function Home() {
           </p>
           <DynamicModes2 />
         </div>
-      </main>
+      </div>
     )
   );
 }

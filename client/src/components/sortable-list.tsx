@@ -5,13 +5,13 @@ import {
   KeyboardSensor,
   PointerSensor,
   useSensor,
-  useSensors
+  useSensors,
 } from "@dnd-kit/core";
 import type { Active, UniqueIdentifier } from "@dnd-kit/core";
 import {
   SortableContext,
   arrayMove,
-  sortableKeyboardCoordinates
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { SortableOverlay } from "./sortable-overlay";
 import { DragHandle, SortableItem } from "./sortable-item";
@@ -29,7 +29,7 @@ interface Props<T extends BaseItem> {
 export function SortableList<T extends BaseItem>({
   items,
   onChange,
-  renderItem
+  renderItem,
 }: Props<T>) {
   const [active, setActive] = useState<Active | null>(null);
   const activeItem = useMemo(
@@ -39,7 +39,7 @@ export function SortableList<T extends BaseItem>({
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
@@ -63,7 +63,7 @@ export function SortableList<T extends BaseItem>({
       }}
     >
       <SortableContext items={items}>
-        <ul className="SortableList" role="application">
+        <ul className="SortableList">
           {items.map((item) => (
             <React.Fragment key={item.id}>{renderItem(item)}</React.Fragment>
           ))}

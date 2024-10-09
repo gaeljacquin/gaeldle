@@ -14,7 +14,9 @@ export type Game = Guess & {
   bgStatus?: string;
   frd: number;
   frdFormatted: string;
-  correctIndex?: number | null;
+  correctIndex?: number;
+  latestIndex?: number;
+  proximity?: number;
 };
 
 export type Spec = {

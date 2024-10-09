@@ -2,11 +2,18 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import { MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  DndContext,
+  DragEndEvent,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import {
   SortableContext,
   horizontalListSortingStrategy,
+  // rectSwappingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable";
 import { ChevronsUpDown } from "lucide-react";
@@ -16,7 +23,7 @@ import Placeholders from "~/src/views/placeholders";
 import ModesHeader from "~/src/components/modes-header";
 import Hearts from "~/src/components/hearts";
 import zTriviary from "@/stores/triviary";
-import { SortableItem } from "@/components/sortable-item";
+import SortableItem from "@/components/sortable-item";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -109,10 +116,19 @@ export default function Triviary() {
                         items={timeline.map((card) => card?.igdbId ?? 0)}
                         strategy={horizontalListSortingStrategy}
                       >
-                        {timeline.map((card: Partial<Game>) => (
-                          <SortableItem key={card.igdbId} id={card.igdbId ?? 0}>
-                            <GameCard card={card} showBar={!gameOver} />
-                          </SortableItem>
+                        {timeline.map((card: Partial<Game>, index) => (
+                          <div key={card.igdbId}>
+                            <SortableItem id={card.igdbId ?? 0}>
+                              <GameCard
+                                card={card}
+                                showBar={!gameOver}
+                                showPos={true}
+                              />
+                            </SortableItem>
+                            <Badge className="flex items-center justify-center bg-sky-700 hover:bg-sky-800 text-white text-xs font-semibold px-2 py-2 mt-4">
+                              {index + 1}
+                            </Badge>
+                          </div>
                         ))}
                       </SortableContext>
                     </div>
@@ -218,10 +234,13 @@ export default function Triviary() {
                 >
                   <div className="flex items-center justify-center space-x-4 px-4 mb-4">
                     <CollapsibleTrigger asChild>
-                      <div className="flex items-center justify-center space-x-2 border border-gray-200 rounded-lg px-2 py-1">
-                        <h4 className="text-sm font-semibold pl-4">
+                      <div
+                        className="flex items-center justify-center space-x-2 border border-gray-200 rounded-lg px-2 py-1"
+                        role="button"
+                      >
+                        <p className="text-md font-semibold pl-4">
                           {attemptsCollapsibleOpen ? "Hide" : "Show"} Attempts
-                        </h4>
+                        </p>
                         <Button variant="ghost" size="sm" className="w-9 p-0">
                           <ChevronsUpDown className="h-4 w-4" />
                           <span className="sr-only">Toggle</span>

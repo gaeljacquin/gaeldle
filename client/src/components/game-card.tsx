@@ -11,21 +11,33 @@ import {
   cardImgSize,
   cardImgClasses,
   cardImgClassesAlt,
+  bgCorrect,
+  bgPartial,
+  bgIncorrect,
 } from "~/src/lib/client-constants";
+import { Badge } from "./ui/badge";
+import { cn } from "../lib/utils";
 
 type GameCardProps = {
   card: Partial<Game>;
   showBar?: boolean;
   showTooltip?: boolean;
+  showPos?: boolean;
 };
 
 const GameCard = (props: GameCardProps) => {
-  const { card, showBar = true, showTooltip = true } = props;
+  const { card, showBar = true, showTooltip = true, showPos = false } = props;
+
+  const posComp = (index: number) => {
+    return (
+      <span className="text-white text-xl font-semibold">{index + 1}</span>
+    );
+  };
 
   const daCard = () => {
     return (
       <Card
-        className="rounded-2xl overflow-x-auto shadow-md"
+        className="relative rounded-2xl overflow-x-auto shadow-md"
         style={{ width: cardImgSize }}
       >
         <CardContent className="p-0">
@@ -34,10 +46,19 @@ const GameCard = (props: GameCardProps) => {
             alt={card?.name ?? ""}
             width={cardImgSize}
             height={cardImgSize}
-            className={cardImgClasses}
+            className={cn(
+              cardImgClasses,
+              (card.bgStatus === bgCorrect || card.bgStatus === bgPartial) &&
+                `contrast-50`
+            )}
             style={{ objectFit: "cover" }}
             priority
           />
+          {card.bgStatus === bgIncorrect && showPos && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+              {posComp(card?.latestIndex ?? 0)}
+            </div>
+          )}
           {showBar && (
             <div className={`p-2 ${card?.bgStatus} text-center`}>
               {card?.frdFormatted ? (
@@ -45,7 +66,10 @@ const GameCard = (props: GameCardProps) => {
                   {card?.frdFormatted}
                 </p>
               ) : (
-                <p className="text-sm text-white font-semibold">?</p>
+                <p className="text-sm text-white font-semibold">
+                  {card?.proximity ?? "?"}
+                  {card?.proximity && "%"}
+                </p>
               )}
             </div>
           )}
@@ -73,7 +97,9 @@ const GameCard = (props: GameCardProps) => {
               style={{ objectFit: "cover" }}
               priority
             />
-            <p className="text-center text-sm font-semibold">{card?.name}</p>
+            <Badge className="flex items-center justify-center mt-4 mb-2 bg-gael-blue text-white text-lg font-light">
+              {card?.name}
+            </Badge>
           </div>
         </TooltipContent>
       </Tooltip>

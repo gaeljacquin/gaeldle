@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import io, { Socket } from "socket.io-client";
 import { z } from "zod";
-import { Games } from "../types/games";
+import { bgTextSpecial1, bgTextSpecial2 } from "@/lib/server-constants";
 
 const textVictory = "You got it! 😀";
 const textGameOver = "Game over 😭";
@@ -84,8 +84,8 @@ const triviary2Legend = [
 ];
 const streakCounters = (streak: number, bestStreak: number) => {
   return [
-    { text: `Streak: ${streak}`, backgroundClass: bgOther1 },
-    { text: `Best Streak: ${bestStreak}`, backgroundClass: bgOther2 },
+    { text: `Streak: ${streak}`, backgroundClass: bgTextSpecial1 },
+    { text: `Best Streak: ${bestStreak}`, backgroundClass: bgTextSpecial2 },
   ];
 };
 

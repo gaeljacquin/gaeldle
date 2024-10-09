@@ -89,6 +89,7 @@ export default function GamesForm({
                         "w-[420px] justify-between",
                         !field.value && "text-muted-foreground"
                       )}
+                      aria-labelledby="dialog-title"
                       aria-label="Select game"
                       disabled={played || summaryTab}
                     >

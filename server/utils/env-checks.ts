@@ -17,8 +17,8 @@ export function genKey(key: string) {
   return key;
 }
 
-export async function getRandomGames(gamesService, numCards, sampleSize) {
-  const games = await gamesService.findRandom(numCards, sampleSize);
+export async function getRandomGames(gamesService, numCards) {
+  const games = await gamesService.findRandom(numCards);
 
   return games;
 }

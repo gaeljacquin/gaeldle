@@ -13,8 +13,8 @@ import cors from '~/utils/cors';
 import { ModeMap } from '~/utils/mode-map';
 import shuffleList from '~/utils/shuffle-list';
 import { ModesService } from '~/src/modes/modes.service';
-import { getRandomGame, getRandomGames } from '~/utils/env-checks';
 import { bgCorrect } from '~/utils/constants';
+import { Games } from '~/types/games';
 
 @WebSocketGateway({ cors })
 export class Triviary2Gateway
@@ -72,7 +72,7 @@ export class Triviary2Gateway
   async handleTriviary2Next(client: Socket, data): Promise<void> {
     const { timelineIds } = data;
     const clientId = client.id;
-    const game = (await getRandomGame(this.gamesService, timelineIds))[0];
+    const game = (await this.gamesService.findOneRandom(timelineIds))[0];
     let nextGame = null;
 
     if (game) {
@@ -90,7 +90,10 @@ export class Triviary2Gateway
   async handleTriviary2Init(client) {
     const numCards = (await this.mode).pixelationStep;
     const sampleSize = (await this.mode).pixelation;
-    const games = await getRandomGames(this.gamesService, numCards, sampleSize);
+    const games = (await this.gamesService.findRandom(
+      numCards,
+      sampleSize,
+    )) as Games;
     let reshuffledGames = shuffleList(games);
     reshuffledGames = games.map((game, index) => {
       if (index === games.length - 1) {

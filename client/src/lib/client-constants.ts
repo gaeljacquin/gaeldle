@@ -75,7 +75,6 @@ const levels = [
 ];
 const triviaryLegend = [
   { text: "Incorrect", backgroundClass: bgIncorrect },
-  { text: "Found then moved", backgroundClass: bgPartial },
   { text: "Correct", backgroundClass: bgCorrect },
 ];
 const triviary2Legend = [

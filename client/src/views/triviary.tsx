@@ -13,8 +13,9 @@ import {
 import {
   SortableContext,
   horizontalListSortingStrategy,
-  // rectSwappingStrategy,
+  rectSwappingStrategy,
   arrayMove,
+  arraySwap,
 } from "@dnd-kit/sortable";
 import { ChevronsUpDown } from "lucide-react";
 import { Game, Games } from "~/src/types/games";
@@ -32,7 +33,12 @@ import {
 } from "@/components/ui/collapsible";
 import GameCard from "@/components/game-card";
 import MyBadgeGroup from "~/src/components/my-badge-group";
-import { streakCounters, triviaryLegend } from "~/src/lib/client-constants";
+import {
+  bgCorrect,
+  bgPartial,
+  streakCounters,
+  triviaryLegend,
+} from "~/src/lib/client-constants";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -70,6 +76,10 @@ export default function Triviary() {
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor);
   const sensors = useSensors(mouseSensor, touchSensor);
+  const correctIgdbs =
+    timeline
+      ?.filter((game) => game.bgStatus === bgCorrect)
+      .map((game) => game.igdbId) ?? [];
 
   if (!readySetGo) {
     return <Placeholders />;
@@ -82,7 +92,7 @@ export default function Triviary() {
           <div className="flex flex-col min-h-screen">
             <ModesHeader mode={mode} />
             <div
-              className={`flex flex-col p-4 mt-5 mb-5 justify-center bg-white shadow-sm ${
+              className={`flex flex-col mb-5 justify-center bg-white shadow-sm ${
                 process.env.NODE_ENV === "development" &&
                 "border border-gray-200"
               }`}
@@ -108,24 +118,35 @@ export default function Triviary() {
                 )}
               </div>
 
-              <div className="flex justify-center mt-5">
-                <div className="flex flex-row px-4 py-16 rounded-lg bg-white shadow-sm border-dashed border-2 border-gray-600 overflow-x-auto">
+              <div className="flex justify-center">
+                <div className="flex flex-row px-4 py-8 rounded-lg bg-white shadow-sm border-dashed border-2 border-gray-600 overflow-x-auto">
                   {!(gameOver || won) && (
-                    <div className="flex justify-start p-2 space-x-4">
+                    <div className="flex justify-start p-0 space-x-4">
                       <SortableContext
                         items={timeline.map((card) => card?.igdbId ?? 0)}
-                        strategy={horizontalListSortingStrategy}
+                        strategy={
+                          correctIgdbs.length > 0
+                            ? rectSwappingStrategy
+                            : horizontalListSortingStrategy
+                        }
                       >
                         {timeline.map((card: Partial<Game>, index) => (
                           <div key={card.igdbId}>
-                            <SortableItem id={card.igdbId ?? 0}>
+                            <SortableItem
+                              id={card.igdbId ?? 0}
+                              disabled={correctIgdbs.includes(
+                                card?.igdbId ?? 0
+                              )}
+                            >
                               <GameCard
                                 card={card}
                                 showBar={!gameOver}
                                 showPos={true}
                               />
                             </SortableItem>
-                            <Badge className="flex items-center justify-center bg-sky-700 hover:bg-sky-800 text-white text-xs font-semibold px-2 py-2 mt-4">
+                            <Badge
+                              className={`flex items-center justify-center ${bgPartial} text-white text-xs font-semibold px-2 py-2 mt-4`}
+                            >
                               {index + 1}
                             </Badge>
                           </div>
@@ -142,7 +163,7 @@ export default function Triviary() {
                         </Badge>
                       </div> */}
                       <div className="flex flex-col rounded-lg bg-white">
-                        <div className="flex justify-start p-2 space-x-4 overflow-x-auto">
+                        <div className="flex justify-start p-0 space-x-4 overflow-x-auto">
                           {timeline.map((card: Partial<Game>) => (
                             <GameCard
                               key={card.igdbId}
@@ -163,7 +184,7 @@ export default function Triviary() {
                         </Badge>
                       </div> */}
                       <div className="flex flex-col rounded-lg bg-white">
-                        <div className="flex justify-start p-2 space-x-4 overflow-x-auto">
+                        <div className="flex justify-start p-0 space-x-4 overflow-x-auto">
                           {goodTimeline.map((card: Partial<Game>) => (
                             <GameCard
                               key={card.igdbId}
@@ -178,9 +199,9 @@ export default function Triviary() {
                 </div>
               </div>
 
-              <div className="flex justify-center mt-7">
+              <div className="flex justify-center mt-2">
                 {!(played || won) ? (
-                  <div className="flex justify-start p-2 space-x-8">
+                  <div className="flex justify-start p-0 space-x-8">
                     <Button
                       onClick={submitAnswer}
                       className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold tracking-sm"
@@ -254,18 +275,18 @@ export default function Triviary() {
 
                       return (
                         <div key={index} className="mb-8">
-                          <div className="flex justify-center space-x-2 mt-2 mb-4">
+                          <div className="flex justify-center space-x-2 mt-2 mb-">
                             <Badge className="text-sm bg-red-100 hover:bg-red-100 text-red-800 border-red-400 text-center font-semibold">
                               {guesses.length - index}
                             </Badge>
                           </div>
                           <div className="flex justify-center mt-5">
                             <div
-                              className={`flex flex-row justify-start px-4 space-x-4 overflow-x-auto ${
+                              className={`flex flex-row justify-start px-2 space-x-4 overflow-x-auto ${
                                 !showBar && "grayscale hover:grayscale-0"
                               }`}
                             >
-                              <div className="flex justify-start p-2 space-x-4">
+                              <div className="flex justify-start p-0 space-x-4">
                                 {timeline.map((card: Partial<Game>) => (
                                   <GameCard
                                     key={card.igdbId}
@@ -297,7 +318,18 @@ export default function Triviary() {
     if (e.active.id !== e.over.id) {
       const oldIdx = timeline.findIndex((card) => card.igdbId === e.active.id);
       const newIdx = timeline.findIndex((card) => card.igdbId === e.over!.id);
-      const newTimeline = arrayMove(timeline, oldIdx, newIdx);
+      let newTimeline;
+
+      if (correctIgdbs.length === 0) {
+        newTimeline = arrayMove(timeline, oldIdx, newIdx);
+      } else {
+        if (correctIgdbs.includes(timeline[newIdx].igdbId)) {
+          return;
+        }
+
+        newTimeline = arraySwap(timeline, oldIdx, newIdx);
+      }
+
       updateTimeline(newTimeline);
     }
   }

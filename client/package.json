@@ -40,7 +40,7 @@
     "cmdk": "1.0.0",
     "lottie-react": "^2.4.0",
     "lucide-react": "^0.439.0",
-    "next": "^14.2.14",
+    "next": "^14.2.15",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",
@@ -52,7 +52,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
-    "@types/node": "^22.7.4",
+    "@types/node": "^22.7.5",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "@vercel/toolbar": "^0.1.22",
@@ -60,6 +60,6 @@
     "eslint-config-next": "14.2.6",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.3"
   }
 }

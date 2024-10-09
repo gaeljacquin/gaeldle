@@ -33,4 +33,15 @@ const genKey = (key: string) => {
   return key;
 };
 
-export { gSeconds, getLastSegment, genKey, today, tomorrow };
+const bgTextSpecial1 = "bg-gradient-to-r from-blue-500 to-teal-400";
+const bgTextSpecial2 = "bg-gradient-to-r from-gael-purple to-red-500";
+
+export {
+  gSeconds,
+  getLastSegment,
+  genKey,
+  today,
+  tomorrow,
+  bgTextSpecial1,
+  bgTextSpecial2,
+};

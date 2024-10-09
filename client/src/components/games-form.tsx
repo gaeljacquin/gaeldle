@@ -1,15 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Socket } from "socket.io-client";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -18,18 +12,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { FormSchema, textAlreadyGuessed } from "~/src/lib/client-constants";
 import zGames from "@/stores/games";
 import { Game, Guess, Guesses } from "@/types/games";
 import { UseFormReturn } from "react-hook-form";
+import { useState } from "react";
 
 type GamesFormProps = {
   form: UseFormReturn<{ game: Guess }, any, undefined>;
@@ -51,7 +40,6 @@ export default function GamesForm({
   summaryTab,
 }: GamesFormProps) {
   const { games } = zGames();
-  const [gameMenuOpen, setGameMenuOpen] = useState(false);
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     if (guesses.some((guess) => guess && guess.igdbId == data.game.igdbId)) {
@@ -60,102 +48,79 @@ export default function GamesForm({
     }
 
     socket.emit(modeSlug, { game: data.game, livesLeft: getLivesLeft() - 1 });
+    form.reset();
   }
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col items-center space-y-4 mt-8"
+        className="flex flex-col items-center space-y-4 mt-2 w-full"
       >
         <FormField
           control={form.control}
           name="game"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <Popover
-                open={gameMenuOpen}
-                onOpenChange={() => {
-                  setGameMenuOpen(!gameMenuOpen);
+            <FormItem className="flex flex-col border border-gray-100 rounded-md p-4 w-full">
+              <Command
+                onClick={() => {
                   form.clearErrors("game");
                 }}
+                className="border border-gray-300 rounded-md p-4 w-full"
               >
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        "w-[420px] justify-between",
-                        !field.value && "text-muted-foreground"
-                      )}
-                      aria-label="Select game"
-                      disabled={played || summaryTab}
-                    >
-                      {field.value
-                        ? games.find(
-                            (game: Game) => game.igdbId === field.value.igdbId
-                          )?.name
-                        : "Select game"}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-[420px] p-0"
-                  side="bottom"
-                  align="start"
-                >
-                  <Command
-                    onClick={() => {
-                      form.clearErrors("game");
-                    }}
-                  >
-                    <CommandInput placeholder="Search game..." />
-                    <CommandList>
-                      <CommandEmpty>No game found</CommandEmpty>
-                      <CommandGroup>
-                        {games.map((game: Game) => (
-                          <CommandItem
-                            key={game.igdbId}
-                            value={game.name}
-                            onSelect={(selectedIgdbId) => {
-                              if (
-                                parseInt(selectedIgdbId, 10) ===
-                                field.value?.igdbId
-                              ) {
-                                form.reset();
-                              } else {
-                                form.setValue("game", game);
-                                setGameMenuOpen(false);
-                              }
-                            }}
+                <CommandInput placeholder="Search game..." className="w-full" />
+                <CommandList className="w-full">
+                  <CommandEmpty>No game found</CommandEmpty>
+                  <CommandGroup>
+                    {games.map((game: Game) => {
+                      const alreadyGuessed = guesses.some(
+                        (guess) => guess?.igdbId === game.igdbId
+                      );
+
+                      return (
+                        <CommandItem
+                          key={game.igdbId}
+                          value={game.name}
+                          onSelect={(selectedIgdbId) => {
+                            if (
+                              parseInt(selectedIgdbId, 10) ===
+                              field.value?.igdbId
+                            ) {
+                              form.reset();
+                            } else {
+                              form.setValue("game", game);
+                            }
+                          }}
+                          disabled={alreadyGuessed}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              field.value?.igdbId &&
+                                game.igdbId === field.value.igdbId
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          <span
+                            className={alreadyGuessed ? "line-through" : ""}
                           >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                field.value?.igdbId &&
-                                  game.igdbId === field.value.igdbId
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
                             {game.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+                          </span>
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="flex space-x-4 w-full">
+        <div className="flex w-full">
           <Button
             type="submit"
-            className="flex-1 bg-gael-green hover:bg-gael-green-dark mt-5 mb-5"
+            className="flex-1 bg-gael-green hover:bg-gael-green-dark mb-5"
             disabled={played || summaryTab}
           >
             Guess

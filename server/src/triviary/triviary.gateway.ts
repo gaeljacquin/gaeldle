@@ -14,7 +14,7 @@ import { ModeMap } from '~/utils/mode-map';
 import shuffleList from '~/utils/shuffle-list';
 import { ModesService } from '~/src/modes/modes.service';
 import { bgCorrect, bgIncorrect, bgOther1, bgOther2 } from '~/utils/constants';
-import { Games } from '~/types/games';
+import { Game, Games } from '~/types/games';
 
 @WebSocketGateway({ cors })
 export class TriviaryGateway
@@ -67,10 +67,10 @@ export class TriviaryGateway
       return;
     }
 
-    const updatedTimeline = timeline.map((game, index) => {
-      if (game.igdbId === games[index].igdbId) {
+    const updatedTimeline = timeline.map((card, index) => {
+      if (card.igdbId === games[index].igdbId) {
         return {
-          ...game,
+          ...card,
           bgStatus: bgCorrect,
           frd: games[index].frd,
           frdFormatted: games[index].frdFormatted,
@@ -81,7 +81,20 @@ export class TriviaryGateway
           answer = false;
         }
 
-        return { ...game, bgStatus: bgIncorrect };
+        const listLength = (games as []).length;
+        const correctIndex = (games as []).findIndex(
+          (game: Game) => game.igdbId === card.igdbId,
+        );
+        const positionDifference = Math.abs(index - correctIndex);
+        const proximity =
+          ((listLength - positionDifference) / listLength) * 100;
+
+        return {
+          ...card,
+          bgStatus: bgIncorrect,
+          latestIndex: index,
+          proximity,
+        };
       }
     });
 

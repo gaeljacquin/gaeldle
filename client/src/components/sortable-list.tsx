@@ -14,7 +14,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { SortableOverlay } from "./sortable-overlay";
-import { DragHandle, SortableItem } from "./sortable-item";
+import SortableItem, { DragHandle } from "./sortable-item";
 
 interface BaseItem {
   id: UniqueIdentifier;

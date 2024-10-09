@@ -55,6 +55,12 @@ export default function Cover() {
         <div className="flex-grow container mx-auto px-4">
           <ModesHeader mode={mode} />
 
+          <div className="items-center justify-center mb-7 -mt-5">
+            <MyBadgeGroup
+              group={streakCounters(getStreak(), getBestStreak())}
+            />
+          </div>
+
           <div className="grid md:grid-cols-2 gap-8">
             <div
               className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === "development" && "border border-gray-200 "}`}
@@ -82,8 +88,13 @@ export default function Cover() {
                   priority
                 />
               )}
-            </div>
 
+              {process.env.NODE_ENV === "development" && (
+                <div className="w-full rounded-lg bg-gray-100 border border-2 border-red-400 mt-8">
+                  <Button onClick={() => form.reset()}>Clear Form</Button>
+                </div>
+              )}
+            </div>
             <div
               className={`flex flex-col items-center text-center p-6 rounded-lg bg-white shadow-sm relative ${process.env.NODE_ENV === "development" && "border border-gray-200 "}`}
             >
@@ -113,7 +124,7 @@ export default function Cover() {
                 played={played}
               />
 
-              <div className="w-full flex flex-col">
+              <div className="w-full">
                 <div className="mt-4" aria-live="polite">
                   {guesses.map((game, index) => (
                     <div
@@ -128,16 +139,8 @@ export default function Cover() {
                 </div>
               </div>
 
-              <div
-                className={`absolute bottom-0 left-0 right-0 p-4 rounded-b-lg ${process.env.NODE_ENV === "development" && "bg-gray-100 border-t border-gray-200"}`}
-              >
-                {process.env.NODE_ENV === "development" && (
-                  <div className="mb-5">
-                    <Button onClick={() => form.reset()}>Clear Form</Button>
-                  </div>
-                )}
-
-                <div className="max-w-3xl mx-auto mt-10 text-center">
+              <div className="w-full rounded-b-lg mt-7">
+                <div className="mx-auto text-center">
                   {livesLeft === 0 && (
                     <Button
                       className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold"
@@ -161,12 +164,6 @@ export default function Cover() {
                       {finito ? "All done! 🤩" : "Keep playing!"}
                     </Button>
                   )}
-                </div>
-
-                <div>
-                  <MyBadgeGroup
-                    group={streakCounters(getStreak(), getBestStreak())}
-                  />
                 </div>
               </div>
             </div>

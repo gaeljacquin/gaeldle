@@ -16,7 +16,7 @@ type idgafProps = {
 };
 
 export function Item2(props: idgafProps) {
-  const { id, isOpacityEnabled, isDragging, style } = props;
+  const { id, isOpacityEnabled, isDragging, style, showTooltip } = props;
   const { timeline, nextGame } = zTimeline2();
   const card = timeline
     ? findCard(id, [...timeline, nextGame ? nextGame : {}])
@@ -32,7 +32,7 @@ export function Item2(props: idgafProps) {
   return (
     card && (
       <div style={styles}>
-        <GameCard card={card} showTooltip={!isDragging} />
+        <GameCard card={card} showTooltip={!isDragging && showTooltip} />
       </div>
     )
   );

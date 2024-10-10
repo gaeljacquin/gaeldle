@@ -17,7 +17,7 @@ import { bgCorrect, bgIncorrect, bgOther1, bgOther2 } from '~/utils/constants';
 import { Game, Games } from '~/types/games';
 
 @WebSocketGateway({ cors })
-export class TriviaryGateway
+export class TimelineGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
@@ -28,38 +28,38 @@ export class TriviaryGateway
 
   @WebSocketServer() server: Server;
 
-  private triviaryMap = new ModeMap();
+  private timelineMap = new ModeMap();
   private mode = this.modesService.findOne(8);
 
   async afterInit() {
-    console.info('WebSocket server initialized (triviary)');
+    console.info('WebSocket server initialized (timeline)');
   }
 
   async handleConnection(client: Socket, ...args: any[]) {
-    console.info(`Client connected (triviary): ${client.id}`);
+    console.info(`Client connected (timeline): ${client.id}`);
     console.info('args: ', args);
-    this.handleTriviaryInit(client);
+    this.handleTimelineInit(client);
   }
 
   handleDisconnect(client: Socket) {
-    console.info(`Client disconnected (triviary): ${client.id}`);
-    this.triviaryMap.delete(client.id);
+    console.info(`Client disconnected (timeline): ${client.id}`);
+    this.timelineMap.delete(client.id);
   }
 
-  @SubscribeMessage('triviary-stats')
-  async handleTriviaryStats(client: Socket, data): Promise<void> {
+  @SubscribeMessage('timeline-stats')
+  async handleTimelineStats(client: Socket, data): Promise<void> {
     const clientId = client.id;
-    console.info('Received triviary stats:', data);
+    console.info('Received timeline stats:', data);
     await this.unlimitedStatsService.create(data);
-    client.emit('triviary-stats-res', {
-      message: `Saved triviary stats for ${clientId}`,
+    client.emit('timeline-stats-res', {
+      message: `Saved timeline stats for ${clientId}`,
     });
   }
 
-  @SubscribeMessage('triviary')
-  async handleTriviary(client: Socket, data): Promise<void> {
+  @SubscribeMessage('timeline')
+  async handleTimeline(client: Socket, data): Promise<void> {
     const clientId = client.id;
-    const games = this.triviaryMap.get(clientId);
+    const games = this.timelineMap.get(clientId);
     const { timeline, livesLeft } = data;
     let answer = true;
 
@@ -119,11 +119,11 @@ export class TriviaryGateway
       };
     }
 
-    client.emit('triviary-res', emit);
+    client.emit('timeline-res', emit);
   }
 
-  @SubscribeMessage('triviary-init')
-  async handleTriviaryInit(client) {
+  @SubscribeMessage('timeline-init')
+  async handleTimelineInit(client) {
     const numCards = (await this.mode).pixelationStep;
     const sampleSize = (await this.mode).pixelation;
     const games = (await this.gamesService.findRandom(
@@ -137,9 +137,9 @@ export class TriviaryGateway
 
       return { ...rest, bgStatus: bgOther1 };
     });
-    this.triviaryMap.set(client.id, games);
+    this.timelineMap.set(client.id, games);
 
-    client.emit('triviary-init-res', {
+    client.emit('timeline-init-res', {
       games: reshuffledGames,
       mode: await this.mode,
     });

@@ -54,11 +54,16 @@ const GameCard = (props: GameCardProps) => {
             style={{ objectFit: "cover" }}
             priority
           />
-          {card.bgStatus === bgIncorrect && showPos && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
-              {posComp(card?.latestIndex ?? 0)}
-            </div>
-          )}
+          {(card.bgStatus === bgIncorrect || card.bgStatus === bgPartial) &&
+            showPos && (
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+                {posComp(
+                  (card.bgStatus === bgPartial
+                    ? card?.correctIndex
+                    : card?.latestIndex) ?? 0
+                )}
+              </div>
+            )}
           {showBar && (
             <div className={`p-2 ${card?.bgStatus} text-center`}>
               {card?.frdFormatted ? (

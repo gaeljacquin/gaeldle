@@ -13,13 +13,13 @@ import { UnlimitedStatsModule } from './unlimited-stats/unlimited-stats.module';
 import { UnlimitedStatsService } from './unlimited-stats/unlimited-stats.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { TriviaryGateway } from './triviary/triviary.gateway';
+import { TimelineGateway } from './timeline/timeline.gateway';
 import { GamesService } from './games/games.service';
 // import { DailyGateway } from './daily/daily.gateway';
 // import { GotdService } from './gotd/gotd.service';
 import { CategoriesModule } from './categories/categories.module';
 import { CategoriesService } from './categories/categories.service';
-import { Triviary2Gateway } from './triviary2/triviary2.gateway';
+import { Timeline2Gateway } from './timeline2/timeline2.gateway';
 import { CoverGateway } from './cover/cover.gateway';
 
 @Module({
@@ -40,12 +40,12 @@ import { CoverGateway } from './cover/cover.gateway';
     ModesService,
     // DailyStatsService,
     UnlimitedStatsService,
-    TriviaryGateway,
+    TimelineGateway,
     GamesService,
     // DailyGateway,
     // GotdService,
     CategoriesService,
-    Triviary2Gateway,
+    Timeline2Gateway,
     CoverGateway,
   ],
 })

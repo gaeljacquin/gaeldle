@@ -5,7 +5,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import GameCard from "./game-card";
 import { findCard } from "../lib/utils";
-import zTriviary2 from "../stores/triviary2";
+import zTimeline2 from "../stores/timeline2";
 
 type idgafProps = {
   id: number;
@@ -16,8 +16,8 @@ type idgafProps = {
 };
 
 export function Item2(props: idgafProps) {
-  const { id, isOpacityEnabled, isDragging, style, showTooltip } = props;
-  const { timeline, nextGame } = zTriviary2();
+  const { id, isOpacityEnabled, isDragging, style } = props;
+  const { timeline, nextGame } = zTimeline2();
   const card = timeline
     ? findCard(id, [...timeline, nextGame ? nextGame : {}])
     : null;
@@ -32,7 +32,7 @@ export function Item2(props: idgafProps) {
   return (
     card && (
       <div style={styles}>
-        <GameCard card={card} showTooltip={showTooltip} />
+        <GameCard card={card} showTooltip={!isDragging} />
       </div>
     )
   );

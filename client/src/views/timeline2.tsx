@@ -19,14 +19,14 @@ import ModesHeader from "../components/modes-header";
 import Placeholders from "./placeholders";
 import Hearts from "../components/hearts";
 import LivesLeftComp from "../components/lives-left";
-import zTriviary2 from "../stores/triviary2";
+import zTimeline2 from "../stores/timeline2";
 import MyBadgeGroup from "../components/my-badge-group";
-import { streakCounters, triviary2Legend } from "../lib/client-constants";
+import { streakCounters, timeline2Legend } from "../lib/client-constants";
 import PlaceholderCard from "../components/placeholder-card";
 import { Item2 } from "../components/sortable-item2";
 import { Button } from "../components/ui/button";
 
-export default function TriviaryVer2() {
+export default function TimelineVer2() {
   const pathname = usePathname();
   const {
     containers,
@@ -41,7 +41,7 @@ export default function TriviaryVer2() {
     setContainersDragEnd,
     setContainersDragOver,
     setContainersDragCancel,
-  } = zTriviary2();
+  } = zTimeline2();
   const { getModeBySlug } = zModes();
   const mode = getModeBySlug(pathname);
   const gameOver = played && !won;
@@ -110,13 +110,13 @@ export default function TriviaryVer2() {
                   lives={lives}
                 />
               </div>
-              <div className="flex justify-center space-x-2 -mt-2">
+              <div className="flex justify-center space-x-2 mt-8 mb-4">
                 {gameOver || won ? (
                   <MyBadgeGroup
                     group={streakCounters(getStreak(), getBestStreak())}
                   />
                 ) : (
-                  <MyBadgeGroup group={triviary2Legend} />
+                  <MyBadgeGroup group={timeline2Legend} />
                 )}
               </div>
               <div className="flex justify-center space-x-2">

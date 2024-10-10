@@ -102,13 +102,8 @@ export default function Timeline() {
           <div className="flex flex-col min-h-screen">
             <ModesHeader mode={mode} />
 
-            <div
-              className={`flex flex-col mb-5 justify-center bg-white shadow-sm ${
-                process.env.NODE_ENV === "development" &&
-                "border border-gray-200"
-              }`}
-            >
-              <div className="flex justify-center">
+            <div className={`flex flex-col mb-5 justify-center`}>
+              <div className="flex justify-center mb-6">
                 <div
                   className={`px-4 py-8 rounded-lg bg-white shadow-sm border-dashed border-4 ${dragSwitch ? "border-gael-green-dark" : "border-gael-red-dark"} overflow-x-auto`}
                 >
@@ -326,6 +321,7 @@ export default function Timeline() {
                                     key={card.igdbId}
                                     card={card}
                                     showBar={false}
+                                    showTooltip={false}
                                   />
                                 ))}
                               </div>

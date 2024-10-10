@@ -110,7 +110,7 @@ export default function TriviaryVer2() {
                   lives={lives}
                 />
               </div>
-              <div className="flex justify-center space-x-2 -mt-2">
+              <div className="flex justify-center space-x-2 mt-8 mb-4">
                 {gameOver || won ? (
                   <MyBadgeGroup
                     group={streakCounters(getStreak(), getBestStreak())}

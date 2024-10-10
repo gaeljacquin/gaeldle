@@ -14,6 +14,7 @@ export type ZTriviary = {
   timeline: Games;
   timelineOnLoad: Games;
   won: boolean;
+  dragSwitch: boolean;
   getLivesLeft: () => number;
   getStreak: () => number;
   getBestStreak: () => number;
@@ -29,4 +30,5 @@ export type ZTriviary = {
   updateGuesses: (arg0: Games) => void;
   updateLivesLeft: () => void;
   updateTimeline: (arg0: Games) => void;
+  setDragSwitch: () => void;
 };

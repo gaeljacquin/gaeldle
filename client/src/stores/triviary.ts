@@ -32,6 +32,7 @@ export const initialState = {
 const initialState2 = {
   streak: 0,
   bestStreak: 0,
+  dragSwitch: true,
 };
 
 type checkAnswerProps = {
@@ -231,14 +232,18 @@ const zTriviary = create(
         const bestStreak = Math.max(get().bestStreak, get().streak);
         set({ bestStreak });
       },
+      setDragSwitch: () => {
+        const dragSwitch = get().dragSwitch;
+        set({ dragSwitch: !dragSwitch });
+      },
     })),
     {
       name: "ztriviary",
       partialize: (state) => {
-        const { lives, streak, bestStreak, ...rest } = state;
+        const { lives, streak, bestStreak, dragSwitch, ...rest } = state;
         void rest;
 
-        return { lives, streak, bestStreak };
+        return { lives, streak, bestStreak, dragSwitch };
       },
     }
   )

@@ -55,12 +55,6 @@ export default function Cover() {
         <div className="flex-grow container mx-auto px-4">
           <ModesHeader mode={mode} />
 
-          <div className="items-center justify-center mb-7 -mt-5">
-            <MyBadgeGroup
-              group={streakCounters(getStreak(), getBestStreak())}
-            />
-          </div>
-
           <div className="grid md:grid-cols-2 gap-8">
             <div
               className={`flex flex-col items-center text-center p-6 bg-white shadow-sm rounded-lg ${process.env.NODE_ENV === "development" && "border border-gray-200 "}`}
@@ -114,6 +108,12 @@ export default function Cover() {
                   <Hearts lives={lives} livesLeft={livesLeft} />
                 </div>
               </>
+
+              <div className="items-center justify-center mt-4">
+                <MyBadgeGroup
+                  group={streakCounters(getStreak(), getBestStreak())}
+                />
+              </div>
 
               <GamesForm
                 form={form}

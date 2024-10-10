@@ -23,7 +23,7 @@ export default function SortableItem({
   ...props
 }: PropsWithChildren<Props>) {
   const { id, disabled } = props;
-  const { attributes, listeners, setNodeRef, transform, transition } =
+  const { attributes, listeners, setNodeRef, transform, transition, active } =
     useSortable({ id, disabled });
 
   const style = {
@@ -32,7 +32,13 @@ export default function SortableItem({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={active && id === active.id ? "shadow-animate rounded-2xl" : ""}
+    >
       {children}
     </div>
   );

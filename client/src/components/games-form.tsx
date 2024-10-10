@@ -1,7 +1,7 @@
 "use client";
 
 import { Socket } from "socket.io-client";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check } from "lucide-react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import {
@@ -18,7 +18,6 @@ import { FormSchema, textAlreadyGuessed } from "~/src/lib/client-constants";
 import zGames from "@/stores/games";
 import { Game, Guess, Guesses } from "@/types/games";
 import { UseFormReturn } from "react-hook-form";
-import { useState } from "react";
 
 type GamesFormProps = {
   form: UseFormReturn<{ game: Guess }, any, undefined>;
@@ -67,6 +66,13 @@ export default function GamesForm({
                   form.clearErrors("game");
                 }}
                 className="border border-gray-300 rounded-md p-4 w-full"
+                filter={(gameName, searchTerm) => {
+                  return Number(
+                    gameName
+                      .toLocaleLowerCase()
+                      .includes(searchTerm.toLocaleLowerCase())
+                  );
+                }}
               >
                 <CommandInput placeholder="Search game..." className="w-full" />
                 <CommandList className="w-full">

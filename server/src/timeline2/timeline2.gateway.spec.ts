@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TriviaryVer2Gateway } from './triviary2.gateway';
+import { TimelineVer2Gateway } from './timeline2.gateway';
 
-describe('Triviary2Gateway', () => {
-  let gateway: TriviaryVer2Gateway;
+describe('Timeline2Gateway', () => {
+  let gateway: TimelineVer2Gateway;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TriviaryVer2Gateway],
+      providers: [TimelineVer2Gateway],
     }).compile();
 
-    gateway = module.get<TriviaryVer2Gateway>(TriviaryVer2Gateway);
+    gateway = module.get<TimelineVer2Gateway>(TimelineVer2Gateway);
   });
 
   it('should be defined', () => {

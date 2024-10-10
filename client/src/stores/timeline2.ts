@@ -5,8 +5,8 @@ import { Game } from "@/types/games";
 import {
   setContainersDragEndProps,
   setContainersDragOverProps,
-  ZTriviary2,
-} from "~/src/types/ztriviary2";
+  ZTimeline2,
+} from "~/src/types/ztimeline2";
 import { UnlimitedStats } from "@/types/unlimited-stats";
 import { bgCorrect, bgIncorrect, textSubmit } from "@/lib/client-constants";
 
@@ -43,17 +43,17 @@ type checkAnswerProps = {
 export const socket = io(`${process.env.serverUrl}`);
 
 const wsConnect = () => {
-  const { getState, setState } = zTriviary2;
+  const { getState, setState } = zTimeline2;
 
   socket.on("connect", () => {
     console.info("Connected to WebSocket server");
   });
 
-  socket.on("triviary2-check-res", (data: checkAnswerProps) => {
+  socket.on("timeline2-check-res", (data: checkAnswerProps) => {
     checkAnswer(data);
   });
 
-  socket.on("triviary2-next-res", (data) => {
+  socket.on("timeline2-next-res", (data) => {
     const { nextGame } = data;
     const containers = getState().containers;
 
@@ -85,7 +85,7 @@ const wsConnect = () => {
     }
   });
 
-  socket.on("triviary2-init-res", (data) => {
+  socket.on("timeline2-init-res", (data) => {
     const mode = data.mode;
     const timelineGame = data.games[0];
     const nextGame = data.games[data.games.length - 1];
@@ -106,22 +106,22 @@ const wsConnect = () => {
     });
   });
 
-  socket.on("triviary2-stats-res", (data: { message: string }) => {
+  socket.on("timeline2-stats-res", (data: { message: string }) => {
     console.info(data.message);
   });
 
   return () => {
     socket.off("connect");
-    socket.off(`triviary2-init-res`);
-    socket.off(`triviary2-check-res`);
-    socket.off(`triviary2-next-res`);
-    socket.off("triviary2-stats-res");
+    socket.off(`timeline2-init-res`);
+    socket.off(`timeline2-check-res`);
+    socket.off(`timeline2-next-res`);
+    socket.off("timeline2-stats-res");
   };
 };
 
 const checkAnswer = (data: checkAnswerProps) => {
   const { insertIndex, gameCheck } = data;
-  const { getState, setState } = zTriviary2;
+  const { getState, setState } = zTimeline2;
   const timeline = getState().timeline;
   const containers = getState().containers;
   timeline[insertIndex].frd = gameCheck.frd;
@@ -134,7 +134,7 @@ const checkAnswer = (data: checkAnswerProps) => {
     timeline[insertIndex].bgStatus = bgCorrect;
     getState().setStreak(true);
     getState().setBestStreak();
-    socket.emit("triviary2-next", {
+    socket.emit("timeline2-next", {
       timelineIds: timeline.map((game) => game.igdbId),
     });
   } else {
@@ -158,7 +158,7 @@ const checkAnswer = (data: checkAnswerProps) => {
         attempts: getState().attempts,
       });
     } else {
-      socket.emit("triviary2-next", {
+      socket.emit("timeline2-next", {
         timelineIds: timeline.map((game) => game.igdbId),
       });
     }
@@ -178,12 +178,12 @@ const checkAnswer = (data: checkAnswerProps) => {
 };
 
 const saveUnlimitedStats = (data: UnlimitedStats) => {
-  socket.emit("triviary2-stats", data);
+  socket.emit("timeline2-stats", data);
 };
 
-const zTriviary2 = create(
+const zTimeline2 = create(
   persist(
-    devtools<ZTriviary2>((set, get) => ({
+    devtools<ZTimeline2>((set, get) => ({
       ...initialState,
       ...initialState2,
       updateLivesLeft: () => {
@@ -204,7 +204,7 @@ const zTriviary2 = create(
       getNextGame: () => get().nextGame,
       resetPlay: () => {
         set({ ...initialState });
-        socket.emit("triviary2-init");
+        socket.emit("timeline2-init");
       },
       setStreak: (won: boolean) => {
         const streak = won ? get().streak + 1 : 0;
@@ -240,7 +240,7 @@ const zTriviary2 = create(
           nextGame: null,
           attempts: attempts + 1,
         });
-        socket.emit("triviary2-check", emit);
+        socket.emit("timeline2-check", emit);
       },
       setContainersDragOver: (props: setContainersDragOverProps) => {
         const {
@@ -321,7 +321,7 @@ const zTriviary2 = create(
       },
     })),
     {
-      name: "ztriviary2",
+      name: "ztimeline2",
       partialize: (state) => {
         const { lives, bestStreak, ...rest } = state;
         void rest;
@@ -334,4 +334,4 @@ const zTriviary2 = create(
 
 wsConnect();
 
-export default zTriviary2;
+export default zTimeline2;

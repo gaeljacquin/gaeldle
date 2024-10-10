@@ -8,7 +8,7 @@ export type UnlimitedStats = {
   info?: unknown;
 };
 
-export type TriviaryStats = UnlimitedStats & {
+export type TimelineStats = UnlimitedStats & {
   guesses: Games[];
 };
 

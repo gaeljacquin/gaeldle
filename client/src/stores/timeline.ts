@@ -2,8 +2,8 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { io } from "socket.io-client";
 import { Games } from "@/types/games";
-import { ZTriviary } from "@/types/ztriviary";
-import { TriviaryStats } from "@/types/unlimited-stats";
+import { ZTimeline } from "@/types/ztimeline";
+import { TimelineStats } from "@/types/unlimited-stats";
 import {
   bgCorrect,
   bgPartial,
@@ -44,17 +44,17 @@ type checkAnswerProps = {
 export const socket = io(`${process.env.serverUrl}`);
 
 const wsConnect = () => {
-  const { setState } = zTriviary;
+  const { setState } = zTimeline;
 
   socket.on("connect", () => {
     console.info("Connected to WebSocket server");
   });
 
-  socket.on("triviary-res", (data: checkAnswerProps) => {
+  socket.on("timeline-res", (data: checkAnswerProps) => {
     checkAnswer(data);
   });
 
-  socket.on("triviary-init-res", (data) => {
+  socket.on("timeline-init-res", (data) => {
     const mode = data.mode;
     let { lives, lives: livesLeft } = mode;
     setState({
@@ -65,21 +65,21 @@ const wsConnect = () => {
     });
   });
 
-  socket.on("triviary-stats-res", (data: { message: string }) => {
+  socket.on("timeline-stats-res", (data: { message: string }) => {
     console.info(data.message);
   });
 
   return () => {
     socket.off("connect");
-    socket.off(`triviary-res`);
-    socket.off(`triviary-init-res`);
-    socket.off("triviary-stats-res");
+    socket.off(`timeline-res`);
+    socket.off(`timeline-init-res`);
+    socket.off("timeline-stats-res");
   };
 };
 
 const checkAnswer = (data: checkAnswerProps) => {
   const { answer, timeline, goodTimeline } = data;
-  const { getState, setState } = zTriviary;
+  const { getState, setState } = zTimeline;
   setState({ timeline, submitButtonText: textTryAgain, alreadyGuessed: true });
 
   if (answer) {
@@ -87,7 +87,7 @@ const checkAnswer = (data: checkAnswerProps) => {
     getState().markAsWon();
     getState().setStreak(true);
     getState().setBestStreak();
-    saveTriviaryStats({
+    saveTimelineStats({
       modeId,
       attempts: Math.min(getState().guesses.length + 1, getState().lives),
       guesses: getState().guesses,
@@ -103,7 +103,7 @@ const checkAnswer = (data: checkAnswerProps) => {
     if (getState().livesLeft === 0) {
       getState().markAsPlayed();
       setState({ goodTimeline });
-      saveTriviaryStats({
+      saveTimelineStats({
         modeId,
         attempts: getState().guesses.length,
         guesses: getState().guesses,
@@ -116,13 +116,13 @@ const checkAnswer = (data: checkAnswerProps) => {
   getState().setBestStreak();
 };
 
-const saveTriviaryStats = (data: TriviaryStats) => {
-  socket.emit("triviary-stats", data);
+const saveTimelineStats = (data: TimelineStats) => {
+  socket.emit("timeline-stats", data);
 };
 
-const zTriviary = create(
+const zTimeline = create(
   persist(
-    devtools<ZTriviary>((set, get) => ({
+    devtools<ZTimeline>((set, get) => ({
       ...initialState,
       ...initialState2,
       updateLivesLeft: () => {
@@ -212,13 +212,13 @@ const zTriviary = create(
       getBestStreak: () => get().bestStreak,
       resetPlay: () => {
         set({ ...initialState });
-        socket.emit("triviary-init");
+        socket.emit("timeline-init");
       },
       submitAnswer: () => {
         const timeline = get().timeline;
         const livesLeft = get().livesLeft - 1;
         const emit = { timeline, livesLeft };
-        socket.emit("triviary", emit);
+        socket.emit("timeline", emit);
       },
       setLastGuess: () => {
         const guesses = get().guesses;
@@ -238,7 +238,7 @@ const zTriviary = create(
       },
     })),
     {
-      name: "ztriviary",
+      name: "ztimeline",
       partialize: (state) => {
         const { lives, streak, bestStreak, dragSwitch, ...rest } = state;
         void rest;
@@ -251,4 +251,4 @@ const zTriviary = create(
 
 wsConnect();
 
-export default zTriviary;
+export default zTimeline;

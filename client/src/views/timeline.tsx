@@ -24,7 +24,7 @@ import zModes from "~/src/stores/modes";
 import Placeholders from "~/src/views/placeholders";
 import ModesHeader from "~/src/components/modes-header";
 import Hearts from "~/src/components/hearts";
-import zTriviary from "@/stores/triviary";
+import zTimeline from "@/stores/timeline";
 import SortableItem from "@/components/sortable-item";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +38,7 @@ import {
   bgCorrect,
   bgPartial,
   streakCounters,
-  triviaryLegend,
+  timelineLegend,
 } from "~/src/lib/client-constants";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -51,7 +51,7 @@ import LivesLeftComp from "@/components/lives-left";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 
-export default function Triviary() {
+export default function Timeline() {
   const pathname = usePathname();
   const {
     timeline,
@@ -72,7 +72,7 @@ export default function Triviary() {
     getStreak,
     getBestStreak,
     setDragSwitch,
-  } = zTriviary();
+  } = zTimeline();
   const { getModeBySlug } = zModes();
   const mode = getModeBySlug(pathname);
   const [attemptsCollapsibleOpen, setAttemptsCollapsibleOpen] = useState(false);
@@ -137,7 +137,7 @@ export default function Triviary() {
                           group={streakCounters(getStreak(), getBestStreak())}
                         />
                       ) : (
-                        <MyBadgeGroup group={triviaryLegend} />
+                        <MyBadgeGroup group={timelineLegend} />
                       )}
                     </div>
 

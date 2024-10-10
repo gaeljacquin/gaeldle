@@ -152,7 +152,7 @@ const checkAnswer = ({ answer, ...props }: checkAnswerProps) => {
 };
 
 const saveCoverStats = (data: CoverStats) => {
-  socket.emit("triviary2-stats", data);
+  socket.emit("timeline2-stats", data);
 };
 
 const zCover = create(

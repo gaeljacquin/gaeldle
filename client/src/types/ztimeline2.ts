@@ -1,6 +1,6 @@
 import { Game, Games } from "@/types/games";
 
-export type ZTriviary2 = {
+export type ZTimeline2 = {
   lives: number;
   livesLeft: number;
   nextGame: Partial<Game> | null;

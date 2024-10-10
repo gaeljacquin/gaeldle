@@ -73,12 +73,12 @@ const levels = [
   { text: "Moderate", backgroundClass: bgPartial },
   { text: "Hard", backgroundClass: bgIncorrect },
 ];
-const triviaryLegend = [
+const timelineLegend = [
   { text: "Incorrect", backgroundClass: bgIncorrect },
   { text: "Displaced", backgroundClass: bgPartial },
   { text: "Correct", backgroundClass: bgCorrect },
 ];
-const triviary2Legend = [
+const timeline2Legend = [
   { text: "Incorrect", backgroundClass: bgIncorrect },
   { text: "Correct", backgroundClass: bgCorrect },
 ];
@@ -116,8 +116,8 @@ export {
   textSubmit,
   textTryAgain,
   textVictory,
-  triviary2Legend,
-  triviaryLegend,
+  timeline2Legend,
+  timelineLegend,
   yoe,
   GamesFormInit,
   imgAlt,

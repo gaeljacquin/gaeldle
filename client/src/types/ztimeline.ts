@@ -1,6 +1,6 @@
 import { Games } from "@/types/games";
 
-export type ZTriviary = {
+export type ZTimeline = {
   alreadyGuessed: boolean;
   dummyOnLoad: boolean;
   goodTimeline: Games;

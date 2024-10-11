@@ -27,6 +27,7 @@ type GamesFormProps = {
   getLivesLeft: () => number;
   played: boolean;
   summaryTab?: boolean;
+  additionalButton?: React.ReactNode;
 };
 
 export default function GamesForm({
@@ -37,8 +38,10 @@ export default function GamesForm({
   getLivesLeft,
   played,
   summaryTab,
+  ...props
 }: GamesFormProps) {
   const { games } = zGames();
+  const { additionalButton } = props;
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     if (guesses.some((guess) => guess && guess.igdbId == data.game.igdbId)) {
@@ -54,7 +57,7 @@ export default function GamesForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col items-center space-y-4 mt-2 w-full"
+        className="flex flex-col items-center mt-2 w-full"
       >
         <FormField
           control={form.control}
@@ -75,7 +78,7 @@ export default function GamesForm({
                 }}
               >
                 <CommandInput placeholder="Search game..." className="w-full" />
-                <CommandList className="w-full">
+                <CommandList className="w-full mt-2">
                   <CommandEmpty>No game found</CommandEmpty>
                   <CommandGroup>
                     {games.map((game: Game) => {
@@ -123,14 +126,15 @@ export default function GamesForm({
             </FormItem>
           )}
         />
-        <div className="flex w-full">
+        <div className="flex space-x-2 w-full p-4 justify-center items-center">
           <Button
             type="submit"
-            className="flex-1 bg-gael-green hover:bg-gael-green-dark mb-5"
+            className="bg-gael-green hover:bg-gael-green-dark w-full text-md font-semibold"
             disabled={played || summaryTab}
           >
             Guess
           </Button>
+          {additionalButton}
         </div>
       </form>
     </Form>

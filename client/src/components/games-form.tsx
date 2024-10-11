@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Socket } from "socket.io-client";
 import { Check } from "lucide-react";
 import { z } from "zod";
+import { UseFormReturn } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -17,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { FormSchema, textAlreadyGuessed } from "~/src/lib/client-constants";
 import zGames from "@/stores/games";
 import { Game, Guess, Guesses } from "@/types/games";
-import { UseFormReturn } from "react-hook-form";
 
 type GamesFormProps = {
   form: UseFormReturn<{ game: Guess }, any, undefined>;
@@ -27,18 +28,22 @@ type GamesFormProps = {
   getLivesLeft: () => number;
   played: boolean;
   summaryTab?: boolean;
+  additionalButton?: React.ReactNode;
 };
 
-export default function GamesForm({
-  form,
-  modeSlug,
-  guesses,
-  socket,
-  getLivesLeft,
-  played,
-  summaryTab,
-}: GamesFormProps) {
+export default function GamesForm({ ...props }: GamesFormProps) {
   const { games } = zGames();
+  const {
+    form,
+    modeSlug,
+    guesses,
+    socket,
+    played,
+    summaryTab,
+    additionalButton,
+    getLivesLeft,
+  } = props;
+  const [search, setSearch] = useState("");
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     if (guesses.some((guess) => guess && guess.igdbId == data.game.igdbId)) {
@@ -48,13 +53,14 @@ export default function GamesForm({
 
     socket.emit(modeSlug, { game: data.game, livesLeft: getLivesLeft() - 1 });
     form.reset();
+    setSearch("");
   }
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col items-center space-y-4 mt-2 w-full"
+        className="flex flex-col items-center mt-2 w-full"
       >
         <FormField
           control={form.control}
@@ -74,8 +80,14 @@ export default function GamesForm({
                   );
                 }}
               >
-                <CommandInput placeholder="Search game..." className="w-full" />
-                <CommandList className="w-full">
+                <CommandInput
+                  placeholder="Search game..."
+                  className="w-full"
+                  value={search}
+                  onValueChange={setSearch}
+                  disabled={played || summaryTab}
+                />
+                <CommandList className="w-full mt-2 h-72">
                   <CommandEmpty>No game found</CommandEmpty>
                   <CommandGroup>
                     {games.map((game: Game) => {
@@ -97,7 +109,7 @@ export default function GamesForm({
                               form.setValue("game", game);
                             }
                           }}
-                          disabled={alreadyGuessed}
+                          disabled={alreadyGuessed || played || summaryTab}
                         >
                           <Check
                             className={cn(
@@ -123,14 +135,15 @@ export default function GamesForm({
             </FormItem>
           )}
         />
-        <div className="flex w-full">
+        <div className="flex space-x-2 w-full p-4 justify-center items-center">
           <Button
             type="submit"
-            className="flex-1 bg-gael-green hover:bg-gael-green-dark mb-5"
+            className="bg-gael-green hover:bg-gael-green-dark w-full text-md font-semibold"
             disabled={played || summaryTab}
           >
             Guess
           </Button>
+          {additionalButton}
         </div>
       </form>
     </Form>

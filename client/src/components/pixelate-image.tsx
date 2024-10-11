@@ -1,24 +1,30 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { SkeletonImage } from "./skeleton-image";
 import { fileToDataUri, pixelateImage } from "@/lib/pixelate-image";
+import { placeholderImage } from "../lib/client-constants";
 
 type PixelateImageProps = {
-  imageUrl: string
-  pixelationFactor: number
-  alt: string
-  width: number
-  height: number
-}
+  imageUrl: string;
+  pixelationFactor: number;
+  alt: string;
+  width: number;
+  height: number;
+};
 
-const PixelatedImage = ({ imageUrl, pixelationFactor, alt, width, height }: PixelateImageProps) => {
+const PixelatedImage = ({
+  imageUrl,
+  pixelationFactor,
+  alt,
+  width,
+  height,
+}: PixelateImageProps) => {
   const [pixelatedSrc, setPixelatedSrc] = useState(imageUrl);
   const [loading, setLoading] = useState(true);
   const originalImageRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     const loadImage = async () => {
-      const dataUri = await fileToDataUri(imageUrl) as string;
+      const dataUri = (await fileToDataUri(imageUrl)) as string;
       setPixelatedSrc(dataUri);
       const imgElement = new window.Image();
       imgElement.src = dataUri;
@@ -26,7 +32,12 @@ const PixelatedImage = ({ imageUrl, pixelationFactor, alt, width, height }: Pixe
         originalImageRef.current = imgElement;
 
         if (pixelationFactor > 0) {
-          pixelateImage(imgElement, pixelationFactor, setPixelatedSrc, setLoading);
+          pixelateImage(
+            imgElement,
+            pixelationFactor,
+            setPixelatedSrc,
+            setLoading
+          );
         }
       };
     };
@@ -37,15 +48,26 @@ const PixelatedImage = ({ imageUrl, pixelationFactor, alt, width, height }: Pixe
   return (
     <div>
       {loading ? (
-        <SkeletonImage width={width} height={height} />
+        <Image
+          placeholder="empty"
+          className="relative z-10"
+          src={placeholderImage.url}
+          width={width}
+          height={height}
+          style={{ objectFit: "contain", width: "auto", height: "auto" }}
+          alt={placeholderImage.alt}
+          priority
+        />
       ) : (
         <Image
+          placeholder="empty"
+          className="relative z-10"
           src={pixelatedSrc}
           width={width}
           height={height}
           style={{ objectFit: "contain", width: "auto", height: "auto" }}
           alt={alt}
-          priority
+          loading="lazy"
         />
       )}
     </div>

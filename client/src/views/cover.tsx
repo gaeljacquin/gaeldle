@@ -95,7 +95,9 @@ export default function Cover() {
     readySetGo && (
       <div className="flex flex-col min-h-screen">
         <div className="flex-grow container mx-auto px-4">
-          <ModesHeader mode={mode} />
+          <div className="flex justify-center">
+            <ModesHeader mode={mode} />
+          </div>
 
           <div className="grid md:grid-cols-2 gap-8">
             <div className="flex flex-col items-center text-center">
@@ -115,28 +117,31 @@ export default function Cover() {
                       src={imageUrl}
                       width={imgWidth}
                       height={imgHeight}
+                      className="relative z-10"
                       style={{
                         objectFit: "contain",
                         width: "auto",
                         height: "auto",
                       }}
                       alt={imgAlt(mode.label)}
-                      priority
+                      loading="lazy"
                     />
                   )}
-                  <div className="items-center justify-center my-4 p-2">
+                  <div className="relative z-10 items-center justify-center my-4 p-2">
                     <MyBadgeGroup
                       group={streakCounters(getStreak(), getBestStreak())}
+                      textColor="black"
                     />
                   </div>
+                  <div className="absolute inset-0 bg-gray-200/30 backdrop-blur-sm"></div>
                 </CardContent>
               </Card>
 
-              {/* {process.env.NODE_ENV === "development" && (
+              {process.env.NODE_ENV === "development" && (
                 <div className="w-full rounded-lg bg-gray-100 border border-2 border-red-400 mt-8">
                   <Button onClick={() => form.reset()}>Clear Form</Button>
                 </div>
-              )} */}
+              )}
             </div>
 
             <div className="flex flex-col items-center text-center p-6 relative">

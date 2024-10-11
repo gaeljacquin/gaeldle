@@ -1,17 +1,31 @@
 import { Badge } from "@/components/ui/badge";
 
-type MyBadgeGroupProps = {
+type BadgeProps = {
   text: string;
   backgroundClass: string;
-}[];
+};
 
-export default function MyBadgeGroup({ group }: { group: MyBadgeGroupProps }) {
+type MyBadgeGroupProps = BadgeProps[];
+
+type MyBadgeGroupExtendedProps = {
+  textColor?: string;
+} & {
+  group: MyBadgeGroupProps;
+};
+
+export default function MyBadgeGroup({
+  group,
+  ...props
+}: MyBadgeGroupExtendedProps) {
+  const { textColor } = props;
+  const textColorClass = `text-${textColor ?? "white"}`;
+
   return (
     <div className="flex space-x-4 w-full justify-center items-center text-center">
       {group.map((item, index) => (
         <Badge
           key={item.text + "-" + index}
-          className={`text-md ${item.backgroundClass} hover:${item.backgroundClass}`}
+          className={`text-md ${textColorClass} ${item.backgroundClass} hover:${item.backgroundClass}`}
         >
           {item.text}
         </Badge>

@@ -172,7 +172,7 @@ export default function Cover() {
                   >
                     <div className="flex items-center justify-center space-x-4 px-4">
                       <CollapsibleTrigger asChild>
-                        <button
+                        <div
                           className="flex items-center justify-center space-x-2 border border-gray-200 rounded-lg px-2 py-1"
                           role="button"
                         >
@@ -183,7 +183,7 @@ export default function Cover() {
                             <ChevronsUpDown className="h-4 w-4" />
                             <span className="sr-only">Toggle</span>
                           </Button>
-                        </button>
+                        </div>
                       </CollapsibleTrigger>
                     </div>
                     <CollapsibleContent>

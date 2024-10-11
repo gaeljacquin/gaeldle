@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Socket } from "socket.io-client";
 import { Check } from "lucide-react";
 import { z } from "zod";
+import { UseFormReturn } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -17,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { FormSchema, textAlreadyGuessed } from "~/src/lib/client-constants";
 import zGames from "@/stores/games";
 import { Game, Guess, Guesses } from "@/types/games";
-import { UseFormReturn } from "react-hook-form";
 
 type GamesFormProps = {
   form: UseFormReturn<{ game: Guess }, any, undefined>;
@@ -30,18 +31,19 @@ type GamesFormProps = {
   additionalButton?: React.ReactNode;
 };
 
-export default function GamesForm({
-  form,
-  modeSlug,
-  guesses,
-  socket,
-  getLivesLeft,
-  played,
-  summaryTab,
-  ...props
-}: GamesFormProps) {
+export default function GamesForm({ ...props }: GamesFormProps) {
   const { games } = zGames();
-  const { additionalButton } = props;
+  const {
+    form,
+    modeSlug,
+    guesses,
+    socket,
+    played,
+    summaryTab,
+    additionalButton,
+    getLivesLeft,
+  } = props;
+  const [search, setSearch] = useState("");
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     if (guesses.some((guess) => guess && guess.igdbId == data.game.igdbId)) {
@@ -51,6 +53,7 @@ export default function GamesForm({
 
     socket.emit(modeSlug, { game: data.game, livesLeft: getLivesLeft() - 1 });
     form.reset();
+    setSearch("");
   }
 
   return (
@@ -77,8 +80,14 @@ export default function GamesForm({
                   );
                 }}
               >
-                <CommandInput placeholder="Search game..." className="w-full" />
-                <CommandList className="w-full mt-2">
+                <CommandInput
+                  placeholder="Search game..."
+                  className="w-full"
+                  value={search}
+                  onValueChange={setSearch}
+                  disabled={played || summaryTab}
+                />
+                <CommandList className="w-full mt-2 h-72">
                   <CommandEmpty>No game found</CommandEmpty>
                   <CommandGroup>
                     {games.map((game: Game) => {
@@ -100,7 +109,7 @@ export default function GamesForm({
                               form.setValue("game", game);
                             }
                           }}
-                          disabled={alreadyGuessed}
+                          disabled={alreadyGuessed || played || summaryTab}
                         >
                           <Check
                             className={cn(

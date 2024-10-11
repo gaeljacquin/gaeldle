@@ -170,6 +170,7 @@ const zCover = create(
           set({ guesses: [...guesses, guess] });
         }
       },
+      getLives: () => get().lives,
       getLivesLeft: () => get().livesLeft,
       getGuesses: () => get().guesses,
       markAsPlayed: () => {

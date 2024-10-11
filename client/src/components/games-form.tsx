@@ -85,7 +85,7 @@ export default function GamesForm({ ...props }: GamesFormProps) {
                   className="w-full"
                   value={search}
                   onValueChange={setSearch}
-                  disabled={played || summaryTab}
+                  disabled={played || summaryTab || getLivesLeft() === 0}
                 />
                 <CommandList className="w-full mt-2 h-72">
                   <CommandEmpty>No game found</CommandEmpty>
@@ -109,7 +109,12 @@ export default function GamesForm({ ...props }: GamesFormProps) {
                               form.setValue("game", game);
                             }
                           }}
-                          disabled={alreadyGuessed || played || summaryTab}
+                          disabled={
+                            alreadyGuessed ||
+                            played ||
+                            summaryTab ||
+                            getLivesLeft() === 0
+                          }
                         >
                           <Check
                             className={cn(
@@ -139,7 +144,7 @@ export default function GamesForm({ ...props }: GamesFormProps) {
           <Button
             type="submit"
             className="bg-gael-green hover:bg-gael-green-dark w-full text-md font-semibold"
-            disabled={played || summaryTab}
+            disabled={played || summaryTab || getLivesLeft() === 0}
           >
             Guess
           </Button>

@@ -12,11 +12,11 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { jwtAuthGuard } from '~/utils/env-checks';
 
-@jwtAuthGuard()
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
+  @jwtAuthGuard()
   @Post()
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(createCategoryDto);
@@ -32,6 +32,7 @@ export class CategoriesController {
     return this.categoriesService.findOne(+id);
   }
 
+  @jwtAuthGuard()
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -40,6 +41,7 @@ export class CategoriesController {
     return this.categoriesService.update(+id, updateCategoryDto);
   }
 
+  @jwtAuthGuard()
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.categoriesService.remove(+id);

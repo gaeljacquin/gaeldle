@@ -6,7 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import Navbar from "@/components/navbar";
-import TextSpecial from "@/components/text-special";
+import { appinfo } from "@/lib/server-constants";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,8 +19,8 @@ const DynamicFooter = dynamic(() => import("@/components/footer"), {
 });
 
 export const metadata = {
-  title: "Gaeldle",
-  description: "A gaming-themed Wordle clone inspired by Wiki Trivia",
+  title: appinfo.title,
+  description: appinfo.description,
 };
 
 export default function RootLayout({
@@ -35,16 +35,7 @@ export default function RootLayout({
       >
         <div className="flex flex-col min-h-screen" tabIndex={-1}>
           <Navbar />
-          <main role="main">
-            <div className="text-center mt-10">
-              <div className="max-w-3xl mx-auto">
-                <h1 className="text-5xl md:text-6xl font-extrabold mb-4">
-                  <TextSpecial term1={"Gael"} term2={"dle"} space={false} />
-                </h1>
-              </div>
-            </div>
-            {children}
-          </main>
+          <main role="main">{children}</main>
         </div>
         <div className="mt-10 md:mt-24" tabIndex={-1}>
           <DynamicFooter />

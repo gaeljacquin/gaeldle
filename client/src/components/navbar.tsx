@@ -5,13 +5,13 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import LottieDynamic from "@/components/lottie-dynamic";
 import AboutDialog from "@/components/about-dialog";
-// import ModesNav from "@/components/modes-nav";
+import { appinfo } from "@/lib/server-constants";
 
 export default function Navbar() {
   const pathname = usePathname();
-  // const DynamicModesNav = dynamic(() => import("@/components/modes-nav"), {
-  //   ssr: false,
-  // });
+  const DynamicModesNav = dynamic(() => import("@/components/modes-nav"), {
+    ssr: false,
+  });
 
   return (
     <header
@@ -19,8 +19,8 @@ export default function Navbar() {
       className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-600 backdrop-filter backdrop-blur-md flex h-20 w-full shrink-0 items-center px-4 md:px-6"
     >
       <Link href={pathname !== "/" ? "/" : "#"} className="mr-6 flex h-16 w-16">
-        <LottieDynamic loop={true} />
-        <span className="sr-only">Gaeldle</span>
+        <LottieDynamic loop={false} />
+        <span className="sr-only">{appinfo.title}</span>
       </Link>
 
       <nav role="navigation" className="ml-auto flex gap-6">
@@ -31,7 +31,7 @@ export default function Navbar() {
           Home
         </Link>
         <AboutDialog />
-        {/* <DynamicModesNav /> */}
+        <DynamicModesNav />
       </nav>
     </header>
   );

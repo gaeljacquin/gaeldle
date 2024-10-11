@@ -26,7 +26,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../components/ui/collapsible";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 export default function Cover() {
@@ -43,6 +43,7 @@ export default function Cover() {
     finito,
     getStreak,
     getBestStreak,
+    getLives,
     getLivesLeft,
     getName,
     resetPlay,
@@ -55,7 +56,7 @@ export default function Cover() {
   const readySetGo = games && imageUrl && mode;
 
   const renderButton = () => {
-    if (livesLeft === 0) {
+    if (livesLeft === 0 && getLives() > 0) {
       return (
         <Button
           className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold"
@@ -95,7 +96,9 @@ export default function Cover() {
     readySetGo && (
       <div className="flex flex-col min-h-screen">
         <div className="flex-grow container mx-auto px-4">
-          <ModesHeader mode={mode} />
+          <div className="flex justify-center">
+            <ModesHeader mode={mode} />
+          </div>
 
           <div className="grid md:grid-cols-2 gap-8">
             <div className="flex flex-col items-center text-center">
@@ -115,43 +118,52 @@ export default function Cover() {
                       src={imageUrl}
                       width={imgWidth}
                       height={imgHeight}
+                      className="relative z-10"
                       style={{
                         objectFit: "contain",
                         width: "auto",
                         height: "auto",
                       }}
                       alt={imgAlt(mode.label)}
-                      priority
+                      loading="lazy"
                     />
                   )}
-                  <div className="items-center justify-center my-4 p-2">
+                  <div className="relative z-10 items-center justify-center my-4 p-2">
                     <MyBadgeGroup
                       group={streakCounters(getStreak(), getBestStreak())}
+                      textColor="black"
                     />
                   </div>
+                  <div className="absolute inset-0 bg-gray-200/30 backdrop-blur-sm"></div>
                 </CardContent>
               </Card>
 
-              {/* {process.env.NODE_ENV === "development" && (
+              {process.env.NODE_ENV === "development" && (
                 <div className="w-full rounded-lg bg-gray-100 border border-2 border-red-400 mt-8">
                   <Button onClick={() => form.reset()}>Clear Form</Button>
                 </div>
-              )} */}
+              )}
             </div>
 
             <div className="flex flex-col items-center text-center p-6 relative">
-              <div className="text-lg text-center space-y-1">
-                <p>{played ? `${getName()}` : `🤔`}</p>
-                <div className="flex justify-center space-x-2">
-                  <Hearts lives={lives} livesLeft={livesLeft} />
+              {getLives() > 0 ? (
+                <div className="text-lg text-center space-y-1">
+                  <p>{played ? `${getName()}` : `🤔`}</p>
+                  <div className="flex justify-center space-x-2">
+                    <Hearts lives={lives} livesLeft={livesLeft} />
+                  </div>
+                  <LivesLeftComp
+                    played={played}
+                    won={won}
+                    livesLeft={livesLeft}
+                    lives={lives}
+                  />
                 </div>
-                <LivesLeftComp
-                  played={played}
-                  won={won}
-                  livesLeft={livesLeft}
-                  lives={lives}
-                />
-              </div>
+              ) : (
+                <div className="text-lg text-center p-8">
+                  <Loader2 className="flex items-center justify-center h-5 w-5 animate-spin" />
+                </div>
+              )}
 
               <GamesForm
                 form={form}

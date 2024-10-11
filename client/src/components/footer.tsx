@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ExternalLinkIcon } from "@radix-ui/react-icons";
 import { currentYear } from "~/src/lib/client-constants";
 import zModes from "~/src/stores/modes";
+import LottieDynamic from "./lottie-dynamic";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -85,18 +86,21 @@ export default function Footer() {
           </div>
         </div>
         <hr className="my-6 border-white" />
-        <div className="flex flex-wrap items-center md:justify-between justify-center">
-          <div className="w-full md:w-4/12 px-4 mx-auto text-center">
-            <div className="text-sm font-semibold py-1">
-              &copy; 2024{currentYear !== 2024 && `-${currentYear}`}{" "}
-              <span className="hover:underline">
-                <Link href="https://gaeljacquin.com" target="_blank">
-                  Gaël Jacquin
-                </Link>
-              </span>
-              . All rights reserved.
-            </div>
+
+        <div className="relative">
+          <div className="relative z-10 flex w-32 h-32 mx-auto text-center">
+            <LottieDynamic loop={true} />
           </div>
+          <div className="relative z-10 text-sm font-semibold py-1 mx-auto text-center">
+            &copy; 2024{currentYear !== 2024 && `-${currentYear}`}{" "}
+            <span className="hover:underline">
+              <Link href="https://gaeljacquin.com" target="_blank">
+                Gaël Jacquin
+              </Link>
+            </span>
+            . All rights reserved.
+          </div>
+          <div className="absolute inset-0 bg-gray-900/30 backdrop-blur-md"></div>
         </div>
       </div>
     </footer>

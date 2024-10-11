@@ -1,23 +1,19 @@
-"use client"
+"use client";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import zModes from "@/stores/modes";
-import zCategories from "@/stores/categories";
-import { Category } from "@/types/categories";
 import { Mode } from "@/types/modes";
+import { Button } from "./ui/button";
 
 export default function ModesNav() {
   const { modes } = zModes();
-  const { categories } = zCategories();
+  const readySetGo = !!modes;
 
   return (
     <DropdownMenu>
@@ -30,31 +26,20 @@ export default function ModesNav() {
         </Link>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        {(() => {
-          const categoriesWithModes = categories.filter((category: Category) => category._count.modes > 0);
-          return categoriesWithModes.map((category: Category, index: number) => {
-            const isLast = index === categoriesWithModes.length - 1;
-
-            return (
-              <div key={category.id}>
-                <DropdownMenuLabel>{category.label}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  {modes.filter((mode: Mode) => mode.categoryId === category.id && mode.active).map((mode: Mode, index: number) => {
-                    return (
-                      <DropdownMenuItem key={mode.mode + '-' + index}>
-                        <Link href={`/${mode.mode}`}>{mode.label}</Link>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuGroup>
-                {!isLast && <DropdownMenuSeparator />}
-              </div>
-            );
-          });
-        })()}
+        {!readySetGo ? (
+          <p className="text-center text-sm font-semibold">Loading modes...</p>
+        ) : (
+          modes.map((mode: Mode, index: number) => (
+            <DropdownMenuItem key={mode.mode + "-" + index}>
+              <Link href={`/${mode.mode}`} className="w-full">
+                <Button className={`${mode.classNames} w-full`}>
+                  {mode.label}
+                </Button>
+              </Link>
+            </DropdownMenuItem>
+          ))
+        )}
       </DropdownMenuContent>
-
     </DropdownMenu>
-  )
+  );
 }

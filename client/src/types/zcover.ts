@@ -17,6 +17,7 @@ export type ZCover = {
   finito: boolean;
   updateLivesLeft: () => void;
   updateGuesses: (arg0: Guess | null) => void;
+  getLives: () => number;
   getLivesLeft: () => number;
   getGuesses: () => Guesses;
   getStreak: () => number;

@@ -36,6 +36,11 @@ const genKey = (key: string) => {
 const bgTextSpecial1 = "bg-gradient-to-r from-blue-500 to-teal-400";
 const bgTextSpecial2 = "bg-gradient-to-r from-gael-purple to-red-500";
 
+const appinfo = {
+  title: "Gaeldle",
+  description: "A gaming-themed Wordle clone",
+};
+
 export {
   gSeconds,
   getLastSegment,
@@ -44,4 +49,5 @@ export {
   tomorrow,
   bgTextSpecial1,
   bgTextSpecial2,
+  appinfo,
 };

@@ -69,14 +69,9 @@ export default function TimelineVer2() {
           <div className="flex flex-col min-h-screen">
             <ModesHeader mode={mode} />
 
-            <div
-              className={`flex flex-col p-4 mt-5 mb-5 justify-center bg-white shadow-sm relative ${
-                process.env.NODE_ENV === "development" &&
-                "border border-gray-200"
-              }`}
-            >
-              <div className="flex justify-center mt-2">
-                <div className="flex flex-row px-4 py-4 rounded-lg bg-white shadow-sm border-dashed border-2 border-sky-600">
+            <div className="flex flex-col p-4 justify-center relative -mt-4">
+              <div className="flex justify-center">
+                <div className="flex flex-row px-4 py-4 rounded-lg border-dashed border-2 border-sky-600">
                   <div className="relative w-full h-full">
                     <div className="relative">
                       <PlaceholderCard />
@@ -93,12 +88,7 @@ export default function TimelineVer2() {
               </div>
             </div>
 
-            <div
-              className={`mt-5 mb-7 ${
-                process.env.NODE_ENV === "development" &&
-                "border border-gray-200"
-              }`}
-            >
+            <div className="mt-5 mb-7">
               <div className="flex justify-center space-x-2">
                 <Hearts lives={lives} livesLeft={livesLeft} size={"md"} />
               </div>
@@ -110,7 +100,7 @@ export default function TimelineVer2() {
                   lives={lives}
                 />
               </div>
-              <div className="flex justify-center space-x-2 mt-8 mb-4">
+              <div className="flex justify-center space-x-2 mt-6 mb-6">
                 {gameOver || won ? (
                   <MyBadgeGroup
                     group={streakCounters(getStreak(), getBestStreak())}
@@ -130,7 +120,7 @@ export default function TimelineVer2() {
               </div>
             </div>
 
-            <div className="flex justify-left mt-5 rounded-lg bg-white shadow-sm border-dashed border-2 border-emerald-600 overflow-x-auto px-8 py-8">
+            <div className="flex justify-left mt-5 rounded-lg border-dashed border-2 border-emerald-600 overflow-x-auto px-8 py-8">
               <div className="relative w-full h-full">
                 <div className="absolute top-1/2 left-0 w-full border-t border-slate-800 transform -translate-y-1/2" />
                 <div className="relative inset-0 flex justify-center items-center gap-4">

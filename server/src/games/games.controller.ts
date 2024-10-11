@@ -2,7 +2,6 @@ import { Controller, Get } from '@nestjs/common';
 import { GamesService } from './games.service';
 import { jwtAuthGuard } from '~/utils/env-checks';
 
-@jwtAuthGuard()
 @Controller('games')
 export class GamesController {
   constructor(private readonly gamesService: GamesService) {}
@@ -11,6 +10,7 @@ export class GamesController {
     return this.gamesService.findAll();
   }
 
+  @jwtAuthGuard()
   @Get('/test')
   findTest() {
     return this.gamesService.findRandom(10, 15);

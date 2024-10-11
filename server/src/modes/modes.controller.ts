@@ -10,7 +10,6 @@ import { ModesService } from './modes.service';
 import { jwtAuthGuard } from '~/utils/env-checks';
 import { UpdateModesDto } from '~/src/modes/dto/update-modes.dto';
 
-@jwtAuthGuard()
 @Controller('modes')
 export class ModesController {
   constructor(private readonly modesService: ModesService) {}
@@ -24,6 +23,7 @@ export class ModesController {
     return this.modesService.findOne(modeId);
   }
 
+  @jwtAuthGuard()
   @Post('edit/:modeId')
   myEdit(
     @Param('modeId', ParseIntPipe) modeId: number,

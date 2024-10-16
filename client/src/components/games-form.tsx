@@ -14,7 +14,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { FormSchema, textAlreadyGuessed } from "~/src/lib/client-constants";
 import zGames from "@/stores/games";
@@ -71,7 +77,7 @@ export default function GamesForm({ ...props }: GamesFormProps) {
                 onClick={() => {
                   form.clearErrors("game");
                 }}
-                className="border border-gray-300 rounded-md p-4 w-full"
+                className={`rounded-md p-4 w-full border ${form.formState.errors.game ? "border-red-300" : "border-gray-300"}`}
                 filter={(gameName, searchTerm) => {
                   return Number(
                     gameName
@@ -81,8 +87,8 @@ export default function GamesForm({ ...props }: GamesFormProps) {
                 }}
               >
                 <CommandInput
-                  placeholder="Search game..."
-                  className="w-full"
+                  placeholder="Search"
+                  className="w-full text-md"
                   value={search}
                   onValueChange={setSearch}
                   disabled={played || summaryTab || getLivesLeft() === 0}
@@ -99,11 +105,8 @@ export default function GamesForm({ ...props }: GamesFormProps) {
                         <CommandItem
                           key={game.igdbId}
                           value={game.name}
-                          onSelect={(selectedIgdbId) => {
-                            if (
-                              parseInt(selectedIgdbId, 10) ===
-                              field.value?.igdbId
-                            ) {
+                          onSelect={() => {
+                            if (game.igdbId === field.value?.igdbId) {
                               form.reset();
                             } else {
                               form.setValue("game", game);
@@ -126,7 +129,7 @@ export default function GamesForm({ ...props }: GamesFormProps) {
                             )}
                           />
                           <span
-                            className={alreadyGuessed ? "line-through" : ""}
+                            className={`text-lg ${alreadyGuessed ? "line-through" : ""}`}
                           >
                             {game.name}
                           </span>
@@ -136,7 +139,10 @@ export default function GamesForm({ ...props }: GamesFormProps) {
                   </CommandGroup>
                 </CommandList>
               </Command>
-              <FormMessage />
+              <FormLabel className="flex items-center justify-center w-full text-center text-md border border-2 border-dotted border-gray-400 bg-gray-200 rounded-md">
+                {field.value?.igdbId ? field.value?.name : <>&nbsp;</>}
+                <FormMessage />
+              </FormLabel>
             </FormItem>
           )}
         />

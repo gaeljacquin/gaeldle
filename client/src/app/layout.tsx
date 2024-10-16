@@ -1,6 +1,6 @@
 import "./globals.css";
 
-import { Inter } from "next/font/google";
+import { Comic_Neue } from "next/font/google";
 import dynamic from "next/dynamic";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
@@ -8,11 +8,13 @@ import { VercelToolbar } from "@vercel/toolbar/next";
 import Navbar from "@/components/navbar";
 import { appinfo } from "@/lib/server-constants";
 
-const inter = Inter({
+const theFontInit = Comic_Neue({
+  weight: "400",
+  style: "normal",
   subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
 });
+const theFontClass = "font-comic-neue";
+const theFont = theFontInit.className + " " + theFontClass;
 
 const DynamicFooter = dynamic(() => import("@/components/footer"), {
   ssr: false,
@@ -31,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} font-inter antialiased bg-white text-gray-900 tracking-tight`}
+        className={`${theFont} antialiased bg-white text-gray-900 tracking-tight`}
       >
         <div className="flex flex-col min-h-screen" tabIndex={-1}>
           <Navbar />

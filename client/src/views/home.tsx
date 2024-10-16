@@ -31,14 +31,14 @@ export default function Home() {
       >
         <div className="text-center mt-10">
           <div className="max-w-3xl mx-auto mb-2">
-            <h1 className="text-5xl md:text-6xl font-extrabold mb-5">
+            <h1 className="text-6xl font-extrabold mb-5">
               <TextSpecial
                 term1={`${titleFirstHalf}`}
                 term2={`${titleSecondHalf}`}
                 space={false}
               />
             </h1>
-            <p className="text-2xl justify-center text-center">
+            <p className="text-3xl justify-center text-center">
               {appinfo.description.split("Wordle")[0]}{" "}
               <Link
                 className="text-gael-blue hover:text-gael-blue-dark hover:underline"

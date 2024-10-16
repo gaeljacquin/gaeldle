@@ -13,15 +13,15 @@ export default function ModesHeader({ mode }: { mode: Mode }) {
   );
 
   return (
-    <div className="mb-8 text-xl text-center font-semibold rounded-lg p-4">
-      <h1 className="text-5xl md:text-6xl font-extrabold mb-4">
+    <div className="mt-10 mb-8 text-center font-semibold rounded-lg p-4">
+      <h1 className="text-5xl font-extrabold mb-4">
         <TextSpecial
           term1={labelFirstHalf}
           term2={labelSecondHalf}
           space={false}
         />
       </h1>
-      <p>
+      <p className="text-2xl">
         <TextSpecial
           term1={descriptionFirstHalf}
           term2={descriptionSecondHalf}

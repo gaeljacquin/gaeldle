@@ -105,6 +105,7 @@ const wsConnect = () => {
 const checkAnswer = ({ answer, ...props }: checkAnswerProps) => {
   const { getState, setState } = zCover;
   const { guess, igdbId } = props;
+  const name = guess.name;
 
   if (answer) {
     getState().markAsWon();
@@ -113,6 +114,7 @@ const checkAnswer = ({ answer, ...props }: checkAnswerProps) => {
     getState().setStreak(true);
     getState().setBestStreak();
     const skipIgdbIds = getState().skipIgdbIds;
+
     skipIgdbIds.push(guess.igdbId);
     saveCoverStats({
       igdbId,
@@ -126,7 +128,7 @@ const checkAnswer = ({ answer, ...props }: checkAnswerProps) => {
         skipIgdbIds,
       },
     });
-    setState({ skipIgdbIds });
+    setState({ skipIgdbIds, name });
   } else {
     getState().updateGuesses(guess);
     getState().setPixelation();
@@ -147,6 +149,7 @@ const checkAnswer = ({ answer, ...props }: checkAnswerProps) => {
           bestStreak: getState().bestStreak,
         },
       });
+      setState({ name });
     }
   }
 };
@@ -190,9 +193,6 @@ const zCover = create(
       },
       getStreak: () => get().streak,
       getBestStreak: () => get().bestStreak,
-      setName: (name: string) => {
-        set({ name });
-      },
       getName: () => get().name,
       resetPlay: () => {
         set({ ...initialState });

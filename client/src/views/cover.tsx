@@ -41,11 +41,11 @@ export default function Cover() {
     pixelation,
     imageUrl,
     finito,
+    name,
     getStreak,
     getBestStreak,
     getLives,
     getLivesLeft,
-    getName,
     resetPlay,
     continuePlay,
   } = zCover();
@@ -86,6 +86,18 @@ export default function Cover() {
         </Button>
       );
     }
+
+    return (
+      <Button
+        className="text-md font-semibold"
+        onClick={(e) => {
+          e.preventDefault();
+          form.reset();
+        }}
+      >
+        Clear
+      </Button>
+    );
   };
 
   if (!readySetGo) {
@@ -137,18 +149,12 @@ export default function Cover() {
                   <div className="absolute inset-0 bg-gray-200/30 backdrop-blur-sm"></div>
                 </CardContent>
               </Card>
-
-              {process.env.NODE_ENV === "development" && (
-                <div className="w-full rounded-lg bg-gray-100 border border-2 border-red-400 mt-8">
-                  <Button onClick={() => form.reset()}>Clear Form</Button>
-                </div>
-              )}
             </div>
 
             <div className="flex flex-col items-center text-center p-6 relative">
               {getLives() > 0 ? (
                 <div className="text-lg text-center space-y-1">
-                  <p>{played ? `${getName()}` : `🤔`}</p>
+                  <p className="font-semibold">{played ? `${name}` : `🤔`}</p>
                   <div className="flex justify-center space-x-2">
                     <Hearts lives={lives} livesLeft={livesLeft} />
                   </div>
@@ -208,7 +214,7 @@ export default function Cover() {
                               index
                             }
                           >
-                            <div className="p-2 bg-gael-red text-white rounded-2xl border border-3 w-full">
+                            <div className="p-2 bg-gael-red text-white rounded-2xl border border-3 w-full text-md font-light">
                               {game ? game.name : "SKIPPED"}
                             </div>
                             {/* <div className="p-2 bg-gael-blue text-white rounded-2xl border border-3 w-full">

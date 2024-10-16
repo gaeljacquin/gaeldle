@@ -28,7 +28,6 @@ export type ZCover = {
   setPixelation: () => void;
   removePixelation: () => void;
   getName: () => string;
-  setName: (arg0: string) => void;
   resetPlay: () => void;
   continuePlay: () => void;
   setBestStreak: () => void;

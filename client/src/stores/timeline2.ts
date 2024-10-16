@@ -8,7 +8,7 @@ import {
   ZTimeline2,
 } from "~/src/types/ztimeline2";
 import { UnlimitedStats } from "@/types/unlimited-stats";
-import { bgCorrect, bgIncorrect, textSubmit } from "@/lib/client-constants";
+import { bgCorrect, bgIncorrect } from "@/lib/client-constants";
 
 const modeId = 9;
 

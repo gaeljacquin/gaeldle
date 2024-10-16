@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from "lucide-react";
 
 export default function Transition() {
   return (
@@ -8,5 +8,5 @@ export default function Transition() {
     >
       <Loader2 className="w-8 h-8 text-white animate-spin" />
     </div>
-  )
+  );
 }

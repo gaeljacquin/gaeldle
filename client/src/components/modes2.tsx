@@ -50,7 +50,7 @@ export default function Modes() {
     const buttonMarkup = () => {
       return (
         <Button
-          className={`w-full shadow-lg ${classNames} ${isDisabled && !isClicked ? "cursor-not-allowed" : ""}`}
+          className={`w-full shadow-lg text-lg ${classNames} ${isDisabled && !isClicked ? "cursor-not-allowed" : ""}`}
           onClick={() => handleClick(buttonKey)}
           disabled={isClicked}
           aria-disabled={isDisabled && !isClicked}

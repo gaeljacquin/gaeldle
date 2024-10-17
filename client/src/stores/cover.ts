@@ -104,8 +104,7 @@ const wsConnect = () => {
 
 const checkAnswer = ({ answer, ...props }: checkAnswerProps) => {
   const { getState, setState } = zCover;
-  const { guess, igdbId } = props;
-  const name = guess.name;
+  const { guess, igdbId, name } = props;
 
   if (answer) {
     getState().markAsWon();

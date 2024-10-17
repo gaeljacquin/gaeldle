@@ -16,7 +16,6 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/wakeup')
   wakeUp() {
     return this.appService.wakeUp();

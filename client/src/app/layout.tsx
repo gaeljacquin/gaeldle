@@ -12,6 +12,7 @@ const theFontInit = Comic_Neue({
   weight: "400",
   style: "normal",
   subsets: ["latin"],
+  display: "swap",
 });
 const theFontClass = "font-comic-neue";
 const theFont = theFontInit.className + " " + theFontClass;

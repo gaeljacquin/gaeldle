@@ -26,7 +26,7 @@ import PlaceholderCard from "../components/placeholder-card";
 import { Item2 } from "../components/sortable-item2";
 import { Button } from "../components/ui/button";
 
-export default function TimelineVer2() {
+export default function Timeline2() {
   const pathname = usePathname();
   const {
     containers,

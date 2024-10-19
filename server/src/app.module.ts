@@ -21,6 +21,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { CategoriesService } from './categories/categories.service';
 import { Timeline2Gateway } from './timeline2/timeline2.gateway';
 import { CoverGateway } from './cover/cover.gateway';
+import { HiloGateway } from './hilo/hilo.gateway';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { CoverGateway } from './cover/cover.gateway';
     CategoriesService,
     Timeline2Gateway,
     CoverGateway,
+    HiloGateway,
   ],
 })
 export class AppModule {}

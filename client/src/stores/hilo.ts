@@ -2,20 +2,23 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { io } from "socket.io-client";
 import { Game } from "@/types/games";
-import { ZHilo } from "~/src/types/zhilo";
-import { UnlimitedStats } from "@/types/unlimited-stats";
+import { Operator, ZHilo } from "~/src/types/zhilo";
+import { HiloStats } from "@/types/unlimited-stats";
 import { bgCorrect, bgIncorrect } from "@/lib/client-constants";
 
-const modeId = 9;
+const modeId = 10;
 
 export const initialState = {
-  attempts: 0,
   streak: 0,
   lives: 0,
   livesLeft: -1,
   played: false,
   won: false,
+  operator: "=" as Operator,
+  timeline: [],
+  guesses: [],
   nextGame: null,
+  currentGame: null,
 };
 
 const initialState2 = {
@@ -24,13 +27,15 @@ const initialState2 = {
 
 type checkAnswerProps = {
   gameCheck: Partial<Game>;
-  insertIndex: number;
+  operator: Omit<Operator, "=">;
 };
 
 export const socket = io(`${process.env.serverUrl}`);
 
 const wsConnect = () => {
   const { getState, setState } = zHilo;
+  const { timeline, guesses, streak, bestStreak, markAsPlayed, markAsWon } =
+    getState();
 
   socket.on("connect", () => {
     console.info("Connected to WebSocket server");
@@ -44,33 +49,42 @@ const wsConnect = () => {
     const { nextGame } = data;
 
     if (!nextGame) {
-      getState().markAsPlayed();
-      getState().markAsWon();
+      markAsPlayed();
+      markAsWon();
       saveUnlimitedStats({
         modeId,
         found: true,
         info: {
-          streak: getState().streak,
-          bestStreak: getState().bestStreak,
+          streak,
+          bestStreak,
         },
-        attempts: getState().attempts,
+        attempts: streak,
+        guesses,
       });
+      setState({ nextGame: null });
     } else {
       setState({
+        currentGame: timeline[timeline.length - 1],
         nextGame,
       });
     }
+    setState({
+      operator: initialState.operator,
+    });
   });
 
   socket.on("hilo-init-res", (data) => {
     const mode = data.mode;
-    const timelineGame = data.games[0];
+    const currentGame = data.games[0];
     const nextGame = data.games[data.games.length - 1];
     let { lives, lives: livesLeft } = mode;
+    timeline.push(currentGame);
     setState({
       lives,
       livesLeft,
+      currentGame,
       nextGame,
+      timeline,
     });
   });
 
@@ -80,39 +94,88 @@ const wsConnect = () => {
 
   return () => {
     socket.off("connect");
-    socket.off(`hilo-init-res`);
-    socket.off(`hilo-check-res`);
-    socket.off(`hilo-next-res`);
+    socket.off("hilo-init-res");
+    socket.off("hilo-check-res");
+    socket.off("hilo-next-res");
     socket.off("hilo-stats-res");
   };
 };
 
 const checkAnswer = (data: checkAnswerProps) => {
-  const { insertIndex, gameCheck } = data;
+  const { gameCheck, operator } = data;
   const { getState, setState } = zHilo;
+  const {
+    currentGame,
+    timeline,
+    guesses,
+    streak,
+    bestStreak,
+    updateLivesLeft,
+    setStreak,
+    setBestStreak,
+    markAsPlayed,
+  } = getState();
+  let rightAnswer = false;
+  let bgStatus = bgIncorrect;
 
-  if (true) {
-    getState().setStreak(true);
-    getState().setBestStreak();
+  switch (operator) {
+    case ">":
+      rightAnswer = !!(
+        gameCheck.frd &&
+        currentGame?.frd &&
+        gameCheck.frd >= currentGame.frd
+      );
+      rightAnswer && (bgStatus = bgCorrect);
+      break;
+    case "<":
+      rightAnswer = !!(
+        gameCheck.frd &&
+        currentGame?.frd &&
+        gameCheck.frd <= currentGame.frd
+      );
+      rightAnswer && (bgStatus = bgCorrect);
+      break;
+    default:
+      console.error(`Operator ${operator} not supported`);
+      break;
+  }
+
+  timeline[timeline.length - 1].bgStatus = bgStatus;
+  timeline[timeline.length - 1].frd = gameCheck.frd;
+  timeline[timeline.length - 1].frdFormatted = gameCheck.frdFormatted;
+  guesses.unshift({
+    currentGame: currentGame!,
+    nextGame: timeline[timeline.length - 1],
+    operator,
+    rightAnswer,
+  });
+
+  if (rightAnswer) {
+    setStreak(true);
+    setBestStreak();
     socket.emit("hilo-next", {
       timelineIds: timeline.map((game) => game.igdbId),
     });
   } else {
-    getState().updateLivesLeft();
+    updateLivesLeft();
 
     if (getState().livesLeft === 0) {
-      getState().markAsPlayed();
-      getState().setBestStreak();
+      // getState().livesLeft gets the updated value
+      // const { livesLeft } = getState(); then livesLeft doesn't
+      markAsPlayed();
+      setBestStreak();
       saveUnlimitedStats({
         modeId,
         found: false,
         info: {
           timeline,
-          streak: getState().streak,
-          bestStreak: getState().bestStreak,
+          streak,
+          bestStreak,
         },
-        attempts: getState().attempts,
+        attempts: streak,
+        guesses,
       });
+      setState({ currentGame: timeline[timeline.length - 1], nextGame: null });
     } else {
       socket.emit("hilo-next", {
         timelineIds: timeline.map((game) => game.igdbId),
@@ -122,18 +185,11 @@ const checkAnswer = (data: checkAnswerProps) => {
 
   setState({
     timeline,
-    containers: {
-      ...containers,
-      timeline: timeline?.map((game) => game?.igdbId ?? 0) ?? [0],
-    },
-    shadowContainers: {
-      ...containers,
-      timeline: timeline?.map((game) => game?.igdbId ?? 0) ?? [0],
-    },
+    operator: initialState.operator,
   });
 };
 
-const saveUnlimitedStats = (data: UnlimitedStats) => {
+const saveUnlimitedStats = (data: HiloStats) => {
   socket.emit("hilo-stats", data);
 };
 
@@ -157,8 +213,10 @@ const zHilo = create(
       getStreak: () => get().streak,
       getBestStreak: () => get().bestStreak,
       getNextGame: () => get().nextGame,
+      getTimeline: () => get().timeline,
       resetPlay: () => {
-        set({ ...initialState });
+        set({ ...initialState, timeline: [], guesses: [] });
+        console.log(get().guesses, get().timeline);
         socket.emit("hilo-init");
       },
       setStreak: (won: boolean) => {
@@ -168,6 +226,13 @@ const zHilo = create(
       setBestStreak: () => {
         const bestStreak = Math.max(get().bestStreak, get().streak);
         set({ bestStreak });
+      },
+      submitOperator: (operator: Operator) => {
+        const { timeline, nextGame } = get();
+        timeline.push(nextGame!);
+        const emit = { operator };
+        socket.emit("hilo-check", emit);
+        set({ timeline, operator });
       },
     })),
     {

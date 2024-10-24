@@ -1,4 +1,5 @@
-import { Games, Guesses } from "./games";
+import { Games, Guesses } from "@/types/games";
+import { GuessHilo } from "@/types/zhilo";
 
 export type UnlimitedStats = {
   igdbId?: number;
@@ -14,4 +15,8 @@ export type TimelineStats = UnlimitedStats & {
 
 export type CoverStats = UnlimitedStats & {
   guesses: Guesses;
+};
+
+export type HiloStats = UnlimitedStats & {
+  guesses: GuessHilo[];
 };

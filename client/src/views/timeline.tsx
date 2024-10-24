@@ -299,7 +299,7 @@ export default function Timeline() {
 
                       return (
                         <div key={index} className="mb-8 p-0">
-                          <div className="flex justify-center space-x-2 mt-2 mb-">
+                          <div className="flex justify-center space-x-2 mt-2">
                             <Badge className="text-sm bg-red-100 hover:bg-red-100 text-red-800 border-red-400 text-center font-semibold">
                               {guesses.length - index}
                             </Badge>

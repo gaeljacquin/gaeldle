@@ -1,13 +1,6 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  cardImgSize,
-  cardImgClasses,
-  bgOther2,
-  bgOther1,
-  cardImgClassesAlt,
-  placeholderImage,
-} from "~/src/lib/client-constants";
+import { cardImgSize, placeholderImage } from "~/src/lib/client-constants";
 
 const PlaceholderCard = () => {
   return (

@@ -19,8 +19,9 @@ import { GamesService } from './games/games.service';
 // import { GotdService } from './gotd/gotd.service';
 import { CategoriesModule } from './categories/categories.module';
 import { CategoriesService } from './categories/categories.service';
-import { Timeline2Gateway } from './timeline2/timeline2.gateway';
+// import { Timeline2Gateway } from './timeline2/timeline2.gateway';
 import { CoverGateway } from './cover/cover.gateway';
+import { HiloGateway } from './hilo/hilo.gateway';
 
 @Module({
   imports: [
@@ -45,8 +46,9 @@ import { CoverGateway } from './cover/cover.gateway';
     // DailyGateway,
     // GotdService,
     CategoriesService,
-    Timeline2Gateway,
+    // Timeline2Gateway,
     CoverGateway,
+    HiloGateway,
   ],
 })
 export class AppModule {}

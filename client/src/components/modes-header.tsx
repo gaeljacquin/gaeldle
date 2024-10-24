@@ -4,13 +4,10 @@ import TextSpecial from "@/components/text-special";
 export default function ModesHeader({ mode }: { mode: Mode }) {
   const labelFirstHalf = mode.label.slice(0, mode.label.length / 2);
   const labelSecondHalf = mode.label.slice(mode.label.length / 2);
-  const descriptionFirstHalf = mode.description.slice(
-    0,
-    mode.description.length / 2
-  );
-  const descriptionSecondHalf = mode.description.slice(
-    mode.description.length / 2
-  );
+  const descriptionFirstHalf =
+    mode.description?.slice(0, mode.description?.length / 2) ?? "";
+  const descriptionSecondHalf =
+    mode.description?.slice(mode.description?.length / 2) ?? "";
 
   return (
     <div className="mt-10 mb-8 text-center font-semibold rounded-lg p-4">

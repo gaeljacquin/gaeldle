@@ -73,9 +73,11 @@ export default function Modes() {
               {buttonMarkup()}
             </Link>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>{description}</p>
-          </TooltipContent>
+          {description && (
+            <TooltipContent>
+              <p>{description}</p>
+            </TooltipContent>
+          )}
         </Tooltip>
       </TooltipProvider>
     );

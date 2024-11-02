@@ -1,0 +1,29 @@
+services:
+  app:
+    container_name: azure-nextjs-poc
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    volumes:
+      - node-modules:/usr/src/app/node_modules
+      - dot-next:/usr/src/app/.next
+      - vscode:/usr/src/app/.vscode
+    develop:
+      watch:
+        - path: ./package.json
+          action: rebuild
+        - path: .
+          target: /usr/src/app
+          action: sync
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      TEST_VAR: ${TEST_VAR}
+
+volumes:
+  node-modules:
+  dot-next:
+  vscode:
+  # server-apt-packages:
+  #   driver: local

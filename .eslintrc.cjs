@@ -6,7 +6,6 @@ module.exports = {
     sourceType: 'module',
   },
   extends: [
-    'mantine',
     'plugin:@next/next/recommended',
     'plugin:jest/recommended',
     'plugin:@typescript-eslint/recommended',

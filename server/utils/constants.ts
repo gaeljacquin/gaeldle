@@ -3,9 +3,6 @@ const bgPartial = 'bg-gradient-to-r from-gael-blue to-gael-purple';
 const bgCorrect = 'bg-gael-green';
 const bgOther1 = 'bg-gael-blue';
 const bgOther2 = 'bg-indigo-500';
-const testGameIgdbIds = process.env.TEST_GAME_IGDB_IDS.split(',')
-  .map((id) => parseInt(id.trim(), 10))
-  .filter((id) => !isNaN(id)) ?? [0];
 
 /** Timestamp start */
 const todayStart = new Date();
@@ -36,7 +33,6 @@ export {
   bgCorrect,
   bgOther1,
   bgOther2,
-  testGameIgdbIds,
   today,
   tomorrow,
   cacheDuration,

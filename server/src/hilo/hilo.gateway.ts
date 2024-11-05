@@ -7,29 +7,24 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UnlimitedStatsService } from '~/src/unlimited-stats/unlimited-stats.service';
-import { GamesService } from '~/src/games/games.service';
-import cors from '~/utils/cors';
-import { ModeMap } from '~/utils/mode-map';
-import shuffleList from '~/utils/shuffle-list';
-import { ModesService } from '~/src/modes/modes.service';
-import { bgCorrect } from '~/utils/constants';
-import { Games } from '~/types/games';
+import cors from '@/utils/cors';
+import { ModeMap } from '@/utils/mode-map';
+import { bgCorrect } from '@/utils/constants';
+import { Game, Games } from '@/types/games';
+import { getMode } from '@/functions/modes';
+import { getRandomGame, getRandomGames } from '@/functions/games';
+import shuffleList from '@/utils/shuffle-list';
 
 @WebSocketGateway({ cors })
 export class HiloGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(
-    private readonly gamesService: GamesService,
-    private readonly modesService: ModesService,
-    private readonly unlimitedStatsService: UnlimitedStatsService,
-  ) {}
+  constructor() {}
 
   @WebSocketServer() server: Server;
 
   private hiloMap = new ModeMap();
-  private mode = this.modesService.findOne(10);
+  private mode = getMode(10);
 
   async afterInit() {
     console.info('WebSocket server initialized (hilo)');
@@ -44,16 +39,6 @@ export class HiloGateway
   handleDisconnect(client: Socket) {
     console.info(`Client disconnected (hilo): ${client.id}`);
     this.hiloMap.delete(client.id);
-  }
-
-  @SubscribeMessage('hilo-stats')
-  async handleHiloStats(client: Socket, data): Promise<void> {
-    const clientId = client.id;
-    console.info('Received hilo stats:', data);
-    await this.unlimitedStatsService.create(data);
-    client.emit('hilo-stats-res', {
-      message: `Saved hilo stats for ${clientId}`,
-    });
   }
 
   @SubscribeMessage('hilo-check')
@@ -72,7 +57,7 @@ export class HiloGateway
   async handleHiloNext(client: Socket, data): Promise<void> {
     const { timelineIds } = data;
     const clientId = client.id;
-    const game = (await this.gamesService.findOneRandom(timelineIds))[0];
+    const game = (await getRandomGame(timelineIds)) as Game;
     let nextGame = null;
 
     if (game) {
@@ -88,12 +73,8 @@ export class HiloGateway
 
   @SubscribeMessage('hilo-init')
   async handleHiloInit(client) {
-    const numCards = (await this.mode).pixelationStep;
-    const sampleSize = (await this.mode).pixelation;
-    const games = (await this.gamesService.findRandom(
-      numCards,
-      sampleSize,
-    )) as Games;
+    const modeId = (await this.mode).id;
+    const games = (await getRandomGames(modeId)) as Games;
     let reshuffledGames = shuffleList(games);
     reshuffledGames = games.map((game, index) => {
       if (index === games.length - 1) {
@@ -108,7 +89,6 @@ export class HiloGateway
     this.hiloMap.set(client.id, games[games.length - 1]);
     client.emit('hilo-init-res', {
       games: reshuffledGames,
-      mode: await this.mode,
     });
   }
 }

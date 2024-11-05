@@ -38,6 +38,30 @@ export async function getModes() {
   return modes;
 }
 
+export async function getMode(id: number) {
+  const mode = await prisma.modes.findUniqueOrThrow({
+    where: {
+      id: id,
+      active: true,
+      hidden: false,
+    },
+    omit: {
+      createdAt: true,
+      updatedAt: true,
+    },
+    include: {
+      levels: {
+        select: {
+          level: true,
+          label: true,
+        },
+      },
+    },
+  });
+
+  return mode;
+}
+
 export async function getModeBySlug(slug: string) {
   const mode = await prisma.modes.findUniqueOrThrow({
     where: {

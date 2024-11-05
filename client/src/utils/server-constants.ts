@@ -41,6 +41,10 @@ const appinfo = {
   description: 'A gaming-themed Wordle clone',
 };
 
+const whichList = (list: unknown[]) => {
+  return list ?? [0];
+};
+
 export {
   gSeconds,
   getLastSegment,
@@ -50,4 +54,5 @@ export {
   bgTextSpecial1,
   bgTextSpecial2,
   appinfo,
+  whichList,
 };

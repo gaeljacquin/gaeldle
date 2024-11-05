@@ -1,5 +1,5 @@
-import { Modes } from './modes';
-import { Other, Others } from './other';
+import { Modes } from '@/types/modes';
+import { Other, Others } from '@/types/other';
 
 export type Guess = {
   igdbId: number;

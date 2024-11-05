@@ -1,8 +1,9 @@
 import 'server-only';
 
 import { Prisma as Prisma2 } from '@prisma/client';
-import { bgOther1, whichList } from '@/utils/client-constants';
+import { bgOther1 } from '@/utils/client-constants';
 import { prisma } from '@/utils/db';
+import { whichList } from '@/utils/server-constants';
 
 export async function getGames() {
   const games = await prisma.games.findMany({

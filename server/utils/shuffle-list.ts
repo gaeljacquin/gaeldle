@@ -1,5 +1,5 @@
 // Utility function to shuffle an array (Fisher-Yates shuffle)
-export default function shuffleList(list) {
+export default function shuffleList(list: unknown[]) {
   const shuffledList = [...list];
 
   for (let i = shuffledList.length - 1; i > 0; i--) {

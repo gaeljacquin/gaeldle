@@ -7,28 +7,20 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UnlimitedStatsService } from '~/src/unlimited-stats/unlimited-stats.service';
-import { GamesService } from '~/src/games/games.service';
-import cors from '~/utils/cors';
-import { ModeMap } from '~/utils/mode-map';
-import { ModesService } from '~/src/modes/modes.service';
-import { getRandomGame } from '~/utils/env-checks';
-import { Game } from '~/types/games';
+import cors from '@/utils/cors';
+import { ModeMap } from '@/utils/mode-map';
+import { Game } from '@/types/games';
+import { getRandomGame } from '@/functions/games';
 
 @WebSocketGateway({ cors })
 export class CoverGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(
-    private readonly gamesService: GamesService,
-    private readonly modesService: ModesService,
-    private readonly unlimitedStatsService: UnlimitedStatsService,
-  ) {}
+  constructor() {}
 
   @WebSocketServer() server: Server;
 
   private coverMap = new ModeMap();
-  private mode = this.modesService.findOne(5);
 
   async afterInit() {
     console.info('WebSocket server initialized (cover)');
@@ -43,16 +35,6 @@ export class CoverGateway
   handleDisconnect(client: Socket) {
     console.info(`Client disconnected (cover): ${client.id}`);
     this.coverMap.delete(client.id);
-  }
-
-  @SubscribeMessage('cover-stats')
-  async handleCoverStats(client: Socket, data): Promise<void> {
-    const clientId = client.id;
-    console.info('Received cover stats:', data);
-    await this.unlimitedStatsService.create(data);
-    client.emit('cover-stats-res', {
-      message: `Saved cover stats for ${clientId}`,
-    });
   }
 
   @SubscribeMessage('cover')
@@ -82,7 +64,7 @@ export class CoverGateway
   async handleCoverNext(client: Socket, data): Promise<void> {
     const { skipIgdbIds } = data;
     const clientId = client.id;
-    const game = (await getRandomGame(this.gamesService, skipIgdbIds))[0];
+    const game = await getRandomGame(skipIgdbIds);
     let nextGame = null;
 
     if (game) {
@@ -94,14 +76,13 @@ export class CoverGateway
 
     const emit = {
       nextGame,
-      mode: await this.mode,
     };
     client.emit('cover-next-res', emit);
   }
 
   @SubscribeMessage('cover-init')
   async handleCoverInit(client) {
-    const game = (await getRandomGame(this.gamesService, null))[0];
+    const game = await getRandomGame(null);
     const nextGame = (game) => {
       const { igdbId, name, ...rest } = game;
       void igdbId, name;
@@ -111,7 +92,6 @@ export class CoverGateway
     this.coverMap.set(client.id, game);
     const emit = {
       nextGame: nextGame(game),
-      mode: await this.mode,
     };
     client.emit('cover-init-res', emit);
   }

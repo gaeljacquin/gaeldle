@@ -2,14 +2,16 @@
 
 import { Game, Games } from '@/services/games';
 import { getCoverVal, getHiloVal, getTimelineVal } from '@/services/redis';
-import { CheckAnswer } from '@/types/check-answer';
 import { Operator } from '@/types/zhilo';
 import { bgCorrect, bgIncorrect, bgOther2 } from '@/utils/server-constants';
 
-export async function coverCheckAnswer(key: string, answer: CheckAnswer): Promise<boolean> {
-  const val = await getCoverVal(key);
+export async function coverCheckAnswer(key: string, igdbId: number): Promise<unknown> {
+  const val = (await getCoverVal(key)) as Game;
+  const answer = igdbId === val.igdbId;
+  const correctIgdbId = answer ? val.igdbId : 0;
+  const correctName = answer ? val.name : '';
 
-  return (answer as Game).igdbId === val;
+  return { igdbId: correctIgdbId, name: correctName };
 }
 
 export async function hiloCheckAnswer(key: string, game: Game, operator: Operator) {

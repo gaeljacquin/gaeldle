@@ -127,19 +127,16 @@ export default function Hilo(props: Props) {
       continuePlay();
     } else {
       setCurrentGame(newCurrentGame);
-      updateLivesLeft((prevLives) => {
-        const newLives = prevLives - 1;
+      const newLivesLeft = livesLeft - 1;
+      updateLivesLeft(newLivesLeft);
 
-        if (newLives === 0) {
-          setPlayed(true);
-          setStreak(false);
-          setNextGame(null);
-        } else {
-          continuePlay();
-        }
-
-        return newLives;
-      });
+      if (newLivesLeft === 0) {
+        setPlayed(true);
+        setStreak(false);
+        setNextGame(null);
+      } else {
+        continuePlay();
+      }
     }
   }
 

@@ -17,8 +17,8 @@ export async function getHiloVal(key: string, fields: string[]): Promise<unknown
   return getVal(key, true, fields) as Promise<Partial<Game>>;
 }
 
-export async function setCoverVal(key: string, value: number) {
-  setKeyVal(key, value);
+export async function setCoverVal(key: string, value: Game) {
+  setKeyVal(key, value, true);
 }
 
 export async function getCoverVal(key: string): Promise<unknown> {

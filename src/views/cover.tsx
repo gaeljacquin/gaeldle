@@ -13,6 +13,7 @@ import Placeholders from '@/components/placeholders';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { coverCheckAnswer } from '@/services/check-answer';
 import { Game, Games } from '@/services/games';
 import { Mode } from '@/services/modes';
 import { setCoverVal } from '@/services/redis';
@@ -40,7 +41,7 @@ export default function Cover(props: Props) {
   const { setStreak, getStreak, setBestStreak, getBestStreak } = zCover();
   const [game, setGame] = useState<Partial<Game>>(initialGame);
   const [guessesCollapsibleOpen, setGuessesCollapsibleOpen] = useState(true);
-  const [playedGameIds, updatePlayedGameIds] = useState<number[]>([]);
+  const [idList, updateIdList] = useState<number[]>([]);
   const [guesses, updateGuesses] = useState<Guesses>([]);
   const [played, setPlayed] = useState<boolean>(false);
   const [won, setWon] = useState<boolean>(false);
@@ -61,8 +62,9 @@ export default function Cover(props: Props) {
   async function continuePlay() {
     form.reset();
     resetGameState();
-    const newList = [...playedGameIds, game?.igdbId ?? 0];
-    updatePlayedGameIds(newList);
+    const newList = [...idList, game?.igdbId ?? 0];
+    console.log(newList);
+    updateIdList(newList);
 
     ('use server');
     const res = await getOneRandom(newList);
@@ -71,33 +73,39 @@ export default function Cover(props: Props) {
     if (!game) {
       setFinito(true);
     } else {
-      setGame(game);
-      setCoverVal(clientId, nextGame.igdbId);
+      setCoverVal(clientId, nextGame);
+      const { igdbId, name, ...rest } = nextGame;
+      void igdbId, name;
+      setGame(rest);
     }
   }
 
-  function updateScore(guess: Guess, answer: boolean) {
+  async function checkAnswer(guess: Guess) {
+    ('use server');
+    const res = await coverCheckAnswer(clientId, guess.igdbId);
+    const { igdbId, name } = res as Partial<Game>;
+    const answer = igdbId && name;
+    game.igdbId = igdbId;
+    game.name = name;
+
     if (answer) {
       setStreak(true);
       setBestStreak();
       setPlayed(true);
       setWon(true);
-      updatePlayedGameIds((prev) => [...prev, game.igdbId ?? 0]);
+      setGame(game);
     } else {
       updateGuesses((prev) => [...prev, guess]);
       setPixelation((prev) => prev - mode.pixelationStep);
-      updateLivesLeft((prevLives) => {
-        const newLives = prevLives - 1;
+      const newLivesLeft = livesLeft - 1;
+      updateLivesLeft(newLivesLeft);
 
-        if (newLives === 0) {
-          updatePlayedGameIds((prev) => [...prev, game.igdbId ?? 0]);
-          setPlayed(true);
-          setPixelation(0);
-          setStreak(false);
-        }
-
-        return newLives;
-      });
+      if (newLivesLeft === 0) {
+        setPlayed(true);
+        setPixelation(0);
+        setStreak(false);
+        setGame(game);
+      }
     }
   }
 
@@ -177,7 +185,7 @@ export default function Cover(props: Props) {
               livesLeft={livesLeft}
               played={played}
               clientId={clientId}
-              updateScore={updateScore}
+              checkAnswer={checkAnswer}
             />
 
             {played && (

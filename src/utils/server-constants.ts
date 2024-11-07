@@ -51,6 +51,18 @@ const bgCorrect = 'bg-gael-green';
 const bgOther1 = 'bg-gael-blue';
 const bgOther2 = 'bg-indigo-500';
 
+const fmTimelineContainer = {
+  hidden: { opacity: 1, scale: 0 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      delayChildren: 0.3,
+      staggerChildren: 0.2,
+    },
+  },
+};
+
 export {
   gSeconds,
   getLastSegment,
@@ -66,4 +78,5 @@ export {
   bgCorrect,
   bgOther1,
   bgOther2,
+  fmTimelineContainer,
 };

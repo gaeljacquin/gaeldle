@@ -12,6 +12,7 @@ import {
   bgPartial,
   bgTextSpecial1,
   bgTextSpecial2,
+  fmTimelineContainer,
 } from '@/utils/server-constants';
 
 const textVictory = 'You got it! 😀';
@@ -93,6 +94,8 @@ export {
   bgOther1,
   bgOther2,
   bgPartial,
+  bgTextSpecial1,
+  bgTextSpecial2,
   cardImgClasses,
   cardImgClassesAlt,
   cardImgSize,
@@ -114,6 +117,7 @@ export {
   yoe,
   finitoText,
   appinfo,
+  fmTimelineContainer,
   GamesFormInit,
   imgAlt,
   streakCounters,

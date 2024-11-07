@@ -112,16 +112,13 @@ export default function Timeline(props: Props) {
       updateGoodTimeline(goodTimeline);
     } else {
       updateGuesses((prev) => [...prev, updatedTimeline]);
-      updateLivesLeft((prevLives) => {
-        const newLives = prevLives - 1;
+      const newLivesLeft = livesLeft - 1;
+      updateLivesLeft(newLivesLeft);
 
-        if (newLives === 0) {
-          setPlayed(true);
-          updateGoodTimeline(goodTimeline);
-        }
-
-        return newLives;
-      });
+      if (newLivesLeft === 0) {
+        setPlayed(true);
+        updateGoodTimeline(goodTimeline);
+      }
 
       setBestStreak();
       setStreak(false);
@@ -149,6 +146,92 @@ export default function Timeline(props: Props) {
     updateTimelineOnLoad(reshuffledGames);
   }
 
+  function handleDragStart(e: DragStartEvent) {
+    if (!(e.active && e.active.id && typeof e.active.id === 'number')) {
+      return;
+    }
+
+    setActiveId(e.active.id);
+  }
+
+  function handleDragEnd(e: DragEndEvent) {
+    if (!e.over) {
+      return;
+    }
+
+    if (e.active.id !== e.over.id) {
+      const oldIdx = timeline.findIndex((card) => card.igdbId === e.active.id);
+      const newIdx = timeline.findIndex((card) => card.igdbId === e.over!.id);
+      let newTimeline;
+
+      if (correctIgdbs.includes(timeline[newIdx].igdbId)) {
+        return;
+      }
+
+      if (dragSwitch) {
+        newTimeline = arrayMove(timeline, oldIdx, newIdx);
+      } else {
+        newTimeline = arraySwap(timeline, oldIdx, newIdx);
+      }
+
+      const newTimelineIds = newTimeline.map((game) => game.igdbId);
+      const timelineOnLoadIds = timelineOnLoad.map((game) => game.igdbId);
+
+      if (dummyOnLoad) {
+        setDummyOnLoad(false);
+      }
+
+      if (alreadyGuessed) {
+        setAlreadyGuessed(false);
+        setSubmitButtonText(textSubmit);
+      }
+
+      if (
+        newTimelineIds.length === timelineOnLoadIds.length &&
+        newTimelineIds.every((id, index) => id === timelineOnLoadIds[index])
+      ) {
+        setAlreadyGuessed(true);
+        setSubmitButtonText(textStartingPosition);
+      }
+
+      guesses.some((guess) => {
+        const guessIds = guess.map((game) => game?.igdbId ?? 0);
+
+        if (
+          newTimelineIds.length === guessIds.length &&
+          newTimelineIds.every((id, index) => id === guessIds[index])
+        ) {
+          setAlreadyGuessed(true);
+          setSubmitButtonText(textAlreadyGuessed);
+          return true;
+        }
+      });
+
+      newTimeline = newTimeline.map((game, index) => {
+        if (game.igdbId !== timeline[index].igdbId && game.bgStatus === bgCorrect) {
+          return {
+            ...game,
+            bgStatus: bgPartial,
+          };
+        } else if (
+          game.correctIndex &&
+          index === game.correctIndex &&
+          game.bgStatus === bgPartial
+        ) {
+          return {
+            ...game,
+            bgStatus: bgCorrect,
+          };
+        }
+
+        return game;
+      });
+
+      updateTimeline(newTimeline);
+      setActiveId(0);
+    }
+  }
+
   useEffect(() => {
     setReady(true);
   }, []);
@@ -164,36 +247,38 @@ export default function Timeline(props: Props) {
           <ModesHeader mode={mode} />
 
           <div className="flex flex-col mb-5 justify-center">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 mb-7">
-              <div className="mb-4 md:mb-0 space-y-4">
-                <div className="flex justify-center md:justify-start space-x-2">
-                  <Hearts lives={mode.lives} livesLeft={livesLeft} size={'md'} />
+            <div className="flex justify-center mb-6">
+              <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 space-x-0 md:space-x-20 mb-7">
+                <div className="mb-4 md:mb-0 space-y-4">
+                  <div className="flex justify-center md:justify-start space-x-2">
+                    <Hearts lives={mode.lives} livesLeft={livesLeft} size={'md'} />
+                  </div>
+                  <div className="flex justify-center space-x-2">
+                    <LivesLeftComp
+                      played={played}
+                      won={won}
+                      livesLeft={livesLeft}
+                      lives={mode.lives}
+                    />
+                  </div>
                 </div>
-                <div className="flex justify-center space-x-2">
-                  <LivesLeftComp
-                    played={played}
-                    won={won}
-                    livesLeft={livesLeft}
-                    lives={mode.lives}
+                <div className="flex items-center justify-center space-x-4 md:space-x-2 space-y-4 md:space-y-0">
+                  {gameOver || won ? (
+                    <MyBadgeGroup group={streakCounters(getStreak(), getBestStreak())} />
+                  ) : (
+                    <MyBadgeGroup group={timelineLegend} />
+                  )}
+                </div>
+                <div className="flex justify-center md:justify-end items-center space-x-4 md:space-x-2 mb-8 md:mb-0">
+                  <Label htmlFor="drag-type">Swap</Label>
+                  <Switch
+                    id="drag-type"
+                    defaultChecked={dragSwitch}
+                    onCheckedChange={setDragSwitch}
+                    className={`data-[state=checked]:bg-gael-green-dark data-[state=unchecked]:bg-gael-red-dark relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
                   />
+                  <Label htmlFor="drag-type">Normal</Label>
                 </div>
-              </div>
-              <div className="flex items-center justify-center space-x-4 md:space-x-2 space-y-4 md:space-y-0">
-                {gameOver || won ? (
-                  <MyBadgeGroup group={streakCounters(getStreak(), getBestStreak())} />
-                ) : (
-                  <MyBadgeGroup group={timelineLegend} />
-                )}
-              </div>
-              <div className="flex justify-center md:justify-end items-center space-x-4 md:space-x-2 mb-8 md:mb-0">
-                <Label htmlFor="drag-type">Swap</Label>
-                <Switch
-                  id="drag-type"
-                  defaultChecked={dragSwitch}
-                  onCheckedChange={setDragSwitch}
-                  className={`data-[state=checked]:bg-gael-green-dark data-[state=unchecked]:bg-gael-red-dark relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                />
-                <Label htmlFor="drag-type">Normal</Label>
               </div>
             </div>
           </div>
@@ -391,90 +476,4 @@ export default function Timeline(props: Props) {
       </DndContext>
     </>
   );
-
-  function handleDragStart(e: DragStartEvent) {
-    if (!(e.active && e.active.id && typeof e.active.id === 'number')) {
-      return;
-    }
-
-    setActiveId(e.active.id);
-  }
-
-  function handleDragEnd(e: DragEndEvent) {
-    if (!e.over) {
-      return;
-    }
-
-    if (e.active.id !== e.over.id) {
-      const oldIdx = timeline.findIndex((card) => card.igdbId === e.active.id);
-      const newIdx = timeline.findIndex((card) => card.igdbId === e.over!.id);
-      let newTimeline;
-
-      if (correctIgdbs.includes(timeline[newIdx].igdbId)) {
-        return;
-      }
-
-      if (dragSwitch) {
-        newTimeline = arrayMove(timeline, oldIdx, newIdx);
-      } else {
-        newTimeline = arraySwap(timeline, oldIdx, newIdx);
-      }
-
-      const newTimelineIds = newTimeline.map((game) => game.igdbId);
-      const timelineOnLoadIds = timelineOnLoad.map((game) => game.igdbId);
-
-      if (dummyOnLoad) {
-        setDummyOnLoad(false);
-      }
-
-      if (alreadyGuessed) {
-        setAlreadyGuessed(false);
-        setSubmitButtonText(textSubmit);
-      }
-
-      if (
-        newTimelineIds.length === timelineOnLoadIds.length &&
-        newTimelineIds.every((id, index) => id === timelineOnLoadIds[index])
-      ) {
-        setAlreadyGuessed(true);
-        setSubmitButtonText(textStartingPosition);
-      }
-
-      guesses.some((guess) => {
-        const guessIds = guess.map((game) => game?.igdbId ?? 0);
-
-        if (
-          newTimelineIds.length === guessIds.length &&
-          newTimelineIds.every((id, index) => id === guessIds[index])
-        ) {
-          setAlreadyGuessed(true);
-          setSubmitButtonText(textAlreadyGuessed);
-          return true;
-        }
-      });
-
-      newTimeline = newTimeline.map((game, index) => {
-        if (game.igdbId !== timeline[index].igdbId && game.bgStatus === bgCorrect) {
-          return {
-            ...game,
-            bgStatus: bgPartial,
-          };
-        } else if (
-          game.correctIndex &&
-          index === game.correctIndex &&
-          game.bgStatus === bgPartial
-        ) {
-          return {
-            ...game,
-            bgStatus: bgCorrect,
-          };
-        }
-
-        return game;
-      });
-
-      updateTimeline(newTimeline);
-      setActiveId(0);
-    }
-  }
 }

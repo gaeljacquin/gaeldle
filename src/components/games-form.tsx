@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/command';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
-import { coverCheckAnswer } from '@/services/check-answer';
 import { Games } from '@/services/games';
 import { Guess, Guesses } from '@/types/guesses';
 import { FormSchema, textAlreadyGuessed } from '@/utils/client-constants';
@@ -28,11 +27,11 @@ type GamesFormProps = {
   played: boolean;
   summaryTab?: boolean;
   clientId: string;
-  updateScore: (arg0: Guess, arg1: boolean) => void;
+  checkAnswer: (arg0: Guess) => void;
 };
 
 export default function GamesForm({ ...props }: GamesFormProps) {
-  const { games, form, guesses, played, summaryTab, livesLeft, clientId, updateScore } = props;
+  const { games, form, guesses, played, summaryTab, livesLeft, checkAnswer } = props;
   const [search, setSearch] = useState('');
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -46,9 +45,7 @@ export default function GamesForm({ ...props }: GamesFormProps) {
     form.reset();
     setSearch('');
 
-    ('use server');
-    const answer = await coverCheckAnswer(clientId, guess);
-    updateScore(guess, answer);
+    checkAnswer(guess);
   }
 
   return (

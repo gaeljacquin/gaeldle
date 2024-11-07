@@ -9,9 +9,10 @@ export default async function Page() {
   const games = await getGames();
   const res = await getOneRandom();
   const game = ((await res) as Game[])[0] as Game;
-  const { igdbId, ...rest } = game;
   const clientId = 'cover-' + uuidv4();
-  setCoverVal(clientId, igdbId);
+  setCoverVal(clientId, game);
+  const { igdbId, name, ...rest } = game;
+  void igdbId, name;
 
   return (
     <>

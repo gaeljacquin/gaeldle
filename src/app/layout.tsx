@@ -4,7 +4,6 @@ import { Comic_Neue } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { VercelToolbar } from '@vercel/toolbar/next';
-import HydrationZustand from '@/app/hydration-zustand';
 import Footer from '@/components/footer';
 import Navbar from '@/components/navbar';
 import { getModes } from '@/services/modes';
@@ -30,13 +29,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body className={`${theFont} antialiased bg-white text-gray-900 tracking-tight`}>
-        <HydrationZustand>
-          <div className="flex flex-col min-h-screen">
-            <Navbar modes={modes} />
-            <main role="main">{children}</main>
-            <Footer />
-          </div>
-        </HydrationZustand>
+        <div className="flex flex-col min-h-screen">
+          <Navbar modes={modes} />
+          <main role="main">{children}</main>
+          <Footer />
+        </div>
         <SpeedInsights />
         <Analytics />
         {process.env.NODE_ENV === 'development' && <VercelToolbar />}

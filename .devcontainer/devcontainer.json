@@ -1,0 +1,7 @@
+{
+  "name": "gael-dev-container",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "workspaceFolder": "/usr/src/app"
+}

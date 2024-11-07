@@ -1,0 +1,4 @@
+*.cjs
+*.mjs
+*.js
+src/components/ui/*.*

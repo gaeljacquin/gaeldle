@@ -17,6 +17,7 @@ import {
   rectSwappingStrategy,
   SortableContext,
 } from '@dnd-kit/sortable';
+import { motion } from 'framer-motion';
 import { ChevronsUpDown } from 'lucide-react';
 import GameCard from '@/components/game-card';
 import Hearts from '@/components/hearts';
@@ -53,6 +54,24 @@ type Props = {
   games: Partial<Game>[];
   clientId: string;
   getRandom: (arg0: number, arg1: number) => Promise<unknown>;
+};
+
+const container = {
+  hidden: { opacity: 1, scale: 0 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      delayChildren: 0.3,
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const spring = {
+  type: 'spring',
+  damping: 25,
+  stiffness: 120,
 };
 
 export default function Timeline(props: Props) {
@@ -289,13 +308,18 @@ export default function Timeline(props: Props) {
                 className={`px-4 py-8 rounded-lg bg-white shadow-sm border-dashed border-4 ${dragSwitch ? 'border-gael-green-dark' : 'border-gael-red-dark'} overflow-x-auto`}
               >
                 {!(gameOver || won) && (
-                  <div className="flex justify-start p-0 space-x-4">
+                  <motion.div
+                    className="flex justify-start p-0 space-x-4"
+                    variants={container}
+                    initial="hidden"
+                    animate="visible"
+                  >
                     <SortableContext
                       items={timeline.map((card) => card?.igdbId ?? 0)}
                       strategy={dragSwitch ? horizontalListSortingStrategy : rectSwappingStrategy}
                     >
                       {timeline.map((card: Partial<Game>, index) => (
-                        <div key={card.igdbId}>
+                        <motion.div key={card.igdbId} className="item" variants={spring}>
                           <SortableItem
                             id={card.igdbId ?? 0}
                             disabled={correctIgdbs.includes(card?.igdbId ?? 0)}
@@ -310,10 +334,10 @@ export default function Timeline(props: Props) {
                           <Badge className="flex items-center justify-center bg-sky-700 hover:bg-sky-800 text-white text-sm font-semibold px-2 py-2 mt-4">
                             {index + 1}
                           </Badge>
-                        </div>
+                        </motion.div>
                       ))}
                     </SortableContext>
-                  </div>
+                  </motion.div>
                 )}
 
                 {won && (

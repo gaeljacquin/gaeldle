@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Modes from '@/components/modes';
+// import ModesCarousel from '@/components/modes-carousel';
 import TextSpecial from '@/components/text-special';
 import { type Modes as ModesType } from '@/services/modes';
 import { appinfo } from '@/utils/server-constants';
@@ -35,6 +36,7 @@ export default function Home(props: Props) {
           </p>
         </div>
         <Modes modes={modes} />
+        {/* <ModesCarousel modes={modes} /> */}
       </div>
     </div>
   );

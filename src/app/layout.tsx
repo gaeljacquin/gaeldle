@@ -6,7 +6,6 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { VercelToolbar } from '@vercel/toolbar/next';
 import Footer from '@/components/footer';
 import Navbar from '@/components/navbar';
-import { getModes } from '@/services/modes';
 import { appinfo } from '@/utils/server-constants';
 
 const theFontInit = Comic_Neue({
@@ -24,13 +23,11 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const modes = await getModes();
-
   return (
     <html lang="en">
       <body className={`${theFont} antialiased bg-white text-gray-900 tracking-tight`}>
         <div className="flex flex-col min-h-screen">
-          <Navbar modes={modes} />
+          <Navbar />
           <main role="main">{children}</main>
           <Footer />
         </div>

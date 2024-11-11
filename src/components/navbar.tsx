@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import GitHubButton from 'react-github-btn';
 import AboutModal from '@/components/about-modal';
 import LottieComp from '@/components/lottie-comp';
 // import ModesNav from '@/components/modes-nav';
@@ -38,7 +39,19 @@ export default function Navbar(props: Props) {
         <span className="mr-6 flex h-16 w-16">{lottie()}</span>
       )}
 
-      <nav role="navigation" className="ml-auto flex gap-6">
+      <nav role="navigation" className="ml-auto flex gap-4">
+        <span className="mt-1">
+          <GitHubButton
+            href="https://github.com/gaeljacquin/gaeldle"
+            data-color-scheme="no-preference: light; light: light; dark: dark;"
+            data-icon="octicon-star"
+            data-size="large"
+            aria-label="Star gaeljacquin/gaeldle on GitHub"
+          >
+            Star
+          </GitHubButton>
+        </span>
+
         {pathname !== '/' ? (
           <Link href="/" className="navbar-item">
             Home

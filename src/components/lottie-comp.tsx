@@ -13,8 +13,8 @@ export default function LottieComp({ loop }: { loop: boolean }) {
       lottieRef={logoRef}
       animationData={animationData}
       loop={loop}
-      aria-label="Gaël Logo"
-      aria-labelledby="Gaël"
+      aria-label="Gaël Jacquin Logo"
+      aria-labelledby="Gaël Jacquin"
     />
   );
 }

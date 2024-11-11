@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ExternalLinkIcon } from '@radix-ui/react-icons';
+import GitHubButton from 'react-github-btn';
 import LottieComp from '@/components/lottie-comp';
 import { appinfo, currentYear } from '@/utils/client-constants';
 
@@ -40,25 +40,20 @@ export default function Footer() {
             </span>
           </div>
 
-          <div className="flex space-x-4">
-            <Link
-              href="https://linkedin.com/in/gaeljacquin"
-              className="text-sm  hover:underline"
-              target="_blank"
+          <div className="flex flex-row items-center space-x-4">
+            <GitHubButton
+              href="https://github.com/gaeljacquin/gaeldle"
+              data-color-scheme="no-preference: light; light: light; dark: dark;"
+              data-icon="octicon-star"
+              data-size="large"
+              aria-label="Star gaeljacquin/gaeldle on GitHub"
             >
-              LinkedIn <ExternalLinkIcon className="inline-block w-4 h-4 ml-1" />
-            </Link>
-            <Link
-              href="https://github.com/gaeljacquin"
-              className="text-sm  hover:underline"
-              target="_blank"
-            >
-              GitHub <ExternalLinkIcon className="inline-block w-4 h-4 ml-1" />
-            </Link>
-            <Link href="/privacy" className="text-sm  hover:underline">
+              Star
+            </GitHubButton>
+            <Link href="/privacy" className="text-sm hover:underline">
               Privacy
             </Link>
-            <Link href="/tos" className="text-sm  hover:underline">
+            <Link href="/tos" className="text-sm hover:underline">
               Terms of Service
             </Link>
           </div>

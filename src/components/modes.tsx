@@ -9,6 +9,8 @@ import { Mode, type Modes } from '@/services/modes';
 
 type Props = {
   modes: Modes;
+  modeSelected?: boolean;
+  setModeSelected?: (modeSelected: boolean) => void;
 };
 
 type Props2 = {
@@ -20,7 +22,7 @@ type Props2 = {
 };
 
 export default function Modes(props: Props) {
-  const { modes } = props;
+  const { modes, modeSelected, setModeSelected } = props;
   const [clickedButton, setClickedButton] = useState<string | null>(null);
 
   const handleClick = (buttonKey: string) => {
@@ -36,13 +38,16 @@ export default function Modes(props: Props) {
   const generateButton = (props2: Props2) => {
     const { label, description, slug, classNames, buttonKey } = props2;
     const isClicked = clickedButton === buttonKey;
-    const isDisabled = clickedButton !== null;
+    const isDisabled = clickedButton !== null || modeSelected;
 
     const buttonMarkup = () => {
       return (
         <Button
           className={`w-full shadow-lg text-lg ${classNames} ${isDisabled && !isClicked ? 'cursor-not-allowed' : ''}`}
-          onClick={() => handleClick(buttonKey)}
+          onClick={() => {
+            handleClick(buttonKey);
+            setModeSelected && setModeSelected(true);
+          }}
           disabled={isClicked}
           aria-disabled={isDisabled && !isClicked}
         >

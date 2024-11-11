@@ -49,7 +49,7 @@ const bgIncorrect = 'bg-gael-red';
 const bgPartial = 'bg-gradient-to-r from-gael-blue to-gael-purple';
 const bgCorrect = 'bg-gael-green';
 const bgOther1 = 'bg-gael-blue';
-const bgOther2 = 'bg-indigo-500';
+const bgOther2 = 'bg-fuchsia-900';
 
 const fmTimelineContainer = {
   hidden: { opacity: 1, scale: 0 },

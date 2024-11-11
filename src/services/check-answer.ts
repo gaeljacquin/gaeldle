@@ -3,7 +3,7 @@
 import { Game, Games } from '@/services/games';
 import { getCoverVal, getHiloVal, getTimelineVal } from '@/services/redis';
 import { Operator } from '@/types/zhilo';
-import { bgCorrect, bgIncorrect, bgOther2 } from '@/utils/server-constants';
+import { bgCorrect, bgIncorrect, bgOther2, bgPartial } from '@/utils/server-constants';
 
 export async function coverCheckAnswer(key: string, igdbId: number): Promise<unknown> {
   const val = (await getCoverVal(key)) as Game;
@@ -67,7 +67,7 @@ export async function timelineCheckAnswer(
 
       return {
         ...card,
-        bgStatus: bgIncorrect,
+        bgStatus: card.frd ? bgPartial : bgIncorrect,
         latestIndex: index,
         proximity,
       };
@@ -81,6 +81,13 @@ export async function timelineCheckAnswer(
       return {
         ...game,
         bgStatus: bgOther2,
+      };
+    });
+  } else if (answer) {
+    goodTimeline = correctTimeline.map((game: Game) => {
+      return {
+        ...game,
+        bgStatus: bgCorrect,
       };
     });
   }

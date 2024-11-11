@@ -95,6 +95,7 @@ export default function Timeline(props: Props) {
   const sensors = useSensors(mouseSensor, touchSensor);
   const gameOver = played && !won;
   const [ready, setReady] = useState<boolean>(false);
+  const [viewSwitch, setViewSwitch] = useState<boolean>(true);
   const correctIgdbs =
     timeline?.filter((game) => game.bgStatus === bgCorrect).map((game) => game.igdbId) ?? [];
   const resetGameState = () => {
@@ -282,22 +283,32 @@ export default function Timeline(props: Props) {
                   </div>
                 </div>
                 <div className="flex items-center justify-center space-x-4 md:space-x-2 space-y-4 md:space-y-0">
-                  {gameOver || won ? (
-                    <MyBadgeGroup group={streakCounters(getStreak(), getBestStreak())} />
-                  ) : (
-                    <MyBadgeGroup group={timelineLegend} />
-                  )}
+                  <MyBadgeGroup group={timelineLegend} />
                 </div>
-                <div className="flex justify-center md:justify-end items-center space-x-4 md:space-x-2 mb-8 md:mb-0">
-                  <Label htmlFor="drag-type">Swap</Label>
-                  <Switch
-                    id="drag-type"
-                    defaultChecked={dragSwitch}
-                    onCheckedChange={setDragSwitch}
-                    className={`data-[state=checked]:bg-gael-green-dark data-[state=unchecked]:bg-gael-red-dark relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                  />
-                  <Label htmlFor="drag-type">Normal</Label>
-                </div>
+                {!gameOver ? (
+                  <div className="flex justify-center md:justify-end items-center space-x-4 md:space-x-2 mb-8 md:mb-0">
+                    <Label htmlFor="drag-type">Swap</Label>
+                    <Switch
+                      id="drag-type"
+                      defaultChecked={dragSwitch}
+                      onCheckedChange={setDragSwitch}
+                      className={`data-[state=checked]:bg-gael-green-dark data-[state=unchecked]:bg-gael-red-dark relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+                      disabled={gameOver || won}
+                    />
+                    <Label htmlFor="drag-type">Normal</Label>
+                  </div>
+                ) : (
+                  <div className="flex justify-center md:justify-end items-center space-x-4 md:space-x-2 mb-8 md:mb-0">
+                    <Label htmlFor="view-type">Last attempt</Label>
+                    <Switch
+                      id="drag-type"
+                      defaultChecked={viewSwitch}
+                      onCheckedChange={setViewSwitch}
+                      className={`data-[state=checked]:bg-gael-green-dark data-[state=unchecked]:bg-gael-red-dark relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+                    />
+                    <Label htmlFor="view-type">Correct answer</Label>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -349,7 +360,7 @@ export default function Timeline(props: Props) {
                       </div> */}
                     <div className="flex flex-col rounded-lg bg-white">
                       <div className="flex justify-start p-0 space-x-4 overflow-x-auto">
-                        {timeline.map((card: Partial<Game>, index) => (
+                        {goodTimeline.map((card: Partial<Game>, index) => (
                           <div key={card.igdbId}>
                             <GameCard card={card} showBar={won} />
                             <Badge className="flex items-center justify-center bg-sky-700 hover:bg-sky-800 text-white text-sm font-semibold px-2 py-2 mt-4">
@@ -371,15 +382,23 @@ export default function Timeline(props: Props) {
                       </div> */}
                     <div className="flex flex-col rounded-lg bg-white">
                       <div className="flex justify-start p-0 space-x-4 overflow-x-auto">
-                        {goodTimeline &&
-                          (goodTimeline as []).map((card: Partial<Game>, index) => (
-                            <div key={card.igdbId}>
-                              <GameCard card={card} showBar={true} />
-                              <Badge className="flex items-center justify-center bg-sky-700 hover:bg-sky-800 text-white text-sm font-semibold px-2 py-2 mt-4">
-                                {index + 1}
-                              </Badge>
-                            </div>
-                          ))}
+                        {viewSwitch
+                          ? (goodTimeline as []).map((card: Partial<Game>, index) => (
+                              <div key={card.igdbId}>
+                                <GameCard card={card} showBar={true} />
+                                <Badge className="flex items-center justify-center bg-sky-700 hover:bg-sky-800 text-white text-sm font-semibold px-2 py-2 mt-4">
+                                  {index + 1}
+                                </Badge>
+                              </div>
+                            ))
+                          : (guesses[0] as []).map((card: Partial<Game>, index) => (
+                              <div key={card.igdbId}>
+                                <GameCard card={card} showBar={true} />
+                                <Badge className="flex items-center justify-center bg-sky-700 hover:bg-sky-800 text-white text-sm font-semibold px-2 py-2 mt-4">
+                                  {index + 1}
+                                </Badge>
+                              </div>
+                            ))}
                       </div>
                     </div>
                   </>
@@ -451,7 +470,7 @@ export default function Timeline(props: Props) {
                       role="button"
                     >
                       <p className="text-md font-semibold pl-4">
-                        {attemptsCollapsibleOpen ? 'Hide' : 'Show'} Attempts
+                        {attemptsCollapsibleOpen ? 'Hide' : 'Show'} attempts
                       </p>
                       <Button variant="ghost" size="sm" className="w-9 p-0">
                         <ChevronsUpDown className="h-4 w-4" />

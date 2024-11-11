@@ -18,7 +18,6 @@ export const TransitionGridWrapper = styled('div')`
 
 export const AnimationCard = styled('div')`
   font-weight: 500;
-  backdrop-filter: blur(6px);
   border-radius: var(--border-radius-2);
   margin: 0 auto;
   overflow: hidden;

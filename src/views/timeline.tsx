@@ -130,7 +130,7 @@ export default function Timeline(props: Props) {
       setBestStreak();
       updateGoodTimeline(goodTimeline);
     } else {
-      updateGuesses((prev) => [...prev, updatedTimeline]);
+      updateGuesses((prev) => [updatedTimeline, ...prev]);
       const newLivesLeft = livesLeft - 1;
       updateLivesLeft(newLivesLeft);
 

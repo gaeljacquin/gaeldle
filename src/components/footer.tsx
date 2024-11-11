@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import GitHubButton from 'react-github-btn';
+import BMCButton from '@/components/bmc-button';
 import LottieComp from '@/components/lottie-comp';
 import { appinfo, currentYear } from '@/utils/client-constants';
 
@@ -41,15 +41,7 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-row items-center space-x-4">
-            <GitHubButton
-              href="https://github.com/gaeljacquin/gaeldle"
-              data-color-scheme="no-preference: light; light: light; dark: dark;"
-              data-icon="octicon-star"
-              data-size="large"
-              aria-label="Star gaeljacquin/gaeldle on GitHub"
-            >
-              Star
-            </GitHubButton>
+            <BMCButton />
             <Link href="/privacy" className="text-sm hover:underline">
               Privacy
             </Link>

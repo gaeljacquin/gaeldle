@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { coverCheckAnswer } from '@/services/check-answer';
+import { confettiEmoji, confettiFireworks } from '@/services/confetti';
 import { Game, Games } from '@/services/games';
 import { Mode } from '@/services/modes';
 import { setCoverVal } from '@/services/redis';
@@ -93,6 +94,7 @@ export default function Cover(props: Props) {
       setPlayed(true);
       setWon(true);
       setGame(game);
+      confettiFireworks();
     } else {
       updateGuesses((prev) => [...prev, guess]);
       setPixelation((prev) => prev - mode.pixelationStep);
@@ -104,6 +106,7 @@ export default function Cover(props: Props) {
         setPixelation(0);
         setStreak(false);
         setGame(game);
+        confettiEmoji('❌');
       }
     }
   }

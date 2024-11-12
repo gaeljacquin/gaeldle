@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ChevronsUpDown, Loader2 } from 'lucide-react';
+import Fade from '@/components/fade';
 import GameCard from '@/components/game-card';
 import Hearts from '@/components/hearts';
 import LivesLeftComp from '@/components/lives-left';
@@ -14,12 +15,15 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { hiloCheckAnswer } from '@/services/check-answer';
+import { confettiEmoji } from '@/services/confetti';
 import { Game } from '@/services/games';
 import { Mode } from '@/services/modes';
 import { setHiloVal } from '@/services/redis';
 import zHilo from '@/stores/hilo';
 import { GuessHilo, Operator, OperatorEqual } from '@/types/zhilo';
 import {
+  bgCorrect,
+  bgIncorrect,
   finitoText,
   timeline2Legend as hiloLegend,
   streakCounters,
@@ -57,6 +61,7 @@ export default function Hilo(props: Props) {
   const gameOver = played && !won;
   const buttonDisabled = played || livesLeft === 0 || !nextGame || operator !== '=' || finito;
   const [ready, setReady] = useState<boolean>(false);
+  const [discard, setDiscard] = useState<boolean>(false);
   const resetGameState = () => {
     setTgCollapsibleOpen(false);
     updateGuesses([]);
@@ -64,6 +69,7 @@ export default function Hilo(props: Props) {
     setWon(false);
     updateLivesLeft(mode.lives);
     updatePlayedGameIds([]);
+    updateTimeline([]);
   };
 
   async function resetPlay() {
@@ -106,10 +112,12 @@ export default function Hilo(props: Props) {
 
   async function submitOperator(operator: Operator) {
     setOperator(operator);
+    setDiscard(true);
     ('use server');
     const answerPlusFrd = await hiloCheckAnswer(clientId, currentGame, operator);
     const { answer, frd, frdFormatted, bgStatus } = answerPlusFrd;
     const newCurrentGame = { frd, frdFormatted, ...nextGame } as Game;
+    const firstAttempt = guesses.length === 0;
     newCurrentGame.bgStatus = bgStatus;
     timeline.push(newCurrentGame);
     updateTimeline(timeline);
@@ -125,6 +133,7 @@ export default function Hilo(props: Props) {
       setBestStreak();
       setCurrentGame(newCurrentGame);
       continuePlay();
+      (currentGame.bgStatus === bgIncorrect || firstAttempt) && confettiEmoji('🤩');
     } else {
       setCurrentGame(newCurrentGame);
       const newLivesLeft = livesLeft - 1;
@@ -134,10 +143,14 @@ export default function Hilo(props: Props) {
         setPlayed(true);
         setStreak(false);
         setNextGame(null);
+        confettiEmoji('❌');
       } else {
         continuePlay();
+        (currentGame.bgStatus === bgCorrect || firstAttempt) && confettiEmoji('❌');
       }
     }
+
+    setDiscard(false);
   }
 
   useEffect(() => {
@@ -158,7 +171,9 @@ export default function Hilo(props: Props) {
         <div className="grid md:grid-cols-3 gap-8">
           <div className="flex flex-col items-center text-center">
             {nextGame ? (
-              <GameCard card={nextGame} />
+              <Fade isActive={!discard}>
+                <GameCard card={nextGame} />
+              </Fade>
             ) : (
               <div className="mb-4">
                 <PlaceholderCard />
@@ -217,7 +232,9 @@ export default function Hilo(props: Props) {
 
           <div className="flex flex-col items-center text-center">
             {currentGame ? (
-              <GameCard card={currentGame} />
+              <Fade isActive={!discard}>
+                <GameCard card={currentGame} />
+              </Fade>
             ) : (
               <div className="mb-4">
                 <PlaceholderCard />

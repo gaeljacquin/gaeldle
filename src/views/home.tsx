@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import Modes from '@/components/modes';
 import ModesCarousel from '@/components/modes-carousel';
+import { Notifications } from '@/components/notifications';
 import TextSpecial from '@/components/text-special';
 import { Button } from '@/components/ui/button';
 import { type Modes as ModesType } from '@/services/modes';
@@ -41,6 +42,10 @@ export default function Home(props: Props) {
             </Link>{' '}
             {appinfo.description.split('Wordle')[1]}
           </p>
+        </div>
+
+        <div>
+          <Notifications />
         </div>
 
         <AnimatePresence mode="wait">

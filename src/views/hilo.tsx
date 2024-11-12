@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ToastAction } from '@radix-ui/react-toast';
 import { ChevronsUpDown, Loader2 } from 'lucide-react';
 import Fade from '@/components/fade';
 import GameCard from '@/components/game-card';
@@ -14,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 import { hiloCheckAnswer } from '@/services/check-answer';
 import { confettiEmoji } from '@/services/confetti';
 import { Game } from '@/services/games';
@@ -39,22 +41,15 @@ type Props = {
 export default function Hilo(props: Props) {
   const { mode, games, clientId, getOneRandom } = props;
   const [initialCurrentGame, initialNextGame] = games;
-  const {
-    guesses,
-    timeline,
-    updateGuesses,
-    updateTimeline,
-    setStreak,
-    getStreak,
-    setBestStreak,
-    getBestStreak,
-  } = zHilo();
+  const { setStreak, getStreak, setBestStreak, getBestStreak } = zHilo();
   const [currentGame, setCurrentGame] = useState<Game>(initialCurrentGame as Game);
   const [nextGame, setNextGame] = useState<Partial<Game> | null>(initialNextGame);
   const [playedGameIds, updatePlayedGameIds] = useState<number[]>([initialCurrentGame.igdbId ?? 0]);
   const [played, setPlayed] = useState<boolean>(false);
   const [won, setWon] = useState<boolean>(false);
   const [finito, setFinito] = useState<boolean>(false);
+  const [guesses, updateGuesses] = useState<GuessHilo[]>([]);
+  const [timeline, updateTimeline] = useState<Partial<Game>[]>([]);
   const [livesLeft, updateLivesLeft] = useState<number>(mode.lives);
   const [tgCollapsibleOpen, setTgCollapsibleOpen] = useState(false);
   const [operator, setOperator] = useState<OperatorEqual>('=');
@@ -71,6 +66,7 @@ export default function Hilo(props: Props) {
     updatePlayedGameIds([]);
     updateTimeline([]);
   };
+  const { toast } = useToast();
 
   async function resetPlay() {
     resetGameState();
@@ -133,7 +129,12 @@ export default function Hilo(props: Props) {
       setBestStreak();
       setCurrentGame(newCurrentGame);
       continuePlay();
-      (currentGame.bgStatus === bgIncorrect || firstAttempt) && confettiEmoji('🤩');
+
+      if (currentGame.bgStatus === bgIncorrect || firstAttempt) {
+        confettiEmoji('🤩');
+      } else {
+        confettiEmoji('✅');
+      }
     } else {
       setCurrentGame(newCurrentGame);
       const newLivesLeft = livesLeft - 1;
@@ -145,8 +146,17 @@ export default function Hilo(props: Props) {
         setNextGame(null);
         confettiEmoji('❌');
       } else {
+        if (currentGame.bgStatus === bgCorrect || firstAttempt) {
+          confettiEmoji('❌');
+        } else {
+          toast({
+            variant: 'destructive',
+            description: 'Incorrect 😭',
+            action: <ToastAction altText="Click to close">Close</ToastAction>,
+          });
+        }
+
         continuePlay();
-        (currentGame.bgStatus === bgCorrect || firstAttempt) && confettiEmoji('❌');
       }
     }
 

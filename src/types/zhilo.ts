@@ -13,17 +13,8 @@ export type GuessHilo = {
 export type ZHilo = {
   streak: number;
   bestStreak: number;
-  timeline: Partial<Game>[];
-  guesses: GuessHilo[];
-  // livesLeft: number;
   getStreak: () => number;
   getBestStreak: () => number;
-  // getLivesLeft: () => number;
   setBestStreak: () => void;
   setStreak: (arg0: boolean) => void;
-  getGuesses: () => GuessHilo[];
-  updateGuesses: (arg0: GuessHilo[]) => void;
-  getTimeline: () => Partial<Game>[];
-  updateTimeline: (arg0: Partial<Game>[]) => void;
-  // updateLivesLeft: () => void;
 };

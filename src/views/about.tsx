@@ -28,6 +28,14 @@ export default function About() {
                   </Link>
                   ,{' '}
                   <Link
+                    href="https://www.gamedle.wtf/?lang=en"
+                    target="_blank"
+                    className="text-gael-blue hover:text-gael-blue-dark hover:underline"
+                  >
+                    Gamedle
+                  </Link>
+                  ,{' '}
+                  <Link
                     href="https://wikitrivia.tomjwatson.com/"
                     target="_blank"
                     className="text-gael-blue hover:text-gael-blue-dark hover:underline"
@@ -42,36 +50,27 @@ export default function About() {
                   >
                     Higher Lower Game
                   </Link>
-                  ,{' '}
-                  <Link
-                    href="https://www.gamedle.wtf/?lang=en"
-                    target="_blank"
-                    className="text-gael-blue hover:text-gael-blue-dark hover:underline"
-                  >
-                    Gamedle
-                  </Link>
                   , and{' '}
                   <Link
                     href="https://medium.com/floodgates/the-complete-and-authoritative-list-of-wordle-spinoffs-fb00bfafc448"
                     target="_blank"
                     className="text-gael-blue hover:text-gael-blue-dark hover:underline"
                   >
-                    all the other spinoffs
+                    all the other Wordle spinoffs
                   </Link>
                   .
                 </p>
-                {/* <p>
-            New games and artwork are picked daily from an ever-growing list of
-            games. The list, cover images and artwork are sourced from{" "}
-            <Link
-              href="https://www.igdb.com/"
-              target="_blank"
-              className="text-gael-blue hover:text-gael-blue-dark hover:underline"
-            >
-              IGDB
-            </Link>
-            .
-          </p> */}
+                <p>
+                  Cover images and artwork are sourced from{' '}
+                  <Link
+                    href="https://www.igdb.com/"
+                    target="_blank"
+                    className="text-gael-blue hover:text-gael-blue-dark hover:underline"
+                  >
+                    IGDB
+                  </Link>
+                  .
+                </p>
                 <p>All rights go to the rightful owners - no copyright infringement intended.</p>
                 <p>
                   View our{' '}

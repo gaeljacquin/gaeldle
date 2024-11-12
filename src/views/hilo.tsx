@@ -15,12 +15,15 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { hiloCheckAnswer } from '@/services/check-answer';
+import { confettiEmoji } from '@/services/confetti';
 import { Game } from '@/services/games';
 import { Mode } from '@/services/modes';
 import { setHiloVal } from '@/services/redis';
 import zHilo from '@/stores/hilo';
 import { GuessHilo, Operator, OperatorEqual } from '@/types/zhilo';
 import {
+  bgCorrect,
+  bgIncorrect,
   finitoText,
   timeline2Legend as hiloLegend,
   streakCounters,
@@ -66,6 +69,7 @@ export default function Hilo(props: Props) {
     setWon(false);
     updateLivesLeft(mode.lives);
     updatePlayedGameIds([]);
+    updateTimeline([]);
   };
 
   async function resetPlay() {
@@ -113,6 +117,7 @@ export default function Hilo(props: Props) {
     const answerPlusFrd = await hiloCheckAnswer(clientId, currentGame, operator);
     const { answer, frd, frdFormatted, bgStatus } = answerPlusFrd;
     const newCurrentGame = { frd, frdFormatted, ...nextGame } as Game;
+    const firstAttempt = guesses.length === 0;
     newCurrentGame.bgStatus = bgStatus;
     timeline.push(newCurrentGame);
     updateTimeline(timeline);
@@ -128,6 +133,7 @@ export default function Hilo(props: Props) {
       setBestStreak();
       setCurrentGame(newCurrentGame);
       continuePlay();
+      (currentGame.bgStatus === bgIncorrect || firstAttempt) && confettiEmoji('🤩');
     } else {
       setCurrentGame(newCurrentGame);
       const newLivesLeft = livesLeft - 1;
@@ -137,8 +143,10 @@ export default function Hilo(props: Props) {
         setPlayed(true);
         setStreak(false);
         setNextGame(null);
+        confettiEmoji('❌');
       } else {
         continuePlay();
+        (currentGame.bgStatus === bgCorrect || firstAttempt) && confettiEmoji('❌');
       }
     }
 

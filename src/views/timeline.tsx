@@ -33,6 +33,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { timelineCheckAnswer } from '@/services/check-answer';
+import { confettiEmoji, confettiSideCannons } from '@/services/confetti';
 import { Game, Games } from '@/services/games';
 import { Mode } from '@/services/modes';
 import { setTimelineVal } from '@/services/redis';
@@ -130,6 +131,7 @@ export default function Timeline(props: Props) {
       setStreak(true);
       setBestStreak();
       updateGoodTimeline(goodTimeline);
+      confettiSideCannons();
     } else {
       updateGuesses((prev) => [updatedTimeline, ...prev]);
       const newLivesLeft = livesLeft - 1;
@@ -138,6 +140,7 @@ export default function Timeline(props: Props) {
       if (newLivesLeft === 0) {
         setPlayed(true);
         updateGoodTimeline(goodTimeline);
+        confettiEmoji('❌');
       }
 
       setBestStreak();

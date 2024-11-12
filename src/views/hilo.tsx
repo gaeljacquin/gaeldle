@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ChevronsUpDown, Loader2 } from 'lucide-react';
+import Fade from '@/components/fade';
 import GameCard from '@/components/game-card';
 import Hearts from '@/components/hearts';
 import LivesLeftComp from '@/components/lives-left';
@@ -57,6 +58,7 @@ export default function Hilo(props: Props) {
   const gameOver = played && !won;
   const buttonDisabled = played || livesLeft === 0 || !nextGame || operator !== '=' || finito;
   const [ready, setReady] = useState<boolean>(false);
+  const [discard, setDiscard] = useState<boolean>(false);
   const resetGameState = () => {
     setTgCollapsibleOpen(false);
     updateGuesses([]);
@@ -106,6 +108,7 @@ export default function Hilo(props: Props) {
 
   async function submitOperator(operator: Operator) {
     setOperator(operator);
+    setDiscard(true);
     ('use server');
     const answerPlusFrd = await hiloCheckAnswer(clientId, currentGame, operator);
     const { answer, frd, frdFormatted, bgStatus } = answerPlusFrd;
@@ -138,6 +141,8 @@ export default function Hilo(props: Props) {
         continuePlay();
       }
     }
+
+    setDiscard(false);
   }
 
   useEffect(() => {
@@ -158,7 +163,9 @@ export default function Hilo(props: Props) {
         <div className="grid md:grid-cols-3 gap-8">
           <div className="flex flex-col items-center text-center">
             {nextGame ? (
-              <GameCard card={nextGame} />
+              <Fade isActive={!discard}>
+                <GameCard card={nextGame} />
+              </Fade>
             ) : (
               <div className="mb-4">
                 <PlaceholderCard />
@@ -217,7 +224,9 @@ export default function Hilo(props: Props) {
 
           <div className="flex flex-col items-center text-center">
             {currentGame ? (
-              <GameCard card={currentGame} />
+              <Fade isActive={!discard}>
+                <GameCard card={currentGame} />
+              </Fade>
             ) : (
               <div className="mb-4">
                 <PlaceholderCard />

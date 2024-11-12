@@ -22,7 +22,6 @@ import { setHiloVal } from '@/services/redis';
 import zHilo from '@/stores/hilo';
 import { GuessHilo, Operator, OperatorEqual } from '@/types/zhilo';
 import {
-  bgCorrect,
   bgIncorrect,
   finitoText,
   timeline2Legend as hiloLegend,
@@ -138,15 +137,14 @@ export default function Hilo(props: Props) {
       setCurrentGame(newCurrentGame);
       const newLivesLeft = livesLeft - 1;
       updateLivesLeft(newLivesLeft);
+      confettiEmoji('❌');
 
       if (newLivesLeft === 0) {
         setPlayed(true);
         setStreak(false);
         setNextGame(null);
-        confettiEmoji('❌');
       } else {
         continuePlay();
-        (currentGame.bgStatus === bgCorrect || firstAttempt) && confettiEmoji('❌');
       }
     }
 

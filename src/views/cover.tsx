@@ -63,7 +63,6 @@ export default function Cover(props: Props) {
     form.reset();
     resetGameState();
     const newList = [...idList, game?.igdbId ?? 0];
-    console.log(newList);
     updateIdList(newList);
 
     ('use server');

@@ -21,7 +21,7 @@ export default function Footer() {
     <>
       <footer className="bg-muted mt-auto">
         <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center text-sm  mb-4 md:mb-0">
+          <div className="flex items-center text-sm mb-4 md:mb-0">
             {pathname !== '/' ? (
               <Link href={pathname !== '/' ? '/' : '#'} className="h-10 w-16">
                 {lottie()}

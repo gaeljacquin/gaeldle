@@ -1,22 +1,24 @@
 'use client';
 
+import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Menu, X } from 'lucide-react';
 import GitHubButton from 'react-github-btn';
-import AboutModal from '@/components/about-modal';
 import LottieComp from '@/components/lottie-comp';
-// import ModesNav from '@/components/modes-nav';
-import { Modes } from '@/services/modes';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { appinfo } from '@/utils/server-constants';
 
-type Props = {
-  modes: Modes;
-};
-
-export default function Navbar(props: Props) {
-  // const { modes } = props;
-  void props;
+export default function Navbar() {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const navItems = [
+    { name: 'Home', href: '/' },
+    { name: 'About', href: '/about' },
+  ];
+  const toggleMenu = () => setIsOpen(!isOpen);
+
   const lottie = () => {
     return (
       <>
@@ -27,41 +29,69 @@ export default function Navbar(props: Props) {
   };
 
   return (
-    <header
-      role="banner"
-      className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-600 backdrop-filter backdrop-blur-md flex h-20 w-full shrink-0 items-center px-4 md:px-6"
-    >
-      {pathname !== '/' ? (
-        <Link href={pathname !== '/' ? '/' : '#'} className="mr-6 flex h-16 w-16">
-          {lottie()}
-        </Link>
-      ) : (
-        <span className="mr-6 flex h-16 w-16">{lottie()}</span>
-      )}
+    <nav className="bg-background border-b">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex-shrink-0">
+            {pathname !== '/' ? (
+              <Link href={pathname !== '/' ? '/' : '#'} className="mr-6 flex h-16 w-16">
+                {lottie()}
+              </Link>
+            ) : (
+              <span className="mr-6 flex h-16 w-16">{lottie()}</span>
+            )}
+          </div>
+          <div className="hidden md:block">
+            <div className="ml-10 flex space-x-4">
+              <span className="mt-1">
+                <GitHubButton
+                  href="https://github.com/gaeljacquin/gaeldle"
+                  data-color-scheme="no-preference: light; light: light; dark: dark;"
+                  data-icon="octicon-star"
+                  data-size="large"
+                  aria-label="Star gaeljacquin/gaeldle on GitHub"
+                >
+                  Star
+                </GitHubButton>
+              </span>
 
-      <nav role="navigation" className="ml-auto flex gap-4">
-        <span className="mt-1">
-          <GitHubButton
-            href="https://github.com/gaeljacquin/gaeldle"
-            data-color-scheme="no-preference: light; light: light; dark: dark;"
-            data-icon="octicon-star"
-            data-size="large"
-            aria-label="Star gaeljacquin/gaeldle on GitHub"
-          >
-            Star
-          </GitHubButton>
-        </span>
-
-        {pathname !== '/' ? (
-          <Link href="/" className="navbar-item">
-            Home
-          </Link>
-        ) : (
-          <span className="navbar-item">Home</span>
-        )}
-        <AboutModal />
-        {/* <ModesNav modes={modes} /> */}
-      </nav>
-    </header>
+              {navItems.map((item) => (
+                <Link key={item.name} href={item.href} className="navbar-item">
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div className="md:hidden">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" className="px-2" onClick={toggleMenu}>
+                  <span className="sr-only">Open main menu</span>
+                  {isOpen ? (
+                    <X className="block h-6 w-6" aria-hidden="true" />
+                  ) : (
+                    <Menu className="block h-6 w-6" aria-hidden="true" />
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[240px] sm:w-[300px]">
+                <nav className="flex flex-col gap-4">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 }

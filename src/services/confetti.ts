@@ -1,6 +1,6 @@
 import confetti from 'canvas-confetti';
 
-export function confettiEmoji(emoji: string) {
+export function confettiEmoji(emoji: string, particleCount: number = 50) {
   const scalar = 2;
   const ex = confetti.shapeFromText({ text: emoji, scalar });
 
@@ -18,7 +18,7 @@ export function confettiEmoji(emoji: string) {
   const shoot = () => {
     confetti({
       ...defaults,
-      particleCount: 50,
+      particleCount: particleCount,
     });
   };
 

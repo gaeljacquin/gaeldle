@@ -6,6 +6,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { VercelToolbar } from '@vercel/toolbar/next';
 import Footer from '@/components/footer';
 import Navbar from '@/components/navbar';
+import { Toaster } from '@/components/ui/toaster';
 import { appinfo } from '@/utils/server-constants';
 
 const theFontInit = Comic_Neue({
@@ -30,6 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Navbar />
           <main role="main">{children}</main>
           <Footer />
+          <Toaster />
         </div>
         <SpeedInsights />
         <Analytics />

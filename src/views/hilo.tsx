@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ToastAction } from '@radix-ui/react-toast';
 import { ChevronsUpDown, Loader2 } from 'lucide-react';
 import Fade from '@/components/fade';
 import GameCard from '@/components/game-card';
@@ -14,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 import { hiloCheckAnswer } from '@/services/check-answer';
 import { confettiEmoji } from '@/services/confetti';
 import { Game } from '@/services/games';
@@ -22,6 +24,7 @@ import { setHiloVal } from '@/services/redis';
 import zHilo from '@/stores/hilo';
 import { GuessHilo, Operator, OperatorEqual } from '@/types/zhilo';
 import {
+  bgCorrect,
   bgIncorrect,
   finitoText,
   timeline2Legend as hiloLegend,
@@ -63,6 +66,7 @@ export default function Hilo(props: Props) {
     updatePlayedGameIds([]);
     updateTimeline([]);
   };
+  const { toast } = useToast();
 
   async function resetPlay() {
     resetGameState();
@@ -125,18 +129,33 @@ export default function Hilo(props: Props) {
       setBestStreak();
       setCurrentGame(newCurrentGame);
       continuePlay();
-      (currentGame.bgStatus === bgIncorrect || firstAttempt) && confettiEmoji('🤩');
+
+      if (currentGame.bgStatus === bgIncorrect || firstAttempt) {
+        confettiEmoji('🤩');
+      } else {
+        confettiEmoji('✅');
+      }
     } else {
       setCurrentGame(newCurrentGame);
       const newLivesLeft = livesLeft - 1;
       updateLivesLeft(newLivesLeft);
-      confettiEmoji('❌');
 
       if (newLivesLeft === 0) {
         setPlayed(true);
         setStreak(false);
         setNextGame(null);
+        confettiEmoji('❌');
       } else {
+        if (currentGame.bgStatus === bgCorrect || firstAttempt) {
+          confettiEmoji('❌');
+        } else {
+          toast({
+            variant: 'destructive',
+            description: 'Incorrect 😭',
+            action: <ToastAction altText="Click to close">Close</ToastAction>,
+          });
+        }
+
         continuePlay();
       }
     }

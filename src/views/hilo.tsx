@@ -38,22 +38,15 @@ type Props = {
 export default function Hilo(props: Props) {
   const { mode, games, clientId, getOneRandom } = props;
   const [initialCurrentGame, initialNextGame] = games;
-  const {
-    guesses,
-    timeline,
-    updateGuesses,
-    updateTimeline,
-    setStreak,
-    getStreak,
-    setBestStreak,
-    getBestStreak,
-  } = zHilo();
+  const { setStreak, getStreak, setBestStreak, getBestStreak } = zHilo();
   const [currentGame, setCurrentGame] = useState<Game>(initialCurrentGame as Game);
   const [nextGame, setNextGame] = useState<Partial<Game> | null>(initialNextGame);
   const [playedGameIds, updatePlayedGameIds] = useState<number[]>([initialCurrentGame.igdbId ?? 0]);
   const [played, setPlayed] = useState<boolean>(false);
   const [won, setWon] = useState<boolean>(false);
   const [finito, setFinito] = useState<boolean>(false);
+  const [guesses, updateGuesses] = useState<GuessHilo[]>([]);
+  const [timeline, updateTimeline] = useState<Partial<Game>[]>([]);
   const [livesLeft, updateLivesLeft] = useState<number>(mode.lives);
   const [tgCollapsibleOpen, setTgCollapsibleOpen] = useState(false);
   const [operator, setOperator] = useState<OperatorEqual>('=');

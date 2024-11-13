@@ -2,15 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
 import Modes from '@/components/modes';
-import ModesCarousel from '@/components/modes-carousel';
-import { Notifications } from '@/components/notifications';
 import TextSpecial from '@/components/text-special';
-import { Button } from '@/components/ui/button';
 import { type Modes as ModesType } from '@/services/modes';
-import zHome from '@/stores/home';
 import { appinfo } from '@/utils/server-constants';
 
 type Props = {
@@ -19,7 +13,6 @@ type Props = {
 
 export default function Home(props: Props) {
   const { modes } = props;
-  const { menuType, setMenuType } = zHome();
   const titleFirstHalf = appinfo.title.slice(0, appinfo.title.length / 2 + 1);
   const titleSecondHalf = appinfo.title.slice(appinfo.title.length / 2 + 1);
   const [modeSelected, setModeSelected] = useState<boolean>(false);
@@ -44,68 +37,9 @@ export default function Home(props: Props) {
           </p>
         </div>
 
-        <div>
-          <Notifications />
+        <div className="mt-7 mb-32">
+          <Modes modes={modes} setModeSelected={setModeSelected} modeSelected={modeSelected} />
         </div>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={menuType + '-motion'}
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -10, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {!menuType && (
-              <div className="flex mt-10 justify-center items-center space-x-4">
-                <Loader2 className="h-8 w-8 mt-1 animate-spin" />
-              </div>
-            )}
-            {menuType === 'list' && (
-              <div className="mt-7 mb-32">
-                <Modes
-                  modes={modes}
-                  setModeSelected={setModeSelected}
-                  modeSelected={modeSelected}
-                />
-              </div>
-            )}
-            {menuType === 'carousel' && (
-              <div className="-mt-20 -mb-12">
-                <ModesCarousel
-                  modes={modes}
-                  setModeSelected={setModeSelected}
-                  modeSelected={modeSelected}
-                />
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <div className="flex justify-center items-center space-x-4">
-        <motion.div className="underline mt-10" layoutId="underline">
-          {menuType === 'list' && (
-            <Button
-              onClick={() => setMenuType('carousel')}
-              variant="outline"
-              size="lg"
-              disabled={modeSelected}
-            >
-              Carousel View
-            </Button>
-          )}
-          {menuType === 'carousel' && (
-            <Button
-              onClick={() => setMenuType('list')}
-              variant="outline"
-              size="lg"
-              disabled={modeSelected}
-            >
-              List View
-            </Button>
-          )}
-        </motion.div>
       </div>
     </div>
   );

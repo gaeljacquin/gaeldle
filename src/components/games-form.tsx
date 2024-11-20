@@ -27,11 +27,12 @@ type GamesFormProps = {
   played: boolean;
   summaryTab?: boolean;
   clientId: string;
+  answer?: string;
   checkAnswer: (arg0: Guess) => void;
 };
 
 export default function GamesForm({ ...props }: GamesFormProps) {
-  const { games, form, guesses, played, summaryTab, livesLeft, checkAnswer } = props;
+  const { games, form, guesses, played, summaryTab, livesLeft, checkAnswer, answer } = props;
   const [search, setSearch] = useState('');
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -116,7 +117,13 @@ export default function GamesForm({ ...props }: GamesFormProps) {
                 </CommandList>
               </Command>
               <FormLabel className="flex items-center justify-center w-full text-center text-md border border-2 border-dotted border-gray-400 bg-gray-200 rounded-md">
-                {field.value?.igdbId ? field.value?.name : <>&nbsp;</>}
+                {field.value?.igdbId ? (
+                  field.value?.name
+                ) : played || livesLeft === 0 ? (
+                  answer
+                ) : (
+                  <>&nbsp;</>
+                )}
                 <FormMessage />
               </FormLabel>
             </FormItem>

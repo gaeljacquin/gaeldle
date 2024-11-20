@@ -13,7 +13,6 @@ import Placeholders from '@/components/placeholders';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { coverCheckAnswer } from '@/services/check-answer';
 import { confettiEmoji, confettiFireworks } from '@/services/confetti';
 import { Game, Games } from '@/services/games';
 import { Mode } from '@/services/modes';
@@ -38,7 +37,7 @@ type Props = {
 };
 
 export default function Cover(props: Props) {
-  const { mode, game: initialGame, games, clientId, getOneRandom } = props;
+  const { mode, game: initialGame, games, clientId } = props;
   const { setStreak, getStreak, setBestStreak, getBestStreak } = zCover();
   const [game, setGame] = useState<Partial<Game>>(initialGame);
   const [guessesCollapsibleOpen, setGuessesCollapsibleOpen] = useState(true);
@@ -50,6 +49,7 @@ export default function Cover(props: Props) {
   const [livesLeft, updateLivesLeft] = useState<number>(mode.lives);
   const [pixelation, setPixelation] = useState<number>(mode.pixelation);
   const [ready, setReady] = useState<boolean>(false);
+  const [answer, setAnswer] = useState<string>('');
   const resetGameState = () => {
     setGuessesCollapsibleOpen(true);
     updateGuesses([]);
@@ -64,11 +64,15 @@ export default function Cover(props: Props) {
     form.reset();
     resetGameState();
     const newList = [...idList, game?.igdbId ?? 0];
+    const res = await fetch('/api/random-one', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newList),
+    });
+    const nextGame = ((await res.json()) as Game[])[0] as Game;
     updateIdList(newList);
-
-    ('use server');
-    const res = await getOneRandom(newList);
-    const nextGame = ((await res) as Game[])[0] as Game;
 
     if (!game) {
       setFinito(true);
@@ -81,9 +85,15 @@ export default function Cover(props: Props) {
   }
 
   async function checkAnswer(guess: Guess) {
-    ('use server');
-    const res = await coverCheckAnswer(clientId, guess.igdbId);
-    const { igdbId, name } = res as Partial<Game>;
+    const data = { clientId, igdbId: guess.igdbId, livesLeft };
+    const res = await fetch('/api/cover', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    const { igdbId, name, extra } = await res.json();
     const answer = igdbId && name;
     game.igdbId = igdbId;
     game.name = name;
@@ -94,6 +104,7 @@ export default function Cover(props: Props) {
       setPlayed(true);
       setWon(true);
       setGame(game);
+      setAnswer(game.name ?? '');
       confettiFireworks();
     } else {
       updateGuesses((prev) => [...prev, guess]);
@@ -106,6 +117,7 @@ export default function Cover(props: Props) {
         setPixelation(0);
         setStreak(false);
         setGame(game);
+        setAnswer(extra.name ?? '');
         confettiEmoji('❌');
       }
     }
@@ -188,6 +200,7 @@ export default function Cover(props: Props) {
               played={played}
               clientId={clientId}
               checkAnswer={checkAnswer}
+              answer={answer}
             />
 
             {played && (

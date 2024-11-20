@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { hiloCheckAnswer } from '@/services/check-answer';
 import { confettiEmoji } from '@/services/confetti';
 import { Game } from '@/services/games';
 import { Mode } from '@/services/modes';
@@ -39,7 +38,7 @@ type Props = {
 };
 
 export default function Hilo(props: Props) {
-  const { mode, games, clientId, getOneRandom } = props;
+  const { mode, games, clientId } = props;
   const [initialCurrentGame, initialNextGame] = games;
   const { setStreak, getStreak, setBestStreak, getBestStreak } = zHilo();
   const [currentGame, setCurrentGame] = useState<Game>(initialCurrentGame as Game);
@@ -57,28 +56,32 @@ export default function Hilo(props: Props) {
   const buttonDisabled = played || livesLeft === 0 || !nextGame || operator !== '=' || finito;
   const [ready, setReady] = useState<boolean>(false);
   const [discard, setDiscard] = useState<boolean>(false);
-  const resetGameState = () => {
+  const resetGameState = (newList: number[]) => {
     setTgCollapsibleOpen(false);
     updateGuesses([]);
     setPlayed(false);
     setWon(false);
     updateLivesLeft(mode.lives);
-    updatePlayedGameIds([]);
+    updatePlayedGameIds(newList);
     updateTimeline([]);
   };
   const { toast } = useToast();
 
   async function resetPlay() {
-    resetGameState();
-
-    ('use server');
-    const res = await getOneRandom();
-    const game = ((await res) as Game[])[0] as Game;
+    const newList = [currentGame.igdbId ?? 0];
+    resetGameState(newList);
+    const res = await fetch('/api/random-one', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newList),
+    });
+    const game = ((await res.json()) as Game[])[0] as Game;
 
     if (!game) {
       setFinito(true);
     } else {
-      updatePlayedGameIds([currentGame.igdbId ?? 0]);
       setHiloVal(clientId, game);
       const { frd, frdFormatted, ...rest } = game;
       void frd, frdFormatted;
@@ -90,10 +93,14 @@ export default function Hilo(props: Props) {
   async function continuePlay() {
     const newList = [...playedGameIds, nextGame?.igdbId ?? 0];
     updatePlayedGameIds(newList);
-
-    ('use server');
-    const res = await getOneRandom(newList);
-    const game = ((await res) as Game[])[0] as Game;
+    const res = await fetch('/api/random-one', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newList),
+    });
+    const game = ((await res.json()) as Game[])[0] as Game;
 
     if (!game) {
       setFinito(true);
@@ -109,8 +116,15 @@ export default function Hilo(props: Props) {
   async function submitOperator(operator: Operator) {
     setOperator(operator);
     setDiscard(true);
-    ('use server');
-    const answerPlusFrd = await hiloCheckAnswer(clientId, currentGame, operator);
+    const data = { clientId, currentGame, operator };
+    const res = await fetch('/api/hilo', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    const answerPlusFrd = await res.json();
     const { answer, frd, frdFormatted, bgStatus } = answerPlusFrd;
     const newCurrentGame = { frd, frdFormatted, ...nextGame } as Game;
     const firstAttempt = guesses.length === 0;

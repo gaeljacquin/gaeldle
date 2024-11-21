@@ -32,7 +32,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { timelineCheckAnswer } from '@/services/check-answer';
 import { confettiEmoji, confettiSideCannons } from '@/services/confetti';
 import { Game, Games } from '@/services/games';
 import { Mode } from '@/services/modes';
@@ -76,7 +75,7 @@ const spring = {
 };
 
 export default function Timeline(props: Props) {
-  const { mode, games, clientId, getRandom } = props;
+  const { mode, games, clientId } = props;
   const { dragSwitch, setStreak, getStreak, setBestStreak, getBestStreak, setDragSwitch } =
     zTimeline();
   const [timeline, updateTimeline] = useState<Partial<Game>[]>(games);
@@ -117,9 +116,15 @@ export default function Timeline(props: Props) {
 
   async function checkAnswer() {
     setDummyOnLoad(true);
-
-    ('use server');
-    const answerPlus = await timelineCheckAnswer(clientId, timeline, livesLeft - 1);
+    const data = { clientId, timeline, livesLeft: livesLeft - 1 };
+    const res = await fetch('/api/timeline', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    const answerPlus = await res.json();
     const { answer, updatedTimeline, goodTimeline } = answerPlus;
     updateScore(goodTimeline, updatedTimeline, answer);
   }
@@ -153,9 +158,15 @@ export default function Timeline(props: Props) {
 
   async function continuePlay() {
     resetGameState();
-
-    ('use server');
-    const games = (await getRandom(mode.pixelationStep, mode.pixelation)) as Games;
+    const data = { pixelationStep: mode.pixelationStep, pixelation: mode.pixelation };
+    const res = await fetch('/api/random', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    const games = (await res.json()) as Games;
     setTimelineVal(clientId, games);
     let reshuffledGames = shuffleList(games) as Partial<Game>[];
     reshuffledGames = reshuffledGames.map((game: Partial<Game>) => {

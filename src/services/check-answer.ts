@@ -5,13 +5,18 @@ import { getCoverVal, getHiloVal, getTimelineVal } from '@/services/redis';
 import { Operator } from '@/types/zhilo';
 import { bgCorrect, bgIncorrect, bgOther2, bgPartial } from '@/utils/server-constants';
 
-export async function coverCheckAnswer(key: string, igdbId: number): Promise<unknown> {
+export async function coverCheckAnswer(
+  key: string,
+  igdbId: number,
+  livesLeft: number
+): Promise<unknown> {
   const val = (await getCoverVal(key)) as Game;
   const answer = igdbId === val.igdbId;
   const correctIgdbId = answer ? val.igdbId : 0;
   const correctName = answer ? val.name : '';
+  const extra = livesLeft === 0 ? { igdbId: val.igdbId, name: val.name } : {};
 
-  return { igdbId: correctIgdbId, name: correctName };
+  return { igdbId: correctIgdbId, name: correctName, extra };
 }
 
 export async function hiloCheckAnswer(key: string, game: Game, operator: Operator) {

@@ -16,7 +16,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { confettiEmoji, confettiFireworks } from '@/services/confetti';
 import { Game, Games } from '@/services/games';
 import { Mode } from '@/services/modes';
-import { setCoverVal } from '@/services/redis';
 import zCover from '@/stores/cover';
 import { Guess, Guesses } from '@/types/guesses';
 import {
@@ -77,7 +76,14 @@ export default function Cover(props: Props) {
     if (!game) {
       setFinito(true);
     } else {
-      setCoverVal(clientId, nextGame);
+      const data = { clientId, game: nextGame, action: 'set-answer' };
+      void (await fetch('/api/cover', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }));
       const { igdbId, name, ...rest } = nextGame;
       void igdbId, name;
       setGame(rest);
@@ -85,7 +91,7 @@ export default function Cover(props: Props) {
   }
 
   async function checkAnswer(guess: Guess) {
-    const data = { clientId, igdbId: guess.igdbId, livesLeft };
+    const data = { key: clientId, igdbId: guess.igdbId, livesLeft, action: 'check-answer' };
     const res = await fetch('/api/cover', {
       method: 'POST',
       headers: {

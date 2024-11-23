@@ -105,7 +105,14 @@ export default function Hilo(props: Props) {
     if (!game) {
       setFinito(true);
     } else {
-      setHiloVal(clientId, game);
+      const data = { clientId, game, action: 'set-answer' };
+      void (await fetch('/api/hilo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }));
       const { frd, frdFormatted, ...rest } = game;
       void frd, frdFormatted;
       setNextGame(rest);
@@ -113,10 +120,10 @@ export default function Hilo(props: Props) {
     }
   }
 
-  async function submitOperator(operator: Operator) {
+  async function checkAnswer(operator: Operator) {
     setOperator(operator);
     setDiscard(true);
-    const data = { clientId, currentGame, operator };
+    const data = { key: clientId, game: currentGame, operator, action: 'check-answer' };
     const res = await fetch('/api/hilo', {
       method: 'POST',
       headers: {
@@ -230,7 +237,7 @@ export default function Hilo(props: Props) {
                   type="button"
                   className="bg-rose-700 hover:bg-rose-800 w-full text-md font-semibold"
                   disabled={buttonDisabled}
-                  onClick={() => submitOperator('<')}
+                  onClick={() => checkAnswer('<')}
                 >
                   {operator === '<' && livesLeft > 0 && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -241,7 +248,7 @@ export default function Hilo(props: Props) {
                   type="button"
                   className="bg-sky-700 hover:bg-sky-800 w-full text-md font-semibold"
                   disabled={buttonDisabled}
-                  onClick={() => submitOperator('>')}
+                  onClick={() => checkAnswer('>')}
                 >
                   {operator === '>' && livesLeft > 0 && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -320,8 +327,9 @@ export default function Hilo(props: Props) {
                     <div className="flex flex-row justify-start px-2 space-x-4 overflow-x-auto">
                       <div className="flex justify-start p-0 space-x-4">
                         {' '}
-                        {timeline.map((game: Partial<Game>) => (
-                          <GameCard key={game.igdbId} card={game} />
+                        {timeline.map((game: Partial<Game>, index: number) => (
+                          <GameCard key={game.igdbId + '-' + index} card={game} />
+                          // TODO: look into why a game shows up more than once; fixing duplicate key for now
                         ))}
                       </div>
                     </div>

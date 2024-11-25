@@ -21,7 +21,7 @@ export default async function Page() {
 
   return (
     <>
-      <Timeline mode={mode} games={reshuffledGames} clientId={clientId} getRandom={getRandom} />
+      <Timeline mode={mode} games={reshuffledGames} clientId={clientId} />
     </>
   );
 }

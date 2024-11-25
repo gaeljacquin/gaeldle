@@ -34,7 +34,6 @@ type Props = {
   mode: Mode;
   games: Partial<Game>[];
   clientId: string;
-  getOneRandom: (arg0?: number[]) => Promise<unknown>;
 };
 
 export default function Hilo(props: Props) {

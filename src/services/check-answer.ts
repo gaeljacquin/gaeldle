@@ -1,5 +1,3 @@
-'use server';
-
 import { Game, Games } from '@/services/games';
 import { getCoverVal, getHiloVal, getTimelineVal } from '@/services/redis';
 import { Operator } from '@/types/zhilo';

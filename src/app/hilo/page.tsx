@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Game, getOneRandom, getRandom } from '@/services/games';
+import { Game, getRandom } from '@/services/games';
 import { getModeBySlug } from '@/services/modes';
 import { setHiloVal } from '@/services/redis';
-import { bgCorrect } from '@/utils/client-constants';
+import { bgCorrect } from '@/utils/server-constants';
 import shuffleList from '@/utils/shuffle-list';
 import Hilo from '@/views/hilo';
 
@@ -26,7 +26,7 @@ export default async function Page() {
 
   return (
     <>
-      <Hilo mode={mode} games={reshuffledGames} clientId={clientId} getOneRandom={getOneRandom} />
+      <Hilo mode={mode} games={reshuffledGames} clientId={clientId} />
     </>
   );
 }

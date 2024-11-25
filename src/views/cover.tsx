@@ -32,7 +32,6 @@ type Props = {
   game: Partial<Game>;
   games: Games;
   clientId: string;
-  getOneRandom: (arg0?: number[]) => Promise<unknown>;
 };
 
 export default function Cover(props: Props) {

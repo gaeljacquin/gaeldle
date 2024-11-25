@@ -1,5 +1,3 @@
-'use server';
-
 import { Prisma as Prisma2 } from '@prisma/client';
 import { prisma } from '@/utils/db';
 import { bgOther1, whichList } from '@/utils/server-constants';

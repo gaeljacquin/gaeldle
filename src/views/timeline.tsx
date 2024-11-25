@@ -52,7 +52,6 @@ type Props = {
   mode: Mode;
   games: Partial<Game>[];
   clientId: string;
-  getRandom: (arg0: number, arg1: number) => Promise<unknown>;
 };
 
 const container = {

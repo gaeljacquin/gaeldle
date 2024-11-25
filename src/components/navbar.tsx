@@ -1,14 +1,14 @@
 'use client';
 
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import GitHubButton from 'react-github-btn';
-import LottieComp from '@/components/lottie-comp';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { appinfo } from '@/utils/server-constants';
+import { appinfo } from '@/utils/client-constants';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -18,7 +18,9 @@ export default function Navbar() {
     { name: 'About', href: '/about' },
   ];
   const toggleMenu = () => setIsOpen(!isOpen);
-
+  const LottieComp = dynamic(() => import('@/components/lottie-comp'), {
+    ssr: false,
+  });
   const lottie = () => {
     return (
       <>

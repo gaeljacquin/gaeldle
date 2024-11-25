@@ -1,13 +1,16 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import BMCButton from '@/components/bmc-button';
-import LottieComp from '@/components/lottie-comp';
 import { appinfo, currentYear } from '@/utils/client-constants';
 
 export default function Footer() {
   const pathname = usePathname();
+  const LottieComp = dynamic(() => import('@/components/lottie-comp'), {
+    ssr: false,
+  });
   const lottie = () => {
     return (
       <>

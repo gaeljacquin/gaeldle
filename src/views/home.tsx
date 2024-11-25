@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Modes from '@/components/modes';
 import TextSpecial from '@/components/text-special';
 import { type Modes as ModesType } from '@/services/modes';
-import { appinfo } from '@/utils/server-constants';
+import { appinfo } from '@/utils/client-constants';
 
 type Props = {
   modes: ModesType;

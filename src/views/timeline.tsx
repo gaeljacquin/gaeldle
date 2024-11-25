@@ -35,7 +35,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { confettiEmoji, confettiSideCannons } from '@/services/confetti';
 import { Game, Games } from '@/services/games';
 import { Mode } from '@/services/modes';
-import { setTimelineVal } from '@/services/redis';
 import zTimeline from '@/stores/timeline';
 import {
   bgCorrect,
@@ -53,7 +52,6 @@ type Props = {
   mode: Mode;
   games: Partial<Game>[];
   clientId: string;
-  getRandom: (arg0: number, arg1: number) => Promise<unknown>;
 };
 
 const container = {
@@ -116,7 +114,7 @@ export default function Timeline(props: Props) {
 
   async function checkAnswer() {
     setDummyOnLoad(true);
-    const data = { clientId, timeline, livesLeft: livesLeft - 1 };
+    const data = { key: clientId, timeline, livesLeft: livesLeft - 1, action: 'check-answer' };
     const res = await fetch('/api/timeline', {
       method: 'POST',
       headers: {
@@ -167,7 +165,14 @@ export default function Timeline(props: Props) {
       body: JSON.stringify(data),
     });
     const games = (await res.json()) as Games;
-    setTimelineVal(clientId, games);
+    const data2 = { clientId, games, action: 'set-answer' };
+    void (await fetch('/api/timeline', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data2),
+    }));
     let reshuffledGames = shuffleList(games) as Partial<Game>[];
     reshuffledGames = reshuffledGames.map((game: Partial<Game>) => {
       const { frd, frdFormatted, ...rest } = game;

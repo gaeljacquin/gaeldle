@@ -1,5 +1,3 @@
-'use server';
-
 import { Redis } from '@upstash/redis';
 import { Game, Games } from '@/services/games';
 import { CheckAnswer } from '@/types/check-answer';
@@ -8,6 +6,16 @@ const redis = new Redis({
   url: process.env.kvRestApiUrl,
   token: process.env.kvRestApiToken,
 });
+
+export type setAnswerProps1 = {
+  clientId: string;
+  game: Game;
+};
+
+export type setAnswerProps2 = {
+  clientId: string;
+  games: Games;
+};
 
 export async function setHiloVal(key: string, value: Game) {
   return await setKeyVal(key, value, true, true);

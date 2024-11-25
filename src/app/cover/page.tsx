@@ -16,13 +16,7 @@ export default async function Page() {
 
   return (
     <>
-      <Cover
-        mode={mode}
-        games={games}
-        game={rest}
-        clientId={clientId}
-        getOneRandom={getOneRandom}
-      />
+      <Cover mode={mode} games={games} game={rest} clientId={clientId} />
     </>
   );
 }

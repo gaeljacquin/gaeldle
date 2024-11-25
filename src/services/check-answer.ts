@@ -1,15 +1,28 @@
-'use server';
-
 import { Game, Games } from '@/services/games';
 import { getCoverVal, getHiloVal, getTimelineVal } from '@/services/redis';
 import { Operator } from '@/types/zhilo';
 import { bgCorrect, bgIncorrect, bgOther2, bgPartial } from '@/utils/server-constants';
 
-export async function coverCheckAnswer(
-  key: string,
-  igdbId: number,
-  livesLeft: number
-): Promise<unknown> {
+export type coverCheckAnswerProps = {
+  key: string;
+  igdbId: number;
+  livesLeft: number;
+};
+
+export type hiloCheckAnswerProps = {
+  key: string;
+  game: Game;
+  operator: Operator;
+};
+
+export type timelineCheckAnswerProps = {
+  key: string;
+  timeline: Partial<Game>[];
+  livesLeft: number;
+};
+
+export async function coverCheckAnswer(props: coverCheckAnswerProps): Promise<unknown> {
+  const { key, igdbId, livesLeft } = props;
   const val = (await getCoverVal(key)) as Game;
   const answer = igdbId === val.igdbId;
   const correctIgdbId = answer ? val.igdbId : 0;
@@ -19,7 +32,8 @@ export async function coverCheckAnswer(
   return { igdbId: correctIgdbId, name: correctName, extra };
 }
 
-export async function hiloCheckAnswer(key: string, game: Game, operator: Operator) {
+export async function hiloCheckAnswer(props: hiloCheckAnswerProps) {
+  const { key, game, operator } = props;
   const val = (await getHiloVal(key, ['frd', 'frdFormatted'])) as Partial<Game>;
   let answer: boolean;
 
@@ -40,11 +54,8 @@ export async function hiloCheckAnswer(key: string, game: Game, operator: Operato
   return { answer, frd: val.frd, frdFormatted: val.frdFormatted, bgStatus };
 }
 
-export async function timelineCheckAnswer(
-  key: string,
-  timeline: Partial<Game>[],
-  livesLeft: number
-) {
+export async function timelineCheckAnswer(props: timelineCheckAnswerProps) {
+  const { key, timeline, livesLeft } = props;
   const correctTimeline = (await getTimelineVal(key)) as Game[];
   let answer = true;
   let goodTimeline: Games = [];

@@ -1,4 +1,4 @@
-import { bgTextSpecial1, bgTextSpecial2 } from '@/utils/server-constants';
+import { bgTextSpecial1, bgTextSpecial2 } from '@/utils/client-constants';
 
 type TextSpecialProps = {
   term1: string;

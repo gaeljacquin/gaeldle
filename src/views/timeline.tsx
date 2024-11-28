@@ -25,6 +25,7 @@ import LivesLeftComp from '@/components/lives-left';
 import ModesHeader from '@/components/modes-header';
 import MyBadgeGroup from '@/components/my-badge-group';
 import Placeholders from '@/components/placeholders';
+import { SessionTimeoutAlertDialog } from '@/components/session-timeout-alert-dialog';
 import SortableItem from '@/components/sortable-item';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -94,6 +95,7 @@ export default function Timeline(props: Props) {
   const gameOver = played && !won;
   const [ready, setReady] = useState<boolean>(false);
   const [viewSwitch, setViewSwitch] = useState<boolean>(true);
+  const [alertOpen, setAlertOpen] = useState(false);
   const correctIgdbs =
     timeline?.filter((game) => game.bgStatus === bgCorrect).map((game) => game.igdbId) ?? [];
   const resetGameState = () => {
@@ -123,6 +125,13 @@ export default function Timeline(props: Props) {
       body: JSON.stringify(data),
     });
     const answerPlus = await res.json();
+
+    if (!answerPlus) {
+      setAlertOpen(true);
+
+      return;
+    }
+
     const { answer, updatedTimeline, goodTimeline } = answerPlus;
     updateScore(goodTimeline, updatedTimeline, answer);
   }
@@ -284,7 +293,7 @@ export default function Timeline(props: Props) {
       <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart} sensors={sensors}>
         <div className="flex flex-col min-h-screen">
           <ModesHeader mode={mode} />
-
+          <SessionTimeoutAlertDialog isOpen={alertOpen} setIsOpen={setAlertOpen} />
           <div className="flex flex-col mb-5 justify-center">
             <div className="flex justify-center mb-6">
               <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 space-x-0 md:space-x-20 mb-7">
@@ -312,7 +321,7 @@ export default function Timeline(props: Props) {
                       defaultChecked={dragSwitch}
                       onCheckedChange={setDragSwitch}
                       className={`data-[state=checked]:bg-gael-green-dark data-[state=unchecked]:bg-gael-red-dark relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                      disabled={gameOver || won}
+                      disabled={gameOver || won || alertOpen}
                     />
                     <Label htmlFor="drag-type">Normal</Label>
                   </div>
@@ -438,7 +447,7 @@ export default function Timeline(props: Props) {
                   <Button
                     onClick={checkAnswer}
                     className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold tracking-sm"
-                    disabled={dummyOnLoad || played || alreadyGuessed}
+                    disabled={dummyOnLoad || played || alreadyGuessed || alertOpen}
                   >
                     {submitButtonText}
                   </Button>
@@ -452,7 +461,8 @@ export default function Timeline(props: Props) {
                             guesses.length === 0 ||
                             (guesses.length > 0 && alreadyGuessed) ||
                             dummyOnLoad ||
-                            played
+                            played ||
+                            alertOpen
                           }
                         >
                           Reset

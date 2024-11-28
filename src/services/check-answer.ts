@@ -24,6 +24,11 @@ export type timelineCheckAnswerProps = {
 export async function coverCheckAnswer(props: coverCheckAnswerProps): Promise<unknown> {
   const { key, igdbId, livesLeft } = props;
   const val = (await getCoverVal(key)) as Game;
+
+  if (!val) {
+    return val;
+  }
+
   const answer = igdbId === val.igdbId;
   const correctIgdbId = answer ? val.igdbId : 0;
   const correctName = answer ? val.name : '';
@@ -36,6 +41,10 @@ export async function hiloCheckAnswer(props: hiloCheckAnswerProps) {
   const { key, game, operator } = props;
   const val = (await getHiloVal(key, ['frd', 'frdFormatted'])) as Partial<Game>;
   let answer: boolean;
+
+  if (!val) {
+    return val;
+  }
 
   switch (operator) {
     case '>':
@@ -57,6 +66,11 @@ export async function hiloCheckAnswer(props: hiloCheckAnswerProps) {
 export async function timelineCheckAnswer(props: timelineCheckAnswerProps) {
   const { key, timeline, livesLeft } = props;
   const correctTimeline = (await getTimelineVal(key)) as Game[];
+
+  if (!correctTimeline) {
+    return correctTimeline;
+  }
+
   let answer = true;
   let goodTimeline: Games = [];
 

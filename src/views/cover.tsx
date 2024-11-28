@@ -10,6 +10,7 @@ import ModesHeader from '@/components/modes-header';
 import MyBadgeGroup from '@/components/my-badge-group';
 import PixelatedImage from '@/components/pixelate-image';
 import Placeholders from '@/components/placeholders';
+import { SessionTimeoutAlertDialog } from '@/components/session-timeout-alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -48,6 +49,7 @@ export default function Cover(props: Props) {
   const [pixelation, setPixelation] = useState<number>(mode.pixelation);
   const [ready, setReady] = useState<boolean>(false);
   const [answer, setAnswer] = useState<string>('');
+  const [alertOpen, setAlertOpen] = useState(false);
   const resetGameState = () => {
     setGuessesCollapsibleOpen(true);
     updateGuesses([]);
@@ -98,7 +100,15 @@ export default function Cover(props: Props) {
       },
       body: JSON.stringify(data),
     });
-    const { igdbId, name, extra } = await res.json();
+    const data2 = await res.json();
+
+    if (!data2) {
+      setAlertOpen(true);
+
+      return;
+    }
+
+    const { igdbId, name, extra } = data2;
     const answer = igdbId && name;
     game.igdbId = igdbId;
     game.name = name;
@@ -142,7 +152,7 @@ export default function Cover(props: Props) {
         <div className="flex justify-center">
           <ModesHeader mode={mode} />
         </div>
-
+        <SessionTimeoutAlertDialog isOpen={alertOpen} setIsOpen={setAlertOpen} />
         <div className="grid md:grid-cols-2 gap-8">
           <div className="flex flex-col items-center text-center">
             <Card className="relative rounded-2xl overflow-x-auto shadow-md bg-cyan-50">

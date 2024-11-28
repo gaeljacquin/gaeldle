@@ -11,6 +11,7 @@ import ModesHeader from '@/components/modes-header';
 import MyBadgeGroup from '@/components/my-badge-group';
 import PlaceholderCard from '@/components/placeholder-card';
 import Placeholders from '@/components/placeholders';
+import { SessionTimeoutAlertDialog } from '@/components/session-timeout-alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -55,6 +56,7 @@ export default function Hilo(props: Props) {
   const buttonDisabled = played || livesLeft === 0 || !nextGame || operator !== '=' || finito;
   const [ready, setReady] = useState<boolean>(false);
   const [discard, setDiscard] = useState<boolean>(false);
+  const [alertOpen, setAlertOpen] = useState(false);
   const resetGameState = (newList: number[]) => {
     setTgCollapsibleOpen(false);
     updateGuesses([]);
@@ -131,6 +133,13 @@ export default function Hilo(props: Props) {
       body: JSON.stringify(data),
     });
     const answerPlusFrd = await res.json();
+
+    if (!answerPlusFrd) {
+      setAlertOpen(true);
+
+      return;
+    }
+
     const { answer, frd, frdFormatted, bgStatus } = answerPlusFrd;
     const newCurrentGame = { frd, frdFormatted, ...nextGame } as Game;
     const firstAttempt = guesses.length === 0;
@@ -197,7 +206,7 @@ export default function Hilo(props: Props) {
         <div className="flex justify-center">
           <ModesHeader mode={mode} />
         </div>
-
+        <SessionTimeoutAlertDialog isOpen={alertOpen} setIsOpen={setAlertOpen} />
         <div className="grid md:grid-cols-3 gap-8">
           <div className="flex flex-col items-center text-center">
             {nextGame ? (

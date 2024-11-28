@@ -22,7 +22,7 @@ export async function setHiloVal(key: string, value: Game) {
 }
 
 export async function getHiloVal(key: string, fields: string[]): Promise<unknown> {
-  return (await getVal(key, true, fields)) as Promise<Partial<Game>>;
+  return (await getVal(key, true, fields)) as Promise<Partial<Game>> | null;
 }
 
 export async function setCoverVal(key: string, value: Game) {
@@ -30,7 +30,7 @@ export async function setCoverVal(key: string, value: Game) {
 }
 
 export async function getCoverVal(key: string): Promise<unknown> {
-  return (await getVal(key)) as Promise<number>;
+  return (await getVal(key)) as Promise<number> | null;
 }
 
 export async function setTimelineVal(key: string, value: Games) {
@@ -38,7 +38,7 @@ export async function setTimelineVal(key: string, value: Games) {
 }
 
 export async function getTimelineVal(key: string): Promise<unknown> {
-  return (await getVal(key)) as Promise<Game[]>;
+  return (await getVal(key)) as Promise<Game[]> | null;
 }
 
 async function setKeyVal(key: string, value: CheckAnswer, isHash?: boolean, saveAsHash?: boolean) {
@@ -55,6 +55,10 @@ async function setKeyVal(key: string, value: CheckAnswer, isHash?: boolean, save
 
 async function getVal(key: string, isHash?: boolean, fields?: string[]) {
   const data = isHash && fields ? await redis.hmget(key, ...fields) : await redis.get(key);
+
+  if (data === null || (Array.isArray(data) && data.length === 0)) {
+    return null;
+  }
 
   return await data;
 }

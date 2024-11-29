@@ -4,6 +4,7 @@ import vercelToolbar from '@vercel/toolbar/plugins/next';
 const nextConfig = {
   env: {
     port: `${process.env.PORT ?? '3000'}`,
+    databaseUrl: `${process.env.DATABASE_URL}`,
     kvRestApiUrl: `${process.env.KV_REST_API_URL}`,
     kvRestApiToken: `${process.env.KV_REST_API_TOKEN}`,
   },

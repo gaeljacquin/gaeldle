@@ -92,6 +92,7 @@ export default function Hilo(props: Props) {
   }
 
   async function continuePlay() {
+    setNextGame(null);
     const newList = [...playedGameIds, nextGame?.igdbId ?? 0];
     updatePlayedGameIds(newList);
     const res = await fetch('/api/random-one', {

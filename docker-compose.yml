@@ -1,29 +1,44 @@
 services:
   app:
-    container_name: azure-nextjs-poc
+    container_name: gaeldle
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '3000:3000'
+      - '${PORT}:${PORT}'
+    environment:
+      PORT: ${PORT}
+      DATABASE_URL: ${DATABASE_URL}
     volumes:
-      - node-modules:/usr/src/app/node_modules
-      - dot-next:/usr/src/app/.next
-      - vscode:/usr/src/app/.vscode
+      - node-modules:/app/node_modules
+      - dot-next:/app/.next
+      - vscode:/app/.vscode
     develop:
       watch:
         - path: ./package.json
           action: rebuild
         - path: .
-          target: /usr/src/app
+          target: /app
           action: sync
+    depends_on:
+      - database
+
+  database:
+    container_name: gaeldle-db
+    image: postgres:16
+    restart: always
+    ports:
+      - '5433:5432'
     environment:
-      DATABASE_URL: ${DATABASE_URL}
-      TEST_VAR: ${TEST_VAR}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql
 
 volumes:
   node-modules:
   dot-next:
   vscode:
-  # server-apt-packages:
-  #   driver: local
+  pg-data:

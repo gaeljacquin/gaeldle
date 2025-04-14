@@ -148,7 +148,7 @@ export default function Cover(props: Props) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="flex-grow container mx-auto px-4">
+      <div className="grow container mx-auto px-4">
         <div className="flex justify-center">
           <ModesHeader mode={mode} />
         </div>
@@ -187,7 +187,7 @@ export default function Cover(props: Props) {
                     textColor="black"
                   />
                 </div>
-                <div className="absolute inset-0 bg-gray-200/30 backdrop-blur-sm"></div>
+                <div className="absolute inset-0 bg-gray-200/30 backdrop-blur-xs"></div>
               </CardContent>
             </Card>
           </div>
@@ -222,14 +222,14 @@ export default function Cover(props: Props) {
               <form action={continuePlay} className="mt-2 mb-5">
                 {won ? (
                   <Button
-                    className="bg-gradient-to-r bg-gradient-to-r from-blue-500 to-teal-400 hover:bg-gradient-to-r hover:from-blue-700 hover:to-teal-600 text-white text-md font-semibold"
+                    className="bg-linear-to-r bg-linear-to-r from-blue-500 to-teal-400 hover:bg-linear-to-r hover:from-blue-700 hover:to-teal-600 text-white text-md font-semibold"
                     type="submit"
                     disabled={finito}
                   >
                     {finito ? finitoText : 'Keep playing!'}
                   </Button>
                 ) : (
-                  <Button className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold">
+                  <Button className="bg-linear-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-linear-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold">
                     Play again
                   </Button>
                 )}

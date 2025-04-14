@@ -81,7 +81,7 @@ const ModesContent = (props: Props) => {
       <Button
         variant={'outline'}
         size={'icon'}
-        className="absolute left-2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-200 focus:outline-none mt-16"
+        className="absolute left-2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-200 focus:outline-hidden mt-16"
         onMouseEnter={() => setAboutToBeClicked('prev')}
         onClick={prev}
         disabled={modeSelected}
@@ -139,7 +139,7 @@ const ModesContent = (props: Props) => {
       <Button
         variant={'outline'}
         size={'icon'}
-        className="absolute right-2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-200 focus:outline-none mt-16"
+        className="absolute right-2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-200 focus:outline-hidden mt-16"
         onMouseEnter={() => setAboutToBeClicked('next')}
         onClick={next}
         disabled={modeSelected}

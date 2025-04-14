@@ -18,7 +18,7 @@ export default function Home(props: Props) {
   const [modeSelected, setModeSelected] = useState<boolean>(false);
 
   return (
-    <div role="main" className="flex-grow items-center space-y-8 p-4">
+    <div role="main" className="grow items-center space-y-8 p-4">
       <div className="container text-center mt-10">
         <div className="max-w-3xl mx-auto mb-2">
           <h1 className="text-6xl font-extrabold mb-5">

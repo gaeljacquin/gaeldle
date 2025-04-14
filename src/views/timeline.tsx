@@ -344,7 +344,7 @@ export default function Timeline(props: Props) {
           <div className="flex flex-col mb-5 justify-center">
             <div className="flex justify-center mb-6">
               <div
-                className={`px-4 py-8 rounded-lg bg-white shadow-sm border-dashed border-4 ${dragSwitch ? 'border-gael-green-dark' : 'border-gael-red-dark'} overflow-x-auto`}
+                className={`px-4 py-8 rounded-lg bg-white shadow-2xs border-dashed border-4 ${dragSwitch ? 'border-gael-green-dark' : 'border-gael-red-dark'} overflow-x-auto`}
               >
                 {!(gameOver || won) && (
                   <motion.div
@@ -446,7 +446,7 @@ export default function Timeline(props: Props) {
                 <div className="flex justify-start p-0 space-x-8">
                   <Button
                     onClick={checkAnswer}
-                    className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold tracking-sm"
+                    className="bg-linear-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-linear-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold tracking-sm"
                     disabled={dummyOnLoad || played || alreadyGuessed || alertOpen}
                   >
                     {submitButtonText}
@@ -456,7 +456,7 @@ export default function Timeline(props: Props) {
                       <TooltipTrigger asChild>
                         <Button
                           onClick={setLastGuess}
-                          className="bg-gradient-to-r from-gael-blue to-gael-green via-teal-700 hover:bg-gradient-to-r hover:from-gael-blue-dark hover:to-gael-green-dark hover:via-teal-900 text-white text-md font-semibold tracking-sm"
+                          className="bg-linear-to-r from-gael-blue to-gael-green via-teal-700 hover:bg-linear-to-r hover:from-gael-blue-dark hover:to-gael-green-dark hover:via-teal-900 text-white text-md font-semibold tracking-sm"
                           disabled={
                             guesses.length === 0 ||
                             (guesses.length > 0 && alreadyGuessed) ||
@@ -477,7 +477,7 @@ export default function Timeline(props: Props) {
               ) : (
                 <Button
                   onClick={continuePlay}
-                  className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold tracking-sm"
+                  className="bg-linear-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-linear-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold tracking-sm"
                 >
                   Play again
                 </Button>

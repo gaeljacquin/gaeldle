@@ -90,12 +90,12 @@ function Notification({
       className="w-64 rounded-lg bg-white p-4 shadow-lg relative overflow-hidden flex"
     >
       <div className="absolute left-0 top-0 bottom-0 w-1" />
-      <div className="flex-grow">
+      <div className="grow">
         <div className="flex items-start justify-between mb-2">
           <p className="text-sm text-gray-800">{message}</p>
           <button
             onClick={onClose}
-            className="ml-4 text-gray-400 hover:text-gray-600 focus:outline-none"
+            className="ml-4 text-gray-400 hover:text-gray-600 focus:outline-hidden"
             aria-label="Close notification"
           >
             <X size={16} />

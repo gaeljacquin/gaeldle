@@ -1,6 +1,318 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-gray-100: #fbfbfb;
+  --color-gray-200: #eaeaea;
+  --color-gray-300: #dfdfdf;
+  --color-gray-400: #999999;
+  --color-gray-500: #7f7f7f;
+  --color-gray-600: #666666;
+  --color-gray-700: #4c4c4c;
+  --color-gray-800: #333333;
+  --color-gray-900: #191919;
+
+  --color-blue-100: #e6f0fd;
+  --color-blue-200: #cce2fc;
+  --color-blue-300: #99c5fa;
+  --color-blue-400: #66a9f7;
+  --color-blue-500: #338cf5;
+  --color-blue-600: #0070f4;
+  --color-blue-700: #0064da;
+  --color-blue-800: #0059c2;
+  --color-blue-900: #004391;
+
+  --color-teal-100: #e6fffa;
+  --color-teal-200: #b2f5ea;
+  --color-teal-300: #81e6d9;
+  --color-teal-400: #4fd1c5;
+  --color-teal-500: #3abab4;
+  --color-teal-600: #319795;
+  --color-teal-700: #2c7a7b;
+  --color-teal-800: #285e61;
+  --color-teal-900: #234e52;
+
+  --color-gael-green: #1b6915;
+  --color-gael-green-dark: #14500f;
+  --color-gael-green-light: #4caf50;
+
+  --color-gael-red: #8e1111;
+  --color-gael-red-dark: #6b0e0e;
+  --color-gael-red-light: #ef9a9a;
+
+  --color-gael-blue: #0079ff;
+  --color-gael-blue-dark: #005fc1;
+  --color-gael-blue-light: #81d4fa;
+
+  --color-gael-purple: #a154ed;
+  --color-gael-purple-dark: #7c3bbf;
+  --color-gael-purple-light: #ce93d8;
+
+  --color-gael-pink: #ec00b4;
+  --color-gael-pink-dark: #c8009a;
+  --color-gael-pink-light: #f48fb1;
+
+  --color-gael-yellow: #ffdd00;
+  --color-gael-yellow-dark: #d4eb00;
+  --color-gael-yellow-light: #eeff14;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-pulse-2: pulse 1s infinite;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+@theme {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-gray-100: #fbfbfb;
+  --color-gray-200: #eaeaea;
+  --color-gray-300: #dfdfdf;
+  --color-gray-400: #999999;
+  --color-gray-500: #7f7f7f;
+  --color-gray-600: #666666;
+  --color-gray-700: #4c4c4c;
+  --color-gray-800: #333333;
+  --color-gray-900: #191919;
+
+  --color-blue-100: #e6f0fd;
+  --color-blue-200: #cce2fc;
+  --color-blue-300: #99c5fa;
+  --color-blue-400: #66a9f7;
+  --color-blue-500: #338cf5;
+  --color-blue-600: #0070f4;
+  --color-blue-700: #0064da;
+  --color-blue-800: #0059c2;
+  --color-blue-900: #004391;
+
+  --color-teal-100: #e6fffa;
+  --color-teal-200: #b2f5ea;
+  --color-teal-300: #81e6d9;
+  --color-teal-400: #4fd1c5;
+  --color-teal-500: #3abab4;
+  --color-teal-600: #319795;
+  --color-teal-700: #2c7a7b;
+  --color-teal-800: #285e61;
+  --color-teal-900: #234e52;
+
+  --color-gael-green: #1b6915;
+  --color-gael-green-dark: #14500f;
+  --color-gael-green-light: #4caf50;
+
+  --color-gael-red: #8e1111;
+  --color-gael-red-dark: #6b0e0e;
+  --color-gael-red-light: #ef9a9a;
+
+  --color-gael-blue: #0079ff;
+  --color-gael-blue-dark: #005fc1;
+  --color-gael-blue-light: #81d4fa;
+
+  --color-gael-purple: #a154ed;
+  --color-gael-purple-dark: #7c3bbf;
+  --color-gael-purple-light: #ce93d8;
+
+  --color-gael-pink: #ec00b4;
+  --color-gael-pink-dark: #c8009a;
+  --color-gael-pink-light: #f48fb1;
+
+  --color-gael-yellow: #ffdd00;
+  --color-gael-yellow-dark: #d4eb00;
+  --color-gael-yellow-light: #eeff14;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-pulse-2: pulse 1s infinite;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+@utility shadow-animate {
+  box-shadow: 0px 0px 10px 5px #48abe0;
+  animation: shadows 1.5s infinite;
+}
+
+@utility shadow-animate-2 {
+  box-shadow: 0px 0px 10px 5px #48abe0;
+  animation: shadows 1.5s forwards;
+}
+
+@utility navbar-item {
+  @apply inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-lg font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-active:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-active:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 @layer base {
   :root {
@@ -70,15 +382,6 @@
 }
 
 @layer components {
-  .shadow-animate {
-    box-shadow: 0px 0px 10px 5px #48abe0;
-    animation: shadows 1.5s infinite;
-  }
-
-  .shadow-animate-2 {
-    box-shadow: 0px 0px 10px 5px #48abe0;
-    animation: shadows 1.5s forwards;
-  }
 
   @keyframes shadows {
     0% {
@@ -97,14 +400,10 @@
       box-shadow: 0px 0px 10px 5px #48abe0;
     }
   }
-
-  .navbar-item {
-    @apply inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-lg font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50;
-  }
 }
 
 .bmcButton {
-  @apply flex items-center text-white bg-transparent rounded-lg border border-black p-2 text-base tracking-[0.6px] shadow-sm hover:shadow-lg focus:shadow-lg active:shadow-lg hover:bg-gray-500 focus:bg-gray-500 active:bg-gray-500 text-black hover:text-white focus:text-white active:text-white;
+  @apply flex items-center text-white bg-transparent rounded-lg border border-black p-2 text-base tracking-[0.6px] shadow-2xs hover:shadow-lg focus:shadow-lg active:shadow-lg hover:bg-gray-500 focus:bg-gray-500 active:bg-gray-500 text-black hover:text-white focus:text-white active:text-white;
 }
 
 .bmcImage {

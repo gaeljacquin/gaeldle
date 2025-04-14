@@ -33,8 +33,8 @@ const genKey = (key: string) => {
   return key;
 };
 
-const bgTextSpecial1 = 'bg-gradient-to-r from-blue-500 to-teal-400';
-const bgTextSpecial2 = 'bg-gradient-to-r from-gael-purple to-red-500';
+const bgTextSpecial1 = 'bg-linear-to-r from-blue-500 to-teal-400';
+const bgTextSpecial2 = 'bg-linear-to-r from-gael-purple to-red-500';
 
 const appinfo = {
   title: 'Gaeldle',
@@ -46,7 +46,7 @@ const whichList = (list?: unknown[]) => {
 };
 
 const bgIncorrect = 'bg-gael-red';
-const bgPartial = 'bg-gradient-to-r from-gael-blue to-gael-purple';
+const bgPartial = 'bg-linear-to-r from-gael-blue to-gael-purple';
 const bgCorrect = 'bg-gael-green';
 const bgOther1 = 'bg-gael-blue';
 const bgOther2 = 'bg-fuchsia-900';

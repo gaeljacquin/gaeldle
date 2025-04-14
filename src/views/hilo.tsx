@@ -203,7 +203,7 @@ export default function Hilo(props: Props) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="flex-grow container mx-auto px-4">
+      <div className="grow container mx-auto px-4">
         <div className="flex justify-center">
           <ModesHeader mode={mode} />
         </div>
@@ -313,7 +313,7 @@ export default function Hilo(props: Props) {
               <div className="flex items-center justify-center space-x-4 px-2 py-1">
                 <form action={resetPlay} className="mt-2 mb-5">
                   <Button
-                    className="bg-gradient-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-gradient-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold"
+                    className="bg-linear-to-r from-gael-pink to-gael-purple via-gael-red hover:bg-linear-to-r hover:from-gael-pink-dark hover:to-gael-purple-dark hover:via-gael-red-dark text-white text-md font-semibold"
                     type="submit"
                   >
                     Play again

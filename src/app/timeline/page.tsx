@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+
 import { Game, Games, getRandom } from '@/services/games';
 import { getModeBySlug } from '@/services/modes';
 import { setTimelineVal } from '@/services/redis';
@@ -12,7 +13,7 @@ export default async function Page() {
   let reshuffledGames = shuffleList(games) as Partial<Game>[];
   reshuffledGames = reshuffledGames.map((game: Partial<Game>) => {
     const { frd, frdFormatted, ...rest } = game;
-    void frd, frdFormatted;
+    void { frd, frdFormatted };
 
     return { ...rest, bgStatus: bgOther1 };
   });

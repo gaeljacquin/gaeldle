@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+
 import { Game, getGames, getOneRandom } from '@/services/games';
 import { getModeBySlug } from '@/services/modes';
 import { setCoverVal } from '@/services/redis';
@@ -12,7 +13,7 @@ export default async function Page() {
   const clientId = 'cover-' + uuidv4();
   setCoverVal(clientId, game);
   const { igdbId, name, ...rest } = game;
-  void igdbId, name;
+  void { igdbId, name };
 
   return (
     <>

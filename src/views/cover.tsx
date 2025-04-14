@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { ChevronsUpDown, Loader2 } from 'lucide-react';
+import Image from 'next/image';
+
 import GamesForm from '@/components/games-form';
 import Hearts from '@/components/hearts';
 import LivesLeftComp from '@/components/lives-left';
@@ -86,7 +89,7 @@ export default function Cover(props: Props) {
         body: JSON.stringify(data),
       }));
       const { igdbId, name, ...rest } = nextGame;
-      void igdbId, name;
+      void { igdbId, name };
       setGame(rest);
     }
   }
@@ -209,7 +212,7 @@ export default function Cover(props: Props) {
 
             <GamesForm
               games={games}
-              form={form}
+              form={form as any}
               guesses={guesses}
               livesLeft={livesLeft}
               played={played}
@@ -222,7 +225,7 @@ export default function Cover(props: Props) {
               <form action={continuePlay} className="mt-2 mb-5">
                 {won ? (
                   <Button
-                    className="bg-linear-to-r bg-linear-to-r from-blue-500 to-teal-400 hover:bg-linear-to-r hover:from-blue-700 hover:to-teal-600 text-white text-md font-semibold"
+                    className="bg-linear-to-r from-blue-500 to-teal-400 hover:bg-linear-to-r hover:from-blue-700 hover:to-teal-600 text-white text-md font-semibold"
                     type="submit"
                     disabled={finito}
                   >
@@ -266,7 +269,7 @@ export default function Cover(props: Props) {
                           className="flex w-full space-x-2"
                           key={(game ? game.igdbId + '-guessed-' : 'skipped-') + index}
                         >
-                          <div className="p-2 bg-gael-red text-white rounded-2xl border border-3 w-full text-md font-light">
+                          <div className="p-2 bg-gael-red text-white rounded-2xl border-3 w-full text-md font-light">
                             {game ? game.name : 'SKIPPED'}
                           </div>
                           {/* <div className="p-2 bg-gael-blue text-white rounded-2xl border border-3 w-full">

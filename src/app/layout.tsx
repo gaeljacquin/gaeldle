@@ -1,12 +1,11 @@
 import './globals.css';
 
-import { Comic_Neue } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { VercelToolbar } from '@vercel/toolbar/next';
+import { Comic_Neue } from 'next/font/google';
+
 import Footer from '@/components/footer';
 import Navbar from '@/components/navbar';
-import { Toaster } from '@/components/ui/toaster';
 import { appinfo } from '@/utils/server-constants';
 
 const theFontInit = Comic_Neue({
@@ -31,11 +30,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Navbar />
           <main role="main">{children}</main>
           <Footer />
-          <Toaster />
         </div>
         <SpeedInsights />
         <Analytics />
-        {process.env.NODE_ENV === 'development' && <VercelToolbar />}
       </body>
     </html>
   );

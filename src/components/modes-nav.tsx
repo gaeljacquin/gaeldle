@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Mode, Modes } from '@/services/modes';
+
 import { Button } from './ui/button';
 
 type Props = {

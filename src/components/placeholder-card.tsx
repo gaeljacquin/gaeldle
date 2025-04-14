@@ -1,4 +1,5 @@
 import Image from 'next/image';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { cardImgSize, placeholderImage } from '@/utils/client-constants';
 

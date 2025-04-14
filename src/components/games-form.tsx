@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client';
 
 import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
+
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -52,11 +55,11 @@ export default function GamesForm({ ...props }: GamesFormProps) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit as any)}
         className="flex flex-col items-center mt-2 w-full"
       >
         <FormField
-          control={form.control}
+          control={form.control as any}
           name="game"
           render={({ field }) => (
             <FormItem className="flex flex-col border border-gray-100 rounded-md p-4 w-full">
@@ -116,7 +119,7 @@ export default function GamesForm({ ...props }: GamesFormProps) {
                   </CommandGroup>
                 </CommandList>
               </Command>
-              <FormLabel className="flex items-center justify-center w-full text-center text-md border border-2 border-dotted border-gray-400 bg-gray-200 rounded-md">
+              <FormLabel className="flex items-center justify-center w-full text-center text-md border-2 border-dotted border-gray-400 bg-gray-200 rounded-md">
                 {field.value?.igdbId ? (
                   field.value?.name
                 ) : played || livesLeft === 0 ? (

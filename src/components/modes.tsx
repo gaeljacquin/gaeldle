@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
+
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Mode, type Modes } from '@/services/modes';
@@ -46,7 +47,10 @@ export default function Modes(props: Props) {
           className={`w-full shadow-lg text-lg ${classNames} ${isDisabled && !isClicked ? 'cursor-not-allowed' : ''}`}
           onClick={() => {
             handleClick(buttonKey);
-            setModeSelected && setModeSelected(true);
+
+            if (setModeSelected) {
+              setModeSelected(true);
+            }
           }}
           disabled={isClicked}
           aria-disabled={isDisabled && !isClicked}

@@ -1,8 +1,9 @@
 import { ReactNode, useState } from 'react';
-import Link from 'next/link';
 import styled from '@emotion/styled';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+
 import {
   AnimationCard,
   AnimationCardContent,

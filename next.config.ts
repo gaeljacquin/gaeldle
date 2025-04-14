@@ -1,7 +1,6 @@
-/** @type {import('next').NextConfig} */
-import vercelToolbar from '@vercel/toolbar/plugins/next';
+import type { NextConfig } from 'next';
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   env: {
     port: `${process.env.PORT ?? '3000'}`,
     kvRestApiUrl: `${process.env.KV_REST_API_URL}`,
@@ -23,4 +22,4 @@ const nextConfig = {
   },
 };
 
-export default vercelToolbar()(nextConfig);
+export default nextConfig;

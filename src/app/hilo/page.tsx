@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+
 import { Game, getRandom } from '@/services/games';
 import { getModeBySlug } from '@/services/modes';
 import { setHiloVal } from '@/services/redis';
@@ -14,7 +15,7 @@ export default async function Page() {
   reshuffledGames = games.map((game, index) => {
     if (index === games.length - 1) {
       const { frd, frdFormatted, ...rest } = game;
-      void frd, frdFormatted;
+      void { frd, frdFormatted };
 
       return { ...rest };
     }

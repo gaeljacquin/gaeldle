@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { Prisma as Prisma2 } from '@prisma/client';
+
 import { prisma } from '@/utils/db';
 
 export async function getModes() {

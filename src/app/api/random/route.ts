@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+
 import { getRandom } from '@/services/games';
 
 export const dynamic = 'force-dynamic';

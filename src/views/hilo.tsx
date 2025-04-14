@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ToastAction } from '@radix-ui/react-toast';
 import { ChevronsUpDown, Loader2 } from 'lucide-react';
+
 import Fade from '@/components/fade';
 import GameCard from '@/components/game-card';
 import Hearts from '@/components/hearts';
@@ -16,7 +16,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
 import { confettiEmoji } from '@/services/confetti';
 import { Game } from '@/services/games';
 import { Mode } from '@/services/modes';
@@ -27,8 +26,8 @@ import {
   bgCorrect,
   bgIncorrect,
   finitoText,
-  timeline2Legend as hiloLegend,
   streakCounters,
+  timeline2Legend as hiloLegend,
 } from '@/utils/client-constants';
 
 type Props = {
@@ -66,7 +65,6 @@ export default function Hilo(props: Props) {
     updatePlayedGameIds(newList);
     updateTimeline([]);
   };
-  const { toast } = useToast();
 
   async function resetPlay() {
     const newList = [currentGame.igdbId ?? 0];
@@ -85,7 +83,7 @@ export default function Hilo(props: Props) {
     } else {
       setHiloVal(clientId, game);
       const { frd, frdFormatted, ...rest } = game;
-      void frd, frdFormatted;
+      void { frd, frdFormatted };
       setNextGame(rest);
       setOperator('=');
     }
@@ -116,7 +114,7 @@ export default function Hilo(props: Props) {
         body: JSON.stringify(data),
       }));
       const { frd, frdFormatted, ...rest } = game;
-      void frd, frdFormatted;
+      void { frd, frdFormatted };
       setNextGame(rest);
       setOperator('=');
     }
@@ -178,12 +176,12 @@ export default function Hilo(props: Props) {
       } else {
         if (currentGame.bgStatus === bgCorrect || firstAttempt) {
           confettiEmoji('❌');
-        } else {
-          toast({
-            variant: 'destructive',
-            description: 'Incorrect 😭',
-            action: <ToastAction altText="Click to close">Close</ToastAction>,
-          });
+          // } else {
+          //   toast({
+          //     variant: 'destructive',
+          //     description: 'Incorrect 😭',
+          //     // action: <ToastAction altText="Click to close">Close</ToastAction>,
+          //   });
         }
 
         continuePlay();
@@ -240,7 +238,7 @@ export default function Hilo(props: Props) {
                 <Loader2 className="flex items-center justify-center h-5 w-5 animate-spin" />
               </div>
             )}
-            <div className="border border-2 border-dashed border-black rounded-md p-4 mt-5">
+            <div className="border-2 border-dashed border-black rounded-md p-4 mt-5">
               <div className="flex space-x-2 w-full p-4 justify-center items-center">
                 <Button
                   type="button"

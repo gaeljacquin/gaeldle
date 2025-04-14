@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import type { LottieRefCurrentProps } from 'lottie-react';
 import Lottie from 'lottie-react';
+
 import animationData from '@/assets/logo.json';
 
 export default function LottieComp({ loop }: { loop: boolean }) {

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+
 import { timelineCheckAnswer, timelineCheckAnswerProps } from '@/services/check-answer';
 import { setAnswerProps2, setTimelineVal } from '@/services/redis';
 
@@ -7,10 +8,11 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   const data = await request.json();
   const action = data.action;
+  let res;
 
   switch (action) {
     case 'check-answer':
-      const res = await checkAnswer(data);
+      res = await checkAnswer(data);
 
       return NextResponse.json(res);
     case 'set-answer':

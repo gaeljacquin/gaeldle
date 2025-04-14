@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -19,6 +21,7 @@ import {
 } from '@dnd-kit/sortable';
 import { motion } from 'framer-motion';
 import { ChevronsUpDown } from 'lucide-react';
+
 import GameCard from '@/components/game-card';
 import Hearts from '@/components/hearts';
 import LivesLeftComp from '@/components/lives-left';
@@ -185,7 +188,7 @@ export default function Timeline(props: Props) {
     let reshuffledGames = shuffleList(games) as Partial<Game>[];
     reshuffledGames = reshuffledGames.map((game: Partial<Game>) => {
       const { frd, frdFormatted, ...rest } = game;
-      void frd, frdFormatted;
+      void { frd, frdFormatted };
 
       return { ...rest, bgStatus: bgOther1 };
     });
@@ -358,7 +361,7 @@ export default function Timeline(props: Props) {
                       strategy={dragSwitch ? horizontalListSortingStrategy : rectSwappingStrategy}
                     >
                       {timeline.map((card: Partial<Game>, index) => (
-                        <motion.div key={card.igdbId} className="item" variants={spring}>
+                        <motion.div key={card.igdbId} className="item" variants={spring as any}>
                           <SortableItem
                             id={card.igdbId ?? 0}
                             disabled={correctIgdbs.includes(card?.igdbId ?? 0)}

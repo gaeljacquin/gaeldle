@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
+    "target": "ES2017",
     "types": ["node", "jest", "@testing-library/jest-dom"],
-    "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -15,11 +15,22 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "plugins": [{ "name": "next" }]
+    }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "**/*.cjs",
+    "**/*.json"
+  ],
   "exclude": ["node_modules"]
 }

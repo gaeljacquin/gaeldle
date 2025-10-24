@@ -1,8 +1,14 @@
 import { Separator } from '@/components/ui/separator';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 export default function Terms() {
   return (
       <div className="max-w-4xl mx-auto p-8 space-y-6">
+        <Link href="/" className="hover:underline flex gap-2">
+          <ArrowLeft className="size-7" />
+          Home
+        </Link>
         <h1 className="text-4xl font-bold">Terms of Service</h1>
         <p className="text-xl text-muted-foreground">Last updated: 2024.09.02</p>
 

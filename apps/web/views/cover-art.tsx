@@ -6,6 +6,8 @@ import { GameSelector } from '@/components/game-selector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 export default function CoverArt() {
   const gameMode = getGameModeBySlug('cover-art');
@@ -48,13 +50,21 @@ export default function CoverArt() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto">
+      <div className="flex flex-col gap-8 p-8">
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold">{gameMode?.title}</h1>
+          <p className="text-lg text-muted-foreground">{gameMode?.description}</p>
+        </div>
+      </div>
       <Card>
         <CardHeader>
-          <CardTitle>{gameMode?.title || 'Cover Art'}</CardTitle>
-          <CardDescription>
-            {gameMode?.description || 'Identify the game from their cover art.'}
-          </CardDescription>
+          <Link href="/" className="hover:underline">
+            <CardTitle><ArrowLeft className="size-7" /></CardTitle>
+            <CardDescription>
+              Home
+            </CardDescription>
+          </Link>
         </CardHeader>
         <CardContent>
           <div className="flex gap-6">

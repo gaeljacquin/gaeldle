@@ -5,7 +5,7 @@ import { daFont1, daFont2, daFont3 } from "@/lib/fonts";
 import { appInfo } from "@/lib/app-info";
 import { ReactNode } from "react";
 import Footer from "@/components/footer";
-import TopNav from "@/components/top-nav";
+// import TopNav from "@/components/top-nav";
 
 export const metadata: Metadata = {
   title: appInfo.title,
@@ -24,8 +24,8 @@ export default async function RootLayout({
       >
         <Providers>
           <div className="flex h-screen overflow-hidden">
-            <main className="flex flex-1 flex-col overflow-y-auto" style={{ backgroundColor: "#f5f5f0" }}>
-              <TopNav />
+            <main className="flex flex-1 flex-col overflow-y-auto" style={{ backgroundColor: "#f5f5f0", scrollbarGutter: "stable" }}>
+              {/* <TopNav /> */}
               <div className="flex-1">
                 {children}
               </div>

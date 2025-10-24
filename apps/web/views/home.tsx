@@ -6,8 +6,8 @@ import { appInfo } from "@/lib/app-info";
 
 export default function Home() {
   return (
-    <div className="p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="w-full min-h-full">
+      <div className="max-w-7xl mx-auto p-8">
         <div className="flex flex-col gap-8">
           <div className="text-center space-y-2">
             <h1 className="text-4xl font-bold">{appInfo.title}</h1>

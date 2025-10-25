@@ -10,6 +10,16 @@ export interface Game {
   artworks: unknown;
   info: unknown;
   firstReleaseDate: number | null;
+  keywords?: unknown;
+  franchises?: unknown;
+  game_engines?: unknown;
+  game_modes?: unknown;
+  genres?: unknown;
+  involved_companies?: unknown;
+  platforms?: unknown;
+  player_perspectives?: unknown;
+  release_dates?: unknown;
+  themes?: unknown;
 }
 
 /**
@@ -25,6 +35,16 @@ export async function getAllGames(): Promise<Game[]> {
       artworks: games.artworks,
       info: games.info,
       firstReleaseDate: games.first_release_date,
+      keywords: games.keywords,
+      franchises: games.franchises,
+      game_engines: games.game_engines,
+      game_modes: games.game_modes,
+      genres: games.genres,
+      involved_companies: games.involved_companies,
+      platforms: games.platforms,
+      player_perspectives: games.player_perspectives,
+      release_dates: games.release_dates,
+      themes: games.themes,
     })
     .from(games)
     .orderBy(games.name);
@@ -45,6 +65,16 @@ export async function getRandomGame(excludeIds: number[] = []): Promise<Game | n
       artworks: games.artworks,
       info: games.info,
       firstReleaseDate: games.first_release_date,
+      keywords: games.keywords,
+      franchises: games.franchises,
+      game_engines: games.game_engines,
+      game_modes: games.game_modes,
+      genres: games.genres,
+      involved_companies: games.involved_companies,
+      platforms: games.platforms,
+      player_perspectives: games.player_perspectives,
+      release_dates: games.release_dates,
+      themes: games.themes,
     })
     .from(games);
 
@@ -77,6 +107,16 @@ export async function getGameById(id: number): Promise<Game | null> {
       artworks: games.artworks,
       info: games.info,
       firstReleaseDate: games.first_release_date,
+      keywords: games.keywords,
+      franchises: games.franchises,
+      game_engines: games.game_engines,
+      game_modes: games.game_modes,
+      genres: games.genres,
+      involved_companies: games.involved_companies,
+      platforms: games.platforms,
+      player_perspectives: games.player_perspectives,
+      release_dates: games.release_dates,
+      themes: games.themes,
     })
     .from(games)
     .where(eq(games.id, id))

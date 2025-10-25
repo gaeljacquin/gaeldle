@@ -97,7 +97,7 @@ export default function CoverArt() {
                 className="w-full cursor-pointer"
                 size="lg"
               >
-                Submit Guess
+                Submit
               </Button>
             </div>
           </div>

@@ -46,7 +46,7 @@ export const GameModes: GameMode[] = [
   {
     id: "timeline",
     title: "Timeline",
-    description: "TBC",
+    description: "Arrange games in chronological order.",
     difficulty: "Medium",
     icon: Calendar,
     gradient: "bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700",

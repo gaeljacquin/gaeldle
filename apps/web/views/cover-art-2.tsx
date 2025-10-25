@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { getGameModeBySlug } from '@/lib/game-mode';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import Attempts from '@/components/attempts';
 
 export default function CoverArt2() {
   const gameMode = getGameModeBySlug('cover-art-2');
@@ -75,16 +76,7 @@ export default function CoverArt2() {
                 isGameOver={isGameOver}
                 className="h-[500px]"
               />
-              <div className="mt-4 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Total attempts: <span className="font-semibold">{MAX_ATTEMPTS}</span>
-                </p>
-                {!isGameOver &&
-                  <p className="text-sm text-muted-foreground">
-                    Attempts left: <span className="font-semibold">{attemptsLeft}</span>
-                  </p>
-                }
-              </div>
+              <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} />
             </div>
 
             {/* Right side - Game selector and submit */}

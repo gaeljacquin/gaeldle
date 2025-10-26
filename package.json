@@ -1,7 +1,7 @@
 {
-  "name": "scatterbush",
-  "version": "1.0.0",
-  "description": "Elysia backend and Next.js frontend monorepo",
+  "name": "gaeldle",
+  "author": "Gaël Jacquin",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "nx run-many -t serve",
@@ -16,8 +16,6 @@
     "prepare": "husky"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
   "packageManager": "pnpm@10.19.0",
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

@@ -1,0 +1,10 @@
+# Line ending configuration
+* text=auto
+
+# Shell scripts should use LF
+*.sh text eol=lf
+mvnw text eol=lf
+
+# Windows batch files should use CRLF
+*.cmd text eol=crlf
+mvnw.cmd text eol=crlf

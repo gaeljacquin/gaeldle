@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getAllGames, getRandomGame } from '../services/game.service';
-import { getPixelSizeForAttempt } from '../utils/pixelate';
-import type { Game, CoverArtMode } from '../types/game';
+import { getAllGames, getRandomGame } from '@/lib/services/game.service';
+import { getPixelSizeForAttempt } from '@/lib/utils/pixelate';
+import type { Game, CoverArtMode } from '@/lib/types/game';
 
 export const MAX_ATTEMPTS = 5;
 

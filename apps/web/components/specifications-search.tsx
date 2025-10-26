@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { Game } from '@/lib/types/game';
 import { X, Search } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 
 interface SpecificationsSearchProps {
   games: Game[];

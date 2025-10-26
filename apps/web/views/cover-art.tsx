@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';
 
 export default function CoverArt() {
@@ -52,20 +52,24 @@ export default function CoverArt() {
 
   return (
     <div className="container mx-auto">
-      <div className="flex flex-col gap-8 p-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold">{gameMode?.title}</h1>
-          <p className="text-lg text-muted-foreground">{gameMode?.description}</p>
-        </div>
-      </div>
-      <Card>
-        <CardHeader>
-          <Link href="/" className="hover:underline">
-            <CardTitle><ArrowLeft className="size-7" /></CardTitle>
-            <CardDescription>
-              Home
-            </CardDescription>
-          </Link>
+      <Card className="relative">
+        {/* Upper-left corner link */}
+        <Link
+          href="/"
+          className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
+        >
+          <MoveLeft className="size-4" />
+          <span className="text-sm">Main Menu</span>
+        </Link>
+
+        {/* Centered content */}
+        <CardHeader className="flex flex-col items-center justify-center text-center space-y-2 py-4">
+          <CardTitle className="text-4xl font-bold">
+            {gameMode?.title}
+          </CardTitle>
+          <CardDescription className="text-lg text-muted-foreground">
+            {gameMode?.description}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex gap-6">
@@ -108,9 +112,6 @@ export default function CoverArt() {
               {isCorrect ? (
                 <div className="space-y-2">
                   <p className="text-2xl font-bold text-green-600">Correct!</p>
-                  <p className="text-muted-foreground">
-                    You guessed it with {attemptsLeft - 1} attempt{attemptsLeft - 1 !== 1 ? 's' : ''} remaining!
-                  </p>
                 </div>
               ) : (
                 <div className="space-y-2">

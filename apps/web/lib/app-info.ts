@@ -9,4 +9,5 @@ export const appInfo = {
   description: 'A gaming-themed Wordle clone',
   url: 'https://gaeldle.gaeljacquin.com/',
   ogImageUrl: 'https://cataas.com/cat',
+  authorUrl: 'https://gaeljacquin.com',
 };

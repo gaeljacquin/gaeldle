@@ -30,7 +30,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 import type { Game } from '@/lib/types/game';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';
 import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';
@@ -193,20 +193,24 @@ export default function Timeline() {
 
   return (
     <div className="container mx-auto max-w-[1800px]">
-      <div className="flex flex-col gap-8 p-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold">{gameMode?.title}</h1>
-          <p className="text-lg text-muted-foreground">{gameMode?.description}</p>
-        </div>
-      </div>
-      <Card>
-        <CardHeader>
-          <Link href="/" className="hover:underline">
-            <CardTitle><ArrowLeft className="size-7" /></CardTitle>
-            <CardDescription>
-              Home
-            </CardDescription>
-          </Link>
+      <Card className="relative">
+        {/* Upper-left corner link */}
+        <Link
+          href="/"
+          className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
+        >
+          <MoveLeft className="size-4" />
+          <span className="text-sm">Main Menu</span>
+        </Link>
+
+        {/* Centered content */}
+        <CardHeader className="flex flex-col items-center justify-center text-center space-y-2 py-4">
+          <CardTitle className="text-4xl font-bold">
+            {gameMode?.title}
+          </CardTitle>
+          <CardDescription className="text-lg text-muted-foreground">
+            {gameMode?.description}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">

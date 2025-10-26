@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';
 import { motion, useMotionValue } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -22,8 +22,8 @@ export default function Timeline2() {
   const {
     timelineCards,
     dealtCard,
-    livesLeft,
-    maxLives,
+    attemptsLeft,
+    maxAttempts,
     isGameOver,
     score,
     isLoading,
@@ -121,29 +121,30 @@ export default function Timeline2() {
 
   return (
     <div className="container mx-auto max-w-[1800px]">
-      <div className="flex flex-col gap-8 p-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold">{gameMode?.title}</h1>
-          <p className="text-lg text-muted-foreground">{gameMode?.description}</p>
-        </div>
-      </div>
-      <Card>
-        <CardHeader>
-          <Link href="/" className="hover:underline">
-            <CardTitle><ArrowLeft className="size-7" /></CardTitle>
-            <CardDescription>
-              Home
-            </CardDescription>
-          </Link>
+      <Card className="relative">
+        {/* Upper-left corner link */}
+        <Link
+          href="/"
+          className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
+        >
+          <MoveLeft className="size-4" />
+          <span className="text-sm">Main Menu</span>
+        </Link>
+
+        {/* Centered content */}
+        <CardHeader className="flex flex-col items-center justify-center text-center space-y-2 py-4">
+          <CardTitle className="text-4xl font-bold">
+            {gameMode?.title}
+          </CardTitle>
+          <CardDescription className="text-lg text-muted-foreground">
+            {gameMode?.description}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
             {/* Dealt Card Container */}
             <div className="flex justify-center my-8">
               <div className="flex flex-col items-center">
-                <p className="text-sm text-muted-foreground mb-2 text-center">
-                  {isGameOver ? 'Game Over' : 'Drag this card to the timeline'}
-                </p>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 flex justify-center items-center w-[172px] h-[228px]">
                   {isDealingCard || isGameOver || !dealtCard ? (
                     <Skeleton className="w-[140px] h-[196px] rounded-lg" />
@@ -190,11 +191,10 @@ export default function Timeline2() {
             </div>
 
             {/* Attempts */}
-            <Attempts maxAttempts={maxLives} attemptsLeft={livesLeft} />
+            <Attempts maxAttempts={maxAttempts} attemptsLeft={attemptsLeft} />
 
             {/* Timeline Container */}
             <div className="text-center space-y-4">
-              <p className="text-sm text-muted-foreground">Timeline</p>
               <div
                 ref={timelineRef}
                 className="border-2 border-dashed border-gray-300 rounded-lg p-4 overflow-x-auto flex justify-center items-center"

@@ -3,6 +3,7 @@
 import { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 import type { Game } from '@/lib/types/game';
+import Image from 'next/image';
 
 interface TimelineCardProps {
   game: Game;
@@ -42,13 +43,16 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
         {/* Cover Image */}
         <div className="absolute inset-0">
           {game.imageUrl ? (
-            <img
+            <Image
               src={game.imageUrl}
               alt={game.name}
               className={cn(
                 'w-full h-full object-cover',
                 shouldGrayscale && 'grayscale'
               )}
+              width={16}
+              height={16}
+              sizes='100vw'
             />
           ) : (
             <div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-500">

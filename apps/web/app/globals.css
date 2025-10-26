@@ -41,6 +41,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --font-kiwi-maru-light: var(--font-kiwi-maru-light);
+  --font-kiwi-maru-regular: var(--font-kiwi-maru-regular);
+  --font-kiwi-maru-medium: var(--font-kiwi-maru-medium);
 }
 
 :root {
@@ -118,5 +121,6 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-kiwi-maru-regular), sans-serif;
   }
 }

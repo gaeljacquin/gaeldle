@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode, Fragment } from 'react';
 import { cn } from '@/lib/utils';
 import type { SpecificationGuess, RevealedClue, Game, CellMatch } from '@/lib/types/game';
 import Image from 'next/image';
@@ -166,7 +166,7 @@ function renderHintRow(revealedClue: RevealedClue) {
 }
 
 // Helper to determine arrow direction for release year
-function getYearArrow(guessYear: string | null, targetYear: string | null): React.ReactNode {
+function getYearArrow(guessYear: string | null, targetYear: string | null): ReactNode {
   if (!guessYear || !targetYear) return null;
 
   const guessYearNum = parseInt(guessYear, 10);
@@ -412,140 +412,140 @@ export function SpecificationsGrid({
             <>
               {/* Guess rows with hint inserted at correct position */}
               {reversedGuesses.map((guess, index) => (
-            <React.Fragment key={`${guess.gameId}-${index}`}>
-              {/* Insert hint row before this guess if this is the correct position */}
-              {revealedClue && index === hintInsertIndex && renderHintRow(revealedClue)}
-              <tr>
-              {/* Summary (cover art with blue banner) */}
-              <td className="border border-border p-0 w-32">
-                <div className="relative w-32 h-44">
-                  {guess.imageUrl ? (
-                    <>
-                      <Image
-                        src={guess.imageUrl}
-                        alt={guess.gameName}
-                        className="w-full h-full object-cover"
-                        width={128}
-                        height={176}
-                        sizes="100vw"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-blue-600 px-2 py-1">
-                        <p className="text-xs font-semibold text-white truncate text-center">
-                          {guess.gameName}
-                        </p>
+                <Fragment key={`${guess.gameId}-${index}`}>
+                  {/* Insert hint row before this guess if this is the correct position */}
+                  {revealedClue && index === hintInsertIndex && renderHintRow(revealedClue)}
+                  <tr>
+                    {/* Summary (cover art with blue banner) */}
+                    <td className="border border-border p-0 w-32">
+                      <div className="relative w-32 h-44">
+                        {guess.imageUrl ? (
+                          <>
+                            <Image
+                              src={guess.imageUrl}
+                              alt={guess.gameName}
+                              className="w-full h-full object-cover"
+                              width={128}
+                              height={176}
+                              sizes="100vw"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 bg-blue-600 px-2 py-1">
+                              <p className="text-xs font-semibold text-white truncate text-center">
+                                {guess.gameName}
+                              </p>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-full h-full bg-muted flex flex-col items-center justify-center">
+                            <span className="text-xs text-muted-foreground">No image</span>
+                            <div className="absolute bottom-0 left-0 right-0 bg-blue-600 px-2 py-1">
+                              <p className="text-xs font-semibold text-white truncate text-center">
+                                {guess.gameName}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </>
-                  ) : (
-                    <div className="w-full h-full bg-muted flex flex-col items-center justify-center">
-                      <span className="text-xs text-muted-foreground">No image</span>
-                      <div className="absolute bottom-0 left-0 right-0 bg-blue-600 px-2 py-1">
-                        <p className="text-xs font-semibold text-white truncate text-center">
-                          {guess.gameName}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </td>
+                    </td>
 
-              {/* Platforms */}
-              <td
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(guess.matches.platforms.type, hasData(guess.matches.platforms.value))
-                )}
-              >
-                <CellValue value={guess.matches.platforms.value} />
-              </td>
-
-              {/* Genres */}
-              <td
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(guess.matches.genres.type, hasData(guess.matches.genres.value))
-                )}
-              >
-                <CellValue value={guess.matches.genres.value} />
-              </td>
-
-              {/* Themes */}
-              <td
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(guess.matches.themes.type, hasData(guess.matches.themes.value))
-                )}
-              >
-                <CellValue value={guess.matches.themes.value} />
-              </td>
-
-              {/* Release Date */}
-              <td
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white relative text-center',
-                  getCellColor(guess.matches.releaseDate.type, hasData(guess.matches.releaseDate.value))
-                )}
-              >
-                {(() => {
-                  const arrow = getYearArrow(
-                    typeof guess.matches.releaseDate.value === 'string' ? guess.matches.releaseDate.value : null,
-                    answerSpecs?.releaseDate || null
-                  );
-                  return (
-                    <>
-                      {arrow && (
-                        <div className="absolute inset-0 flex items-center justify-center opacity-40">
-                          {arrow}
-                        </div>
+                    {/* Platforms */}
+                    <td
+                      className={cn(
+                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
+                        getCellColor(guess.matches.platforms.type, hasData(guess.matches.platforms.value))
                       )}
-                      <span className="relative z-10">
-                        <CellValue value={guess.matches.releaseDate.value} />
-                      </span>
-                    </>
-                  );
-                })()}
-              </td>
+                    >
+                      <CellValue value={guess.matches.platforms.value} />
+                    </td>
 
-              {/* Game Modes */}
-              <td
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(guess.matches.gameModes.type, hasData(guess.matches.gameModes.value))
-                )}
-              >
-                <CellValue value={guess.matches.gameModes.value} />
-              </td>
+                    {/* Genres */}
+                    <td
+                      className={cn(
+                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
+                        getCellColor(guess.matches.genres.type, hasData(guess.matches.genres.value))
+                      )}
+                    >
+                      <CellValue value={guess.matches.genres.value} />
+                    </td>
 
-              {/* Game Engines */}
-              <td
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(guess.matches.gameEngines.type, hasData(guess.matches.gameEngines.value))
-                )}
-              >
-                <CellValue value={guess.matches.gameEngines.value} />
-              </td>
+                    {/* Themes */}
+                    <td
+                      className={cn(
+                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
+                        getCellColor(guess.matches.themes.type, hasData(guess.matches.themes.value))
+                      )}
+                    >
+                      <CellValue value={guess.matches.themes.value} />
+                    </td>
 
-              {/* Publisher */}
-              <td
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(guess.matches.publisher.type, hasData(guess.matches.publisher.value))
-                )}
-              >
-                <CellValue value={guess.matches.publisher.value} />
-              </td>
+                    {/* Release Date */}
+                    <td
+                      className={cn(
+                        'border border-border px-3 py-2 text-xs text-white relative text-center',
+                        getCellColor(guess.matches.releaseDate.type, hasData(guess.matches.releaseDate.value))
+                      )}
+                    >
+                      {(() => {
+                        const arrow = getYearArrow(
+                          typeof guess.matches.releaseDate.value === 'string' ? guess.matches.releaseDate.value : null,
+                          answerSpecs?.releaseDate || null
+                        );
+                        return (
+                          <>
+                            {arrow && (
+                              <div className="absolute inset-0 flex items-center justify-center opacity-40">
+                                {arrow}
+                              </div>
+                            )}
+                            <span className="relative z-10">
+                              <CellValue value={guess.matches.releaseDate.value} />
+                            </span>
+                          </>
+                        );
+                      })()}
+                    </td>
 
-              {/* Perspective */}
-              <td
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(guess.matches.perspective.type, hasData(guess.matches.perspective.value))
-                )}
-              >
-                <CellValue value={guess.matches.perspective.value} />
-              </td>
-            </tr>
-            </React.Fragment>
+                    {/* Game Modes */}
+                    <td
+                      className={cn(
+                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
+                        getCellColor(guess.matches.gameModes.type, hasData(guess.matches.gameModes.value))
+                      )}
+                    >
+                      <CellValue value={guess.matches.gameModes.value} />
+                    </td>
+
+                    {/* Game Engines */}
+                    <td
+                      className={cn(
+                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
+                        getCellColor(guess.matches.gameEngines.type, hasData(guess.matches.gameEngines.value))
+                      )}
+                    >
+                      <CellValue value={guess.matches.gameEngines.value} />
+                    </td>
+
+                    {/* Publisher */}
+                    <td
+                      className={cn(
+                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
+                        getCellColor(guess.matches.publisher.type, hasData(guess.matches.publisher.value))
+                      )}
+                    >
+                      <CellValue value={guess.matches.publisher.value} />
+                    </td>
+
+                    {/* Perspective */}
+                    <td
+                      className={cn(
+                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
+                        getCellColor(guess.matches.perspective.type, hasData(guess.matches.perspective.value))
+                      )}
+                    >
+                      <CellValue value={guess.matches.perspective.value} />
+                    </td>
+                  </tr>
+                </Fragment>
               ))}
 
               {/* Insert hint row at the end if no guesses were made when it was revealed */}

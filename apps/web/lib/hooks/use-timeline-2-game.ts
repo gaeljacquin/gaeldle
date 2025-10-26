@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { getRandomGame } from '@/lib/services/game.service';
 import type { Game } from '@/lib/types/game';
 
-const MAX_LIVES = 3;
+const MAX_ATTEMPTS = 3;
 
 export function useTimeline2Game() {
   const [timelineCards, setTimelineCards] = useState<Game[]>([]);
   const [dealtCard, setDealtCard] = useState<Game | null>(null);
-  const [livesLeft, setLivesLeft] = useState(MAX_LIVES);
+  const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -122,8 +122,8 @@ export function useTimeline2Game() {
       }, 800);
     } else {
       // Wrong placement - show error and insert at correct position
-      const newLives = livesLeft - 1;
-      setLivesLeft(newLives);
+      const newAttempts = attemptsLeft - 1;
+      setAttemptsLeft(newAttempts);
 
       // Insert at correct position immediately (framer-motion will animate it)
       const newTimeline = [...timelineCards];
@@ -131,7 +131,7 @@ export function useTimeline2Game() {
       setTimelineCards(newTimeline);
 
       // Check game over
-      if (newLives <= 0) {
+      if (newAttempts <= 0) {
         setTimeout(() => {
           setIsGameOver(true);
           setIsAnimating(false);
@@ -149,13 +149,13 @@ export function useTimeline2Game() {
         }, 1800);
       }
     }
-  }, [dealtCard, timelineCards, livesLeft, isAnimating, isDealingCard, findCorrectPosition, dealNextCard]);
+  }, [dealtCard, timelineCards, attemptsLeft, isAnimating, isDealingCard, findCorrectPosition, dealNextCard]);
 
   // Reset game
   const resetGame = useCallback(() => {
     setTimelineCards([]);
     setDealtCard(null);
-    setLivesLeft(MAX_LIVES);
+    setAttemptsLeft(MAX_ATTEMPTS);
     setIsGameOver(false);
     setScore(0);
     setLastPlacementCorrect(null);
@@ -169,8 +169,8 @@ export function useTimeline2Game() {
   return {
     timelineCards,
     dealtCard,
-    livesLeft,
-    maxLives: MAX_LIVES,
+    attemptsLeft,
+    maxAttempts: MAX_ATTEMPTS,
     isGameOver,
     score,
     isLoading,

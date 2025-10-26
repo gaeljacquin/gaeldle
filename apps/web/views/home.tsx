@@ -1,7 +1,7 @@
 "use client";
 
 import GameModeCard from "@/components/game-mode-card";
-import { GameModes } from "@/lib/game-mode";
+import { gameModes } from "@/lib/game-mode";
 import { appInfo } from "@/lib/app-info";
 
 export default function Home() {
@@ -13,8 +13,9 @@ export default function Home() {
             <h1 className="text-4xl font-bold">{appInfo.title}</h1>
             <p className="text-lg text-muted-foreground">{appInfo.description}</p>
           </div>
-          <div className="flex flex-wrap items-stretch justify-start gap-4 md:gap-6">
-            {GameModes.map((gameMode) => (
+          {/* <div className="flex flex-col sm:flex-wrap items-center sm:items-stretch justify-center sm:justify-start gap-4 md:gap-6"> */}
+          <div className="flex items-center justify-center gap-2 sm:flex-wrap sm:items-stretch sm:justify-start md:gap-6">
+            {gameModes.map((gameMode) => (
               <GameModeCard
                 key={gameMode.id}
                 href={gameMode.href}

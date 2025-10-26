@@ -1,8 +1,8 @@
 'use client';
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from './ui/button';
-import { HoldToRevealButton } from './hold-to-reveal-button';
+import { Button } from '@/components/ui/button';
+import { HoldToRevealButton } from '@/components/hold-to-reveal-button';
 
 interface ClueConfirmationModalProps {
   isOpen: boolean;

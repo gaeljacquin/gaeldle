@@ -19,6 +19,7 @@ export default function Attempts(props: AttemptsProps) {
           width={32}
           height={32}
           className={cn(
+            "size-3 sm:size-4 md:size-6",
             props.attemptsLeft <= i && "grayscale",
             props.className,
           )}

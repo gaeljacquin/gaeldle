@@ -75,7 +75,7 @@ export function GuessHistorySidebar({
                 )}
                 aria-label="Clear selection"
               >
-                <X className="w-3 h-3 text-white" />
+                <X className="size-3 text-white" />
               </button>
             )}
           </div>
@@ -117,13 +117,14 @@ export function GuessHistorySidebar({
       </div>
 
       {/* Dev mode toggle */}
-      {targetGame && (
+      {targetGame && process.env.NODE_ENV === 'development' && (
         <div className="pt-3 border-t border-border space-y-2">
+          <p className="text-xs font-semibold">[dev]</p>
           <button
             onClick={() => setShowDevInfo(!showDevInfo)}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
-            [dev] {showDevInfo ? 'Hide' : 'Show'} Answer
+            {showDevInfo ? 'Hide' : 'Show'} Answer
           </button>
           {showDevInfo && (
             <p className="text-xs font-mono p-2 bg-muted rounded">
@@ -134,7 +135,7 @@ export function GuessHistorySidebar({
           {/* Attempts controls */}
           {onAdjustAttempts && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">[dev] Attempts:</span>
+              <span className="text-xs text-muted-foreground">Attempts:</span>
               <button
                 onClick={() => onAdjustAttempts(-1)}
                 disabled={attemptsLeft <= 1}

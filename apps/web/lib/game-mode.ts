@@ -1,4 +1,10 @@
-import { Image, Calendar, CalendarRange, Scroll, Wallpaper } from "lucide-react";
+import {
+  Image,
+  Calendar,
+  CalendarRange,
+  Scroll,
+  // Wallpaper,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface GameMode {
@@ -12,7 +18,7 @@ export interface GameMode {
   href: string;
 }
 
-export const GameModes: GameMode[] = [
+export const gameModes: GameMode[] = [
   {
     id: "cover-art",
     title: "Cover Art",
@@ -23,26 +29,16 @@ export const GameModes: GameMode[] = [
     pattern: "diagonal",
     href: "/cover-art",
   },
-  {
-    id: "cover-art-2",
-    title: "Cover Art 2",
-    description: "Identify the game from an AI-generated cover art.",
-    difficulty: "Medium",
-    icon: Wallpaper,
-    gradient: "bg-gradient-to-br from-purple-600 via-purple-700 to-violet-900",
-    pattern: "diagonal-reverse",
-    href: "/cover-art-2",
-  },
-  {
-    id: "specifications",
-    title: "Specifications",
-    description: "Guess the game from their specifications.",
-    difficulty: "Hard",
-    icon: Scroll,
-    gradient: "bg-gradient-to-br from-red-600 via-red-700 to-rose-900",
-    pattern: "diagonal-reverse",
-    href: "/specifications",
-  },
+  // {
+  //   id: "cover-art-2",
+  //   title: "Cover Art 2",
+  //   description: "Guess the game from an AI-generated cover art.",
+  //   difficulty: "Medium",
+  //   icon: Wallpaper,
+  //   gradient: "bg-gradient-to-br from-purple-600 via-purple-700 to-violet-900",
+  //   pattern: "diagonal-reverse",
+  //   href: "/cover-art-2",
+  // },
   {
     id: "timeline",
     title: "Timeline",
@@ -56,12 +52,22 @@ export const GameModes: GameMode[] = [
   {
     id: "timeline-2",
     title: "Timeline 2",
-    description: "Place cards in chronological order on the timeline.",
+    description: "Place each game in chronological order.",
     difficulty: "Hard",
     icon: CalendarRange,
     gradient: "bg-gradient-to-br from-pink-600 via-pink-700 to-fuchsia-900",
     pattern: "diagonal",
     href: "/timeline-2",
+  },
+  {
+    id: "specifications",
+    title: "Specifications",
+    description: "Deduce the game from their specifications.",
+    difficulty: "Hard",
+    icon: Scroll,
+    gradient: "bg-gradient-to-br from-red-600 via-red-700 to-rose-900",
+    pattern: "diagonal-reverse",
+    href: "/specifications",
   },
 ];
 
@@ -71,5 +77,5 @@ export const GameModes: GameMode[] = [
  * @returns GameMode or undefined if not found
  */
 export function getGameModeBySlug(slug: string): GameMode | undefined {
-  return GameModes.find((mode) => mode.id === slug);
+  return gameModes.find((mode) => mode.id === slug);
 }

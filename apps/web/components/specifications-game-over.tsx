@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import type { Game } from '@/lib/types/game';
 
 interface SpecificationsGameOverProps {
@@ -14,7 +14,6 @@ interface SpecificationsGameOverProps {
 export function SpecificationsGameOver({
   isCorrect,
   targetGame,
-  attemptsUsed,
   onPlayAgain,
   onToggleTable,
   showingAnswer = true,
@@ -40,9 +39,6 @@ export function SpecificationsGameOver({
         {isCorrect ? (
           <div className="space-y-2 text-center">
             <h2 className="text-3xl font-bold text-green-600">Correct!</h2>
-            <p className="text-lg text-muted-foreground">
-              You guessed it in {attemptsUsed} attempt{attemptsUsed !== 1 ? 's' : ''}!
-            </p>
             <p className="text-md font-semibold">
               The game was: <span className="text-primary">{targetGame?.name}</span>
             </p>
@@ -50,9 +46,6 @@ export function SpecificationsGameOver({
         ) : (
           <div className="space-y-2 text-center">
             <h2 className="text-3xl font-bold text-red-600">Game Over!</h2>
-            <p className="text-lg text-muted-foreground">
-              You&apos;ve used all your attempts.
-            </p>
             <p className="text-md font-semibold">
               The game was: <span className="text-primary">{targetGame?.name}</span>
             </p>

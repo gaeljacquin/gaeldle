@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getAllGames } from '../services/game.service';
-import type { Game } from '../types/game';
+import { getAllGames } from '@/lib/services/game.service';
+import type { Game } from '@/lib/types/game';
 
 export const MAX_ATTEMPTS = 3;
 const GAMES_COUNT = 10;

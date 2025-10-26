@@ -1,7 +1,7 @@
 {
-  "name": "@scatterbush/api",
+  "name": "@gaeldle/api",
   "version": "1.0.2-dev",
-  "description": "Scatterbush API built with Elysia and Bun",
+  "description": "Gaeldle API built with Elysia and Bun",
   "private": true,
   "type": "module",
   "scripts": {

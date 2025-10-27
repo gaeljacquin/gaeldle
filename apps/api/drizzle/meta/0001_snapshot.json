@@ -1,0 +1,167 @@
+{
+  "id": "e60eaecb-2f8e-4bb0-81bd-99d54d38a37e",
+  "prevId": "d4912007-9b1c-49dd-92a5-e650f457137f",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.game": {
+      "name": "game",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "igdb_id": {
+          "name": "igdb_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "info": {
+          "name": "info",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "artworks": {
+          "name": "artworks",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keywords": {
+          "name": "keywords",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "franchises": {
+          "name": "franchises",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_engines": {
+          "name": "game_engines",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_modes": {
+          "name": "game_modes",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "genres": {
+          "name": "genres",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "involved_companies": {
+          "name": "involved_companies",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "platforms": {
+          "name": "platforms",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "player_perspectives": {
+          "name": "player_perspectives",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "release_dates": {
+          "name": "release_dates",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "themes": {
+          "name": "themes",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "first_release_date": {
+          "name": "first_release_date",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "games_igdb_key": {
+          "name": "games_igdb_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "igdb_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.theme": {
+      "name": "theme",
+      "schema": "public",
+      "values": [
+        "cream",
+        "pink",
+        "blue",
+        "green"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

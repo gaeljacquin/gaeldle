@@ -1,4 +1,4 @@
-# [Gaeldle](gaeldle.gaeljacquin.com) 🎮
+# [Gaeldle](https://gaeldle.gaeljacquin.com) 🎮
 
 A collection of daily video game guessing challenges! Test your gaming knowledge across different game modes, each with unique mechanics and difficulty levels.
 

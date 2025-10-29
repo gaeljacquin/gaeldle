@@ -7,12 +7,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:808
  * @param artwork - If true, only fetch games with artwork
  */
 export async function getAllGames(artwork?: boolean): Promise<Game[]> {
-  const response = await fetch(`${API_BASE_URL}/api/game`, {
-    method: 'POST',
+  const endpoint = artwork ? `${API_BASE_URL}/api/game/artwork` : `${API_BASE_URL}/api/game`;
+
+  const response = await fetch(endpoint, {
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ artwork }),
   });
 
   if (!response.ok) {

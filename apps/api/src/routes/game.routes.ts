@@ -2,19 +2,24 @@ import { Elysia, t } from 'elysia';
 import { getAllGames, getRandomGame, getGameById } from '../services/game.service';
 
 export const gameRoutes = new Elysia({ prefix: '/api/game' })
-  .post(
+  .get(
     '/',
-    async ({ body }) => {
-      const games = await getAllGames(body.artwork);
+    async () => {
+      const games = await getAllGames();
       return {
         success: true,
         data: games,
       };
-    },
-    {
-      body: t.Object({
-        artwork: t.Optional(t.Boolean()),
-      }),
+    }
+  )
+  .get(
+    '/artwork',
+    async () => {
+      const games = await getAllGames(true);
+      return {
+        success: true,
+        data: games,
+      };
     }
   )
   .post(

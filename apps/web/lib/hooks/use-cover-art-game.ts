@@ -15,7 +15,7 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
   const [allGames, setAllGames] = useState<Game[]>([]);
   const [targetGame, setTargetGame] = useState<Game | null>(null);
   const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
-  const [wrongGuesses, setWrongGuesses] = useState<number[]>([]);
+  const [wrongGuesses, setWrongGuesses] = useState<Game[]>([]);
   const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -63,16 +63,23 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
     setSelectedGameId(gameId);
   }, []);
 
+  const clearSelection = useCallback(() => {
+    setSelectedGameId(null);
+  }, []);
+
   const handleSubmit = useCallback(() => {
     if (!targetGame || selectedGameId === null || isGameOver) return;
+
+    const selectedGame = allGames.find(g => g.id === selectedGameId);
+    if (!selectedGame) return;
 
     // Check if the selected game is correct
     if (selectedGameId === targetGame.id) {
       setIsCorrect(true);
       setIsGameOver(true);
     } else {
-      // Wrong answer
-      setWrongGuesses((prev) => [...prev, selectedGameId]);
+      // Wrong answer - store full game object
+      setWrongGuesses((prev) => [...prev, selectedGame]);
       setAttemptsLeft((prev) => prev - 1);
 
       // Check if game is over
@@ -83,7 +90,7 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
 
     // Reset selection
     setSelectedGameId(null);
-  }, [targetGame, selectedGameId, isGameOver, attemptsLeft]);
+  }, [targetGame, selectedGameId, isGameOver, attemptsLeft, allGames]);
 
   const resetGame = useCallback(async () => {
     try {
@@ -120,6 +127,7 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
 
     // Actions
     handleSelectGame,
+    clearSelection,
     handleSubmit,
     resetGame,
   };

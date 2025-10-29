@@ -15,7 +15,7 @@ interface SpecificationsSearchProps {
   className?: string;
 }
 
-export function SpecificationsSearch({
+export default function SpecificationsSearch({
   games,
   selectedGameId,
   wrongGuesses,

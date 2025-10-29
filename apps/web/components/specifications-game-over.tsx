@@ -11,7 +11,7 @@ interface SpecificationsGameOverProps {
   showingAnswer?: boolean;
 }
 
-export function SpecificationsGameOver({
+export default function SpecificationsGameOver({
   isCorrect,
   targetGame,
   onPlayAgain,

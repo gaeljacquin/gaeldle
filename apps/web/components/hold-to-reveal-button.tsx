@@ -13,7 +13,7 @@ interface HoldToRevealButtonProps {
 const HOLD_DURATION = 3000; // 3 seconds
 const NOW = Date.now();
 
-export function HoldToRevealButton({ onReveal, disabled, className }: HoldToRevealButtonProps) {
+export default function HoldToRevealButton({ onReveal, disabled, className }: HoldToRevealButtonProps) {
   const [isHolding, setIsHolding] = useState(false);
   const [progress, setProgress] = useState(0);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);

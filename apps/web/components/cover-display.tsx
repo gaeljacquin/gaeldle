@@ -14,7 +14,7 @@ interface CoverDisplayProps {
   className?: string;
 }
 
-export function CoverDisplay({
+export default function CoverDisplay({
   game,
   pixelSize = 0,
   usePixelation = false,

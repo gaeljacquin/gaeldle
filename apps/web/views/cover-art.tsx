@@ -1,8 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { MAX_ATTEMPTS, useCoverArtGame } from '@/lib/hooks/use-cover-art-game';
-import { CoverDisplay } from '@/components/cover-display';
-import { GameSelector } from '@/components/game-selector';
+import CoverDisplay from '@/components/cover-display';
+import SpecificationsSearch from '@/components/specifications-search';
+import SelectedGameDisplay from '@/components/selected-game-display';
+import GuessHistoryInline from '@/components/guess-history-inline';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
@@ -12,6 +15,7 @@ import Attempts from '@/components/attempts';
 
 export default function CoverArt() {
   const gameMode = getGameModeBySlug('cover-art');
+  const [searchKey, setSearchKey] = useState(0);
 
   const {
     allGames,
@@ -25,9 +29,15 @@ export default function CoverArt() {
     error,
     currentPixelSize,
     handleSelectGame,
+    clearSelection,
     handleSubmit,
     resetGame,
   } = useCoverArtGame({ mode: 'cover-art' });
+
+  const handleSubmitWithClear = () => {
+    handleSubmit();
+    setSearchKey(prev => prev + 1);
+  };
 
   if (isLoading) {
     return (
@@ -49,6 +59,9 @@ export default function CoverArt() {
       </div>
     );
   }
+
+  const selectedGame = allGames.find(g => g.id === selectedGameId) || null;
+  const wrongGuessIds = wrongGuesses.map(g => g.id);
 
   return (
     <div className="container mx-auto">
@@ -73,7 +86,6 @@ export default function CoverArt() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-6">
-            {/* Left side - Cover Image */}
             <div className="flex-1 flex flex-col">
               <CoverDisplay
                 game={targetGame}
@@ -82,31 +94,48 @@ export default function CoverArt() {
                 isGameOver={isGameOver}
                 className="h-[500px]"
               />
-              <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} />
             </div>
 
-            {/* Right side - Game selector and submit */}
-            <div className="flex-1 flex flex-col gap-4">
-              <GameSelector
-                games={allGames}
-                selectedGameId={selectedGameId}
-                wrongGuesses={wrongGuesses}
-                onSelectGame={handleSelectGame}
-                disabled={isGameOver}
-                className="h-[500px]"
-              />
-              <Button
-                onClick={handleSubmit}
-                disabled={selectedGameId === null || isGameOver}
-                className="w-full cursor-pointer"
-                size="lg"
-              >
-                Submit
-              </Button>
+            <div className="flex-1 flex flex-col gap-4 h-[500px]">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <SpecificationsSearch
+                    key={searchKey}
+                    games={allGames}
+                    selectedGameId={selectedGameId}
+                    wrongGuesses={wrongGuessIds}
+                    onSelectGame={handleSelectGame}
+                    disabled={isGameOver}
+                  />
+                </div>
+                <Button
+                  onClick={handleSubmitWithClear}
+                  disabled={selectedGameId === null || isGameOver}
+                  className="cursor-pointer"
+                  size="lg"
+                >
+                  Submit
+                </Button>
+              </div>
+
+
+              {!isGameOver && (
+                <div className="flex gap-2">
+                  <SelectedGameDisplay
+                    selectedGame={selectedGame}
+                    onClearSelection={clearSelection}
+                    showSkeleton={!selectedGame}
+                    className="flex-1"
+                  />
+                </div>
+              )}
+
+              <GuessHistoryInline guesses={wrongGuesses} className="flex-1 min-h-0" />
+
+              <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} />
             </div>
           </div>
 
-          {/* Game Over Message */}
           {isGameOver && (
             <div className="mt-6 text-center">
               {isCorrect ? (

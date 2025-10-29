@@ -21,7 +21,7 @@ interface GameSelectorProps {
   className?: string;
 }
 
-export function GameSelector({
+export default function GameSelector({
   games,
   selectedGameId,
   wrongGuesses,

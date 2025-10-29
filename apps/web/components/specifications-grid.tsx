@@ -183,7 +183,7 @@ function getYearArrow(guessYear: string | null, targetYear: string | null): Reac
   return null; // Equal, no arrow
 }
 
-export function SpecificationsGrid({
+export default function SpecificationsGrid({
   guesses,
   revealedClue,
   targetGame,
@@ -318,19 +318,21 @@ export function SpecificationsGrid({
           )}
 
           {/* Column headers */}
-          <tr>
-            {COLUMN_HEADERS.map((header) => (
-              <th
-                key={header.key}
-                className={cn(
-                  'border border-border bg-muted px-3 py-2 text-sm font-semibold',
-                  'text-center min-w-[120px]'
-                )}
-              >
-                {header.label}
-              </th>
-            ))}
-          </tr>
+          {(guesses.length > 0 || showAnswerOnly) && (
+            <tr>
+              {COLUMN_HEADERS.map((header) => (
+                <th
+                  key={header.key}
+                  className={cn(
+                    'border border-border bg-muted px-3 py-2 text-sm font-semibold',
+                    'text-center min-w-[120px]'
+                  )}
+                >
+                  {header.label}
+                </th>
+              ))}
+            </tr>
+          )}
         </thead>
         <tbody>
           {/* Show answer row when showAnswerOnly is true */}

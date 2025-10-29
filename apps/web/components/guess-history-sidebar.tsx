@@ -18,7 +18,7 @@ interface GuessHistorySidebarProps {
   className?: string;
 }
 
-export function GuessHistorySidebar({
+export default function GuessHistorySidebar({
   guesses,
   isVisible,
   selectedGame,

@@ -1,8 +1,8 @@
 'use client';
 
 import { MAX_ATTEMPTS, useCoverArtGame } from '@/lib/hooks/use-cover-art-game';
-import { CoverDisplay } from '@/components/cover-display';
-import { GameSelector } from '@/components/game-selector';
+import CoverDisplay from '@/components/cover-display';
+import GameSelector from '@/components/game-selector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
@@ -27,6 +27,8 @@ export default function CoverArt2() {
     handleSubmit,
     resetGame,
   } = useCoverArtGame({ mode: 'cover-art-2' });
+
+  const wrongGuessIds = wrongGuesses.map(g => g.id);
 
   if (isLoading) {
     return (
@@ -88,7 +90,7 @@ export default function CoverArt2() {
               <GameSelector
                 games={allGames}
                 selectedGameId={selectedGameId}
-                wrongGuesses={wrongGuesses}
+                wrongGuesses={wrongGuessIds}
                 onSelectGame={handleSelectGame}
                 disabled={isGameOver}
                 className="h-[500px]"

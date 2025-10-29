@@ -24,7 +24,12 @@ export interface GameApiResponse {
   error?: string;
 }
 
-export type CoverArtMode = 'cover-art' | 'cover-art-2';
+export type CoverArtMode = 'cover-art' | 'cover-art-2' | 'artwork';
+
+export interface ArtworkImage {
+  url: string;
+  image_id: string;
+}
 
 export interface GameState {
   targetGame: Game | null;

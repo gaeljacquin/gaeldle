@@ -3,7 +3,7 @@ import {
   Calendar,
   CalendarRange,
   Scroll,
-  // Wallpaper,
+  Wallpaper,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -28,6 +28,16 @@ export const gameModes: GameMode[] = [
     gradient: "bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-900",
     pattern: "diagonal",
     href: "/cover-art",
+  },
+  {
+    id: "artwork",
+    title: "Artwork",
+    description: "Guess the game from their artwork.",
+    difficulty: "Medium",
+    icon: Wallpaper,
+    gradient: "bg-gradient-to-br from-purple-600 via-purple-700 to-violet-900",
+    pattern: "diagonal-reverse",
+    href: "/artwork",
   },
   // {
   //   id: "cover-art-2",

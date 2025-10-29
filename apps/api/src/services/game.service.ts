@@ -1,6 +1,6 @@
 import { db } from '../db';
 import { games } from '../db/schema';
-import { notInArray, eq } from 'drizzle-orm';
+import { notInArray, eq, isNotNull } from 'drizzle-orm';
 
 export interface Game {
   id: number;
@@ -24,38 +24,9 @@ export interface Game {
 
 /**
  * Get all video games
+ * @param artwork - If true, only return games with artwork
  */
-export async function getAllGames(): Promise<Game[]> {
-  const result = await db
-    .select({
-      id: games.id,
-      igdbId: games.igdbId,
-      name: games.name,
-      imageUrl: games.imageUrl,
-      artworks: games.artworks,
-      info: games.info,
-      firstReleaseDate: games.first_release_date,
-      keywords: games.keywords,
-      franchises: games.franchises,
-      game_engines: games.game_engines,
-      game_modes: games.game_modes,
-      genres: games.genres,
-      involved_companies: games.involved_companies,
-      platforms: games.platforms,
-      player_perspectives: games.player_perspectives,
-      release_dates: games.release_dates,
-      themes: games.themes,
-    })
-    .from(games)
-    .orderBy(games.name);
-
-  return result;
-}
-
-/**
- * Get a random video game excluding specified IDs
- */
-export async function getRandomGame(excludeIds: number[] = []): Promise<Game | null> {
+export async function getAllGames(artwork?: boolean): Promise<Game[]> {
   let query = db
     .select({
       id: games.id,
@@ -78,9 +49,60 @@ export async function getRandomGame(excludeIds: number[] = []): Promise<Game | n
     })
     .from(games);
 
-  // If we have excluded IDs, filter them out
+  // If artwork filter is requested, add where clause
+  if (artwork) {
+    query = query.where(isNotNull(games.artworks)) as typeof query;
+  }
+
+  const result = await query.orderBy(games.name);
+
+  return result;
+}
+
+/**
+ * Get a random video game excluding specified IDs
+ * @param excludeIds - Array of game IDs to exclude
+ * @param artwork - If true, only return games with artwork
+ */
+export async function getRandomGame(excludeIds: number[] = [], artwork?: boolean): Promise<Game | null> {
+  let query = db
+    .select({
+      id: games.id,
+      igdbId: games.igdbId,
+      name: games.name,
+      imageUrl: games.imageUrl,
+      artworks: games.artworks,
+      info: games.info,
+      firstReleaseDate: games.first_release_date,
+      keywords: games.keywords,
+      franchises: games.franchises,
+      game_engines: games.game_engines,
+      game_modes: games.game_modes,
+      genres: games.genres,
+      involved_companies: games.involved_companies,
+      platforms: games.platforms,
+      player_perspectives: games.player_perspectives,
+      release_dates: games.release_dates,
+      themes: games.themes,
+    })
+    .from(games);
+
+  // Build where conditions
+  const conditions = [];
+
   if (excludeIds.length > 0) {
-    query = query.where(notInArray(games.id, excludeIds)) as typeof query;
+    conditions.push(notInArray(games.id, excludeIds));
+  }
+
+  if (artwork) {
+    conditions.push(isNotNull(games.artworks));
+  }
+
+  // Apply conditions if any exist
+  if (conditions.length > 0) {
+    conditions.forEach((condition) => {
+      query = query.where(condition) as typeof query;
+    })
   }
 
   const allGames = await query;

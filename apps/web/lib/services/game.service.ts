@@ -4,13 +4,15 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:808
 
 /**
  * Fetch all video games from the API
+ * @param artwork - If true, only fetch games with artwork
  */
-export async function getAllGames(): Promise<Game[]> {
+export async function getAllGames(artwork?: boolean): Promise<Game[]> {
   const response = await fetch(`${API_BASE_URL}/api/game`, {
-    method: 'GET',
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify({ artwork }),
   });
 
   if (!response.ok) {
@@ -28,14 +30,16 @@ export async function getAllGames(): Promise<Game[]> {
 
 /**
  * Fetch a random video game from the API
+ * @param excludeIds - Array of game IDs to exclude
+ * @param artwork - If true, only fetch games with artwork
  */
-export async function getRandomGame(excludeIds: number[] = []): Promise<Game> {
+export async function getRandomGame(excludeIds: number[] = [], artwork?: boolean): Promise<Game> {
   const response = await fetch(`${API_BASE_URL}/api/game/random`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ excludeIds }),
+    body: JSON.stringify({ excludeIds, artwork }),
   });
 
   if (!response.ok) {

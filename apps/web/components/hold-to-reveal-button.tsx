@@ -83,7 +83,6 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Ho
       )}
       size="lg"
     >
-      {/* Fill animation background */}
       <div
         className={cn(
           'absolute inset-0 bg-primary-foreground/20 transition-transform origin-left',
@@ -94,7 +93,6 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Ho
         }}
       />
 
-      {/* Button text */}
       <span className="relative z-10">
         {isHolding ? `Hold (${Math.ceil((HOLD_DURATION - (progress / 100) * HOLD_DURATION) / 1000)}s)` : 'Hold to Reveal Hint'}
       </span>

@@ -227,7 +227,6 @@ export default function SpecificationsGrid({
     <div className={cn('overflow-x-auto w-full', className)}>
       <table className="w-full border-collapse min-w-max">
         <thead>
-          {/* Summary row - shows best matches */}
           {bestMatches && (
             <tr>
               <th className="border border-border bg-slate-700 px-3 py-2 text-sm font-semibold text-white text-center w-32">
@@ -317,7 +316,6 @@ export default function SpecificationsGrid({
             </tr>
           )}
 
-          {/* Column headers */}
           {(guesses.length > 0 || showAnswerOnly) && (
             <tr>
               {COLUMN_HEADERS.map((header) => (
@@ -335,10 +333,8 @@ export default function SpecificationsGrid({
           )}
         </thead>
         <tbody>
-          {/* Show answer row when showAnswerOnly is true */}
           {showAnswerOnly && answerSpecs && targetGame ? (
             <tr>
-              {/* Summary (cover art with blue banner) */}
               <td className="border border-border p-0 w-32">
                 <div className="relative w-32 h-44">
                   {targetGame.imageUrl ? (
@@ -370,55 +366,44 @@ export default function SpecificationsGrid({
                 </div>
               </td>
 
-              {/* Platforms */}
               <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
                 <CellValue value={answerSpecs.platforms.length > 0 ? answerSpecs.platforms : null} />
               </td>
 
-              {/* Genres */}
               <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
                 <CellValue value={answerSpecs.genres.length > 0 ? answerSpecs.genres : null} />
               </td>
 
-              {/* Themes */}
               <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
                 <CellValue value={answerSpecs.themes.length > 0 ? answerSpecs.themes : null} />
               </td>
 
-              {/* Release Date */}
               <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
                 <CellValue value={answerSpecs.releaseDate} />
               </td>
 
-              {/* Game Modes */}
               <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
                 <CellValue value={answerSpecs.gameModes.length > 0 ? answerSpecs.gameModes : null} />
               </td>
 
-              {/* Game Engines */}
               <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
                 <CellValue value={answerSpecs.gameEngines.length > 0 ? answerSpecs.gameEngines : null} />
               </td>
 
-              {/* Publisher */}
               <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
                 <CellValue value={answerSpecs.publisher} />
               </td>
 
-              {/* Perspective */}
               <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
                 <CellValue value={answerSpecs.perspective.length > 0 ? answerSpecs.perspective : null} />
               </td>
             </tr>
           ) : (
             <>
-              {/* Guess rows with hint inserted at correct position */}
               {reversedGuesses.map((guess, index) => (
                 <Fragment key={`${guess.gameId}-${index}`}>
-                  {/* Insert hint row before this guess if this is the correct position */}
                   {revealedClue && index === hintInsertIndex && renderHintRow(revealedClue)}
                   <tr>
-                    {/* Summary (cover art with blue banner) */}
                     <td className="border border-border p-0 w-32">
                       <div className="relative w-32 h-44">
                         {guess.imageUrl ? (
@@ -450,7 +435,6 @@ export default function SpecificationsGrid({
                       </div>
                     </td>
 
-                    {/* Platforms */}
                     <td
                       className={cn(
                         'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
@@ -460,7 +444,6 @@ export default function SpecificationsGrid({
                       <CellValue value={guess.matches.platforms.value} />
                     </td>
 
-                    {/* Genres */}
                     <td
                       className={cn(
                         'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
@@ -470,7 +453,6 @@ export default function SpecificationsGrid({
                       <CellValue value={guess.matches.genres.value} />
                     </td>
 
-                    {/* Themes */}
                     <td
                       className={cn(
                         'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
@@ -480,7 +462,6 @@ export default function SpecificationsGrid({
                       <CellValue value={guess.matches.themes.value} />
                     </td>
 
-                    {/* Release Date */}
                     <td
                       className={cn(
                         'border border-border px-3 py-2 text-xs text-white relative text-center',
@@ -507,7 +488,6 @@ export default function SpecificationsGrid({
                       })()}
                     </td>
 
-                    {/* Game Modes */}
                     <td
                       className={cn(
                         'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
@@ -517,7 +497,6 @@ export default function SpecificationsGrid({
                       <CellValue value={guess.matches.gameModes.value} />
                     </td>
 
-                    {/* Game Engines */}
                     <td
                       className={cn(
                         'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
@@ -527,7 +506,6 @@ export default function SpecificationsGrid({
                       <CellValue value={guess.matches.gameEngines.value} />
                     </td>
 
-                    {/* Publisher */}
                     <td
                       className={cn(
                         'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
@@ -537,7 +515,6 @@ export default function SpecificationsGrid({
                       <CellValue value={guess.matches.publisher.value} />
                     </td>
 
-                    {/* Perspective */}
                     <td
                       className={cn(
                         'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
@@ -550,7 +527,6 @@ export default function SpecificationsGrid({
                 </Fragment>
               ))}
 
-              {/* Insert hint row at the end if no guesses were made when it was revealed */}
               {revealedClue && hintInsertIndex === reversedGuesses.length && renderHintRow(revealedClue)}
             </>
           )}

@@ -5,24 +5,35 @@ import { cn } from '@/lib/utils';
 import { Plus, Minus } from 'lucide-react';
 import type { Game } from '@/lib/types/game';
 
-interface DevModeToggleProps {
-  targetGame: Game | null;
+interface Timeline2DevToggleProps {
+  dealtCard: Game | null;
   attemptsLeft: number;
   maxAttempts: number;
   onAdjustAttempts?: (delta: number) => void;
   className?: string;
 }
 
-export default function DevModeToggle({
-  targetGame,
+function formatReleaseDate(timestamp: number | null): string {
+  if (!timestamp) return 'Unknown';
+
+  // IGDB timestamps are in seconds, convert to milliseconds
+  const date = new Date(timestamp * 1000);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export default function Timeline2DevToggle({
+  dealtCard,
   attemptsLeft,
   maxAttempts,
   onAdjustAttempts,
   className
-}: DevModeToggleProps) {
+}: Timeline2DevToggleProps) {
   const [showDevInfo, setShowDevInfo] = useState(false);
 
-  if (!targetGame || process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV !== 'development') {
     return null;
   }
 
@@ -33,12 +44,17 @@ export default function DevModeToggle({
         onClick={() => setShowDevInfo(!showDevInfo)}
         className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
       >
-        {showDevInfo ? 'Hide' : 'Show'} Answer
+        {showDevInfo ? 'Hide' : 'Show'} Current Card
       </button>
-      {showDevInfo && (
-        <p className="text-xs font-mono p-2 bg-muted rounded">
-          {targetGame.name}
-        </p>
+      {showDevInfo && dealtCard && (
+        <div className="text-xs font-mono p-3 bg-muted rounded space-y-1">
+          <div className="flex flex-col gap-1">
+            <span className="font-semibold">{dealtCard.name}</span>
+            <span className="text-muted-foreground">
+              {formatReleaseDate(dealtCard.firstReleaseDate)}
+            </span>
+          </div>
+        </div>
       )}
 
       {onAdjustAttempts && (

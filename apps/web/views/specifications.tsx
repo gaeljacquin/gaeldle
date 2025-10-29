@@ -65,7 +65,6 @@ export default function Specifications() {
   return (
     <div className="container mx-auto">
       <Card className="relative">
-        {/* Upper-left corner link */}
         <Link
           href="/"
           className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
@@ -157,16 +156,16 @@ export default function Specifications() {
             )}
           </div>
 
-          <div className="flex items-center justify-center mt-4">
-            <DevModeToggle
-              targetGame={targetGame}
-              attemptsLeft={attemptsLeft}
-              maxAttempts={MAX_ATTEMPTS}
-              onAdjustAttempts={adjustAttempts}
-            />
-          </div>
         </CardContent>
       </Card>
+      <div className="flex items-center justify-center mt-4">
+        <DevModeToggle
+          targetGame={targetGame}
+          attemptsLeft={attemptsLeft}
+          maxAttempts={MAX_ATTEMPTS}
+          onAdjustAttempts={adjustAttempts}
+        />
+      </div>
     </div>
   );
 }

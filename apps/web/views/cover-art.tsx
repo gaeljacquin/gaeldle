@@ -12,6 +12,7 @@ import { getGameModeBySlug } from '@/lib/game-mode';
 import Link from 'next/link';
 import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';
+import DevModeToggle from '@/components/dev-mode-toggle';
 
 export default function CoverArt() {
   const gameMode = getGameModeBySlug('cover-art');
@@ -32,6 +33,7 @@ export default function CoverArt() {
     clearSelection,
     handleSubmit,
     resetGame,
+    adjustAttempts,
   } = useCoverArtGame({ mode: 'cover-art' });
 
   const handleSubmitWithClear = () => {
@@ -66,7 +68,6 @@ export default function CoverArt() {
   return (
     <div className="container mx-auto">
       <Card className="relative">
-        {/* Upper-left corner link */}
         <Link
           href="/"
           className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
@@ -75,7 +76,6 @@ export default function CoverArt() {
           <span className="text-sm">Main Menu</span>
         </Link>
 
-        {/* Centered content */}
         <CardHeader className="flex flex-col items-center justify-center text-center space-y-2 py-4">
           <CardTitle className="text-4xl font-bold">
             {gameMode?.title}
@@ -161,6 +161,14 @@ export default function CoverArt() {
           )}
         </CardContent>
       </Card>
+      <div className="flex items-center justify-center mt-4">
+        <DevModeToggle
+          targetGame={targetGame}
+          attemptsLeft={attemptsLeft}
+          maxAttempts={MAX_ATTEMPTS}
+          onAdjustAttempts={adjustAttempts}
+        />
+      </div>
     </div>
   );
 }

@@ -166,6 +166,14 @@ export function useTimeline2Game() {
     initializeGame();
   }, [initializeGame]);
 
+  const adjustAttempts = useCallback((delta: number) => {
+    setAttemptsLeft(prev => {
+      const newValue = prev + delta;
+      if (newValue < 1 || newValue > MAX_ATTEMPTS) return prev;
+      return newValue;
+    });
+  }, []);
+
   return {
     timelineCards,
     dealtCard,
@@ -181,5 +189,6 @@ export function useTimeline2Game() {
     firstCardId,
     handleCardPlacement,
     resetGame,
+    adjustAttempts,
   };
 }

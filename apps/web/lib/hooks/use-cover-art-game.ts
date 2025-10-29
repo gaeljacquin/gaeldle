@@ -136,6 +136,14 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
     }
   }, [isArtworkMode]);
 
+  const adjustAttempts = useCallback((delta: number) => {
+    setAttemptsLeft(prev => {
+      const newValue = prev + delta;
+      if (newValue < 1 || newValue > MAX_ATTEMPTS) return prev;
+      return newValue;
+    });
+  }, []);
+
   return {
     // Game state
     allGames,
@@ -155,5 +163,6 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
     clearSelection,
     handleSubmit,
     resetGame,
+    adjustAttempts,
   };
 }

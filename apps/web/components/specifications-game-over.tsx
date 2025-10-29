@@ -21,7 +21,6 @@ export default function SpecificationsGameOver({
   return (
     <div className="space-y-4 p-6 bg-muted/50 rounded-lg border border-border">
       <div className="flex flex-col items-center gap-4">
-        {/* Game Cover */}
         {targetGame?.imageUrl && (
           <div className="relative">
             <Image
@@ -35,7 +34,6 @@ export default function SpecificationsGameOver({
           </div>
         )}
 
-        {/* Game Over Message */}
         {isCorrect ? (
           <div className="space-y-2 text-center">
             <h2 className="text-3xl font-bold text-green-600">Correct!</h2>

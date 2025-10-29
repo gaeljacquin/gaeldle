@@ -12,6 +12,7 @@ import { getGameModeBySlug } from '@/lib/game-mode';
 import Link from 'next/link';
 import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';
+import DevModeToggle from '@/components/dev-mode-toggle';
 
 export default function Artwork() {
   const gameMode = getGameModeBySlug('artwork');
@@ -33,6 +34,7 @@ export default function Artwork() {
     clearSelection,
     handleSubmit,
     resetGame,
+    adjustAttempts,
   } = useCoverArtGame({ mode: 'artwork' });
 
   const handleSubmitWithClear = () => {
@@ -67,7 +69,6 @@ export default function Artwork() {
   return (
     <div className="container mx-auto">
       <Card className="relative">
-        {/* Upper-left corner link */}
         <Link
           href="/"
           className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
@@ -76,7 +77,6 @@ export default function Artwork() {
           <span className="text-sm">Main Menu</span>
         </Link>
 
-        {/* Centered content */}
         <CardHeader className="flex flex-col items-center justify-center text-center space-y-2 py-4">
           <CardTitle className="text-4xl font-bold">
             {gameMode?.title}
@@ -87,7 +87,6 @@ export default function Artwork() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-6">
-            {/* Left side - Artwork Image */}
             <div className="flex-1 flex flex-col">
               <ArtworkDisplay
                 imageUrl={selectedArtworkUrl}
@@ -97,13 +96,7 @@ export default function Artwork() {
               />
             </div>
 
-            {/* Right side - Controls */}
             <div className="flex-1 flex flex-col gap-4 h-[500px]">
-              {/* Attempts at top */}
-              <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} />
-
-              {/* Search box */}
-              {!isGameOver && (
                 <div className="flex gap-4">
                   <div className="flex-1">
                     <SpecificationsSearch
@@ -124,9 +117,7 @@ export default function Artwork() {
                     Submit
                   </Button>
                 </div>
-              )}
 
-              {/* Selected game */}
               {!isGameOver && (
                 <div className="flex gap-2">
                   <SelectedGameDisplay
@@ -138,12 +129,12 @@ export default function Artwork() {
                 </div>
               )}
 
-              {/* Guess history */}
               <GuessHistoryInline guesses={wrongGuesses} className="flex-1 min-h-0" />
+
+              <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} />
             </div>
           </div>
 
-          {/* Game Over Message */}
           {isGameOver && (
             <div className="mt-6 text-center">
               {isCorrect ? (
@@ -169,6 +160,14 @@ export default function Artwork() {
           )}
         </CardContent>
       </Card>
+      <div className="flex items-center justify-center mt-4">
+        <DevModeToggle
+          targetGame={targetGame}
+          attemptsLeft={attemptsLeft}
+          maxAttempts={MAX_ATTEMPTS}
+          onAdjustAttempts={adjustAttempts}
+        />
+      </div>
     </div>
   );
 }

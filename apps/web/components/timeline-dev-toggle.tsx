@@ -5,26 +5,39 @@ import { cn } from '@/lib/utils';
 import { Plus, Minus } from 'lucide-react';
 import type { Game } from '@/lib/types/game';
 
-interface DevModeToggleProps {
-  targetGame: Game | null;
+interface TimelineDevToggleProps {
+  getCorrectOrder: () => Game[];
   attemptsLeft: number;
   maxAttempts: number;
   onAdjustAttempts?: (delta: number) => void;
   className?: string;
 }
 
-export default function DevModeToggle({
-  targetGame,
+function formatReleaseDate(timestamp: number | null): string {
+  if (!timestamp) return 'Unknown';
+
+  // IGDB timestamps are in seconds, convert to milliseconds
+  const date = new Date(timestamp * 1000);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export default function TimelineDevToggle({
+  getCorrectOrder,
   attemptsLeft,
   maxAttempts,
   onAdjustAttempts,
   className
-}: DevModeToggleProps) {
+}: TimelineDevToggleProps) {
   const [showDevInfo, setShowDevInfo] = useState(false);
 
-  if (!targetGame || process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV !== 'development') {
     return null;
   }
+
+  const correctOrder = getCorrectOrder();
 
   return (
     <div className={cn('pt-3 space-y-2', className)}>
@@ -33,12 +46,20 @@ export default function DevModeToggle({
         onClick={() => setShowDevInfo(!showDevInfo)}
         className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
       >
-        {showDevInfo ? 'Hide' : 'Show'} Answer
+        {showDevInfo ? 'Hide' : 'Show'} Correct Order
       </button>
       {showDevInfo && (
-        <p className="text-xs font-mono p-2 bg-muted rounded">
-          {targetGame.name}
-        </p>
+        <div className="text-xs font-mono p-3 bg-muted rounded space-y-1 max-w-md">
+          {correctOrder.map((game, index) => (
+            <div key={game.id} className="flex gap-2">
+              <span className="font-semibold">{index + 1}.</span>
+              <span className="flex-1">{game.name}</span>
+              <span className="text-muted-foreground whitespace-nowrap">
+                {formatReleaseDate(game.firstReleaseDate)}
+              </span>
+            </div>
+          ))}
+        </div>
       )}
 
       {onAdjustAttempts && (

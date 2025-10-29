@@ -54,7 +54,6 @@ export default function CoverArt2() {
   return (
     <div className="container mx-auto">
       <Card className="relative">
-        {/* Upper-left corner link */}
         <Link
           href="/"
           className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
@@ -63,7 +62,6 @@ export default function CoverArt2() {
           <span className="text-sm">Main Menu</span>
         </Link>
 
-        {/* Centered content */}
         <CardHeader className="flex flex-col items-center justify-center text-center space-y-2 py-4">
           <CardTitle className="text-4xl font-bold">
             {gameMode?.title}
@@ -74,7 +72,6 @@ export default function CoverArt2() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-6">
-            {/* Left side - Cover Image */}
             <div className="flex-1 flex flex-col">
               <CoverDisplay
                 game={targetGame}
@@ -85,7 +82,6 @@ export default function CoverArt2() {
               <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} />
             </div>
 
-            {/* Right side - Game selector and submit */}
             <div className="flex-1 flex flex-col gap-4">
               <GameSelector
                 games={allGames}
@@ -106,7 +102,6 @@ export default function CoverArt2() {
             </div>
           </div>
 
-          {/* Game Over Message */}
           {isGameOver && (
             <div className="mt-6 text-center">
               {isCorrect ? (

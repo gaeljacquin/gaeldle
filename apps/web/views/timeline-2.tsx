@@ -12,6 +12,7 @@ import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';
 import { motion, useMotionValue } from 'motion/react';
 import { cn } from '@/lib/utils';
+import Timeline2DevToggle from '@/components/timeline-2-dev-toggle';
 
 export default function Timeline2() {
   const gameMode = getGameModeBySlug('timeline-2');
@@ -34,6 +35,7 @@ export default function Timeline2() {
     firstCardId,
     handleCardPlacement,
     resetGame,
+    adjustAttempts,
   } = useTimeline2Game();
 
   const x = useMotionValue(0);
@@ -122,7 +124,6 @@ export default function Timeline2() {
   return (
     <div className="container mx-auto max-w-[1800px]">
       <Card className="relative">
-        {/* Upper-left corner link */}
         <Link
           href="/"
           className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
@@ -131,7 +132,6 @@ export default function Timeline2() {
           <span className="text-sm">Main Menu</span>
         </Link>
 
-        {/* Centered content */}
         <CardHeader className="flex flex-col items-center justify-center text-center space-y-2 py-4">
           <CardTitle className="text-4xl font-bold">
             {gameMode?.title}
@@ -142,7 +142,6 @@ export default function Timeline2() {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {/* Dealt Card Container */}
             <div className="flex justify-center my-8">
               <div className="flex flex-col items-center">
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 flex justify-center items-center w-[172px] h-[228px]">
@@ -150,7 +149,6 @@ export default function Timeline2() {
                     <Skeleton className="w-[140px] h-[196px] rounded-lg" />
                   ) : (
                     <div className="relative">
-                      {/* Transparent copy that stays in place during drag */}
                       {isDragging && (
                         <div className="absolute inset-0 opacity-50 pointer-events-none">
                           <Timeline2Card
@@ -161,7 +159,6 @@ export default function Timeline2() {
                         </div>
                       )}
 
-                      {/* Draggable card */}
                       <motion.div
                         drag
                         dragMomentum={false}
@@ -190,10 +187,8 @@ export default function Timeline2() {
               </div>
             </div>
 
-            {/* Attempts */}
             <Attempts maxAttempts={maxAttempts} attemptsLeft={attemptsLeft} />
 
-            {/* Timeline Container */}
             <div className="text-center space-y-4">
               <div
                 ref={timelineRef}
@@ -217,7 +212,6 @@ export default function Timeline2() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.3 }}
                       >
-                        {/* Drop zone before card */}
                         <div
                           className={cn(
                             "transition-all duration-200",
@@ -227,7 +221,6 @@ export default function Timeline2() {
                           )}
                         />
 
-                        {/* Timeline card */}
                         <div data-timeline-card>
                           <Timeline2Card
                             game={game}
@@ -239,7 +232,6 @@ export default function Timeline2() {
                     );
                   })}
 
-                  {/* Drop zone after last card */}
                   <div
                     className={cn(
                       "transition-all duration-200",
@@ -252,7 +244,6 @@ export default function Timeline2() {
               </div>
             </div>
 
-            {/* Game Over Message */}
             {isGameOver && (
               <div className="mt-6 text-center space-y-4">
                 <div className="space-y-2">
@@ -274,6 +265,14 @@ export default function Timeline2() {
           </div>
         </CardContent>
       </Card>
+      <div className="flex items-center justify-center mt-4">
+        <Timeline2DevToggle
+          dealtCard={dealtCard}
+          attemptsLeft={attemptsLeft}
+          maxAttempts={maxAttempts}
+          onAdjustAttempts={adjustAttempts}
+        />
+      </div>
     </div>
   );
 }

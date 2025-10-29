@@ -34,7 +34,6 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
         )}
         {...props}
       >
-        {/* Cover Image */}
         <div className="absolute inset-0 pointer-events-none">
           {game.imageUrl ? (
             <Image
@@ -53,7 +52,6 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
           )}
         </div>
 
-        {/* Upper Banner - Date/Question Mark */}
         <div
           className={cn(
             'absolute top-0 left-0 right-0 px-2 py-1 text-center text-white text-sm font-semibold',
@@ -65,7 +63,6 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
           {showDate ? formatDate(game.firstReleaseDate) : '?'}
         </div>
 
-        {/* Lower Banner - Game Name */}
         <div className="absolute bottom-0 left-0 right-0 bg-blue-600 px-2 py-1 text-center">
           <p className="text-white text-xs font-medium truncate" title={game.name}>
             {game.name}

@@ -141,6 +141,14 @@ export function useTimelineGame() {
     });
   }, [selectedGames]);
 
+  const adjustAttempts = useCallback((delta: number) => {
+    setAttemptsLeft(prev => {
+      const newValue = prev + delta;
+      if (newValue < 1 || newValue > MAX_ATTEMPTS) return prev;
+      return newValue;
+    });
+  }, []);
+
   return {
     userOrder,
     correctGameIds,
@@ -157,5 +165,6 @@ export function useTimelineGame() {
     isOrderSameAsSaved,
     resetGame,
     getCorrectOrder,
+    adjustAttempts,
   };
 }

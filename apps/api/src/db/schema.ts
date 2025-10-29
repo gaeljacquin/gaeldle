@@ -5,10 +5,7 @@ import {
   timestamp,
   integer,
   json,
-  pgEnum,
 } from 'drizzle-orm/pg-core';
-
-export const themeEnum = pgEnum('theme', ['cream', 'pink', 'blue', 'green']);
 
 export const games = pgTable('game', {
   id: serial('id').primaryKey(),

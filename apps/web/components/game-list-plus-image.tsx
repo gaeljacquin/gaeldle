@@ -48,10 +48,54 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
     setSearchKey(prev => prev + 1);
   };
 
+  const selectedGame = allGames.find(g => g.id === selectedGameId) || null;
+  const wrongGuessIds = wrongGuesses.map(g => g.id);
+
+  const imageDisplayComp = () => {
+    let imageDisplayed;
+
+    switch (props.gameModeSlug) {
+      case 'artwork':
+        imageDisplayed =
+          <ArtworkDisplay
+            imageUrl={selectedArtworkUrl}
+            pixelSize={currentPixelSize}
+            isGameOver={isGameOver}
+            className="h-[500px] border border-slate-200 rounded-lg"
+          />
+        break;
+      case 'image-ai':
+        imageDisplayed =
+          <CoverDisplay
+            game={targetGame}
+            pixelSize={0}
+            usePixelation={false}
+            isGameOver={isGameOver}
+            className="h-[500px]"
+            sourceImageUrl={targetGame?.aiImageUrl}
+          />
+        break;
+      default:
+        imageDisplayed =
+          <CoverDisplay
+            game={targetGame}
+            pixelSize={currentPixelSize}
+            usePixelation={true}
+            isGameOver={isGameOver}
+            className="h-[500px]"
+            sourceImageUrl={targetGame?.imageUrl}
+          />
+        break;
+    }
+
+    return imageDisplayed;
+  }
+
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 flex items-center justify-center min-h-screen">
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2">
         <p className="text-lg">Loading game...</p>
+        <p className="text-lg">Do not refresh the page</p>
       </div>
     );
   }
@@ -68,10 +112,6 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
       </div>
     );
   }
-
-  const selectedGame = allGames.find(g => g.id === selectedGameId) || null;
-  const wrongGuessIds = wrongGuesses.map(g => g.id);
-  const isArtworkMode = props.gameModeSlug === 'artwork';
 
   return (
     <div className="container mx-auto">
@@ -95,22 +135,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
         <CardContent>
           <div className="flex gap-6">
             <div className="flex-1 flex flex-col">
-              {isArtworkMode ? (
-                <ArtworkDisplay
-                  imageUrl={selectedArtworkUrl}
-                  pixelSize={currentPixelSize}
-                  isGameOver={isGameOver}
-                  className="h-[500px] border border-slate-200 rounded-lg"
-                />
-              ) : (
-                <CoverDisplay
-                  game={targetGame}
-                  pixelSize={currentPixelSize}
-                  usePixelation={true}
-                  isGameOver={isGameOver}
-                  className="h-[500px]"
-                />
-              )}
+              {imageDisplayComp()}
             </div>
 
             <div className="flex-1 flex flex-col gap-4 h-[500px]">

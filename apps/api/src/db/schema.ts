@@ -27,4 +27,6 @@ export const games = pgTable('game', {
   release_dates: json('release_dates'),
   themes: json('themes'),
   first_release_date: integer('first_release_date'),
+  aiImageUrl: varchar('ai_image_url'),
+  aiPrompt: varchar('ai_prompt'),
 });

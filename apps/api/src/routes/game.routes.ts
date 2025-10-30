@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia';
-import { getAllGames, getRandomGame, getGameById } from '../services/game.service';
+import { getAllGames, getRandomGame, getGameById } from 'src/services/game.service';
 
 export const gameRoutes = new Elysia({ prefix: '/api/game' })
   .get(
@@ -25,7 +25,7 @@ export const gameRoutes = new Elysia({ prefix: '/api/game' })
   .post(
     '/random',
     async ({ body, set }) => {
-      const game = await getRandomGame(body.excludeIds, body.artwork);
+      const game = await getRandomGame(body.excludeIds, body.artwork, body.imageAI);
 
       if (!game) {
         set.status = 404;
@@ -44,6 +44,7 @@ export const gameRoutes = new Elysia({ prefix: '/api/game' })
       body: t.Object({
         excludeIds: t.Optional(t.Array(t.Number())),
         artwork: t.Optional(t.Boolean()),
+        imageAI: t.Optional(t.Boolean()),
       }),
     }
   )

@@ -33,14 +33,15 @@ export async function getAllGames(artwork?: boolean): Promise<Game[]> {
  * Fetch a random video game from the API
  * @param excludeIds - Array of game IDs to exclude
  * @param artwork - If true, only fetch games with artwork
+ * @param imageAI - If true, generate AI image if missing
  */
-export async function getRandomGame(excludeIds: number[] = [], artwork?: boolean): Promise<Game> {
+export async function getRandomGame(excludeIds: number[] = [], artwork?: boolean, imageAI?: boolean): Promise<Game> {
   const response = await fetch(`${API_BASE_URL}/api/game/random`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ excludeIds, artwork }),
+    body: JSON.stringify({ excludeIds, artwork, imageAI }),
   });
 
   if (!response.ok) {

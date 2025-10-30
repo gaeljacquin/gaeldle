@@ -74,8 +74,9 @@ export default function ArtworkDisplay({
             <Image
               src={displayUrl || imageUrl}
               alt="Game artwork"
-              fill
               className="object-contain rounded-lg"
+              fill
+              sizes="10vw"
               priority
             />
           </div>
@@ -100,8 +101,9 @@ export default function ArtworkDisplay({
             <Image
               src={displayUrl || imageUrl}
               alt="Game artwork (expanded)"
-              fill
               className="object-contain"
+              fill
+              sizes="10vw"
             />
           </div>
         </DialogContent>

@@ -102,13 +102,9 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
 
   if (error) {
     return (
-      <div className="container mx-auto p-6 flex items-center justify-center min-h-screen">
-        <Card>
-          <CardHeader>
-            <CardTitle>Error</CardTitle>
-            <CardDescription>{error}</CardDescription>
-          </CardHeader>
-        </Card>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2">
+        <p className="text-lg">Error</p>
+        <p className="text-lg">{error}</p>
       </div>
     );
   }

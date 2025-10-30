@@ -217,48 +217,6 @@ export async function getRandomGame(excludeIds: number[] = [], artwork?: boolean
 }
 
 /**
- * Get a specific video game by ID
- */
-export async function getGameById(id: number): Promise<Game | null> {
-  const [game] = await db
-    .select({
-      id: games.id,
-      igdbId: games.igdbId,
-      name: games.name,
-      imageUrl: games.imageUrl,
-      aiImageUrl: games.aiImageUrl,
-      aiPrompt: games.aiPrompt,
-      artworks: games.artworks,
-      info: games.info,
-      firstReleaseDate: games.first_release_date,
-      keywords: games.keywords,
-      franchises: games.franchises,
-      game_engines: games.game_engines,
-      game_modes: games.game_modes,
-      genres: games.genres,
-      involved_companies: games.involved_companies,
-      platforms: games.platforms,
-      player_perspectives: games.player_perspectives,
-      release_dates: games.release_dates,
-      themes: games.themes,
-    })
-    .from(games)
-    .where(eq(games.id, id))
-    .limit(1);
-
-  if (!game) {
-    return null;
-  }
-
-  const aiImageUrl = await getAiImageUrl(game.aiImageUrl) ?? game.imageUrl;
-
-  return {
-    ...game,
-    aiImageUrl,
-  };
-}
-
-/**
  * Update a game's AI prompt
  */
 export async function updateGameAiPrompt(gameId: number, aiPrompt: string): Promise<void> {

@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia';
-import { getAllGames, getRandomGame, getGameById } from 'src/services/game.service';
+import { getAllGames, getRandomGame } from 'src/services/game.service';
 
 export const gameRoutes = new Elysia({ prefix: '/api/game' })
   .get(
@@ -45,30 +45,6 @@ export const gameRoutes = new Elysia({ prefix: '/api/game' })
         excludeIds: t.Optional(t.Array(t.Number())),
         artwork: t.Optional(t.Boolean()),
         imageAI: t.Optional(t.Boolean()),
-      }),
-    }
-  )
-  .get(
-    '/:gameId',
-    async ({ params: { gameId }, set }) => {
-      const game = await getGameById(parseInt(gameId));
-
-      if (!game) {
-        set.status = 404;
-        return {
-          success: false,
-          error: 'Game not found',
-        };
-      }
-
-      return {
-        success: true,
-        data: game,
-      };
-    },
-    {
-      params: t.Object({
-        gameId: t.String(),
       }),
     }
   )

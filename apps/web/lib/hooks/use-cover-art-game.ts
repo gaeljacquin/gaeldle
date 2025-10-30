@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAllGames, getRandomGame } from '@/lib/services/game.service';
 import { getPixelSizeForAttempt } from '@/lib/utils/pixelate';
-import type { Game, CoverArtMode } from '@/lib/types/game';
+import type { Game, CoverArtMode, ArtworkImage } from '@/lib/types/game';
 
 export const MAX_ATTEMPTS = 5;
 
@@ -11,11 +11,22 @@ interface UseCoverArtGameProps {
   mode: CoverArtMode;
 }
 
+// Helper to pick a random artwork from the artworks array
+function getRandomArtwork(artworks: unknown): string | null {
+  if (!artworks || !Array.isArray(artworks) || artworks.length === 0) {
+    return null;
+  }
+
+  const randomIndex = Math.floor(Math.random() * artworks.length);
+  const artwork = artworks[randomIndex] as ArtworkImage;
+  return artwork.url || null;
+}
+
 export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
   const [allGames, setAllGames] = useState<Game[]>([]);
   const [targetGame, setTargetGame] = useState<Game | null>(null);
   const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
-  const [wrongGuesses, setWrongGuesses] = useState<number[]>([]);
+  const [wrongGuesses, setWrongGuesses] = useState<Game[]>([]);
   const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -24,22 +35,25 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
   const [currentPixelSize, setCurrentPixelSize] = useState(
     getPixelSizeForAttempt(0, MAX_ATTEMPTS)
   );
+  const [selectedArtworkUrl, setSelectedArtworkUrl] = useState<string | null>(null);
 
-  // Load all games on mount
+  const isArtworkMode = mode === 'artwork';
+  const isImageAIMode = mode === 'image-ai';
+
   useEffect(() => {
     async function loadGames() {
       try {
         setIsLoading(true);
-        console.log('Fetching all games...');
-        const games = await getAllGames();
-        console.log('Fetched games:', games.length);
+        const games = await getAllGames(isArtworkMode);
         setAllGames(games);
 
-        // Get a random game for the answer
-        console.log('Fetching random game...');
-        const randomGame = await getRandomGame();
-        console.log('Random game:', randomGame);
+        const randomGame = await getRandomGame([], isArtworkMode, isImageAIMode);
         setTargetGame(randomGame);
+
+        if (isArtworkMode && randomGame) {
+          const artworkUrl = getRandomArtwork(randomGame.artworks);
+          setSelectedArtworkUrl(artworkUrl);
+        }
       } catch (err) {
         console.error('Error loading games:', err);
         setError(err instanceof Error ? err.message : 'Failed to load games');
@@ -49,41 +63,41 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
     }
 
     loadGames();
-  }, []);
+  }, [isArtworkMode, isImageAIMode]);
 
-  // Update pixel size when attempts change (only for cover-art mode)
   useEffect(() => {
-    if (mode === 'cover-art') {
-      const wrongAttempts = MAX_ATTEMPTS - attemptsLeft;
-      setCurrentPixelSize(getPixelSizeForAttempt(wrongAttempts, MAX_ATTEMPTS));
-    }
-  }, [attemptsLeft, mode]);
+    const wrongAttempts = MAX_ATTEMPTS - attemptsLeft;
+    setCurrentPixelSize(getPixelSizeForAttempt(wrongAttempts, MAX_ATTEMPTS));
+  }, [attemptsLeft]);
 
   const handleSelectGame = useCallback((gameId: number) => {
     setSelectedGameId(gameId);
   }, []);
 
+  const clearSelection = useCallback(() => {
+    setSelectedGameId(null);
+  }, []);
+
   const handleSubmit = useCallback(() => {
     if (!targetGame || selectedGameId === null || isGameOver) return;
 
-    // Check if the selected game is correct
+    const selectedGame = allGames.find(g => g.id === selectedGameId);
+    if (!selectedGame) return;
+
     if (selectedGameId === targetGame.id) {
       setIsCorrect(true);
       setIsGameOver(true);
     } else {
-      // Wrong answer
-      setWrongGuesses((prev) => [...prev, selectedGameId]);
+      setWrongGuesses((prev) => [...prev, selectedGame]);
       setAttemptsLeft((prev) => prev - 1);
 
-      // Check if game is over
       if (attemptsLeft - 1 <= 0) {
         setIsGameOver(true);
       }
     }
 
-    // Reset selection
     setSelectedGameId(null);
-  }, [targetGame, selectedGameId, isGameOver, attemptsLeft]);
+  }, [targetGame, selectedGameId, isGameOver, attemptsLeft, allGames]);
 
   const resetGame = useCallback(async () => {
     try {
@@ -96,17 +110,29 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
       setCurrentPixelSize(getPixelSizeForAttempt(0, MAX_ATTEMPTS));
 
       // Get a new random game
-      const randomGame = await getRandomGame();
+      const randomGame = await getRandomGame([], isArtworkMode, isImageAIMode);
       setTargetGame(randomGame);
+
+      if (isArtworkMode && randomGame) {
+        const artworkUrl = getRandomArtwork(randomGame.artworks);
+        setSelectedArtworkUrl(artworkUrl);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reset game');
     } finally {
       setIsLoading(false);
     }
+  }, [isArtworkMode, isImageAIMode]);
+
+  const adjustAttempts = useCallback((delta: number) => {
+    setAttemptsLeft(prev => {
+      const newValue = prev + delta;
+      if (newValue < 1 || newValue > MAX_ATTEMPTS) return prev;
+      return newValue;
+    });
   }, []);
 
   return {
-    // Game state
     allGames,
     targetGame,
     selectedGameId,
@@ -117,10 +143,11 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
     isLoading,
     error,
     currentPixelSize,
-
-    // Actions
+    selectedArtworkUrl,
     handleSelectGame,
+    clearSelection,
     handleSubmit,
     resetGame,
+    adjustAttempts,
   };
 }

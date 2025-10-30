@@ -18,7 +18,7 @@ interface GuessHistorySidebarProps {
   className?: string;
 }
 
-export function GuessHistorySidebar({
+export default function GuessHistorySidebar({
   guesses,
   isVisible,
   selectedGame,
@@ -41,7 +41,6 @@ export function GuessHistorySidebar({
     <div className={cn('space-y-3', className)}>
       <h3 className="text-sm font-semibold text-muted-foreground">Guess History</h3>
       <div className="space-y-2">
-        {/* Selected game - shown at top with dark styling */}
         {selectedGame && (
           <div
             className="relative flex items-center gap-2 p-2 bg-slate-700 rounded border border-slate-600 group"
@@ -81,7 +80,6 @@ export function GuessHistorySidebar({
           </div>
         )}
 
-        {/* Previous guesses */}
         {reversedGuesses.length === 0 && !selectedGame ? (
           <p className="text-xs text-muted-foreground italic">No guesses yet</p>
         ) : (
@@ -116,7 +114,6 @@ export function GuessHistorySidebar({
         )}
       </div>
 
-      {/* Dev mode toggle */}
       {targetGame && process.env.NODE_ENV === 'development' && (
         <div className="pt-3 border-t border-border space-y-2">
           <p className="text-xs font-semibold">[dev]</p>
@@ -132,7 +129,6 @@ export function GuessHistorySidebar({
             </p>
           )}
 
-          {/* Attempts controls */}
           {onAdjustAttempts && (
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">Attempts:</span>

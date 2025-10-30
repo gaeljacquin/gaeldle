@@ -3,6 +3,7 @@ export interface Game {
   igdbId: number;
   name: string;
   imageUrl: string | null;
+  aiImageUrl?: string | null;
   artworks: unknown;
   info: unknown;
   firstReleaseDate: number | null;
@@ -24,7 +25,12 @@ export interface GameApiResponse {
   error?: string;
 }
 
-export type CoverArtMode = 'cover-art' | 'cover-art-2';
+export type CoverArtMode = 'cover-art' | 'image-ai' | 'artwork';
+
+export interface ArtworkImage {
+  url: string;
+  image_id: string;
+}
 
 export interface GameState {
   targetGame: Game | null;

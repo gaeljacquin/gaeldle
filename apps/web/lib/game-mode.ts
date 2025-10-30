@@ -3,7 +3,8 @@ import {
   Calendar,
   CalendarRange,
   Scroll,
-  // Wallpaper,
+  Wallpaper,
+  Gpu,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -29,16 +30,26 @@ export const gameModes: GameMode[] = [
     pattern: "diagonal",
     href: "/cover-art",
   },
-  // {
-  //   id: "cover-art-2",
-  //   title: "Cover Art 2",
-  //   description: "Guess the game from an AI-generated cover art.",
-  //   difficulty: "Medium",
-  //   icon: Wallpaper,
-  //   gradient: "bg-gradient-to-br from-purple-600 via-purple-700 to-violet-900",
-  //   pattern: "diagonal-reverse",
-  //   href: "/cover-art-2",
-  // },
+  {
+    id: "artwork",
+    title: "Artwork",
+    description: "Guess the game from their artwork.",
+    difficulty: "Medium",
+    icon: Wallpaper,
+    gradient: "bg-gradient-to-br from-purple-600 via-purple-700 to-violet-900",
+    pattern: "diagonal-reverse",
+    href: "/artwork",
+  },
+  {
+    id: "image-ai",
+    title: "Image AI",
+    description: "Guess the game from an AI-generated image.",
+    difficulty: "Medium",
+    icon: Gpu,
+    gradient: "bg-gradient-to-br from-red-600 via-red-700 to-rose-900",
+    pattern: "diagonal",
+    href: "/image-ai",
+  },
   {
     id: "timeline",
     title: "Timeline",
@@ -65,7 +76,7 @@ export const gameModes: GameMode[] = [
     description: "Deduce the game from their specifications.",
     difficulty: "Hard",
     icon: Scroll,
-    gradient: "bg-gradient-to-br from-red-600 via-red-700 to-rose-900",
+    gradient: "bg-gradient-to-br from-sky-600 via-sky-700 to-lime-900",
     pattern: "diagonal-reverse",
     href: "/specifications",
   },
@@ -73,7 +84,7 @@ export const gameModes: GameMode[] = [
 
 /**
  * Get game mode by slug (pathname without leading slash)
- * @param slug - The game mode slug (e.g., "cover-art", "cover-art-2")
+ * @param slug - The game mode slug (e.g., "cover-art", "image-ai")
  * @returns GameMode or undefined if not found
  */
 export function getGameModeBySlug(slug: string): GameMode | undefined {

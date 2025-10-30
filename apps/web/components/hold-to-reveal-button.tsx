@@ -13,7 +13,7 @@ interface HoldToRevealButtonProps {
 const HOLD_DURATION = 3000; // 3 seconds
 const NOW = Date.now();
 
-export function HoldToRevealButton({ onReveal, disabled, className }: HoldToRevealButtonProps) {
+export default function HoldToRevealButton({ onReveal, disabled, className }: HoldToRevealButtonProps) {
   const [isHolding, setIsHolding] = useState(false);
   const [progress, setProgress] = useState(0);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -83,7 +83,6 @@ export function HoldToRevealButton({ onReveal, disabled, className }: HoldToReve
       )}
       size="lg"
     >
-      {/* Fill animation background */}
       <div
         className={cn(
           'absolute inset-0 bg-primary-foreground/20 transition-transform origin-left',
@@ -94,7 +93,6 @@ export function HoldToRevealButton({ onReveal, disabled, className }: HoldToReve
         }}
       />
 
-      {/* Button text */}
       <span className="relative z-10">
         {isHolding ? `Hold (${Math.ceil((HOLD_DURATION - (progress / 100) * HOLD_DURATION) / 1000)}s)` : 'Hold to Reveal Hint'}
       </span>

@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 import fs from "fs";
 
 // Load environment variables before any other imports
-const currentEnv = (process.env.APP_ENV || process.env.NODE_ENV || "development").toLowerCase();
+export const currentEnv = (process.env.APP_ENV || process.env.NODE_ENV || "development").toLowerCase();
 const envPaths = [
   `.env.${currentEnv}.local`,
   `.env.local`,

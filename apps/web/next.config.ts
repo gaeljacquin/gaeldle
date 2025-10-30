@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   env: {
     serverUrl: process.env.SERVER_URL,
     publicServerUrl: process.env.NEXT_PUBLIC_SERVER_URL,
@@ -11,6 +10,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'images.igdb.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'kqujhdaltqildqytisgc.supabase.co',
         pathname: '**',
       },
     ],

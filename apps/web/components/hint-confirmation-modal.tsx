@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { HoldToRevealButton } from '@/components/hold-to-reveal-button';
+import HoldToRevealButton from '@/components/hold-to-reveal-button';
 
 interface ClueConfirmationModalProps {
   isOpen: boolean;

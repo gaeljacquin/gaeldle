@@ -12,30 +12,32 @@ interface CoverDisplayProps {
   usePixelation?: boolean;
   isGameOver?: boolean;
   className?: string;
+  sourceImageUrl?: string | null;
 }
 
-export function CoverDisplay({
+export default function CoverDisplay({
   game,
   pixelSize = 0,
   usePixelation = false,
   isGameOver = false,
   className,
+  sourceImageUrl,
 }: CoverDisplayProps) {
   const [pixelatedUrl, setPixelatedUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    if (!game?.imageUrl || !usePixelation || isGameOver) {
+    if (!sourceImageUrl || !usePixelation || isGameOver) {
       setPixelatedUrl(null);
       return;
     }
 
     async function applyPixelation() {
-      if (!game || !game.imageUrl) return;
+      if (!sourceImageUrl) return;
 
       try {
         setIsProcessing(true);
-        const pixelated = await pixelateImage(game.imageUrl, pixelSize);
+        const pixelated = await pixelateImage(sourceImageUrl, pixelSize);
         setPixelatedUrl(pixelated);
       } catch (error) {
         console.error('Failed to pixelate image:', error);
@@ -46,7 +48,7 @@ export function CoverDisplay({
     }
 
     applyPixelation();
-  }, [game?.imageUrl, pixelSize, usePixelation, isGameOver, game]);
+  }, [sourceImageUrl, pixelSize, usePixelation, isGameOver]);
 
   if (!game) {
     return (
@@ -63,7 +65,7 @@ export function CoverDisplay({
 
   const displayUrl = usePixelation && !isGameOver && pixelatedUrl
     ? pixelatedUrl
-    : game.imageUrl;
+    : sourceImageUrl;
 
   if (!displayUrl) {
     return (
@@ -93,8 +95,9 @@ export function CoverDisplay({
       <Image
         src={displayUrl}
         alt={isGameOver ? game.name : 'Game cover'}
-        fill
         className="object-contain"
+        fill
+        sizes="10vw"
         priority
       />
       {isGameOver && (

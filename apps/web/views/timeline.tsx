@@ -35,6 +35,7 @@ import Attempts from '@/components/attempts';
 import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import TimelineDevToggle from '@/components/timeline-dev-toggle';
 
 // No-op strategy for swap mode - prevents automatic reordering animation
 const noOpStrategy: SortingStrategy = () => {
@@ -110,6 +111,7 @@ export default function Timeline() {
     isOrderSameAsSaved,
     resetGame,
     getCorrectOrder,
+    adjustAttempts,
   } = useTimelineGame();
 
   const sensors = useSensors(
@@ -194,7 +196,6 @@ export default function Timeline() {
   return (
     <div className="container mx-auto max-w-[1800px]">
       <Card className="relative">
-        {/* Upper-left corner link */}
         <Link
           href="/"
           className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
@@ -203,7 +204,6 @@ export default function Timeline() {
           <span className="text-sm">Main Menu</span>
         </Link>
 
-        {/* Centered content */}
         <CardHeader className="flex flex-col items-center justify-center text-center space-y-2 py-4">
           <CardTitle className="text-4xl font-bold">
             {gameMode?.title}
@@ -214,9 +214,7 @@ export default function Timeline() {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {/* Game Info */}
             <div className="text-center space-y-2 mb-8">
-              {/* Timeline Cards Container */}
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 overflow-x-auto flex justify-center">
                 <DndContext
                   sensors={sensors}
@@ -277,7 +275,6 @@ export default function Timeline() {
                 </DndContext>
               </div>
 
-              {/* Swap Mode Toggle */}
               <div className="flex items-center justify-center gap-2 my-8">
                 <Switch
                   id="swap-mode"
@@ -321,7 +318,6 @@ export default function Timeline() {
               </div>
             )}
 
-            {/* Game Over Message */}
             {isGameOver && (
               <div className="mt-6 text-center space-y-4">
                 {isWinner ? (
@@ -340,7 +336,6 @@ export default function Timeline() {
                       </p>
                     </div>
 
-                    {/* Correct Order Display */}
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 overflow-x-auto">
                       <div className="flex gap-4 min-w-max">
                         {getCorrectOrder().map((game) => (
@@ -368,6 +363,14 @@ export default function Timeline() {
           </div>
         </CardContent>
       </Card>
+      <div className="flex items-center justify-center mt-4">
+        <TimelineDevToggle
+          getCorrectOrder={getCorrectOrder}
+          attemptsLeft={attemptsLeft}
+          maxAttempts={MAX_ATTEMPTS}
+          onAdjustAttempts={adjustAttempts}
+        />
+      </div>
     </div>
   );
 }

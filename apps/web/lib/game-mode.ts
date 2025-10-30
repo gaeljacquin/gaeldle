@@ -4,7 +4,7 @@ import {
   CalendarRange,
   Scroll,
   Wallpaper,
-  Gpu,
+  // Gpu,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -40,16 +40,16 @@ export const gameModes: GameMode[] = [
     pattern: "diagonal-reverse",
     href: "/artwork",
   },
-  {
-    id: "image-ai",
-    title: "Image AI",
-    description: "Guess the game from an AI-generated image.",
-    difficulty: "Medium",
-    icon: Gpu,
-    gradient: "bg-gradient-to-br from-red-600 via-red-700 to-rose-900",
-    pattern: "diagonal",
-    href: "/image-ai",
-  },
+  // {
+  //   id: "image-ai",
+  //   title: "Image AI",
+  //   description: "Guess the game from an AI-generated image.",
+  //   difficulty: "Medium",
+  //   icon: Gpu,
+  //   gradient: "bg-gradient-to-br from-red-600 via-red-700 to-rose-900",
+  //   pattern: "diagonal",
+  //   href: "/image-ai",
+  // },
   {
     id: "timeline",
     title: "Timeline",

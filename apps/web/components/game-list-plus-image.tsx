@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { MAX_ATTEMPTS, useCoverArtGame } from '@/lib/hooks/use-cover-art-game';
 import ArtworkDisplay from '@/components/artwork-display';
 import CoverDisplay from '@/components/cover-display';
-import SpecificationsSearch from '@/components/specifications-search';
+import GameSearch from '@/components/game-search';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import GuessHistoryInline from '@/components/guess-history-inline';
 import { Button } from '@/components/ui/button';
@@ -137,7 +137,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
             <div className="flex-1 flex flex-col gap-4 h-[500px]">
                 <div className="flex gap-4">
                   <div className="flex-1">
-                    <SpecificationsSearch
+                    <GameSearch
                       key={searchKey}
                       games={allGames}
                       selectedGameId={selectedGameId}

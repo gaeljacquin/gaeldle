@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { MAX_ATTEMPTS, useSpecificationsGame } from '@/lib/hooks/use-specifications-game';
 import SpecificationsGrid from '@/components/specifications-grid';
-import SpecificationsSearch from '@/components/specifications-search';
+import GameSearch from '@/components/game-search';
 import DevModeToggle from '@/components/dev-mode-toggle';
 import SpecificationsGameOver from '@/components/specifications-game-over';
 import { Button } from '@/components/ui/button';
@@ -86,7 +86,7 @@ export default function Specifications() {
             {!isGameOver && (
               <div className="flex flex-row gap-4 max-w-2xl mx-auto">
                 <div className="flex-1">
-                  <SpecificationsSearch
+                  <GameSearch
                     games={allGames}
                     selectedGameId={selectedGameId}
                     wrongGuesses={wrongGuesses}

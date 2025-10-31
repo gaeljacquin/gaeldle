@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia';
-import { getAllGames, getRandomGame } from 'src/services/game.service';
+import { getAllGames, getRandomGame, searchGames } from 'src/services/game.service';
 
 export const gameRoutes = new Elysia({ prefix: '/api/game' })
   .get(
@@ -20,6 +20,34 @@ export const gameRoutes = new Elysia({ prefix: '/api/game' })
         success: true,
         data: games,
       };
+    }
+  )
+  .get(
+    '/search',
+    async ({ query, set }) => {
+      const { q, limit, mode } = query;
+
+      // Validate query parameter
+      if (!q || q.length < 2) {
+        set.status = 400;
+        return {
+          success: false,
+          error: 'Search query must be at least 2 characters',
+        };
+      }
+
+      const games = await searchGames(q, limit ? parseInt(limit) : 100, mode);
+      return {
+        success: true,
+        data: games,
+      };
+    },
+    {
+      query: t.Object({
+        q: t.String({ minLength: 2 }),
+        limit: t.Optional(t.String()),
+        mode: t.Optional(t.String()),
+      }),
     }
   )
   .post(

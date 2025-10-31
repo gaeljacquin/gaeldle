@@ -1,6 +1,6 @@
 import { db } from 'src/db';
 import { allGames, allGamesWithArtwork, Game } from 'src/db/schema';
-import { notInArray } from 'drizzle-orm';
+import { notInArray, ilike } from 'drizzle-orm';
 import { getMaterializedView } from 'src/utils/materialized-vew';
 
 export async function getAllGames(mode?: string): Promise<Game[]> {
@@ -29,6 +29,19 @@ export async function getRandomGame(excludeIds: number[] = [], mode?: string): P
   const randomIndex = Math.floor(Math.random() * result.length);
 
   return result[randomIndex];
+}
+
+export async function searchGames(query: string, limit: number = 100, mode?: string): Promise<Game[]> {
+  const materializedView = getMaterializedView(mode ?? '');
+
+  // Perform case-insensitive search using ILIKE
+  const result = await db
+    .select()
+    .from(materializedView)
+    .where(ilike(materializedView.name, `%${query}%`))
+    .limit(limit);
+
+  return result;
 }
 
 // export async function updateGameAiPrompt(gameId: number, aiPrompt: string): Promise<void> {

@@ -139,7 +139,6 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                   <div className="flex-1">
                     <GameSearch
                       key={searchKey}
-                      games={allGames}
                       selectedGameId={selectedGameId}
                       wrongGuesses={wrongGuessIds}
                       onSelectGame={handleSelectGame}

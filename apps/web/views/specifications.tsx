@@ -87,7 +87,6 @@ export default function Specifications() {
               <div className="flex flex-row gap-4 max-w-2xl mx-auto">
                 <div className="flex-1">
                   <GameSearch
-                    games={allGames}
                     selectedGameId={selectedGameId}
                     wrongGuesses={wrongGuesses}
                     onSelectGame={handleSelectGame}

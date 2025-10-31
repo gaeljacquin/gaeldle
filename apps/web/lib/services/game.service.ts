@@ -46,3 +46,37 @@ export async function getRandomGame(excludeIds: number[] = [], mode?: string): P
 
   return data.data as Game;
 }
+
+export async function searchGames(query: string, limit: number = 100, mode?: string): Promise<Game[]> {
+  if (query.length < 2) {
+    return [];
+  }
+
+  const params = new URLSearchParams({
+    q: query,
+    limit: limit.toString(),
+  });
+
+  if (mode) {
+    params.append('mode', mode);
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/game/search?${params.toString()}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to search games');
+  }
+
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to search games');
+  }
+
+  return data.data as Game[];
+}

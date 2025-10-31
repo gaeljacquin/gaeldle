@@ -7,9 +7,10 @@ import {
   // Gpu,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { GameModeSlug } from "@/lib/types/game";
 
 export interface GameMode {
-  id: string;
+  id: GameModeSlug;
   title: string;
   description: string;
   difficulty: "Easy" | "Medium" | "Hard";

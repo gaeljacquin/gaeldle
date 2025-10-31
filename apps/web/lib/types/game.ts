@@ -25,7 +25,9 @@ export interface GameApiResponse {
   error?: string;
 }
 
-export type CoverArtMode = 'cover-art' | 'image-ai' | 'artwork';
+export type CoverArtModeSlug = 'cover-art' | 'image-ai' | 'artwork';
+
+export type GameModeSlug = CoverArtModeSlug | 'timeline' | 'timeline-2' | 'specifications';
 
 export interface ArtworkImage {
   url: string;

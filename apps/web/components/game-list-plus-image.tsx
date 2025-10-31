@@ -14,10 +14,10 @@ import Link from 'next/link';
 import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
-import { CoverArtMode } from '@/lib/types/game';
+import { CoverArtModeSlug } from '@/lib/types/game';
 
 interface GameListPlusImageProps {
-  gameModeSlug: CoverArtMode;
+  gameModeSlug: CoverArtModeSlug;
 }
 
 export default function GameListPlusImage(props: GameListPlusImageProps) {
@@ -163,6 +163,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                     onClearSelection={clearSelection}
                     showSkeleton={!selectedGame}
                     className="flex-1"
+                    mode={props.gameModeSlug}
                   />
                 </div>
               )}

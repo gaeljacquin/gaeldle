@@ -113,6 +113,7 @@ export default function Specifications() {
                   onClearSelection={clearSelection}
                   showSkeleton={!selectedGame}
                   className="flex-1"
+                  mode="specifications"
                 />
               </div>
             )}

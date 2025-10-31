@@ -11,6 +11,7 @@ interface CoverDisplayProps {
   pixelSize?: number;
   usePixelation?: boolean;
   isGameOver?: boolean;
+  isLoading?: boolean;
   className?: string;
   sourceImageUrl?: string | null;
 }
@@ -20,15 +21,19 @@ export default function CoverDisplay({
   pixelSize = 0,
   usePixelation = false,
   isGameOver = false,
+  isLoading = false,
   className,
   sourceImageUrl,
 }: CoverDisplayProps) {
-  const [pixelatedUrl, setPixelatedUrl] = useState<string | null>(null);
+  const [pixelatedData, setPixelatedData] = useState<{url: string; sourceUrl: string} | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    if (!sourceImageUrl || !usePixelation || isGameOver) {
-      setPixelatedUrl(null);
+    // Clear old pixelated image immediately when source changes
+    setPixelatedData(null);
+
+    if (!sourceImageUrl || !usePixelation || isGameOver || isLoading) {
+      setIsProcessing(false);
       return;
     }
 
@@ -38,17 +43,18 @@ export default function CoverDisplay({
       try {
         setIsProcessing(true);
         const pixelated = await pixelateImage(sourceImageUrl, pixelSize);
-        setPixelatedUrl(pixelated);
+        // Store both the pixelated URL and the source it came from
+        setPixelatedData({ url: pixelated, sourceUrl: sourceImageUrl });
       } catch (error) {
         console.error('Failed to pixelate image:', error);
-        setPixelatedUrl(null);
+        setPixelatedData(null);
       } finally {
         setIsProcessing(false);
       }
     }
 
     applyPixelation();
-  }, [sourceImageUrl, pixelSize, usePixelation, isGameOver]);
+  }, [sourceImageUrl, pixelSize, usePixelation, isGameOver, isLoading]);
 
   if (!game) {
     return (
@@ -63,11 +69,16 @@ export default function CoverDisplay({
     );
   }
 
-  const displayUrl = usePixelation && !isGameOver && pixelatedUrl
-    ? pixelatedUrl
-    : sourceImageUrl;
+  // Determine what to display
+  const shouldShowPixelated = usePixelation && !isGameOver;
+  // Only use pixelated URL if it matches the current source
+  const pixelatedUrl = (pixelatedData && pixelatedData.sourceUrl === sourceImageUrl) ? pixelatedData.url : null;
+  const displayUrl = shouldShowPixelated ? pixelatedUrl : sourceImageUrl;
 
-  if (!displayUrl) {
+  // Don't show original image if we're waiting for pixelation
+  const shouldShowImage = !shouldShowPixelated || (shouldShowPixelated && pixelatedUrl);
+
+  if (!sourceImageUrl) {
     return (
       <div
         className={cn(
@@ -87,19 +98,21 @@ export default function CoverDisplay({
         className
       )}
     >
-      {isProcessing && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
-          <p className="text-sm text-muted-foreground">Processing...</p>
+      {(isProcessing || !shouldShowImage) && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       )}
-      <Image
-        src={displayUrl}
-        alt={isGameOver ? game.name : 'Game cover'}
-        className="object-contain"
-        fill
-        sizes="10vw"
-        priority
-      />
+      {shouldShowImage && displayUrl && (
+        <Image
+          src={displayUrl}
+          alt={isGameOver ? game.name : 'Game cover'}
+          className="object-contain"
+          fill
+          sizes="10vw"
+          priority
+        />
+      )}
       {isGameOver && (
         <div className="absolute bottom-0 left-0 right-0 bg-background/80 p-2 text-center">
           <p className="font-semibold">{game.name}</p>

@@ -61,6 +61,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
             imageUrl={selectedArtworkUrl}
             pixelSize={currentPixelSize}
             isGameOver={isGameOver}
+            isLoading={isLoading}
             className="h-[500px] border border-slate-200 rounded-lg"
           />
         break;
@@ -71,6 +72,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
             pixelSize={0}
             usePixelation={false}
             isGameOver={isGameOver}
+            isLoading={isLoading}
             className="h-[500px]"
             sourceImageUrl={targetGame?.aiImageUrl}
           />
@@ -82,6 +84,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
             pixelSize={currentPixelSize}
             usePixelation={true}
             isGameOver={isGameOver}
+            isLoading={isLoading}
             className="h-[500px]"
             sourceImageUrl={targetGame?.imageUrl}
           />

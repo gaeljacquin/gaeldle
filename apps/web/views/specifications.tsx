@@ -12,6 +12,7 @@ import { getGameModeBySlug } from '@/lib/game-mode';
 import Link from 'next/link';
 import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';
+import SelectedGameDisplay from '@/components/selected-game-display';
 
 export default function Specifications() {
   const gameMode = getGameModeBySlug('specifications');
@@ -28,6 +29,7 @@ export default function Specifications() {
     isLoading,
     error,
     revealedClue,
+    clearSelection,
     handleSelectGame,
     handleSubmit,
     resetGame,
@@ -38,6 +40,8 @@ export default function Specifications() {
     setShowAnswerSpecs(true);
     resetGame();
   };
+
+  const selectedGame = allGames.find(g => g.id === selectedGameId) || null;
 
   if (isLoading) {
     return (
@@ -99,6 +103,17 @@ export default function Specifications() {
                 >
                   Submit
                 </Button>
+              </div>
+            )}
+
+            {!isGameOver && (
+              <div className="flex flex-row gap-4 max-w-2xl mx-auto">
+                <SelectedGameDisplay
+                  selectedGame={selectedGame}
+                  onClearSelection={clearSelection}
+                  showSkeleton={!selectedGame}
+                  className="flex-1"
+                />
               </div>
             )}
 

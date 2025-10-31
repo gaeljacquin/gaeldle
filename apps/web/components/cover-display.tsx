@@ -29,13 +29,14 @@ export default function CoverDisplay({
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    // Clear old pixelated image immediately when source changes
-    setPixelatedData(null);
-
+    // Early return for invalid states - don't clear cached data yet
     if (!sourceImageUrl || !usePixelation || isGameOver || isLoading) {
       setIsProcessing(false);
       return;
     }
+
+    // Clear old pixelated image only when we're about to generate a new one
+    setPixelatedData(null);
 
     async function applyPixelation() {
       if (!sourceImageUrl) return;

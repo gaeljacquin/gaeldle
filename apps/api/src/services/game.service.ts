@@ -1,33 +1,18 @@
 import { db } from 'src/db';
 import { allGames, allGamesWithArtwork, Game } from 'src/db/schema';
 import { notInArray } from 'drizzle-orm';
+import { getMaterializedView } from 'src/utils/materialized-vew';
 
-/**
- * Get all video games
- * @param artwork - If true, only return games with artwork
- */
-export async function getAllGames(artwork?: boolean): Promise<Game[]> {
-  let materializedView;
-
-  if (artwork) {
-    materializedView = allGamesWithArtwork;
-  } else {
-    materializedView = allGames;
-  }
-
+export async function getAllGames(mode?: string): Promise<Game[]> {
+  const materializedView = getMaterializedView(mode ?? '');
   const query = db.select().from(materializedView);
   const result = await query;
 
   return result;
 }
 
-/**
- * Get a random video game excluding specified IGDB IDs
- * @param excludeIds - Array of IGDB IDs to exclude
- * @param artwork - If true, only return games with artwork
- */
-export async function getRandomGame(excludeIds: number[] = [], artwork?: boolean): Promise<Game | null> {
-  const materializedView = artwork ? allGamesWithArtwork : allGames;
+export async function getRandomGame(excludeIds: number[] = [], mode?: string): Promise<Game | null> {
+  const materializedView = getMaterializedView(mode ?? '');
 
   let query = db.select().from(materializedView);
 

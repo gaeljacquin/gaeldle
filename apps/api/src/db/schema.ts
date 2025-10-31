@@ -71,4 +71,13 @@ export const allGamesWithArtwork = pgMaterializedView('all_games_with_artwork').
   ;
 });
 
+export const allGamesWithFirstReleaseDate = pgMaterializedView('all_games_with_first_release_date').as((qb) => {
+  return qb
+    .select(gameObject)
+    .from(games)
+    .where(isNotNull(games.firstReleaseDate))
+    .orderBy(games.name)
+  ;
+});
+
 export type Game = typeof allGames.$inferSelect;

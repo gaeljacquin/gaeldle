@@ -30,13 +30,14 @@ export default function ArtworkDisplay({
 
   // Apply pixelation when image URL or pixel size changes
   useEffect(() => {
-    // Clear old pixelated image immediately when source changes
-    setPixelatedData(null);
-
+    // Early return for invalid states - don't clear cached data yet
     if (!imageUrl || isGameOver || isLoading) {
       setIsProcessing(false);
       return;
     }
+
+    // Clear old pixelated image only when we're about to generate a new one
+    setPixelatedData(null);
 
     async function applyPixelation() {
       if (!imageUrl) return;

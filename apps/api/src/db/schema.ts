@@ -5,7 +5,9 @@ import {
   timestamp,
   integer,
   json,
+  pgMaterializedView,
 } from 'drizzle-orm/pg-core';
+import { isNotNull } from 'drizzle-orm';
 
 export const games = pgTable('game', {
   id: serial('id').primaryKey(),
@@ -18,15 +20,55 @@ export const games = pgTable('game', {
   artworks: json('artworks'),
   keywords: json('keywords'),
   franchises: json('franchises'),
-  game_engines: json('game_engines'),
-  game_modes: json('game_modes'),
+  gameEngines: json('game_engines'),
+  gameModes: json('game_modes'),
   genres: json('genres'),
-  involved_companies: json('involved_companies'),
+  involvedCompanies: json('involved_companies'),
   platforms: json('platforms'),
-  player_perspectives: json('player_perspectives'),
-  release_dates: json('release_dates'),
+  playerPerspectives: json('player_perspectives'),
+  releaseDates: json('release_dates'),
   themes: json('themes'),
-  first_release_date: integer('first_release_date'),
+  firstReleaseDate: integer('first_release_date'),
   aiImageUrl: varchar('ai_image_url'),
   aiPrompt: varchar('ai_prompt'),
 });
+
+const gameObject = {
+  id: games.id,
+  igdbId: games.igdbId,
+  name: games.name,
+  imageUrl: games.imageUrl,
+  artworks: games.artworks,
+  keywords: games.keywords,
+  franchises: games.franchises,
+  gameEngines: games.gameEngines,
+  gameModes: games.gameModes,
+  genres: games.genres,
+  involvedCompanies: games.involvedCompanies,
+  platforms: games.platforms,
+  playerPerspectives: games.playerPerspectives,
+  releaseDates: games.releaseDates,
+  themes: games.themes,
+  firstReleaseDate: games.firstReleaseDate,
+  aiImageUrl: games.aiImageUrl,
+  aiPrompt: games.aiPrompt,
+};
+
+export const allGames = pgMaterializedView('all_games').as((qb) => {
+  return qb
+    .select(gameObject)
+    .from(games)
+    .orderBy(games.name)
+  ;
+});
+
+export const allGamesWithArtwork = pgMaterializedView('all_games_with_artwork').as((qb) => {
+  return qb
+    .select(gameObject)
+    .from(games)
+    .where(isNotNull(games.artworks))
+    .orderBy(games.name)
+  ;
+});
+
+export type Game = typeof allGames.$inferSelect;

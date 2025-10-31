@@ -22,6 +22,20 @@
       "when": 1761783359341,
       "tag": "0002_familiar_machine_man",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1761864701557,
+      "tag": "0003_fixed_kronos",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1761870039727,
+      "tag": "0004_thick_black_widow",
+      "breakpoints": true
     }
   ]
 }

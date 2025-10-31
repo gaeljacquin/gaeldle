@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@/lib/utils';
 import type { Game } from '@/lib/types/game';
 import { X, Search } from 'lucide-react';
@@ -30,6 +31,15 @@ export default function GameSearch({
   const [searchResults, setSearchResults] = useState<Game[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const debouncedSearch = useDebounce(searchValue, 300);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  // Virtual scrolling - show 5 items at once
+  const virtualizer = useVirtualizer({
+    count: searchResults.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 32, // Approximate height of each item in pixels
+    overscan: 2, // Render 2 items above and below visible area for smooth scrolling
+  });
 
   const handleSelect = (gameId: number) => {
     if (wrongGuesses.includes(gameId) || disabled) return;
@@ -103,7 +113,7 @@ export default function GameSearch({
       </div>
 
       {isOpen && searchValue.length > 0 && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-lg shadow-lg max-h-[300px] overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-lg shadow-lg">
           {searchValue.length < 2 ? (
             <div className="py-6 text-center text-sm text-muted-foreground">
               Type at least 2 characters to search...
@@ -117,29 +127,49 @@ export default function GameSearch({
               No games found.
             </div>
           ) : (
-            <div className="p-1">
-              {searchResults.map((game) => {
-                const isWrongGuess = wrongGuesses.includes(game.id);
-                const isSelected = selectedGameId === game.id;
-                const isDisabled = isWrongGuess || disabled;
+            <div
+              ref={parentRef}
+              className="overflow-y-auto p-1"
+              style={{
+                height: `${Math.min(searchResults.length, 5) * 32}px`,
+                maxHeight: '160px',
+              }}
+            >
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {virtualizer.getVirtualItems().map((virtualItem) => {
+                  const game = searchResults[virtualItem.index];
+                  const isWrongGuess = wrongGuesses.includes(game.id);
+                  const isSelected = selectedGameId === game.id;
+                  const isDisabled = isWrongGuess || disabled;
 
-                return (
-                  <button
-                    key={game.id}
-                    onClick={() => handleSelect(game.id)}
-                    disabled={isDisabled}
-                    className={cn(
-                      'w-full text-left px-2 py-1.5 text-sm rounded-sm transition-colors',
-                      'hover:bg-accent hover:text-accent-foreground',
-                      'disabled:pointer-events-none disabled:opacity-50',
-                      isSelected && 'bg-accent',
-                      isWrongGuess && 'line-through opacity-50 cursor-not-allowed'
-                    )}
-                  >
-                    {game.name}
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={game.id}
+                      onClick={() => handleSelect(game.id)}
+                      disabled={isDisabled}
+                      className={cn(
+                        'w-full text-left px-2 py-1.5 text-sm rounded-sm transition-colors absolute top-0 left-0',
+                        'hover:bg-accent hover:text-accent-foreground',
+                        'disabled:pointer-events-none disabled:opacity-50',
+                        isSelected && 'bg-accent',
+                        isWrongGuess && 'line-through opacity-50 cursor-not-allowed'
+                      )}
+                      style={{
+                        height: `${virtualItem.size}px`,
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                    >
+                      {game.name}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

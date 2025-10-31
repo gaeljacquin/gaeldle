@@ -1,6 +1,6 @@
 import { db } from 'src/db';
 import { Game, games } from 'src/db/schema';
-import { notInArray, sql, asc } from 'drizzle-orm';
+import { notInArray, sql, desc } from 'drizzle-orm';
 import { getMaterializedView } from 'src/utils/materialized-view';
 
 export async function getAllGames(mode?: string): Promise<Game[]> {
@@ -48,11 +48,24 @@ export async function searchGames(query: string, limit: number = 100, mode?: str
       whereCondition = sql`${whereCondition} AND first_release_date IS NOT NULL`;
     }
 
+    // Use ts_rank_cd with normalization for better relevance sorting
+    // Also boost exact phrase matches and shorter names (more specific results)
+    // Normalization divides rank by document length, favoring shorter, more relevant matches
     const result = await db
       .select()
       .from(games)
       .where(whereCondition)
-      .orderBy(asc(games.name))
+      .orderBy(
+        desc(sql`
+          ts_rank_cd(name_search, to_tsquery('english', ${tsQuery}), 32) *
+          (CASE WHEN LOWER(name) = LOWER(${query}) THEN 10.0
+                WHEN LOWER(name) LIKE LOWER(${query} || '%') THEN 5.0
+                WHEN LOWER(name) LIKE LOWER('%' || ${query}) THEN 3.0
+                ELSE 1.0
+           END) /
+          (1.0 + LENGTH(name) / 100.0)
+        `)
+      )
       .limit(limit);
 
     // If full-text search returns results, use them

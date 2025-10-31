@@ -6,6 +6,12 @@ import { cn } from '@/lib/utils';
 import type { Game } from '@/lib/types/game';
 import { X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import { searchGames } from '@/lib/services/game.service';
 
@@ -37,7 +43,7 @@ export default function GameSearch({
   const virtualizer = useVirtualizer({
     count: searchResults.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 32, // Approximate height of each item in pixels
+    estimateSize: () => 44, // Approximate height of each item in pixels (increased from 32)
     overscan: 2, // Render 2 items above and below visible area for smooth scrolling
   });
 
@@ -127,50 +133,59 @@ export default function GameSearch({
               No games found.
             </div>
           ) : (
-            <div
-              ref={parentRef}
-              className="overflow-y-auto p-1"
-              style={{
-                height: `${Math.min(searchResults.length, 5) * 32}px`,
-                maxHeight: '160px',
-              }}
-            >
+            <TooltipProvider delayDuration={300}>
               <div
+                ref={parentRef}
+                className="overflow-y-auto p-1"
                 style={{
-                  height: `${virtualizer.getTotalSize()}px`,
-                  width: '100%',
-                  position: 'relative',
+                  height: `${Math.min(searchResults.length, 5) * 44}px`,
+                  maxHeight: '220px',
                 }}
               >
-                {virtualizer.getVirtualItems().map((virtualItem) => {
-                  const game = searchResults[virtualItem.index];
-                  const isWrongGuess = wrongGuesses.includes(game.id);
-                  const isSelected = selectedGameId === game.id;
-                  const isDisabled = isWrongGuess || disabled;
+                <div
+                  style={{
+                    height: `${virtualizer.getTotalSize()}px`,
+                    width: '100%',
+                    position: 'relative',
+                  }}
+                >
+                  {virtualizer.getVirtualItems().map((virtualItem) => {
+                    const game = searchResults[virtualItem.index];
+                    const isWrongGuess = wrongGuesses.includes(game.id);
+                    const isSelected = selectedGameId === game.id;
+                    const isDisabled = isWrongGuess || disabled;
 
-                  return (
-                    <button
-                      key={game.id}
-                      onClick={() => handleSelect(game.id)}
-                      disabled={isDisabled}
-                      className={cn(
-                        'w-full text-left px-2 py-1.5 text-sm rounded-sm transition-colors absolute top-0 left-0',
-                        'hover:bg-accent hover:text-accent-foreground',
-                        'disabled:pointer-events-none disabled:opacity-50',
-                        isSelected && 'bg-accent',
-                        isWrongGuess && 'line-through opacity-50 cursor-not-allowed'
-                      )}
-                      style={{
-                        height: `${virtualItem.size}px`,
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                    >
-                      {game.name}
-                    </button>
-                  );
-                })}
+                    return (
+                      <Tooltip key={game.id}>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => handleSelect(game.id)}
+                            disabled={isDisabled}
+                            className={cn(
+                              'w-full text-left px-3 py-2.5 text-sm rounded-sm transition-colors absolute top-0 left-0 leading-relaxed',
+                              'disabled:pointer-events-none disabled:opacity-50',
+                              isWrongGuess && 'line-through opacity-50 cursor-not-allowed',
+                              isSelected
+                                ? 'bg-slate-700 text-white hover:bg-slate-700'
+                                : 'hover:bg-accent hover:text-accent-foreground'
+                            )}
+                            style={{
+                              height: `${virtualItem.size}px`,
+                              transform: `translateY(${virtualItem.start}px)`,
+                            }}
+                          >
+                            <span className="block truncate">{game.name}</span>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-md">
+                          <p>{game.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            </TooltipProvider>
           )}
         </div>
       )}

@@ -6,6 +6,7 @@ import {
   integer,
   json,
   pgMaterializedView,
+  index,
 } from 'drizzle-orm/pg-core';
 import { isNotNull } from 'drizzle-orm';
 
@@ -31,7 +32,9 @@ export const games = pgTable('game', {
   firstReleaseDate: integer('first_release_date'),
   aiImageUrl: varchar('ai_image_url'),
   aiPrompt: varchar('ai_prompt'),
-});
+}, (table) => ({
+  nameIdx: index('game_name_idx').on(table.name),
+}));
 
 const gameObject = {
   id: games.id,

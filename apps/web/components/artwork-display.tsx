@@ -13,6 +13,7 @@ interface ArtworkDisplayProps {
   imageUrl: string | null;
   pixelSize: number;
   isGameOver: boolean;
+  isLoading?: boolean;
   className?: string;
 }
 
@@ -20,16 +21,20 @@ export default function ArtworkDisplay({
   imageUrl,
   pixelSize,
   isGameOver,
+  isLoading = false,
   className,
 }: ArtworkDisplayProps) {
   // const [isExpanded, setIsExpanded] = useState(false);
-  const [pixelatedImageUrl, setPixelatedImageUrl] = useState<string | null>(null);
+  const [pixelatedData, setPixelatedData] = useState<{url: string; sourceUrl: string} | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Apply pixelation when image URL or pixel size changes
   useEffect(() => {
-    if (!imageUrl || isGameOver) {
-      setPixelatedImageUrl(null);
+    // Clear old pixelated image immediately when source changes
+    setPixelatedData(null);
+
+    if (!imageUrl || isGameOver || isLoading) {
+      setIsProcessing(false);
       return;
     }
 
@@ -39,19 +44,27 @@ export default function ArtworkDisplay({
       try {
         setIsProcessing(true);
         const pixelated = await pixelateImage(imageUrl, pixelSize);
-        setPixelatedImageUrl(pixelated);
+        // Store both the pixelated URL and the source it came from
+        setPixelatedData({ url: pixelated, sourceUrl: imageUrl });
       } catch (error) {
         console.error('Failed to pixelate artwork:', error);
-        setPixelatedImageUrl(null);
+        setPixelatedData(null);
       } finally {
         setIsProcessing(false);
       }
     }
 
     applyPixelation();
-  }, [imageUrl, pixelSize, isGameOver]);
+  }, [imageUrl, pixelSize, isGameOver, isLoading]);
 
-  const displayUrl = isGameOver || !pixelatedImageUrl ? imageUrl : pixelatedImageUrl;
+  // Determine what to display
+  const shouldShowPixelated = !isGameOver;
+  // Only use pixelated URL if it matches the current source
+  const pixelatedImageUrl = (pixelatedData && pixelatedData.sourceUrl === imageUrl) ? pixelatedData.url : null;
+  const displayUrl = shouldShowPixelated ? pixelatedImageUrl : imageUrl;
+
+  // Don't show original image if we're waiting for pixelation
+  const shouldShowImage = !shouldShowPixelated || (shouldShowPixelated && pixelatedImageUrl);
 
   if (!imageUrl) {
     return (
@@ -64,21 +77,23 @@ export default function ArtworkDisplay({
   return (
     <>
       <div className={cn('relative', className)}>
-        {isProcessing && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10 rounded-lg">
-            <p className="text-sm text-muted-foreground">Processing...</p>
+        {(isProcessing || !shouldShowImage) && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background z-10 rounded-lg">
+            <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
         )}
         <AspectRatio ratio={16 / 9}>
           <div className="relative w-full h-full">
-            <Image
-              src={displayUrl || imageUrl}
-              alt="Game artwork"
-              className="object-contain rounded-lg"
-              fill
-              sizes="10vw"
-              priority
-            />
+            {shouldShowImage && displayUrl && (
+              <Image
+                src={displayUrl}
+                alt="Game artwork"
+                className="object-contain rounded-lg"
+                fill
+                sizes="10vw"
+                priority
+              />
+            )}
           </div>
         </AspectRatio>
 

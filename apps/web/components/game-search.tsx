@@ -1,31 +1,34 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import type { Game } from '@/lib/types/game';
 import { X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useDebounce } from '@/lib/hooks/use-debounce';
+import { searchGames } from '@/lib/services/game.service';
 
 interface SpecificationsSearchProps {
-  games: Game[];
   selectedGameId: number | null;
   wrongGuesses: number[];
   onSelectGame: (gameId: number) => void;
   disabled?: boolean;
   className?: string;
+  mode?: string;
 }
 
 export default function GameSearch({
-  games,
   selectedGameId,
   wrongGuesses,
   onSelectGame,
   disabled = false,
   className,
+  mode,
 }: SpecificationsSearchProps) {
   const [searchValue, setSearchValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState<Game[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const debouncedSearch = useDebounce(searchValue, 300);
 
   const handleSelect = (gameId: number) => {
@@ -44,21 +47,33 @@ export default function GameSearch({
   const handleClear = () => {
     setSearchValue('');
     setIsOpen(false);
+    setSearchResults([]);
   };
 
-  const filteredGames = useMemo(() => {
+  // Fetch search results from backend API
+  useEffect(() => {
     // Only search if there are at least 2 characters
     if (debouncedSearch.length < 2) {
-      return [];
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
     }
 
-    const searchLower = debouncedSearch.toLowerCase();
+    const performSearch = async () => {
+      setIsSearching(true);
+      try {
+        const results = await searchGames(debouncedSearch, 100, mode);
+        setSearchResults(results);
+      } catch (error) {
+        console.error('Search error:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
 
-    // Filter and limit to first 100 results for performance
-    return games
-      .filter((game) => game.name.toLowerCase().includes(searchLower))
-      .slice(0, 100);
-  }, [games, debouncedSearch]);
+    performSearch();
+  }, [debouncedSearch, mode]);
 
   return (
     <div className={cn('relative', className)}>
@@ -93,13 +108,17 @@ export default function GameSearch({
             <div className="py-6 text-center text-sm text-muted-foreground">
               Type at least 2 characters to search...
             </div>
-          ) : filteredGames.length === 0 ? (
+          ) : isSearching ? (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              Searching...
+            </div>
+          ) : searchResults.length === 0 ? (
             <div className="py-6 text-center text-sm text-muted-foreground">
               No games found.
             </div>
           ) : (
             <div className="p-1">
-              {filteredGames.map((game) => {
+              {searchResults.map((game) => {
                 const isWrongGuess = wrongGuesses.includes(game.id);
                 const isSelected = selectedGameId === game.id;
                 const isDisabled = isWrongGuess || disabled;

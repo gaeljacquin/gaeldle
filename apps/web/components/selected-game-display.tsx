@@ -2,7 +2,7 @@
 
 import { X } from 'lucide-react';
 import Image from 'next/image';
-import type { Game } from '@/lib/types/game';
+import type { Game, GameModeSlug } from '@/lib/types/game';
 import { cn } from '@/lib/utils';
 
 interface SelectedGameDisplayProps {
@@ -10,13 +10,15 @@ interface SelectedGameDisplayProps {
   onClearSelection?: () => void;
   showSkeleton?: boolean;
   className?: string;
+  mode: GameModeSlug;
 }
 
 export default function SelectedGameDisplay({
   selectedGame,
   onClearSelection,
   showSkeleton = false,
-  className
+  className,
+  mode = 'cover-art',
 }: SelectedGameDisplayProps) {
   if (showSkeleton || !selectedGame) {
     return (
@@ -32,7 +34,7 @@ export default function SelectedGameDisplay({
 
   return (
     <div className={cn('relative flex items-center gap-2 p-2 bg-slate-700 rounded border border-slate-600 group', className)}>
-      {selectedGame.imageUrl ? (
+      {selectedGame.imageUrl && mode !== 'cover-art' ? (
         <Image
           src={selectedGame.imageUrl}
           alt={selectedGame.name}

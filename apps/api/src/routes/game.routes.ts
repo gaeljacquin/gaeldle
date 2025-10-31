@@ -15,7 +15,7 @@ export const gameRoutes = new Elysia({ prefix: '/api/game' })
   .get(
     '/artwork',
     async () => {
-      const games = await getAllGames(true);
+      const games = await getAllGames('artwork');
       return {
         success: true,
         data: games,
@@ -25,7 +25,7 @@ export const gameRoutes = new Elysia({ prefix: '/api/game' })
   .post(
     '/random',
     async ({ body, set }) => {
-      const game = await getRandomGame(body.excludeIds, body.artwork, body.imageAI);
+      const game = await getRandomGame(body.excludeIds, body.mode);
 
       if (!game) {
         set.status = 404;
@@ -43,8 +43,7 @@ export const gameRoutes = new Elysia({ prefix: '/api/game' })
     {
       body: t.Object({
         excludeIds: t.Optional(t.Array(t.Number())),
-        artwork: t.Optional(t.Boolean()),
-        imageAI: t.Optional(t.Boolean()),
+        mode: t.Optional(t.String()),
       }),
     }
   )

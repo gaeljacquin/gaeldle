@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAllGames, getRandomGame } from '@/lib/services/game.service';
 import { getPixelSizeForAttempt } from '@/lib/utils/pixelate';
-import type { Game, CoverArtMode, ArtworkImage } from '@/lib/types/game';
+import type { Game, CoverArtModeSlug, ArtworkImage } from '@/lib/types/game';
 
 export const MAX_ATTEMPTS = 5;
 
 interface UseCoverArtGameProps {
-  mode: CoverArtMode;
+  mode: CoverArtModeSlug;
 }
 
 // Helper to pick a random artwork from the artworks array
@@ -37,20 +37,17 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
   );
   const [selectedArtworkUrl, setSelectedArtworkUrl] = useState<string | null>(null);
 
-  const isArtworkMode = mode === 'artwork';
-  const isImageAIMode = mode === 'image-ai';
-
   useEffect(() => {
     async function loadGames() {
       try {
         setIsLoading(true);
-        const games = await getAllGames(isArtworkMode);
+        const games = await getAllGames(mode);
         setAllGames(games);
 
-        const randomGame = await getRandomGame([], isArtworkMode, isImageAIMode);
+        const randomGame = await getRandomGame([], mode);
         setTargetGame(randomGame);
 
-        if (isArtworkMode && randomGame) {
+        if (mode === 'artwork' && randomGame) {
           const artworkUrl = getRandomArtwork(randomGame.artworks);
           setSelectedArtworkUrl(artworkUrl);
         }
@@ -63,7 +60,7 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
     }
 
     loadGames();
-  }, [isArtworkMode, isImageAIMode]);
+  }, [mode]);
 
   useEffect(() => {
     const wrongAttempts = MAX_ATTEMPTS - attemptsLeft;
@@ -110,10 +107,10 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
       setCurrentPixelSize(getPixelSizeForAttempt(0, MAX_ATTEMPTS));
 
       // Get a new random game
-      const randomGame = await getRandomGame([], isArtworkMode, isImageAIMode);
+      const randomGame = await getRandomGame([], mode);
       setTargetGame(randomGame);
 
-      if (isArtworkMode && randomGame) {
+      if (mode === 'artwork' && randomGame) {
         const artworkUrl = getRandomArtwork(randomGame.artworks);
         setSelectedArtworkUrl(artworkUrl);
       }
@@ -122,7 +119,7 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [isArtworkMode, isImageAIMode]);
+  }, [mode]);
 
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft(prev => {

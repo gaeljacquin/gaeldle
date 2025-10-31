@@ -1,0 +1,391 @@
+{
+  "id": "26b671d3-5e51-436b-80fb-81200a97f3a9",
+  "prevId": "7fa9c650-b2e0-4f48-a879-70258c4d4a02",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.game": {
+      "name": "game",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "igdb_id": {
+          "name": "igdb_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "info": {
+          "name": "info",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "artworks": {
+          "name": "artworks",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keywords": {
+          "name": "keywords",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "franchises": {
+          "name": "franchises",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_engines": {
+          "name": "game_engines",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_modes": {
+          "name": "game_modes",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "genres": {
+          "name": "genres",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "involved_companies": {
+          "name": "involved_companies",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "platforms": {
+          "name": "platforms",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "player_perspectives": {
+          "name": "player_perspectives",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "release_dates": {
+          "name": "release_dates",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "themes": {
+          "name": "themes",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "first_release_date": {
+          "name": "first_release_date",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ai_image_url": {
+          "name": "ai_image_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ai_prompt": {
+          "name": "ai_prompt",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "games_igdb_key": {
+          "name": "games_igdb_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "igdb_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {
+    "public.all_games": {
+      "columns": {
+        "igdb_id": {
+          "name": "igdb_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "artworks": {
+          "name": "artworks",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keywords": {
+          "name": "keywords",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "franchises": {
+          "name": "franchises",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_engines": {
+          "name": "game_engines",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_modes": {
+          "name": "game_modes",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "genres": {
+          "name": "genres",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "involved_companies": {
+          "name": "involved_companies",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "platforms": {
+          "name": "platforms",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "player_perspectives": {
+          "name": "player_perspectives",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "release_dates": {
+          "name": "release_dates",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "themes": {
+          "name": "themes",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "first_release_date": {
+          "name": "first_release_date",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ai_image_url": {
+          "name": "ai_image_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ai_prompt": {
+          "name": "ai_prompt",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "select \"igdb_id\", \"name\", \"image_url\", \"artworks\", \"keywords\", \"franchises\", \"game_engines\", \"game_modes\", \"genres\", \"involved_companies\", \"platforms\", \"player_perspectives\", \"release_dates\", \"themes\", \"first_release_date\", \"ai_image_url\", \"ai_prompt\" from \"game\" order by \"game\".\"name\"",
+      "name": "all_games",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.all_games_with_artwork": {
+      "columns": {
+        "igdb_id": {
+          "name": "igdb_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "artworks": {
+          "name": "artworks",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keywords": {
+          "name": "keywords",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "franchises": {
+          "name": "franchises",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_engines": {
+          "name": "game_engines",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_modes": {
+          "name": "game_modes",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "genres": {
+          "name": "genres",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "involved_companies": {
+          "name": "involved_companies",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "platforms": {
+          "name": "platforms",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "player_perspectives": {
+          "name": "player_perspectives",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "release_dates": {
+          "name": "release_dates",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "themes": {
+          "name": "themes",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "first_release_date": {
+          "name": "first_release_date",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ai_image_url": {
+          "name": "ai_image_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ai_prompt": {
+          "name": "ai_prompt",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "select \"igdb_id\", \"name\", \"image_url\", \"artworks\", \"keywords\", \"franchises\", \"game_engines\", \"game_modes\", \"genres\", \"involved_companies\", \"platforms\", \"player_perspectives\", \"release_dates\", \"themes\", \"first_release_date\", \"ai_image_url\", \"ai_prompt\" from \"game\" where \"game\".\"artworks\" is not null order by \"game\".\"name\"",
+      "name": "all_games_with_artwork",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    }
+  },
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

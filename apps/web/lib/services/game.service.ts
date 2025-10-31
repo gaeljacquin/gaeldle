@@ -2,12 +2,8 @@ import type { Game } from '@/lib/types/game';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8080';
 
-/**
- * Fetch all video games from the API
- * @param artwork - If true, only fetch games with artwork
- */
-export async function getAllGames(artwork?: boolean): Promise<Game[]> {
-  const endpoint = artwork ? `${API_BASE_URL}/api/game/artwork` : `${API_BASE_URL}/api/game`;
+export async function getAllGames(mode?: string): Promise<Game[]> {
+  const endpoint = mode === 'artwork' ? `${API_BASE_URL}/api/game/artwork` : `${API_BASE_URL}/api/game`;
 
   const response = await fetch(endpoint, {
     method: 'GET',
@@ -29,19 +25,13 @@ export async function getAllGames(artwork?: boolean): Promise<Game[]> {
   return data.data as Game[];
 }
 
-/**
- * Fetch a random video game from the API
- * @param excludeIds - Array of game IDs to exclude
- * @param artwork - If true, only fetch games with artwork
- * @param imageAI - If true, generate AI image if missing
- */
-export async function getRandomGame(excludeIds: number[] = [], artwork?: boolean, imageAI?: boolean): Promise<Game> {
+export async function getRandomGame(excludeIds: number[] = [], mode?: string): Promise<Game> {
   const response = await fetch(`${API_BASE_URL}/api/game/random`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ excludeIds, artwork, imageAI }),
+    body: JSON.stringify({ excludeIds, mode }),
   });
 
   if (!response.ok) {

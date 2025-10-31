@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { Game } from '@/lib/types/game';
 import { X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useDebounce } from '@/lib/hooks/use-debounce';
 
 interface SpecificationsSearchProps {
   games: Game[];
@@ -15,7 +16,7 @@ interface SpecificationsSearchProps {
   className?: string;
 }
 
-export default function SpecificationsSearch({
+export default function GameSearch({
   games,
   selectedGameId,
   wrongGuesses,
@@ -25,6 +26,7 @@ export default function SpecificationsSearch({
 }: SpecificationsSearchProps) {
   const [searchValue, setSearchValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const debouncedSearch = useDebounce(searchValue, 300);
 
   const handleSelect = (gameId: number) => {
     if (wrongGuesses.includes(gameId) || disabled) return;
@@ -44,9 +46,19 @@ export default function SpecificationsSearch({
     setIsOpen(false);
   };
 
-  const filteredGames = games.filter((game) =>
-    game.name.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const filteredGames = useMemo(() => {
+    // Only search if there are at least 2 characters
+    if (debouncedSearch.length < 2) {
+      return [];
+    }
+
+    const searchLower = debouncedSearch.toLowerCase();
+
+    // Filter and limit to first 100 results for performance
+    return games
+      .filter((game) => game.name.toLowerCase().includes(searchLower))
+      .slice(0, 100);
+  }, [games, debouncedSearch]);
 
   return (
     <div className={cn('relative', className)}>
@@ -77,7 +89,11 @@ export default function SpecificationsSearch({
 
       {isOpen && searchValue.length > 0 && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-lg shadow-lg max-h-[300px] overflow-y-auto">
-          {filteredGames.length === 0 ? (
+          {searchValue.length < 2 ? (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              Type at least 2 characters to search...
+            </div>
+          ) : filteredGames.length === 0 ? (
             <div className="py-6 text-center text-sm text-muted-foreground">
               No games found.
             </div>

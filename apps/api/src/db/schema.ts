@@ -7,6 +7,7 @@ import {
   json,
   pgMaterializedView,
   index,
+  text,
 } from 'drizzle-orm/pg-core';
 import { isNotNull } from 'drizzle-orm';
 
@@ -32,6 +33,8 @@ export const games = pgTable('game', {
   firstReleaseDate: integer('first_release_date'),
   aiImageUrl: varchar('ai_image_url'),
   aiPrompt: varchar('ai_prompt'),
+  summary: text('summary'),
+  storyline: text('storyline'),
 }, (table) => ({
   nameIdx: index('game_name_idx').on(table.name),
 }));
@@ -55,30 +58,14 @@ const gameObject = {
   firstReleaseDate: games.firstReleaseDate,
   aiImageUrl: games.aiImageUrl,
   aiPrompt: games.aiPrompt,
+  summary: games.summary,
+  storyline: games.storyline,
 };
 
 export const allGames = pgMaterializedView('all_games').as((qb) => {
   return qb
     .select(gameObject)
     .from(games)
-    .orderBy(games.name)
-  ;
-});
-
-export const allGamesWithArtwork = pgMaterializedView('all_games_with_artwork').as((qb) => {
-  return qb
-    .select(gameObject)
-    .from(games)
-    .where(isNotNull(games.artworks))
-    .orderBy(games.name)
-  ;
-});
-
-export const allGamesWithFirstReleaseDate = pgMaterializedView('all_games_with_first_release_date').as((qb) => {
-  return qb
-    .select(gameObject)
-    .from(games)
-    .where(isNotNull(games.firstReleaseDate))
     .orderBy(games.name)
   ;
 });

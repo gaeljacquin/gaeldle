@@ -11,29 +11,30 @@ export async function convertSummaryToImagePrompt(gameTitle: string, summary: st
   const model = genAI.getGenerativeModel({ model: 'gemini-flash-lite-latest' });
 
   const systemPrompt = `
-    You are an expert at converting game descriptions into visual, atmospheric image generation prompts.
+    You are an expert at converting game descriptions into visual image generation prompts that capture the game's distinctive identity.
 
-    Your task: Extract the MOOD, ATMOSPHERE, and VISUAL THEMES from a game summary and convert them into an abstract, artistic image prompt suitable for cover art.
+    Your task: Create a prompt that generates recognizable cover art by identifying the game's ICONIC VISUAL ELEMENTS, unique setting, and distinctive aesthetic - while avoiding direct copying of existing art.
 
     RULES:
-    - DO NOT use literal plot points or character names
-    - Focus on: mood, atmosphere, colors, lighting, visual metaphors
-    - Use abstract visual elements (smoke, shadows, light, textures)
-    - Include art style descriptors (concept art, digital painting, illustration)
-    - ALWAYS emphasize: "no text, no letters, no words, no typography"
-    - Keep it under 100 words
-    - Make it atmospheric and evocative, not literal
+    - Extract SPECIFIC visual elements that make this game unique (distinct environments, signature objects, recognizable symbols)
+    - Include the game's DISTINCTIVE COLOR PALETTE if identifiable from the description
+    - Use concrete visual details, not just abstract mood (e.g., "neon-lit cyberpunk streets" not just "futuristic mood")
+    - Incorporate recognizable themes or motifs (portals, specific weapons, iconic vehicles, distinctive architecture)
+    - Balance specificity with artistic interpretation - be recognizable but not a literal copy
+    - CRITICAL: Include "no text, no letters, no words, no UI elements, no typography" in every prompt
+    - Keep it under 120 words
+    - Use cinematic composition and professional art style descriptors
 
     EXAMPLES:
 
     Game: "Firework" - "An accidental fire at a funeral forces police to re-investigate a closed case of massacre..."
-    Output: "Dark atmospheric concept art, mysterious investigation aesthetic, funeral flowers shrouded in smoke and shadow, dramatic orange and red fire glow, noir detective mood, cinematic lighting, moody color palette with deep blues and grays, professional game cover illustration, no text whatsoever, no letters, digital art, artstation style"
+    Output: "Detective noir concept art, crime scene with burning funeral chrysanthemums and candles, evidence markers, dramatic fire and smoke illumination, detective silhouette examining clues, dark cinematic atmosphere with orange fire glow contrasting deep blue shadows, professional mystery thriller aesthetic, detailed illustration style, no text, no letters, no words, artstation quality"
 
     Game: "Spider Hero" - "Play as a superhero with spider powers fighting crime in a big city"
-    Output: "Urban cityscape at dusk, dramatic shadows between skyscrapers, abstract web patterns, heroic silhouette composition, dynamic action mood, red and blue color accents, cinematic lighting from below, comic book art style meets concept art, no text, no letters, digital illustration, high contrast"
+    Output: "Dynamic superhero leaping between Manhattan skyscrapers, distinctive red and blue costume design, intricate glowing web patterns stretched across buildings, aerial perspective of New York cityscape at sunset, heroic action composition, dramatic lighting with lens flare, comic book meets cinematic concept art, vibrant colors, no text, no letters, no UI, digital illustration"
 
     Game: "Peaceful Farm" - "Build and manage your dream farm, grow crops, raise animals, and enjoy rural life"
-    Output: "Serene pastoral landscape, golden hour lighting, soft rolling hills, warm earth tones with green accents, peaceful countryside atmosphere, cozy illustration style, gentle composition, watercolor concept art aesthetic, no text, no words, digital painting, calming mood"
+    Output: "Cozy farm homestead with red barn, golden wheat fields, windmill, scattered farm animals (chickens, cows), rustic wooden fences, vegetable garden with pumpkins and sunflowers, warm golden hour lighting, gentle rolling countryside, charming illustration with soft colors, pastoral game art style, inviting atmosphere, no text, no words, digital painting"
 
     Now convert this game:
   `;

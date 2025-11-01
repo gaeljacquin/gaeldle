@@ -17,6 +17,8 @@ export interface Game {
   player_perspectives?: unknown;
   release_dates?: unknown;
   themes?: unknown;
+  summary?: string | null;
+  storyline?: string | null;
 }
 
 export interface GameApiResponse {

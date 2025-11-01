@@ -20,7 +20,5 @@ export async function getAiImageUrl(filename: string | null) {
     .from(config.supabaseBucket)
     .getPublicUrl(path).data;
 
-  console.log('there', publicUrl)
-
   return publicUrl ?? null;
 }

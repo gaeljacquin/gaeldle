@@ -1,6 +1,6 @@
 {
-  "id": "26b671d3-5e51-436b-80fb-81200a97f3a9",
-  "prevId": "7fa9c650-b2e0-4f48-a879-70258c4d4a02",
+  "id": "885263d4-d03b-4a8b-8e89-f916df9e67c6",
+  "prevId": "938f5b99-f8d2-4e7f-b288-8e5d808fb575",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -135,9 +135,37 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "summary": {
+          "name": "summary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storyline": {
+          "name": "storyline",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "game_name_idx": {
+          "name": "game_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -162,6 +190,12 @@
   "views": {
     "public.all_games": {
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "igdb_id": {
           "name": "igdb_id",
           "type": "integer",
@@ -263,121 +297,22 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "summary": {
+          "name": "summary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storyline": {
+          "name": "storyline",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "definition": "select \"igdb_id\", \"name\", \"image_url\", \"artworks\", \"keywords\", \"franchises\", \"game_engines\", \"game_modes\", \"genres\", \"involved_companies\", \"platforms\", \"player_perspectives\", \"release_dates\", \"themes\", \"first_release_date\", \"ai_image_url\", \"ai_prompt\" from \"game\" order by \"game\".\"name\"",
+      "definition": "select \"id\", \"igdb_id\", \"name\", \"image_url\", \"artworks\", \"keywords\", \"franchises\", \"game_engines\", \"game_modes\", \"genres\", \"involved_companies\", \"platforms\", \"player_perspectives\", \"release_dates\", \"themes\", \"first_release_date\", \"ai_image_url\", \"ai_prompt\", \"summary\", \"storyline\" from \"game\" order by \"game\".\"name\"",
       "name": "all_games",
-      "schema": "public",
-      "isExisting": false,
-      "materialized": true
-    },
-    "public.all_games_with_artwork": {
-      "columns": {
-        "igdb_id": {
-          "name": "igdb_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "image_url": {
-          "name": "image_url",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "artworks": {
-          "name": "artworks",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "keywords": {
-          "name": "keywords",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "franchises": {
-          "name": "franchises",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "game_engines": {
-          "name": "game_engines",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "game_modes": {
-          "name": "game_modes",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "genres": {
-          "name": "genres",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "involved_companies": {
-          "name": "involved_companies",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "platforms": {
-          "name": "platforms",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "player_perspectives": {
-          "name": "player_perspectives",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "release_dates": {
-          "name": "release_dates",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "themes": {
-          "name": "themes",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "first_release_date": {
-          "name": "first_release_date",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "ai_image_url": {
-          "name": "ai_image_url",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "ai_prompt": {
-          "name": "ai_prompt",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "definition": "select \"igdb_id\", \"name\", \"image_url\", \"artworks\", \"keywords\", \"franchises\", \"game_engines\", \"game_modes\", \"genres\", \"involved_companies\", \"platforms\", \"player_perspectives\", \"release_dates\", \"themes\", \"first_release_date\", \"ai_image_url\", \"ai_prompt\" from \"game\" where \"game\".\"artworks\" is not null order by \"game\".\"name\"",
-      "name": "all_games_with_artwork",
       "schema": "public",
       "isExisting": false,
       "materialized": true

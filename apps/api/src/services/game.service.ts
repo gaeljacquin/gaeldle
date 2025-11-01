@@ -1,24 +1,33 @@
 import { db } from 'src/db';
-import { Game, games } from 'src/db/schema';
-import { notInArray, sql, desc } from 'drizzle-orm';
-import { getMaterializedView } from 'src/utils/materialized-view';
+import { allGames, Game, games } from 'src/db/schema';
+import {
+  notInArray,
+  sql,
+  desc,
+  eq,
+  // isNotNull,
+} from 'drizzle-orm';
+import { convertSummaryToImagePrompt } from 'src/utils/ai-prompt-gen';
+import { generateImageFromPrompt } from 'src/utils/ai-image-gen';
+import { getAiImageUrl } from 'src/services/image.service';
 
 export async function getAllGames(mode?: string): Promise<Game[]> {
-  const materializedView = getMaterializedView(mode ?? '');
-  const query = db.select().from(materializedView);
+  const query = db.select().from(allGames);
   const result = await query;
 
   return result;
 }
 
+// TODO: replace string type with GameModeSlug type used on client
 export async function getRandomGame(excludeIds: number[] = [], mode?: string): Promise<Game | null> {
-  const materializedView = getMaterializedView(mode ?? '');
-
-  let query = db.select().from(materializedView);
+  let query = db.select().from(allGames);
 
   if (excludeIds.length > 0) {
-    query = query.where(notInArray(materializedView.igdbId, excludeIds)) as typeof query;
+    query = query.where(notInArray(allGames.igdbId, excludeIds)) as typeof query;
   }
+
+  // const igdbIdTest = 1076;
+  // query = query.where(eq(allGames.igdbId, igdbIdTest)) as typeof query;
 
   const result = await query;
 
@@ -27,8 +36,33 @@ export async function getRandomGame(excludeIds: number[] = [], mode?: string): P
   }
 
   const randomIndex = Math.floor(Math.random() * result.length);
+  const randomGame = result[randomIndex];
+  let aiImageFilename = randomGame.aiImageUrl;
+  let aiPrompt = randomGame.aiPrompt;
 
-  return result[randomIndex];
+  if (mode === 'image-ai') {
+    const summary = randomGame.summary || randomGame.storyline || randomGame.name;
+
+    if (!aiPrompt) {
+      aiPrompt = await convertSummaryToImagePrompt(randomGame.name, summary);
+      await updateGameAiPrompt(randomGame.igdbId, aiPrompt);
+    }
+
+    if (!aiImageFilename) {
+      aiImageFilename = await generateImageFromPrompt(randomGame.igdbId, aiPrompt);
+      await updateGameAiImageUrl(randomGame.igdbId, aiImageFilename);
+    }
+
+    await db.refreshMaterializedView(allGames);
+  }
+
+  const aiImageUrl = await getAiImageUrl(aiImageFilename) ?? randomGame.imageUrl;
+
+  return {
+    ...randomGame,
+    aiPrompt,
+    aiImageUrl,
+  };
 }
 
 export async function searchGames(query: string, limit: number = 100, mode?: string): Promise<Game[]> {
@@ -73,40 +107,27 @@ export async function searchGames(query: string, limit: number = 100, mode?: str
       return result as Game[];
     }
   } catch (error) {
-    console.log('Full-text search failed, falling back to ILIKE:', error);
+    console.log('Something went wrong:', error);
   }
 
-  // Fallback to ILIKE search (case-insensitive pattern matching)
-  // Note: This is kept for backwards compatibility and as a safety net
-  // when full-text search fails or returns no results
-  // const result = await db
-  //   .select()
-  //   .from(materializedView)
-  //   .where(ilike(materializedView.name, `%${query}%`))
-  //   .orderBy(asc(materializedView.name))
-  //   .limit(limit);
-
-  // return result;
-
-  // Return empty array if full-text search fails instead of falling back
   return [];
 }
 
-// export async function updateGameAiPrompt(gameId: number, aiPrompt: string): Promise<void> {
-//   console.log('[GAME-SERVICE] updateGameAiPrompt - IGDB ID:', gameId);
-//   await db
-//     .update(games)
-//     .set({ aiPrompt })
-//     .where(eq(games.igdbId, gameId));
-//   console.log('[GAME-SERVICE] updateGameAiPrompt - Updated successfully');
-// }
+export async function updateGameAiPrompt(gameId: number, aiPrompt: string): Promise<void> {
+  console.log('[GAME-SERVICE] updateGameAiPrompt - IGDB ID:', gameId);
+  await db
+    .update(games)
+    .set({ aiPrompt })
+    .where(eq(games.igdbId, gameId));
+  console.log('[GAME-SERVICE] updateGameAiPrompt - Updated successfully');
+}
 
-// export async function updateGameAiImageUrl(gameId: number, aiImageUrl: string): Promise<void> {
-//   console.log('[GAME-SERVICE] updateGameAiImageUrl - IGDB ID:', gameId);
-//   console.log('[GAME-SERVICE] updateGameAiImageUrl - Filename:', aiImageUrl);
-//   await db
-//     .update(games)
-//     .set({ aiImageUrl })
-//     .where(eq(games.igdbId, gameId));
-//   console.log('[GAME-SERVICE] updateGameAiImageUrl - Updated successfully');
-// }
+export async function updateGameAiImageUrl(gameId: number, aiImageUrl: string): Promise<void> {
+  console.log('[GAME-SERVICE] updateGameAiImageUrl - IGDB ID:', gameId);
+  console.log('[GAME-SERVICE] updateGameAiImageUrl - Filename:', aiImageUrl);
+  await db
+    .update(games)
+    .set({ aiImageUrl })
+    .where(eq(games.igdbId, gameId));
+  console.log('[GAME-SERVICE] updateGameAiImageUrl - Updated successfully');
+}

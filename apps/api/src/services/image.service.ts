@@ -14,11 +14,9 @@ export async function getAiImageUrl(filename: string | null) {
     throw new Error("getAiImageUrl expects a filename, not a full URL");
   }
 
-  const path = `${currentEnv === "development" ? "dev/" : ""}${filename}`;
-
   const { publicUrl } = supabase.storage
     .from(config.supabaseBucket)
-    .getPublicUrl(path).data;
+    .getPublicUrl(filename).data;
 
   return publicUrl ?? null;
 }

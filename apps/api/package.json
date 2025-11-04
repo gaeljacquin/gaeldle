@@ -9,6 +9,7 @@
     "build": "bun build src/index.ts --outdir ./dist --target bun",
     "build:node": "bun build src/index.ts --outdir ./dist --target node --minify --external pg --external sharp --external @google/generative-ai --external @supabase/supabase-js",
     "start": "bun run dist/index.js",
+    "debug": "bun --inspect src/index.ts",
     "test": "bun test",
     "clean": "rm -rf dist node_modules/.cache",
     "type-check": "tsc --noEmit",

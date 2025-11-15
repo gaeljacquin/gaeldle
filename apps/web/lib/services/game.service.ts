@@ -1,82 +1,88 @@
 import type { Game } from '@/lib/types/game';
+import { mockGames } from '@/lib/mock-data';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8080';
 
 export async function getAllGames(mode?: string): Promise<Game[]> {
-  const endpoint = mode === 'artwork' ? `${API_BASE_URL}/api/game/artwork` : `${API_BASE_URL}/api/game`;
+  // const endpoint = mode === 'artwork' ? `${API_BASE_URL}/api/game/artwork` : `${API_BASE_URL}/api/game`;
 
-  const response = await fetch(endpoint, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  // const response = await fetch(endpoint, {
+  //   method: 'GET',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  // });
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch video games');
-  }
+  // if (!response.ok) {
+  //   throw new Error('Failed to fetch video games');
+  // }
 
-  const data = await response.json();
+  // const data = await response.json();
 
-  if (!data.success) {
-    throw new Error(data.error || 'Failed to fetch video games');
-  }
+  // if (!data.success) {
+  //   throw new Error(data.error || 'Failed to fetch video games');
+  // }
 
-  return data.data as Game[];
+  // return data.data as Game[];
+  return Promise.resolve(mockGames);
 }
 
 export async function getRandomGame(excludeIds: number[] = [], mode?: string): Promise<Game> {
-  const response = await fetch(`${API_BASE_URL}/api/game/random`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ excludeIds, mode }),
-  });
+  // const response = await fetch(`${API_BASE_URL}/api/game/random`, {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({ excludeIds, mode }),
+  // });
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch random video game');
-  }
+  // if (!response.ok) {
+  //   throw new Error('Failed to fetch random video game');
+  // }
 
-  const data = await response.json();
+  // const data = await response.json();
 
-  if (!data.success) {
-    throw new Error(data.error || 'Failed to fetch random video game');
-  }
+  // if (!data.success) {
+  //   throw new Error(data.error || 'Failed to fetch random video game');
+  // }
 
-  return data.data as Game;
+  // return data.data as Game;
+  const availableGames = mockGames.filter(game => !excludeIds.includes(game.id));
+  return Promise.resolve(availableGames[Math.floor(Math.random() * availableGames.length)]);
 }
 
 export async function searchGames(query: string, limit: number = 100, mode?: string): Promise<Game[]> {
-  if (query.length < 2) {
-    return [];
-  }
+  // if (query.length < 2) {
+  //   return [];
+  // }
 
-  const params = new URLSearchParams({
-    q: query,
-    limit: limit.toString(),
-  });
+  // const params = new URLSearchParams({
+  //   q: query,
+  //   limit: limit.toString(),
+  // });
 
-  if (mode) {
-    params.append('mode', mode);
-  }
+  // if (mode) {
+  //   params.append('mode', mode);
+  // }
 
-  const response = await fetch(`${API_BASE_URL}/api/game/search?${params.toString()}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  // const response = await fetch(`${API_BASE_URL}/api/game/search?${params.toString()}`, {
+  //   method: 'GET',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  // });
 
-  if (!response.ok) {
-    throw new Error('Failed to search games');
-  }
+  // if (!response.ok) {
+  //   throw new Error('Failed to search games');
+  // }
 
-  const data = await response.json();
+  // const data = await response.json();
 
-  if (!data.success) {
-    throw new Error(data.error || 'Failed to search games');
-  }
+  // if (!data.success) {
+  //   throw new Error(data.error || 'Failed to search games');
+  // }
 
-  return data.data as Game[];
+  // return data.data as Game[];
+  const filteredGames = mockGames.filter(game => game.name.toLowerCase().includes(query.toLowerCase()));
+  return Promise.resolve(filteredGames.slice(0, limit));
 }

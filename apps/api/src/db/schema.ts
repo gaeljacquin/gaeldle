@@ -9,7 +9,6 @@ import {
   index,
   text,
 } from 'drizzle-orm/pg-core';
-import { isNotNull } from 'drizzle-orm';
 
 export const games = pgTable('game', {
   id: serial('id').primaryKey(),
@@ -35,9 +34,9 @@ export const games = pgTable('game', {
   aiPrompt: varchar('ai_prompt'),
   summary: text('summary'),
   storyline: text('storyline'),
-}, (table) => ({
-  nameIdx: index('game_name_idx').on(table.name),
-}));
+}, (table) => [
+  index('game_name_idx').on(table.name),
+]);
 
 const gameObject = {
   id: games.id,

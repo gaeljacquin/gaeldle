@@ -10,6 +10,7 @@ import {
 import { convertSummaryToImagePrompt } from 'src/utils/ai-prompt-gen';
 import { generateImageFromPrompt } from 'src/utils/ai-image-gen';
 import { getAiImageUrl } from 'src/services/image.service';
+import type { GameModeSlug } from 'src/types/game';
 
 export async function getAllGames(mode?: string): Promise<Game[]> {
   const query = db.select().from(allGames);
@@ -18,16 +19,17 @@ export async function getAllGames(mode?: string): Promise<Game[]> {
   return result;
 }
 
-// TODO: replace string type with GameModeSlug type used on client
-export async function getRandomGame(excludeIds: number[] = [], mode?: string): Promise<Game | null> {
+/**
+ * To test a specific game, use:
+ * const igdbIdTest = 1076;
+ * query = query.where(eq(allGames.igdbId, igdbIdTest)) as typeof query;
+ */
+export async function getRandomGame(excludeIds: number[] = [], mode?: GameModeSlug): Promise<Game | null> {
   let query = db.select().from(allGames);
 
   if (excludeIds.length > 0) {
     query = query.where(notInArray(allGames.igdbId, excludeIds)) as typeof query;
   }
-
-  // const igdbIdTest = 1076;
-  // query = query.where(eq(allGames.igdbId, igdbIdTest)) as typeof query;
 
   const result = await query;
 

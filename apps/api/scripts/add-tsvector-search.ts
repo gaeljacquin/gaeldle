@@ -63,4 +63,4 @@ async function migrate() {
   }
 }
 
-migrate();
+await migrate();

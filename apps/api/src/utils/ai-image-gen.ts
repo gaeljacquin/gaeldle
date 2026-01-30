@@ -1,7 +1,6 @@
 import { config } from 'src/config/env';
 import sharp from 'sharp';
 import { supabase } from 'src/services/supabase.service';
-import { currentEnv } from 'src/config/load-env';
 
 // Constants
 const IMAGE_SIZE = 512;

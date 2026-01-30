@@ -1,6 +1,15 @@
 import { Elysia, t } from 'elysia';
 import { getAllGames, getRandomGame, searchGames } from 'src/services/game.service';
 
+const gameModeSchema = t.Union([
+  t.Literal('cover-art'),
+  t.Literal('image-ai'),
+  t.Literal('artwork'),
+  t.Literal('timeline'),
+  t.Literal('timeline-2'),
+  t.Literal('specifications'),
+]);
+
 export const gameRoutes = new Elysia({ prefix: '/api/game' })
   .get(
     '/',
@@ -36,7 +45,7 @@ export const gameRoutes = new Elysia({ prefix: '/api/game' })
         };
       }
 
-      const games = await searchGames(q, limit ? parseInt(limit) : 100, mode);
+      const games = await searchGames(q, limit ? Number.parseInt(limit) : 100, mode);
       return {
         success: true,
         data: games,
@@ -46,7 +55,7 @@ export const gameRoutes = new Elysia({ prefix: '/api/game' })
       query: t.Object({
         q: t.String({ minLength: 2 }),
         limit: t.Optional(t.String()),
-        mode: t.Optional(t.String()),
+        mode: t.Optional(gameModeSchema),
       }),
     }
   )
@@ -71,7 +80,7 @@ export const gameRoutes = new Elysia({ prefix: '/api/game' })
     {
       body: t.Object({
         excludeIds: t.Optional(t.Array(t.Number())),
-        mode: t.Optional(t.String()),
+        mode: t.Optional(gameModeSchema),
       }),
     }
   )

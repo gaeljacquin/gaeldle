@@ -1,6 +1,5 @@
 import { config } from 'src/config/env';
 import { supabase } from 'src/services/supabase.service';
-import { currentEnv } from 'src/config/load-env';
 
 /**
  * Check if an AI image exists in Supabase storage and return appropriate URL

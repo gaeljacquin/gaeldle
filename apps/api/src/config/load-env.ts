@@ -1,6 +1,6 @@
-import path from "path";
+import path from "node:path";
 import * as dotenv from "dotenv";
-import fs from "fs";
+import fs from "node:fs";
 
 // Load environment variables before any other imports
 export const currentEnv = (process.env.APP_ENV || process.env.NODE_ENV || "development").toLowerCase();

@@ -14,7 +14,7 @@ import Link from 'next/link';
 import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
-import { CoverArtModeSlug } from '@/lib/types/game';
+import type { CoverArtModeSlug } from '@gaeldle/types/game';
 
 interface GameListPlusImageProps {
   gameModeSlug: CoverArtModeSlug;

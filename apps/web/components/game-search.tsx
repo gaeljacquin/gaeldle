@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@/lib/utils';
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 import { X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAllGames, getRandomGame } from '@/lib/services/game.service';
 import { getPixelSizeForAttempt } from '@/lib/utils/pixelate';
-import type { Game, CoverArtModeSlug, ArtworkImage } from '@/lib/types/game';
+import type { Game, CoverArtModeSlug, ArtworkImage } from '@gaeldle/types/game';
 
 export const MAX_ATTEMPTS = 5;
 

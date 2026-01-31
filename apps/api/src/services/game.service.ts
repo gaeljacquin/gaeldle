@@ -10,7 +10,7 @@ import {
 import { convertSummaryToImagePrompt } from 'src/utils/ai-prompt-gen';
 import { generateImageFromPrompt } from 'src/utils/ai-image-gen';
 import { getAiImageUrl } from 'src/services/image.service';
-import type { GameModeSlug } from 'src/types/game';
+import type { GameModeSlug } from '@gaeldle/types/game';
 
 export async function getAllGames(mode?: string): Promise<Game[]> {
   const query = db.select().from(allGames);

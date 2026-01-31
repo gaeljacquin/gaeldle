@@ -10,7 +10,7 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 
 interface GameSelectorProps {
   games: Game[];

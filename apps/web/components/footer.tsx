@@ -14,7 +14,7 @@ export default function Footer() {
     <footer className="mt-auto py-6 px-4 sm:px-6 lg:px-8 border-t bg-transparent flex flex-col gap-7">
       <div className="max-w-6xl mx-auto text-center text-muted-foreground">
         <p>
-          &copy; 2025 {currentYear > 2025 && <span>- {new Date().getFullYear()}</span>}
+          &copy; 2025 {currentYear > 2025 && <span>- {new Date().getFullYear()} </span>}
           <Link
             href={`${appInfo.authorUrl}`}
             target="_blank"

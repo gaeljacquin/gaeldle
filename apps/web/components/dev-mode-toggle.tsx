@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Plus, Minus } from 'lucide-react';
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 
 interface DevModeToggleProps {
   targetGame: Game | null;

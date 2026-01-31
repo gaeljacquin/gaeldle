@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Plus, Minus, X } from 'lucide-react';
-import type { SpecificationGuess, Game } from '@/lib/types/game';
+import type { SpecificationGuess, Game } from '@gaeldle/types/game';
 import Image from 'next/image';
 
 interface GuessHistorySidebarProps {

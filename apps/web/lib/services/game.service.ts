@@ -1,4 +1,4 @@
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8080';
 

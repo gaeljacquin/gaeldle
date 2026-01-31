@@ -2,7 +2,7 @@
 
 import { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 import Image from 'next/image';
 
 interface Timeline2CardProps {

@@ -1,6 +1,6 @@
 import { ReactNode, Fragment } from 'react';
 import { cn } from '@/lib/utils';
-import type { SpecificationGuess, RevealedClue, Game, CellMatch } from '@/lib/types/game';
+import type { SpecificationGuess, RevealedClue, Game, CellMatch } from '@gaeldle/types/game';
 import Image from 'next/image';
 import { MoveUp, MoveDown, MoveRight } from 'lucide-react';
 

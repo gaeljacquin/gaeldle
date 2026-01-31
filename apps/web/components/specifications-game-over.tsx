@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 
 interface SpecificationsGameOverProps {
   isCorrect: boolean;

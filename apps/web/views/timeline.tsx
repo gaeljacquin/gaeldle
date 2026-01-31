@@ -28,7 +28,7 @@ import {
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 import Link from 'next/link';
 import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';

@@ -7,7 +7,7 @@ import {
   Gpu,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { GameModeSlug } from "@/lib/types/game";
+import type { GameModeSlug } from "@gaeldle/types/game";
 
 export interface GameMode {
   id: GameModeSlug;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getAllGames, getRandomGame } from '@/lib/services/game.service';
-import type { Game, SpecificationGuess, RevealedClue, MatchType } from '@/lib/types/game';
+import type { Game, SpecificationGuess, RevealedClue, MatchType } from '@gaeldle/types/game';
 
 export const MAX_ATTEMPTS = 10;
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { pixelateImage } from '@/lib/utils/pixelate';
 import { cn } from '@/lib/utils';
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 
 interface CoverDisplayProps {
   game: Game | null;

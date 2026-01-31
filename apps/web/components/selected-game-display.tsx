@@ -2,7 +2,7 @@
 
 import { X } from 'lucide-react';
 import Image from 'next/image';
-import type { Game, GameModeSlug } from '@/lib/types/game';
+import type { Game, GameModeSlug } from '@gaeldle/types/game';
 import { cn } from '@/lib/utils';
 
 interface SelectedGameDisplayProps {

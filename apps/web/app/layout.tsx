@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { StackProvider, StackTheme } from "@stackframe/stack";
+import { stackClientApp } from "../stack/client";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 import { daFont1, daFont2, daFont3 } from "@/lib/fonts";
@@ -21,7 +23,7 @@ export default async function RootLayout({
     <html lang="en">
       <body
         className={`${daFont1.variable} ${daFont2.variable} ${daFont3.variable}`}
-      >
+      ><StackProvider app={stackClientApp}><StackTheme>
         <Providers>
           <div className="flex h-screen overflow-hidden">
             <main className="flex flex-1 flex-col overflow-y-auto" style={{ backgroundColor: "#f5f5f0", scrollbarGutter: "stable" }}>
@@ -33,7 +35,7 @@ export default async function RootLayout({
             </main>
           </div>
         </Providers>
-      </body>
+      </StackTheme></StackProvider></body>
     </html>
   );
 }

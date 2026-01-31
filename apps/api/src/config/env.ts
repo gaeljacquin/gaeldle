@@ -6,6 +6,9 @@ export const config = {
   supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY || '',
   supabaseSecretKey: process.env.SUPABASE_SECRET_KEY || '',
   geminiApiKey: process.env.GEMINI_API_KEY || '',
+  stackProjectId: process.env.STACK_PROJECT_ID || '',
+  stackPublishableClientKey: process.env.STACK_PUBLISHABLE_CLIENT_KEY || '',
+  stackSecretServerKey: process.env.STACK_SECRET_SERVER_KEY || '',
 } as const;
 
 export const getCorsOrigins = () => {

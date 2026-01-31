@@ -9,7 +9,7 @@
 ## Data & Auth
 
 - Database: PostgreSQL 17 (default port 5432).
-- Auth: `better-auth` library used in both frontend and backend.
+- Auth: Stack Auth used in both frontend and backend.
 
 ## Ports
 

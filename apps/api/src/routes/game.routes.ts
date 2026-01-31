@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia';
-import { getAllGames, getRandomGame, searchGames } from 'src/services/game.service';
+import { getAllGames, getGamesPage, getRandomGame, searchGames } from 'src/services/game.service';
+import { verifyStackAccessToken } from 'src/utils/stack-auth';
 
 const gameModeSchema = t.Union([
   t.Literal('cover-art'),
@@ -13,12 +14,53 @@ const gameModeSchema = t.Union([
 export const gameRoutes = new Elysia({ prefix: '/api/game' })
   .get(
     '/',
-    async () => {
+    async ({ query, request, set }) => {
+      const { page, pageSize } = query;
+      const hasPagination = Boolean(page || pageSize);
+
+      if (hasPagination) {
+        const accessToken = request.headers.get('x-stack-access-token');
+        const isAuthorized = await verifyStackAccessToken(accessToken);
+
+        if (!isAuthorized) {
+          set.status = 401;
+          return {
+            success: false,
+            error: 'Unauthorized',
+          };
+        }
+
+        const parsedPage = Number.parseInt(page ?? '1', 10);
+        const parsedPageSize = Number.parseInt(pageSize ?? '10', 10);
+        const pageNumber = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+        const pageSizeNumber = Number.isFinite(parsedPageSize) && parsedPageSize > 0
+          ? parsedPageSize
+          : 10;
+        const cappedPageSize = Math.min(pageSizeNumber, 100);
+        const { games, total } = await getGamesPage(pageNumber, cappedPageSize);
+
+        return {
+          success: true,
+          data: games,
+          meta: {
+            page: pageNumber,
+            pageSize: cappedPageSize,
+            total,
+          },
+        };
+      }
+
       const games = await getAllGames();
       return {
         success: true,
         data: games,
       };
+    },
+    {
+      query: t.Object({
+        page: t.Optional(t.String()),
+        pageSize: t.Optional(t.String()),
+      }),
     }
   )
   .get(

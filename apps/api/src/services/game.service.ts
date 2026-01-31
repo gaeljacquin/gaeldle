@@ -19,6 +19,25 @@ export async function getAllGames(mode?: string): Promise<Game[]> {
   return result;
 }
 
+export async function getGamesPage(page: number, pageSize: number): Promise<{ games: Game[]; total: number }> {
+  const safePage = Number.isFinite(page) && page > 0 ? page : 1;
+  const safePageSize = Number.isFinite(pageSize) && pageSize > 0 ? pageSize : 10;
+  const cappedPageSize = Math.min(safePageSize, 100);
+  const offset = (safePage - 1) * cappedPageSize;
+
+  const [gamesResult, countResult] = await Promise.all([
+    db.select().from(allGames).limit(cappedPageSize).offset(offset),
+    db.select({ count: sql<number>`count(*)` }).from(allGames),
+  ]);
+
+  const total = Number(countResult[0]?.count ?? 0);
+
+  return {
+    games: gamesResult,
+    total,
+  };
+}
+
 /**
  * To test a specific game, use:
  * const igdbIdTest = 1076;

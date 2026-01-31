@@ -5,9 +5,7 @@ import { Providers } from "@/components/providers";
 import "./globals.css";
 import { daFont1, daFont2, daFont3 } from "@/lib/fonts";
 import { appInfo } from "@/lib/app-info";
-import { ReactNode, Suspense } from "react";
-import Footer from "@/components/footer";
-import Navbar from "@/components/navbar";
+import { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: appInfo.title,
@@ -24,21 +22,7 @@ export default async function RootLayout({
       <body
         className={`${daFont1.variable} ${daFont2.variable} ${daFont3.variable}`}
       ><StackProvider app={stackClientApp}><StackTheme>
-        <Providers>
-          <div className="flex h-screen overflow-hidden">
-            <main className="flex flex-1 flex-col overflow-y-auto" style={{ backgroundColor: "#f5f5f0", scrollbarGutter: "stable" }}>
-              <Suspense fallback={null}>
-                <Navbar />
-              </Suspense>
-              <div className="flex-1">
-                {children}
-              </div>
-              <Suspense fallback={null}>
-                <Footer />
-              </Suspense>
-            </main>
-          </div>
-        </Providers>
+        <Providers>{children}</Providers>
       </StackTheme></StackProvider></body>
     </html>
   );

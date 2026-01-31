@@ -1,16 +1,44 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import type { Game } from "@gaeldle/types/game";
 import { useUser } from "@stackframe/stack";
+import { CheckSquare, LayoutGrid, List, Pencil, Search, Trash2 } from "lucide-react";
+
+import { DashboardLayout } from "@/components/dashboard-layout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
-  ChevronLeft,
-  ChevronRight,
-  LayoutGrid,
-  Menu,
-  Search,
-  SlidersHorizontal,
-} from "lucide-react";
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import Image from "next/image";
 
 const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
@@ -28,32 +56,16 @@ type GamesResponse = {
   error?: string;
 };
 
-const navItems = [
-  { label: "Dashboard", icon: LayoutGrid, active: true },
-  { label: "Analytics", icon: SlidersHorizontal },
-  { label: "Reports", icon: SlidersHorizontal },
-  { label: "Settings", icon: SlidersHorizontal },
-];
-
-const formatReleaseYear = (timestamp: number | null) => {
-  if (!timestamp) return "—";
-  const year = new Date(timestamp * 1000).getFullYear();
-  return Number.isFinite(year) ? String(year) : "—";
-};
-
-const getInitials = (value?: string | null) => {
-  if (!value) return "U";
-  const parts = value.trim().split(" ");
-  const letters = parts.slice(0, 2).map((part) => part[0]?.toUpperCase());
-  return letters.join("") || "U";
-};
-
 export default function DashboardView() {
   const user = useUser();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const [filterQuery, setFilterQuery] = useState("");
+  const [filterText, setFilterText] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedGames, setSelectedGames] = useState<Set<number>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const [games, setGames] = useState<Game[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,6 +75,15 @@ export default function DashboardView() {
     () => Math.max(1, Math.ceil(total / pageSize)),
     [total, pageSize]
   );
+
+  const filteredGames = useMemo(() => {
+    const query = filterText.trim().toLowerCase();
+    if (!query) return games;
+    return games.filter((game) => game.name.toLowerCase().includes(query));
+  }, [games, filterText]);
+
+  const startIndex = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const endIndex = total === 0 ? 0 : (page - 1) * pageSize + games.length;
 
   useEffect(() => {
     if (!user) {
@@ -76,8 +97,7 @@ export default function DashboardView() {
         setIsLoading(true);
         setError(null);
 
-        const authJson = await user.getAuthJson();
-        const accessToken = authJson.accessToken;
+        const accessToken = await user.getAccessToken();
 
         if (!accessToken) {
           throw new Error("Missing access token.");
@@ -122,196 +142,483 @@ export default function DashboardView() {
     setPage(1);
   }, [pageSize]);
 
-  return (
-    <div className="min-h-full bg-linear-to-br from-[#f8f3ea] via-[#f5f5f0] to-[#ecf4f7] px-4 py-6 md:px-6">
-      <div className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-7xl gap-6">
-        <aside
-          className={`flex flex-col rounded-3xl border border-black/5 bg-white/80 p-4 shadow-[0_20px_50px_-35px_rgba(15,23,42,0.7)] backdrop-blur transition-all duration-300 ${
-            isSidebarOpen ? "w-64" : "w-20"
-          }`}
+  const handlePageChange = (nextPage: number) => {
+    if (nextPage >= 1 && nextPage <= totalPages) {
+      setPage(nextPage);
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    setDeleteDialogOpen(false);
+  };
+
+  const handleToggleSelection = (gameId: number) => {
+    const newSelected = new Set(selectedGames);
+    if (newSelected.has(gameId)) {
+      newSelected.delete(gameId);
+    } else {
+      newSelected.add(gameId);
+    }
+    setSelectedGames(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedGames.size === filteredGames.length) {
+      setSelectedGames(new Set());
+    } else {
+      setSelectedGames(new Set(filteredGames.map((g) => g.id)));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    setBulkDeleteDialogOpen(false);
+    setSelectedGames(new Set());
+    setSelectionMode(false);
+  };
+
+  const toggleSelectionMode = () => {
+    if (selectionMode) {
+      setSelectedGames(new Set());
+    }
+    setSelectionMode(!selectionMode);
+  };
+
+  const renderPaginationItems = () => {
+    const items = [];
+    const maxVisible = 3;
+
+    items.push(
+      <PaginationItem key={1}>
+        <PaginationLink
+          href="#"
+          isActive={page === 1}
+          size="icon"
+          onClick={(event) => {
+            event.preventDefault();
+            handlePageChange(1);
+          }}
         >
-          <div className="flex items-center justify-between">
-            <button
-              className="flex h-10 w-10 items-center justify-center rounded-2xl border border-black/5 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              onClick={() => setIsSidebarOpen((prev) => !prev)}
-              aria-label="Toggle sidebar"
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+
+    if (page > maxVisible) {
+      items.push(
+        <PaginationItem key="ellipsis-start">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+
+    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+      if (i === 1 || i === totalPages) continue;
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            href="#"
+            isActive={page === i}
+            size="icon"
+            onClick={(event) => {
+              event.preventDefault();
+              handlePageChange(i);
+            }}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    if (page < totalPages - maxVisible + 1) {
+      items.push(
+        <PaginationItem key="ellipsis-end">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+
+    if (totalPages > 1) {
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink
+            href="#"
+            isActive={page === totalPages}
+            size="icon"
+            onClick={(event) => {
+              event.preventDefault();
+              handlePageChange(totalPages);
+            }}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return items;
+  };
+
+  const renderGrid = () => {
+    if (isLoading) {
+      return (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {Array.from({ length: Math.min(pageSize, 10) }).map((_, index) => (
+            <Card key={`grid-skeleton-${index + 1}`} className="overflow-hidden">
+              <CardContent className="p-0">
+                <Skeleton className="aspect-2/3 w-full" />
+                <div className="p-3">
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+          {error}
+        </div>
+      );
+    }
+
+    if (filteredGames.length === 0) {
+      return (
+        <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+          {filterText
+            ? "No games match this filter on the current page."
+            : "No games found for this page."}
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
+        {filteredGames.map((game) => {
+          const gameImage = game.imageUrl || game.aiImageUrl || "";
+          return (
+            <Card
+              key={game.id}
+              className="group relative overflow-hidden transition-all hover:shadow-lg hover:ring-2 hover:ring-primary/50"
             >
-              <Menu className="h-4 w-4 text-slate-700" />
-            </button>
-            {isSidebarOpen && (
-              <div className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Gaeldle
-              </div>
-            )}
-          </div>
-
-          <nav className="mt-8 flex flex-1 flex-col gap-2">
-            {navItems.map((item) => (
-              <button
-                key={item.label}
-                className={`flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition ${
-                  item.active
-                    ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20"
-                    : "text-slate-600 hover:bg-slate-900/5"
-                }`}
-              >
-                <item.icon className="h-4 w-4" />
-                {isSidebarOpen && <span>{item.label}</span>}
-              </button>
-            ))}
-          </nav>
-
-          <div className="rounded-2xl border border-black/5 bg-white p-3 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-sm font-semibold text-white">
-                {getInitials(user?.displayName || user?.primaryEmail)}
-              </div>
-              {isSidebarOpen && (
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-slate-900">
-                    {user?.displayName || "Signed in"}
-                  </span>
-                  <span className="text-xs text-slate-500">
-                    {user?.primaryEmail || "Active session"}
-                  </span>
+              {selectionMode && (
+                <div className="absolute left-2 top-2 z-10">
+                  <Checkbox
+                    checked={selectedGames.has(game.id)}
+                    onCheckedChange={() => handleToggleSelection(game.id)}
+                    className="bg-background"
+                  />
                 </div>
               )}
+
+              <div className="absolute right-2 top-2 z-10 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <Button variant="secondary" size="icon" className="h-8 w-8" asChild>
+                  <Link href={`/cover-art?gameId=${game.id}`}>
+                    <Pencil className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="h-8 w-8"
+                  // onClick={() => handleDeleteClick(game.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <CardContent className="p-0">
+                <Link href={`/cover-art?gameId=${game.id}`} className="block">
+                  <div className="relative aspect-2/3 w-full overflow-hidden bg-muted">
+                    {gameImage ? (
+                      <Image
+                        src={gameImage}
+                        alt={game.name}
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        onError={(event) => {
+                          event.currentTarget.style.display = "none";
+                        }}
+                        fill
+                        sizes="10vw"
+                      />
+                    ) : null}
+                    <Skeleton className="absolute inset-0 -z-10" />
+                  </div>
+                </Link>
+                <div className="p-3">
+                  <h3 className="truncate text-sm font-medium text-foreground">
+                    {game.name}
+                  </h3>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderList = () => {
+    if (isLoading) {
+      return (
+        <div className="space-y-2">
+          {Array.from({ length: Math.min(pageSize, 8) }).map((_, index) => (
+            <Card key={`list-skeleton-${index + 1}`}>
+              <CardContent className="flex items-center gap-4 p-3">
+                <Skeleton className="h-16 w-12 rounded" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+          {error}
+        </div>
+      );
+    }
+
+    if (filteredGames.length === 0) {
+      return (
+        <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+          {filterText
+            ? "No games match this filter on the current page."
+            : "No games found for this page."}
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-2">
+        {filteredGames.map((game) => {
+          const gameImage = game.imageUrl || game.aiImageUrl || "";
+          return (
+            <Card
+              key={game.id}
+              className="group transition-all hover:shadow-md hover:ring-2 hover:ring-primary/50"
+            >
+              <CardContent className="flex items-center gap-4 p-3">
+                {selectionMode && (
+                  <Checkbox
+                    checked={selectedGames.has(game.id)}
+                    onCheckedChange={() => handleToggleSelection(game.id)}
+                  />
+                )}
+
+                <Link href={`/cover-art?gameId=${game.id}`} className="flex flex-1 items-center gap-4">
+                  <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded bg-muted">
+                    {gameImage ? (
+                      <Image
+                        src={gameImage}
+                        alt={game.name}
+                        className="h-full w-full object-cover"
+                        onError={(event) => {
+                          event.currentTarget.style.display = "none";
+                        }}
+                        fill
+                        sizes="10vw"
+                      />
+                    ) : null}
+                    <Skeleton className="absolute inset-0 -z-10" />
+                  </div>
+                  <h3 className="truncate text-sm font-medium text-foreground">
+                    {game.name}
+                  </h3>
+                </Link>
+
+                <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Button variant="secondary" size="icon" className="h-8 w-8" asChild>
+                    <Link href={`/cover-art?gameId=${game.id}`}>
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="h-8 w-8"
+                    // onClick={() => handleDeleteClick(game.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    );
+  };
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Filter games..."
+              value={filterText}
+              onChange={(event) => setFilterText(event.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            <Button
+              variant={selectionMode ? "secondary" : "outline"}
+              size="sm"
+              onClick={toggleSelectionMode}
+            >
+              <CheckSquare className="mr-2 h-4 w-4" />
+              Select
+            </Button>
+
+            {selectionMode && selectedGames.size > 0 && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setBulkDeleteDialogOpen(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete selected ({selectedGames.size})
+              </Button>
+            )}
+
+            {selectionMode && (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={
+                    selectedGames.size === filteredGames.length &&
+                    filteredGames.length > 0
+                  }
+                  onCheckedChange={handleSelectAll}
+                />
+                <span className="text-sm text-muted-foreground">All</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-1 rounded-md border border-input p-1">
+              <Button
+                variant={viewMode === "grid" ? "secondary" : "ghost"}
+                size="icon-sm"
+                className="h-8 w-8"
+                onClick={() => setViewMode("grid")}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "secondary" : "ghost"}
+                size="icon-sm"
+                className="h-8 w-8"
+                onClick={() => setViewMode("list")}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Show:</span>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => setPageSize(Number(value))}
+              >
+                <SelectTrigger className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZE_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={String(option)}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-muted-foreground">per page</span>
             </div>
           </div>
-        </aside>
+        </div>
 
-        <main className="flex flex-1 flex-col gap-6">
-          <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-black/5 bg-white/80 px-6 py-5 shadow-[0_20px_45px_-35px_rgba(15,23,42,0.6)] backdrop-blur">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-                Dashboard
-              </p>
-              <h1 className="text-2xl font-semibold text-slate-900">
-                Game Library Overview
-              </h1>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 rounded-full border border-black/5 bg-white px-4 py-2 shadow-sm">
-                <Search className="h-4 w-4 text-slate-400" />
-                <input
-                  className="w-40 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-                  placeholder="Filter games..."
-                  value={filterQuery}
-                  onChange={(event) => setFilterQuery(event.target.value)}
+        {viewMode === "grid" ? renderGrid() : renderList()}
+
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+          <p className="shrink-0 whitespace-nowrap text-sm text-muted-foreground">
+            Showing {startIndex}-{endIndex} of {total} games
+          </p>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  size="default"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    handlePageChange(page - 1);
+                  }}
+                  className={page === 1 ? "pointer-events-none opacity-50" : ""}
                 />
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-black/5 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
-                <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  Rows
-                </span>
-                <select
-                  className="bg-transparent text-sm font-semibold text-slate-900 outline-none"
-                  value={pageSize}
-                  onChange={(event) => setPageSize(Number(event.target.value))}
-                >
-                  {PAGE_SIZE_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </header>
+              </PaginationItem>
+              {renderPaginationItems()}
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  size="default"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    handlePageChange(page + 1);
+                  }}
+                  className={page === totalPages ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
 
-          <section className="rounded-3xl border border-black/5 bg-white/80 p-6 shadow-[0_30px_60px_-45px_rgba(15,23,42,0.6)] backdrop-blur">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900">
-                  All Games
-                </h2>
-                <p className="text-sm text-slate-500">
-                  {total.toLocaleString()} total entries
-                </p>
-              </div>
-              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-400">
-                <span>Page</span>
-                <span className="rounded-full border border-black/5 bg-white px-3 py-1 text-slate-700">
-                  {page} / {totalPages}
-                </span>
-              </div>
-            </div>
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Game</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this game? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmDelete}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-            <div className="mt-6 overflow-hidden rounded-2xl border border-black/5">
-              <div className="grid grid-cols-[2fr_1fr_1fr] gap-4 bg-slate-900 px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-white">
-                <span>Game</span>
-                <span>Release</span>
-                <span>Status</span>
-              </div>
-
-              <div className="divide-y divide-black/5 bg-white">
-                {isLoading && (
-                  <div className="px-4 py-6 text-sm text-slate-500">
-                    Loading games...
-                  </div>
-                )}
-                {!isLoading && error && (
-                  <div className="px-4 py-6 text-sm text-rose-500">
-                    {error}
-                  </div>
-                )}
-                {!isLoading && !error && games.length === 0 && (
-                  <div className="px-4 py-6 text-sm text-slate-500">
-                    No games found for this page.
-                  </div>
-                )}
-                {!isLoading &&
-                  !error &&
-                  games.map((game) => (
-                    <div
-                      key={game.id}
-                      className="grid grid-cols-[2fr_1fr_1fr] gap-4 px-4 py-4 text-sm text-slate-700"
-                    >
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-slate-900">
-                          {game.name}
-                        </span>
-                        <span className="text-xs text-slate-400">
-                          IGDB #{game.igdbId}
-                        </span>
-                      </div>
-                      <span className="text-slate-600">
-                        {formatReleaseYear(game.firstReleaseDate)}
-                      </span>
-                      <span className="inline-flex w-fit items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
-                        Active
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm text-slate-500">
-                Showing {games.length} of {total.toLocaleString()} games
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  className="flex items-center gap-2 rounded-full border border-black/5 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                  disabled={page <= 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous
-                </button>
-                <button
-                  className="flex items-center gap-2 rounded-full border border-black/5 bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-                  disabled={page >= totalPages}
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </section>
-        </main>
+        <AlertDialog
+          open={bulkDeleteDialogOpen}
+          onOpenChange={setBulkDeleteDialogOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Selected Games</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete {selectedGames.size} selected game
+                {selectedGames.size === 1 ? "" : "s"}? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleBulkDelete}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

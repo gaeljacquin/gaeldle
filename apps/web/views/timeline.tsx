@@ -45,13 +45,13 @@ function SortableCard({
   showDate,
   disabled,
   isGameOver,
-}: {
+}: Readonly<{
   game: Game;
   isCorrect?: boolean;
   showDate?: boolean;
   disabled?: boolean;
   isGameOver?: boolean;
-}) {
+}>) {
   const {
     attributes,
     listeners,
@@ -119,7 +119,7 @@ export default function Timeline() {
   );
 
   function handleDragStart(e: DragStartEvent) {
-    if (!(e.active && e.active.id && typeof e.active.id === 'number')) {
+    if (!(e.active?.id && typeof e.active.id === 'number')) {
       return;
     }
 
@@ -188,7 +188,7 @@ export default function Timeline() {
 
   return (
     <div className="redesign min-h-full bg-background text-foreground">
-      <div className="container mx-auto max-w-[1800px] px-4 py-10">
+      <div className="container mx-auto max-w-450 px-4 py-10">
         <Link
           href="/"
           className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
@@ -236,7 +236,6 @@ export default function Timeline() {
                             showDate = true;
                           } else {
                             isCorrect = false;
-                            showDate = false;
                           }
                         }
 

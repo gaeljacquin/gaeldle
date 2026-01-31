@@ -144,6 +144,14 @@
   --input: hsl(240 4% 83%);
   --ring: hsl(333 71% 50%);
   --radius: 1.5rem;
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5% 10%);
+  --sidebar-primary: hsl(333 71% 50%);
+  --sidebar-primary-foreground: hsl(327 73% 97%);
+  --sidebar-accent: hsl(240 5% 33%);
+  --sidebar-accent-foreground: hsl(0 0% 98%);
+  --sidebar-border: hsl(240 4% 83%);
+  --sidebar-ring: hsl(333 71% 50%);
   --font-sans: var(--font-sour-gummy-regular);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;

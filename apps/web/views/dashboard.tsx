@@ -123,7 +123,7 @@ export default function DashboardView() {
   }, [pageSize]);
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-[#f8f3ea] via-[#f5f5f0] to-[#ecf4f7] px-4 py-6 md:px-6">
+    <div className="min-h-full bg-linear-to-br from-[#f8f3ea] via-[#f5f5f0] to-[#ecf4f7] px-4 py-6 md:px-6">
       <div className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-7xl gap-6">
         <aside
           className={`flex flex-col rounded-3xl border border-black/5 bg-white/80 p-4 shadow-[0_20px_50px_-35px_rgba(15,23,42,0.7)] backdrop-blur transition-all duration-300 ${

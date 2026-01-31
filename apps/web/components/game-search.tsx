@@ -31,7 +31,7 @@ export default function GameSearch({
   disabled = false,
   className,
   mode,
-}: SpecificationsSearchProps) {
+}: Readonly<SpecificationsSearchProps>) {
   const [searchValue, setSearchValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<Game[]>([]);
@@ -91,11 +91,94 @@ export default function GameSearch({
     performSearch();
   }, [debouncedSearch, mode]);
 
+  const renderSearchContent = () => {
+    if (searchValue.length < 2) {
+      return (
+        <div className="py-6 text-center text-sm text-muted-foreground">
+          Type at least 2 characters to search...
+        </div>
+      );
+    }
+
+    if (isSearching) {
+      return (
+        <div className="py-6 text-center text-sm text-muted-foreground">
+          Searching...
+        </div>
+      );
+    }
+
+    if (searchResults.length === 0) {
+      return (
+        <div className="py-6 text-center text-sm text-muted-foreground">
+          No games found.
+        </div>
+      );
+    }
+
+    return (
+      <TooltipProvider delayDuration={300}>
+        <div
+          ref={parentRef}
+          className="overflow-y-auto p-1"
+          style={{
+            height: `${Math.min(searchResults.length, 5) * 44}px`,
+            maxHeight: '220px',
+          }}
+        >
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const game = searchResults[virtualItem.index];
+              const isWrongGuess = wrongGuesses.includes(game.id);
+              const isSelected = selectedGameId === game.id;
+              const isDisabled = isWrongGuess || disabled;
+              const selectionClass = isSelected
+                ? 'bg-primary text-primary-foreground hover:bg-primary'
+                : 'hover:bg-accent hover:text-accent-foreground';
+
+              return (
+                <Tooltip key={game.id}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => handleSelect(game.id)}
+                      disabled={isDisabled}
+                      className={cn(
+                        'w-full text-left px-3 py-2.5 text-sm rounded-sm transition-colors absolute top-0 left-0 leading-relaxed',
+                        'disabled:pointer-events-none disabled:opacity-50',
+                        isWrongGuess && 'line-through opacity-50 cursor-not-allowed',
+                        selectionClass
+                      )}
+                      style={{
+                        height: `${virtualItem.size}px`,
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                    >
+                      <span className="block truncate">{game.name}</span>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-md">
+                    <p>{game.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+        </div>
+      </TooltipProvider>
+    );
+  };
+
   return (
     <div className={cn('relative', className)}>
       <div className="relative">
-        <div className="flex h-10 items-center gap-2 border border-border rounded-lg px-3 bg-background">
-          <Search className="size-4 shrink-0 opacity-50" />
+        <div className="flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-3 shadow-sm">
+          <Search className="size-4 shrink-0 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search..."
@@ -119,74 +202,8 @@ export default function GameSearch({
       </div>
 
       {isOpen && searchValue.length > 0 && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-lg shadow-lg">
-          {searchValue.length < 2 ? (
-            <div className="py-6 text-center text-sm text-muted-foreground">
-              Type at least 2 characters to search...
-            </div>
-          ) : isSearching ? (
-            <div className="py-6 text-center text-sm text-muted-foreground">
-              Searching...
-            </div>
-          ) : searchResults.length === 0 ? (
-            <div className="py-6 text-center text-sm text-muted-foreground">
-              No games found.
-            </div>
-          ) : (
-            <TooltipProvider delayDuration={300}>
-              <div
-                ref={parentRef}
-                className="overflow-y-auto p-1"
-                style={{
-                  height: `${Math.min(searchResults.length, 5) * 44}px`,
-                  maxHeight: '220px',
-                }}
-              >
-                <div
-                  style={{
-                    height: `${virtualizer.getTotalSize()}px`,
-                    width: '100%',
-                    position: 'relative',
-                  }}
-                >
-                  {virtualizer.getVirtualItems().map((virtualItem) => {
-                    const game = searchResults[virtualItem.index];
-                    const isWrongGuess = wrongGuesses.includes(game.id);
-                    const isSelected = selectedGameId === game.id;
-                    const isDisabled = isWrongGuess || disabled;
-
-                    return (
-                      <Tooltip key={game.id}>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => handleSelect(game.id)}
-                            disabled={isDisabled}
-                            className={cn(
-                              'w-full text-left px-3 py-2.5 text-sm rounded-sm transition-colors absolute top-0 left-0 leading-relaxed',
-                              'disabled:pointer-events-none disabled:opacity-50',
-                              isWrongGuess && 'line-through opacity-50 cursor-not-allowed',
-                              isSelected
-                                ? 'bg-slate-700 text-white hover:bg-slate-700'
-                                : 'hover:bg-accent hover:text-accent-foreground'
-                            )}
-                            style={{
-                              height: `${virtualItem.size}px`,
-                              transform: `translateY(${virtualItem.start}px)`,
-                            }}
-                          >
-                            <span className="block truncate">{game.name}</span>
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="right" className="max-w-md">
-                          <p>{game.name}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  })}
-                </div>
-              </div>
-            </TooltipProvider>
-          )}
+        <div className="absolute top-full left-0 right-0 z-50 mt-2 rounded-xl border border-border bg-card shadow-lg">
+          {renderSearchContent()}
         </div>
       )}
     </div>

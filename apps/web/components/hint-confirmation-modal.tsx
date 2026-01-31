@@ -10,7 +10,7 @@ interface ClueConfirmationModalProps {
   onReveal: () => void;
 }
 
-export default function HintConfirmationModal({ isOpen, onClose, onReveal }: ClueConfirmationModalProps) {
+export default function HintConfirmationModal({ isOpen, onClose, onReveal }: Readonly<ClueConfirmationModalProps>) {
   const handleReveal = () => {
     onReveal();
     onClose();

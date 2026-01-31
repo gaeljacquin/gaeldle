@@ -30,7 +30,7 @@ export default function Timeline2DevToggle({
   maxAttempts,
   onAdjustAttempts,
   className
-}: Timeline2DevToggleProps) {
+}: Readonly<Timeline2DevToggleProps>) {
   const [showDevInfo, setShowDevInfo] = useState(false);
 
   if (process.env.NODE_ENV !== 'development') {
@@ -58,7 +58,7 @@ export default function Timeline2DevToggle({
       )}
 
       {onAdjustAttempts && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <span className="text-xs text-muted-foreground">Attempts:</span>
           <button
             onClick={() => onAdjustAttempts(-1)}

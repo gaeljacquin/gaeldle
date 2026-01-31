@@ -3,9 +3,7 @@
 import { MAX_ATTEMPTS, useTimelineGame } from '@/lib/hooks/use-timeline-game';
 import { TimelineCard } from '@/components/timeline-card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Card, CardContent } from '@/components/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import {
   DndContext,
@@ -34,7 +32,6 @@ import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';
 import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';
-import { cn } from '@/lib/utils';
 import TimelineDevToggle from '@/components/timeline-dev-toggle';
 
 // No-op strategy for swap mode - prevents automatic reordering animation
@@ -190,28 +187,25 @@ export default function Timeline() {
   const buttonsDisabled = isOrderSameAsSaved() || hasMovedCorrectCard;
 
   return (
-    <div className="container mx-auto max-w-[1800px]">
-      <Card className="relative">
+    <div className="redesign min-h-full bg-background text-foreground">
+      <div className="container mx-auto max-w-[1800px] px-4 py-10">
         <Link
           href="/"
-          className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
+          className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
         >
           <MoveLeft className="size-4" />
-          <span className="text-sm">Main Menu</span>
+          Main Menu
         </Link>
 
-        <CardHeader className="flex flex-col items-center justify-center text-center space-y-2 py-4">
-          <CardTitle className="text-4xl font-bold">
-            {gameMode?.title}
-          </CardTitle>
-          <CardDescription className="text-lg text-muted-foreground">
-            {gameMode?.description}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            <div className="text-center space-y-2 mb-8">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 overflow-x-auto flex justify-center">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{gameMode?.title}</h1>
+          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+        </div>
+
+        <Card className="border-border bg-card">
+          <CardContent className="p-6">
+            <div className="space-y-6">
+              <div className="rounded-xl border-2 border-dashed border-border p-4 overflow-x-auto flex justify-center bg-card">
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCenter}
@@ -234,16 +228,13 @@ export default function Timeline() {
                           const isInCorrectPosition = correctPositionMap.get(index) === game.id;
 
                           if (wasCorrect && isInCorrectPosition) {
-                            // Game is correct and in correct position: green + date
                             isCorrect = true;
                             showDate = true;
-                            isLocked = true; // Lock cards in correct position
+                            isLocked = true;
                           } else if (wasCorrect && !isInCorrectPosition) {
-                            // Game was correct but moved: slate + date
                             isCorrect = undefined;
                             showDate = true;
                           } else {
-                            // Game was never correct: red + "?"
                             isCorrect = false;
                             showDate = false;
                           }
@@ -271,101 +262,98 @@ export default function Timeline() {
                 </DndContext>
               </div>
 
-              <div className="flex items-center justify-center gap-2 my-8">
-                <Switch
-                  id="swap-mode"
-                  checked={swapMode}
-                  onCheckedChange={setSwapMode}
+              <div className="flex flex-col items-center gap-4">
+                <button
+                  onClick={() => setSwapMode(!swapMode)}
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    swapMode
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
                   disabled={isGameOver}
-                  className={cn(
-                    "data-[state=checked]:bg-green-700 data-[state=unchecked]:bg-red-700 relative inline-flex items-center rounded-full transition-colors"
-                  )}
-                />
-                <Label htmlFor="swap-mode" className={cn(
-                  "cursor-pointer",
-                  !swapMode && 'text-muted-foreground'
-                )}>
+                >
                   Swap
-                </Label>
+                </button>
+
+                <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
               </div>
 
-              <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} />
-            </div>
+              {!isGameOver && (
+                <div className="flex flex-wrap items-center justify-center gap-4">
+                  <Button
+                    onClick={handleSubmit}
+                    size="lg"
+                    className="cursor-pointer"
+                    disabled={buttonsDisabled}
+                  >
+                    Submit
+                  </Button>
+                  <Button
+                    onClick={handleResetToSaved}
+                    size="lg"
+                    variant="outline"
+                    className="cursor-pointer"
+                    disabled={buttonsDisabled}
+                  >
+                    Reset
+                  </Button>
+                </div>
+              )}
 
-            {!isGameOver && (
-              <div className="text-center flex gap-4 justify-center">
-                <Button
-                  onClick={handleSubmit}
-                  size="lg"
-                  className="cursor-pointer"
-                  disabled={buttonsDisabled}
-                >
-                  Submit
-                </Button>
-                <Button
-                  onClick={handleResetToSaved}
-                  size="lg"
-                  variant="outline"
-                  className="cursor-pointer"
-                  disabled={buttonsDisabled}
-                >
-                  Reset
-                </Button>
-              </div>
-            )}
-
-            {isGameOver && (
-              <div className="mt-6 text-center space-y-4">
-                {isWinner ? (
-                  <div className="space-y-2">
-                    <p className="text-2xl font-bold text-green-600">Congratulations!</p>
-                    <p className="text-muted-foreground">
-                      You arranged all games in the correct chronological order!
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
+              {isGameOver && (
+                <div className="mt-6 text-center space-y-4">
+                  {isWinner ? (
                     <div className="space-y-2">
-                      <p className="text-2xl font-bold text-red-600">Game Over!</p>
+                      <p className="text-2xl font-bold text-green-600">Congratulations!</p>
                       <p className="text-muted-foreground">
-                        Here&apos;s the correct order:
+                        You arranged all games in the correct chronological order!
                       </p>
                     </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <p className="text-2xl font-bold text-destructive">Game Over!</p>
+                        <p className="text-muted-foreground">
+                          Here&apos;s the correct order:
+                        </p>
+                      </div>
 
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 overflow-x-auto">
-                      <div className="flex gap-4 min-w-max">
-                        {getCorrectOrder().map((game) => (
-                          <TimelineCard
-                            key={game.id}
-                            game={game}
-                            isCorrect={true}
-                            showDate={true}
-                          />
-                        ))}
+                      <div className="rounded-xl border-2 border-dashed border-border p-4 overflow-x-auto bg-card">
+                        <div className="flex gap-4 min-w-max">
+                          {getCorrectOrder().map((game) => (
+                            <TimelineCard
+                              key={game.id}
+                              game={game}
+                              isCorrect={true}
+                              showDate={true}
+                            />
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                <Button
-                  onClick={resetGame}
-                  className="mt-4 cursor-pointer"
-                  size="lg"
-                >
-                  {isWinner ? 'Keep Playing' : 'Play Again'}
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      <div className="flex items-center justify-center mt-4">
-        <TimelineDevToggle
-          getCorrectOrder={getCorrectOrder}
-          attemptsLeft={attemptsLeft}
-          maxAttempts={MAX_ATTEMPTS}
-          onAdjustAttempts={adjustAttempts}
-        />
+                  <Button
+                    onClick={resetGame}
+                    className="mt-4 cursor-pointer"
+                    size="lg"
+                  >
+                    {isWinner ? 'Keep Playing' : 'Play Again'}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="mx-auto mt-6 max-w-md rounded-xl border border-dashed border-border bg-muted/30 p-4 text-center">
+          <TimelineDevToggle
+            getCorrectOrder={getCorrectOrder}
+            attemptsLeft={attemptsLeft}
+            maxAttempts={MAX_ATTEMPTS}
+            onAdjustAttempts={adjustAttempts}
+          />
+        </div>
       </div>
     </div>
   );

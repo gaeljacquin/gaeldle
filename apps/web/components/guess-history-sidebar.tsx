@@ -28,9 +28,8 @@ export default function GuessHistorySidebar({
   onAdjustAttempts,
   onClearSelection,
   className
-}: GuessHistorySidebarProps) {
+}: Readonly<GuessHistorySidebarProps>) {
   const [showDevInfo, setShowDevInfo] = useState(false);
-  const [isHoveringSelected, setIsHoveringSelected] = useState(false);
 
   if (!isVisible) return null;
 
@@ -42,11 +41,7 @@ export default function GuessHistorySidebar({
       <h3 className="text-sm font-semibold text-muted-foreground">Guess History</h3>
       <div className="space-y-2">
         {selectedGame && (
-          <div
-            className="relative flex items-center gap-2 p-2 bg-slate-700 rounded border border-slate-600 group"
-            onMouseEnter={() => setIsHoveringSelected(true)}
-            onMouseLeave={() => setIsHoveringSelected(false)}
-          >
+          <div className="relative flex items-center gap-2 p-2 bg-slate-700 rounded border border-slate-600 group">
             {selectedGame.imageUrl ? (
               <Image
                 src={selectedGame.imageUrl}
@@ -66,14 +61,14 @@ export default function GuessHistorySidebar({
               <p className="text-xs text-slate-300">Selected</p>
             </div>
             {onClearSelection && (
-              <button
-                onClick={onClearSelection}
-                className={cn(
-                  'absolute top-2 right-2 p-1 bg-slate-600 hover:bg-slate-500 rounded-full transition-all cursor-pointer',
-                  isHoveringSelected ? 'opacity-100' : 'opacity-0'
-                )}
-                aria-label="Clear selection"
-              >
+                <button
+                  onClick={onClearSelection}
+                  className={cn(
+                    'absolute top-2 right-2 p-1 bg-slate-600 hover:bg-slate-500 rounded-full transition-all cursor-pointer',
+                    'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
+                  )}
+                  aria-label="Clear selection"
+                >
                 <X className="size-3 text-white" />
               </button>
             )}

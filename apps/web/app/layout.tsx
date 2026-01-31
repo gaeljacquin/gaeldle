@@ -7,6 +7,7 @@ import { daFont1, daFont2, daFont3 } from "@/lib/fonts";
 import { appInfo } from "@/lib/app-info";
 import { ReactNode, Suspense } from "react";
 import Footer from "@/components/footer";
+import Navbar from "@/components/navbar";
 
 export const metadata: Metadata = {
   title: appInfo.title,
@@ -26,7 +27,9 @@ export default async function RootLayout({
         <Providers>
           <div className="flex h-screen overflow-hidden">
             <main className="flex flex-1 flex-col overflow-y-auto" style={{ backgroundColor: "#f5f5f0", scrollbarGutter: "stable" }}>
-              {/* <TopNav /> */}
+              <Suspense fallback={null}>
+                <Navbar />
+              </Suspense>
               <div className="flex-1">
                 {children}
               </div>

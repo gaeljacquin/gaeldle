@@ -9,10 +9,10 @@ interface GuessHistoryInlineProps {
   className?: string;
 }
 
-export default function GuessHistoryInline({ guesses, className }: GuessHistoryInlineProps) {
+export default function GuessHistoryInline({ guesses, className }: Readonly<GuessHistoryInlineProps>) {
   if (guesses.length === 0) {
     return (
-      <div className={cn('p-4 text-center text-sm text-muted-foreground italic', className)}>
+      <div className={cn('rounded-xl border border-border bg-card/60 p-4 text-center text-sm text-muted-foreground', className)}>
         No guesses yet
       </div>
     );
@@ -29,24 +29,24 @@ export default function GuessHistoryInline({ guesses, className }: GuessHistoryI
           return (
             <div
               key={`${guess.id}-${index}`}
-              className="flex items-center gap-2 p-2 bg-muted/50 rounded border border-border"
+              className="flex items-center gap-3 rounded-xl border border-border bg-card/70 p-2.5"
             >
               {guess.imageUrl ? (
                 <Image
                   src={guess.imageUrl}
                   alt={guess.name}
-                  className="w-12 h-16 object-cover rounded shrink-0"
+                  className="h-16 w-12 rounded object-cover shrink-0"
                   width={48}
                   height={64}
                   sizes="100vw"
                 />
               ) : (
-                <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shrink-0">
+                <div className="h-16 w-12 rounded bg-muted flex items-center justify-center shrink-0">
                   <span className="text-xs text-muted-foreground">?</span>
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate">{guess.name}</p>
+                <p className="text-sm font-medium truncate">{guess.name}</p>
                 <p className="text-xs text-muted-foreground">Guess #{originalIndex}</p>
               </div>
             </div>

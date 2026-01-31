@@ -3,9 +3,6 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-// import { Button } from '@/components/ui/button';
-// import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-// import { Expand } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { pixelateImage } from '@/lib/utils/pixelate';
 
@@ -23,8 +20,7 @@ export default function ArtworkDisplay({
   isGameOver,
   isLoading = false,
   className,
-}: ArtworkDisplayProps) {
-  // const [isExpanded, setIsExpanded] = useState(false);
+}: Readonly<ArtworkDisplayProps>) {
   const [pixelatedData, setPixelatedData] = useState<{url: string; sourceUrl: string} | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -61,7 +57,7 @@ export default function ArtworkDisplay({
   // Determine what to display
   const shouldShowPixelated = !isGameOver;
   // Only use pixelated URL if it matches the current source
-  const pixelatedImageUrl = (pixelatedData && pixelatedData.sourceUrl === imageUrl) ? pixelatedData.url : null;
+  const pixelatedImageUrl = (pixelatedData?.sourceUrl === imageUrl) ? pixelatedData.url : null;
   const displayUrl = shouldShowPixelated ? pixelatedImageUrl : imageUrl;
 
   // Don't show original image if we're waiting for pixelation

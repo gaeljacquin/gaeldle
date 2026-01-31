@@ -17,7 +17,7 @@ export default function SpecificationsGameOver({
   onPlayAgain,
   onToggleTable,
   showingAnswer = true,
-}: SpecificationsGameOverProps) {
+}: Readonly<SpecificationsGameOverProps>) {
   return (
     <div className="space-y-4 p-6 bg-muted/50 rounded-lg border border-border">
       <div className="flex flex-col items-center gap-4">

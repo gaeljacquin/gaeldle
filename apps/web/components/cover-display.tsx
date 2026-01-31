@@ -24,7 +24,7 @@ export default function CoverDisplay({
   isLoading = false,
   className,
   sourceImageUrl,
-}: CoverDisplayProps) {
+}: Readonly<CoverDisplayProps>) {
   const [pixelatedData, setPixelatedData] = useState<{url: string; sourceUrl: string} | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 

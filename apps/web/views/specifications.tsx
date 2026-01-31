@@ -7,7 +7,7 @@ import GameSearch from '@/components/game-search';
 import DevModeToggle from '@/components/dev-mode-toggle';
 import SpecificationsGameOver from '@/components/specifications-game-over';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import Link from 'next/link';
 import { MoveLeft } from 'lucide-react';
@@ -63,119 +63,120 @@ export default function Specifications() {
   const wrongGuesses = guesses.map(g => g.gameId);
 
   return (
-    <div className="container mx-auto">
-      <Card className="relative">
+    <div className="redesign min-h-full bg-background text-foreground">
+      <div className="container mx-auto px-4 py-10">
         <Link
           href="/"
-          className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
+          className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
         >
           <MoveLeft className="size-4" />
-          <span className="text-sm">Main Menu</span>
+          Main Menu
         </Link>
 
-        <CardHeader className="flex flex-col items-center justify-center text-center space-y-2 py-4">
-          <CardTitle className="text-4xl font-bold">
-            {gameMode?.title}
-          </CardTitle>
-          <CardDescription className="text-lg text-muted-foreground">
-            {gameMode?.description}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {!isGameOver && (
-              <div className="flex flex-row gap-4 max-w-2xl mx-auto">
-                <div className="flex-1">
-                  <GameSearch
-                    selectedGameId={selectedGameId}
-                    wrongGuesses={wrongGuesses}
-                    onSelectGame={handleSelectGame}
-                    disabled={isGameOver}
-                  />
-                </div>
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{gameMode?.title}</h1>
+          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+        </div>
 
-                <Button
-                  onClick={handleSubmit}
-                  disabled={selectedGameId === null || isGameOver}
-                  className="cursor-pointer"
-                  size="lg"
-                >
-                  Submit
-                </Button>
-              </div>
-            )}
-
-            {!isGameOver && (
-              <div className="flex flex-row gap-4 max-w-2xl mx-auto">
-                <SelectedGameDisplay
-                  selectedGame={selectedGame}
-                  onClearSelection={clearSelection}
-                  showSkeleton={!selectedGame}
-                  className="flex-1"
-                  mode="specifications"
+        <div className="mx-auto max-w-6xl space-y-6">
+          {!isGameOver && (
+            <div className="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row">
+              <div className="flex-1">
+                <GameSearch
+                  selectedGameId={selectedGameId}
+                  wrongGuesses={wrongGuesses}
+                  onSelectGame={handleSelectGame}
+                  disabled={isGameOver}
                 />
               </div>
-            )}
 
-            <div className="max-w-2xl mx-auto">
-              <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} />
+              <Button
+                onClick={handleSubmit}
+                disabled={selectedGameId === null || isGameOver}
+                className="cursor-pointer"
+                size="lg"
+              >
+                Submit
+              </Button>
             </div>
+          )}
 
-            {!isGameOver && guesses.length > 0 && (
-              <div className="flex items-center justify-center gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-green-600 rounded"></div>
-                  <span>Correct</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-yellow-500 rounded"></div>
-                  <span>Partially correct</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-red-600 rounded"></div>
-                  <span>Incorrect</span>
-                </div>
+          {!isGameOver && (
+            <div className="mx-auto flex max-w-2xl">
+              <SelectedGameDisplay
+                selectedGame={selectedGame}
+                onClearSelection={clearSelection}
+                showSkeleton={!selectedGame}
+                className="flex-1"
+                mode="specifications"
+              />
+            </div>
+          )}
+
+          <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
+
+          {!isGameOver && guesses.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded bg-green-500"></div>
+                <span className="text-muted-foreground">Correct</span>
               </div>
-            )}
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded bg-yellow-500"></div>
+                <span className="text-muted-foreground">Partially correct</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded bg-destructive"></div>
+                <span className="text-muted-foreground">Incorrect</span>
+              </div>
+            </div>
+          )}
 
-            {isGameOver && (
-              <SpecificationsGameOver
-                isCorrect={isCorrect}
-                targetGame={targetGame}
-                attemptsUsed={MAX_ATTEMPTS - attemptsLeft}
-                onPlayAgain={handleResetGame}
-                onToggleTable={() => setShowAnswerSpecs(!showAnswerSpecs)}
-                showingAnswer={showAnswerSpecs}
-              />
-            )}
+          {isGameOver && (
+            <SpecificationsGameOver
+              isCorrect={isCorrect}
+              targetGame={targetGame}
+              attemptsUsed={MAX_ATTEMPTS - attemptsLeft}
+              onPlayAgain={handleResetGame}
+              onToggleTable={() => setShowAnswerSpecs(!showAnswerSpecs)}
+              showingAnswer={showAnswerSpecs}
+            />
+          )}
 
-            {!isGameOver && (
-              <SpecificationsGrid
-                guesses={guesses}
-                revealedClue={revealedClue}
-                targetGame={targetGame}
-              />
-            )}
+          {!isGameOver && (
+            <Card className="overflow-hidden border-border bg-card">
+              <CardContent className="p-0">
+                <SpecificationsGrid
+                  guesses={guesses}
+                  revealedClue={revealedClue}
+                  targetGame={targetGame}
+                />
+              </CardContent>
+            </Card>
+          )}
 
-            {isGameOver && (
-              <SpecificationsGrid
-                guesses={guesses}
-                revealedClue={revealedClue}
-                targetGame={targetGame}
-                showAnswerOnly={showAnswerSpecs}
-              />
-            )}
+          {isGameOver && (
+            <Card className="overflow-hidden border-border bg-card">
+              <CardContent className="p-0">
+                <SpecificationsGrid
+                  guesses={guesses}
+                  revealedClue={revealedClue}
+                  targetGame={targetGame}
+                  showAnswerOnly={showAnswerSpecs}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="mx-auto max-w-md rounded-xl border border-dashed border-border bg-muted/30 p-4 text-center">
+            <DevModeToggle
+              targetGame={targetGame}
+              attemptsLeft={attemptsLeft}
+              maxAttempts={MAX_ATTEMPTS}
+              onAdjustAttempts={adjustAttempts}
+            />
           </div>
-
-        </CardContent>
-      </Card>
-      <div className="flex items-center justify-center mt-4">
-        <DevModeToggle
-          targetGame={targetGame}
-          attemptsLeft={attemptsLeft}
-          maxAttempts={MAX_ATTEMPTS}
-          onAdjustAttempts={adjustAttempts}
-        />
+        </div>
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ export default function DevModeToggle({
   maxAttempts,
   onAdjustAttempts,
   className
-}: DevModeToggleProps) {
+}: Readonly<DevModeToggleProps>) {
   const [showDevInfo, setShowDevInfo] = useState(false);
 
   if (!targetGame || process.env.NODE_ENV !== 'development') {
@@ -42,7 +42,7 @@ export default function DevModeToggle({
       )}
 
       {onAdjustAttempts && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <span className="text-xs text-muted-foreground">Attempts:</span>
           <button
             onClick={() => onAdjustAttempts(-1)}

@@ -28,7 +28,7 @@ export default function GameSelector({
   onSelectGame,
   disabled = false,
   className,
-}: GameSelectorProps) {
+}: Readonly<GameSelectorProps>) {
   const [searchValue, setSearchValue] = useState('');
 
   const handleSelect = (gameId: number) => {

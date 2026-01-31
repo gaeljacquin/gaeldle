@@ -5,7 +5,7 @@ import { Providers } from "@/components/providers";
 import "./globals.css";
 import { daFont1, daFont2, daFont3 } from "@/lib/fonts";
 import { appInfo } from "@/lib/app-info";
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import Footer from "@/components/footer";
 // import TopNav from "@/components/top-nav";
 
@@ -31,7 +31,9 @@ export default async function RootLayout({
               <div className="flex-1">
                 {children}
               </div>
-              <Footer />
+              <Suspense fallback={null}>
+                <Footer />
+              </Suspense>
             </main>
           </div>
         </Providers>

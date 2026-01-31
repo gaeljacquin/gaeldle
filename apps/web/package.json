@@ -12,7 +12,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@fontsource/kiwi-maru": "^5.2.8",
+    "@fontsource/sour-gummy": "^5.2.8",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
     "@radix-ui/react-dialog": "^1.1.15",

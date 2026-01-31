@@ -7,7 +7,6 @@ import { daFont1, daFont2, daFont3 } from "@/lib/fonts";
 import { appInfo } from "@/lib/app-info";
 import { ReactNode, Suspense } from "react";
 import Footer from "@/components/footer";
-// import TopNav from "@/components/top-nav";
 
 export const metadata: Metadata = {
   title: appInfo.title,
@@ -16,9 +15,9 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: ReactNode;
-}) {
+}>) {
   return (
     <html lang="en">
       <body

@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -41,9 +39,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-kiwi-maru-light: var(--font-kiwi-maru-light);
-  --font-kiwi-maru-regular: var(--font-kiwi-maru-regular);
-  --font-kiwi-maru-medium: var(--font-kiwi-maru-medium);
+  --font-sour-gummy-light: var(--font-sour-gummy-light);
+  --font-sour-gummy-regular: var(--font-sour-gummy-regular);
+  --font-sour-gummy-medium: var(--font-sour-gummy-medium);
 }
 
 :root {
@@ -121,6 +119,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-kiwi-maru-regular), sans-serif;
+    font-family: var(--font-sour-gummy-regular), sans-serif;
   }
 }

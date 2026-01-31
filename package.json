@@ -18,14 +18,14 @@
   "keywords": [],
   "packageManager": "pnpm@10.28.2",
   "devDependencies": {
-    "@commitlint/cli": "^20.2.0",
-    "@commitlint/config-conventional": "^20.2.0",
-    "@nx/js": "^22.2.0",
-    "@types/node": "^24.10.2",
+    "@commitlint/cli": "^20.4.0",
+    "@commitlint/config-conventional": "^20.4.0",
+    "@nx/js": "^22.4.4",
+    "@types/node": "^24.10.9",
     "husky": "^9.1.7",
-    "nx": "^22.2.0"
+    "nx": "^22.4.4"
   },
   "dependencies": {
-    "motion": "^12.23.25"
+    "motion": "^12.29.2"
   }
 }

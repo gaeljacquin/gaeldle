@@ -4,7 +4,6 @@ import {
   notInArray,
   sql,
   desc,
-  eq,
   // isNotNull,
 } from 'drizzle-orm';
 import type { GameModeSlug } from '@gaeldle/types/game';

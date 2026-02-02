@@ -30,8 +30,6 @@ export const games = pgTable('game', {
   releaseDates: json('release_dates'),
   themes: json('themes'),
   firstReleaseDate: integer('first_release_date'),
-  aiImageUrl: varchar('ai_image_url'),
-  aiPrompt: varchar('ai_prompt'),
   summary: text('summary'),
   storyline: text('storyline'),
 }, (table) => [
@@ -55,8 +53,6 @@ const gameObject = {
   releaseDates: games.releaseDates,
   themes: games.themes,
   firstReleaseDate: games.firstReleaseDate,
-  aiImageUrl: games.aiImageUrl,
-  aiPrompt: games.aiPrompt,
   summary: games.summary,
   storyline: games.storyline,
 };

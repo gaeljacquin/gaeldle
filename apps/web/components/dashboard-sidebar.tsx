@@ -41,7 +41,6 @@ import Image from 'next/image';
 const gameItems = [
   { title: "Cover Art", url: "/cover-art", icon: ImageIcon },
   { title: "Artwork", url: "/artwork", icon: Palette },
-  { title: "Image AI", url: "/image-ai", icon: Sparkles },
   { title: "Timeline", url: "/timeline", icon: Clock },
   { title: "Timeline 2", url: "/timeline-2", icon: History },
   { title: "Specifications", url: "/specifications", icon: FileText },

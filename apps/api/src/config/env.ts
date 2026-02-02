@@ -1,11 +1,6 @@
 export const config = {
   port: process.env.PORT || process.env.SERVER_PORT || 8080,
   clientPort: process.env.CLIENT_PORT || 3000,
-  supabaseUrl: process.env.SUPABASE_URL || '',
-  supabaseBucket: process.env.SUPABASE_BUCKET || '',
-  supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY || '',
-  supabaseSecretKey: process.env.SUPABASE_SECRET_KEY || '',
-  geminiApiKey: process.env.GEMINI_API_KEY || '',
   stackProjectId: process.env.STACK_PROJECT_ID || '',
   stackPublishableClientKey: process.env.STACK_PUBLISHABLE_CLIENT_KEY || '',
   stackSecretServerKey: process.env.STACK_SECRET_SERVER_KEY || '',

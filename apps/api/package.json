@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --outdir ./dist --target bun",
-    "build:node": "bun build src/index.ts --outdir ./dist --target node --minify --external pg --external sharp --external @google/generative-ai --external @supabase/supabase-js",
+    "build:node": "bun build src/index.ts --outdir ./dist --target node --minify --external pg --external sharp",
     "start": "bun run dist/index.js",
     "test": "bun test",
     "clean": "rm -rf dist node_modules/.cache",
@@ -20,8 +20,6 @@
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/node": "^1.4.3",
-    "@google/generative-ai": "^0.24.1",
-    "@supabase/supabase-js": "^2.93.3",
     "csv-parse": "^6.1.0",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",

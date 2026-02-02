@@ -7,9 +7,6 @@ import {
   eq,
   // isNotNull,
 } from 'drizzle-orm';
-import { convertSummaryToImagePrompt } from 'src/utils/ai-prompt-gen';
-import { generateImageFromPrompt } from 'src/utils/ai-image-gen';
-import { getAiImageUrl } from 'src/services/image.service';
 import type { GameModeSlug } from '@gaeldle/types/game';
 
 export async function getAllGames(mode?: string): Promise<Game[]> {
@@ -58,32 +55,8 @@ export async function getRandomGame(excludeIds: number[] = [], mode?: GameModeSl
 
   const randomIndex = Math.floor(Math.random() * result.length);
   const randomGame = result[randomIndex];
-  let aiImageFilename = randomGame.aiImageUrl;
-  let aiPrompt = randomGame.aiPrompt;
 
-  if (mode === 'image-ai') {
-    const summary = randomGame.summary || randomGame.storyline || randomGame.name;
-
-    if (!aiPrompt) {
-      aiPrompt = await convertSummaryToImagePrompt(randomGame.name, summary);
-      await updateGameAiPrompt(randomGame.igdbId, aiPrompt);
-    }
-
-    if (!aiImageFilename) {
-      aiImageFilename = await generateImageFromPrompt(randomGame.igdbId, aiPrompt);
-      await updateGameAiImageUrl(randomGame.igdbId, aiImageFilename);
-    }
-
-    await db.refreshMaterializedView(allGames);
-  }
-
-  const aiImageUrl = await getAiImageUrl(aiImageFilename) ?? randomGame.imageUrl;
-
-  return {
-    ...randomGame,
-    aiPrompt,
-    aiImageUrl,
-  };
+  return randomGame;
 }
 
 export async function searchGames(query: string, limit: number = 100, mode?: string): Promise<Game[]> {
@@ -132,23 +105,4 @@ export async function searchGames(query: string, limit: number = 100, mode?: str
   }
 
   return [];
-}
-
-export async function updateGameAiPrompt(gameId: number, aiPrompt: string): Promise<void> {
-  console.log('[GAME-SERVICE] updateGameAiPrompt - IGDB ID:', gameId);
-  await db
-    .update(games)
-    .set({ aiPrompt })
-    .where(eq(games.igdbId, gameId));
-  console.log('[GAME-SERVICE] updateGameAiPrompt - Updated successfully');
-}
-
-export async function updateGameAiImageUrl(gameId: number, aiImageUrl: string): Promise<void> {
-  console.log('[GAME-SERVICE] updateGameAiImageUrl - IGDB ID:', gameId);
-  console.log('[GAME-SERVICE] updateGameAiImageUrl - Filename:', aiImageUrl);
-  await db
-    .update(games)
-    .set({ aiImageUrl })
-    .where(eq(games.igdbId, gameId));
-  console.log('[GAME-SERVICE] updateGameAiImageUrl - Updated successfully');
 }

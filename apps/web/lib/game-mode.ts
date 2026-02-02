@@ -4,7 +4,6 @@ import {
   CalendarRange,
   Scroll,
   Wallpaper,
-  Gpu,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { GameModeSlug } from "@gaeldle/types/game";
@@ -40,16 +39,6 @@ export const gameModes: GameMode[] = [
     gradient: "--gradient-medium-1",
     pattern: "diagonal-reverse",
     href: "/artwork",
-  },
-  {
-    id: "image-ai",
-    title: "Image AI",
-    description: "Guess the game from an AI-generated image.",
-    difficulty: "Medium",
-    icon: Gpu,
-    gradient: "--gradient-medium-2",
-    pattern: "diagonal",
-    href: "/image-ai",
   },
   {
     id: "timeline",

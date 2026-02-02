@@ -4,7 +4,6 @@ import { verifyStackAccessToken } from 'src/utils/stack-auth';
 
 const gameModeSchema = t.Union([
   t.Literal('cover-art'),
-  t.Literal('image-ai'),
   t.Literal('artwork'),
   t.Literal('timeline'),
   t.Literal('timeline-2'),

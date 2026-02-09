@@ -3,60 +3,68 @@
 ## Running Services Locally
 
 ```bash
-# Using Nx (from root)
-nx serve api
-nx serve web
+# Using Turbo (from root)
+turbo dev
+# or
+bun run dev
+
+# Specific projects
+turbo dev --filter @gaeldle/web
+turbo dev --filter games-api
 
 # Direct commands
 cd apps/api && bun run dev
-cd apps/web && pnpm dev
+cd apps/web && bun run dev
 ```
 
 ## Building
 
 ```bash
 # Build all projects
-nx run-many -t build
+turbo build
+# or
+bun run build
 
 # Build specific project
-nx build api
-nx build web
+turbo build --filter games-api
+turbo build --filter @gaeldle/web
 
 # Direct build commands
 cd apps/api && bun run build
-cd apps/web && pnpm build
+cd apps/web && bun run build
 ```
 
 ## Testing
 
 ```bash
 # Test all projects
-nx run-many -t test
+turbo test
+# or
+bun run test
 
 # Test API
-nx test api
+turbo test --filter games-api
 cd apps/api && bun test
 ```
 
 ## Type Checking & Linting
 
 ```bash
+# All projects
+turbo type-check
+turbo lint
+
 # API
 cd apps/api && bun run type-check
 
 # Web
-nx run web:type-check
-nx run web:lint
+cd apps/web && bun run type-check
+cd apps/web && bun run lint
 ```
 
 ## Cleaning
 
 ```bash
-# Clean API build artifacts
-nx clean api
-# or
-cd apps/api && bun run clean
-
-# Clean Next.js cache
-rm -rf apps/web/.next
+# Clean build artifacts
+rm -rf .turbo apps/api/dist apps/web/.next
 ```

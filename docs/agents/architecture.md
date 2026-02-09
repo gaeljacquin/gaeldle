@@ -2,9 +2,9 @@
 
 ## Topology
 
-- `apps/api`: Elysia REST API (TypeScript, Bun runtime), default port 8080.
+- `apps/api`: NestJS REST API (TypeScript, Bun runtime), default port 8080.
 - `apps/web`: Next.js 15 App Router app (TypeScript, Tailwind v4), default port 3000.
-- Monorepo: Nx workspace with apps under `apps/` and libs under `libs/`.
+- Monorepo: Turborepo workspace with apps under `apps/`.
 
 ## Data & Auth
 
@@ -44,8 +44,3 @@
 - `NEXT_PUBLIC_SERVER_URL` (client-side)
 - `SERVER_URL` (server-side)
 - `CLIENT_PORT`
-
-### Docker (`docker-compose.yml`)
-
-- `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `DB_PORT`
-- `SERVER_PORT`, `CLIENT_PORT`

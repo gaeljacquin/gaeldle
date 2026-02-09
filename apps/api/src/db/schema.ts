@@ -10,31 +10,39 @@ import {
   text,
 } from 'drizzle-orm/pg-core';
 
-export const games = pgTable('game', {
-  id: serial('id').primaryKey(),
-  igdbId: integer('igdb_id').notNull().unique('games_igdb_key'),
-  name: varchar('name', { length: 255 }).notNull(),
-  info: json('info'),
-  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow(),
-  imageUrl: varchar('image_url'),
-  artworks: json('artworks'),
-  keywords: json('keywords'),
-  franchises: json('franchises'),
-  gameEngines: json('game_engines'),
-  gameModes: json('game_modes'),
-  genres: json('genres'),
-  involvedCompanies: json('involved_companies'),
-  platforms: json('platforms'),
-  playerPerspectives: json('player_perspectives'),
-  releaseDates: json('release_dates'),
-  themes: json('themes'),
-  firstReleaseDate: integer('first_release_date'),
-  summary: text('summary'),
-  storyline: text('storyline'),
-}, (table) => [
-  index('game_name_idx').on(table.name),
-]);
+export const games = pgTable(
+  'game',
+  {
+    id: serial('id').primaryKey(),
+    igdbId: integer('igdb_id').notNull().unique('games_igdb_key'),
+    name: varchar('name', { length: 255 }).notNull(),
+    info: json('info'),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).defaultNow(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).defaultNow(),
+    imageUrl: varchar('image_url'),
+    artworks: json('artworks'),
+    keywords: json('keywords'),
+    franchises: json('franchises'),
+    gameEngines: json('game_engines'),
+    gameModes: json('game_modes'),
+    genres: json('genres'),
+    involvedCompanies: json('involved_companies'),
+    platforms: json('platforms'),
+    playerPerspectives: json('player_perspectives'),
+    releaseDates: json('release_dates'),
+    themes: json('themes'),
+    firstReleaseDate: integer('first_release_date'),
+    summary: text('summary'),
+    storyline: text('storyline'),
+  },
+  (table) => [index('game_name_idx').on(table.name)],
+);
 
 const gameObject = {
   id: games.id,
@@ -58,11 +66,7 @@ const gameObject = {
 };
 
 export const allGames = pgMaterializedView('all_games').as((qb) => {
-  return qb
-    .select(gameObject)
-    .from(games)
-    .orderBy(games.name)
-  ;
+  return qb.select(gameObject).from(games).orderBy(games.name);
 });
 
 export type Game = typeof allGames.$inferSelect;

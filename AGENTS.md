@@ -1,16 +1,16 @@
 # AGENTS.md
 
-Gaeldle is an Nx monorepo with a Next.js web app and an Elysia (Bun) API.
+Gaeldle is a Turborepo monorepo with a Next.js web app and a NestJS API.
 
 ## Essentials
 
-- Package managers: root uses `pnpm`; `apps/api` uses `bun`; `apps/web` uses `pnpm`.
-- Non-standard build/typecheck commands:
-  - `nx run-many -t build`
-  - `nx run-many -t test`
-  - `nx run web:type-check`
-  - `nx run web:lint`
-  - `cd apps/api && bun run type-check`
+- Package manager: `bun` (unified for root and apps).
+- Commands:
+  - `bun run build` (or `turbo build`)
+  - `bun run test` (or `turbo test`)
+  - `bun run type-check` (or `turbo type-check`)
+  - `bun run lint` (or `turbo lint`)
+  - `bun run dev` (or `turbo dev`)
 
 ## More guidance
 
@@ -18,5 +18,4 @@ Gaeldle is an Nx monorepo with a Next.js web app and an Elysia (Bun) API.
 - [Dev commands](docs/agents/commands.md)
 - [Frontend conventions (separation of concerns)](docs/agents/frontend-conventions.md)
 - [Backend conventions (routes/services/config)](docs/agents/backend-conventions.md)
-- [Docker workflow](docs/agents/docker.md)
 - [Common workflows](docs/agents/workflows.md)

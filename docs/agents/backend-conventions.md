@@ -23,4 +23,4 @@ apps/api/src/
 - Services contain business logic and DB/external integrations.
 - Config is for env parsing and typed config exports only.
 - Utils are pure and side-effect free.
-- Use Elysia `prefix` to organize route modules.
+- Use NestJS controllers and services to organize the code.

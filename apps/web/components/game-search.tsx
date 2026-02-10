@@ -4,18 +4,18 @@ import { useState, useEffect, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@/lib/utils';
 import type { Game } from '@gaeldle/types/game';
-import { X, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { IconSearch, IconX } from '@tabler/icons-react';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group';
+import { Card } from '@/components/ui/card';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import { searchGames } from '@/lib/services/game.service';
 
-interface SpecificationsSearchProps {
+interface GameSearchProps {
   selectedGameId: number | null;
   wrongGuesses: number[];
   onSelectGame: (gameId: number) => void;
@@ -31,7 +31,7 @@ export default function GameSearch({
   disabled = false,
   className,
   mode,
-}: Readonly<SpecificationsSearchProps>) {
+}: Readonly<GameSearchProps>) {
   const [searchValue, setSearchValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<Game[]>([]);
@@ -39,12 +39,11 @@ export default function GameSearch({
   const debouncedSearch = useDebounce(searchValue, 300);
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // Virtual scrolling - show 5 items at once
   const virtualizer = useVirtualizer({
     count: searchResults.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 44, // Approximate height of each item in pixels (increased from 32)
-    overscan: 2, // Render 2 items above and below visible area for smooth scrolling
+    estimateSize: () => 40,
+    overscan: 2,
   });
 
   const handleSelect = (gameId: number) => {
@@ -66,9 +65,7 @@ export default function GameSearch({
     setSearchResults([]);
   };
 
-  // Fetch search results from backend API
   useEffect(() => {
-    // Only search if there are at least 2 characters
     if (debouncedSearch.length < 2) {
       setSearchResults([]);
       setIsSearching(false);
@@ -94,15 +91,15 @@ export default function GameSearch({
   const renderSearchContent = () => {
     if (searchValue.length < 2) {
       return (
-        <div className="py-6 text-center text-sm text-muted-foreground">
-          Type at least 2 characters to search...
+        <div className="py-4 text-center text-xs text-muted-foreground uppercase tracking-widest">
+          Type at least 2 characters...
         </div>
       );
     }
 
     if (isSearching) {
       return (
-        <div className="py-6 text-center text-sm text-muted-foreground">
+        <div className="py-4 text-center text-xs text-muted-foreground uppercase tracking-widest">
           Searching...
         </div>
       );
@@ -110,101 +107,91 @@ export default function GameSearch({
 
     if (searchResults.length === 0) {
       return (
-        <div className="py-6 text-center text-sm text-muted-foreground">
+        <div className="py-4 text-center text-xs text-muted-foreground uppercase tracking-widest">
           No games found.
         </div>
       );
     }
 
     return (
-      <TooltipProvider delayDuration={300}>
+      <div
+        ref={parentRef}
+        className="overflow-y-auto"
+        style={{
+          height: `${Math.min(searchResults.length, 6) * 40}px`,
+          maxHeight: '240px',
+        }}
+      >
         <div
-          ref={parentRef}
-          className="overflow-y-auto p-1"
           style={{
-            height: `${Math.min(searchResults.length, 5) * 44}px`,
-            maxHeight: '220px',
+            height: `${virtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
           }}
         >
-          <div
-            style={{
-              height: `${virtualizer.getTotalSize()}px`,
-              width: '100%',
-              position: 'relative',
-            }}
-          >
-            {virtualizer.getVirtualItems().map((virtualItem) => {
-              const game = searchResults[virtualItem.index];
-              const isWrongGuess = wrongGuesses.includes(game.id);
-              const isSelected = selectedGameId === game.id;
-              const isDisabled = isWrongGuess || disabled;
-              const selectionClass = isSelected
-                ? 'bg-primary text-primary-foreground hover:bg-primary'
-                : 'hover:bg-accent hover:text-accent-foreground';
+          {virtualizer.getVirtualItems().map((virtualItem) => {
+            const game = searchResults[virtualItem.index];
+            const isWrongGuess = wrongGuesses.includes(game.id);
+            const isSelected = selectedGameId === game.id;
+            const isDisabled = isWrongGuess || disabled;
 
-              return (
-                <Tooltip key={game.id}>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => handleSelect(game.id)}
-                      disabled={isDisabled}
-                      className={cn(
-                        'w-full text-left px-3 py-2.5 text-sm rounded-sm transition-colors absolute top-0 left-0 leading-relaxed',
-                        'disabled:pointer-events-none disabled:opacity-50',
-                        isWrongGuess && 'line-through opacity-50 cursor-not-allowed',
-                        selectionClass
-                      )}
-                      style={{
-                        height: `${virtualItem.size}px`,
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                    >
-                      <span className="block truncate">{game.name}</span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="max-w-md">
-                    <p>{game.name}</p>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            })}
-          </div>
+            return (
+              <button
+                key={game.id}
+                onClick={() => handleSelect(game.id)}
+                disabled={isDisabled}
+                className={cn(
+                  'w-full text-left px-3 py-2 text-xs transition-colors absolute top-0 left-0 leading-relaxed uppercase tracking-tight',
+                  'hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none',
+                  isSelected && 'bg-primary text-primary-foreground',
+                  isWrongGuess && 'line-through opacity-50'
+                )}
+                style={{
+                  height: `${virtualItem.size}px`,
+                  transform: `translateY(${virtualItem.start}px)`,
+                }}
+              >
+                <span className="block truncate">{game.name}</span>
+              </button>
+            );
+          })}
         </div>
-      </TooltipProvider>
+      </div>
     );
   };
 
   return (
     <div className={cn('relative', className)}>
-      <div className="relative">
-        <div className="flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-3 shadow-sm">
-          <Search className="size-4 shrink-0 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchValue}
-            onChange={handleInputChange}
-            disabled={disabled}
-            onFocus={() => searchValue.length > 0 && setIsOpen(true)}
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-          />
-          {searchValue.length > 0 && (
-            <Button
+      <InputGroup className="h-10">
+        <InputGroupAddon align="inline-start">
+          <IconSearch className="size-4" />
+        </InputGroupAddon>
+        <InputGroupInput
+          placeholder="Search for a game..."
+          value={searchValue}
+          onChange={handleInputChange}
+          disabled={disabled}
+          onFocus={() => searchValue.length > 0 && setIsOpen(true)}
+          className="uppercase tracking-tight h-full"
+        />
+        {searchValue.length > 0 && (
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
               onClick={handleClear}
               variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 hover:bg-transparent cursor-pointer"
+              size="icon-xs"
+              className="cursor-pointer"
             >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      </div>
+              <IconX className="size-4" />
+            </InputGroupButton>
+          </InputGroupAddon>
+        )}
+      </InputGroup>
 
       {isOpen && searchValue.length > 0 && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-2 rounded-xl border border-border bg-card shadow-lg">
+        <Card className="absolute top-full left-0 right-0 z-50 mt-1 shadow-xl p-0 ring-1 ring-foreground/10 bg-card rounded-none">
           {renderSearchContent()}
-        </div>
+        </Card>
       )}
     </div>
   );

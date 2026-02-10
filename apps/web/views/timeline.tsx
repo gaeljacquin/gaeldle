@@ -28,13 +28,13 @@ import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 import type { Game } from '@gaeldle/types/game';
 import Link from 'next/link';
-import { MoveLeft } from 'lucide-react';
+import { IconArrowLeft } from '@tabler/icons-react';
 import Attempts from '@/components/attempts';
 import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';
 import TimelineDevToggle from '@/components/timeline-dev-toggle';
+import { cn } from '@/lib/utils';
 
-// No-op strategy for swap mode - prevents automatic reordering animation
 const noOpStrategy: SortingStrategy = () => {
   return null;
 };
@@ -140,11 +140,9 @@ export default function Timeline() {
       let newOrder: Game[];
 
       if (swapMode) {
-        // In swap mode, swap the two cards directly
         newOrder = [...userOrder];
         [newOrder[oldIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[oldIndex]];
       } else {
-        // In normal mode, shift cards to make room
         newOrder = arrayMove(userOrder, oldIndex, newIndex);
       }
 
@@ -160,24 +158,24 @@ export default function Timeline() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 flex items-center justify-center min-h-screen">
-        <p className="text-lg">Loading game...</p>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-xs uppercase tracking-[0.2em] animate-pulse">Initializing Protocol...</p>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Do not terminate session</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2">
-        <p className="text-lg">Error</p>
-        <p className="text-lg">{error}</p>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-xs uppercase tracking-widest text-destructive">System Error</p>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{error}</p>
       </div>
     );
   }
 
   const activeGame = activeId ? userOrder.find((game) => game.id === activeId) : null;
 
-  // Check if any correct card has been moved from its correct position
   const hasMovedCorrectCard = hasSubmitted && userOrder.some((game, index) => {
     const wasCorrect = correctGameIds.has(game.id);
     const isInCorrectPosition = correctPositionMap.get(index) === game.id;
@@ -187,25 +185,25 @@ export default function Timeline() {
   const buttonsDisabled = isOrderSameAsSaved() || hasMovedCorrectCard;
 
   return (
-    <div className="redesign min-h-full bg-background text-foreground">
-      <div className="container mx-auto max-w-450 px-4 py-10">
+    <div className="min-h-full bg-background text-foreground">
+      <div className="container mx-auto max-w-5xl px-4 py-8">
         <Link
           href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          className="mb-6 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
         >
-          <MoveLeft className="size-4" />
-          Main Menu
+          <IconArrowLeft className="size-3" />
+          Return to Terminal
         </Link>
 
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{gameMode?.title}</h1>
-          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+        <div className="mb-8 border-l-2 border-primary pl-4">
+          <h1 className="text-2xl font-bold tracking-tight uppercase">{gameMode?.title}</h1>
+          <p className="mt-1 text-[10px] text-muted-foreground uppercase tracking-widest">{gameMode?.description}</p>
         </div>
 
-        <Card className="border-border bg-card">
+        <Card className="border shadow-none bg-muted/5">
           <CardContent className="p-6">
-            <div className="space-y-6">
-              <div className="rounded-xl border-2 border-dashed border-border p-4 overflow-x-auto flex justify-center bg-card">
+            <div className="space-y-8">
+              <div className="rounded-none border-2 border-dashed border-border p-6 overflow-x-auto flex justify-center bg-card/50">
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCenter}
@@ -217,7 +215,7 @@ export default function Timeline() {
                     items={userOrder.map((game) => game.id)}
                     strategy={swapMode ? noOpStrategy : horizontalListSortingStrategy}
                   >
-                    <div className="flex gap-4">
+                    <div className="flex gap-6 min-w-max px-4">
                       {userOrder.map((game, index) => {
                         let isCorrect: boolean | undefined = undefined;
                         let showDate = false;
@@ -255,43 +253,57 @@ export default function Timeline() {
 
                   <DragOverlay>
                     {activeGame ? (
-                      <TimelineCard game={activeGame} className="opacity-100" />
+                      <TimelineCard game={activeGame} className="opacity-100 ring-2 ring-primary" />
                     ) : null}
                   </DragOverlay>
                 </DndContext>
               </div>
 
-              <div className="flex flex-col items-center gap-4">
-                <button
-                  onClick={() => setSwapMode(!swapMode)}
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                    swapMode
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
-                  }`}
-                  disabled={isGameOver}
-                >
-                  Swap
-                </button>
+              <div className="flex flex-col items-center gap-6">
+                <div className="flex items-center gap-2 border p-1 bg-muted/20">
+                  <button
+                    onClick={() => setSwapMode(false)}
+                    className={cn(
+                      "px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors cursor-pointer",
+                      swapMode ? "text-muted-foreground hover:text-foreground" : "bg-primary text-primary-foreground"
+                    )}
+                    disabled={isGameOver}
+                  >
+                    Shift
+                  </button>
+                  <button
+                    onClick={() => setSwapMode(true)}
+                    className={cn(
+                      "px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors cursor-pointer",
+                      swapMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                    )}
+                    disabled={isGameOver}
+                  >
+                    Swap
+                  </button>
+                </div>
 
-                <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Attempt Authorization</p>
+                  <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
+                </div>
               </div>
 
               {!isGameOver && (
-                <div className="flex flex-wrap items-center justify-center gap-4">
+                <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                   <Button
                     onClick={handleSubmit}
                     size="lg"
-                    className="cursor-pointer"
+                    className="cursor-pointer uppercase tracking-widest text-[10px] font-bold h-10 px-8"
                     disabled={buttonsDisabled}
                   >
-                    Submit
+                    Transmit
                   </Button>
                   <Button
                     onClick={handleResetToSaved}
                     size="lg"
                     variant="outline"
-                    className="cursor-pointer"
+                    className="cursor-pointer uppercase tracking-widest text-[10px] font-bold h-10 px-8"
                     disabled={buttonsDisabled}
                   >
                     Reset
@@ -300,25 +312,25 @@ export default function Timeline() {
               )}
 
               {isGameOver && (
-                <div className="mt-6 text-center space-y-4">
+                <div className="mt-8 border-2 border-primary bg-primary/5 p-8 text-center animate-in fade-in zoom-in duration-300">
                   {isWinner ? (
                     <div className="space-y-2">
-                      <p className="text-2xl font-bold text-green-600">Congratulations!</p>
-                      <p className="text-muted-foreground">
-                        You arranged all games in the correct chronological order!
+                      <p className="text-xl font-bold text-primary uppercase tracking-tighter">Sequence Validated</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                        Chronological order correctly established
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       <div className="space-y-2">
-                        <p className="text-2xl font-bold text-destructive">Game Over!</p>
-                        <p className="text-muted-foreground">
-                          Here&apos;s the correct order:
+                        <p className="text-xl font-bold text-destructive uppercase tracking-tighter">Sequence Error</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                          Correct chronological order:
                         </p>
                       </div>
 
-                      <div className="rounded-xl border-2 border-dashed border-border p-4 overflow-x-auto bg-card">
-                        <div className="flex gap-4 min-w-max">
+                      <div className="rounded-none border-2 border-dashed border-border p-6 overflow-x-auto bg-card/50">
+                        <div className="flex gap-6 min-w-max justify-center">
                           {getCorrectOrder().map((game) => (
                             <TimelineCard
                               key={game.id}
@@ -334,10 +346,10 @@ export default function Timeline() {
 
                   <Button
                     onClick={resetGame}
-                    className="mt-4 cursor-pointer"
+                    className="mt-8 cursor-pointer uppercase tracking-widest text-[10px] font-bold"
                     size="lg"
                   >
-                    {isWinner ? 'Keep Playing' : 'Play Again'}
+                    {isWinner ? 'New Mission' : 'Retry Protocol'}
                   </Button>
                 </div>
               )}
@@ -345,7 +357,7 @@ export default function Timeline() {
           </CardContent>
         </Card>
 
-        <div className="mx-auto mt-6 max-w-md rounded-xl border border-dashed border-border bg-muted/30 p-4 text-center">
+        <div className="mx-auto mt-8 max-w-md border border-dashed p-6 text-center opacity-50 hover:opacity-100 transition-opacity">
           <TimelineDevToggle
             getCorrectOrder={getCorrectOrder}
             attemptsLeft={attemptsLeft}

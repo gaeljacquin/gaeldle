@@ -4,10 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { IconMenu2, IconX } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useStackApp, useUser } from "@stackframe/stack";
+import { useUser } from "@stackframe/stack";
 import { appInfo } from "@/lib/app-info";
 
 const navLinks = [
@@ -16,26 +16,21 @@ const navLinks = [
   { label: "Terms", href: "/terms" },
 ];
 
-export default function Navbar() {
+export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const user = useUser();
-  const stackApp = useStackApp();
   const isSignedIn = Boolean(user);
   const authLabel = isSignedIn ? "Dashboard" : "Sign in";
-  const authHref = isSignedIn ? "/dashboard" : "/sign-in";
+  const authHref = isSignedIn ? "/dashboard" : "/handler/sign-in";
   const isActive = (path: string) => pathname === path;
 
-  const handleSignOut = () => {
-    void stackApp.signOut();
-  };
-
   return (
-    <nav className="redesign sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+    <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href={`${appInfo.authorUrl}`} className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.png" alt={`${appInfo.title} logo`} width={32} height={32} />
-          {/* <span className="text-xl font-bold tracking-tight text-foreground">{appInfo.title}</span> */}
+          <span className="text-xl font-bold tracking-tight text-foreground">{appInfo.title}</span>
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
@@ -56,24 +51,14 @@ export default function Navbar() {
           <Link
             href={authHref}
             className={cn(
-              "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "rounded-md px-3 py-2 text-sm font-medium transition-colors ml-4",
               isActive(authHref)
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                ? "bg-primary text-primary-foreground"
+                : "bg-primary/90 text-primary-foreground hover:bg-primary"
             )}
           >
             {authLabel}
           </Link>
-          {isSignedIn && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-2 text-muted-foreground hover:text-foreground cursor-pointer"
-              onClick={handleSignOut}
-            >
-              Sign out
-            </Button>
-          )}
         </div>
 
         <Button
@@ -83,7 +68,7 @@ export default function Navbar() {
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle menu"
         >
-          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {isOpen ? <IconX size={20} /> : <IconMenu2 size={20} />}
         </Button>
       </div>
 
@@ -110,25 +95,11 @@ export default function Navbar() {
               onClick={() => setIsOpen(false)}
               className={cn(
                 "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive(authHref)
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                "bg-primary text-primary-foreground"
               )}
             >
               {authLabel}
             </Link>
-            {isSignedIn && (
-              <button
-                type="button"
-                onClick={() => {
-                  handleSignOut();
-                  setIsOpen(false);
-                }}
-                className="rounded-md px-3 py-2 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground cursor-pointer"
-              >
-                Sign out
-              </button>
-            )}
           </div>
         </div>
       )}

@@ -1,46 +1,51 @@
 'use client';
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogCancel,
+  AlertDialogFooter,
+} from '@/components/ui/alert-dialog';
 import HoldToRevealButton from '@/components/hold-to-reveal-button';
 
-interface ClueConfirmationModalProps {
+interface HintConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onReveal: () => void;
 }
 
-export default function HintConfirmationModal({ isOpen, onClose, onReveal }: Readonly<ClueConfirmationModalProps>) {
+export default function HintConfirmationModal({ isOpen, onClose, onReveal }: Readonly<HintConfirmationModalProps>) {
   const handleReveal = () => {
     onReveal();
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Reveal Hint</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to reveal a hint? This will cost 1 attempt.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex gap-3 mt-4">
-          <Button
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="uppercase tracking-widest text-primary">Signal Interception</AlertDialogTitle>
+          <AlertDialogDescription className="uppercase tracking-tight text-[10px]">
+            Are you sure you want to intercept a hint? This will consume 1 attempt authorization.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex gap-3 mt-4">
+          <AlertDialogCancel
             onClick={onClose}
-            variant="outline"
-            className="flex-1 cursor-pointer"
-            size="lg"
+            className="flex-1 cursor-pointer uppercase tracking-widest text-[10px] font-bold h-10"
           >
-            Cancel
-          </Button>
+            Abort
+          </AlertDialogCancel>
           <HoldToRevealButton
             onReveal={handleReveal}
             disabled={false}
             className="flex-1"
           />
-        </div>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

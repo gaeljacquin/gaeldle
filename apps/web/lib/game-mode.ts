@@ -1,21 +1,20 @@
 import {
-  Image,
-  Calendar,
-  CalendarRange,
-  Scroll,
-  Wallpaper,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import type { GameModeSlug } from "@gaeldle/types/game";
+  IconPhoto,
+  IconCalendar,
+  IconCalendarDue,
+  IconNotes,
+  IconWallpaper,
+  type TablerIcon,
+} from "@tabler/icons-react";
+import type { GameModeSlug } from "../../../types/game";
 
 export interface GameMode {
   id: GameModeSlug;
   title: string;
   description: string;
   difficulty: "Easy" | "Medium" | "Hard";
-  icon: LucideIcon;
+  icon: TablerIcon;
   gradient: string;
-  pattern: "diagonal" | "diagonal-reverse";
   href: string;
 }
 
@@ -25,9 +24,8 @@ export const gameModes: GameMode[] = [
     title: "Cover Art",
     description: "Identify the game from their cover art.",
     difficulty: "Easy",
-    icon: Image,
+    icon: IconPhoto,
     gradient: "--gradient-easy",
-    pattern: "diagonal",
     href: "/cover-art",
   },
   {
@@ -35,9 +33,8 @@ export const gameModes: GameMode[] = [
     title: "Artwork",
     description: "Guess the game from their artwork.",
     difficulty: "Medium",
-    icon: Wallpaper,
+    icon: IconWallpaper,
     gradient: "--gradient-medium-1",
-    pattern: "diagonal-reverse",
     href: "/artwork",
   },
   {
@@ -45,9 +42,8 @@ export const gameModes: GameMode[] = [
     title: "Timeline",
     description: "Arrange games in chronological order.",
     difficulty: "Medium",
-    icon: Calendar,
+    icon: IconCalendar,
     gradient: "--gradient-medium-3",
-    pattern: "diagonal",
     href: "/timeline",
   },
   {
@@ -55,9 +51,8 @@ export const gameModes: GameMode[] = [
     title: "Timeline 2",
     description: "Place each game in chronological order.",
     difficulty: "Hard",
-    icon: CalendarRange,
+    icon: IconCalendarDue,
     gradient: "--gradient-hard-1",
-    pattern: "diagonal",
     href: "/timeline-2",
   },
   {
@@ -65,9 +60,8 @@ export const gameModes: GameMode[] = [
     title: "Specifications",
     description: "Deduce the game from their specifications.",
     difficulty: "Hard",
-    icon: Scroll,
+    icon: IconNotes,
     gradient: "--gradient-hard-2",
-    pattern: "diagonal-reverse",
     href: "/specifications",
   },
 ];

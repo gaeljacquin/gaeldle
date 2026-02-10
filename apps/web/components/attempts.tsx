@@ -16,19 +16,19 @@ export default function Attempts({
     variant === 'neutral'
       ? 'border-muted-foreground bg-transparent'
       : 'border-primary bg-primary';
-  const usedClass = 'border-slate-500 bg-slate-500';
+  const usedClass = 'border-foreground/20 bg-foreground/10';
 
   return (
     <div className={`flex items-center justify-center gap-2 ${className ?? ''}`}>
       {Array.from({ length: maxAttempts }).map((_, index) => {
         const isUsed = index >= maxAttempts - attemptsUsed;
         return (
-        <div
-          key={`attempt-${index + 1}`}
-          className={`h-4 w-4 rounded-full border-2 transition-colors ${
-            isUsed ? usedClass : emptyClass
-          }`}
-        />
+          <div
+            key={`attempt-${index + 1}`}
+            className={`h-3 w-3 rounded-none border transition-colors ${
+              isUsed ? usedClass : emptyClass
+            }`}
+          />
         );
       })}
     </div>

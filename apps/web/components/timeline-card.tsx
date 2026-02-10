@@ -14,7 +14,6 @@ interface TimelineCardProps {
   className?: string;
 }
 
-// Convert Unix timestamp to yyyy-mm-dd format
 function formatDate(timestamp: number | null): string {
   if (!timestamp) return '????-??-??';
   const date = new Date(timestamp * 1000);
@@ -26,15 +25,14 @@ function formatDate(timestamp: number | null): string {
 
 export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
   ({ game, isCorrect, showDate = false, isDragging = false, isGameOver = false, className, ...props }, ref) => {
-    // Apply grayscale to incorrect cards when game is over
     const shouldGrayscale = isGameOver && isCorrect === false;
 
     return (
       <div
         ref={ref}
         className={cn(
-          'relative overflow-hidden rounded-xl border-2 border-border bg-card shadow-sm',
-          'w-35 h-49',
+          'relative overflow-hidden border-2 border-border bg-card',
+          'w-32 h-44',
           isDragging && 'opacity-50',
           className
         )}
@@ -49,37 +47,36 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
                 'w-full h-full object-cover',
                 shouldGrayscale && 'grayscale'
               )}
-              width={16}
-              height={16}
-              sizes='100vw'
+              fill
+              sizes="10vw"
             />
           ) : (
-            <div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-500">
-              No Image
+            <div className="w-full h-full bg-muted flex items-center justify-center text-[10px] uppercase tracking-widest text-muted-foreground">
+              No Data
             </div>
           )}
         </div>
 
         <div
           className={cn(
-            'absolute top-0 left-0 right-0 px-2 py-1 text-center text-white text-sm font-semibold',
+            'absolute top-0 left-0 right-0 px-2 py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-white',
             isCorrect === true && 'bg-green-600',
-            isCorrect === false && 'bg-red-600',
-            isCorrect === undefined && 'bg-slate-600'
+            isCorrect === false && 'bg-destructive',
+            isCorrect === undefined && 'bg-muted-foreground'
           )}
         >
-          {showDate ? formatDate(game.firstReleaseDate) : '?'}
+          {showDate ? formatDate(game.firstReleaseDate) : '????-??-??'}
         </div>
 
         <div
           className={cn(
-            'absolute inset-x-0 bottom-0 px-2 py-1 text-center',
-            isCorrect === true && 'bg-green-600/90',
-            isCorrect === false && 'bg-destructive/90',
-            isCorrect === undefined && 'bg-primary/90'
+            'absolute inset-x-0 bottom-0 px-2 py-1 text-center border-t',
+            isCorrect === true && 'bg-green-600/90 text-white',
+            isCorrect === false && 'bg-destructive/90 text-white',
+            isCorrect === undefined && 'bg-primary/90 text-primary-foreground'
           )}
         >
-          <p className="truncate text-xs font-medium text-primary-foreground" title={game.name}>
+          <p className="truncate text-[10px] font-bold uppercase tracking-tight" title={game.name}>
             {game.name}
           </p>
         </div>

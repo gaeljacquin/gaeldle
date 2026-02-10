@@ -10,13 +10,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import Link from 'next/link';
-import { MoveLeft } from 'lucide-react';
+import { IconArrowLeft } from '@tabler/icons-react';
 import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
+import HintConfirmationModal from '@/components/hint-confirmation-modal';
 
 export default function Specifications() {
   const gameMode = getGameModeBySlug('specifications');
   const [showAnswerSpecs, setShowAnswerSpecs] = useState(true);
+  const [isHintModalOpen, setIsHintModalOpen] = useState(false);
 
   const {
     allGames,
@@ -32,6 +34,7 @@ export default function Specifications() {
     clearSelection,
     handleSelectGame,
     handleSubmit,
+    revealClue,
     resetGame,
     adjustAttempts,
   } = useSpecificationsGame();
@@ -45,17 +48,18 @@ export default function Specifications() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 flex items-center justify-center min-h-screen">
-        <p className="text-lg">Loading game...</p>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-xs uppercase tracking-[0.2em] animate-pulse">Initializing Protocol...</p>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Do not terminate session</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2">
-        <p className="text-lg">Error</p>
-        <p className="text-lg">{error}</p>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-xs uppercase tracking-widest text-destructive">System Error</p>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{error}</p>
       </div>
     );
   }
@@ -63,112 +67,121 @@ export default function Specifications() {
   const wrongGuesses = guesses.map(g => g.gameId);
 
   return (
-    <div className="redesign min-h-full bg-background text-foreground">
-      <div className="container mx-auto px-4 py-10">
+    <div className="min-h-full bg-background text-foreground">
+      <div className="container mx-auto px-4 py-8">
         <Link
           href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          className="mb-6 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
         >
-          <MoveLeft className="size-4" />
-          Main Menu
+          <IconArrowLeft className="size-3" />
+          Return to Terminal
         </Link>
 
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{gameMode?.title}</h1>
-          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+        <div className="mb-8 border-l-2 border-primary pl-4 text-left">
+          <h1 className="text-2xl font-bold tracking-tight uppercase">{gameMode?.title}</h1>
+          <p className="mt-1 text-[10px] text-muted-foreground uppercase tracking-widest">{gameMode?.description}</p>
         </div>
 
-        <div className="mx-auto max-w-6xl space-y-6">
+        <div className="mx-auto max-w-6xl space-y-8">
           {!isGameOver && (
-            <div className="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row">
-              <div className="flex-1">
-                <GameSearch
-                  selectedGameId={selectedGameId}
-                  wrongGuesses={wrongGuesses}
-                  onSelectGame={handleSelectGame}
-                  disabled={isGameOver}
-                />
+            <div className="mx-auto flex max-w-2xl flex-col gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row items-stretch">
+                <div className="flex-1">
+                  <GameSearch
+                    selectedGameId={selectedGameId}
+                    wrongGuesses={wrongGuesses}
+                    onSelectGame={handleSelectGame}
+                    disabled={isGameOver}
+                  />
+                </div>
+
+                <Button
+                  onClick={handleSubmit}
+                  disabled={selectedGameId === null || isGameOver}
+                  className="cursor-pointer h-10 uppercase tracking-widest text-[10px] font-bold px-8"
+                  size="lg"
+                >
+                  Transmit
+                </Button>
               </div>
 
-              <Button
-                onClick={handleSubmit}
-                disabled={selectedGameId === null || isGameOver}
-                className="cursor-pointer"
-                size="lg"
-              >
-                Submit
-              </Button>
-            </div>
-          )}
-
-          {!isGameOver && (
-            <div className="mx-auto flex max-w-2xl">
               <SelectedGameDisplay
                 selectedGame={selectedGame}
                 onClearSelection={clearSelection}
                 showSkeleton={!selectedGame}
-                className="flex-1"
+                className="w-full bg-muted/10 border-dashed"
                 mode="specifications"
               />
             </div>
           )}
 
-          <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Attempt Authorization</p>
+              <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
+            </div>
+
+            {!isGameOver && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsHintModalOpen(true)}
+                disabled={attemptsLeft <= 1 || !!revealedClue}
+                className="uppercase tracking-widest text-[10px] font-bold h-8 cursor-pointer"
+              >
+                {revealedClue ? 'Signal Intercepted' : 'Intercept Signal (-1 ATP)'}
+              </Button>
+            )}
+          </div>
+
+          <HintConfirmationModal
+            isOpen={isHintModalOpen}
+            onClose={() => setIsHintModalOpen(false)}
+            onReveal={revealClue}
+          />
 
           {!isGameOver && guesses.length > 0 && (
-            <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-[10px] uppercase tracking-widest font-bold">
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded bg-green-500"></div>
-                <span className="text-muted-foreground">Correct</span>
+                <div className="h-3 w-3 bg-green-600/50 border border-green-600"></div>
+                <span className="text-muted-foreground">Match</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded bg-yellow-500"></div>
-                <span className="text-muted-foreground">Partially correct</span>
+                <div className="h-3 w-3 bg-yellow-600/50 border border-yellow-600"></div>
+                <span className="text-muted-foreground">Partial</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded bg-destructive"></div>
-                <span className="text-muted-foreground">Incorrect</span>
+                <div className="h-3 w-3 bg-destructive/50 border border-destructive"></div>
+                <span className="text-muted-foreground">Null</span>
               </div>
             </div>
           )}
 
           {isGameOver && (
-            <SpecificationsGameOver
-              isCorrect={isCorrect}
-              targetGame={targetGame}
-              attemptsUsed={MAX_ATTEMPTS - attemptsLeft}
-              onPlayAgain={handleResetGame}
-              onToggleTable={() => setShowAnswerSpecs(!showAnswerSpecs)}
-              showingAnswer={showAnswerSpecs}
-            />
+            <div className="mx-auto max-w-2xl">
+              <SpecificationsGameOver
+                isCorrect={isCorrect}
+                targetGame={targetGame}
+                attemptsUsed={MAX_ATTEMPTS - attemptsLeft}
+                onPlayAgain={handleResetGame}
+                onToggleTable={() => setShowAnswerSpecs(!showAnswerSpecs)}
+                showingAnswer={showAnswerSpecs}
+              />
+            </div>
           )}
 
-          {!isGameOver && (
-            <Card className="overflow-hidden border-border bg-card">
-              <CardContent className="p-0">
-                <SpecificationsGrid
-                  guesses={guesses}
-                  revealedClue={revealedClue}
-                  targetGame={targetGame}
-                />
-              </CardContent>
-            </Card>
-          )}
+          <Card className="border shadow-none bg-muted/5 p-0 overflow-hidden">
+            <CardContent className="p-0">
+              <SpecificationsGrid
+                guesses={guesses}
+                revealedClue={revealedClue}
+                targetGame={targetGame}
+                showAnswerOnly={isGameOver ? showAnswerSpecs : false}
+              />
+            </CardContent>
+          </Card>
 
-          {isGameOver && (
-            <Card className="overflow-hidden border-border bg-card">
-              <CardContent className="p-0">
-                <SpecificationsGrid
-                  guesses={guesses}
-                  revealedClue={revealedClue}
-                  targetGame={targetGame}
-                  showAnswerOnly={showAnswerSpecs}
-                />
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="mx-auto max-w-md rounded-xl border border-dashed border-border bg-muted/30 p-4 text-center">
+          <div className="mx-auto max-w-md border border-dashed p-6 text-center opacity-50 hover:opacity-100 transition-opacity">
             <DevModeToggle
               targetGame={targetGame}
               attemptsLeft={attemptsLeft}

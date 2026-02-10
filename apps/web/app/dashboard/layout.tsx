@@ -1,11 +1,12 @@
 import { stackServerApp } from "@/stack/server";
 import { Sidebar } from "@/components/sidebar";
+import { ReactNode } from "react";
 
 export default async function DashboardLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: Readonly<{
+  children: ReactNode;
+}>) {
   await stackServerApp.getUser({ or: "redirect" });
 
   return (

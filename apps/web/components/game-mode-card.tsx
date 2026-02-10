@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LucideIcon } from "lucide-react";
+import { type TablerIcon } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 interface GameModeCardProps {
@@ -7,13 +7,12 @@ interface GameModeCardProps {
   title: string;
   description: string;
   difficulty: "Easy" | "Medium" | "Hard";
-  icon: LucideIcon;
+  icon: TablerIcon;
   gradient: string;
-  pattern?: "diagonal" | "diagonal-reverse";
   disabled?: boolean;
 }
 
-export default function GameModeCard({
+export function GameModeCard({
   href,
   title,
   description,
@@ -43,7 +42,7 @@ export default function GameModeCard({
       </span>
 
       <div className="absolute right-4 top-4 rounded-lg bg-card/20 p-2 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
-        <Icon className="h-5 w-5 text-primary-foreground" />
+        <Icon size={20} className="text-primary-foreground" />
       </div>
 
       <div className="relative z-10">

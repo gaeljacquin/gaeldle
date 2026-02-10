@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { cn } from '@/lib/utils';
 import { pixelateImage } from '@/lib/utils/pixelate';
 
@@ -65,61 +64,31 @@ export default function ArtworkDisplay({
 
   if (!imageUrl) {
     return (
-      <div className={cn('relative bg-muted rounded-lg flex items-center justify-center', className)}>
-        <span className="text-muted-foreground">No artwork available</span>
+      <div className={cn('relative bg-muted flex items-center justify-center border aspect-video', className)}>
+        <span className="text-muted-foreground text-xs uppercase tracking-wider">No artwork available</span>
       </div>
     );
   }
 
   return (
-    <>
-      <div className={cn('relative', className)}>
-        {(isProcessing || !shouldShowImage) && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background z-10 rounded-lg">
-            <p className="text-sm text-muted-foreground">Loading...</p>
-          </div>
+    <div className={cn('relative border', className)}>
+      {(isProcessing || !shouldShowImage) && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Loading...</p>
+        </div>
+      )}
+      <div className="aspect-video relative w-full h-full overflow-hidden">
+        {shouldShowImage && displayUrl && (
+          <Image
+            src={displayUrl}
+            alt="Game artwork"
+            className="object-contain"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority
+          />
         )}
-        <AspectRatio ratio={16 / 9}>
-          <div className="relative w-full h-full">
-            {shouldShowImage && displayUrl && (
-              <Image
-                src={displayUrl}
-                alt="Game artwork"
-                className="object-contain rounded-lg"
-                fill
-                sizes="10vw"
-                priority
-              />
-            )}
-          </div>
-        </AspectRatio>
-
-        {/* <Button
-          onClick={() => setIsExpanded(true)}
-          className="absolute top-2 right-2 cursor-pointer"
-          size="icon"
-          variant="secondary"
-        >
-          <Expand className="size-4" />
-        </Button> */}
       </div>
-
-      {/* <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
-        <DialogTitle className="text-sm hidden">
-          Artwork
-        </DialogTitle>
-        <DialogContent className="max-w-4xl">
-          <div className="relative w-full aspect-video">
-            <Image
-              src={displayUrl || imageUrl}
-              alt="Game artwork (expanded)"
-              className="object-contain"
-              fill
-              sizes="10vw"
-            />
-          </div>
-        </DialogContent>
-      </Dialog> */}
-    </>
+    </div>
   );
 }

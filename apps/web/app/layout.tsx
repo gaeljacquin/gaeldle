@@ -1,29 +1,49 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackClientApp } from "../stack/client";
-import { Providers } from "@/components/providers";
+import { Geist, Geist_Mono, Figtree } from "next/font/google";
+import { LayoutWrapper } from "@/components/layout-wrapper";
+import Loading from "./loading";
 import "./globals.css";
-import { daFont1, daFont2, daFont3 } from "@/lib/fonts";
-import { appInfo } from "@/lib/app-info";
-import { ReactNode } from "react";
+
+const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
-  title: appInfo.title,
-  description: appInfo.description,
+  title: "Gaeldle",
+  description: "A gaming-themed Wordle clone",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
-  children: ReactNode;
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={figtree.variable}>
       <body
-        className={`${daFont1.variable} ${daFont2.variable} ${daFont3.variable}`}
-      ><StackProvider app={stackClientApp}><StackTheme>
-        <Providers>{children}</Providers>
-      </StackTheme></StackProvider></body>
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <StackProvider app={stackClientApp}>
+          <StackTheme>
+            <Suspense fallback={<Loading />}>
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+            </Suspense>
+          </StackTheme>
+        </StackProvider>
+      </body>
     </html>
   );
 }

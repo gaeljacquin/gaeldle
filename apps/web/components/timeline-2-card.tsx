@@ -12,7 +12,6 @@ interface Timeline2CardProps {
   bannerColor?: 'green' | 'red' | 'slate' | 'none';
 }
 
-// Convert Unix timestamp to yyyy-mm-dd format
 function formatDate(timestamp: number | null): string {
   if (!timestamp) return '????-??-??';
   const date = new Date(timestamp * 1000);
@@ -28,8 +27,8 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
       <div
         ref={ref}
         className={cn(
-          'relative overflow-hidden rounded-xl border-2 border-border bg-card shadow-sm select-none',
-          'w-35 h-49',
+          'relative overflow-hidden border-2 border-border bg-card shadow-sm select-none',
+          'w-32 h-44',
           className
         )}
         {...props}
@@ -41,38 +40,37 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
               alt={game.name}
               className="w-full h-full object-cover"
               draggable={false}
-              width={16}
-              height={24}
-              sizes='100vw'
+              fill
+              sizes="10vw"
             />
           ) : (
-            <div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-500">
-              No Image
+            <div className="w-full h-full bg-muted flex items-center justify-center text-[10px] uppercase tracking-widest text-muted-foreground">
+              No Data
             </div>
           )}
         </div>
 
         <div
           className={cn(
-            'absolute top-0 left-0 right-0 px-2 py-1 text-center text-white text-sm font-semibold',
+            'absolute top-0 left-0 right-0 px-2 py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-white',
             bannerColor === 'green' && 'bg-green-600',
-            bannerColor === 'red' && 'bg-red-600',
-            bannerColor === 'slate' && 'bg-slate-600'
+            bannerColor === 'red' && 'bg-destructive',
+            bannerColor === 'slate' && 'bg-muted-foreground'
           )}
         >
-          {showDate ? formatDate(game.firstReleaseDate) : '?'}
+          {showDate ? formatDate(game.firstReleaseDate) : '????-??-??'}
         </div>
 
         <div
           className={cn(
-            'absolute inset-x-0 bottom-0 px-2 py-1 text-center',
-            bannerColor === 'green' && 'bg-green-600/90',
-            bannerColor === 'red' && 'bg-destructive/90',
-            bannerColor === 'slate' && 'bg-slate-600/90',
-            bannerColor === 'none' && 'bg-primary/90'
+            'absolute inset-x-0 bottom-0 px-2 py-1 text-center border-t',
+            bannerColor === 'green' && 'bg-green-600/90 text-white',
+            bannerColor === 'red' && 'bg-destructive/90 text-white',
+            bannerColor === 'slate' && 'bg-muted-foreground/90 text-white',
+            bannerColor === 'none' && 'bg-primary/90 text-primary-foreground'
           )}
         >
-          <p className="truncate text-xs font-medium text-primary-foreground" title={game.name}>
+          <p className="truncate text-[10px] font-bold uppercase tracking-tight" title={game.name}>
             {game.name}
           </p>
         </div>

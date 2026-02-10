@@ -1,15 +1,15 @@
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { IconArrowLeft } from '@tabler/icons-react';
 
-export default function Privacy() {
+export default function PrivacyView() {
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-6">
-      <Link href="/" className="hover:underline flex gap-2">
-        <ArrowLeft className="size-7" />
-        Home
+      <Link href="/" className="hover:underline flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+        <IconArrowLeft size={24} />
+        <span>Home</span>
       </Link>
-      <h1 className="text-4xl font-bold">Privacy Policy</h1>
+      <h1 className="text-4xl font-bold tracking-tight">Privacy Policy</h1>
       <p className="text-xl text-muted-foreground">Last updated: 2024.09.02</p>
 
       <Separator />

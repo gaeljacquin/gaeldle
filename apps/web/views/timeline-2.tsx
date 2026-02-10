@@ -4,11 +4,10 @@ import { useTimeline2Game } from '@/lib/hooks/use-timeline-2-game';
 import { Timeline2Card } from '@/components/timeline-2-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { MoveLeft } from 'lucide-react';
+import { IconArrowLeft } from '@tabler/icons-react';
 import Attempts from '@/components/attempts';
 import { motion, useMotionValue } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -41,13 +40,11 @@ export default function Timeline2() {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  // Find which drop zone the card is over
   const findDropZone = (clientX: number, clientY: number): number | null => {
     if (!timelineRef.current) return null;
 
     const timelineRect = timelineRef.current.getBoundingClientRect();
 
-    // Check if cursor is within timeline bounds vertically
     if (clientY < timelineRect.top - 50 || clientY > timelineRect.bottom + 50) {
       return null;
     }
@@ -56,7 +53,6 @@ export default function Timeline2() {
 
     if (cards.length === 0) return null;
 
-    // For each card, check if cursor is before it
     for (let i = 0; i < cards.length; i++) {
       const cardRect = cards[i].getBoundingClientRect();
       const cardCenter = cardRect.left + cardRect.width / 2;
@@ -66,7 +62,6 @@ export default function Timeline2() {
       }
     }
 
-    // If past all cards, insert at end
     return cards.length;
   };
 
@@ -80,20 +75,17 @@ export default function Timeline2() {
   };
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: { point: { x: number; y: number }; offset: { x: number; y: number } }) => {
-    // Only allow placement if dragged far enough (prevent accidental drops)
-    const dragDistance = Math.sqrt(info.offset.x ** 2 + info.offset.y ** 2);
-    const MIN_DRAG_DISTANCE = 40; // pixels
+    const dragDistance = Math.hypot(info.offset.x, info.offset.y);
+    const MIN_DRAG_DISTANCE = 40;
 
     if (dragDistance >= MIN_DRAG_DISTANCE) {
       const dropZone = findDropZone(info.point.x, info.point.y);
 
       if (dropZone !== null) {
-        // Valid drop on timeline
         handleCardPlacement(dropZone);
       }
     }
 
-    // Reset drag state
     setIsDragging(false);
     setDraggedOverIndex(null);
     x.set(0);
@@ -109,41 +101,36 @@ export default function Timeline2() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 max-w-6xl">
-        <Card>
-          <CardContent className="p-8">
-            <div className="text-center">
-              <p className="text-lg">Loading game...</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-xs uppercase tracking-[0.2em] animate-pulse">Initializing Protocol...</p>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Do not terminate session</p>
       </div>
     );
   }
 
   return (
-    <div className="redesign min-h-full bg-background text-foreground">
-      <div className="container mx-auto max-w-[1800px] px-4 py-10">
+    <div className="min-h-full bg-background text-foreground">
+      <div className="container mx-auto max-w-450 px-4 py-8">
         <Link
           href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          className="mb-6 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
         >
-          <MoveLeft className="size-4" />
-          Main Menu
+          <IconArrowLeft className="size-3" />
+          Return to Terminal
         </Link>
 
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{gameMode?.title}</h1>
-          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+        <div className="mb-8 border-l-2 border-primary pl-4 text-left">
+          <h1 className="text-2xl font-bold tracking-tight uppercase">{gameMode?.title}</h1>
+          <p className="mt-1 text-[10px] text-muted-foreground uppercase tracking-widest">{gameMode?.description}</p>
         </div>
 
-        <Card className="border-border bg-card">
-          <CardContent className="p-6">
-            <div className="space-y-6">
+        <Card className="border shadow-none bg-muted/5">
+          <CardContent className="p-8">
+            <div className="space-y-8">
               <div className="flex justify-center">
-                <div className="rounded-xl border-2 border-dashed border-border p-4 flex justify-center items-center w-[172px] h-[228px] bg-card">
+                <div className="border-2 border-dashed border-border p-4 flex justify-center items-center w-36 h-48 bg-card/50">
                   {isDealingCard || isGameOver || !dealtCard ? (
-                    <Skeleton className="w-[140px] h-[196px] rounded-xl" />
+                    <div className="w-32 h-44 bg-muted animate-pulse border" />
                   ) : (
                     <div className="relative">
                       {isDragging && (
@@ -183,20 +170,24 @@ export default function Timeline2() {
                 </div>
               </div>
 
-              <Attempts maxAttempts={maxAttempts} attemptsLeft={attemptsLeft} variant="primary" />
+              <div className="flex flex-col items-center gap-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Attempt Authorization</p>
+                  <Attempts maxAttempts={maxAttempts} attemptsLeft={attemptsLeft} variant="primary" />
+              </div>
 
-              <div className="text-center space-y-4">
+              <div className="text-center">
                 <div
                   ref={timelineRef}
-                  className="rounded-xl border-2 border-dashed border-border p-4 overflow-x-auto flex justify-center items-center bg-card"
+                  className="border-2 border-dashed border-border p-6 overflow-x-auto flex justify-center items-center bg-card/50 min-h-55"
                 >
-                  <div className="flex gap-4 items-center">
+                  <div className="flex gap-4 items-center px-4">
                     {timelineCards.map((game, index) => {
+                      const correctlyPlacedCardsColor = correctlyPlacedCards.has(game.id)
+                          ? 'green'
+                          : 'red'
                       const bannerColor = game.id === firstCardId
                         ? 'slate'
-                        : correctlyPlacedCards.has(game.id)
-                          ? 'green'
-                          : 'red';
+                        : correctlyPlacedCardsColor;
 
                       return (
                         <motion.div
@@ -211,7 +202,7 @@ export default function Timeline2() {
                             className={cn(
                               "transition-all duration-200",
                               isDragging && draggedOverIndex === index
-                                ? "w-[148px] mx-2 border-2 border-dashed border-primary rounded-xl h-[196px] bg-primary/10"
+                                ? "w-32 mx-2 border-2 border-dashed border-primary h-44 bg-primary/10"
                                 : "w-0"
                             )}
                           />
@@ -231,7 +222,7 @@ export default function Timeline2() {
                       className={cn(
                         "transition-all duration-200",
                         isDragging && draggedOverIndex === timelineCards.length
-                          ? "w-[148px] mx-2 border-2 border-dashed border-primary rounded-xl h-[196px] bg-primary/10"
+                          ? "w-32 mx-2 border-2 border-dashed border-primary h-44 bg-primary/10"
                           : "w-0"
                       )}
                     />
@@ -240,20 +231,20 @@ export default function Timeline2() {
               </div>
 
               {isGameOver && (
-                <div className="mt-6 text-center space-y-4">
-                  <div className="space-y-2">
-                    <p className="text-2xl font-bold text-destructive">Game Over!</p>
-                    <p className="text-lg font-semibold">
-                      Score: {score} card{score !== 1 ? 's' : ''} placed correctly
+                <div className="mt-8 border-2 border-primary bg-primary/5 p-8 text-center animate-in fade-in zoom-in duration-300">
+                  <div className="space-y-4">
+                    <p className="text-xl font-bold text-destructive uppercase tracking-tighter">Mission Terminated</p>
+                    <p className="text-sm font-bold uppercase tracking-widest">
+                      Final Score: {score} Correct Signal{score === 1 ? '' : 's'}
                     </p>
                   </div>
 
                   <Button
                     onClick={resetGame}
                     size="lg"
-                    className="cursor-pointer"
+                    className="mt-8 cursor-pointer uppercase tracking-widest text-[10px] font-bold px-8 h-10"
                   >
-                    Play Again
+                    Initialize New Session
                   </Button>
                 </div>
               )}
@@ -261,7 +252,7 @@ export default function Timeline2() {
           </CardContent>
         </Card>
 
-        <div className="mx-auto mt-6 max-w-md rounded-xl border border-dashed border-border bg-muted/30 p-4 text-center">
+        <div className="mx-auto mt-8 max-w-md border border-dashed p-6 text-center opacity-50 hover:opacity-100 transition-opacity">
           <Timeline2DevToggle
             dealtCard={dealtCard}
             attemptsLeft={attemptsLeft}

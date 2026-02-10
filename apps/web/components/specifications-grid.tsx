@@ -1,8 +1,10 @@
+'use client';
+
 import { ReactNode, Fragment } from 'react';
 import { cn } from '@/lib/utils';
 import type { SpecificationGuess, RevealedClue, Game, CellMatch } from '@gaeldle/types/game';
 import Image from 'next/image';
-import { MoveUp, MoveDown, MoveRight } from 'lucide-react';
+import { IconArrowUp, IconArrowDown, IconArrowRight } from '@tabler/icons-react';
 
 interface SpecificationsGridProps {
   guesses: SpecificationGuess[];
@@ -19,11 +21,11 @@ const COLUMN_HEADERS = [
   { key: 'platforms', label: 'Platforms' },
   { key: 'genres', label: 'Genres' },
   { key: 'themes', label: 'Themes' },
-  { key: 'releaseDate', label: 'Release year' },
-  { key: 'gameModes', label: 'Game mode' },
-  { key: 'gameEngines', label: 'Game engines' },
+  { key: 'releaseDate', label: 'Year' },
+  { key: 'gameModes', label: 'Mode' },
+  { key: 'gameEngines', label: 'Engines' },
   { key: 'publisher', label: 'Publisher' },
-  { key: 'perspective', label: 'Perspective' },
+  { key: 'perspective', label: 'View' },
 ] as const;
 
 type MatchKey = keyof SpecificationGuess['matches'];
@@ -40,25 +42,24 @@ const MATCH_COLUMNS: Array<{ key: MatchKey; isReleaseDate?: boolean }> = [
 ];
 
 function getCellColor(matchType: 'exact' | 'partial' | 'none', hasData: boolean): string {
-  // If there's no data, use dark slate background
   if (!hasData) {
-    return 'bg-muted/70 text-foreground';
+    return 'bg-muted/50 text-muted-foreground';
   }
 
   switch (matchType) {
     case 'exact':
-      return 'bg-green-500 text-white';
+      return 'bg-green-600/20 text-green-400 border-green-600/50';
     case 'partial':
-      return 'bg-yellow-500 text-white';
+      return 'bg-yellow-600/20 text-yellow-400 border-yellow-600/50';
     case 'none':
-      return 'bg-destructive text-white';
+      return 'bg-destructive/20 text-destructive border-destructive/50';
   }
 }
 
-function CellValue({ value }: Readonly<{ value: CellValue }>) {
-  if (!value) return <>No data</>;
+function CellValueDisplay({ value }: Readonly<{ value: CellValue }>) {
+  if (!value) return <span className="opacity-50">NULL</span>;
   if (Array.isArray(value)) {
-    if (value.length === 0) return <>No data</>;
+    if (value.length === 0) return <span className="opacity-50">NULL</span>;
     return (
       <div className="flex flex-col gap-0.5">
         {value.map((item, idx) => (
@@ -78,7 +79,6 @@ function hasData(value: string | string[] | null): boolean {
   return value !== 'No data' && value !== '';
 }
 
-// Helper to extract array from JSON field
 function extractArray(data: unknown): string[] {
   if (!data) return [];
   if (Array.isArray(data)) {
@@ -93,14 +93,12 @@ function extractArray(data: unknown): string[] {
   return [];
 }
 
-// Helper to extract year from release date
 function extractReleaseYear(firstReleaseDate: number | null): string | null {
   if (!firstReleaseDate) return null;
   const date = new Date(firstReleaseDate * 1000);
   return date.getFullYear().toString();
 }
 
-// Helper to extract publisher
 function extractPublisher(involved_companies: unknown): string | null {
   if (!involved_companies || !Array.isArray(involved_companies)) return null;
 
@@ -123,13 +121,11 @@ function extractPublisher(involved_companies: unknown): string | null {
   return null;
 }
 
-// Helper to find best match across all guesses for a field
 function getBestMatch(
   guesses: SpecificationGuess[],
   field: keyof SpecificationGuess['matches'],
   revealedClue?: RevealedClue | null
 ): CellMatch {
-  // If a hint was revealed for this field, treat it as an exact match
   if (revealedClue?.field === field) {
     return { type: 'exact', value: revealedClue.value };
   }
@@ -138,7 +134,6 @@ function getBestMatch(
     return { type: 'none', value: null };
   }
 
-  // Priority: exact > partial > none
   const exactMatch = guesses.find(g => g.matches[field].type === 'exact');
   if (exactMatch) {
     return exactMatch.matches[field];
@@ -149,38 +144,35 @@ function getBestMatch(
     return partialMatch.matches[field];
   }
 
-  // Return first guess's value even if it's 'none'
   return guesses[0].matches[field];
 }
 
-// Helper to render hint row
 function renderHintRow(revealedClue: RevealedClue) {
   return (
-    <tr key="hint-row" className="bg-muted/70 text-center">
-      <td className="border border-border px-3 py-2 text-xs w-32 text-foreground">
+    <tr key="hint-row" className="bg-primary/5 text-center">
+      <td className="border border-border/50 px-3 py-2 text-[10px] w-32 text-primary font-bold uppercase tracking-widest">
         <div className="flex gap-1 items-center justify-center">
-          <p className="font-semibold">Hint</p>
-          <MoveRight className="size-4" />
+          <span>Hint</span>
+          <IconArrowRight className="size-3" />
         </div>
       </td>
       {COLUMN_HEADERS.slice(1).map((header) => (
         <td
           key={header.key}
           className={cn(
-            'border border-border px-3 py-2 text-xs text-foreground',
-            revealedClue.field === header.key && 'bg-primary/20 font-semibold text-foreground'
+            'border border-border/50 px-3 py-2 text-[10px] uppercase tracking-tight',
+            revealedClue.field === header.key ? 'text-primary font-bold' : 'text-muted-foreground'
           )}
         >
           {revealedClue.field === header.key
-            ? <CellValue value={revealedClue.value} />
-            : '???'}
+            ? <CellValueDisplay value={revealedClue.value} />
+            : '---'}
         </td>
       ))}
     </tr>
   );
 }
 
-// Helper to determine arrow direction for release year
 function getYearArrow(guessYear: string | null, targetYear: string | null): ReactNode {
   if (!guessYear || !targetYear) return null;
 
@@ -190,39 +182,38 @@ function getYearArrow(guessYear: string | null, targetYear: string | null): Reac
   if (Number.isNaN(guessYearNum) || Number.isNaN(targetYearNum)) return null;
 
   if (guessYearNum < targetYearNum) {
-    return <MoveUp className="w-16 h-32 text-white" strokeWidth={2} />;
+    return <IconArrowUp className="size-4 text-white/50" />;
   }
   if (guessYearNum > targetYearNum) {
-    return <MoveDown className="w-16 h-32 text-white" strokeWidth={2} />;
+    return <IconArrowDown className="size-4 text-white/50" />;
   }
-  return null; // Equal, no arrow
+  return null;
 }
 
 function ImageCell({ imageUrl, name }: Readonly<{ imageUrl: string | null; name: string }>) {
   return (
-    <td className="border border-border p-0 w-32">
-      <div className="relative w-32 h-44">
+    <td className="border border-border/50 p-0 w-32">
+      <div className="relative w-32 h-44 bg-muted/20">
         {imageUrl ? (
           <>
             <Image
               src={imageUrl}
               alt={name}
               className="w-full h-full object-cover"
-              width={128}
-              height={176}
-              sizes="100vw"
+              fill
+              sizes="10vw"
             />
-            <div className="absolute bottom-0 left-0 right-0 bg-primary/90 px-2 py-1">
-              <p className="text-xs font-semibold text-primary-foreground truncate text-center">
+            <div className="absolute bottom-0 left-0 right-0 bg-primary/90 px-2 py-1 border-t">
+              <p className="text-[10px] font-bold text-primary-foreground truncate text-center uppercase tracking-tighter">
                 {name}
               </p>
             </div>
           </>
         ) : (
-          <div className="w-full h-full bg-muted flex flex-col items-center justify-center">
-            <span className="text-xs text-muted-foreground">No image</span>
-            <div className="absolute bottom-0 left-0 right-0 bg-primary/90 px-2 py-1">
-              <p className="text-xs font-semibold text-primary-foreground truncate text-center">
+          <div className="w-full h-full flex flex-col items-center justify-center">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">No Signal</span>
+            <div className="absolute bottom-0 left-0 right-0 bg-primary/90 px-2 py-1 border-t">
+              <p className="text-[10px] font-bold text-primary-foreground truncate text-center uppercase tracking-tighter">
                 {name}
               </p>
             </div>
@@ -245,18 +236,14 @@ function ReleaseDateCell({
   return (
     <td
       className={cn(
-        'border border-border px-3 py-2 text-xs relative text-center',
+        'border border-border/50 px-3 py-2 text-[10px] relative text-center uppercase tracking-tight',
         getCellColor(match.type, hasData(match.value))
       )}
     >
-      {arrow && (
-        <div className="absolute inset-0 flex items-center justify-center opacity-40">
-          {arrow}
-        </div>
-      )}
-      <span className="relative z-10">
-        <CellValue value={match.value} />
-      </span>
+      <div className="flex flex-col items-center justify-center gap-1">
+        <CellValueDisplay value={match.value} />
+        {arrow}
+      </div>
     </td>
   );
 }
@@ -265,19 +252,19 @@ function MatchCell({ match }: Readonly<{ match: CellMatch }>) {
   return (
     <td
       className={cn(
-        'border border-border px-3 py-2 text-xs text-center wrap-break-word',
+        'border border-border/50 px-3 py-2 text-[10px] text-center wrap-break-word uppercase tracking-tight',
         getCellColor(match.type, hasData(match.value))
       )}
     >
-      <CellValue value={match.value} />
+      <CellValueDisplay value={match.value} />
     </td>
   );
 }
 
 function AnswerCell({ value }: Readonly<{ value: string | string[] | null }>) {
   return (
-    <td className="border border-border px-3 py-2 text-xs text-foreground bg-muted/70 text-center wrap-break-word">
-      <CellValue value={value} />
+    <td className="border border-border/50 px-3 py-2 text-[10px] text-foreground bg-muted/20 text-center wrap-break-word uppercase tracking-tight">
+      <CellValueDisplay value={value} />
     </td>
   );
 }
@@ -324,8 +311,8 @@ function SummaryRow({
   targetYear: string | null;
 }>) {
   return (
-    <tr>
-      <th className="border border-border bg-secondary px-3 py-2 text-sm font-semibold text-white text-center w-32">
+    <tr className="border-b-2 border-primary/50">
+      <th className="border border-border/50 bg-primary/10 px-3 py-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] text-center w-32">
         Summary
       </th>
       {MATCH_COLUMNS.map((column) =>
@@ -345,13 +332,13 @@ function SummaryRow({
 
 function HeaderRow() {
   return (
-    <tr>
+    <tr className="bg-muted">
       {COLUMN_HEADERS.map((header) => (
         <th
           key={header.key}
           className={cn(
-            'border border-border bg-slate-700 px-3 py-2 text-sm font-semibold text-slate-100',
-            'text-center min-w-30'
+            'border border-border/50 px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest',
+            'text-center min-w-28'
           )}
         >
           {header.label}
@@ -427,11 +414,7 @@ export default function SpecificationsGrid({
   showAnswerOnly = false,
   className
 }: Readonly<SpecificationsGridProps>) {
-  // Reverse guesses to show newest first
   const reversedGuesses = [...guesses].reverse();
-
-  // Calculate where to insert the hint row (if revealed)
-  // If hint was revealed after N guesses, it should appear after the Nth guess from the end
   const hintInsertIndex = revealedClue
     ? guesses.length - revealedClue.revealedAtGuessCount
     : -1;
@@ -441,7 +424,7 @@ export default function SpecificationsGrid({
   const showHeaders = guesses.length > 0 || showAnswerOnly || bestMatches;
 
   return (
-    <div className={cn('overflow-x-auto w-full', className)}>
+    <div className={cn('overflow-x-auto w-full border border-border/50 bg-card/5', className)}>
       <table className="w-full border-collapse min-w-max">
         <thead>
           {bestMatches && (

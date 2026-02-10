@@ -10,8 +10,7 @@ interface HoldToRevealButtonProps {
   className?: string;
 }
 
-const HOLD_DURATION = 3000; // 3 seconds
-const NOW = Date.now();
+const HOLD_DURATION = 3000;
 
 export default function HoldToRevealButton({ onReveal, disabled, className }: Readonly<HoldToRevealButtonProps>) {
   const [isHolding, setIsHolding] = useState(false);
@@ -24,7 +23,7 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Re
     if (disabled) return;
 
     setIsHolding(true);
-    startTimeRef.current = NOW;
+    startTimeRef.current = Date.now();
 
     const updateProgress = () => {
       const elapsed = Date.now() - startTimeRef.current;
@@ -34,7 +33,6 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Re
       if (newProgress < 100) {
         animationFrameRef.current = requestAnimationFrame(updateProgress);
       } else {
-        // Completed
         onReveal();
         stopHolding();
       }
@@ -78,14 +76,15 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Re
       onTouchEnd={stopHolding}
       disabled={disabled}
       className={cn(
-        'relative overflow-hidden cursor-pointer',
+        'relative overflow-hidden cursor-pointer uppercase tracking-widest text-[10px] font-bold h-10',
         className
       )}
       size="lg"
+      variant="outline"
     >
       <div
         className={cn(
-          'absolute inset-0 bg-primary-foreground/20 transition-transform origin-left',
+          'absolute inset-0 bg-primary/20 transition-transform origin-left',
           isHolding ? 'duration-0' : 'duration-200'
         )}
         style={{
@@ -94,7 +93,7 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Re
       />
 
       <span className="relative z-10">
-        {isHolding ? `Hold (${Math.ceil((HOLD_DURATION - (progress / 100) * HOLD_DURATION) / 1000)}s)` : 'Hold to Reveal Hint'}
+        {isHolding ? `Decrypting (${Math.ceil((HOLD_DURATION - (progress / 100) * HOLD_DURATION) / 1000)}s)` : 'Hold to Intercept Signal'}
       </span>
     </Button>
   );

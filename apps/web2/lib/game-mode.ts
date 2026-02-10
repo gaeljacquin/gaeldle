@@ -65,3 +65,12 @@ export const gameModes: GameMode[] = [
     href: "/specifications",
   },
 ];
+
+/**
+ * Get game mode by slug (pathname without leading slash)
+ * @param slug - The game mode slug (e.g., "cover-art", "image-ai")
+ * @returns GameMode or undefined if not found
+ */
+export function getGameModeBySlug(slug: string): GameMode | undefined {
+  return gameModes.find((mode) => mode.id === slug);
+}

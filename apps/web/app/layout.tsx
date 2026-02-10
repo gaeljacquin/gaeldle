@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { StackProvider, StackTheme } from "@stackframe/stack";
-import { stackClientApp } from "../stack/client";
+import { ReactNode, Suspense } from "react";
 import { Geist, Geist_Mono, Figtree } from "next/font/google";
 import { LayoutWrapper } from "@/components/layout-wrapper";
+import Providers from "./providers";
 import Loading from "./loading";
 import "./globals.css";
 
@@ -27,22 +26,20 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="en" className={figtree.variable}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <StackProvider app={stackClientApp}>
-          <StackTheme>
-            <Suspense fallback={<Loading />}>
-              <LayoutWrapper>
-                {children}
-              </LayoutWrapper>
-            </Suspense>
-          </StackTheme>
-        </StackProvider>
+        <Providers>
+          <Suspense fallback={<Loading />}>
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
+          </Suspense>
+        </Providers>
       </body>
     </html>
   );

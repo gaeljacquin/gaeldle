@@ -91,15 +91,15 @@ export default function GameSearch({
   const renderSearchContent = () => {
     if (searchValue.length < 2) {
       return (
-        <div className="py-4 text-center text-xs text-muted-foreground uppercase tracking-widest">
-          Type at least 2 characters...
+        <div className="py-4 text-center text-xs text-muted-foreground">
+          Type at least 2 characters to search...
         </div>
       );
     }
 
     if (isSearching) {
       return (
-        <div className="py-4 text-center text-xs text-muted-foreground uppercase tracking-widest">
+        <div className="py-4 text-center text-xs text-muted-foreground">
           Searching...
         </div>
       );
@@ -107,7 +107,7 @@ export default function GameSearch({
 
     if (searchResults.length === 0) {
       return (
-        <div className="py-4 text-center text-xs text-muted-foreground uppercase tracking-widest">
+        <div className="py-4 text-center text-xs text-muted-foreground">
           No games found.
         </div>
       );
@@ -172,7 +172,7 @@ export default function GameSearch({
           onChange={handleInputChange}
           disabled={disabled}
           onFocus={() => searchValue.length > 0 && setIsOpen(true)}
-          className="uppercase tracking-tight h-full"
+          className="h-full"
         />
         {searchValue.length > 0 && (
           <InputGroupAddon align="inline-end">

@@ -59,13 +59,13 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
 
         <div
           className={cn(
-            'absolute top-0 left-0 right-0 px-2 py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-white',
+            'absolute top-0 left-0 right-0 px-2 py-1 text-center text-sm font-semibold text-white',
             isCorrect === true && 'bg-green-600',
             isCorrect === false && 'bg-destructive',
-            isCorrect === undefined && 'bg-muted-foreground'
+            isCorrect === undefined && 'bg-slate-600'
           )}
         >
-          {showDate ? formatDate(game.firstReleaseDate) : '????-??-??'}
+          {showDate ? formatDate(game.firstReleaseDate) : '?'}
         </div>
 
         <div
@@ -76,7 +76,7 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
             isCorrect === undefined && 'bg-primary/90 text-primary-foreground'
           )}
         >
-          <p className="truncate text-[10px] font-bold uppercase tracking-tight" title={game.name}>
+          <p className="truncate text-xs font-medium" title={game.name}>
             {game.name}
           </p>
         </div>

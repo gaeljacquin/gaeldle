@@ -12,7 +12,7 @@ interface GuessHistoryInlineProps {
 export default function GuessHistoryInline({ guesses, className }: Readonly<GuessHistoryInlineProps>) {
   if (guesses.length === 0) {
     return (
-      <div className={cn('border border-border bg-card/60 p-4 text-center text-[10px] text-muted-foreground uppercase tracking-widest', className)}>
+      <div className={cn('border border-border bg-card/60 p-4 text-center text-sm text-muted-foreground', className)}>
         No guesses yet
       </div>
     );
@@ -46,8 +46,8 @@ export default function GuessHistoryInline({ guesses, className }: Readonly<Gues
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold truncate uppercase tracking-tight">{guess.name}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Guess #{originalIndex}</p>
+                <p className="text-sm font-bold truncate uppercase tracking-tight">{guess.name}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-widest">Guess #{originalIndex}</p>
               </div>
             </div>
           );

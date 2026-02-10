@@ -37,15 +37,15 @@ export default function Timeline2DevToggle({
 
   return (
     <div className={cn('pt-2 space-y-2', className)}>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">[dev-mode]</p>
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">[dev]</p>
       <button
         onClick={() => setShowDevInfo(!showDevInfo)}
-        className="text-[10px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer uppercase tracking-widest"
+        className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer uppercase tracking-widest"
       >
         {showDevInfo ? 'Hide' : 'Show'} Current Card
       </button>
       {showDevInfo && dealtCard && (
-        <div className="text-[10px] font-mono p-3 bg-muted border border-border/50 space-y-1 text-left uppercase">
+        <div className="text-xs font-mono p-3 bg-muted border border-border/50 space-y-1 text-left uppercase">
           <div className="flex flex-col gap-1">
             <span className="font-bold">{dealtCard.name}</span>
             <span className="text-muted-foreground">
@@ -57,7 +57,7 @@ export default function Timeline2DevToggle({
 
       {onAdjustAttempts && (
         <div className="flex items-center justify-center gap-2 pt-1">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Atp:</span>
+          <span className="text-xs text-muted-foreground uppercase tracking-widest">Attempts:</span>
           <button
             onClick={() => onAdjustAttempts(-1)}
             disabled={attemptsLeft <= 1}
@@ -69,7 +69,7 @@ export default function Timeline2DevToggle({
           >
             <IconMinus className="h-3 w-3" />
           </button>
-          <span className="text-[10px] font-mono">{attemptsLeft}/{maxAttempts}</span>
+          <span className="text-xs font-mono">{attemptsLeft}/{maxAttempts}</span>
           <button
             onClick={() => onAdjustAttempts(1)}
             disabled={attemptsLeft >= maxAttempts}

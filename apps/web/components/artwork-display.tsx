@@ -65,7 +65,7 @@ export default function ArtworkDisplay({
   if (!imageUrl) {
     return (
       <div className={cn('relative bg-muted flex items-center justify-center border aspect-video', className)}>
-        <span className="text-muted-foreground text-xs uppercase tracking-wider">No artwork available</span>
+        <span className="text-muted-foreground text-sm">No artwork available</span>
       </div>
     );
   }
@@ -74,7 +74,7 @@ export default function ArtworkDisplay({
     <div className={cn('relative border', className)}>
       {(isProcessing || !shouldShowImage) && (
         <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Loading...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       )}
       <div className="aspect-video relative w-full h-full overflow-hidden">

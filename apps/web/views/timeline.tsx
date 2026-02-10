@@ -27,13 +27,12 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 import type { Game } from '@gaeldle/types/game';
-import Link from 'next/link';
-import { IconArrowLeft } from '@tabler/icons-react';
 import Attempts from '@/components/attempts';
 import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';
 import TimelineDevToggle from '@/components/timeline-dev-toggle';
 import { cn } from '@/lib/utils';
+import BackToMainMenu from '@/components/back-to-main-menu';
 
 const noOpStrategy: SortingStrategy = () => {
   return null;
@@ -158,18 +157,17 @@ export default function Timeline() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-xs uppercase tracking-[0.2em] animate-pulse">Initializing Protocol...</p>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Do not terminate session</p>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
+        <p className="text-lg">Loading game...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-xs uppercase tracking-widest text-destructive">System Error</p>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{error}</p>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
+        <p className="text-lg font-bold">Error</p>
+        <p className="text-muted-foreground">{error}</p>
       </div>
     );
   }
@@ -186,18 +184,12 @@ export default function Timeline() {
 
   return (
     <div className="min-h-full bg-background text-foreground">
-      <div className="container mx-auto max-w-5xl px-4 py-8">
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
-        >
-          <IconArrowLeft className="size-3" />
-          Return to Terminal
-        </Link>
+      <div className="container mx-auto max-w-5xl px-4 py-10">
+        <BackToMainMenu />
 
-        <div className="mb-8 border-l-2 border-primary pl-4">
-          <h1 className="text-2xl font-bold tracking-tight uppercase">{gameMode?.title}</h1>
-          <p className="mt-1 text-[10px] text-muted-foreground uppercase tracking-widest">{gameMode?.description}</p>
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
+          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
         </div>
 
         <Card className="border shadow-none bg-muted/5">
@@ -264,8 +256,8 @@ export default function Timeline() {
                   <button
                     onClick={() => setSwapMode(false)}
                     className={cn(
-                      "px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors cursor-pointer",
-                      swapMode ? "text-muted-foreground hover:text-foreground" : "bg-primary text-primary-foreground"
+                      "px-6 py-2 text-sm font-bold transition-colors cursor-pointer",
+                      swapMode ? "text-muted-foreground hover:text-foreground" : "bg-primary text-primary-foreground",
                     )}
                     disabled={isGameOver}
                   >
@@ -274,7 +266,7 @@ export default function Timeline() {
                   <button
                     onClick={() => setSwapMode(true)}
                     className={cn(
-                      "px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors cursor-pointer",
+                      "px-6 py-2 text-sm font-bold transition-colors cursor-pointer",
                       swapMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                     )}
                     disabled={isGameOver}
@@ -284,7 +276,7 @@ export default function Timeline() {
                 </div>
 
                 <div className="flex flex-col items-center gap-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Attempt Authorization</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Attempts</p>
                   <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
                 </div>
               </div>
@@ -294,16 +286,16 @@ export default function Timeline() {
                   <Button
                     onClick={handleSubmit}
                     size="lg"
-                    className="cursor-pointer uppercase tracking-widest text-[10px] font-bold h-10 px-8"
+                    className="cursor-pointer font-bold px-8"
                     disabled={buttonsDisabled}
                   >
-                    Transmit
+                    Submit
                   </Button>
                   <Button
                     onClick={handleResetToSaved}
                     size="lg"
                     variant="outline"
-                    className="cursor-pointer uppercase tracking-widest text-[10px] font-bold h-10 px-8"
+                    className="cursor-pointer font-bold px-8"
                     disabled={buttonsDisabled}
                   >
                     Reset
@@ -312,20 +304,20 @@ export default function Timeline() {
               )}
 
               {isGameOver && (
-                <div className="mt-8 border-2 border-primary bg-primary/5 p-8 text-center animate-in fade-in zoom-in duration-300">
+                <div className="mt-8 border border-border bg-card/60 p-8 text-center animate-in fade-in zoom-in duration-300">
                   {isWinner ? (
                     <div className="space-y-2">
-                      <p className="text-xl font-bold text-primary uppercase tracking-tighter">Sequence Validated</p>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                        Chronological order correctly established
+                      <p className="text-2xl font-bold text-green-600">Congratulations!</p>
+                      <p className="text-muted-foreground">
+                        You arranged all games in the correct chronological order!
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <p className="text-xl font-bold text-destructive uppercase tracking-tighter">Sequence Error</p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                          Correct chronological order:
+                        <p className="text-2xl font-bold text-destructive">Game Over!</p>
+                        <p className="text-muted-foreground">
+                          Here&apos;s the correct order:
                         </p>
                       </div>
 
@@ -346,10 +338,10 @@ export default function Timeline() {
 
                   <Button
                     onClick={resetGame}
-                    className="mt-8 cursor-pointer uppercase tracking-widest text-[10px] font-bold"
+                    className="mt-8 cursor-pointer font-bold"
                     size="lg"
                   >
-                    {isWinner ? 'New Mission' : 'Retry Protocol'}
+                    {isWinner ? 'Keep Playing' : 'Play Again'}
                   </Button>
                 </div>
               )}
@@ -357,7 +349,7 @@ export default function Timeline() {
           </CardContent>
         </Card>
 
-        <div className="mx-auto mt-8 max-w-md border border-dashed p-6 text-center opacity-50 hover:opacity-100 transition-opacity">
+        <div className="mx-auto mt-8 max-w-md border border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
           <TimelineDevToggle
             getCorrectOrder={getCorrectOrder}
             attemptsLeft={attemptsLeft}

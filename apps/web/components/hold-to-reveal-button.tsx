@@ -23,10 +23,13 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Re
     if (disabled) return;
 
     setIsHolding(true);
-    startTimeRef.current = Date.now();
+    startTimeRef.current = 0;
 
-    const updateProgress = () => {
-      const elapsed = Date.now() - startTimeRef.current;
+    const updateProgress = (timestamp: number) => {
+      if (startTimeRef.current === 0) {
+        startTimeRef.current = timestamp;
+      }
+      const elapsed = timestamp - startTimeRef.current;
       const newProgress = Math.min((elapsed / HOLD_DURATION) * 100, 100);
       setProgress(newProgress);
 
@@ -76,7 +79,7 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Re
       onTouchEnd={stopHolding}
       disabled={disabled}
       className={cn(
-        'relative overflow-hidden cursor-pointer uppercase tracking-widest text-[10px] font-bold h-10',
+        'relative overflow-hidden cursor-pointer font-bold h-10',
         className
       )}
       size="lg"
@@ -93,7 +96,7 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Re
       />
 
       <span className="relative z-10">
-        {isHolding ? `Decrypting (${Math.ceil((HOLD_DURATION - (progress / 100) * HOLD_DURATION) / 1000)}s)` : 'Hold to Intercept Signal'}
+        {isHolding ? `Holding (${Math.ceil((HOLD_DURATION - (progress / 100) * HOLD_DURATION) / 1000)}s)` : 'Hold to Reveal Hint'}
       </span>
     </Button>
   );

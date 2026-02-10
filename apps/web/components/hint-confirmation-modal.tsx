@@ -27,17 +27,17 @@ export default function HintConfirmationModal({ isOpen, onClose, onReveal }: Rea
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="uppercase tracking-widest text-primary">Signal Interception</AlertDialogTitle>
-          <AlertDialogDescription className="uppercase tracking-tight text-[10px]">
-            Are you sure you want to intercept a hint? This will consume 1 attempt authorization.
+          <AlertDialogTitle>Reveal Hint</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to reveal a hint? This will cost 1 attempt.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex gap-3 mt-4">
           <AlertDialogCancel
             onClick={onClose}
-            className="flex-1 cursor-pointer uppercase tracking-widest text-[10px] font-bold h-10"
+            className="flex-1 cursor-pointer font-bold h-10"
           >
-            Abort
+            Cancel
           </AlertDialogCancel>
           <HoldToRevealButton
             onReveal={handleReveal}

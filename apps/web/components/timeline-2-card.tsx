@@ -52,13 +52,13 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
 
         <div
           className={cn(
-            'absolute top-0 left-0 right-0 px-2 py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-white',
+            'absolute top-0 left-0 right-0 px-2 py-1 text-center text-sm font-semibold text-white',
             bannerColor === 'green' && 'bg-green-600',
             bannerColor === 'red' && 'bg-destructive',
-            bannerColor === 'slate' && 'bg-muted-foreground'
+            bannerColor === 'slate' && 'bg-slate-600'
           )}
         >
-          {showDate ? formatDate(game.firstReleaseDate) : '????-??-??'}
+          {showDate ? formatDate(game.firstReleaseDate) : '?'}
         </div>
 
         <div
@@ -66,11 +66,11 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
             'absolute inset-x-0 bottom-0 px-2 py-1 text-center border-t',
             bannerColor === 'green' && 'bg-green-600/90 text-white',
             bannerColor === 'red' && 'bg-destructive/90 text-white',
-            bannerColor === 'slate' && 'bg-muted-foreground/90 text-white',
+            bannerColor === 'slate' && 'bg-slate-600/90 text-white',
             bannerColor === 'none' && 'bg-primary/90 text-primary-foreground'
           )}
         >
-          <p className="truncate text-[10px] font-bold uppercase tracking-tight" title={game.name}>
+          <p className="truncate text-xs font-medium" title={game.name}>
             {game.name}
           </p>
         </div>

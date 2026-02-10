@@ -3,12 +3,13 @@
 import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { ReactNode } from "react";
 
-export function LayoutWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
+export function LayoutWrapper({ children }: Readonly<{ children: ReactNode }>) {
   const pathname = usePathname();
-  const isDashboard = pathname?.startsWith("/dashboard");
+  const shouldHideNav = pathname?.startsWith("/dashboard") || pathname?.startsWith("/handler");
 
-  if (isDashboard) {
+  if (shouldHideNav) {
     return <>{children}</>;
   }
 

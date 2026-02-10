@@ -21,11 +21,11 @@ const COLUMN_HEADERS = [
   { key: 'platforms', label: 'Platforms' },
   { key: 'genres', label: 'Genres' },
   { key: 'themes', label: 'Themes' },
-  { key: 'releaseDate', label: 'Year' },
-  { key: 'gameModes', label: 'Mode' },
-  { key: 'gameEngines', label: 'Engines' },
+  { key: 'releaseDate', label: 'Release year' },
+  { key: 'gameModes', label: 'Game mode' },
+  { key: 'gameEngines', label: 'Game engines' },
   { key: 'publisher', label: 'Publisher' },
-  { key: 'perspective', label: 'View' },
+  { key: 'perspective', label: 'Perspective' },
 ] as const;
 
 type MatchKey = keyof SpecificationGuess['matches'];
@@ -43,7 +43,7 @@ const MATCH_COLUMNS: Array<{ key: MatchKey; isReleaseDate?: boolean }> = [
 
 function getCellColor(matchType: 'exact' | 'partial' | 'none', hasData: boolean): string {
   if (!hasData) {
-    return 'bg-muted/50 text-muted-foreground';
+    return 'bg-muted/70 text-foreground';
   }
 
   switch (matchType) {
@@ -57,9 +57,9 @@ function getCellColor(matchType: 'exact' | 'partial' | 'none', hasData: boolean)
 }
 
 function CellValueDisplay({ value }: Readonly<{ value: CellValue }>) {
-  if (!value) return <span className="opacity-50">NULL</span>;
+  if (!value) return <span className="opacity-50">No data</span>;
   if (Array.isArray(value)) {
-    if (value.length === 0) return <span className="opacity-50">NULL</span>;
+    if (value.length === 0) return <span className="opacity-50">No data</span>;
     return (
       <div className="flex flex-col gap-0.5">
         {value.map((item, idx) => (
@@ -149,24 +149,24 @@ function getBestMatch(
 
 function renderHintRow(revealedClue: RevealedClue) {
   return (
-    <tr key="hint-row" className="bg-primary/5 text-center">
-      <td className="border border-border/50 px-3 py-2 text-[10px] w-32 text-primary font-bold uppercase tracking-widest">
+    <tr key="hint-row" className="bg-muted/70 text-center">
+      <td className="border border-border/50 px-3 py-2 text-xs w-32 text-foreground font-bold">
         <div className="flex gap-1 items-center justify-center">
           <span>Hint</span>
-          <IconArrowRight className="size-3" />
+          <IconArrowRight className="size-4" />
         </div>
       </td>
       {COLUMN_HEADERS.slice(1).map((header) => (
         <td
           key={header.key}
           className={cn(
-            'border border-border/50 px-3 py-2 text-[10px] uppercase tracking-tight',
-            revealedClue.field === header.key ? 'text-primary font-bold' : 'text-muted-foreground'
+            'border border-border/50 px-3 py-2 text-xs',
+            revealedClue.field === header.key ? 'bg-primary/10 font-bold text-foreground' : 'text-muted-foreground'
           )}
         >
           {revealedClue.field === header.key
             ? <CellValueDisplay value={revealedClue.value} />
-            : '---'}
+            : '???'}
         </td>
       ))}
     </tr>
@@ -203,17 +203,17 @@ function ImageCell({ imageUrl, name }: Readonly<{ imageUrl: string | null; name:
               fill
               sizes="10vw"
             />
-            <div className="absolute bottom-0 left-0 right-0 bg-primary/90 px-2 py-1 border-t">
-              <p className="text-[10px] font-bold text-primary-foreground truncate text-center uppercase tracking-tighter">
+            <div className="absolute bottom-0 left-0 right-0 bg-primary/90 px-2 py-1">
+              <p className="text-xs font-semibold text-primary-foreground truncate text-center">
                 {name}
               </p>
             </div>
           </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center">
-            <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">No Signal</span>
-            <div className="absolute bottom-0 left-0 right-0 bg-primary/90 px-2 py-1 border-t">
-              <p className="text-[10px] font-bold text-primary-foreground truncate text-center uppercase tracking-tighter">
+            <span className="text-xs text-muted-foreground">No image</span>
+            <div className="absolute bottom-0 left-0 right-0 bg-primary/90 px-2 py-1">
+              <p className="text-xs font-semibold text-primary-foreground truncate text-center">
                 {name}
               </p>
             </div>
@@ -236,7 +236,7 @@ function ReleaseDateCell({
   return (
     <td
       className={cn(
-        'border border-border/50 px-3 py-2 text-[10px] relative text-center uppercase tracking-tight',
+        'border border-border/50 px-3 py-2 text-xs relative text-center',
         getCellColor(match.type, hasData(match.value))
       )}
     >
@@ -252,7 +252,7 @@ function MatchCell({ match }: Readonly<{ match: CellMatch }>) {
   return (
     <td
       className={cn(
-        'border border-border/50 px-3 py-2 text-[10px] text-center wrap-break-word uppercase tracking-tight',
+        'border border-border/50 px-3 py-2 text-xs text-center wrap-break-word',
         getCellColor(match.type, hasData(match.value))
       )}
     >
@@ -263,7 +263,7 @@ function MatchCell({ match }: Readonly<{ match: CellMatch }>) {
 
 function AnswerCell({ value }: Readonly<{ value: string | string[] | null }>) {
   return (
-    <td className="border border-border/50 px-3 py-2 text-[10px] text-foreground bg-muted/20 text-center wrap-break-word uppercase tracking-tight">
+    <td className="border border-border/50 px-3 py-2 text-xs text-foreground bg-muted/70 text-center wrap-break-word">
       <CellValueDisplay value={value} />
     </td>
   );
@@ -311,8 +311,8 @@ function SummaryRow({
   targetYear: string | null;
 }>) {
   return (
-    <tr className="border-b-2 border-primary/50">
-      <th className="border border-border/50 bg-primary/10 px-3 py-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] text-center w-32">
+    <tr>
+      <th className="border border-border/50 bg-secondary px-3 py-2 text-sm font-semibold text-white text-center w-32">
         Summary
       </th>
       {MATCH_COLUMNS.map((column) =>
@@ -332,13 +332,13 @@ function SummaryRow({
 
 function HeaderRow() {
   return (
-    <tr className="bg-muted">
+    <tr className="bg-slate-700">
       {COLUMN_HEADERS.map((header) => (
         <th
           key={header.key}
           className={cn(
-            'border border-border/50 px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest',
-            'text-center min-w-28'
+            'border border-border/50 px-3 py-2 text-sm font-semibold text-slate-100',
+            'text-center min-w-30'
           )}
         >
           {header.label}

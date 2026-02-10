@@ -9,11 +9,10 @@ import SpecificationsGameOver from '@/components/specifications-game-over';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
-import Link from 'next/link';
-import { IconArrowLeft } from '@tabler/icons-react';
 import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';
+import BackToMainMenu from '@/components/back-to-main-menu';
 
 export default function Specifications() {
   const gameMode = getGameModeBySlug('specifications');
@@ -48,18 +47,17 @@ export default function Specifications() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-xs uppercase tracking-[0.2em] animate-pulse">Initializing Protocol...</p>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Do not terminate session</p>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
+        <p className="text-lg">Loading game...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-xs uppercase tracking-widest text-destructive">System Error</p>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{error}</p>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
+        <p className="text-lg font-bold">Error</p>
+        <p className="text-muted-foreground">{error}</p>
       </div>
     );
   }
@@ -68,18 +66,12 @@ export default function Specifications() {
 
   return (
     <div className="min-h-full bg-background text-foreground">
-      <div className="container mx-auto px-4 py-8">
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
-        >
-          <IconArrowLeft className="size-3" />
-          Return to Terminal
-        </Link>
+      <div className="container mx-auto px-4 py-10">
+        <BackToMainMenu />
 
-        <div className="mb-8 border-l-2 border-primary pl-4 text-left">
-          <h1 className="text-2xl font-bold tracking-tight uppercase">{gameMode?.title}</h1>
-          <p className="mt-1 text-[10px] text-muted-foreground uppercase tracking-widest">{gameMode?.description}</p>
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
+          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
         </div>
 
         <div className="mx-auto max-w-6xl space-y-8">
@@ -98,10 +90,10 @@ export default function Specifications() {
                 <Button
                   onClick={handleSubmit}
                   disabled={selectedGameId === null || isGameOver}
-                  className="cursor-pointer h-10 uppercase tracking-widest text-[10px] font-bold px-8"
+                  className="cursor-pointer h-10 font-bold px-8"
                   size="lg"
                 >
-                  Transmit
+                  Submit
                 </Button>
               </div>
 
@@ -117,7 +109,7 @@ export default function Specifications() {
 
           <div className="flex flex-col items-center gap-4">
             <div className="flex flex-col items-center gap-2">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Attempt Authorization</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Attempts</p>
               <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
             </div>
 
@@ -127,9 +119,9 @@ export default function Specifications() {
                 size="sm"
                 onClick={() => setIsHintModalOpen(true)}
                 disabled={attemptsLeft <= 1 || !!revealedClue}
-                className="uppercase tracking-widest text-[10px] font-bold h-8 cursor-pointer"
+                className="font-bold h-8 cursor-pointer"
               >
-                {revealedClue ? 'Signal Intercepted' : 'Intercept Signal (-1 ATP)'}
+                {revealedClue ? 'Hint revealed' : 'Reveal Hint (-1 attempt)'}
               </Button>
             )}
           </div>
@@ -144,15 +136,15 @@ export default function Specifications() {
             <div className="flex flex-wrap items-center justify-center gap-6 text-[10px] uppercase tracking-widest font-bold">
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 bg-green-600/50 border border-green-600"></div>
-                <span className="text-muted-foreground">Match</span>
+                <span className="text-muted-foreground">Correct</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 bg-yellow-600/50 border border-yellow-600"></div>
-                <span className="text-muted-foreground">Partial</span>
+                <span className="text-muted-foreground">Partially correct</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 bg-destructive/50 border border-destructive"></div>
-                <span className="text-muted-foreground">Null</span>
+                <span className="text-muted-foreground">Incorrect</span>
               </div>
             </div>
           )}
@@ -181,7 +173,7 @@ export default function Specifications() {
             </CardContent>
           </Card>
 
-          <div className="mx-auto max-w-md border border-dashed p-6 text-center opacity-50 hover:opacity-100 transition-opacity">
+          <div className="mx-auto max-w-md border border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
             <DevModeToggle
               targetGame={targetGame}
               attemptsLeft={attemptsLeft}

@@ -65,7 +65,7 @@ export default function CoverDisplay({
           className
         )}
       >
-        <p className="text-xs text-muted-foreground uppercase tracking-wider">Loading game...</p>
+        <p className="text-sm text-muted-foreground">Loading game...</p>
       </div>
     );
   }
@@ -87,7 +87,7 @@ export default function CoverDisplay({
           className
         )}
       >
-        <p className="text-xs text-muted-foreground uppercase tracking-wider">No cover available</p>
+        <p className="text-sm text-muted-foreground">No cover available</p>
       </div>
     );
   }
@@ -101,7 +101,7 @@ export default function CoverDisplay({
     >
       {(isProcessing || !shouldShowImage) && (
         <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Loading...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       )}
       {shouldShowImage && displayUrl && (
@@ -116,7 +116,7 @@ export default function CoverDisplay({
       )}
       {isGameOver && (
         <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 text-center border-t">
-          <p className="text-xs font-bold uppercase tracking-tight">{game.name}</p>
+          <p className="font-semibold">{game.name}</p>
         </div>
       )}
     </div>

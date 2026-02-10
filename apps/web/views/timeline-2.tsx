@@ -6,12 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import { useState, useRef } from 'react';
-import Link from 'next/link';
-import { IconArrowLeft } from '@tabler/icons-react';
 import Attempts from '@/components/attempts';
 import { motion, useMotionValue } from 'motion/react';
 import { cn } from '@/lib/utils';
 import Timeline2DevToggle from '@/components/timeline-2-dev-toggle';
+import BackToMainMenu from '@/components/back-to-main-menu';
 
 export default function Timeline2() {
   const gameMode = getGameModeBySlug('timeline-2');
@@ -101,27 +100,20 @@ export default function Timeline2() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-xs uppercase tracking-[0.2em] animate-pulse">Initializing Protocol...</p>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Do not terminate session</p>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
+        <p className="text-lg">Loading game...</p>
       </div>
     );
   }
 
   return (
     <div className="min-h-full bg-background text-foreground">
-      <div className="container mx-auto max-w-450 px-4 py-8">
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
-        >
-          <IconArrowLeft className="size-3" />
-          Return to Terminal
-        </Link>
+      <div className="container mx-auto max-w-450 px-4 py-10">
+        <BackToMainMenu />
 
-        <div className="mb-8 border-l-2 border-primary pl-4 text-left">
-          <h1 className="text-2xl font-bold tracking-tight uppercase">{gameMode?.title}</h1>
-          <p className="mt-1 text-[10px] text-muted-foreground uppercase tracking-widest">{gameMode?.description}</p>
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
+          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
         </div>
 
         <Card className="border shadow-none bg-muted/5">
@@ -171,7 +163,7 @@ export default function Timeline2() {
               </div>
 
               <div className="flex flex-col items-center gap-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Attempt Authorization</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Attempts</p>
                   <Attempts maxAttempts={maxAttempts} attemptsLeft={attemptsLeft} variant="primary" />
               </div>
 
@@ -182,12 +174,14 @@ export default function Timeline2() {
                 >
                   <div className="flex gap-4 items-center px-4">
                     {timelineCards.map((game, index) => {
-                      const correctlyPlacedCardsColor = correctlyPlacedCards.has(game.id)
-                          ? 'green'
-                          : 'red'
+                      const correctlyPlacedCardColor = correctlyPlacedCards.has(game.id)
+                        ? 'green'
+                        : 'red'
+                      ;
                       const bannerColor = game.id === firstCardId
                         ? 'slate'
-                        : correctlyPlacedCardsColor;
+                        : correctlyPlacedCardColor
+                      ;
 
                       return (
                         <motion.div
@@ -231,20 +225,20 @@ export default function Timeline2() {
               </div>
 
               {isGameOver && (
-                <div className="mt-8 border-2 border-primary bg-primary/5 p-8 text-center animate-in fade-in zoom-in duration-300">
+                <div className="mt-8 border border-border bg-card/60 p-8 text-center animate-in fade-in zoom-in duration-300">
                   <div className="space-y-4">
-                    <p className="text-xl font-bold text-destructive uppercase tracking-tighter">Mission Terminated</p>
-                    <p className="text-sm font-bold uppercase tracking-widest">
-                      Final Score: {score} Correct Signal{score === 1 ? '' : 's'}
+                    <p className="text-2xl font-bold text-destructive">Game Over!</p>
+                    <p className="text-lg font-semibold">
+                      Score: {score} card{score === 1 ? '' : 's'} placed correctly
                     </p>
                   </div>
 
                   <Button
                     onClick={resetGame}
                     size="lg"
-                    className="mt-8 cursor-pointer uppercase tracking-widest text-[10px] font-bold px-8 h-10"
+                    className="mt-8 cursor-pointer font-bold px-8"
                   >
-                    Initialize New Session
+                    Play Again
                   </Button>
                 </div>
               )}
@@ -252,7 +246,7 @@ export default function Timeline2() {
           </CardContent>
         </Card>
 
-        <div className="mx-auto mt-8 max-w-md border border-dashed p-6 text-center opacity-50 hover:opacity-100 transition-opacity">
+        <div className="mx-auto mt-8 max-w-md border border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
           <Timeline2DevToggle
             dealtCard={dealtCard}
             attemptsLeft={attemptsLeft}

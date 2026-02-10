@@ -49,8 +49,8 @@ export default function SelectedGameDisplay({
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-bold truncate text-foreground uppercase tracking-tight">{selectedGame.name}</p>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Selected</p>
+        <p className="text-sm font-bold truncate text-foreground uppercase tracking-tight">{selectedGame.name}</p>
+        <p className="text-xs text-muted-foreground uppercase tracking-widest">Selected</p>
       </div>
       {onClearSelection && (
         <button

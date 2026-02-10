@@ -21,10 +21,10 @@ export default function SpecificationsGameOver({
   showingAnswer = true,
 }: Readonly<SpecificationsGameOverProps>) {
   return (
-    <div className="space-y-6 p-8 border-2 border-primary bg-primary/5 animate-in fade-in zoom-in duration-300">
+    <div className="space-y-6 p-8 border border-border bg-muted/50">
       <div className="flex flex-col items-center gap-6">
         {targetGame?.imageUrl && (
-          <div className="relative border-2 border-primary shadow-[0_0_15px_rgba(var(--primary),0.3)]">
+          <div className="relative border-2 border-border shadow-lg">
             <Image
               src={targetGame.imageUrl}
               alt={targetGame.name}
@@ -38,16 +38,16 @@ export default function SpecificationsGameOver({
 
         {isCorrect ? (
           <div className="space-y-2 text-center">
-            <h2 className="text-2xl font-bold text-primary uppercase tracking-tighter">Validation Successful</h2>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-              Target correctly identified: <span className="text-foreground">{targetGame?.name}</span>
+            <h2 className="text-3xl font-bold text-green-600">Correct!</h2>
+            <p className="text-md font-semibold">
+              The game was: <span className="text-primary">{targetGame?.name}</span>
             </p>
           </div>
         ) : (
           <div className="space-y-2 text-center">
-            <h2 className="text-2xl font-bold text-destructive uppercase tracking-tighter">Mission Failed</h2>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-              Target was: <span className="text-foreground">{targetGame?.name}</span>
+            <h2 className="text-3xl font-bold text-destructive">Game Over!</h2>
+            <p className="text-md font-semibold">
+              The game was: <span className="text-primary">{targetGame?.name}</span>
             </p>
           </div>
         )}
@@ -56,18 +56,18 @@ export default function SpecificationsGameOver({
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
         <Button
           onClick={onPlayAgain}
-          className="cursor-pointer uppercase tracking-widest text-[10px] font-bold px-8 h-10"
+          className="cursor-pointer font-bold px-8"
           size="lg"
         >
-          {isCorrect ? 'New Mission' : 'Retry Protocol'}
+          {isCorrect ? 'Keep Playing' : 'Play Again'}
         </Button>
         <Button
           onClick={onToggleTable}
           variant="outline"
-          className="cursor-pointer uppercase tracking-widest text-[10px] font-bold px-8 h-10"
+          className="cursor-pointer font-bold px-8"
           size="lg"
         >
-          {showingAnswer ? 'Show Log' : 'Show Answer'}
+          {showingAnswer ? 'Show My Guesses' : 'Show Answer'}
         </Button>
       </div>
     </div>

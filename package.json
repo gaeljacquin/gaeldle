@@ -7,7 +7,6 @@
     "apps/*"
   ],
   "scripts": {
-    "preinstall": "node scripts/preinstall.js",
     "dev": "turbo dev",
     "build": "turbo build",
     "test": "turbo test",

@@ -1,9 +1,10 @@
 import type { Game } from '@gaeldle/types/game';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8080';
+const API_GAMES = 'api/games';
 
 export async function getAllGames(mode?: string): Promise<Game[]> {
-  const endpoint = mode === 'artwork' ? `${API_BASE_URL}/api/game/artwork` : `${API_BASE_URL}/api/game`;
+  const endpoint = mode === 'artwork' ? `${API_BASE_URL}/${API_GAMES}/artwork` : `${API_BASE_URL}/${API_GAMES}`;
 
   const response = await fetch(endpoint, {
     method: 'GET',
@@ -26,7 +27,7 @@ export async function getAllGames(mode?: string): Promise<Game[]> {
 }
 
 export async function getRandomGame(excludeIds: number[] = [], mode?: string): Promise<Game> {
-  const response = await fetch(`${API_BASE_URL}/api/game/random`, {
+  const response = await fetch(`${API_BASE_URL}/${API_GAMES}/random`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -61,7 +62,7 @@ export async function searchGames(query: string, limit: number = 100, mode?: str
     params.append('mode', mode);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/game/search?${params.toString()}`, {
+  const response = await fetch(`${API_BASE_URL}/${API_GAMES}/search?${params.toString()}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

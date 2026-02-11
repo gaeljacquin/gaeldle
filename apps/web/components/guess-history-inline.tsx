@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import type { Game } from '@gaeldle/types/game';
+import type { Game } from '@gaeldle/api-contract';
 import { cn } from '@/lib/utils';
 
 interface GuessHistoryInlineProps {

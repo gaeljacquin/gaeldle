@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@/lib/utils';
-import type { Game } from '@gaeldle/types/game';
+import type { Game } from '@gaeldle/api-contract';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import {
   InputGroup,

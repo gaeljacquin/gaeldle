@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from 'src/auth/auth.module';
-import { DatabaseModule } from 'src/db/database.module';
-import { GamesController } from 'src/games/games.controller';
-import { GamesService } from 'src/games/games.service';
-import { IgdbService } from 'src/games/igdb.service';
+import { AuthModule } from '@/auth/auth.module';
+import { DatabaseModule } from '@/db/database.module';
+import { GamesRouter } from '@/games/games.router';
+import { GamesService } from '@/games/games.service';
+import { IgdbService } from '@/games/igdb.service';
 
 @Module({
   imports: [DatabaseModule, AuthModule],
-  controllers: [GamesController],
+  controllers: [GamesRouter],
   providers: [GamesService, IgdbService],
 })
 export class GamesModule {}

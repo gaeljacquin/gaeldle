@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import configuration from './config/configuration';
-import { GamesModule } from './games/games.module';
+import { AppController } from '@/app.controller';
+import { AppService } from '@/app.service';
+import { AuthModule } from '@/auth/auth.module';
+import configuration from '@/config/configuration';
+import { GamesModule } from '@/games/games.module';
+import { ORPCModule } from '@orpc/nest';
 
 const appEnv = (
   process.env.APP_ENV ||
@@ -25,6 +26,7 @@ const envFilePath = [
       envFilePath,
       load: [configuration],
     }),
+    ORPCModule.forRoot({}),
     AuthModule,
     GamesModule,
   ],

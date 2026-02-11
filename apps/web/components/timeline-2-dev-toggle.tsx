@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { IconPlus, IconMinus } from '@tabler/icons-react';
-import type { Game } from '@gaeldle/types/game';
+import type { Game } from '@gaeldle/api-contract';
 
 interface Timeline2DevToggleProps {
   dealtCard: Game | null;

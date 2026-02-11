@@ -1,15 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { getAllGames, getRandomGame } from '@/lib/services/game.service';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query'; // Import from TanStack Query
 import { getPixelSizeForAttempt } from '@/lib/utils/pixelate';
-import type { Game, CoverArtModeSlug, ArtworkImage } from '@gaeldle/types/game';
+import { orpc } from '@/lib/orpc';
+import type { CoverArtModeSlug, Game, ArtworkImage } from '@gaeldle/api-contract';
 
 export const MAX_ATTEMPTS = 5;
-
-interface UseCoverArtGameProps {
-  mode: CoverArtModeSlug;
-}
 
 // Helper to pick a random artwork from the artworks array
 function getRandomArtwork(artworks: unknown): string | null {
@@ -22,45 +19,49 @@ function getRandomArtwork(artworks: unknown): string | null {
   return artwork.url || null;
 }
 
-export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
-  const [allGames, setAllGames] = useState<Game[]>([]);
-  const [targetGame, setTargetGame] = useState<Game | null>(null);
+export function useCoverArtGame(mode: CoverArtModeSlug) {
+  // Use oRPC with TanStack Query's useQuery hook
+  const { data: allGamesData, isLoading: isLoadingAll } = useQuery(
+    orpc.games.list.queryOptions({
+      input: undefined, // list() takes optional input
+      select: (res) => res.data,
+    })
+  );
+
+  const {
+    data: targetGameData,
+    isLoading: isLoadingTarget,
+    refetch: refetchTarget,
+    isRefetching: isRefetchingTarget
+  } = useQuery(
+    orpc.games.getRandom.queryOptions({
+      input: { excludeIds: [], mode },
+      select: (res) => res.data,
+      enabled: true,
+      staleTime: 0, // Ensure we can get a new one on reset
+    })
+  );
+
+  const allGames: Game[] = allGamesData ?? [];
+  const targetGame = targetGameData ?? null;
+
   const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
   const [wrongGuesses, setWrongGuesses] = useState<Game[]>([]);
   const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [currentPixelSize, setCurrentPixelSize] = useState(
     getPixelSizeForAttempt(0, MAX_ATTEMPTS)
   );
-  const [selectedArtworkUrl, setSelectedArtworkUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadGames() {
-      try {
-        setIsLoading(true);
-        const games = await getAllGames(mode);
-        setAllGames(games);
-
-        const randomGame = await getRandomGame([], mode);
-        setTargetGame(randomGame);
-
-        if (mode === 'artwork' && randomGame) {
-          const artworkUrl = getRandomArtwork(randomGame.artworks);
-          setSelectedArtworkUrl(artworkUrl);
-        }
-      } catch (err) {
-        console.error('Error loading games:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load games');
-      } finally {
-        setIsLoading(false);
-      }
+  const selectedArtworkUrl = useMemo(() => {
+    if (mode === 'artwork' && targetGame) {
+      return getRandomArtwork(targetGame.artworks);
     }
+    return null;
+  }, [mode, targetGame]);
 
-    loadGames();
-  }, [mode]);
+  const isLoading = isLoadingAll || isLoadingTarget || isRefetchingTarget;
 
   useEffect(() => {
     const wrongAttempts = MAX_ATTEMPTS - attemptsLeft;
@@ -87,39 +88,22 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
     } else {
       setWrongGuesses((prev) => [...prev, selectedGame]);
       setAttemptsLeft((prev) => prev - 1);
-
       if (attemptsLeft - 1 <= 0) {
         setIsGameOver(true);
       }
     }
-
     setSelectedGameId(null);
   }, [targetGame, selectedGameId, isGameOver, attemptsLeft, allGames]);
 
   const resetGame = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setWrongGuesses([]);
-      setAttemptsLeft(MAX_ATTEMPTS);
-      setIsGameOver(false);
-      setIsCorrect(false);
-      setSelectedGameId(null);
-      setCurrentPixelSize(getPixelSizeForAttempt(0, MAX_ATTEMPTS));
-
-      // Get a new random game
-      const randomGame = await getRandomGame([], mode);
-      setTargetGame(randomGame);
-
-      if (mode === 'artwork' && randomGame) {
-        const artworkUrl = getRandomArtwork(randomGame.artworks);
-        setSelectedArtworkUrl(artworkUrl);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reset game');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [mode]);
+    setWrongGuesses([]);
+    setAttemptsLeft(MAX_ATTEMPTS);
+    setIsGameOver(false);
+    setIsCorrect(false);
+    setSelectedGameId(null);
+    setCurrentPixelSize(getPixelSizeForAttempt(0, MAX_ATTEMPTS));
+    await refetchTarget();
+  }, [refetchTarget]);
 
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft(prev => {
@@ -138,7 +122,7 @@ export function useCoverArtGame({ mode }: UseCoverArtGameProps) {
     isGameOver,
     isCorrect,
     isLoading,
-    error,
+    error: null, // TanStack Query handles error state
     currentPixelSize,
     selectedArtworkUrl,
     handleSelectGame,

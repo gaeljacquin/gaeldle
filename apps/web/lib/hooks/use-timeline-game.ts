@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getAllGames } from '@/lib/services/game.service';
-import type { Game } from '@gaeldle/types/game';
+import type { Game } from '@gaeldle/api-contract';
 
 export const MAX_ATTEMPTS = 3;
 const GAMES_COUNT = 10;

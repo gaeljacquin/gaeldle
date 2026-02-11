@@ -9,6 +9,7 @@ import {
   index,
   text,
 } from 'drizzle-orm/pg-core';
+import { createSelectSchema, createInsertSchema } from 'drizzle-zod';
 
 export const games = pgTable(
   'game',
@@ -16,7 +17,7 @@ export const games = pgTable(
     id: serial('id').primaryKey(),
     igdbId: integer('igdb_id').notNull().unique('games_igdb_key'),
     name: varchar('name', { length: 255 }).notNull(),
-    info: json('info'),
+    info: json('info').$type<any>(),
     createdAt: timestamp('created_at', {
       withTimezone: true,
       mode: 'date',
@@ -26,17 +27,19 @@ export const games = pgTable(
       mode: 'date',
     }).defaultNow(),
     imageUrl: varchar('image_url'),
-    artworks: json('artworks'),
-    keywords: json('keywords'),
-    franchises: json('franchises'),
-    gameEngines: json('game_engines'),
-    gameModes: json('game_modes'),
-    genres: json('genres'),
-    involvedCompanies: json('involved_companies'),
-    platforms: json('platforms'),
-    playerPerspectives: json('player_perspectives'),
-    releaseDates: json('release_dates'),
-    themes: json('themes'),
+    aiImageUrl: varchar('ai_image_url'),
+    aiPrompt: varchar('ai_prompt'),
+    artworks: json('artworks').$type<any>(),
+    keywords: json('keywords').$type<any>(),
+    franchises: json('franchises').$type<any>(),
+    gameEngines: json('game_engines').$type<any>(),
+    gameModes: json('game_modes').$type<any>(),
+    genres: json('genres').$type<any>(),
+    involvedCompanies: json('involved_companies').$type<any>(),
+    platforms: json('platforms').$type<any>(),
+    playerPerspectives: json('player_perspectives').$type<any>(),
+    releaseDates: json('release_dates').$type<any>(),
+    themes: json('themes').$type<any>(),
     firstReleaseDate: integer('first_release_date'),
     summary: text('summary'),
     storyline: text('storyline'),
@@ -48,7 +51,12 @@ const gameObject = {
   id: games.id,
   igdbId: games.igdbId,
   name: games.name,
+  info: games.info,
+  createdAt: games.createdAt,
+  updatedAt: games.updatedAt,
   imageUrl: games.imageUrl,
+  aiImageUrl: games.aiImageUrl,
+  aiPrompt: games.aiPrompt,
   artworks: games.artworks,
   keywords: games.keywords,
   franchises: games.franchises,
@@ -69,4 +77,12 @@ export const allGames = pgMaterializedView('all_games').as((qb) => {
   return qb.select(gameObject).from(games).orderBy(games.name);
 });
 
+export const GameSelectSchema = createSelectSchema(games);
+export const GameInsertSchema = createInsertSchema(games);
+export const GameUpdateInputSchema = GameInsertSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  igdbId: true,
+}).partial();
 export type Game = typeof allGames.$inferSelect;

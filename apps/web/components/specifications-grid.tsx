@@ -2,7 +2,7 @@
 
 import { ReactNode, Fragment } from 'react';
 import { cn } from '@/lib/utils';
-import type { SpecificationGuess, RevealedClue, Game, CellMatch } from '@gaeldle/types/game';
+import type { SpecificationGuess, RevealedClue, Game, CellMatch } from '@gaeldle/api-contract';
 import Image from 'next/image';
 import { IconArrowUp, IconArrowDown, IconArrowRight } from '@tabler/icons-react';
 
@@ -277,10 +277,10 @@ function getAnswerSpecs(targetGame?: Game | null) {
     genres: extractArray(targetGame.genres),
     themes: extractArray(targetGame.themes),
     releaseDate: extractReleaseYear(targetGame.firstReleaseDate),
-    gameModes: extractArray(targetGame.game_modes),
-    gameEngines: extractArray(targetGame.game_engines),
-    publisher: extractPublisher(targetGame.involved_companies),
-    perspective: extractArray(targetGame.player_perspectives),
+    gameModes: extractArray(targetGame.gameModes),
+    gameEngines: extractArray(targetGame.gameEngines),
+    publisher: extractPublisher(targetGame.involvedCompanies),
+    perspective: extractArray(targetGame.playerPerspectives),
   };
 }
 

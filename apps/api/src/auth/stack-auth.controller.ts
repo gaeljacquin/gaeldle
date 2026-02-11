@@ -5,7 +5,7 @@ import {
   HttpCode,
   Post,
 } from '@nestjs/common';
-import { StackAuthService } from './stack-auth.service';
+import { StackAuthService } from '@/auth/stack-auth.service';
 
 type StackSignInBody = {
   email?: string;

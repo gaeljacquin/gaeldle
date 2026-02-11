@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { desc, eq, inArray, notInArray, sql } from 'drizzle-orm';
+import { desc, eq, inArray, notInArray, sql, type SQL } from 'drizzle-orm';
+import type { PgColumn } from 'drizzle-orm/pg-core';
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { DatabaseService } from 'src/db/database.service';
 import { allGames, games, type Game } from 'src/db/schema';
@@ -33,6 +34,7 @@ export class GamesService {
   async getGamesPage(
     page: number,
     pageSize: number,
+    search?: string,
   ): Promise<{ games: Game[]; total: number }> {
     const safePage = Number.isFinite(page) && page > 0 ? page : 1;
     const safePageSize =
@@ -40,21 +42,39 @@ export class GamesService {
     const cappedPageSize = Math.min(safePageSize, 100);
     const offset = (safePage - 1) * cappedPageSize;
 
+    let whereCondition: SQL | undefined = undefined;
+    let orderBy: SQL | PgColumn = games.name;
+
+    if (search && search.trim().length >= 2) {
+      const tsQuery = search.trim().split(/\s+/).join(' & ');
+      whereCondition = sql`name_search @@ to_tsquery('english', ${tsQuery})`;
+      orderBy = desc(
+        sql`ts_rank_cd(name_search, to_tsquery('english', ${tsQuery}), 32)`,
+      );
+    } else {
+      orderBy = games.name;
+    }
+
+    const query = this.databaseService.db.select().from(games).$dynamic();
+    const countQuery = this.databaseService.db
+      .select({ count: sql<number>`count(*)` })
+      .from(games)
+      .$dynamic();
+
+    if (whereCondition) {
+      query.where(whereCondition);
+      countQuery.where(whereCondition);
+    }
+
     const [gamesResult, countResult] = await Promise.all([
-      this.databaseService.db
-        .select()
-        .from(allGames)
-        .limit(cappedPageSize)
-        .offset(offset),
-      this.databaseService.db
-        .select({ count: sql<number>`count(*)` })
-        .from(allGames),
+      query.orderBy(orderBy).limit(cappedPageSize).offset(offset),
+      countQuery,
     ]);
 
     const total = Number(countResult[0]?.count ?? 0);
 
     return {
-      games: gamesResult,
+      games: gamesResult as Game[],
       total,
     };
   }

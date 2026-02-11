@@ -26,6 +26,50 @@ export async function getAllGames(mode?: string): Promise<Game[]> {
   return data.data as Game[];
 }
 
+export interface PaginatedResponse<T> {
+  success: boolean;
+  data: T[];
+  meta: {
+    page: number;
+    pageSize: number;
+    total: number;
+  };
+}
+
+export async function getPaginatedGames(
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string
+): Promise<PaginatedResponse<Game>> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    pageSize: pageSize.toString(),
+  });
+
+  if (query && query.length >= 2) {
+    params.append('q', query);
+  }
+
+  const response = await fetch(`${API_BASE_URL}/${API_GAMES}?${params.toString()}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch games');
+  }
+
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to fetch games');
+  }
+
+  return data as PaginatedResponse<Game>;
+}
+
 export async function getRandomGame(excludeIds: number[] = [], mode?: string): Promise<Game> {
   const response = await fetch(`${API_BASE_URL}/${API_GAMES}/random`, {
     method: 'POST',

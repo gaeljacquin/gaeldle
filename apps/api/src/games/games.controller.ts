@@ -57,8 +57,9 @@ export class GamesController {
   async getGames(
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
+    @Query('q') q?: string,
   ) {
-    const hasPagination = Boolean(page || pageSize);
+    const hasPagination = Boolean(page || pageSize || q);
 
     if (hasPagination) {
       const pageNumber = parsePositiveInt(page, 1);
@@ -67,6 +68,7 @@ export class GamesController {
       const { games, total } = await this.gamesService.getGamesPage(
         pageNumber,
         cappedPageSize,
+        q,
       );
 
       return {

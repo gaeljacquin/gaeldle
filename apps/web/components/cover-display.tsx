@@ -66,6 +66,7 @@ export default function CoverDisplay({
         )}
       >
         <p className="text-sm text-muted-foreground">Loading game...</p>
+        <p className="text-muted-foreground">Stuck? Try refreshing the page 😅</p>
       </div>
     );
   }

@@ -1,7 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { desc, eq, inArray, notInArray, sql, type SQL } from 'drizzle-orm';
+import {
+  desc,
+  eq,
+  inArray,
+  notInArray,
+  sql,
+  InferInsertModel,
+  InferSelectModel,
+  type SQL,
+} from 'drizzle-orm';
 import type { PgColumn } from 'drizzle-orm/pg-core';
-import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { DatabaseService } from 'src/db/database.service';
 import { allGames, games, type Game } from 'src/db/schema';
 import type { GameModeSlug } from 'src/games/game-mode';
@@ -43,7 +51,7 @@ export class GamesService {
     const offset = (safePage - 1) * cappedPageSize;
 
     let whereCondition: SQL | undefined = undefined;
-    let orderBy: SQL | PgColumn = games.name;
+    let orderBy: SQL | PgColumn;
 
     if (search && search.trim().length >= 2) {
       const tsQuery = search.trim().split(/\s+/).join(' & ');

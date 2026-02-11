@@ -49,6 +49,7 @@ export default function Specifications() {
     return (
       <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
         <p className="text-lg">Loading game...</p>
+        <p className="text-muted-foreground">Stuck? Try refreshing the page 😅</p>
       </div>
     );
   }

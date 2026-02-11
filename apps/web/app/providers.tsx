@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { StackProvider, StackTheme } from "@stackframe/stack";
+import { ThemeProvider } from "next-themes";
 import { stackClientApp } from "@/stack/client";
 import type { ReactNode } from "react";
 import { useState } from "react";
@@ -28,10 +29,12 @@ export default function Providers({ children }: Readonly<ProvidersProps>) {
   return (
     <StackProvider app={stackClientApp}>
       <StackTheme>
-        <QueryClientProvider client={queryClient}>
-          {children}
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <QueryClientProvider client={queryClient}>
+            {children}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </QueryClientProvider>
+        </ThemeProvider>
       </StackTheme>
     </StackProvider>
   );

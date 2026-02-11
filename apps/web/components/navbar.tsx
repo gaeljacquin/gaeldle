@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import { useUser } from "@stackframe/stack";
 import { appInfo } from "@/lib/app-info";
@@ -54,10 +55,12 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+          <div className="mx-2 h-4 w-px bg-border" />
+          <ThemeToggle />
           <Link
             href={authHref}
             className={cn(
-              "rounded-md px-3 py-2 text-sm font-medium transition-colors ml-4",
+              "rounded-md px-3 py-2 text-sm font-medium transition-colors ml-2",
               isActive(authHref)
                 ? "bg-primary text-primary-foreground"
                 : "bg-primary/90 text-primary-foreground hover:bg-primary"
@@ -78,15 +81,17 @@ export function Navbar() {
           }
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <IconX size={20} /> : <IconMenu2 size={20} />}
-        </Button>
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <IconX size={20} /> : <IconMenu2 size={20} />}
+          </Button>
+        </div>
       </div>
 
       {isOpen && (

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -8,28 +8,14 @@ import { UserButton, useUser } from "@stackframe/stack";
 import {
   IconDashboard,
   IconDeviceGamepad2,
-  IconLayoutSidebarLeftCollapse,
-  IconLayoutSidebarLeftExpand,
   IconChevronDown,
   IconChevronRight,
-  IconPhoto,
-  IconWallpaper,
-  IconCalendar,
-  IconCalendarDue,
-  IconNotes,
-  IconBrandOpenai
+  IconSettings,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { appInfo } from "@/lib/app-info";
-
-const gameModes = [
-  { name: "Cover Art", href: "/cover-art", icon: IconPhoto },
-  { name: "AI Image", href: "/image-ai", icon: IconBrandOpenai },
-  { name: "Artwork", href: "/artwork", icon: IconWallpaper },
-  { name: "Timeline", href: "/timeline", icon: IconCalendar },
-  { name: "Timeline 2", href: "/timeline-2", icon: IconCalendarDue },
-  { name: "Specifications", href: "/specifications", icon: IconNotes },
-];
+import { gameModes } from "@/lib/game-mode";
+import SidebarToggle from "./sidebar-toggle";
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -44,13 +30,12 @@ export function Sidebar() {
     <aside
       className={cn(
         "relative flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-12" : "w-64"
+        isCollapsed ? "w-12" : "w-64",
       )}
     >
-      {/* Top Header */}
       <div className={cn(
         "flex h-16 items-center border-b px-4",
-        isCollapsed && "justify-center px-0"
+        isCollapsed && "justify-center px-0",
       )}>
         {!isCollapsed && (
           <Link href="/" className="flex items-center gap-2 font-bold tracking-tight">
@@ -62,33 +47,19 @@ export function Sidebar() {
                 className="object-cover"
               />
             </div>
-            <span>Gaeldle</span>
+            <span>{appInfo.title}</span>
           </Link>
         )}
-        <button
-          onClick={toggleSidebar}
-          className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer",
-            !isCollapsed && "ml-auto"
-          )}
-          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {isCollapsed ? (
-            <IconLayoutSidebarLeftExpand size={20} />
-          ) : (
-            <IconLayoutSidebarLeftCollapse size={20} />
-          )}
-        </button>
+        <SidebarToggle isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 space-y-1 p-2">
         <Link
           href="/dashboard"
           className={cn(
             "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
             isCollapsed && "justify-center px-0",
-            pathname === "/dashboard" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "transparent"
+            pathname === "/dashboard" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "transparent",
           )}
           title={isCollapsed ? "Dashboard" : undefined}
         >
@@ -101,7 +72,7 @@ export function Sidebar() {
             onClick={toggleGames}
             className={cn(
               "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer",
-              isCollapsed && "justify-center px-0"
+              isCollapsed && "justify-center px-0",
             )}
             title={isCollapsed ? "Games" : undefined}
           >
@@ -128,25 +99,37 @@ export function Sidebar() {
                   className={cn(
                     "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                     isCollapsed && "justify-center px-0",
-                    pathname === mode.href ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold" : "text-muted-foreground"
+                    pathname === mode.href ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold" : "text-muted-foreground",
                   )}
-                  title={isCollapsed ? mode.name : undefined}
+                  title={isCollapsed ? mode.title : undefined}
                 >
                   <mode.icon size={isCollapsed ? 20 : 18} />
-                  {!isCollapsed && <span>{mode.name}</span>}
+                  {!isCollapsed && <span>{mode.title}</span>}
                 </Link>
               ))}
             </div>
           )}
         </div>
+
+        <Link
+          href="/dashboard/settings"
+          className={cn(
+            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            isCollapsed && "justify-center px-0",
+            pathname === "/dashboard/settings" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "transparent",
+          )}
+          title={isCollapsed ? "Settings" : undefined}
+        >
+          <IconSettings size={20} />
+          {!isCollapsed && <span>Settings</span>}
+        </Link>
       </nav>
 
-      {/* Bottom Footer */}
       <div className={cn("mt-auto border-t p-4 flex items-center", isCollapsed && "justify-center px-0")}>
         <div className={cn(
           "flex items-center gap-3",
           isCollapsed && "justify-center",
-          !isCollapsed && "w-full"
+          !isCollapsed && "w-full",
         )}>
           <UserButton />
           {!isCollapsed && (

@@ -14,7 +14,7 @@ export function LayoutWrapper({ children }: Readonly<{ children: ReactNode }>) {
   }
 
   return (
-    <div className="redesign flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />

@@ -1,6 +1,7 @@
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { IconArrowLeft } from '@tabler/icons-react';
+import { appInfo } from '@/lib/app-info';
 
 export default function PrivacyView() {
   return (
@@ -17,7 +18,7 @@ export default function PrivacyView() {
       <div className="space-y-6">
         <h2 className="text-2xl font-semibold">Introduction</h2>
         <p className="text-base leading-7">
-          At Gaeldle, we are committed to protecting your privacy and ensuring you have a
+          At {appInfo.title}, we are committed to protecting your privacy and ensuring you have a
           positive experience on our website. This policy outlines our practices concerning
           the collection, use, and sharing of your information.
         </p>
@@ -73,12 +74,12 @@ export default function PrivacyView() {
         <p className="text-base leading-7">
           The information we receive depends on your settings with the third-party service
           and their privacy policy. We use this information for account management,
-          communication purposes, and to enhance your user experience on Gaeldle.
+          communication purposes, and to enhance your user experience on {appInfo.title}.
         </p>
         <p className="text-base leading-7">
           Please note that while we protect the information we receive, we do not control
           the privacy practices of these third-party services. We encourage you to review
-          the privacy policies of any third-party service you use to sign in to Gaeldle.
+          the privacy policies of any third-party service you use to sign in to {appInfo.title}.
         </p>
         <h2 className="text-2xl font-semibold">5. Data Storage and Security</h2>
         <p className="text-base leading-7">

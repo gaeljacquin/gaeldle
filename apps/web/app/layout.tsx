@@ -5,6 +5,7 @@ import { LayoutWrapper } from "@/components/layout-wrapper";
 import Providers from "./providers";
 import Loading from "./loading";
 import "./globals.css";
+import { appInfo } from "@/lib/app-info";
 
 const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
@@ -14,8 +15,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gaeldle",
-  description: "A gaming-themed Wordle clone",
+  title: appInfo.title,
+  description: appInfo.description,
 };
 
 export default function RootLayout({
@@ -24,9 +25,9 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" className={figtree.variable}>
+    <html lang="en" className={figtree.variable} suppressHydrationWarning>
       <body
-        className={`${jetbrainsMono.variable} font-sans antialiased`}
+        className={`${jetbrainsMono.variable} redesign font-sans antialiased`}
       >
         <Providers>
           <Suspense fallback={<Loading />}>

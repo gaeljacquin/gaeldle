@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, ChangeEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPaginatedGames } from '@/lib/services/game.service';
 import { Timeline2Card } from '@/components/timeline-2-card';
@@ -79,7 +79,7 @@ export default function DashboardPage() {
     return range;
   }, [totalPages, page]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
 

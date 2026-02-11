@@ -108,6 +108,14 @@ export class GamesController {
     @Query('limit') limit?: string,
     @Query('mode') mode?: string,
   ) {
+    // Prevent array type confusion
+    if (Array.isArray(q) || Array.isArray(limit) || Array.isArray(mode)) {
+      throw new BadRequestException({
+        success: false,
+        error: 'Invalid parameter format',
+      });
+    }
+
     if (!q || q.length < 2) {
       throw new BadRequestException({
         success: false,

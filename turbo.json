@@ -3,7 +3,8 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/ cache/**", "dist/**"],
+      "env": ["SERVER_URL", "STACK_SECRET_SERVER_KEY"]
     },
     "lint": {},
     "test": {},

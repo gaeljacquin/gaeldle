@@ -20,6 +20,7 @@ import {
   IconBrandOpenai
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { appInfo } from "@/lib/app-info";
 
 const gameModes = [
   { name: "Cover Art", href: "/cover-art", icon: IconPhoto },
@@ -53,10 +54,10 @@ export function Sidebar() {
       )}>
         {!isCollapsed && (
           <Link href="/" className="flex items-center gap-2 font-bold tracking-tight">
-            <div className="relative h-8 w-8 overflow-hidden rounded-md">
+            <div className="relative size-8 overflow-hidden rounded-md">
               <Image
                 src="/logo.png"
-                alt="Gaeldle Logo"
+                alt={`${appInfo.title} logo`}
                 fill
                 className="object-cover"
               />

@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -123,6 +123,16 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Hide scrollbar for all elements */
+  * {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
 }
 
 .redesign {
@@ -132,34 +142,34 @@
   --card-foreground: hsl(240 5% 10%);
   --popover: hsl(240 5% 90%);
   --popover-foreground: hsl(240 5% 10%);
-  --primary: hsl(333 71% 50%);
-  --primary-foreground: hsl(327 73% 97%);
+  --primary: hsl(171 77% 37%);
+  --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(240 5% 33%);
   --secondary-foreground: hsl(0 0% 98%);
   --muted: hsl(240 4% 83%);
   --muted-foreground: hsl(240 5% 33%);
-  --accent: hsl(355 100% 97%);
-  --accent-foreground: hsl(349 89% 60%);
+  --accent: hsl(171 20% 96%);
+  --accent-foreground: hsl(171 77% 37%);
   --destructive: hsl(0 72% 50%);
   --destructive-foreground: hsl(0 85% 97%);
   --border: hsl(240 4% 83%);
   --input: hsl(240 4% 83%);
-  --ring: hsl(333 71% 50%);
-  --radius: 1.5rem;
+  --ring: hsl(171 77% 37%);
+  --radius: 0;
   --sidebar: hsl(0 0% 98%);
   --sidebar-foreground: hsl(240 5% 10%);
-  --sidebar-primary: hsl(333 71% 50%);
-  --sidebar-primary-foreground: hsl(327 73% 97%);
+  --sidebar-primary: hsl(171 77% 37%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
   --sidebar-accent: hsl(240 5% 33%);
   --sidebar-accent-foreground: hsl(0 0% 98%);
   --sidebar-border: hsl(240 4% 83%);
-  --sidebar-ring: hsl(333 71% 50%);
+  --sidebar-ring: hsl(171 77% 37%);
   --gradient-easy: linear-gradient(135deg, hsl(145 70% 45%) 0%, hsl(170 60% 40%) 100%);
   --gradient-medium-1: linear-gradient(135deg, hsl(220 80% 50%) 0%, hsl(280 70% 55%) 100%);
   --gradient-medium-2: linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%);
   --gradient-medium-3: linear-gradient(135deg, hsl(195 80% 45%) 0%, hsl(220 70% 50%) 100%);
   --gradient-hard-1: linear-gradient(135deg, hsl(340 70% 50%) 0%, hsl(320 60% 45%) 100%);
   --gradient-hard-2: linear-gradient(135deg, hsl(180 60% 45%) 0%, hsl(210 70% 50%) 100%);
-  --gradient-hero: linear-gradient(135deg, hsl(333 71% 50%) 0%, hsl(352 95% 81%) 100%);
+  --gradient-hero: linear-gradient(135deg, hsl(171 77% 37%) 0%, hsl(171 50% 70%) 100%);
   --gradient-card-overlay: linear-gradient(180deg, transparent 0%, hsl(0 0% 0% / 0.4) 100%);
 }

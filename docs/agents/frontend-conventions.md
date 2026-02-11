@@ -9,6 +9,15 @@
 - **Auth**: Stack Auth.
 - **State Management**: Zustand (stores) and TanStack Query (API).
 
+## Theming & Styling
+
+- **Theme**: Teal (Gray base, Radius 0, Lyra style).
+- **Generator**: [shadcn/ui Theme Generator](https://ui.shadcn.com/create?base=base&style=lyra&baseColor=gray&theme=teal&iconLibrary=tabler&font=figtree&radius=none)
+- **Typography**: 
+  - Sans: **Figtree** (Primary)
+  - Mono: **JetBrains Mono** (Technical details/Dev mode)
+- **Global Styles**: Scrollbars are disabled globally via `globals.css`.
+
 ## Separation of Concerns (Critical)
 
 All frontend code must separate business logic from components and views.

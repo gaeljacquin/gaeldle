@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={figtree.variable} suppressHydrationWarning>
       <body
-        className={`${jetbrainsMono.variable} redesign font-sans antialiased`}
+        className={`${jetbrainsMono.variable} font-sans antialiased`}
       >
         <Providers>
           <Suspense fallback={<Loading />}>

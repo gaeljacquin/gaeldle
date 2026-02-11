@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 import { cn } from '@/lib/utils';
 
 interface GuessHistoryInlineProps {
@@ -9,10 +9,10 @@ interface GuessHistoryInlineProps {
   className?: string;
 }
 
-export default function GuessHistoryInline({ guesses, className }: GuessHistoryInlineProps) {
+export default function GuessHistoryInline({ guesses, className }: Readonly<GuessHistoryInlineProps>) {
   if (guesses.length === 0) {
     return (
-      <div className={cn('p-4 text-center text-sm text-muted-foreground italic', className)}>
+      <div className={cn('border border-border bg-card/60 p-4 text-center text-sm text-muted-foreground', className)}>
         No guesses yet
       </div>
     );
@@ -29,25 +29,25 @@ export default function GuessHistoryInline({ guesses, className }: GuessHistoryI
           return (
             <div
               key={`${guess.id}-${index}`}
-              className="flex items-center gap-2 p-2 bg-muted/50 rounded border border-border"
+              className="flex items-center gap-3 border border-border bg-card/70 p-2"
             >
               {guess.imageUrl ? (
                 <Image
                   src={guess.imageUrl}
                   alt={guess.name}
-                  className="w-12 h-16 object-cover rounded shrink-0"
+                  className="h-16 w-12 object-cover shrink-0 border"
                   width={48}
                   height={64}
-                  sizes="100vw"
+                  sizes="10vw"
                 />
               ) : (
-                <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shrink-0">
-                  <span className="text-xs text-muted-foreground">?</span>
+                <div className="h-16 w-12 bg-muted flex items-center justify-center shrink-0 border">
+                  <span className="text-xs text-muted-foreground font-mono">?</span>
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate">{guess.name}</p>
-                <p className="text-xs text-muted-foreground">Guess #{originalIndex}</p>
+                <p className="text-sm font-bold truncate uppercase tracking-tight">{guess.name}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-widest">Guess #{originalIndex}</p>
               </div>
             </div>
           );

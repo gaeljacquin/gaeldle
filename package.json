@@ -3,29 +3,27 @@
   "author": "Gaël Jacquin",
   "license": "MIT",
   "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "nx run-many -t serve",
-    "build": "nx run-many -t build",
-    "test": "nx run-many -t test",
-    "lint": "nx run-many -t lint",
-    "docker:up": "docker compose --profile all up -d",
-    "docker:down": "docker compose --profile all down",
-    "docker:up:apps": "docker compose --profile apps up -d",
-    "docker:up:infra": "docker compose --profile infra up -d",
-    "docker:down:volumes": "docker compose --profile all down -v",
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
     "prepare": "husky"
   },
   "keywords": [],
-  "packageManager": "pnpm@10.19.0",
+  "packageManager": "bun@1.2.2",
   "devDependencies": {
-    "@commitlint/cli": "^20.2.0",
-    "@commitlint/config-conventional": "^20.2.0",
-    "@nx/js": "^22.2.0",
-    "@types/node": "^24.10.2",
+    "@commitlint/cli": "^20.4.1",
+    "@commitlint/config-conventional": "^20.4.1",
+    "@types/node": "^25.2.2",
     "husky": "^9.1.7",
-    "nx": "^22.2.0"
+    "turbo": "^2.8.5"
   },
   "dependencies": {
-    "motion": "^12.23.25"
+    "motion": "^12.34.0"
   }
 }

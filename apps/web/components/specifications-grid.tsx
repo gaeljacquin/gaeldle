@@ -1,8 +1,10 @@
+'use client';
+
 import { ReactNode, Fragment } from 'react';
 import { cn } from '@/lib/utils';
-import type { SpecificationGuess, RevealedClue, Game, CellMatch } from '@/lib/types/game';
+import type { SpecificationGuess, RevealedClue, Game, CellMatch } from '@gaeldle/types/game';
 import Image from 'next/image';
-import { MoveUp, MoveDown, MoveRight } from 'lucide-react';
+import { IconArrowUp, IconArrowDown, IconArrowRight } from '@tabler/icons-react';
 
 interface SpecificationsGridProps {
   guesses: SpecificationGuess[];
@@ -11,6 +13,8 @@ interface SpecificationsGridProps {
   showAnswerOnly?: boolean;
   className?: string;
 }
+
+type CellValue = string | string[] | null
 
 const COLUMN_HEADERS = [
   { key: 'name', label: 'Name' },
@@ -24,30 +28,42 @@ const COLUMN_HEADERS = [
   { key: 'perspective', label: 'Perspective' },
 ] as const;
 
+type MatchKey = keyof SpecificationGuess['matches'];
+
+const MATCH_COLUMNS: Array<{ key: MatchKey; isReleaseDate?: boolean }> = [
+  { key: 'platforms' },
+  { key: 'genres' },
+  { key: 'themes' },
+  { key: 'releaseDate', isReleaseDate: true },
+  { key: 'gameModes' },
+  { key: 'gameEngines' },
+  { key: 'publisher' },
+  { key: 'perspective' },
+];
+
 function getCellColor(matchType: 'exact' | 'partial' | 'none', hasData: boolean): string {
-  // If there's no data, use dark slate background
   if (!hasData) {
-    return 'bg-slate-700';
+    return 'bg-muted/70 text-foreground';
   }
 
   switch (matchType) {
     case 'exact':
-      return 'bg-green-600';
+      return 'bg-green-600/20 text-green-400 border-green-600/50';
     case 'partial':
-      return 'bg-yellow-500';
+      return 'bg-yellow-600/20 text-yellow-400 border-yellow-600/50';
     case 'none':
-      return 'bg-red-600';
+      return 'bg-destructive/20 text-destructive border-destructive/50';
   }
 }
 
-function CellValue({ value }: { value: string | string[] | null }) {
-  if (!value) return <>No data</>;
+function CellValueDisplay({ value }: Readonly<{ value: CellValue }>) {
+  if (!value) return <span className="opacity-50">No data</span>;
   if (Array.isArray(value)) {
-    if (value.length === 0) return <>No data</>;
+    if (value.length === 0) return <span className="opacity-50">No data</span>;
     return (
       <div className="flex flex-col gap-0.5">
         {value.map((item, idx) => (
-          <div key={idx}>{item}</div>
+          <div key={`key-${idx + 1}`}>{item}</div>
         ))}
       </div>
     );
@@ -63,7 +79,6 @@ function hasData(value: string | string[] | null): boolean {
   return value !== 'No data' && value !== '';
 }
 
-// Helper to extract array from JSON field
 function extractArray(data: unknown): string[] {
   if (!data) return [];
   if (Array.isArray(data)) {
@@ -78,14 +93,12 @@ function extractArray(data: unknown): string[] {
   return [];
 }
 
-// Helper to extract year from release date
 function extractReleaseYear(firstReleaseDate: number | null): string | null {
   if (!firstReleaseDate) return null;
   const date = new Date(firstReleaseDate * 1000);
   return date.getFullYear().toString();
 }
 
-// Helper to extract publisher
 function extractPublisher(involved_companies: unknown): string | null {
   if (!involved_companies || !Array.isArray(involved_companies)) return null;
 
@@ -108,14 +121,12 @@ function extractPublisher(involved_companies: unknown): string | null {
   return null;
 }
 
-// Helper to find best match across all guesses for a field
 function getBestMatch(
   guesses: SpecificationGuess[],
   field: keyof SpecificationGuess['matches'],
   revealedClue?: RevealedClue | null
 ): CellMatch {
-  // If a hint was revealed for this field, treat it as an exact match
-  if (revealedClue && revealedClue.field === field) {
+  if (revealedClue?.field === field) {
     return { type: 'exact', value: revealedClue.value };
   }
 
@@ -123,7 +134,6 @@ function getBestMatch(
     return { type: 'none', value: null };
   }
 
-  // Priority: exact > partial > none
   const exactMatch = guesses.find(g => g.matches[field].type === 'exact');
   if (exactMatch) {
     return exactMatch.matches[field];
@@ -134,30 +144,28 @@ function getBestMatch(
     return partialMatch.matches[field];
   }
 
-  // Return first guess's value even if it's 'none'
   return guesses[0].matches[field];
 }
 
-// Helper to render hint row
 function renderHintRow(revealedClue: RevealedClue) {
   return (
-    <tr key="hint-row" className="bg-slate-800 text-center">
-      <td className="border border-border px-3 py-2 text-xs w-32">
-        <div className="flex gap-1 text-white items-center justify-center">
-          <p className="font-semibold">Hint</p>
-          <MoveRight className="size-4" />
+    <tr key="hint-row" className="bg-muted/70 text-center">
+      <td className="border border-border/50 px-3 py-2 text-xs w-32 text-foreground font-bold">
+        <div className="flex gap-1 items-center justify-center">
+          <span>Hint</span>
+          <IconArrowRight className="size-4" />
         </div>
       </td>
       {COLUMN_HEADERS.slice(1).map((header) => (
         <td
           key={header.key}
           className={cn(
-            'border border-border px-3 py-2 text-xs text-white',
-            revealedClue.field === header.key && 'bg-sky-700 font-semibold'
+            'border border-border/50 px-3 py-2 text-xs',
+            revealedClue.field === header.key ? 'bg-primary/10 font-bold text-foreground' : 'text-muted-foreground'
           )}
         >
           {revealedClue.field === header.key
-            ? <CellValue value={revealedClue.value} />
+            ? <CellValueDisplay value={revealedClue.value} />
             : '???'}
         </td>
       ))}
@@ -165,42 +173,106 @@ function renderHintRow(revealedClue: RevealedClue) {
   );
 }
 
-// Helper to determine arrow direction for release year
 function getYearArrow(guessYear: string | null, targetYear: string | null): ReactNode {
   if (!guessYear || !targetYear) return null;
 
-  const guessYearNum = parseInt(guessYear, 10);
-  const targetYearNum = parseInt(targetYear, 10);
+  const guessYearNum = Number.parseInt(guessYear, 10);
+  const targetYearNum = Number.parseInt(targetYear, 10);
 
-  if (isNaN(guessYearNum) || isNaN(targetYearNum)) return null;
+  if (Number.isNaN(guessYearNum) || Number.isNaN(targetYearNum)) return null;
 
   if (guessYearNum < targetYearNum) {
-    return <MoveUp className="w-16 h-32 text-white" strokeWidth={2} />;
+    return <IconArrowUp className="size-4 text-white/50" />;
   }
   if (guessYearNum > targetYearNum) {
-    return <MoveDown className="w-16 h-32 text-white" strokeWidth={2} />;
+    return <IconArrowDown className="size-4 text-white/50" />;
   }
-  return null; // Equal, no arrow
+  return null;
 }
 
-export default function SpecificationsGrid({
-  guesses,
-  revealedClue,
-  targetGame,
-  showAnswerOnly = false,
-  className
-}: SpecificationsGridProps) {
-  // Reverse guesses to show newest first
-  const reversedGuesses = [...guesses].reverse();
+function ImageCell({ imageUrl, name }: Readonly<{ imageUrl: string | null; name: string }>) {
+  return (
+    <td className="border border-border/50 p-0 w-32">
+      <div className="relative w-32 h-44 bg-muted/20">
+        {imageUrl ? (
+          <>
+            <Image
+              src={imageUrl}
+              alt={name}
+              className="w-full h-full object-cover"
+              fill
+              sizes="10vw"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-primary/90 px-2 py-1">
+              <p className="text-xs font-semibold text-primary-foreground truncate text-center">
+                {name}
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center">
+            <span className="text-xs text-muted-foreground">No image</span>
+            <div className="absolute bottom-0 left-0 right-0 bg-primary/90 px-2 py-1">
+              <p className="text-xs font-semibold text-primary-foreground truncate text-center">
+                {name}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </td>
+  );
+}
 
-  // Calculate where to insert the hint row (if revealed)
-  // If hint was revealed after N guesses, it should appear after the Nth guess from the end
-  const hintInsertIndex = revealedClue
-    ? guesses.length - revealedClue.revealedAtGuessCount
-    : -1;
+function ReleaseDateCell({
+  match,
+  targetYear,
+}: Readonly<{ match: CellMatch; targetYear: string | null }>) {
+  const arrow = getYearArrow(
+    typeof match.value === 'string' ? match.value : null,
+    targetYear
+  );
 
-  // Extract answer specs if showing answer only
-  const answerSpecs = targetGame ? {
+  return (
+    <td
+      className={cn(
+        'border border-border/50 px-3 py-2 text-xs relative text-center',
+        getCellColor(match.type, hasData(match.value))
+      )}
+    >
+      <div className="flex flex-col items-center justify-center gap-1">
+        <CellValueDisplay value={match.value} />
+        {arrow}
+      </div>
+    </td>
+  );
+}
+
+function MatchCell({ match }: Readonly<{ match: CellMatch }>) {
+  return (
+    <td
+      className={cn(
+        'border border-border/50 px-3 py-2 text-xs text-center wrap-break-word',
+        getCellColor(match.type, hasData(match.value))
+      )}
+    >
+      <CellValueDisplay value={match.value} />
+    </td>
+  );
+}
+
+function AnswerCell({ value }: Readonly<{ value: string | string[] | null }>) {
+  return (
+    <td className="border border-border/50 px-3 py-2 text-xs text-foreground bg-muted/70 text-center wrap-break-word">
+      <CellValueDisplay value={value} />
+    </td>
+  );
+}
+
+function getAnswerSpecs(targetGame?: Game | null) {
+  if (!targetGame) return null;
+
+  return {
     platforms: extractArray(targetGame.platforms),
     genres: extractArray(targetGame.genres),
     themes: extractArray(targetGame.themes),
@@ -209,10 +281,17 @@ export default function SpecificationsGrid({
     gameEngines: extractArray(targetGame.game_engines),
     publisher: extractPublisher(targetGame.involved_companies),
     perspective: extractArray(targetGame.player_perspectives),
-  } : null;
+  };
+}
 
-  // Calculate best matches for summary row (show if there are guesses OR a hint was revealed)
-  const bestMatches = !showAnswerOnly && (guesses.length > 0 || revealedClue) ? {
+function getBestMatches(
+  guesses: SpecificationGuess[],
+  revealedClue?: RevealedClue | null,
+  showAnswerOnly?: boolean
+) {
+  if (showAnswerOnly) return null;
+
+  return {
     platforms: getBestMatch(guesses, 'platforms', revealedClue),
     genres: getBestMatch(guesses, 'genres', revealedClue),
     themes: getBestMatch(guesses, 'themes', revealedClue),
@@ -221,314 +300,148 @@ export default function SpecificationsGrid({
     gameEngines: getBestMatch(guesses, 'gameEngines', revealedClue),
     publisher: getBestMatch(guesses, 'publisher', revealedClue),
     perspective: getBestMatch(guesses, 'perspective', revealedClue),
-  } : null;
+  };
+}
+
+function SummaryRow({
+  bestMatches,
+  targetYear,
+}: Readonly<{
+  bestMatches: Record<MatchKey, CellMatch>;
+  targetYear: string | null;
+}>) {
+  return (
+    <tr>
+      <th className="border border-border/50 bg-secondary px-3 py-2 text-sm font-semibold text-white text-center w-32">
+        Summary
+      </th>
+      {MATCH_COLUMNS.map((column) =>
+        column.isReleaseDate ? (
+          <ReleaseDateCell
+            key={column.key}
+            match={bestMatches[column.key]}
+            targetYear={targetYear}
+          />
+        ) : (
+          <MatchCell key={column.key} match={bestMatches[column.key]} />
+        )
+      )}
+    </tr>
+  );
+}
+
+function HeaderRow() {
+  return (
+    <tr className="bg-slate-700">
+      {COLUMN_HEADERS.map((header) => (
+        <th
+          key={header.key}
+          className={cn(
+            'border border-border/50 px-3 py-2 text-sm font-semibold text-slate-100',
+            'text-center min-w-30'
+          )}
+        >
+          {header.label}
+        </th>
+      ))}
+    </tr>
+  );
+}
+
+function AnswerRow({
+  answerSpecs,
+  targetGame,
+}: Readonly<{
+  answerSpecs: NonNullable<ReturnType<typeof getAnswerSpecs>>;
+  targetGame: Game;
+}>) {
+  return (
+    <tr>
+      <ImageCell imageUrl={targetGame.imageUrl || null} name={targetGame.name} />
+      <AnswerCell value={answerSpecs.platforms.length > 0 ? answerSpecs.platforms : null} />
+      <AnswerCell value={answerSpecs.genres.length > 0 ? answerSpecs.genres : null} />
+      <AnswerCell value={answerSpecs.themes.length > 0 ? answerSpecs.themes : null} />
+      <AnswerCell value={answerSpecs.releaseDate} />
+      <AnswerCell value={answerSpecs.gameModes.length > 0 ? answerSpecs.gameModes : null} />
+      <AnswerCell value={answerSpecs.gameEngines.length > 0 ? answerSpecs.gameEngines : null} />
+      <AnswerCell value={answerSpecs.publisher} />
+      <AnswerCell value={answerSpecs.perspective.length > 0 ? answerSpecs.perspective : null} />
+    </tr>
+  );
+}
+
+function GuessRows({
+  guesses,
+  revealedClue,
+  hintInsertIndex,
+  targetYear,
+}: Readonly<{
+  guesses: SpecificationGuess[];
+  revealedClue?: RevealedClue | null;
+  hintInsertIndex: number;
+  targetYear: string | null;
+}>) {
+  return (
+    <>
+      {guesses.map((guess, index) => (
+        <Fragment key={`${guess.gameId}-${index}`}>
+          {revealedClue && index === hintInsertIndex && renderHintRow(revealedClue)}
+          <tr>
+            <ImageCell imageUrl={guess.imageUrl} name={guess.gameName} />
+            {MATCH_COLUMNS.map((column) =>
+              column.isReleaseDate ? (
+                <ReleaseDateCell
+                  key={column.key}
+                  match={guess.matches[column.key]}
+                  targetYear={targetYear}
+                />
+              ) : (
+                <MatchCell key={column.key} match={guess.matches[column.key]} />
+              )
+            )}
+          </tr>
+        </Fragment>
+      ))}
+      {revealedClue && hintInsertIndex === guesses.length && renderHintRow(revealedClue)}
+    </>
+  );
+}
+
+export default function SpecificationsGrid({
+  guesses,
+  revealedClue,
+  targetGame,
+  showAnswerOnly = false,
+  className
+}: Readonly<SpecificationsGridProps>) {
+  const reversedGuesses = [...guesses].reverse();
+  const hintInsertIndex = revealedClue
+    ? guesses.length - revealedClue.revealedAtGuessCount
+    : -1;
+
+  const answerSpecs = getAnswerSpecs(targetGame);
+  const bestMatches = getBestMatches(guesses, revealedClue, showAnswerOnly);
+  const showHeaders = guesses.length > 0 || showAnswerOnly || bestMatches;
 
   return (
-    <div className={cn('overflow-x-auto w-full', className)}>
+    <div className={cn('overflow-x-auto w-full border border-border/50 bg-card/5', className)}>
       <table className="w-full border-collapse min-w-max">
         <thead>
           {bestMatches && (
-            <tr>
-              <th className="border border-border bg-slate-700 px-3 py-2 text-sm font-semibold text-white text-center w-32">
-                Summary
-              </th>
-              <th
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(bestMatches.platforms.type, hasData(bestMatches.platforms.value))
-                )}
-              >
-                <CellValue value={bestMatches.platforms.value} />
-              </th>
-              <th
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(bestMatches.genres.type, hasData(bestMatches.genres.value))
-                )}
-              >
-                <CellValue value={bestMatches.genres.value} />
-              </th>
-              <th
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(bestMatches.themes.type, hasData(bestMatches.themes.value))
-                )}
-              >
-                <CellValue value={bestMatches.themes.value} />
-              </th>
-              <th
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white relative text-center',
-                  getCellColor(bestMatches.releaseDate.type, hasData(bestMatches.releaseDate.value))
-                )}
-              >
-                {(() => {
-                  const arrow = getYearArrow(
-                    typeof bestMatches.releaseDate.value === 'string' ? bestMatches.releaseDate.value : null,
-                    answerSpecs?.releaseDate || null
-                  );
-                  return (
-                    <>
-                      {arrow && (
-                        <div className="absolute inset-0 flex items-center justify-center opacity-40">
-                          {arrow}
-                        </div>
-                      )}
-                      <span className="relative z-10">
-                        <CellValue value={bestMatches.releaseDate.value} />
-                      </span>
-                    </>
-                  );
-                })()}
-              </th>
-              <th
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(bestMatches.gameModes.type, hasData(bestMatches.gameModes.value))
-                )}
-              >
-                <CellValue value={bestMatches.gameModes.value} />
-              </th>
-              <th
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(bestMatches.gameEngines.type, hasData(bestMatches.gameEngines.value))
-                )}
-              >
-                <CellValue value={bestMatches.gameEngines.value} />
-              </th>
-              <th
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(bestMatches.publisher.type, hasData(bestMatches.publisher.value))
-                )}
-              >
-                <CellValue value={bestMatches.publisher.value} />
-              </th>
-              <th
-                className={cn(
-                  'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                  getCellColor(bestMatches.perspective.type, hasData(bestMatches.perspective.value))
-                )}
-              >
-                <CellValue value={bestMatches.perspective.value} />
-              </th>
-            </tr>
+            <SummaryRow bestMatches={bestMatches} targetYear={answerSpecs?.releaseDate || null} />
           )}
-
-          {(guesses.length > 0 || showAnswerOnly) && (
-            <tr>
-              {COLUMN_HEADERS.map((header) => (
-                <th
-                  key={header.key}
-                  className={cn(
-                    'border border-border bg-muted px-3 py-2 text-sm font-semibold',
-                    'text-center min-w-[120px]'
-                  )}
-                >
-                  {header.label}
-                </th>
-              ))}
-            </tr>
-          )}
+          {showHeaders && <HeaderRow />}
         </thead>
         <tbody>
           {showAnswerOnly && answerSpecs && targetGame ? (
-            <tr>
-              <td className="border border-border p-0 w-32">
-                <div className="relative w-32 h-44">
-                  {targetGame.imageUrl ? (
-                    <>
-                      <Image
-                        src={targetGame.imageUrl}
-                        alt={targetGame.name}
-                        className="w-full h-full object-cover"
-                        width={128}
-                        height={176}
-                        sizes="100vw"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-blue-600 px-2 py-1">
-                        <p className="text-xs font-semibold text-white truncate text-center">
-                          {targetGame.name}
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="w-full h-full bg-muted flex flex-col items-center justify-center">
-                      <span className="text-xs text-muted-foreground">No image</span>
-                      <div className="absolute bottom-0 left-0 right-0 bg-blue-600 px-2 py-1">
-                        <p className="text-xs font-semibold text-white truncate text-center">
-                          {targetGame.name}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </td>
-
-              <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
-                <CellValue value={answerSpecs.platforms.length > 0 ? answerSpecs.platforms : null} />
-              </td>
-
-              <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
-                <CellValue value={answerSpecs.genres.length > 0 ? answerSpecs.genres : null} />
-              </td>
-
-              <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
-                <CellValue value={answerSpecs.themes.length > 0 ? answerSpecs.themes : null} />
-              </td>
-
-              <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
-                <CellValue value={answerSpecs.releaseDate} />
-              </td>
-
-              <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
-                <CellValue value={answerSpecs.gameModes.length > 0 ? answerSpecs.gameModes : null} />
-              </td>
-
-              <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
-                <CellValue value={answerSpecs.gameEngines.length > 0 ? answerSpecs.gameEngines : null} />
-              </td>
-
-              <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
-                <CellValue value={answerSpecs.publisher} />
-              </td>
-
-              <td className="border border-border px-3 py-2 text-xs text-white bg-slate-700 text-center wrap-break-word">
-                <CellValue value={answerSpecs.perspective.length > 0 ? answerSpecs.perspective : null} />
-              </td>
-            </tr>
+            <AnswerRow answerSpecs={answerSpecs} targetGame={targetGame} />
           ) : (
-            <>
-              {reversedGuesses.map((guess, index) => (
-                <Fragment key={`${guess.gameId}-${index}`}>
-                  {revealedClue && index === hintInsertIndex && renderHintRow(revealedClue)}
-                  <tr>
-                    <td className="border border-border p-0 w-32">
-                      <div className="relative w-32 h-44">
-                        {guess.imageUrl ? (
-                          <>
-                            <Image
-                              src={guess.imageUrl}
-                              alt={guess.gameName}
-                              className="w-full h-full object-cover"
-                              width={128}
-                              height={176}
-                              sizes="100vw"
-                            />
-                            <div className="absolute bottom-0 left-0 right-0 bg-blue-600 px-2 py-1">
-                              <p className="text-xs font-semibold text-white truncate text-center">
-                                {guess.gameName}
-                              </p>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="w-full h-full bg-muted flex flex-col items-center justify-center">
-                            <span className="text-xs text-muted-foreground">No image</span>
-                            <div className="absolute bottom-0 left-0 right-0 bg-blue-600 px-2 py-1">
-                              <p className="text-xs font-semibold text-white truncate text-center">
-                                {guess.gameName}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-
-                    <td
-                      className={cn(
-                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                        getCellColor(guess.matches.platforms.type, hasData(guess.matches.platforms.value))
-                      )}
-                    >
-                      <CellValue value={guess.matches.platforms.value} />
-                    </td>
-
-                    <td
-                      className={cn(
-                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                        getCellColor(guess.matches.genres.type, hasData(guess.matches.genres.value))
-                      )}
-                    >
-                      <CellValue value={guess.matches.genres.value} />
-                    </td>
-
-                    <td
-                      className={cn(
-                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                        getCellColor(guess.matches.themes.type, hasData(guess.matches.themes.value))
-                      )}
-                    >
-                      <CellValue value={guess.matches.themes.value} />
-                    </td>
-
-                    <td
-                      className={cn(
-                        'border border-border px-3 py-2 text-xs text-white relative text-center',
-                        getCellColor(guess.matches.releaseDate.type, hasData(guess.matches.releaseDate.value))
-                      )}
-                    >
-                      {(() => {
-                        const arrow = getYearArrow(
-                          typeof guess.matches.releaseDate.value === 'string' ? guess.matches.releaseDate.value : null,
-                          answerSpecs?.releaseDate || null
-                        );
-                        return (
-                          <>
-                            {arrow && (
-                              <div className="absolute inset-0 flex items-center justify-center opacity-40">
-                                {arrow}
-                              </div>
-                            )}
-                            <span className="relative z-10">
-                              <CellValue value={guess.matches.releaseDate.value} />
-                            </span>
-                          </>
-                        );
-                      })()}
-                    </td>
-
-                    <td
-                      className={cn(
-                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                        getCellColor(guess.matches.gameModes.type, hasData(guess.matches.gameModes.value))
-                      )}
-                    >
-                      <CellValue value={guess.matches.gameModes.value} />
-                    </td>
-
-                    <td
-                      className={cn(
-                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                        getCellColor(guess.matches.gameEngines.type, hasData(guess.matches.gameEngines.value))
-                      )}
-                    >
-                      <CellValue value={guess.matches.gameEngines.value} />
-                    </td>
-
-                    <td
-                      className={cn(
-                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                        getCellColor(guess.matches.publisher.type, hasData(guess.matches.publisher.value))
-                      )}
-                    >
-                      <CellValue value={guess.matches.publisher.value} />
-                    </td>
-
-                    <td
-                      className={cn(
-                        'border border-border px-3 py-2 text-xs text-white text-center wrap-break-word',
-                        getCellColor(guess.matches.perspective.type, hasData(guess.matches.perspective.value))
-                      )}
-                    >
-                      <CellValue value={guess.matches.perspective.value} />
-                    </td>
-                  </tr>
-                </Fragment>
-              ))}
-
-              {revealedClue && hintInsertIndex === reversedGuesses.length && renderHintRow(revealedClue)}
-            </>
+            <GuessRows
+              guesses={reversedGuesses}
+              revealedClue={revealedClue}
+              hintInsertIndex={hintInsertIndex}
+              targetYear={answerSpecs?.releaseDate || null}
+            />
           )}
         </tbody>
       </table>

@@ -1,5 +1,5 @@
-import Timeline from "@/views/timeline";
+import Timeline from '@/views/timeline';
 
 export default function TimelinePage() {
-  return <Timeline />
+  return <Timeline />;
 }

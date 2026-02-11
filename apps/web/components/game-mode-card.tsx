@@ -1,67 +1,55 @@
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+import { type TablerIcon } from "@tabler/icons-react";
+import { cn } from "@/lib/utils";
 
 interface GameModeCardProps {
   href?: string;
   title: string;
   description: string;
   difficulty: "Easy" | "Medium" | "Hard";
-  icon: LucideIcon;
+  icon: TablerIcon;
   gradient: string;
-  pattern?: "diagonal" | "diagonal-reverse";
   disabled?: boolean;
 }
 
-export default function GameModeCard({
+export function GameModeCard({
   href,
   title,
   description,
   difficulty,
   icon: Icon,
   gradient,
-  pattern = "diagonal",
   disabled = false,
-}: GameModeCardProps) {
-  const patternStyle = {
-    backgroundImage: `repeating-linear-gradient(
-      ${pattern === "diagonal" ? "45deg" : "-45deg"},
-      transparent,
-      transparent 10px,
-      rgba(0,0,0,0.1) 10px,
-      rgba(0,0,0,0.1) 20px
-    )`,
-  };
+}: Readonly<GameModeCardProps>) {
+  const difficultyLabel = difficulty.toUpperCase();
 
   const cardContent = (
-    <Card
-      className={`relative overflow-hidden border-2 border-slate-200 transition-all h-72 w-full ${
-        disabled
-          ? "opacity-75 cursor-not-allowed"
-          : "hover:border-slate-300 hover:shadow-xl cursor-pointer"
-      }`}
+    <div
+      className={cn(
+        "group relative flex h-44 w-full flex-col justify-end overflow-hidden rounded-xl p-5 text-left transition-all duration-300",
+        "hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]",
+        disabled && "cursor-not-allowed opacity-70"
+      )}
+      style={{ background: `var(${gradient})` }}
     >
-      <div className={`absolute inset-0 ${gradient}`}>
-        <div className="absolute inset-0 opacity-20" style={patternStyle} />
-      </div>
-      <CardContent className="relative h-full flex flex-col justify-between p-6">
-        <div className="flex justify-between items-start">
-          <div className="flex items-center bg-white/90 px-3 py-2 rounded-full">
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              {difficulty}
-            </span>
-          </div>
-          <div className="bg-white/20 backdrop-blur-sm p-2 rounded-full">
-            <Icon className="size-4 text-white" />
-          </div>
-        </div>
+      <div
+        className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{ background: "var(--gradient-card-overlay)" }}
+      />
 
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2">{title}</h2>
-          <p className="text-white/90 text-sm leading-relaxed">{description}</p>
-        </div>
-      </CardContent>
-    </Card>
+      <span className="absolute left-4 top-4 rounded-full bg-card/90 px-3 py-1 text-xs font-semibold tracking-wide text-foreground">
+        {difficultyLabel}
+      </span>
+
+      <div className="absolute right-4 top-4 rounded-lg bg-card/20 p-2 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
+        <Icon size={20} className="text-primary-foreground" />
+      </div>
+
+      <div className="relative z-10">
+        <h2 className="text-xl font-bold text-primary-foreground">{title}</h2>
+        <p className="mt-1 text-sm text-primary-foreground/80">{description}</p>
+      </div>
+    </div>
   );
 
   if (disabled || !href) {
@@ -69,10 +57,8 @@ export default function GameModeCard({
   }
 
   return (
-    <div className="w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] min-w-[280px] max-w-md">
-      <Link href={href} className="group w-full">
-        {cardContent}
-      </Link>
-    </div>
+    <Link href={href} className="block w-full">
+      {cardContent}
+    </Link>
   );
 }

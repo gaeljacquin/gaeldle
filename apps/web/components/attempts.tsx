@@ -1,31 +1,36 @@
-import Image from 'next/image';
-import { appInfo } from '@/lib/app-info';
-import { cn } from '@/lib/utils';
-
 interface AttemptsProps {
   maxAttempts: number;
   attemptsLeft: number;
-  className?: string
+  className?: string;
+  variant?: 'primary' | 'neutral';
 }
 
-export default function Attempts(props: AttemptsProps) {
+export default function Attempts({
+  maxAttempts,
+  attemptsLeft,
+  className,
+  variant = 'primary',
+}: Readonly<AttemptsProps>) {
+  const attemptsUsed = maxAttempts - attemptsLeft;
+  const emptyClass =
+    variant === 'neutral'
+      ? 'border-muted-foreground bg-transparent'
+      : 'border-primary bg-primary';
+  const usedClass = 'border-foreground/20 bg-foreground/10';
+
   return (
-    <div className="flex items-center justify-center gap-4 mt-4">
-      {[...Array(props.maxAttempts).keys()].map((i) => (
-        <Image
-          key={`attempt-${i + 1}`}
-          src="/logo.png"
-          alt={`${appInfo.title} Logo`}
-          width={32}
-          height={32}
-          className={cn(
-            "size-3 sm:size-4 md:size-6",
-            props.attemptsLeft <= i && "grayscale",
-            props.className,
-          )}
-          sizes='100vw'
-        />
-      ))}
+    <div className={`flex items-center justify-center gap-2 ${className ?? ''}`}>
+      {Array.from({ length: maxAttempts }).map((_, index) => {
+        const isUsed = index >= maxAttempts - attemptsUsed;
+        return (
+          <div
+            key={`attempt-${index + 1}`}
+            className={`h-3 w-3 rounded-none border transition-colors ${
+              isUsed ? usedClass : emptyClass
+            }`}
+          />
+        );
+      })}
     </div>
-  )
+  );
 }

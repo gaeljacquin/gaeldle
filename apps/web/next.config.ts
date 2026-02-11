@@ -12,11 +12,6 @@ const nextConfig: NextConfig = {
         hostname: 'images.igdb.com',
         pathname: '**',
       },
-      {
-        protocol: 'https',
-        hostname: 'kqujhdaltqildqytisgc.supabase.co',
-        pathname: '**',
-      },
     ],
   },
 };

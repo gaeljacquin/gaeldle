@@ -1,37 +1,40 @@
 import type { Metadata } from "next";
-import { Providers } from "@/components/providers";
+import { ReactNode, Suspense } from "react";
+import { Figtree, JetBrains_Mono } from "next/font/google";
+import { LayoutWrapper } from "@/components/layout-wrapper";
+import Providers from "./providers";
+import Loading from "./loading";
 import "./globals.css";
-import { daFont1, daFont2, daFont3 } from "@/lib/fonts";
 import { appInfo } from "@/lib/app-info";
-import { ReactNode } from "react";
-import Footer from "@/components/footer";
-// import TopNav from "@/components/top-nav";
+
+const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: appInfo.title,
   description: appInfo.description,
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en">
+    <html lang="en" className={figtree.variable} suppressHydrationWarning>
       <body
-        className={`${daFont1.variable} ${daFont2.variable} ${daFont3.variable}`}
+        className={`${jetbrainsMono.variable} font-sans antialiased`}
       >
         <Providers>
-          <div className="flex h-screen overflow-hidden">
-            <main className="flex flex-1 flex-col overflow-y-auto" style={{ backgroundColor: "#f5f5f0", scrollbarGutter: "stable" }}>
-              {/* <TopNav /> */}
-              <div className="flex-1">
-                {children}
-              </div>
-              <Footer />
-            </main>
-          </div>
+          <Suspense fallback={<Loading />}>
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
+          </Suspense>
         </Providers>
       </body>
     </html>

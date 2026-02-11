@@ -1,6 +1,8 @@
+'use client';
+
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 
 interface SpecificationsGameOverProps {
   isCorrect: boolean;
@@ -17,19 +19,19 @@ export default function SpecificationsGameOver({
   onPlayAgain,
   onToggleTable,
   showingAnswer = true,
-}: SpecificationsGameOverProps) {
+}: Readonly<SpecificationsGameOverProps>) {
   return (
-    <div className="space-y-4 p-6 bg-muted/50 rounded-lg border border-border">
-      <div className="flex flex-col items-center gap-4">
+    <div className="space-y-6 p-8 border border-border bg-muted/50">
+      <div className="flex flex-col items-center gap-6">
         {targetGame?.imageUrl && (
-          <div className="relative">
+          <div className="relative border-2 border-border shadow-lg">
             <Image
               src={targetGame.imageUrl}
               alt={targetGame.name}
-              className="w-32 h-44 object-cover rounded-lg border-2 border-border shadow-lg"
+              className="w-32 h-44 object-cover"
               width={128}
               height={176}
-              sizes="100vw"
+              sizes="10vw"
             />
           </div>
         )}
@@ -43,7 +45,7 @@ export default function SpecificationsGameOver({
           </div>
         ) : (
           <div className="space-y-2 text-center">
-            <h2 className="text-3xl font-bold text-red-600">Game Over!</h2>
+            <h2 className="text-3xl font-bold text-destructive">Game Over!</h2>
             <p className="text-md font-semibold">
               The game was: <span className="text-primary">{targetGame?.name}</span>
             </p>
@@ -51,10 +53,10 @@ export default function SpecificationsGameOver({
         )}
       </div>
 
-      <div className="flex gap-3 justify-center">
+      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
         <Button
           onClick={onPlayAgain}
-          className="cursor-pointer"
+          className="cursor-pointer font-bold px-8"
           size="lg"
         >
           {isCorrect ? 'Keep Playing' : 'Play Again'}
@@ -62,7 +64,7 @@ export default function SpecificationsGameOver({
         <Button
           onClick={onToggleTable}
           variant="outline"
-          className="cursor-pointer"
+          className="cursor-pointer font-bold px-8"
           size="lg"
         >
           {showingAnswer ? 'Show My Guesses' : 'Show Answer'}

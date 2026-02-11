@@ -1,46 +1,51 @@
 'use client';
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogCancel,
+  AlertDialogFooter,
+} from '@/components/ui/alert-dialog';
 import HoldToRevealButton from '@/components/hold-to-reveal-button';
 
-interface ClueConfirmationModalProps {
+interface HintConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onReveal: () => void;
 }
 
-export default function HintConfirmationModal({ isOpen, onClose, onReveal }: ClueConfirmationModalProps) {
+export default function HintConfirmationModal({ isOpen, onClose, onReveal }: Readonly<HintConfirmationModalProps>) {
   const handleReveal = () => {
     onReveal();
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Reveal Hint</DialogTitle>
-          <DialogDescription>
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Reveal Hint</AlertDialogTitle>
+          <AlertDialogDescription>
             Are you sure you want to reveal a hint? This will cost 1 attempt.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex gap-3 mt-4">
-          <Button
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex gap-3 mt-4">
+          <AlertDialogCancel
             onClick={onClose}
-            variant="outline"
-            className="flex-1 cursor-pointer"
-            size="lg"
+            className="flex-1 cursor-pointer font-bold h-10"
           >
             Cancel
-          </Button>
+          </AlertDialogCancel>
           <HoldToRevealButton
             onReveal={handleReveal}
             disabled={false}
             className="flex-1"
           />
-        </div>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

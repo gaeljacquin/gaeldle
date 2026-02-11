@@ -1,8 +1,8 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { IconX } from '@tabler/icons-react';
 import Image from 'next/image';
-import type { Game, GameModeSlug } from '@/lib/types/game';
+import type { Game, GameModeSlug } from '@gaeldle/types/game';
 import { cn } from '@/lib/utils';
 
 interface SelectedGameDisplayProps {
@@ -19,46 +19,46 @@ export default function SelectedGameDisplay({
   showSkeleton = false,
   className,
   mode = 'cover-art',
-}: SelectedGameDisplayProps) {
+}: Readonly<SelectedGameDisplayProps>) {
   if (showSkeleton || !selectedGame) {
     return (
-      <div className={cn('flex items-center gap-2 p-2 bg-slate-600/50 rounded border border-border', className)}>
-        <div className="w-12 h-16 bg-slate-100 rounded animate-pulse" />
+      <div className={cn('flex items-center gap-3 border bg-card/80 p-3', className)}>
+        <div className="h-14 w-10 bg-muted animate-pulse" />
         <div className="flex-1 min-w-0 space-y-2">
-          <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
-          <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+          <div className="h-4 bg-muted animate-pulse w-3/4" />
+          <div className="h-3 bg-muted animate-pulse w-1/2" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className={cn('relative flex items-center gap-2 p-2 bg-slate-700 rounded border border-slate-600 group', className)}>
+    <div className={cn('group relative flex items-center gap-3 border bg-card/90 p-3', className)}>
       {selectedGame.imageUrl && mode !== 'cover-art' ? (
         <Image
           src={selectedGame.imageUrl}
           alt={selectedGame.name}
-          className="w-12 h-16 object-cover rounded"
+          className="h-14 w-10 object-cover border"
           width={48}
           height={64}
-          sizes="100vw"
+          sizes="10vw"
         />
       ) : (
-        <div className="w-12 h-16 bg-slate-600 rounded flex items-center justify-center">
-          <span className="text-xs text-slate-300">?</span>
+        <div className="h-14 w-10 bg-muted flex items-center justify-center border">
+          <span className="text-xs text-muted-foreground font-mono">?</span>
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium truncate text-white">{selectedGame.name}</p>
-        <p className="text-xs text-slate-300">Selected</p>
+        <p className="text-sm font-bold truncate text-foreground uppercase tracking-tight">{selectedGame.name}</p>
+        <p className="text-xs text-muted-foreground uppercase tracking-widest">Selected</p>
       </div>
       {onClearSelection && (
         <button
           onClick={onClearSelection}
-          className="absolute top-2 right-2 p-1 bg-slate-600 hover:bg-slate-500 rounded-full transition-all cursor-pointer opacity-0 group-hover:opacity-100"
+          className="absolute top-1 right-1 p-1 text-muted-foreground transition-all opacity-0 group-hover:opacity-100 hover:text-foreground cursor-pointer"
           aria-label="Clear selection"
         >
-          <X className="size-3 text-white" />
+          <IconX className="size-3" />
         </button>
       )}
     </div>

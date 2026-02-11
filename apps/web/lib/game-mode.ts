@@ -1,22 +1,20 @@
 import {
-  Image,
-  Calendar,
-  CalendarRange,
-  Scroll,
-  Wallpaper,
-  Gpu,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { GameModeSlug } from "@/lib/types/game";
+  IconPhoto,
+  IconCalendar,
+  IconCalendarDue,
+  IconNotes,
+  IconWallpaper,
+  type TablerIcon,
+} from "@tabler/icons-react";
+import type { GameModeSlug } from "../../../types/game";
 
 export interface GameMode {
   id: GameModeSlug;
   title: string;
   description: string;
   difficulty: "Easy" | "Medium" | "Hard";
-  icon: LucideIcon;
+  icon: TablerIcon;
   gradient: string;
-  pattern: "diagonal" | "diagonal-reverse";
   href: string;
 }
 
@@ -26,9 +24,8 @@ export const gameModes: GameMode[] = [
     title: "Cover Art",
     description: "Identify the game from their cover art.",
     difficulty: "Easy",
-    icon: Image,
-    gradient: "bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-900",
-    pattern: "diagonal",
+    icon: IconPhoto,
+    gradient: "--gradient-easy",
     href: "/cover-art",
   },
   {
@@ -36,29 +33,17 @@ export const gameModes: GameMode[] = [
     title: "Artwork",
     description: "Guess the game from their artwork.",
     difficulty: "Medium",
-    icon: Wallpaper,
-    gradient: "bg-gradient-to-br from-purple-600 via-purple-700 to-violet-900",
-    pattern: "diagonal-reverse",
+    icon: IconWallpaper,
+    gradient: "--gradient-medium-1",
     href: "/artwork",
-  },
-  {
-    id: "image-ai",
-    title: "Image AI",
-    description: "Guess the game from an AI-generated image.",
-    difficulty: "Medium",
-    icon: Gpu,
-    gradient: "bg-gradient-to-br from-red-600 via-red-700 to-rose-900",
-    pattern: "diagonal",
-    href: "/image-ai",
   },
   {
     id: "timeline",
     title: "Timeline",
     description: "Arrange games in chronological order.",
     difficulty: "Medium",
-    icon: Calendar,
-    gradient: "bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700",
-    pattern: "diagonal",
+    icon: IconCalendar,
+    gradient: "--gradient-medium-3",
     href: "/timeline",
   },
   {
@@ -66,9 +51,8 @@ export const gameModes: GameMode[] = [
     title: "Timeline 2",
     description: "Place each game in chronological order.",
     difficulty: "Hard",
-    icon: CalendarRange,
-    gradient: "bg-gradient-to-br from-pink-600 via-pink-700 to-fuchsia-900",
-    pattern: "diagonal",
+    icon: IconCalendarDue,
+    gradient: "--gradient-hard-1",
     href: "/timeline-2",
   },
   {
@@ -76,9 +60,8 @@ export const gameModes: GameMode[] = [
     title: "Specifications",
     description: "Deduce the game from their specifications.",
     difficulty: "Hard",
-    icon: Scroll,
-    gradient: "bg-gradient-to-br from-sky-600 via-sky-700 to-lime-900",
-    pattern: "diagonal-reverse",
+    icon: IconNotes,
+    gradient: "--gradient-hard-2",
     href: "/specifications",
   },
 ];

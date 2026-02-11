@@ -8,19 +8,18 @@ import GameSearch from '@/components/game-search';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import GuessHistoryInline from '@/components/guess-history-inline';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
-import Link from 'next/link';
-import { MoveLeft } from 'lucide-react';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
-import { CoverArtModeSlug } from '@/lib/types/game';
+import type { CoverArtModeSlug } from '@gaeldle/types/game';
+import BackToMainMenu from '@/components/back-to-main-menu';
 
 interface GameListPlusImageProps {
   gameModeSlug: CoverArtModeSlug;
 }
 
-export default function GameListPlusImage(props: GameListPlusImageProps) {
+export default function GameListPlusImage(props: Readonly<GameListPlusImageProps>) {
   const gameMode = getGameModeBySlug(props.gameModeSlug);
   const [searchKey, setSearchKey] = useState(0);
 
@@ -50,6 +49,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
 
   const selectedGame = allGames.find(g => g.id === selectedGameId) || null;
   const wrongGuessIds = wrongGuesses.map(g => g.id);
+  const clarity = Math.min(100, Math.round(((MAX_ATTEMPTS - attemptsLeft) / MAX_ATTEMPTS) * 100));
 
   const imageDisplayComp = () => {
     let imageDisplayed;
@@ -62,7 +62,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
             pixelSize={currentPixelSize}
             isGameOver={isGameOver}
             isLoading={isLoading}
-            className="h-[500px] border border-slate-200 rounded-lg"
+            className="h-full w-full"
           />
         break;
       case 'image-ai':
@@ -73,7 +73,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
             usePixelation={false}
             isGameOver={isGameOver}
             isLoading={isLoading}
-            className="h-[500px]"
+            className="h-full w-full"
             sourceImageUrl={targetGame?.aiImageUrl}
           />
         break;
@@ -85,7 +85,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
             usePixelation={true}
             isGameOver={isGameOver}
             isLoading={isLoading}
-            className="h-[500px]"
+            className="h-full w-full"
             sourceImageUrl={targetGame?.imageUrl}
           />
         break;
@@ -96,49 +96,55 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2">
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
         <p className="text-lg">Loading game...</p>
-        <p className="text-lg">Do not refresh or close the page</p>
+        <p className="text-muted-foreground">Stuck? Try refreshing the page 😅</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2">
-        <p className="text-lg">Error</p>
-        <p className="text-lg">{error}</p>
+      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
+        <p className="text-lg font-bold">Error</p>
+        <p className="text-muted-foreground">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto">
-      <Card className="relative">
-        <Link
-          href="/"
-          className="absolute top-4 left-4 flex items-center gap-1 hover:underline"
-        >
-          <MoveLeft className="size-4" />
-          <span className="text-sm">Main Menu</span>
-        </Link>
+    <div className="min-h-full bg-background text-foreground">
+      <div className="container mx-auto px-4 py-10">
+        <BackToMainMenu />
 
-        <CardHeader className="flex flex-col items-center justify-center text-center space-y-2 py-4">
-          <CardTitle className="text-4xl font-bold">
-            {gameMode?.title}
-          </CardTitle>
-          <CardDescription className="text-lg text-muted-foreground">
-            {gameMode?.description}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-6">
-            <div className="flex-1 flex flex-col">
-              {imageDisplayComp()}
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
+          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+        </div>
+
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="flex flex-col gap-4">
+              <Card className="p-0 border shadow-none bg-muted/20">
+                <div className="relative aspect-4/5 w-full">
+                  {imageDisplayComp()}
+                </div>
+              </Card>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground font-medium">Clarity</span>
+                  <span className="font-bold text-foreground">{clarity}%</span>
+                </div>
+                <div className="h-2 w-full bg-muted border overflow-hidden">
+                  <div className="h-full bg-primary transition-all duration-500" style={{ width: `${clarity}%` }} />
+                </div>
+              </div>
             </div>
 
-            <div className="flex-1 flex flex-col gap-4 h-[500px]">
-                <div className="flex gap-4">
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row items-stretch">
                   <div className="flex-1">
                     <GameSearch
                       key={searchKey}
@@ -151,63 +157,66 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                   <Button
                     onClick={handleSubmitWithClear}
                     disabled={selectedGameId === null || isGameOver}
-                    className="cursor-pointer"
+                    className="cursor-pointer h-10 font-bold"
                     size="lg"
                   >
                     Submit
                   </Button>
                 </div>
 
-              {!isGameOver && (
-                <div className="flex gap-2">
+                {!isGameOver && (
                   <SelectedGameDisplay
                     selectedGame={selectedGame}
                     onClearSelection={clearSelection}
                     showSkeleton={!selectedGame}
-                    className="flex-1"
+                    className="w-full bg-muted/10 border-dashed"
                     mode={props.gameModeSlug}
                   />
+                )}
+              </div>
+
+              <GuessHistoryInline guesses={wrongGuesses} className="max-h-60" />
+
+              <div className="flex flex-col items-center gap-4 border p-4">
+                 <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Attempts</p>
+                 <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
+              </div>
+
+              {isGameOver && (
+                <div className="border border-border bg-card/60 p-6 text-center animate-in fade-in zoom-in duration-300">
+                  {isCorrect ? (
+                    <div className="space-y-2">
+                      <p className="text-2xl font-bold text-green-600">Correct!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-2xl font-bold text-destructive">Game Over!</p>
+                      <p className="text-muted-foreground">
+                        The game was: <span className="font-bold text-foreground">{targetGame?.name}</span>
+                      </p>
+                    </div>
+                  )}
+                  <Button
+                    onClick={resetGame}
+                    className="mt-6 cursor-pointer font-bold"
+                    size="lg"
+                  >
+                    {isCorrect ? 'Keep Playing' : 'Play Again'}
+                  </Button>
                 </div>
               )}
 
-              <GuessHistoryInline guesses={wrongGuesses} className="flex-1 min-h-0" />
-
-              <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} />
+              <div className="border border-dashed p-4 text-center opacity-70 hover:opacity-100 transition-opacity">
+                <DevModeToggle
+                  targetGame={targetGame}
+                  attemptsLeft={attemptsLeft}
+                  maxAttempts={MAX_ATTEMPTS}
+                  onAdjustAttempts={adjustAttempts}
+                />
+              </div>
             </div>
           </div>
-
-          {isGameOver && (
-            <div className="mt-6 text-center">
-              {isCorrect ? (
-                <div className="space-y-2">
-                  <p className="text-2xl font-bold text-green-600">Correct!</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-2xl font-bold text-red-600">Game Over!</p>
-                  <p className="text-muted-foreground">
-                    The game was: <span className="font-semibold">{targetGame?.name}</span>
-                  </p>
-                </div>
-              )}
-              <Button
-                onClick={resetGame}
-                className="mt-4 cursor-pointer"
-                size="lg"
-              >
-                {isCorrect ? 'Keep Playing' : 'Play Again'}
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      <div className="flex items-center justify-center mt-4">
-        <DevModeToggle
-          targetGame={targetGame}
-          attemptsLeft={attemptsLeft}
-          maxAttempts={MAX_ATTEMPTS}
-          onAdjustAttempts={adjustAttempts}
-        />
+        </div>
       </div>
     </div>
   );

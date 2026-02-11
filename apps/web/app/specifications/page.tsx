@@ -1,5 +1,5 @@
-import Specifications from "@/views/specifications";
+import Specifications from '@/views/specifications';
 
 export default function SpecificationsPage() {
-  return <Specifications />
+  return <Specifications />;
 }

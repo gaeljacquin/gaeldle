@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { pixelateImage } from '@/lib/utils/pixelate';
 import { cn } from '@/lib/utils';
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 
 interface CoverDisplayProps {
   game: Game | null;
@@ -24,7 +24,7 @@ export default function CoverDisplay({
   isLoading = false,
   className,
   sourceImageUrl,
-}: CoverDisplayProps) {
+}: Readonly<CoverDisplayProps>) {
   const [pixelatedData, setPixelatedData] = useState<{url: string; sourceUrl: string} | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -61,11 +61,12 @@ export default function CoverDisplay({
     return (
       <div
         className={cn(
-          'flex items-center justify-center bg-muted rounded-lg',
+          'flex items-center justify-center bg-muted border',
           className
         )}
       >
-        <p className="text-muted-foreground">Loading game...</p>
+        <p className="text-sm text-muted-foreground">Loading game...</p>
+        <p className="text-muted-foreground">Stuck? Try refreshing the page 😅</p>
       </div>
     );
   }
@@ -83,11 +84,11 @@ export default function CoverDisplay({
     return (
       <div
         className={cn(
-          'flex items-center justify-center bg-muted rounded-lg',
+          'flex items-center justify-center bg-muted border',
           className
         )}
       >
-        <p className="text-muted-foreground">No cover available</p>
+        <p className="text-sm text-muted-foreground">No cover available</p>
       </div>
     );
   }
@@ -95,7 +96,7 @@ export default function CoverDisplay({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-lg bg-muted',
+        'relative overflow-hidden bg-muted border',
         className
       )}
     >
@@ -110,12 +111,12 @@ export default function CoverDisplay({
           alt={isGameOver ? game.name : 'Game cover'}
           className="object-contain"
           fill
-          sizes="10vw"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           priority
         />
       )}
       {isGameOver && (
-        <div className="absolute bottom-0 left-0 right-0 bg-background/80 p-2 text-center">
+        <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 text-center border-t">
           <p className="font-semibold">{game.name}</p>
         </div>
       )}

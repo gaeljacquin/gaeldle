@@ -1,9 +1,10 @@
-import type { Game } from '@/lib/types/game';
+import type { Game } from '@gaeldle/types/game';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8080';
+const API_GAMES = 'api/games';
 
 export async function getAllGames(mode?: string): Promise<Game[]> {
-  const endpoint = mode === 'artwork' ? `${API_BASE_URL}/api/game/artwork` : `${API_BASE_URL}/api/game`;
+  const endpoint = mode === 'artwork' ? `${API_BASE_URL}/${API_GAMES}/artwork` : `${API_BASE_URL}/${API_GAMES}`;
 
   const response = await fetch(endpoint, {
     method: 'GET',
@@ -25,8 +26,52 @@ export async function getAllGames(mode?: string): Promise<Game[]> {
   return data.data as Game[];
 }
 
+export interface PaginatedResponse<T> {
+  success: boolean;
+  data: T[];
+  meta: {
+    page: number;
+    pageSize: number;
+    total: number;
+  };
+}
+
+export async function getPaginatedGames(
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string
+): Promise<PaginatedResponse<Game>> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    pageSize: pageSize.toString(),
+  });
+
+  if (query && query.length >= 2) {
+    params.append('q', query);
+  }
+
+  const response = await fetch(`${API_BASE_URL}/${API_GAMES}?${params.toString()}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch games');
+  }
+
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to fetch games');
+  }
+
+  return data as PaginatedResponse<Game>;
+}
+
 export async function getRandomGame(excludeIds: number[] = [], mode?: string): Promise<Game> {
-  const response = await fetch(`${API_BASE_URL}/api/game/random`, {
+  const response = await fetch(`${API_BASE_URL}/${API_GAMES}/random`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -61,7 +106,7 @@ export async function searchGames(query: string, limit: number = 100, mode?: str
     params.append('mode', mode);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/game/search?${params.toString()}`, {
+  const response = await fetch(`${API_BASE_URL}/${API_GAMES}/search?${params.toString()}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

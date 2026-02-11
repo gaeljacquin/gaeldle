@@ -138,8 +138,10 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Nx
-.nx/cache
-.nx/workspace-data
+# Turborepo
+.turbo
 
 .DS_Store
+
+# Previous apps
+*/*-old

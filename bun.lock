@@ -78,6 +78,7 @@
         "@hookform/resolvers": "^5.2.2",
         "@orpc/client": "^1.13.4",
         "@orpc/contract": "^1.13.4",
+        "@orpc/openapi-client": "^1.13.5",
         "@orpc/react-query": "^1.13.4",
         "@stackframe/stack": "^2.8.65",
         "@tabler/icons-react": "^3.36.1",

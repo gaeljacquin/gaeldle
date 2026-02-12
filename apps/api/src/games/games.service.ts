@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  and,
   desc,
   eq,
   inArray,
@@ -36,7 +37,7 @@ export class GamesService {
       .select()
       .from(games)
       .where(
-        and(sql`artworks IS NOT NULL`, sql`jsonb_array_length(artworks) > 0`),
+        and(sql`artworks IS NOT NULL`, sql`json_array_length(artworks) > 0`),
       )
       .orderBy(desc(games.id));
   }
@@ -82,7 +83,7 @@ export class GamesService {
     if (mode === 'artwork') {
       conditions.push(
         sql`artworks IS NOT NULL`,
-        sql`jsonb_array_length(artworks) > 0`,
+        sql`json_array_length(artworks) > 0`,
       );
     }
 
@@ -106,7 +107,7 @@ export class GamesService {
     if (mode === 'artwork') {
       whereClause.push(
         sql`artworks IS NOT NULL`,
-        sql`jsonb_array_length(artworks) > 0`,
+        sql`json_array_length(artworks) > 0`,
       );
     }
 
@@ -196,16 +197,22 @@ export class GamesService {
   }
 
   private mapIgdbToGame(igdbGame: IgdbGame): InferInsertModel<typeof games> {
+    const formatUrl = (url?: string) => {
+      if (!url) return undefined;
+      const fullUrl = url.startsWith('//') ? `https:${url}` : url;
+      return fullUrl.replace('t_thumb', 't_720p');
+    };
+
     return {
       igdbId: igdbGame.id,
       name: igdbGame.name,
       summary: igdbGame.summary,
       storyline: igdbGame.storyline,
       firstReleaseDate: igdbGame.first_release_date,
-      imageUrl: igdbGame.cover?.url?.replace('t_thumb', 't_720p'),
+      imageUrl: formatUrl(igdbGame.cover?.url),
       artworks: igdbGame.artworks?.map((art) => ({
         ...art,
-        url: art.url?.replace('t_thumb', 't_720p'),
+        url: formatUrl(art.url),
       })),
       platforms: igdbGame.platforms?.map((p) => p.name),
       genres: igdbGame.genres?.map((g) => g.name),
@@ -233,9 +240,3 @@ export class GamesService {
   }
 }
 
-function and(...args: (SQL | undefined)[]): SQL | undefined {
-  const filtered = args.filter((arg): arg is SQL => arg !== undefined);
-  if (filtered.length === 0) return undefined;
-  if (filtered.length === 1) return filtered[0];
-  return sql.join(filtered, sql` AND `);
-}

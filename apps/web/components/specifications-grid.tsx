@@ -48,18 +48,18 @@ function getCellColor(matchType: 'exact' | 'partial' | 'none', hasData: boolean)
 
   switch (matchType) {
     case 'exact':
-      return 'bg-green-600/20 text-green-400 border-green-600/50';
+      return 'bg-green-600/20 text-green-600 border-green-600/50';
     case 'partial':
-      return 'bg-yellow-600/20 text-yellow-400 border-yellow-600/50';
+      return 'bg-yellow-600/20 text-yellow-600 border-yellow-600/50';
     case 'none':
       return 'bg-destructive/20 text-destructive border-destructive/50';
   }
 }
 
 function CellValueDisplay({ value }: Readonly<{ value: CellValue }>) {
-  if (!value) return <span className="opacity-50">No data</span>;
+  if (!value) return <span className="opacity-80">No data</span>;
   if (Array.isArray(value)) {
-    if (value.length === 0) return <span className="opacity-50">No data</span>;
+    if (value.length === 0) return <span className="opacity-80">No data</span>;
     return (
       <div className="flex flex-col gap-0.5">
         {value.map((item, idx) => (
@@ -182,10 +182,10 @@ function getYearArrow(guessYear: string | null, targetYear: string | null): Reac
   if (Number.isNaN(guessYearNum) || Number.isNaN(targetYearNum)) return null;
 
   if (guessYearNum < targetYearNum) {
-    return <IconArrowUp className="size-4 text-white/50" />;
+    return <IconArrowUp className="size-4 text-slate-700" />;
   }
   if (guessYearNum > targetYearNum) {
-    return <IconArrowDown className="size-4 text-white/50" />;
+    return <IconArrowDown className="size-4 text-slate-700" />;
   }
   return null;
 }

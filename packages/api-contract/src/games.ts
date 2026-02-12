@@ -16,8 +16,8 @@ export const GamesContract = {
     .route({ method: 'GET', path: '/games' })
     .input(
       z.object({
-        page: z.number().int().positive().optional(),
-        pageSize: z.number().int().positive().optional(),
+        page: z.coerce.number().int().positive().optional(),
+        pageSize: z.coerce.number().int().positive().optional(),
         q: z.string().optional(),
       }).optional(),
     )
@@ -47,7 +47,7 @@ export const GamesContract = {
     .input(
       z.object({
         q: z.string().min(2),
-        limit: z.number().int().positive().optional().default(100),
+        limit: z.coerce.number().int().positive().optional().default(100),
         mode: GameModeSlugSchema.optional(),
       }),
     )
@@ -62,7 +62,7 @@ export const GamesContract = {
     .route({ method: 'GET', path: '/games/random' })
     .input(
       z.object({
-        excludeIds: z.array(z.number()).optional(),
+        excludeIds: z.array(z.coerce.number()).optional(),
         mode: GameModeSlugSchema.optional(),
       }).optional(),
     )
@@ -77,7 +77,7 @@ export const GamesContract = {
     .route({ method: 'POST', path: '/games/sync' })
     .input(
       z.object({
-        igdb_id: z.number().int().positive(),
+        igdb_id: z.coerce.number().int().positive(),
       }),
     )
     .output(
@@ -93,7 +93,7 @@ export const GamesContract = {
     .route({ method: 'PATCH', path: '/games/:id' })
     .input(
       z.object({
-        id: z.number().int().positive(),
+        id: z.coerce.number().int().positive(),
         updates: GameUpdateInputSchema,
       }),
     )
@@ -108,7 +108,7 @@ export const GamesContract = {
     .route({ method: 'DELETE', path: '/games/:id' })
     .input(
       z.object({
-        id: z.number().int().positive(),
+        id: z.coerce.number().int().positive(),
       }),
     )
     .output(
@@ -121,7 +121,7 @@ export const GamesContract = {
   deleteBulk: oc
     .route({ method: 'DELETE', path: '/games/bulk' })
     .input(
-      z.array(z.number().int().positive()),
+      z.array(z.coerce.number().int().positive()),
     )
     .output(
       z.object({

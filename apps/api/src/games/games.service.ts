@@ -47,7 +47,7 @@ export class GamesService {
     q?: string,
   ): Promise<{ games: Game[]; total: number }> {
     const offset = (page - 1) * pageSize;
-    const where = q ? sql`name ILIKE %${q}%` : undefined;
+    const where = q ? sql`name ILIKE ${'%' + q + '%'}` : undefined;
 
     const [gamesList, totalCount] = await Promise.all([
       this.databaseService.db
@@ -101,7 +101,7 @@ export class GamesService {
     limit: number,
     mode?: GameModeSlug,
   ): Promise<Game[]> {
-    const whereClause: SQL[] = [sql`name ILIKE %${query}%`];
+    const whereClause: SQL[] = [sql`name ILIKE ${'%' + query + '%'}`];
 
     if (mode === 'artwork') {
       whereClause.push(

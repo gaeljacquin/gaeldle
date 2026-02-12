@@ -61,12 +61,12 @@ export default function CoverDisplay({
     return (
       <div
         className={cn(
-          'flex items-center justify-center bg-muted border',
+          'flex flex-col items-center justify-center bg-muted border',
           className
         )}
       >
         <p className="text-sm text-muted-foreground">Loading game...</p>
-        <p className="text-muted-foreground">Stuck? Try refreshing the page 😅</p>
+        <p className="text-sm text-muted-foreground">Stuck? Try refreshing the page 😅</p>
       </div>
     );
   }

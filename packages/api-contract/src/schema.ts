@@ -51,9 +51,6 @@ const gameObject = {
   id: games.id,
   igdbId: games.igdbId,
   name: games.name,
-  info: games.info,
-  createdAt: games.createdAt,
-  updatedAt: games.updatedAt,
   imageUrl: games.imageUrl,
   aiImageUrl: games.aiImageUrl,
   aiPrompt: games.aiPrompt,
@@ -77,7 +74,7 @@ export const allGames = pgMaterializedView('all_games').as((qb) => {
   return qb.select(gameObject).from(games).orderBy(games.name);
 });
 
-export const GameSelectSchema = createSelectSchema(games);
+export const GameSelectSchema = createSelectSchema(allGames);
 export const GameInsertSchema = createInsertSchema(games);
 export const GameUpdateInputSchema = GameInsertSchema.omit({
   id: true,

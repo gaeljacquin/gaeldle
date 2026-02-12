@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "noEmit": true,
+    "noEmit": false,
     "rewriteRelativeImportExtensions": true,
     "resolvePackageJsonExports": true,
     "esModuleInterop": true,
@@ -15,6 +15,7 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
+    "rootDir": "src",
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
@@ -24,8 +25,8 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@/*": ["./src/*"],
-      "@gaeldle/api-contract": ["../../packages/api-contract/src/index.ts"]
+      "@/*": ["./src/*"]
     }
-  }
+  },
+  "include": ["src"]
 }

@@ -76,6 +76,8 @@
     "node": ">=22"
   },
   "jest": {
+    "preset": "ts-jest/presets/default-esm",
+    "testEnvironment": "node",
     "moduleFileExtensions": [
       "js",
       "json",
@@ -84,12 +86,18 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": ["ts-jest", {
+        "useESM": true
+      }]
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1",
+      "^@gaeldle/api-contract$": "<rootDir>/../../../packages/api-contract/src/index.ts"
+    },
+    "extensionsToTreatAsEsm": [".ts"]
   }
 }

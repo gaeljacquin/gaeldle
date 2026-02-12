@@ -43,6 +43,5 @@
 
 ### Web (`apps/web`)
 
-- `NEXT_PUBLIC_SERVER_URL` (client-side)
 - `SERVER_URL` (server-side)
 - `CLIENT_PORT`

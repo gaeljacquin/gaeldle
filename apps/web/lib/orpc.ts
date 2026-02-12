@@ -5,11 +5,9 @@ import { createORPCReactQueryUtils } from '@orpc/react-query';
 import { inferRPCMethodFromContractRouter } from '@orpc/contract';
 import type { ContractRouterClient } from '@orpc/contract';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8080';
-
 export const orpcClient = createORPCClient<ContractRouterClient<typeof contract>>(
   new RPCLink({
-    url: API_BASE_URL,
+    url: process.env.serverUrl || 'http://localhost:8080',
     method: inferRPCMethodFromContractRouter(contract),
   }),
 );

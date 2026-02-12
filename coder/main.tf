@@ -38,14 +38,6 @@ resource "coder_agent" "main" {
   startup_script = <<-EOT
     set -eu
 
-    # Ensure base tools exist (node image is slim)
-    # if ! command -v git >/dev/null 2>&1; then
-    #   export DEBIAN_FRONTEND=noninteractive
-    #   apt-get update -y
-    #   apt-get install -y --no-install-recommends git openssh-client ca-certificates curl
-    #   update-ca-certificates || true
-    # fi
-
     # Preserve Coder's injected GIT_SSH_COMMAND (contains IdentityFile),
     # but auto-accept host keys on first connect.
     if [ -n "$${GIT_SSH_COMMAND:-}" ]; then
@@ -54,9 +46,19 @@ resource "coder_agent" "main" {
       export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"
     fi
 
+    if ! command -v git >/dev/null 2>&1; then
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update -y
+      apt-get install -y --no-install-recommends git openssh-client ca-certificates curl
+      update-ca-certificates || true
+    fi
+
     # Clone or fix remote
     if [ -d "$HOME/${var.app_dir}/.git" ]; then
       git -C "$HOME/${var.app_dir}" remote set-url origin "${var.repo_url}" || true
+      git -C "$HOME/${var.app_dir}" fetch origin "${var.dev_branch}" || true
+      git -C "$HOME/${var.app_dir}" checkout "${var.dev_branch}" || true
+      git -C "$HOME/${var.app_dir}" pull --ff-only origin "${var.dev_branch}" || true
     else
       rm -rf "$HOME/${var.app_dir}"
       git clone "${var.repo_url}" "$HOME/${var.app_dir}"
@@ -64,41 +66,47 @@ resource "coder_agent" "main" {
 
     cd "$HOME/${var.app_dir}"
 
-    # Corepack/pnpm without global installs (avoids yarnpkg EEXIST issues)
-    npx -y corepack@latest enable
-    npx -y corepack@latest prepare pnpm@latest --activate
+    # Install bun if not present
+    if ! command -v bun >/dev/null 2>&1; then
+      curl -fsSL https://bun.sh/install | bash
+      export PATH="$HOME/.bun/bin:$PATH"
+    fi
 
-    # Install deps using corepack pnpm (avoid PATH/shim timing issues)
-    npx -y corepack@latest pnpm install
+    # Install deps
+    bun install
 
-    # Shared env (matches your env examples)
-    export NEXT_PUBLIC_SERVER_URL="http://localhost:${var.api_port}"
-    export SERVER_URL="http://localhost:${var.api_port}"
-    export CLIENT_PORT="${var.web_port}"
-    export CORS_ALLOWED_ORIGINS="${var.cors_allowed_origins}"
-    export TRUSTED_ORIGINS="${var.trusted_origins}"
+    # Create .env file from template variables
+    cat > "$HOME/${var.app_dir}/apps/api/.env" <<EOF
+    DATABASE_URL=${var.database_url}
+    STACK_PROJECT_ID=${var.stack_project_id}
+    STACK_PUBLISHABLE_CLIENT_KEY=${var.stack_publishable_client_key}
+    STACK_SECRET_SERVER_KEY=${var.stack_secret_server_key}
+    PORT=${var.api_port}
+    CLIENT_PORT=${var.web_port}
+    CORS_ALLOWED_ORIGINS=${var.cors_allowed_origins}
+    OPENAI_API_KEY=${var.openai_api_key}
+    TWITCH_CLIENT_ID=${var.twitch_client_id}
+    TWITCH_CLIENT_SECRET=${var.twitch_client_secret}
+    SUPABASE_URL=${var.supabase_url}
+    SUPABASE_PUBLISHABLE_KEY=${var.supabase_publishable_key}
+    SUPABASE_SECRET_KEY=${var.supabase_secret_key}
+    EOF
 
-    # Secrets / config
-    export DATABASE_URL="${var.database_url}"
-    export BETTER_AUTH_SECRET="${var.better_auth_secret}"
-    export GOOGLE_CLIENT_ID="${var.google_client_id}"
-    export GOOGLE_CLIENT_SECRET="${var.google_client_secret}"
-    export NEO4J_URI="${var.neo4j_uri}"
-    export NEO4J_USER="${var.neo4j_user}"
-    export NEO4J_PASSWORD="${var.neo4j_password}"
+    # If you also need one in the web app directory
+    cat > "$HOME/${var.app_dir}/apps/web/.env.local" <<EOF
+    SERVER_URL=${var.server_url}
+    NEXT_PUBLIC_STACK_PROJECT_ID=${var.stack_project_id}
+    NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=${var.stack_publishable_client_key}
+    STACK_SECRET_SERVER_KEY=${var.stack_secret_server_key}
+    EOF
 
-    # Per-app ports & per-app BETTER_AUTH_URL
-    (
-      export PORT="${var.web_port}"
-      export BETTER_AUTH_URL="${var.better_auth_url_web}"
-      nohup npx -y corepack@latest pnpm nx run web:serve -- --hostname 0.0.0.0 --port "${var.web_port}" >"$HOME/web.log" 2>&1 &
-    )
+    # Start web app
+    PORT="${var.web_port}" \
+    nohup bun x turbo dev --filter @gaeldle/web -- --port "${var.web_port}" >"$HOME/web.log" 2>&1 &
 
-    (
-      export PORT="${var.api_port}"
-      export BETTER_AUTH_URL="${var.better_auth_url_api}"
-      nohup npx -y corepack@latest pnpm nx run api:serve -- --host=0.0.0.0 --port="${var.api_port}" >"$HOME/api.log" 2>&1 &
-    )
+    # Start API
+    PORT="${var.api_port}" \
+    nohup bun x turbo dev --filter games-api -- --port "${var.api_port}" >"$HOME/api.log" 2>&1 &
 
     echo "Started web on :${var.web_port} (log: $HOME/web.log)"
     echo "Started api on :${var.api_port} (log: $HOME/api.log)"

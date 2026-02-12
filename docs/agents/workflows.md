@@ -13,4 +13,4 @@
 2. **API Access**: Use the oRPC client from `apps/web/lib/orpc.ts`. For client components, use the React Query hooks provided by oRPC; for server components, use the server-side client.
 3. Keep components in `apps/web/components/` presentation-only.
 4. Use App Router conventions (server components by default).
-5. Use `NEXT_PUBLIC_SERVER_URL` for client-side calls and `SERVER_URL` for server-side calls.
+5. Use `SERVER_URL` for server-side calls.

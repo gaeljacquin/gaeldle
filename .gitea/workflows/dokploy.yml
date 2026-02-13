@@ -33,6 +33,12 @@ jobs:
         run: bun run test
 
       - name: Build
+        env:
+          NEXT_PUBLIC_STACK_PROJECT_ID: ${{ secrets.STACK_PROJECT_ID }}
+          STACK_PROJECT_ID: ${{ secrets.STACK_PROJECT_ID }}
+          NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY: ${{ secrets.STACK_PUBLISHABLE_CLIENT_KEY }}
+          STACK_PUBLISHABLE_CLIENT_KEY: ${{ secrets.STACK_PUBLISHABLE_CLIENT_KEY }}
+          STACK_SECRET_SERVER_KEY: ${{ secrets.STACK_SECRET_SERVER_KEY }}
         run: bun run build
 
   deploy:
@@ -64,6 +70,11 @@ jobs:
           DOKPLOY_API_TOKEN: ${{ secrets.DOKPLOY_API_TOKEN }}
           DOKPLOY_APP_ID_API: ${{ secrets.DOKPLOY_APP_ID_API }}
           DOKPLOY_APP_ID_WEB: ${{ secrets.DOKPLOY_APP_ID_WEB }}
+          STACK_SECRET_SERVER_KEY: ${{ secrets.STACK_SECRET_SERVER_KEY }}
+          NEXT_PUBLIC_STACK_PROJECT_ID: ${{ secrets.STACK_PROJECT_ID }}
+          STACK_PROJECT_ID: ${{ secrets.STACK_PROJECT_ID }}
+          NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY: ${{ secrets.STACK_PUBLISHABLE_CLIENT_KEY }}
+          STACK_PUBLISHABLE_CLIENT_KEY: ${{ secrets.STACK_PUBLISHABLE_CLIENT_KEY }}
           GIT_SHA: ${{ github.sha }}
           GIT_REF: ${{ github.ref_name }}
         run: |

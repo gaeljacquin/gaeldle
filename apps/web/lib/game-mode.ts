@@ -6,7 +6,7 @@ import {
   IconWallpaper,
   type TablerIcon,
 } from "@tabler/icons-react";
-import type { GameModeSlug } from "../../../types/game";
+import type { GameModeSlug } from "@gaeldle/api-contract";
 
 export interface GameMode {
   id: GameModeSlug;

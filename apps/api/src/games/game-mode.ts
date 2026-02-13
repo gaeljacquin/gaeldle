@@ -1,5 +1,6 @@
 export const GAME_MODE_SLUGS = [
   'cover-art',
+  'image-ai',
   'artwork',
   'timeline',
   'timeline-2',

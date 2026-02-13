@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import type { Game } from '@gaeldle/types/game';
+import type { Game } from '@gaeldle/api-contract';
 
 interface SpecificationsGameOverProps {
   isCorrect: boolean;

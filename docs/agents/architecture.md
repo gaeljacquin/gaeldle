@@ -2,13 +2,15 @@
 
 ## Topology
 
-- `apps/api`: NestJS REST API (TypeScript, Bun runtime), default port 8080.
+- `apps/api`: NestJS API using oRPC (TypeScript, Bun runtime), default port 8080.
 - `apps/web`: Next.js 15 App Router app (TypeScript, Tailwind v4), default port 3000.
-- Monorepo: Turborepo workspace with apps under `apps/`.
+- `packages/api-contract`: Shared oRPC contract and Zod schemas used by both API and Web.
+- Monorepo: Turborepo workspace with apps under `apps/` and packages under `packages/`.
 
 ## Data & Auth
 
 - Database: PostgreSQL 17 (default port 5432).
+- oRPC: Used for end-to-end type-safe API communication.
 - Auth: Stack Auth used in both frontend and backend.
 
 ## Ports
@@ -41,6 +43,5 @@
 
 ### Web (`apps/web`)
 
-- `NEXT_PUBLIC_SERVER_URL` (client-side)
 - `SERVER_URL` (server-side)
 - `CLIENT_PORT`

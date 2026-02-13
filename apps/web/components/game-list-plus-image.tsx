@@ -12,7 +12,7 @@ import { Card } from '@/components/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
-import type { CoverArtModeSlug } from '@gaeldle/types/game';
+import type { CoverArtModeSlug } from '@gaeldle/api-contract';
 import BackToMainMenu from '@/components/back-to-main-menu';
 
 interface GameListPlusImageProps {
@@ -40,15 +40,15 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
     handleSubmit,
     resetGame,
     adjustAttempts,
-  } = useCoverArtGame({ mode: props.gameModeSlug });
+  } = useCoverArtGame(props.gameModeSlug);
 
   const handleSubmitWithClear = () => {
     handleSubmit();
     setSearchKey(prev => prev + 1);
   };
 
-  const selectedGame = allGames.find(g => g.id === selectedGameId) || null;
-  const wrongGuessIds = wrongGuesses.map(g => g.id);
+  const selectedGame = allGames.find((game) => game.id === selectedGameId) || null;
+  const wrongGuessIds = wrongGuesses.map(game => game.id);
   const clarity = Math.min(100, Math.round(((MAX_ATTEMPTS - attemptsLeft) / MAX_ATTEMPTS) * 100));
 
   const imageDisplayComp = () => {

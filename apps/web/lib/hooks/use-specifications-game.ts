@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getAllGames, getRandomGame } from '@/lib/services/game.service';
-import type { Game, SpecificationGuess, RevealedClue, MatchType } from '@gaeldle/types/game';
+import type { Game, SpecificationGuess, RevealedClue, MatchType } from '@gaeldle/api-contract';
 
 export const MAX_ATTEMPTS = 10;
 
@@ -91,17 +91,17 @@ function compareGames(target: Game, guess: Game): SpecificationGuess['matches'] 
   const targetYear = extractReleaseYear(target.firstReleaseDate);
   const guessYear = extractReleaseYear(guess.firstReleaseDate);
 
-  const targetGameModes = extractArray(target.game_modes);
-  const guessGameModes = extractArray(guess.game_modes);
+  const targetGameModes = extractArray(target.gameModes);
+  const guessGameModes = extractArray(guess.gameModes);
 
-  const targetEngines = extractArray(target.game_engines);
-  const guessEngines = extractArray(guess.game_engines);
+  const targetEngines = extractArray(target.gameEngines);
+  const guessEngines = extractArray(guess.gameEngines);
 
-  const targetPublisher = extractPublisher(target.involved_companies);
-  const guessPublisher = extractPublisher(guess.involved_companies);
+  const targetPublisher = extractPublisher(target.involvedCompanies);
+  const guessPublisher = extractPublisher(guess.involvedCompanies);
 
-  const targetPerspective = extractArray(target.player_perspectives);
-  const guessPerspective = extractArray(guess.player_perspectives);
+  const targetPerspective = extractArray(target.playerPerspectives);
+  const guessPerspective = extractArray(guess.playerPerspectives);
 
   return {
     platforms: {
@@ -194,6 +194,7 @@ export function useSpecificationsGame() {
         gameId: selectedGame.id,
         gameName: selectedGame.name,
         imageUrl: selectedGame.imageUrl,
+        aiImageUrl: selectedGame.aiImageUrl,
         matches,
       };
       setGuesses(prev => [...prev, newGuess]);
@@ -206,6 +207,7 @@ export function useSpecificationsGame() {
         gameId: selectedGame.id,
         gameName: selectedGame.name,
         imageUrl: selectedGame.imageUrl,
+        aiImageUrl: selectedGame.aiImageUrl,
         matches,
       };
 
@@ -267,16 +269,16 @@ export function useSpecificationsGame() {
         value = extractReleaseYear(targetGame.firstReleaseDate) || 'Unknown';
         break;
       case 'gameModes':
-        value = extractArray(targetGame.game_modes);
+        value = extractArray(targetGame.gameModes);
         break;
       case 'gameEngines':
-        value = extractArray(targetGame.game_engines);
+        value = extractArray(targetGame.gameEngines);
         break;
       case 'publisher':
-        value = extractPublisher(targetGame.involved_companies) || 'Unknown';
+        value = extractPublisher(targetGame.involvedCompanies) || 'Unknown';
         break;
       case 'perspective':
-        value = extractArray(targetGame.player_perspectives);
+        value = extractArray(targetGame.playerPerspectives);
         break;
       default:
         value = 'Unknown';

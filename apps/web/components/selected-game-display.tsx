@@ -2,7 +2,7 @@
 
 import { IconX } from '@tabler/icons-react';
 import Image from 'next/image';
-import type { Game, GameModeSlug } from '@gaeldle/types/game';
+import type { Game, GameModeSlug } from '@gaeldle/api-contract';
 import { cn } from '@/lib/utils';
 
 interface SelectedGameDisplayProps {

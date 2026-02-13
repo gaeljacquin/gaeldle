@@ -1,127 +1,47 @@
-import type { Game } from '@gaeldle/types/game';
+import { orpcClient } from '@/lib/orpc';
+import type { Game, GameModeSlug } from '@gaeldle/api-contract';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8080';
-const API_GAMES = 'api/games';
-
-export async function getAllGames(mode?: string): Promise<Game[]> {
-  const endpoint = mode === 'artwork' ? `${API_BASE_URL}/${API_GAMES}/artwork` : `${API_BASE_URL}/${API_GAMES}`;
-
-  const response = await fetch(endpoint, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch video games');
+export async function getAllGames(mode?: GameModeSlug): Promise<Game[]> {
+  if (mode === 'artwork') {
+    const result = await orpcClient.games.getArtwork();
+    return result.data;
   }
 
-  const data = await response.json();
-
-  if (!data.success) {
-    throw new Error(data.error || 'Failed to fetch video games');
-  }
-
-  return data.data as Game[];
-}
-
-export interface PaginatedResponse<T> {
-  success: boolean;
-  data: T[];
-  meta: {
-    page: number;
-    pageSize: number;
-    total: number;
-  };
+  const result = await orpcClient.games.list();
+  return result.data;
 }
 
 export async function getPaginatedGames(
   page: number = 1,
   pageSize: number = 10,
   query?: string
-): Promise<PaginatedResponse<Game>> {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    pageSize: pageSize.toString(),
+) {
+  const result = await orpcClient.games.list({
+    page,
+    pageSize,
+    q: query,
   });
-
-  if (query && query.length >= 2) {
-    params.append('q', query);
-  }
-
-  const response = await fetch(`${API_BASE_URL}/${API_GAMES}?${params.toString()}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch games');
-  }
-
-  const data = await response.json();
-
-  if (!data.success) {
-    throw new Error(data.error || 'Failed to fetch games');
-  }
-
-  return data as PaginatedResponse<Game>;
+  return result;
 }
 
-export async function getRandomGame(excludeIds: number[] = [], mode?: string): Promise<Game> {
-  const response = await fetch(`${API_BASE_URL}/${API_GAMES}/random`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ excludeIds, mode }),
+export async function getRandomGame(excludeIds: number[] = [], mode?: GameModeSlug): Promise<Game> {
+  const result = await orpcClient.games.getRandom({
+    excludeIds,
+    mode: mode,
   });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch random video game');
-  }
-
-  const data = await response.json();
-
-  if (!data.success) {
-    throw new Error(data.error || 'Failed to fetch random video game');
-  }
-
-  return data.data as Game;
+  return result.data;
 }
 
-export async function searchGames(query: string, limit: number = 100, mode?: string): Promise<Game[]> {
+export async function searchGames(query: string, limit: number = 100, mode?: GameModeSlug): Promise<Game[]> {
   if (query.length < 2) {
     return [];
   }
 
-  const params = new URLSearchParams({
+  const result = await orpcClient.games.search({
     q: query,
-    limit: limit.toString(),
+    limit,
+    mode: mode,
   });
 
-  if (mode) {
-    params.append('mode', mode);
-  }
-
-  const response = await fetch(`${API_BASE_URL}/${API_GAMES}/search?${params.toString()}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to search games');
-  }
-
-  const data = await response.json();
-
-  if (!data.success) {
-    throw new Error(data.error || 'Failed to search games');
-  }
-
-  return data.data as Game[];
+  return result.data;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, ChangeEvent } from 'react';
+import { useState, useMemo, ChangeEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPaginatedGames } from '@/lib/services/game.service';
 import { Timeline2Card } from '@/components/timeline-2-card';
@@ -23,6 +23,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
+import { Game } from '@gaeldle/api-contract';
 
 export default function DashboardPage() {
   const [page, setPage] = useState(1);
@@ -32,9 +33,11 @@ export default function DashboardPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  useEffect(() => {
+  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
+  if (debouncedSearch !== prevSearch) {
+    setPrevSearch(debouncedSearch);
     setPage(1);
-  }, [debouncedSearch]);
+  }
 
   const { data, isLoading, isPlaceholderData } = useQuery({
     queryKey: ['games', page, pageSize, debouncedSearch],
@@ -42,7 +45,7 @@ export default function DashboardPage() {
     placeholderData: (previousData) => previousData,
   });
 
-  const totalPages = data?.meta.total ? Math.ceil(data.meta.total / Number.parseInt(pageSize, 10)) : 0;
+  const totalPages = data?.meta?.total ? Math.ceil(data.meta.total / Number.parseInt(pageSize, 10)) : 0;
 
   const paginationRange = useMemo(() => {
     if (!totalPages) return [];
@@ -127,7 +130,7 @@ export default function DashboardPage() {
                 : 'grid-cols-1'
             )}
           >
-            {data?.data.map((game) => (
+            {data?.data.map((game: Game) => (
               <div
                 key={game.id}
                 className={cn(
@@ -171,9 +174,9 @@ export default function DashboardPage() {
               <p className="text-sm text-muted-foreground order-2 sm:order-1">
                 Showing <span className="font-medium">{(page - 1) * Number.parseInt(pageSize, 10) + 1}</span> to{' '}
                 <span className="font-medium">
-                  {Math.min(page * Number.parseInt(pageSize, 10), data?.meta.total || 0)}
+                  {Math.min(page * Number.parseInt(pageSize, 10), data?.meta?.total || 0)}
                 </span>{' '}
-                of <span className="font-medium">{data?.meta.total}</span> games
+                of <span className="font-medium">{data?.meta?.total}</span> games
               </p>
 
               <div className="flex items-center gap-1 order-1 sm:order-2">

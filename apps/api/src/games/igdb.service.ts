@@ -6,9 +6,12 @@ type IgdbGame = {
   name: string;
   summary?: string;
   storyline?: string;
+  url?: string;
+  total_rating?: number;
+  total_rating_count?: number;
   first_release_date?: number;
-  cover?: { image_id?: string };
-  artworks?: Array<{ image_id?: string }>;
+  cover?: { image_id?: string; url?: string };
+  artworks?: Array<{ image_id?: string; url?: string }>;
   keywords?: Array<{ name?: string }>;
   franchises?: Array<{ name?: string }>;
   game_engines?: Array<{ name?: string }>;
@@ -62,9 +65,14 @@ export class IgdbService {
       'name',
       'summary',
       'storyline',
+      'url',
+      'total_rating',
+      'total_rating_count',
       'first_release_date',
       'cover.image_id',
+      'cover.url',
       'artworks.image_id',
+      'artworks.url',
       'keywords.name',
       'franchises.name',
       'game_engines.name',

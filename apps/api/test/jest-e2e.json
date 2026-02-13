@@ -4,6 +4,13 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
-  }
+    "^.+\\.(t|j)s$": ["ts-jest", {
+      "useESM": true
+    }]
+  },
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/../src/$1",
+    "^@gaeldle/api-contract$": "<rootDir>/../../../packages/api-contract/src/index.ts"
+  },
+  "extensionsToTreatAsEsm": [".ts"]
 }

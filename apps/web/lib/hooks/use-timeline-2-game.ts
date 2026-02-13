@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRandomGame } from '@/lib/services/game.service';
-import type { Game } from '@gaeldle/types/game';
+import type { Game } from '@gaeldle/api-contract';
 
 const MAX_ATTEMPTS = 7;
 

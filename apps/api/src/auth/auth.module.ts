@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { StackAuthController } from './stack-auth.controller';
-import { StackAuthGuard } from './stack-auth.guard';
-import { StackAuthService } from './stack-auth.service';
+import { StackAuthController } from '@/auth/stack-auth.controller';
+import { StackAuthGuard } from '@/auth/stack-auth.guard';
+import { StackAuthService } from '@/auth/stack-auth.service';
 
 @Module({
   controllers: [StackAuthController],

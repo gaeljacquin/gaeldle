@@ -1,0 +1,127 @@
+name: Dokploy CI/CD
+
+on:
+  pull_request:
+    branches: [ "main", "ci", "staging", "stg" ]
+  push:
+    branches: [ "main", "ci", "staging", "stg" ]
+
+jobs:
+  ci:
+    name: Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Type check
+        run: bun run type-check
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Unit tests
+        run: bun run test
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_STACK_PROJECT_ID: ${{ secrets.STACK_PROJECT_ID }}
+          STACK_PROJECT_ID: ${{ secrets.STACK_PROJECT_ID }}
+          NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY: ${{ secrets.STACK_PUBLISHABLE_CLIENT_KEY }}
+          STACK_PUBLISHABLE_CLIENT_KEY: ${{ secrets.STACK_PUBLISHABLE_CLIENT_KEY }}
+          STACK_SECRET_SERVER_KEY: ${{ secrets.STACK_SECRET_SERVER_KEY }}
+        run: bun run build
+
+  deploy:
+    name: Deploy to Dokploy
+    runs-on: ubuntu-latest
+    needs: ci
+    if: |
+      github.event_name == 'push' &&
+      (startsWith(github.ref, 'refs/heads/main') ||
+      startsWith(github.ref, 'refs/heads/staging') ||
+      startsWith(github.ref, 'refs/heads/stg')) ||
+      startsWith(github.ref, 'refs/heads/ci'))
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: bun run --filter games-api db:migrate
+
+      - name: Trigger Dokploy deploy
+        env:
+          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+          DOKPLOY_API_TOKEN: ${{ secrets.DOKPLOY_API_TOKEN }}
+          DOKPLOY_APP_ID_API: ${{ secrets.DOKPLOY_APP_ID_API }}
+          DOKPLOY_APP_ID_WEB: ${{ secrets.DOKPLOY_APP_ID_WEB }}
+          STACK_SECRET_SERVER_KEY: ${{ secrets.STACK_SECRET_SERVER_KEY }}
+          NEXT_PUBLIC_STACK_PROJECT_ID: ${{ secrets.STACK_PROJECT_ID }}
+          STACK_PROJECT_ID: ${{ secrets.STACK_PROJECT_ID }}
+          NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY: ${{ secrets.STACK_PUBLISHABLE_CLIENT_KEY }}
+          STACK_PUBLISHABLE_CLIENT_KEY: ${{ secrets.STACK_PUBLISHABLE_CLIENT_KEY }}
+          GIT_SHA: ${{ github.sha }}
+          GIT_REF: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${DOKPLOY_URL}" ] || [ -z "${DOKPLOY_API_TOKEN}" ]; then
+            echo "Error: Missing required Dokploy secrets (DOKPLOY_URL, DOKPLOY_API_TOKEN)."
+            exit 1
+          fi
+
+          deploy_service() {
+            local APP_ID=$1
+            local SERVICE_NAME=$2
+
+            if [ -z "${APP_ID}" ]; then
+              echo "Skipping ${SERVICE_NAME} (no DOKPLOY_${SERVICE_NAME^^}_APP_ID provided)."
+              return
+            fi
+
+            echo "Triggering deploy for ${SERVICE_NAME} (${APP_ID})..."
+
+            DEPLOY_PAYLOAD=$(printf '{"applicationId":"%s","title":"Deploy %s","description":"Triggered by push to %s"}' \
+              "${APP_ID}" "${GIT_SHA}" "${GIT_REF}")
+
+            HTTP_CODE=$(curl --silent --show-error \
+              --output "/tmp/dokploy-deploy-${SERVICE_NAME}-response.json" \
+              --write-out "%{http_code}" \
+              --request POST \
+              --url "${DOKPLOY_URL}/api/application.deploy" \
+              --header "Content-Type: application/json" \
+              --header "x-api-key: ${DOKPLOY_API_TOKEN}" \
+              --data "${DEPLOY_PAYLOAD}")
+
+            echo "Dokploy API HTTP status for ${SERVICE_NAME}: ${HTTP_CODE}"
+            cat "/tmp/dokploy-deploy-${SERVICE_NAME}-response.json"
+            echo
+
+            if [ "${HTTP_CODE}" -lt 200 ] || [ "${HTTP_CODE}" -ge 300 ]; then
+              echo "Error: Dokploy deployment trigger failed for ${SERVICE_NAME}."
+              exit 1
+            fi
+          }
+
+          deploy_service "${DOKPLOY_APP_ID_API}" "api"
+          deploy_service "${DOKPLOY_APP_ID_WEB}" "web"

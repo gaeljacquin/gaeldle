@@ -42,7 +42,8 @@ apps/web/
 ### Rules
 
 - **Pure Components**: Components in `components/` are presentational only and receive data via props. They should not have side effects or fetch data.
-- **No Direct Data Access**: No `fetch`, `axios`, or direct data access inside components. Use `lib/services/`.
+- **Type-safe API**: Use the oRPC client for all API communication. This ensures end-to-end type safety between backend and frontend.
+- **No Direct Data Access**: No raw `fetch` or `axios` calls inside components. Use oRPC hooks or server-side calls.
 - **Custom Hooks**: Complex stateful logic, especially game logic, belongs in `lib/hooks/`.
 - **Views**: Complex pages should have their main content in `views/` to keep `app/` files clean.
 - **Centralized Providers**: All context providers (Stack Auth, Query Client, etc.) are consolidated in `apps/web/app/providers.tsx`.

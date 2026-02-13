@@ -33,9 +33,11 @@ export function Navbar() {
           <Image
             src="/logo.png"
             alt={`${appInfo.title} logo`}
+            className="size-auto"
             width={32}
             height={32}
-            sizes="1vw"
+            sizes="2vw"
+            loading="eager"
           />
           <span className="text-xl font-bold tracking-tight text-foreground">{appInfo.title}</span>
         </Link>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, ChangeEvent } from 'react';
+import { useState, useMemo, ChangeEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPaginatedGames } from '@/lib/services/game.service';
 import { Timeline2Card } from '@/components/timeline-2-card';
@@ -33,9 +33,11 @@ export default function DashboardPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  useEffect(() => {
+  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
+  if (debouncedSearch !== prevSearch) {
+    setPrevSearch(debouncedSearch);
     setPage(1);
-  }, [debouncedSearch]);
+  }
 
   const { data, isLoading, isPlaceholderData } = useQuery({
     queryKey: ['games', page, pageSize, debouncedSearch],

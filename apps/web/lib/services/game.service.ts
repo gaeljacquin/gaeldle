@@ -1,7 +1,7 @@
 import { orpcClient } from '@/lib/orpc';
-import type { Game } from '@gaeldle/api-contract';
+import type { Game, GameModeSlug } from '@gaeldle/api-contract';
 
-export async function getAllGames(mode?: string): Promise<Game[]> {
+export async function getAllGames(mode?: GameModeSlug): Promise<Game[]> {
   if (mode === 'artwork') {
     const result = await orpcClient.games.getArtwork();
     return result.data;
@@ -24,15 +24,15 @@ export async function getPaginatedGames(
   return result;
 }
 
-export async function getRandomGame(excludeIds: number[] = [], mode?: string): Promise<Game> {
+export async function getRandomGame(excludeIds: number[] = [], mode?: GameModeSlug): Promise<Game> {
   const result = await orpcClient.games.getRandom({
     excludeIds,
-    mode: mode as any,
+    mode: mode,
   });
   return result.data;
 }
 
-export async function searchGames(query: string, limit: number = 100, mode?: string): Promise<Game[]> {
+export async function searchGames(query: string, limit: number = 100, mode?: GameModeSlug): Promise<Game[]> {
   if (query.length < 2) {
     return [];
   }
@@ -40,7 +40,7 @@ export async function searchGames(query: string, limit: number = 100, mode?: str
   const result = await orpcClient.games.search({
     q: query,
     limit,
-    mode: mode as any,
+    mode: mode,
   });
 
   return result.data;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query'; // Import from TanStack Query
 import { getPixelSizeForAttempt } from '@/lib/utils/pixelate';
 import { orpc } from '@/lib/orpc';
@@ -42,7 +42,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     })
   );
 
-  const allGames: Game[] = allGamesData ?? [];
+  const allGames = useMemo(() => allGamesData ?? [], [allGamesData]);
   const targetGame = targetGameData ?? null;
 
   const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
@@ -50,9 +50,8 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [currentPixelSize, setCurrentPixelSize] = useState(
-    getPixelSizeForAttempt(0, MAX_ATTEMPTS)
-  );
+
+  const currentPixelSize = getPixelSizeForAttempt(MAX_ATTEMPTS - attemptsLeft, MAX_ATTEMPTS);
 
   const selectedArtworkUrl = useMemo(() => {
     if (mode === 'artwork' && targetGame) {
@@ -62,11 +61,6 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   }, [mode, targetGame]);
 
   const isLoading = isLoadingAll || isLoadingTarget || isRefetchingTarget;
-
-  useEffect(() => {
-    const wrongAttempts = MAX_ATTEMPTS - attemptsLeft;
-    setCurrentPixelSize(getPixelSizeForAttempt(wrongAttempts, MAX_ATTEMPTS));
-  }, [attemptsLeft]);
 
   const handleSelectGame = useCallback((gameId: number) => {
     setSelectedGameId(gameId);
@@ -101,7 +95,6 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     setIsGameOver(false);
     setIsCorrect(false);
     setSelectedGameId(null);
-    setCurrentPixelSize(getPixelSizeForAttempt(0, MAX_ATTEMPTS));
     await refetchTarget();
   }, [refetchTarget]);
 

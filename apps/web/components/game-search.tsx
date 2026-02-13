@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@/lib/utils';
-import type { Game } from '@gaeldle/api-contract';
+import type { Game, GameModeSlug } from '@gaeldle/api-contract';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import {
   InputGroup,
@@ -21,7 +21,7 @@ interface GameSearchProps {
   onSelectGame: (gameId: number) => void;
   disabled?: boolean;
   className?: string;
-  mode?: string;
+  mode?: GameModeSlug;
 }
 
 export default function GameSearch({

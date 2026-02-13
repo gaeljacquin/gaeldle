@@ -2,9 +2,9 @@ name: Dokploy CI/CD
 
 on:
   pull_request:
-    branches: ["main"]
+    branches: [ "main", "ci", "staging", "stg" ]
   push:
-    branches: ["main"]
+    branches: [ "main", "ci", "staging", "stg" ]
 
 jobs:
   ci:

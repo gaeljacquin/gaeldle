@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main", "ci", "staging" ]
+    branches: [ "main", "ci", "staging", "stg" ]
 
 jobs:
   sonar:
@@ -22,3 +22,4 @@ jobs:
           args: >
             -Dsonar.projectKey=gaeldle
             -Dsonar.sources=apps/api,apps/web,packages
+            -Dsonar.exclusions=apps/web/components/ui/**

@@ -72,13 +72,13 @@ export default function ArtworkDisplay({
 
   return (
     <div className={cn('relative border', className)}>
-      {(isProcessing || !shouldShowImage) && (
+      {isProcessing || !shouldShowImage ? (
         <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
           <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
-      )}
+      ) : null}
       <div className="aspect-video relative w-full h-full overflow-hidden">
-        {shouldShowImage && displayUrl && (
+        {shouldShowImage && displayUrl ? (
           <Image
             src={displayUrl}
             alt="Game artwork"
@@ -87,7 +87,7 @@ export default function ArtworkDisplay({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority
           />
-        )}
+        ) : null}
       </div>
     </div>
   );

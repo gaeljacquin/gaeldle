@@ -42,6 +42,7 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
               draggable={false}
               fill
               sizes="10vw"
+              loading="eager"
             />
           ) : (
             <div className="w-full h-full bg-muted flex items-center justify-center text-[10px] uppercase tracking-widest text-muted-foreground">

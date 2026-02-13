@@ -143,7 +143,7 @@ export default function DashboardPage() {
                 <Timeline2Card
                   game={game}
                   showDate={false}
-                  className={cn(view === 'list' && 'shrink-0')}
+                  className={cn(view === 'list' ? 'shrink-0' : null)}
                 />
                 {view === 'list' && (
                   <div className="flex flex-col justify-center min-w-0 flex-1">
@@ -281,7 +281,7 @@ export default function DashboardPage() {
               value={search}
               onChange={handleSearchChange}
             />
-            {search && (
+            {search ? (
               <button
                 onClick={clearSearch}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
@@ -289,7 +289,7 @@ export default function DashboardPage() {
               >
                 <IconX size={14} />
               </button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

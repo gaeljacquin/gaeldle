@@ -385,7 +385,7 @@ function GuessRows({
     <>
       {guesses.map((guess, index) => (
         <Fragment key={`${guess.gameId}-${index}`}>
-          {revealedClue && index === hintInsertIndex && renderHintRow(revealedClue)}
+          {revealedClue && index === hintInsertIndex ? renderHintRow(revealedClue) : null}
           <tr>
             <ImageCell imageUrl={guess.imageUrl} name={guess.gameName} />
             {MATCH_COLUMNS.map((column) =>
@@ -402,7 +402,7 @@ function GuessRows({
           </tr>
         </Fragment>
       ))}
-      {revealedClue && hintInsertIndex === guesses.length && renderHintRow(revealedClue)}
+      {revealedClue && hintInsertIndex === guesses.length ? renderHintRow(revealedClue) : null}
     </>
   );
 }
@@ -427,10 +427,10 @@ export default function SpecificationsGrid({
     <div className={cn('overflow-x-auto w-full border border-border/50 bg-card/5', className)}>
       <table className="w-full border-collapse min-w-max">
         <thead>
-          {bestMatches && (
+          {bestMatches ? (
             <SummaryRow bestMatches={bestMatches} targetYear={answerSpecs?.releaseDate || null} />
-          )}
-          {showHeaders && <HeaderRow />}
+          ) : null}
+          {showHeaders ? <HeaderRow /> : null}
         </thead>
         <tbody>
           {showAnswerOnly && answerSpecs && targetGame ? (

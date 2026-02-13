@@ -23,7 +23,7 @@ export default function SpecificationsGameOver({
   return (
     <div className="space-y-6 p-8 border border-border bg-muted/50">
       <div className="flex flex-col items-center gap-6">
-        {targetGame?.imageUrl && (
+        {targetGame?.imageUrl ? (
           <div className="relative border-2 border-border shadow-lg">
             <Image
               src={targetGame.imageUrl}
@@ -34,7 +34,7 @@ export default function SpecificationsGameOver({
               sizes="10vw"
             />
           </div>
-        )}
+        ) : null}
 
         {isCorrect ? (
           <div className="space-y-2 text-center">

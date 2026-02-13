@@ -10,7 +10,8 @@
 ## Add a New Web Page
 
 1. Create the page in `apps/web/app/*/page.tsx`.
-2. **API Access**: Use the oRPC client from `apps/web/lib/orpc.ts`. For client components, use the React Query hooks provided by oRPC; for server components, use the server-side client.
+2. **Specialized Skills**: Refer to `vercel-react-best-practices` and `vercel-composition-patterns` to ensure high-quality component implementation.
+3. **API Access**: Use the oRPC client from `apps/web/lib/orpc.ts`. For client components, use the React Query hooks provided by oRPC; for server components, use the server-side client.
 3. Keep components in `apps/web/components/` presentation-only.
 4. Use App Router conventions (server components by default).
 5. Use `SERVER_URL` for server-side calls.

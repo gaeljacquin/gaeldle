@@ -46,22 +46,6 @@ export class GamesRouter {
     });
   }
 
-  @Implement(contract.games.get)
-  get() {
-    return implement(contract.games.get).handler(async ({ input }) => {
-      const game = await this.gamesService.getGameByIgdbId(input.igdbId);
-
-      if (!game) {
-        throw new NotFoundException('Game not found');
-      }
-
-      return {
-        success: true,
-        data: game,
-      };
-    });
-  }
-
   @Implement(contract.games.getArtwork)
   getArtwork() {
     return implement(contract.games.getArtwork).handler(async () => {
@@ -95,6 +79,22 @@ export class GamesRouter {
 
       if (!game) {
         throw new NotFoundException('No games available');
+      }
+
+      return {
+        success: true,
+        data: game,
+      };
+    });
+  }
+
+  @Implement(contract.games.get)
+  get() {
+    return implement(contract.games.get).handler(async ({ input }) => {
+      const game = await this.gamesService.getGameByIgdbId(input.igdbId);
+
+      if (!game) {
+        throw new NotFoundException('Game not found');
       }
 
       return {
@@ -141,6 +141,20 @@ export class GamesRouter {
     });
   }
 
+  @Implement(contract.games.deleteBulk)
+  @UseGuards(StackAuthGuard)
+  deleteBulk() {
+    return implement(contract.games.deleteBulk).handler(async ({ input }) => {
+      const deletedIds = await this.gamesService.deleteGames(input);
+      return {
+        success: true,
+        data: {
+          deletedIds,
+        },
+      };
+    });
+  }
+
   @Implement(contract.games.delete)
   @UseGuards(StackAuthGuard)
   delete() {
@@ -154,20 +168,6 @@ export class GamesRouter {
       return {
         success: true,
         data: { id: deletedId },
-      };
-    });
-  }
-
-  @Implement(contract.games.deleteBulk)
-  @UseGuards(StackAuthGuard)
-  deleteBulk() {
-    return implement(contract.games.deleteBulk).handler(async ({ input }) => {
-      const deletedIds = await this.gamesService.deleteGames(input);
-      return {
-        success: true,
-        data: {
-          deletedIds,
-        },
       };
     });
   }

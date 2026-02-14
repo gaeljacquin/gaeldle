@@ -47,7 +47,7 @@ export const games = pgTable(
   (table) => [index('game_name_idx').on(table.name)],
 );
 
-const gameObject = {
+export const gameObject = {
   id: games.id,
   igdbId: games.igdbId,
   name: games.name,

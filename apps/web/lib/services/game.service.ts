@@ -7,7 +7,7 @@ export async function getAllGames(mode?: GameModeSlug): Promise<Game[]> {
     return result.data;
   }
 
-  const result = await orpcClient.games.list();
+  const result = await orpcClient.games.list({});
   return result.data;
 }
 

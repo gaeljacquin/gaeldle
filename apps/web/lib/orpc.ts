@@ -9,47 +9,46 @@ import { stackClientApp } from '@/stack/client';
 export const orpcClient = createORPCClient<JsonifiedClient<ContractRouterClient<typeof contract>>>(
   new OpenAPILink(contract, {
     url: `${process.env.serverUrl || 'http://localhost:8080'}`,
-    fetch: async (url, init: any) => {
-      const headers = new Headers();
-
-      // Merge existing headers
-      if (init?.headers) {
-        if (init.headers instanceof Headers) {
-          init.headers.forEach((value: string, key: string) => headers.set(key, value));
-        } else if (Array.isArray(init.headers)) {
-          init.headers.forEach(([key, value]: [string, string]) => headers.set(key, value));
-        } else {
-          Object.entries(init.headers).forEach(([key, value]) => headers.set(key, value as string));
-        }
-      }
+    fetch: async (request: Request, init: { redirect?: RequestRedirect }) => {
+      const headers = new Headers(request.headers);
+      const signal = request.signal;
 
       try {
+        if (signal?.aborted) {
+          throw signal.reason || new Error('Aborted');
+        }
+
         const user = await stackClientApp.getUser({ or: 'return-null' });
+
         if (user) {
           const authHeaders = await user.getAuthHeaders();
           Object.entries(authHeaders).forEach(([key, value]) => {
             headers.set(key, value);
           });
 
-          // Also set the token explicitly in x-stack-access-token just in case
-          const authJson = await user.getAuthJson();
-          if (authJson.accessToken) {
-            headers.set('x-stack-access-token', authJson.accessToken);
+          // Also set the token explicitly just in case some middleware prefers it
+          const accessToken = await user.getAccessToken();
+          if (accessToken) {
+            headers.set('x-stack-access-token', accessToken);
           }
         }
-      } catch (e) {
-        console.error('Failed to get auth headers', e);
-      }
 
-      try {
-        const response = await fetch(url, {
+        const response = await fetch(request, {
           ...init,
           headers,
+          signal,
           mode: 'cors',
         });
         return response;
       } catch (e) {
-        console.error(`Fetch failed for ${url}:`, e);
+        if (
+          e instanceof Error &&
+          (e.message === 'Aborted' || e.name === 'AbortError')
+        ) {
+          throw e;
+        }
+
+        console.error(`Fetch failed for ${request.url}:`, e);
         throw e;
       }
     },

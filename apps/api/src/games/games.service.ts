@@ -10,7 +10,7 @@ import {
   type SQL,
 } from 'drizzle-orm';
 import { DatabaseService } from '@/db/database.service';
-import { allGames, games, type Game } from '@gaeldle/api-contract';
+import { allGames, games, type Game, gameObject } from '@gaeldle/api-contract';
 import type { GameModeSlug } from '@/games/game-mode';
 import { IgdbService, type IgdbGame } from '@/games/igdb.service';
 
@@ -29,12 +29,15 @@ export class GamesService {
   ) {}
 
   async getAllGames(): Promise<Game[]> {
-    return await this.databaseService.db.select().from(allGames);
+    return await this.databaseService.db
+      .select(gameObject)
+      .from(games)
+      .orderBy(desc(games.id));
   }
 
   async getGameByIgdbId(igdbId: number): Promise<Game | null> {
     const [game] = await this.databaseService.db
-      .select()
+      .select(gameObject)
       .from(games)
       .where(eq(games.igdbId, igdbId))
       .limit(1);
@@ -44,7 +47,7 @@ export class GamesService {
 
   async getArtworkGames(): Promise<Game[]> {
     return this.databaseService.db
-      .select()
+      .select(gameObject)
       .from(games)
       .where(
         and(sql`artworks IS NOT NULL`, sql`json_array_length(artworks) > 0`),
@@ -62,7 +65,7 @@ export class GamesService {
 
     const [gamesList, totalCount] = await Promise.all([
       this.databaseService.db
-        .select()
+        .select(gameObject)
         .from(games)
         .where(where)
         .limit(pageSize)
@@ -108,7 +111,7 @@ export class GamesService {
     }
 
     const [game] = await this.databaseService.db
-      .select()
+      .select(gameObject)
       .from(games)
       .where(and(...conditions))
       .orderBy(sql`RANDOM()`)
@@ -132,7 +135,7 @@ export class GamesService {
     }
 
     const gamesList = await this.databaseService.db
-      .select()
+      .select(gameObject)
       .from(games)
       .where(and(...whereClause))
       .limit(limit)

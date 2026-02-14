@@ -76,7 +76,10 @@ export const GamesContract = {
     .route({ method: 'GET', path: '/games/random' })
     .input(
       z.object({
-        excludeIds: z.array(z.coerce.number()).optional(),
+        excludeIds: z.preprocess((val) => {
+          if (!val) return [];
+          return Array.isArray(val) ? val : [val];
+        }, z.array(z.coerce.number())).optional(),
         mode: GameModeSlugSchema.optional(),
       }).optional(),
     )

@@ -7,9 +7,20 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.enableCors({
-    origin: configService.get<string[]>('corsAllowedOrigins') ?? [],
-    methods: ['GET', 'POST', 'HEAD'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'x-stack-access-token',
+      'x-stack-access-type',
+      'x-stack-project-id',
+      'x-stack-publishable-client-key',
+      'x-stack-auth',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+    ],
     credentials: true,
   });
 

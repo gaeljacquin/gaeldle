@@ -80,6 +80,16 @@ export class GamesService {
     };
   }
 
+  async refreshAllGamesView() {
+    try {
+      await this.databaseService.db.execute(
+        sql`REFRESH MATERIALIZED VIEW all_games`,
+      );
+    } catch (e) {
+      console.error('Failed to refresh materialized view', e);
+    }
+  }
+
   async getRandomGame(
     excludeIds: number[],
     mode?: GameModeSlug,
@@ -158,6 +168,8 @@ export class GamesService {
         .where(eq(games.igdbId, igdbId))
         .returning();
 
+      await this.refreshAllGamesView();
+
       return {
         game: updatedGame,
         operation: 'updated',
@@ -168,6 +180,8 @@ export class GamesService {
       .insert(games)
       .values(gameData)
       .returning();
+
+    await this.refreshAllGamesView();
 
     return {
       game: newGame,
@@ -185,6 +199,10 @@ export class GamesService {
       .where(eq(games.id, id))
       .returning();
 
+    if (updatedGame) {
+      await this.refreshAllGamesView();
+    }
+
     return updatedGame || null;
   }
 
@@ -194,6 +212,10 @@ export class GamesService {
       .where(eq(games.id, id))
       .returning({ id: games.id });
 
+    if (deletedGame) {
+      await this.refreshAllGamesView();
+    }
+
     return deletedGame?.id ?? null;
   }
 
@@ -202,6 +224,10 @@ export class GamesService {
       .delete(games)
       .where(inArray(games.id, ids))
       .returning({ id: games.id });
+
+    if (deletedRows.length > 0) {
+      await this.refreshAllGamesView();
+    }
 
     return deletedRows.map((row) => row.id);
   }

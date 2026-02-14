@@ -32,6 +32,16 @@ export class GamesService {
     return await this.databaseService.db.select().from(allGames);
   }
 
+  async getGameByIgdbId(igdbId: number): Promise<Game | null> {
+    const [game] = await this.databaseService.db
+      .select()
+      .from(games)
+      .where(eq(games.igdbId, igdbId))
+      .limit(1);
+
+    return game || null;
+  }
+
   async getArtworkGames(): Promise<Game[]> {
     return this.databaseService.db
       .select()

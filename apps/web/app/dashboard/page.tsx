@@ -24,6 +24,7 @@ import {
 } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 import { Game } from '@gaeldle/api-contract';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const [page, setPage] = useState(1);
@@ -140,14 +141,23 @@ export default function DashboardPage() {
                     'flex gap-6 p-4 border border-border bg-card hover:bg-accent/50 transition-colors'
                 )}
               >
-                <Timeline2Card
-                  game={game}
-                  showDate={false}
-                  className={cn(view === 'list' ? 'shrink-0' : null)}
-                />
+                <Link
+                  href={`/dashboard/games/${game.igdbId}`}
+                  className={cn(view === 'grid' ? 'block hover:scale-105 transition-transform' : 'shrink-0')}
+                >
+                  <Timeline2Card
+                    game={game}
+                    showDate={false}
+                  />
+                </Link>
                 {view === 'list' && (
                   <div className="flex flex-col justify-center min-w-0 flex-1">
-                    <h3 className="text-xl font-bold truncate">{game.name}</h3>
+                    <Link
+                      href={`/dashboard/games/${game.igdbId}`}
+                      className="hover:text-primary transition-colors"
+                    >
+                      <h3 className="text-xl font-bold truncate">{game.name}</h3>
+                    </Link>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1 mb-3">
                       {game.firstReleaseDate && (
                         <span className="bg-muted px-2 py-0.5 rounded text-xs font-medium">

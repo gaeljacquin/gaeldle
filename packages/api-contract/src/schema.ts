@@ -51,6 +51,7 @@ const gameObject = {
   id: games.id,
   igdbId: games.igdbId,
   name: games.name,
+  info: games.info,
   imageUrl: games.imageUrl,
   aiImageUrl: games.aiImageUrl,
   aiPrompt: games.aiPrompt,

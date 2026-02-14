@@ -33,6 +33,20 @@ export const GamesContract = {
       }),
     ),
 
+  get: oc
+    .route({ method: 'GET', path: '/games/:igdbId' })
+    .input(
+      z.object({
+        igdbId: z.coerce.number().int().positive(),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        data: GameSelectSchema,
+      }),
+    ),
+
   getArtwork: oc
     .route({ method: 'GET', path: '/games/artwork' })
     .output(

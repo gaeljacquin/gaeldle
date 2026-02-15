@@ -21,11 +21,6 @@ export async function deleteGame(id: number): Promise<boolean> {
   return result.success;
 }
 
-export async function deleteBulkGames(ids: number[]): Promise<boolean> {
-  const result = await orpcClient.games.deleteBulk(ids);
-  return result.success;
-}
-
 export async function getPaginatedGames(
   page: number = 1,
   pageSize: number = 10,

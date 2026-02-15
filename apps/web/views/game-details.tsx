@@ -2,7 +2,7 @@
 
 import { use, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getGameByIgdbId, deleteGame } from '@/lib/services/game.service';
+import { getGameByIgdbId, deleteGame, syncGame } from '@/lib/services/game.service';
 import BackToDashboard from '@/components/back-to-dashboard';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -19,8 +19,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { IconTrash, IconCalendar, IconDeviceGamepad, IconLayersIntersect, IconExternalLink } from '@tabler/icons-react';
+import { IconTrash, IconCalendar, IconDeviceGamepad, IconLayersIntersect, IconExternalLink, IconRefresh } from '@tabler/icons-react';
 import { type ArtworkImage } from '@gaeldle/api-contract';
+import { cn } from '@/lib/utils';
 
 interface Company {
   name: string;
@@ -43,6 +44,19 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
   const { data: game, isLoading, error } = useQuery({
     queryKey: ['game', igdbId],
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
+  });
+
+  const syncMutation = useMutation({
+    mutationFn: () => syncGame(Number.parseInt(igdbId, 10)),
+    onSuccess: () => {
+      toast.success('Game info was updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+    },
+    onError: (err) => {
+      toast.error('Failed to sync game info');
+      console.error(err);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -120,12 +134,28 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
           </Card>
 
           <div className="space-y-3 pt-2">
-            {info?.url && (
-              <Button variant="outline" className="w-full font-bold h-10 rounded-none" onClick={() => window.open(info.url, '_blank')}>
-                <IconExternalLink className="mr-2 size-4" />
-                View on IGDB
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full font-bold h-10 rounded-none bg-primary/90 hover:bg-primary text-white hover:text-white",
+                info?.url ? 'cursor-pointer' : 'cursor-not-allowed',
+              )}
+              onClick={() => window.open(info?.url, '_blank')}
+              disabled={!info?.url}
+            >
+              <IconExternalLink className="mr-2 size-4" />
+              View on IGDB
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full font-bold h-10 rounded-none cursor-pointer bg-sky-400 hover:bg-sky-500 text-white hover:text-white"
+              disabled={syncMutation.isPending}
+              onClick={() => syncMutation.mutate()}
+            >
+              <IconRefresh className={cn("mr-2 size-4", syncMutation.isPending && "animate-spin")} />
+              {syncMutation.isPending ? 'Syncing...' : 'Sync with IGDB'}
+            </Button>
 
             <Button
               variant="destructive"
@@ -169,7 +199,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
               {game.firstReleaseDate && (
                 <div className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-none text-xs font-bold uppercase tracking-wider">
                   <IconCalendar size={14} />
-                  {new Date(game.firstReleaseDate * 1000).getFullYear()}
+                  {new Date(game.firstReleaseDate * 1000).toLocaleDateString()}
                 </div>
               )}
               <div className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-none text-xs font-bold uppercase tracking-wider">

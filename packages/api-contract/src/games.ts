@@ -11,6 +11,13 @@ export const GameModeSlugSchema = z.enum([
   'specifications',
 ]);
 
+export const SyncOperationSchema = z.enum([
+  'created',
+  'updated',
+  // 'no_change',
+]);
+export type SyncOperation = z.infer<typeof SyncOperationSchema>;
+
 export const GamesContract = {
   list: oc
     .route({ method: 'GET', path: '/games' })
@@ -101,7 +108,7 @@ export const GamesContract = {
       z.object({
         success: z.boolean(),
         message: z.string(),
-        operation: z.string(),
+        operation: SyncOperationSchema,
         data: GameSelectSchema,
       }),
     ),

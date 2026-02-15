@@ -60,3 +60,8 @@ export async function searchGames(query: string, limit: number = 100, mode?: Gam
 
   return result.data;
 }
+
+export async function syncGame(igdbId: number) {
+  const result = await orpcClient.games.sync({ igdb_id: igdbId });
+  return result;
+}

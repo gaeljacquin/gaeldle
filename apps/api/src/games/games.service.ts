@@ -10,16 +10,15 @@ import {
   type SQL,
 } from 'drizzle-orm';
 import { DatabaseService } from '@/db/database.service';
-import { games, type Game, gameObject } from '@gaeldle/api-contract';
+import {
+  games,
+  type Game,
+  gameObject,
+  type SyncOperation,
+  GameUpdate,
+} from '@gaeldle/api-contract';
 import type { GameModeSlug } from '@/games/game-mode';
 import { IgdbService, type IgdbGame } from '@/games/igdb.service';
-
-export type GameUpdate = Partial<
-  Omit<
-    InferInsertModel<typeof games>,
-    'id' | 'createdAt' | 'updatedAt' | 'igdbId'
-  >
->;
 
 @Injectable()
 export class GamesService {
@@ -148,9 +147,10 @@ export class GamesService {
     return gamesList;
   }
 
-  async syncGameByIgdbId(
-    igdbId: number,
-  ): Promise<{ game: Game; operation: 'created' | 'updated' } | null> {
+  async syncGameByIgdbId(igdbId: number): Promise<{
+    game: Game;
+    operation: SyncOperation;
+  } | null> {
     const igdbGame = await this.igdbService.getGameById(igdbId);
 
     if (!igdbGame) {
@@ -178,7 +178,7 @@ export class GamesService {
       await this.refreshAllGamesView();
 
       return {
-        game: updatedGame,
+        game: updatedGame as unknown as Game,
         operation: 'updated',
       };
     }
@@ -191,7 +191,7 @@ export class GamesService {
     await this.refreshAllGamesView();
 
     return {
-      game: newGame,
+      game: newGame as unknown as Game,
       operation: 'created',
     };
   }

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "tanstack": {
+      "command": "npx",
+      "args": [
+        "@tanstack/cli",
+        "mcp"
+      ]
+    }
+  }
+}

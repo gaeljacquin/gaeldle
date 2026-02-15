@@ -10,7 +10,7 @@ import {
   type SQL,
 } from 'drizzle-orm';
 import { DatabaseService } from '@/db/database.service';
-import { allGames, games, type Game, gameObject } from '@gaeldle/api-contract';
+import { games, type Game, gameObject } from '@gaeldle/api-contract';
 import type { GameModeSlug } from '@/games/game-mode';
 import { IgdbService, type IgdbGame } from '@/games/igdb.service';
 
@@ -29,30 +29,31 @@ export class GamesService {
   ) {}
 
   async getAllGames(): Promise<Game[]> {
-    return await this.databaseService.db
+    return (await this.databaseService.db
       .select(gameObject)
       .from(games)
-      .orderBy(desc(games.id));
+      .orderBy(desc(games.id))) as Game[];
   }
 
   async getGameByIgdbId(igdbId: number): Promise<Game | null> {
-    const [game] = await this.databaseService.db
+    const results = (await this.databaseService.db
       .select(gameObject)
       .from(games)
       .where(eq(games.igdbId, igdbId))
-      .limit(1);
+      .limit(1)) as Game[];
+    const game = results[0];
 
     return game || null;
   }
 
   async getArtworkGames(): Promise<Game[]> {
-    return this.databaseService.db
+    return (await this.databaseService.db
       .select(gameObject)
       .from(games)
       .where(
         and(sql`artworks IS NOT NULL`, sql`json_array_length(artworks) > 0`),
       )
-      .orderBy(desc(games.id));
+      .orderBy(desc(games.id))) as Game[];
   }
 
   async getGamesPage(
@@ -63,7 +64,7 @@ export class GamesService {
     const offset = (page - 1) * pageSize;
     const where = q ? sql`name ILIKE ${'%' + q + '%'}` : undefined;
 
-    const [gamesList, totalCount] = await Promise.all([
+    const [gamesList, totalCount] = (await Promise.all([
       this.databaseService.db
         .select(gameObject)
         .from(games)
@@ -75,7 +76,7 @@ export class GamesService {
         .select({ count: sql<number>`count(*)` })
         .from(games)
         .where(where),
-    ]);
+    ])) as [Game[], { count: number }[]];
 
     return {
       games: gamesList,
@@ -83,13 +84,13 @@ export class GamesService {
     };
   }
 
-  async refreshAllGamesView() {
+  async refreshAllGamesView(): Promise<void> {
     try {
       await this.databaseService.db.execute(
         sql`REFRESH MATERIALIZED VIEW all_games`,
       );
-    } catch (e) {
-      console.error('Failed to refresh materialized view', e);
+    } catch (error: unknown) {
+      console.error('Failed to refresh materialized view', error);
     }
   }
 
@@ -114,12 +115,13 @@ export class GamesService {
       conditions.push(sql`first_release_date IS NOT NULL`);
     }
 
-    const [game] = await this.databaseService.db
+    const results = (await this.databaseService.db
       .select(gameObject)
       .from(games)
       .where(and(...conditions))
       .orderBy(sql`RANDOM()`)
-      .limit(1);
+      .limit(1)) as Game[];
+    const game = results[0];
 
     return game || null;
   }
@@ -138,12 +140,12 @@ export class GamesService {
       );
     }
 
-    const gamesList = await this.databaseService.db
+    const gamesList = (await this.databaseService.db
       .select(gameObject)
       .from(games)
       .where(and(...whereClause))
       .limit(limit)
-      .orderBy(desc(games.id));
+      .orderBy(desc(games.id))) as Game[];
 
     return gamesList;
   }
@@ -159,21 +161,23 @@ export class GamesService {
 
     const gameData = this.mapIgdbToGame(igdbGame);
 
-    const [existingGame] = await this.databaseService.db
+    const results = (await this.databaseService.db
       .select()
       .from(games)
       .where(eq(games.igdbId, igdbId))
-      .limit(1);
+      .limit(1)) as (typeof games.$inferSelect)[];
+    const existingGame = results[0];
 
     if (existingGame) {
-      const [updatedGame] = await this.databaseService.db
+      const updatedResults = (await this.databaseService.db
         .update(games)
         .set({
           ...gameData,
           updatedAt: new Date(),
         })
         .where(eq(games.igdbId, igdbId))
-        .returning();
+        .returning()) as Game[];
+      const updatedGame = updatedResults[0];
 
       await this.refreshAllGamesView();
 
@@ -183,10 +187,11 @@ export class GamesService {
       };
     }
 
-    const [newGame] = await this.databaseService.db
+    const newResults = (await this.databaseService.db
       .insert(games)
       .values(gameData)
-      .returning();
+      .returning()) as Game[];
+    const newGame = newResults[0];
 
     await this.refreshAllGamesView();
 
@@ -197,14 +202,15 @@ export class GamesService {
   }
 
   async updateGame(id: number, updates: GameUpdate): Promise<Game | null> {
-    const [updatedGame] = await this.databaseService.db
+    const results = (await this.databaseService.db
       .update(games)
       .set({
         ...updates,
         updatedAt: new Date(),
       })
       .where(eq(games.id, id))
-      .returning();
+      .returning()) as Game[];
+    const updatedGame = results[0];
 
     if (updatedGame) {
       await this.refreshAllGamesView();
@@ -214,10 +220,11 @@ export class GamesService {
   }
 
   async deleteGame(id: number): Promise<number | null> {
-    const [deletedGame] = await this.databaseService.db
+    const results = (await this.databaseService.db
       .delete(games)
       .where(eq(games.id, id))
-      .returning({ id: games.id });
+      .returning({ id: games.id })) as { id: number }[];
+    const deletedGame = results[0];
 
     if (deletedGame) {
       await this.refreshAllGamesView();
@@ -227,10 +234,10 @@ export class GamesService {
   }
 
   async deleteGames(ids: number[]): Promise<number[]> {
-    const deletedRows = await this.databaseService.db
+    const deletedRows = (await this.databaseService.db
       .delete(games)
       .where(inArray(games.id, ids))
-      .returning({ id: games.id });
+      .returning({ id: games.id })) as { id: number }[];
 
     if (deletedRows.length > 0) {
       await this.refreshAllGamesView();

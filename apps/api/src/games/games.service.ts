@@ -10,7 +10,7 @@ import {
   type SQL,
 } from 'drizzle-orm';
 import { DatabaseService } from '@/db/database.service';
-import { allGames, games, type Game, gameObject } from '@gaeldle/api-contract';
+import { games, type Game, gameObject } from '@gaeldle/api-contract';
 import type { GameModeSlug } from '@/games/game-mode';
 import { IgdbService, type IgdbGame } from '@/games/igdb.service';
 

@@ -26,8 +26,6 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
 
-  const wrongGuessIds = useMemo(() => wrongGuesses.map(g => g.id), [wrongGuesses]);
-
   // Use oRPC with TanStack Query's useQuery hook
   const { data: allGamesData, isLoading: isLoadingAll } = useQuery(
     orpc.games.list.queryOptions({
@@ -44,12 +42,11 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   } = useQuery(
     orpc.games.getRandom.queryOptions({
       input: {
-        ...(wrongGuessIds.length > 0 ? { excludeIds: wrongGuessIds } : {}),
         mode
       },
       select: (res) => res.data,
       enabled: true,
-      staleTime: 0, // Ensure we can get a new one on reset
+      staleTime: Infinity, // Ensure it stays until we explicitly refetch
     })
   );
 

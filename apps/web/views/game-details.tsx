@@ -17,6 +17,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { IconTrash, IconCalendar, IconDeviceGamepad, IconLayersIntersect, IconExternalLink, IconRefresh } from '@tabler/icons-react';
@@ -114,24 +121,46 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
       <div className="flex flex-col lg:flex-row gap-10">
         {/* Sidebar: Cover Art & Actions */}
         <div className="w-full lg:w-80 shrink-0 space-y-6">
-          <Card className="overflow-hidden border-2 rounded-none shadow-xl">
-            <div className="relative aspect-3/4 w-full">
-              {game.imageUrl ? (
-                <Image
-                  src={game.imageUrl}
-                  alt={game.name}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 768px) 100vw, 320px"
-                />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
-                  No Cover Art
+          <Dialog>
+            <DialogTrigger render={<Card className="overflow-hidden border-2 rounded-none shadow-xl cursor-pointer group hover:border-primary/50 transition-colors" />}>
+                <div className="relative aspect-3/4 w-full">
+                  {game.imageUrl ? (
+                    <>
+                      <Image
+                        src={game.imageUrl}
+                        alt={game.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        priority
+                        sizes="(max-width: 768px) 100vw, 320px"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <IconExternalLink className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-8" />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
+                      No Cover Art
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </Card>
+            </DialogTrigger>
+            {game.imageUrl && (
+              <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
+                <DialogHeader className="sr-only">
+                  <DialogTitle>{game.name} Cover Art</DialogTitle>
+                </DialogHeader>
+                <div className="relative w-full h-[85vh]">
+                  <Image
+                    src={game.imageUrl.replace('t_720p', 't_original')}
+                    alt={game.name}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              </DialogContent>
+            )}
+          </Dialog>
 
           <div className="space-y-3 pt-2">
             <Button
@@ -224,19 +253,37 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                 <IconLayersIntersect size={20} />
                 Artworks ({artworks.length})
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {artworks.map((art: ArtworkImage, index: number) => (
-                  <Card key={art.image_id || index} className="overflow-hidden border-2 rounded-none bg-muted/20 group">
-                    <div className="relative aspect-video w-full">
-                      <Image
-                        src={art.url}
-                        alt={`${game.name} artwork ${index + 1}`}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
-                      />
-                    </div>
-                  </Card>
+                  <Dialog key={art.image_id || index}>
+                    <DialogTrigger render={<Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />}>
+                        <div className="relative aspect-video w-full">
+                          <Image
+                            src={art.url.replace('t_720p', 't_cover_big')}
+                            alt={`${game.name} artwork ${index + 1}`}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 200px"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                            <IconExternalLink className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-5" />
+                          </div>
+                        </div>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-6xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-6xl">
+                      <DialogHeader className="sr-only">
+                        <DialogTitle>{game.name} Artwork {index + 1}</DialogTitle>
+                      </DialogHeader>
+                      <div className="relative w-full h-[85vh]">
+                        <Image
+                          src={art.url.replace('t_720p', 't_original')}
+                          alt={`${game.name} artwork ${index + 1}`}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 ))}
               </div>
             </div>

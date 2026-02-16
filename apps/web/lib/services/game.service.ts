@@ -65,3 +65,11 @@ export async function syncGame(igdbId: number) {
   const result = await orpcClient.games.sync({ igdb_id: igdbId });
   return result;
 }
+
+export async function testUpload(image: string, extension: string = 'jpg') {
+  const result = await orpcClient.games.testUpload({
+    image,
+    extension,
+  });
+  return result;
+}

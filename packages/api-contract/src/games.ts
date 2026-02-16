@@ -153,6 +153,21 @@ export const GamesContract = {
         data: z.object({ deletedIds: z.array(z.number()) }),
       }),
     ),
+
+  testUpload: oc
+    .route({ method: 'POST', path: '/games/test-upload' })
+    .input(
+      z.object({
+        image: z.string(), // base64
+        extension: z.string().default('jpg'),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        url: z.string(),
+      }),
+    ),
 } as const;
 
 export interface GameApiResponse {

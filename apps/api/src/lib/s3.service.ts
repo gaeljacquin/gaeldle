@@ -8,10 +8,11 @@ export class S3Service {
   private readonly client: S3Client;
   private readonly bucketName: string;
 
-  constructor(private configService: ConfigService<AppConfiguration>) {
+  constructor(private readonly configService: ConfigService<AppConfiguration>) {
     this.client = new S3Client({
       region: 'auto',
       endpoint: this.configService.get('r2Endpoint', { infer: true }),
+      forcePathStyle: true,
       credentials: {
         accessKeyId: this.configService.get('r2AccessKeyId', { infer: true })!,
         secretAccessKey: this.configService.get('r2SecretAccessKey', {

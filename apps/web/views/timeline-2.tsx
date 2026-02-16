@@ -225,7 +225,7 @@ export default function Timeline2() {
                 </div>
               </div>
 
-              {isGameOver && (
+              {isGameOver ? (
                 <div className="mt-8 border border-border bg-card/60 p-8 text-center animate-in fade-in zoom-in duration-300">
                   <div className="space-y-4">
                     <p className="text-2xl font-bold text-destructive">Game Over!</p>
@@ -242,7 +242,7 @@ export default function Timeline2() {
                     Play Again
                   </Button>
                 </div>
-              )}
+              ) : null}
             </div>
           </CardContent>
         </Card>

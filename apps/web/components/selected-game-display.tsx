@@ -52,7 +52,7 @@ export default function SelectedGameDisplay({
         <p className="text-sm font-bold truncate text-foreground uppercase tracking-tight">{selectedGame.name}</p>
         <p className="text-xs text-muted-foreground uppercase tracking-widest">Selected</p>
       </div>
-      {onClearSelection && (
+      {onClearSelection ? (
         <button
           onClick={onClearSelection}
           className="absolute top-1 right-1 p-1 text-muted-foreground transition-all opacity-0 group-hover:opacity-100 hover:text-foreground cursor-pointer"
@@ -60,7 +60,7 @@ export default function SelectedGameDisplay({
         >
           <IconX className="size-3" />
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

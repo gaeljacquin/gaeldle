@@ -9,6 +9,15 @@
 - **Auth**: Stack Auth.
 - **State Management**: Zustand (stores) and TanStack Query (API).
 
+## Best Practices & Specialized Skills
+
+This project follows Vercel's React best practices. Agents MUST use the following skills when developing frontend features:
+- `vercel-react-best-practices`: Core React/Next.js implementation standards.
+- `vercel-composition-patterns`: Component composition and structure patterns.
+- `web-design-guidelines`: UI/UX and design consistency.
+
+These skills are located in `apps/web/.agents/skills/`.
+
 ## Theming & Styling
 
 - **Theme**: Teal (Gray base, Radius 0, Lyra style).

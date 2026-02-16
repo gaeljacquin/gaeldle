@@ -160,7 +160,7 @@ export function useSpecificationsGame() {
         setAllGames(games);
 
         // Get a random game for the answer
-        const randomGame = await getRandomGame();
+        const randomGame = await getRandomGame([], 'specifications');
         setTargetGame(randomGame);
       } catch (err) {
         console.error('Error loading games:', err);
@@ -310,7 +310,7 @@ export function useSpecificationsGame() {
       setRevealedClue(null);
 
       // Get a new random game
-      const randomGame = await getRandomGame();
+      const randomGame = await getRandomGame([], 'specifications');
       setTargetGame(randomGame);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reset game');

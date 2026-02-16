@@ -282,7 +282,7 @@ export default function Timeline() {
                 </div>
               </div>
 
-              {!isGameOver && (
+              {isGameOver ? null : (
                 <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                   <Button
                     onClick={handleSubmit}
@@ -304,7 +304,7 @@ export default function Timeline() {
                 </div>
               )}
 
-              {isGameOver && (
+              {isGameOver ? (
                 <div className="mt-8 border border-border bg-card/60 p-8 text-center animate-in fade-in zoom-in duration-300">
                   {isWinner ? (
                     <div className="space-y-2">
@@ -345,7 +345,7 @@ export default function Timeline() {
                     {isWinner ? 'Keep Playing' : 'Play Again'}
                   </Button>
                 </div>
-              )}
+              ) : null}
             </div>
           </CardContent>
         </Card>

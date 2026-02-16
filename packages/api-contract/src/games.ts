@@ -11,6 +11,13 @@ export const GameModeSlugSchema = z.enum([
   'specifications',
 ]);
 
+export const SyncOperationSchema = z.enum([
+  'created',
+  'updated',
+  // 'no_change',
+]);
+export type SyncOperation = z.infer<typeof SyncOperationSchema>;
+
 export const GamesContract = {
   list: oc
     .route({ method: 'GET', path: '/games' })
@@ -30,6 +37,20 @@ export const GamesContract = {
           pageSize: z.number(),
           total: z.number(),
         }).optional(),
+      }),
+    ),
+
+  get: oc
+    .route({ method: 'GET', path: '/games/:igdbId' })
+    .input(
+      z.object({
+        igdbId: z.coerce.number().int().positive(),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        data: GameSelectSchema,
       }),
     ),
 
@@ -62,7 +83,10 @@ export const GamesContract = {
     .route({ method: 'GET', path: '/games/random' })
     .input(
       z.object({
-        excludeIds: z.array(z.coerce.number()).optional(),
+        excludeIds: z.preprocess((val) => {
+          if (!val) return [];
+          return Array.isArray(val) ? val : [val];
+        }, z.array(z.coerce.number())).optional(),
         mode: GameModeSlugSchema.optional(),
       }).optional(),
     )
@@ -84,7 +108,7 @@ export const GamesContract = {
       z.object({
         success: z.boolean(),
         message: z.string(),
-        operation: z.string(),
+        operation: SyncOperationSchema,
         data: GameSelectSchema,
       }),
     ),

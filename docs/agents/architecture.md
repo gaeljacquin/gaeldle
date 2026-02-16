@@ -31,6 +31,15 @@
 - API actuator: `GET /actuator/health`.
 - Web dashboard: `http://localhost:3000/health`.
 
+## Code Quality & Standards
+
+These standards apply across the entire monorepo (API, Web, and Packages).
+
+- **Avoid Negated Conditions**: When using ternary or conditional operators, avoid negating the condition if an `else` branch (or `null` branch) is present.
+  - **Bad**: `!isGameOver ? <Game /> : null`
+  - **Good**: `isGameOver ? null : <Game />` or `!isGameOver && <Game />`
+  - **Rationale**: Negated conditions are generally harder to read and are flagged by SonarQube (rule S1264).
+
 ## Environment Variables
 
 ### API (`apps/api`)

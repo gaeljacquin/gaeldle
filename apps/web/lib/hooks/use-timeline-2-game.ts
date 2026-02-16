@@ -23,7 +23,7 @@ export function useTimeline2Game() {
       setIsLoading(true);
 
       // Get first card for timeline (with date revealed)
-      const firstCard = await getRandomGame([]);
+      const firstCard = await getRandomGame([], 'timeline-2');
 
       // Filter games with valid release dates
       if (!firstCard.firstReleaseDate) {
@@ -63,7 +63,7 @@ export function useTimeline2Game() {
   const dealNextCard = useCallback(async () => {
     try {
       const excludedIds = getExcludedIds();
-      const nextCard = await getRandomGame(excludedIds);
+      const nextCard = await getRandomGame(excludedIds, 'timeline-2');
 
       if (!nextCard.firstReleaseDate) {
         // No more valid cards, end game

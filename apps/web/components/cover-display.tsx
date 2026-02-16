@@ -100,12 +100,12 @@ export default function CoverDisplay({
         className
       )}
     >
-      {(isProcessing || !shouldShowImage) && (
+      {isProcessing || !shouldShowImage ? (
         <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
           <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
-      )}
-      {shouldShowImage && displayUrl && (
+      ) : null}
+      {shouldShowImage && displayUrl ? (
         <Image
           src={displayUrl}
           alt={isGameOver ? game.name : 'Game cover'}
@@ -114,12 +114,12 @@ export default function CoverDisplay({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           priority
         />
-      )}
-      {isGameOver && (
+      ) : null}
+      {isGameOver ? (
         <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 text-center border-t">
           <p className="font-semibold">{game.name}</p>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -171,10 +171,10 @@ export default function GameSearch({
           value={searchValue}
           onChange={handleInputChange}
           disabled={disabled}
-          onFocus={() => searchValue.length > 0 && setIsOpen(true)}
+          onFocus={() => (searchValue.length > 0 ? setIsOpen(true) : null)}
           className="h-full"
         />
-        {searchValue.length > 0 && (
+        {searchValue.length > 0 ? (
           <InputGroupAddon align="inline-end">
             <InputGroupButton
               onClick={handleClear}
@@ -185,14 +185,14 @@ export default function GameSearch({
               <IconX className="size-4" />
             </InputGroupButton>
           </InputGroupAddon>
-        )}
+        ) : null}
       </InputGroup>
 
-      {isOpen && searchValue.length > 0 && (
+      {isOpen && searchValue.length > 0 ? (
         <Card className="absolute top-full left-0 right-0 z-50 mt-1 shadow-xl p-0 ring-1 ring-foreground/10 bg-card rounded-none">
           {renderSearchContent()}
         </Card>
-      )}
+      ) : null}
     </div>
   );
 }

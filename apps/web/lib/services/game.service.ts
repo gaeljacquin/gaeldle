@@ -7,8 +7,23 @@ export async function getAllGames(mode?: GameModeSlug): Promise<Game[]> {
     return result.data;
   }
 
-  const result = await orpcClient.games.list();
+  const result = await orpcClient.games.list({});
   return result.data;
+}
+
+export async function getGameByIgdbId(igdbId: number): Promise<Game> {
+  const result = await orpcClient.games.get({ igdbId });
+  return result.data;
+}
+
+export async function deleteGame(id: number): Promise<boolean> {
+  const result = await orpcClient.games.delete({ id });
+  return result.success;
+}
+
+export async function deleteBulkGames(ids: number[]): Promise<boolean> {
+  const result = await orpcClient.games.deleteBulk(ids);
+  return result.success;
 }
 
 export async function getPaginatedGames(
@@ -44,4 +59,9 @@ export async function searchGames(query: string, limit: number = 100, mode?: Gam
   });
 
   return result.data;
+}
+
+export async function syncGame(igdbId: number) {
+  const result = await orpcClient.games.sync({ igdb_id: igdbId });
+  return result;
 }

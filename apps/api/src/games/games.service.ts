@@ -10,16 +10,15 @@ import {
   type SQL,
 } from 'drizzle-orm';
 import { DatabaseService } from '@/db/database.service';
-import { allGames, games, type Game } from '@gaeldle/api-contract';
+import {
+  games,
+  type Game,
+  gameObject,
+  type SyncOperation,
+  GameUpdate,
+} from '@gaeldle/api-contract';
 import type { GameModeSlug } from '@/games/game-mode';
 import { IgdbService, type IgdbGame } from '@/games/igdb.service';
-
-export type GameUpdate = Partial<
-  Omit<
-    InferInsertModel<typeof games>,
-    'id' | 'createdAt' | 'updatedAt' | 'igdbId'
-  >
->;
 
 @Injectable()
 export class GamesService {
@@ -29,12 +28,25 @@ export class GamesService {
   ) {}
 
   async getAllGames(): Promise<Game[]> {
-    return await this.databaseService.db.select().from(allGames);
+    return await this.databaseService.db
+      .select(gameObject)
+      .from(games)
+      .orderBy(desc(games.id));
+  }
+
+  async getGameByIgdbId(igdbId: number): Promise<Game | null> {
+    const [game] = await this.databaseService.db
+      .select(gameObject)
+      .from(games)
+      .where(eq(games.igdbId, igdbId))
+      .limit(1);
+
+    return game || null;
   }
 
   async getArtworkGames(): Promise<Game[]> {
     return this.databaseService.db
-      .select()
+      .select(gameObject)
       .from(games)
       .where(
         and(sql`artworks IS NOT NULL`, sql`json_array_length(artworks) > 0`),
@@ -52,7 +64,7 @@ export class GamesService {
 
     const [gamesList, totalCount] = await Promise.all([
       this.databaseService.db
-        .select()
+        .select(gameObject)
         .from(games)
         .where(where)
         .limit(pageSize)
@@ -70,6 +82,16 @@ export class GamesService {
     };
   }
 
+  async refreshAllGamesView() {
+    try {
+      await this.databaseService.db.execute(
+        sql`REFRESH MATERIALIZED VIEW all_games`,
+      );
+    } catch (e) {
+      console.error('Failed to refresh materialized view', e);
+    }
+  }
+
   async getRandomGame(
     excludeIds: number[],
     mode?: GameModeSlug,
@@ -85,10 +107,14 @@ export class GamesService {
         sql`artworks IS NOT NULL`,
         sql`json_array_length(artworks) > 0`,
       );
+    } else if (mode === 'cover-art' || mode === 'image-ai') {
+      conditions.push(sql`image_url IS NOT NULL`);
+    } else if (mode === 'timeline' || mode === 'timeline-2') {
+      conditions.push(sql`first_release_date IS NOT NULL`);
     }
 
     const [game] = await this.databaseService.db
-      .select()
+      .select(gameObject)
       .from(games)
       .where(and(...conditions))
       .orderBy(sql`RANDOM()`)
@@ -112,7 +138,7 @@ export class GamesService {
     }
 
     const gamesList = await this.databaseService.db
-      .select()
+      .select(gameObject)
       .from(games)
       .where(and(...whereClause))
       .limit(limit)
@@ -121,9 +147,10 @@ export class GamesService {
     return gamesList;
   }
 
-  async syncGameByIgdbId(
-    igdbId: number,
-  ): Promise<{ game: Game; operation: 'created' | 'updated' } | null> {
+  async syncGameByIgdbId(igdbId: number): Promise<{
+    game: Game;
+    operation: SyncOperation;
+  } | null> {
     const igdbGame = await this.igdbService.getGameById(igdbId);
 
     if (!igdbGame) {
@@ -148,8 +175,10 @@ export class GamesService {
         .where(eq(games.igdbId, igdbId))
         .returning();
 
+      await this.refreshAllGamesView();
+
       return {
-        game: updatedGame,
+        game: updatedGame as unknown as Game,
         operation: 'updated',
       };
     }
@@ -159,8 +188,10 @@ export class GamesService {
       .values(gameData)
       .returning();
 
+    await this.refreshAllGamesView();
+
     return {
-      game: newGame,
+      game: newGame as unknown as Game,
       operation: 'created',
     };
   }
@@ -175,6 +206,10 @@ export class GamesService {
       .where(eq(games.id, id))
       .returning();
 
+    if (updatedGame) {
+      await this.refreshAllGamesView();
+    }
+
     return updatedGame || null;
   }
 
@@ -184,6 +219,10 @@ export class GamesService {
       .where(eq(games.id, id))
       .returning({ id: games.id });
 
+    if (deletedGame) {
+      await this.refreshAllGamesView();
+    }
+
     return deletedGame?.id ?? null;
   }
 
@@ -192,6 +231,10 @@ export class GamesService {
       .delete(games)
       .where(inArray(games.id, ids))
       .returning({ id: games.id });
+
+    if (deletedRows.length > 0) {
+      await this.refreshAllGamesView();
+    }
 
     return deletedRows.map((row) => row.id);
   }

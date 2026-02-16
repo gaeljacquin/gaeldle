@@ -164,7 +164,7 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
                   </Button>
                 </div>
 
-                {!isGameOver && (
+                {isGameOver ? null : (
                   <SelectedGameDisplay
                     selectedGame={selectedGame}
                     onClearSelection={clearSelection}
@@ -182,7 +182,7 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
                  <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
               </div>
 
-              {isGameOver && (
+              {isGameOver ? (
                 <div className="border border-border bg-card/60 p-6 text-center animate-in fade-in zoom-in duration-300">
                   {isCorrect ? (
                     <div className="space-y-2">
@@ -204,7 +204,7 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
                     {isCorrect ? 'Keep Playing' : 'Play Again'}
                   </Button>
                 </div>
-              )}
+              ) : null}
 
               <div className="border border-dashed p-4 text-center opacity-70 hover:opacity-100 transition-opacity">
                 <DevModeToggle

@@ -1,5 +1,3 @@
-"use client";
-
 import { GameModeCard } from "@/components/game-mode-card";
 import { gameModes } from "@/lib/game-mode";
 import { appInfo } from "@/lib/app-info";

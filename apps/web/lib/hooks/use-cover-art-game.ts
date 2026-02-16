@@ -20,10 +20,16 @@ function getRandomArtwork(artworks: unknown): string | null {
 }
 
 export function useCoverArtGame(mode: CoverArtModeSlug) {
+  const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
+  const [wrongGuesses, setWrongGuesses] = useState<Game[]>([]);
+  const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+
   // Use oRPC with TanStack Query's useQuery hook
   const { data: allGamesData, isLoading: isLoadingAll } = useQuery(
     orpc.games.list.queryOptions({
-      input: undefined, // list() takes optional input
+      input: {}, // list() now takes an object
       select: (res) => res.data,
     })
   );
@@ -35,21 +41,17 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     isRefetching: isRefetchingTarget
   } = useQuery(
     orpc.games.getRandom.queryOptions({
-      input: { excludeIds: [], mode },
+      input: {
+        mode
+      },
       select: (res) => res.data,
       enabled: true,
-      staleTime: 0, // Ensure we can get a new one on reset
+      staleTime: Infinity, // Ensure it stays until we explicitly refetch
     })
   );
 
   const allGames = useMemo(() => allGamesData ?? [], [allGamesData]);
   const targetGame = targetGameData ?? null;
-
-  const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
-  const [wrongGuesses, setWrongGuesses] = useState<Game[]>([]);
-  const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
 
   const currentPixelSize = getPixelSizeForAttempt(MAX_ATTEMPTS - attemptsLeft, MAX_ATTEMPTS);
 

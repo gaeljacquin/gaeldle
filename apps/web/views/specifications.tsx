@@ -76,7 +76,7 @@ export default function Specifications() {
         </div>
 
         <div className="mx-auto max-w-6xl space-y-8">
-          {!isGameOver && (
+          {isGameOver ? null : (
             <div className="mx-auto flex max-w-2xl flex-col gap-4">
               <div className="flex flex-col gap-3 sm:flex-row items-stretch">
                 <div className="flex-1">
@@ -114,7 +114,7 @@ export default function Specifications() {
               <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
             </div>
 
-            {!isGameOver && (
+            {isGameOver ? null : (
               <Button
                 variant="outline"
                 size="sm"
@@ -133,7 +133,7 @@ export default function Specifications() {
             onReveal={revealClue}
           />
 
-          {!isGameOver && guesses.length > 0 && (
+          {!isGameOver && guesses.length > 0 ? (
             <div className="flex flex-wrap items-center justify-center gap-6 text-[10px] uppercase tracking-widest font-bold">
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 bg-green-600/50 border border-green-600"></div>
@@ -148,9 +148,9 @@ export default function Specifications() {
                 <span className="text-muted-foreground">Incorrect</span>
               </div>
             </div>
-          )}
+          ) : null}
 
-          {isGameOver && (
+          {isGameOver ? (
             <div className="mx-auto max-w-2xl">
               <SpecificationsGameOver
                 isCorrect={isCorrect}
@@ -161,7 +161,7 @@ export default function Specifications() {
                 showingAnswer={showAnswerSpecs}
               />
             </div>
-          )}
+          ) : null}
 
           <Card className="border shadow-none bg-muted/5 p-0 overflow-hidden">
             <CardContent className="p-0">

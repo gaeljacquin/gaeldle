@@ -10,6 +10,7 @@ import {
   text,
 } from 'drizzle-orm/pg-core';
 import { createSelectSchema, createInsertSchema } from 'drizzle-zod';
+import { z } from 'zod';
 
 export const games = pgTable(
   'game',
@@ -47,10 +48,11 @@ export const games = pgTable(
   (table) => [index('game_name_idx').on(table.name)],
 );
 
-const gameObject = {
+export const gameObject = {
   id: games.id,
   igdbId: games.igdbId,
   name: games.name,
+  info: games.info,
   imageUrl: games.imageUrl,
   aiImageUrl: games.aiImageUrl,
   aiPrompt: games.aiPrompt,
@@ -82,4 +84,5 @@ export const GameUpdateInputSchema = GameInsertSchema.omit({
   updatedAt: true,
   igdbId: true,
 }).partial();
+export type GameUpdate = z.infer<typeof GameUpdateInputSchema>;
 export type Game = typeof allGames.$inferSelect;

@@ -9,6 +9,10 @@ export type AppConfiguration = {
   databaseUrl: string;
   twitchClientId: string;
   twitchClientSecret: string;
+  r2Endpoint: string;
+  r2AccessKeyId: string;
+  r2SecretAccessKey: string;
+  r2BucketName: string;
 };
 
 const configuration = (): AppConfiguration => {
@@ -43,6 +47,10 @@ const configuration = (): AppConfiguration => {
     databaseUrl: process.env.DATABASE_URL ?? '',
     twitchClientId: process.env.TWITCH_CLIENT_ID ?? '',
     twitchClientSecret: process.env.TWITCH_CLIENT_SECRET ?? '',
+    r2Endpoint: process.env.R2_ENDPOINT ?? '',
+    r2AccessKeyId: process.env.R2_ACCESS_KEY_ID ?? '',
+    r2SecretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? '',
+    r2BucketName: process.env.R2_BUCKET_NAME ?? 'gaeldle-image-gen',
   };
 };
 export default configuration;

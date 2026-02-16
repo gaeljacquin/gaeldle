@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
+import { S3Service } from '@/lib/s3.service';
 import { AuthModule } from '@/auth/auth.module';
 import configuration from '@/config/configuration';
 import { GamesModule } from '@/games/games.module';
@@ -31,6 +32,7 @@ const envFilePath = [
     GamesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, S3Service],
+  exports: [S3Service],
 })
 export class AppModule {}

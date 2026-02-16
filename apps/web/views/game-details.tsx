@@ -29,7 +29,7 @@ import { useRouter } from 'next/navigation';
 import { IconTrash, IconCalendar, IconDeviceGamepad, IconLayersIntersect, IconExternalLink, IconRefresh, IconBrush } from '@tabler/icons-react';
 import { type ArtworkImage } from '@gaeldle/api-contract';
 import { cn } from '@/lib/utils';
-import { PLACEHOLDER_IMAGE } from '@/lib/constants';
+import { PLACEHOLDER_IMAGE_R2 } from '@/lib/constants';
 
 interface Company {
   name: string;
@@ -301,7 +301,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                   <DialogTrigger nativeButton={false} render={<Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />}>
                       <div className="relative aspect-square w-full">
                         <Image
-                          src={game.aiImageUrl || PLACEHOLDER_IMAGE}
+                          src={game.aiImageUrl || PLACEHOLDER_IMAGE_R2}
                           alt={`${game.name} AI Image`}
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -318,7 +318,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                     </DialogHeader>
                     <div className="relative w-full h-[85vh]">
                       <Image
-                        src={game.aiImageUrl || PLACEHOLDER_IMAGE}
+                        src={game.aiImageUrl || PLACEHOLDER_IMAGE_R2}
                         alt={`${game.name} AI Image`}
                         fill
                         className="object-contain"

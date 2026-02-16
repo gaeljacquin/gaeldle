@@ -4,7 +4,7 @@ import { GameSelectSchema, GameUpdateInputSchema, type Game } from './schema';
 
 export const GameModeSlugSchema = z.enum([
   'cover-art',
-  'image-ai',
+  'image-gen',
   'artwork',
   'timeline',
   'timeline-2',
@@ -161,7 +161,7 @@ export interface GameApiResponse {
   error?: string;
 }
 
-export type CoverArtModeSlug = 'cover-art' | 'image-ai' | 'artwork';
+export type CoverArtModeSlug = 'cover-art' | 'image-gen' | 'artwork';
 
 export type GameModeSlug =
   | CoverArtModeSlug

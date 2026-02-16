@@ -107,7 +107,7 @@ export class GamesService {
         sql`artworks IS NOT NULL`,
         sql`json_array_length(artworks) > 0`,
       );
-    } else if (mode === 'cover-art' || mode === 'image-ai') {
+    } else if (mode === 'cover-art' || mode === 'image-gen') {
       conditions.push(sql`image_url IS NOT NULL`);
     } else if (mode === 'timeline' || mode === 'timeline-2') {
       conditions.push(sql`first_release_date IS NOT NULL`);

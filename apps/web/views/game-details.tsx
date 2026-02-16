@@ -26,9 +26,10 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { IconTrash, IconCalendar, IconDeviceGamepad, IconLayersIntersect, IconExternalLink, IconRefresh } from '@tabler/icons-react';
+import { IconTrash, IconCalendar, IconDeviceGamepad, IconLayersIntersect, IconExternalLink, IconRefresh, IconBrush } from '@tabler/icons-react';
 import { type ArtworkImage } from '@gaeldle/api-contract';
 import { cn } from '@/lib/utils';
+import { PLACEHOLDER_IMAGE } from '@/lib/constants';
 
 interface Company {
   name: string;
@@ -122,7 +123,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
         {/* Sidebar: Cover Art & Actions */}
         <div className="w-full lg:w-80 shrink-0 space-y-6">
           <Dialog>
-            <DialogTrigger render={<Card className="overflow-hidden border-2 rounded-none shadow-xl cursor-pointer group hover:border-primary/50 transition-colors" />}>
+            <DialogTrigger nativeButton={false} render={<Card className="overflow-hidden border-2 rounded-none shadow-xl cursor-pointer group hover:border-primary/50 transition-colors" />}>
                 <div className="relative aspect-3/4 w-full">
                   {game.imageUrl ? (
                     <>
@@ -256,7 +257,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {artworks.map((art: ArtworkImage, index: number) => (
                   <Dialog key={art.image_id || index}>
-                    <DialogTrigger render={<Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />}>
+                    <DialogTrigger nativeButton={false} render={<Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />}>
                         <div className="relative aspect-video w-full">
                           <Image
                             src={art.url.replace('t_720p', 't_cover_big')}
@@ -288,6 +289,58 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
               </div>
             </div>
           )}
+
+          <div className="space-y-6">
+            <h2 className="text-lg font-black uppercase tracking-widest border-l-4 border-primary pl-4 flex items-center gap-2">
+              <IconBrush size={20} />
+              Image Gen
+            </h2>
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="w-full md:w-64 shrink-0">
+                <Dialog>
+                  <DialogTrigger nativeButton={false} render={<Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />}>
+                      <div className="relative aspect-square w-full">
+                        <Image
+                          src={game.aiImageUrl || PLACEHOLDER_IMAGE}
+                          alt={`${game.name} AI Image`}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          sizes="(max-width: 768px) 100vw, 256px"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                          <IconExternalLink className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-8" />
+                        </div>
+                      </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
+                    <DialogHeader className="sr-only">
+                      <DialogTitle>{game.name} AI Image</DialogTitle>
+                    </DialogHeader>
+                    <div className="relative w-full h-[85vh]">
+                      <Image
+                        src={game.aiImageUrl || PLACEHOLDER_IMAGE}
+                        alt={`${game.name} AI Image`}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <div className="flex-1 space-y-3">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">AI Prompt</h3>
+                <div className="bg-muted/30 border border-dashed p-6 rounded-none min-h-37.5 flex items-center">
+                  {game.aiPrompt ? (
+                    <p className="text-sm italic text-muted-foreground leading-relaxed">
+                      &quot;{game.aiPrompt}&quot;
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground/50 italic">No AI prompt available</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-4">
             {platforms && platforms.length > 0 && (

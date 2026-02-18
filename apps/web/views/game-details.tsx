@@ -2,11 +2,12 @@
 
 import { use, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getGameByIgdbId, deleteGame, syncGame } from '@/lib/services/game.service';
+import { getGameByIgdbId, deleteGame, syncGame, generateImage } from '@/lib/services/game.service';
 import BackToDashboard from '@/components/back-to-dashboard';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,6 +49,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
 
   const { data: game, isLoading, error } = useQuery({
     queryKey: ['game', igdbId],
@@ -77,6 +79,21 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
     onError: (err) => {
       toast.error('Failed to delete game');
       console.error(err);
+    },
+  });
+
+  const generateImageMutation = useMutation({
+    mutationFn: () => generateImage(Number.parseInt(igdbId, 10), aiPrompt),
+    onMutate: () => {
+      toast.loading('Generating AI image...', { id: 'generate-image' });
+    },
+    onSuccess: () => {
+      toast.success('AI image generated successfully', { id: 'generate-image' });
+      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+    },
+    onError: (err) => {
+      console.error(err);
+      toast.error('Failed to generate AI image', { id: 'generate-image' });
     },
   });
 
@@ -326,18 +343,41 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                     </div>
                   </DialogContent>
                 </Dialog>
+                {game.aiImageUrl === null && <p className='text-xs text-center'>Placeholder image</p>}
               </div>
               <div className="flex-1 space-y-3">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">AI Prompt</h3>
-                <div className="bg-muted/30 border border-dashed p-6 rounded-none min-h-37.5 flex items-center">
-                  {game.aiPrompt ? (
+                {game.aiPrompt && (
+                  <div className="bg-muted/30 border border-dashed p-4 rounded-none">
                     <p className="text-sm italic text-muted-foreground leading-relaxed">
                       &quot;{game.aiPrompt}&quot;
                     </p>
-                  ) : (
-                    <p className="text-sm text-muted-foreground/50 italic">No AI prompt available</p>
+                  </div>
+                )}
+                <Textarea
+                  placeholder="Enter a prompt to generate an AI image..."
+                  className="rounded-none resize-none min-h-30"
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  disabled={generateImageMutation.isPending}
+                />
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full font-bold h-10 rounded-none text-white hover:text-white",
+                    generateImageMutation.isPending
+                      ? "bg-purple-400 hover:bg-purple-400 cursor-not-allowed"
+                      : "bg-purple-600 hover:bg-purple-700 cursor-pointer",
                   )}
-                </div>
+                  onClick={() => generateImageMutation.mutate()}
+                  disabled={generateImageMutation.isPending || aiPrompt.trim().length === 0}
+                >
+                  <IconBrush className={cn(
+                    "mr-2 size-4",
+                    generateImageMutation.isPending && "animate-pulse"
+                  )} />
+                  {generateImageMutation.isPending ? 'Generating...' : 'Generate AI Image'}
+                </Button>
               </div>
             </div>
           </div>

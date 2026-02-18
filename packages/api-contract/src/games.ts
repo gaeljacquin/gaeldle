@@ -168,6 +168,22 @@ export const GamesContract = {
         url: z.string(),
       }),
     ),
+
+  generateImage: oc
+    .route({ method: 'POST', path: '/games/generate-image' })
+    .input(
+      z.object({
+        igdbId: z.coerce.number().int().positive(),
+        prompt: z.string().min(1),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        url: z.string(),
+        data: GameSelectSchema,
+      }),
+    ),
 } as const;
 
 export interface GameApiResponse {

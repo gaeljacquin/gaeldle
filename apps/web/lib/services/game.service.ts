@@ -73,3 +73,8 @@ export async function testUpload(image: string, extension: string = 'jpg') {
   });
   return result;
 }
+
+export async function generateImage(igdbId: number, prompt: string) {
+  const result = await orpcClient.games.generateImage({ igdbId, prompt });
+  return result;
+}

@@ -253,7 +253,6 @@ export class GamesService {
       storyline: igdbGame.storyline,
       firstReleaseDate: igdbGame.first_release_date,
       imageUrl: formatUrl(igdbGame.cover?.url),
-      aiImageUrl: 'https://gaeldle-image-gen.gaeljacquin.com/placeholder.jpg', // Placeholder from R2
       artworks: igdbGame.artworks?.map((art) => ({
         ...art,
         url: formatUrl(art.url),

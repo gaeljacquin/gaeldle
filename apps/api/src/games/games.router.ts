@@ -3,14 +3,19 @@ import { Implement, implement } from '@orpc/nest';
 import { contract } from '@gaeldle/api-contract';
 import { GamesService } from '@/games/games.service';
 import { S3Service } from '@/lib/s3.service';
+import { AiService } from '@/lib/ai.service';
 import { StackAuthGuard } from '@/auth/stack-auth.guard';
-import { TEST_DIR } from '@/lib/constants';
+import { TEST_DIR, IMAGE_GEN_DIR } from '@/lib/constants';
+import { ConfigService } from '@nestjs/config';
+import type { AppConfiguration } from '@/config/configuration';
 
 @Controller()
 export class GamesRouter {
   constructor(
     private readonly gamesService: GamesService,
     private readonly s3Service: S3Service,
+    private readonly aiService: AiService,
+    private readonly configService: ConfigService<AppConfiguration>,
   ) {}
 
   @Implement(contract.games.list)
@@ -205,6 +210,42 @@ export class GamesRouter {
           console.error('Test upload failed:', error);
           throw error;
         }
+      },
+    );
+  }
+
+  @Implement(contract.games.generateImage)
+  @UseGuards(StackAuthGuard)
+  generateImage() {
+    return implement(contract.games.generateImage).handler(
+      async ({ input }: { input: { igdbId: number; prompt: string } }) => {
+        const { igdbId, prompt } = input;
+
+        const game = await this.gamesService.getGameByIgdbId(igdbId);
+        if (!game) throw new NotFoundException('Game not found');
+
+        const imageBuffer = await this.aiService.generateImage(prompt);
+
+        const timestamp = Date.now();
+        const key = `${IMAGE_GEN_DIR}/${igdbId}_${timestamp}.png`;
+        await this.s3Service.uploadImage(key, imageBuffer, 'image/png');
+
+        const r2PublicUrlRaw =
+          this.configService.get('r2PublicUrl', { infer: true }) ?? '';
+        const r2PublicUrl = r2PublicUrlRaw.startsWith('http')
+          ? r2PublicUrlRaw
+          : `https://${r2PublicUrlRaw}`;
+        const publicUrl = `${r2PublicUrl}/${key}`;
+
+        const updatedGame = await this.gamesService.updateGame(game.id, {
+          aiImageUrl: publicUrl,
+          aiPrompt: prompt,
+        });
+
+        if (!updatedGame)
+          throw new NotFoundException('Failed to update game record');
+
+        return { success: true, url: publicUrl, data: updatedGame };
       },
     );
   }

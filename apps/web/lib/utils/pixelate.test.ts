@@ -66,10 +66,36 @@ describe('pixelate utilities', () => {
     });
   });
 
+  type MockFn = {
+    (...args: unknown[]): unknown;
+    mock: { calls: unknown[][] };
+  };
+
+  interface MockCtx {
+    imageSmoothingEnabled: boolean;
+    drawImage: MockFn;
+  }
+
+  interface MockCanvas {
+    width: number;
+    height: number;
+    getContext: MockFn;
+    toDataURL: MockFn;
+  }
+
+  interface MockImage {
+    crossOrigin: string;
+    src: string;
+    onload: (() => void) | null;
+    onerror: (() => void) | null;
+    width: number;
+    height: number;
+  }
+
   describe('pixelateImage', () => {
-    let mockImage: any;
-    let mockCanvas: any;
-    let mockCtx: any;
+    let mockImage: MockImage;
+    let mockCanvas: MockCanvas;
+    let mockCtx: MockCtx;
     let originalImage: typeof Image;
     let originalDocument: typeof document;
 
@@ -78,8 +104,8 @@ describe('pixelate utilities', () => {
       mockImage = {
         crossOrigin: '',
         src: '',
-        onload: null as any,
-        onerror: null as any,
+        onload: null,
+        onerror: null,
         width: 100,
         height: 100,
       };
@@ -99,8 +125,8 @@ describe('pixelate utilities', () => {
       };
 
       // Mock document.createElement
-      originalDocument = (global as any).document;
-      (global as any).document = {
+      originalDocument = (globalThis as Record<string, unknown>).document as typeof document;
+      (globalThis as Record<string, unknown>).document = {
         createElement: mock((tag: string) => {
           if (tag === 'canvas') return mockCanvas;
           return {};
@@ -108,15 +134,15 @@ describe('pixelate utilities', () => {
       };
 
       // Mock Image constructor
-      originalImage = (global as any).Image;
-      (global as any).Image = mock(function() {
+      originalImage = (globalThis as Record<string, unknown>).Image as typeof Image;
+      (globalThis as Record<string, unknown>).Image = mock(function() {
         return mockImage;
       });
     });
 
     afterEach(() => {
-      (global as any).Image = originalImage;
-      (global as any).document = originalDocument;
+      (globalThis as Record<string, unknown>).Image = originalImage;
+      (globalThis as Record<string, unknown>).document = originalDocument;
     });
 
     it('should set crossOrigin to anonymous', async () => {
@@ -164,7 +190,7 @@ describe('pixelate utilities', () => {
     });
 
     it('should handle canvas context not available', async () => {
-      (global as any).document.createElement = mock(() => ({
+      (globalThis as unknown as Record<string, Record<string, unknown>>).document.createElement = mock(() => ({
         getContext: mock(() => null),
       }));
 
@@ -173,9 +199,9 @@ describe('pixelate utilities', () => {
 
       try {
         await promise;
-        expect.fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.message).toBe('Failed to get canvas context');
+        throw new Error('Should have thrown an error');
+      } catch (error) {
+        expect((error as Error).message).toBe('Failed to get canvas context');
       }
     });
 
@@ -185,9 +211,9 @@ describe('pixelate utilities', () => {
 
       try {
         await promise;
-        expect.fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.message).toBe('Failed to load image');
+        throw new Error('Should have thrown an error');
+      } catch (error) {
+        expect((error as Error).message).toBe('Failed to load image');
       }
     });
 
@@ -218,7 +244,7 @@ describe('pixelate utilities', () => {
       await promise;
 
       // drawImage should be called twice - once to draw small, once to scale up
-      const drawCalls = (mockCtx.drawImage as any).mock.calls;
+      const drawCalls = (mockCtx.drawImage).mock.calls;
       expect(drawCalls.length).toBeGreaterThanOrEqual(2);
     });
 

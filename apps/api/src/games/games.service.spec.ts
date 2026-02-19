@@ -328,7 +328,7 @@ describe('GamesService', () => {
     it('should execute refresh materialized view without throwing', async () => {
       mockDb.execute.mockResolvedValue(undefined);
 
-      await expect(service.refreshAllGamesView()).resolves.not.toThrow();
+      await expect(service.refreshAllGamesView()).resolves.toBeUndefined();
 
       expect(mockDb.execute).toHaveBeenCalled();
     });
@@ -340,7 +340,7 @@ describe('GamesService', () => {
         .spyOn(console, 'error')
         .mockImplementation(() => {});
 
-      await expect(service.refreshAllGamesView()).resolves.not.toThrow();
+      await expect(service.refreshAllGamesView()).resolves.toBeUndefined();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Failed to refresh materialized view',
         error,

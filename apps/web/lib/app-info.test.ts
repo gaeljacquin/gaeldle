@@ -40,7 +40,7 @@ describe('appInfo', () => {
   });
 
   it('should have non-empty string properties', () => {
-    Object.entries(appInfo).forEach(([key, value]) => {
+    Object.entries(appInfo).forEach(([, value]) => {
       expect(typeof value).toBe('string');
       expect(value.length).toBeGreaterThan(0);
     });

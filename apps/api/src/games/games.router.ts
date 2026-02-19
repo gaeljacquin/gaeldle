@@ -6,6 +6,7 @@ import { S3Service } from '@/lib/s3.service';
 import { AiService } from '@/lib/ai.service';
 import { StackAuthGuard } from '@/auth/stack-auth.guard';
 import { TEST_DIR, IMAGE_GEN_DIR } from '@/lib/constants';
+import { IMAGE_PROMPT_SUFFIX } from '@gaeldle/constants';
 import { ConfigService } from '@nestjs/config';
 import type { AppConfiguration } from '@/config/configuration';
 
@@ -313,9 +314,7 @@ export class GamesRouter {
       parts.push(`Keywords: ${(game.keywords as string[]).join(', ')}`);
     }
 
-    parts.push(
-      'Highly detailed, cinematic lighting, dramatic atmosphere, concept art, professional game cover art, trending on ArtStation, 8K resolution, no text, no letters, no words, no titles, no logos, no watermarks, no labels, no UI elements.',
-    );
+    parts.push(IMAGE_PROMPT_SUFFIX);
 
     return parts.join('. ');
   }

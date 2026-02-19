@@ -16,6 +16,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@gaeldle/api-contract": "workspace:*",
+    "@gaeldle/constants": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@orpc/client": "^1.13.5",
     "@orpc/contract": "^1.13.5",

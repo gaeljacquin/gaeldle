@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useState } from 'react';
+import { IMAGE_PROMPT_SUFFIX } from '@gaeldle/constants';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getGameByIgdbId, deleteGame, syncGame, generateImage } from '@/lib/services/game.service';
 import BackToDashboard from '@/components/back-to-dashboard';
@@ -66,7 +67,7 @@ function buildPromptPreview(
   }
 
   parts.push(
-    'Highly detailed, cinematic lighting, dramatic atmosphere, concept art, professional game cover art, trending on ArtStation, 8K resolution, no text, no letters, no words, no titles, no logos, no watermarks, no labels, no UI elements.',
+    IMAGE_PROMPT_SUFFIX,
   );
 
   return parts.join('. ');
@@ -399,6 +400,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                         alt={`${game.name} AI Image`}
                         fill
                         className="object-contain"
+                        sizes="(max-width: 768px) 100vw, 320px"
                       />
                     </div>
                   </DialogContent>

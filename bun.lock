@@ -23,6 +23,7 @@
         "@aws-sdk/client-s3": "^3.993.0",
         "@aws-sdk/s3-request-presigner": "^3.993.0",
         "@gaeldle/api-contract": "workspace:*",
+        "@gaeldle/constants": "workspace:*",
         "@nestjs/common": "^11.1.14",
         "@nestjs/config": "^4.0.3",
         "@nestjs/core": "^11.1.14",
@@ -77,6 +78,7 @@
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
         "@gaeldle/api-contract": "workspace:*",
+        "@gaeldle/constants": "workspace:*",
         "@hookform/resolvers": "^5.2.2",
         "@orpc/client": "^1.13.5",
         "@orpc/contract": "^1.13.5",
@@ -126,6 +128,10 @@
       "peerDependencies": {
         "zod": "^3.x",
       },
+    },
+    "packages/constants": {
+      "name": "@gaeldle/constants",
+      "version": "0.1.0",
     },
   },
   "trustedDependencies": [
@@ -470,6 +476,8 @@
     "@floating-ui/utils": ["@floating-ui/utils@0.2.10", "", {}, "sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ=="],
 
     "@gaeldle/api-contract": ["@gaeldle/api-contract@workspace:packages/api-contract"],
+
+    "@gaeldle/constants": ["@gaeldle/constants@workspace:packages/constants"],
 
     "@gaeldle/web": ["@gaeldle/web@workspace:apps/web"],
 

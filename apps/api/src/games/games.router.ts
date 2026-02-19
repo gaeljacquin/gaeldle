@@ -1,4 +1,5 @@
 import { Controller, UseGuards, NotFoundException } from '@nestjs/common';
+import sharp from 'sharp';
 import { Implement, implement } from '@orpc/nest';
 import { contract } from '@gaeldle/api-contract';
 import { GamesService } from '@/games/games.service';
@@ -241,11 +242,14 @@ export class GamesRouter {
           includeThemes: includeThemes ?? false,
         });
 
-        const imageBuffer = await this.aiService.generateImage(prompt);
+        const rawBuffer = await this.aiService.generateImage(prompt);
+        const imageBuffer = await sharp(rawBuffer)
+          .jpeg({ quality: 85 })
+          .toBuffer();
 
         const timestamp = Date.now();
-        const key = `${IMAGE_GEN_DIR}/${igdbId}_${timestamp}.png`;
-        await this.s3Service.uploadImage(key, imageBuffer, 'image/png');
+        const key = `${IMAGE_GEN_DIR}/${igdbId}_${timestamp}.jpg`;
+        await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
 
         const r2PublicUrlRaw =
           this.configService.get('r2PublicUrl', { infer: true }) ?? '';

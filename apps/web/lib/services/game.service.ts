@@ -78,19 +78,3 @@ export async function generateImage(igdbId: number, prompt: string) {
   const result = await orpcClient.games.generateImage({ igdbId, prompt });
   return result;
 }
-
-export async function generatePrompt(params: {
-  igdbId: number;
-  model: string;
-  style: string;
-  includeSummary: boolean;
-  includeStoryline: boolean;
-}) {
-  const result = await orpcClient.games.generatePrompt(params);
-  return result;
-}
-
-export async function clearPrompt(igdbId: number) {
-  const result = await orpcClient.games.clearPrompt({ igdbId });
-  return result;
-}

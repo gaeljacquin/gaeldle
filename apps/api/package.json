@@ -27,7 +27,6 @@
     "test:e2e": "NODE_OPTIONS='--experimental-vm-modules' jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@ai-sdk/gateway": "^3.0.50",
     "@aws-sdk/client-s3": "^3.993.0",
     "@aws-sdk/s3-request-presigner": "^3.993.0",
     "@gaeldle/api-contract": "workspace:*",
@@ -39,7 +38,6 @@
     "@orpc/nest": "^1.13.5",
     "@orpc/openapi": "^1.13.5",
     "@orpc/server": "^1.13.5",
-    "ai": "^6.0.91",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",
@@ -73,7 +71,6 @@
     "ts-loader": "^9.5.4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.0"
   },

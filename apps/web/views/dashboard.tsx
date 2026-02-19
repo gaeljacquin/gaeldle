@@ -92,7 +92,7 @@ export default function Dashboard() {
     setSelectedIds(new Set());
   };
 
-  const { data, isLoading, isPlaceholderData, error } = useQuery({
+  const { data, isLoading, isPlaceholderData } = useQuery({
     queryKey: ['games', page, pageSize, debouncedSearch],
     queryFn: () => getPaginatedGames(page, Number.parseInt(pageSize, 10), debouncedSearch),
     placeholderData: (previousData) => previousData,
@@ -149,19 +149,6 @@ export default function Dashboard() {
       setPage(1);
     }
   };
-
-  const errorComp = () => {
-    if (error) {
-      return (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <h3 className="text-lg font-semibold text-destructive">Failed to load games</h3>
-            <p className="text-muted-foreground mt-1 text-sm">{error.message}</p>
-          </div>
-        )
-    }
-
-    dataLengthZero();
-  }
 
   const dataLengthZero = () => {
     return (
@@ -470,7 +457,7 @@ export default function Dashboard() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             <p className="text-sm font-medium">Loading your library...</p>
           </div>
-        ) : errorComp()}
+        ) : dataLengthZero()}
       </div>
     </div>
   );

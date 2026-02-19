@@ -11,6 +11,7 @@ export class AiService {
     this.accountId =
       this.configService.get('cfAccountId', { infer: true }) ?? '';
     this.apiToken = this.configService.get('cfApiToken', { infer: true }) ?? '';
+    console.log(`[AiService] accountId set: ${!!this.accountId}, apiToken set: ${!!this.apiToken}`);
   }
 
   async generateImage(prompt: string): Promise<Buffer> {
@@ -28,7 +29,15 @@ export class AiService {
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`[AiService] Cloudflare AI error: ${response.status}`, errorText);
       throw new Error(`Cloudflare AI failed: ${response.status} ${errorText}`);
+    }
+
+    const contentType = response.headers.get('content-type') ?? '';
+    if (!contentType.includes('image')) {
+      const body = await response.text();
+      console.error(`[AiService] Unexpected content-type: ${contentType}`, body);
+      throw new Error(`Unexpected response type: ${contentType} — ${body}`);
     }
 
     return Buffer.from(await response.arrayBuffer());

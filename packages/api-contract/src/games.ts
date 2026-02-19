@@ -174,7 +174,9 @@ export const GamesContract = {
     .input(
       z.object({
         igdbId: z.coerce.number().int().positive(),
-        prompt: z.string().min(1),
+        includeStoryline: z.boolean().optional().default(false),
+        includeGenres: z.boolean().optional().default(false),
+        includeThemes: z.boolean().optional().default(false),
       }),
     )
     .output(

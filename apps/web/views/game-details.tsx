@@ -28,9 +28,49 @@ import {
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { IconTrash, IconCalendar, IconDeviceGamepad, IconLayersIntersect, IconExternalLink, IconRefresh, IconBrush } from '@tabler/icons-react';
-import { type ArtworkImage } from '@gaeldle/api-contract';
+import { Game, type ArtworkImage } from '@gaeldle/api-contract';
 import { cn } from '@/lib/utils';
 import { PLACEHOLDER_IMAGE_R2 } from '@/lib/constants';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+
+function buildPromptPreview(
+  game: Game,
+  options: { includeStoryline: boolean; includeGenres: boolean; includeThemes: boolean },
+): string {
+  const parts: string[] = [];
+
+  parts.push(`Cinematic video game key art for "${game.name}"`);
+
+  if (game.summary) {
+    parts.push(game.summary);
+  }
+
+  if (options.includeStoryline && game.storyline) {
+    parts.push(game.storyline);
+  }
+
+  const genres = game.genres as string[] | null;
+  if (options.includeGenres && genres?.length) {
+    parts.push(`Genres: ${genres.join(', ')}`);
+  }
+
+  const themes = game.themes as string[] | null;
+  if (options.includeThemes && themes?.length) {
+    parts.push(`Themes: ${themes.join(', ')}`);
+  }
+
+  const keywords = game.keywords as string[] | null;
+  if (keywords?.length) {
+    parts.push(`Keywords: ${keywords.join(', ')}`);
+  }
+
+  parts.push(
+    'Highly detailed, cinematic lighting, dramatic atmosphere, concept art, professional game cover art, trending on ArtStation, 8K resolution, no text, no letters, no words, no titles, no logos, no watermarks, no labels, no UI elements.',
+  );
+
+  return parts.join('. ');
+}
 
 interface Company {
   name: string;
@@ -49,7 +89,10 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [aiPrompt, setAiPrompt] = useState('');
+  const [includeStoryline, setIncludeStoryline] = useState(false);
+  const [includeGenres, setIncludeGenres] = useState(false);
+  const [includeThemes, setIncludeThemes] = useState(false);
+  const [promptView, setPromptView] = useState<'preview' | 'saved'>('preview');
 
   const { data: game, isLoading, error } = useQuery({
     queryKey: ['game', igdbId],
@@ -83,7 +126,12 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
   });
 
   const generateImageMutation = useMutation({
-    mutationFn: () => generateImage(Number.parseInt(igdbId, 10), aiPrompt),
+    mutationFn: () =>
+      generateImage(Number.parseInt(igdbId, 10), {
+        includeStoryline,
+        includeGenres,
+        includeThemes,
+      }),
     onMutate: () => {
       toast.loading('Generating AI image...', { id: 'generate-image' });
     },
@@ -96,6 +144,18 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
       toast.error('Failed to generate AI image', { id: 'generate-image' });
     },
   });
+
+  const buttonText = (game: Game) => {
+    if (generateImageMutation.isPending) {
+      return  'Generating...';
+    }
+
+    if(game?.aiImageUrl) {
+      return 'Regenerate AI Image';
+    }
+
+    return 'Generate AI Image';
+  }
 
   if (isLoading) {
     return (
@@ -345,22 +405,97 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                 </Dialog>
                 {game.aiImageUrl === null && <p className='text-xs text-center'>Placeholder image</p>}
               </div>
-              <div className="flex-1 space-y-3">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">AI Prompt</h3>
-                {game.aiPrompt && (
-                  <div className="bg-muted/30 border border-dashed p-4 rounded-none">
-                    <p className="text-sm italic text-muted-foreground leading-relaxed">
-                      &quot;{game.aiPrompt}&quot;
-                    </p>
-                  </div>
-                )}
-                <Textarea
-                  placeholder="Enter a prompt to generate an AI image..."
-                  className="rounded-none resize-none min-h-30"
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  disabled={generateImageMutation.isPending}
-                />
+              <div className="flex-1 space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Prompt Fields</h3>
+                <div className="space-y-2.5">
+                  {/* Fixed fields */}
+                  {(
+                    [
+                      { id: 'field-title', label: 'Title', hasValue: !!game.name },
+                      { id: 'field-summary', label: 'Summary', hasValue: !!game.summary },
+                      { id: 'field-keywords', label: 'Keywords', hasValue: !!(game.keywords as string[] | null)?.length },
+                    ] as const
+                  ).map(({ id, label, hasValue }) => (
+                    <div key={id} className="flex items-center gap-2.5">
+                      <Checkbox id={id} checked={hasValue} disabled />
+                      <Label
+                        htmlFor={id}
+                        className="text-sm font-medium cursor-default text-muted-foreground"
+                      >
+                        {label}
+                      </Label>
+                    </div>
+                  ))}
+
+                  {/* Optional fields */}
+                  {(
+                    [
+                      {
+                        id: 'field-storyline',
+                        label: 'Storyline',
+                        hasValue: !!game.storyline,
+                        checked: includeStoryline,
+                        onCheckedChange: setIncludeStoryline,
+                      },
+                      {
+                        id: 'field-genres',
+                        label: 'Genres',
+                        hasValue: !!(game.genres as string[] | null)?.length,
+                        checked: includeGenres,
+                        onCheckedChange: setIncludeGenres,
+                      },
+                      {
+                        id: 'field-themes',
+                        label: 'Themes',
+                        hasValue: !!(game.themes as string[] | null)?.length,
+                        checked: includeThemes,
+                        onCheckedChange: setIncludeThemes,
+                      },
+                    ] as const
+                  ).map(({ id, label, hasValue, checked, onCheckedChange }) => (
+                    <div key={id} className="flex items-center gap-2.5">
+                      <Checkbox
+                        id={id}
+                        checked={hasValue ? checked : false}
+                        disabled={!hasValue || generateImageMutation.isPending}
+                        onCheckedChange={(v) => onCheckedChange(v === true)}
+                      />
+                      <Label
+                        htmlFor={id}
+                        className={cn(
+                          "text-sm font-medium",
+                          hasValue ? "cursor-pointer" : "cursor-default line-through text-muted-foreground/50",
+                        )}
+                      >
+                        {label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-1">
+                  <Textarea
+                    readOnly
+                    value={
+                      promptView === 'saved' && game.aiPrompt
+                        ? game.aiPrompt
+                        : buildPromptPreview(game, { includeStoryline, includeGenres, includeThemes })
+                    }
+                    className="rounded-none resize-none min-h-30 text-sm text-muted-foreground italic bg-muted/30 border-dashed"
+                  />
+                  {game.aiPrompt && (
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setPromptView(promptView === 'preview' ? 'saved' : 'preview')}
+                        className="text-xs text-muted-foreground/60 hover:text-muted-foreground underline-offset-2 hover:underline cursor-pointer"
+                      >
+                        {promptView === 'preview' ? 'View saved prompt' : 'View preview'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <Button
                   variant="outline"
                   className={cn(
@@ -370,13 +505,13 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                       : "bg-purple-600 hover:bg-purple-700 cursor-pointer",
                   )}
                   onClick={() => generateImageMutation.mutate()}
-                  disabled={generateImageMutation.isPending || aiPrompt.trim().length === 0}
+                  disabled={generateImageMutation.isPending}
                 >
                   <IconBrush className={cn(
                     "mr-2 size-4",
                     generateImageMutation.isPending && "animate-pulse"
                   )} />
-                  {generateImageMutation.isPending ? 'Generating...' : 'Generate AI Image'}
+                  {buttonText(game)}
                 </Button>
               </div>
             </div>

@@ -218,11 +218,27 @@ export class GamesRouter {
   @UseGuards(StackAuthGuard)
   generateImage() {
     return implement(contract.games.generateImage).handler(
-      async ({ input }: { input: { igdbId: number; prompt: string } }) => {
-        const { igdbId, prompt } = input;
+      async ({
+        input,
+      }: {
+        input: {
+          igdbId: number;
+          includeStoryline?: boolean;
+          includeGenres?: boolean;
+          includeThemes?: boolean;
+        };
+      }) => {
+        const { igdbId, includeStoryline, includeGenres, includeThemes } =
+          input;
 
         const game = await this.gamesService.getGameByIgdbId(igdbId);
         if (!game) throw new NotFoundException('Game not found');
+
+        const prompt = this.buildImagePrompt(game, {
+          includeStoryline: includeStoryline ?? false,
+          includeGenres: includeGenres ?? false,
+          includeThemes: includeThemes ?? false,
+        });
 
         const imageBuffer = await this.aiService.generateImage(prompt);
 
@@ -248,5 +264,59 @@ export class GamesRouter {
         return { success: true, url: publicUrl, data: updatedGame };
       },
     );
+  }
+
+  private buildImagePrompt(
+    game: {
+      name: string;
+      summary?: string | null;
+      storyline?: string | null;
+      keywords?: unknown;
+      genres?: unknown;
+      themes?: unknown;
+    },
+    options: {
+      includeStoryline: boolean;
+      includeGenres: boolean;
+      includeThemes: boolean;
+    },
+  ): string {
+    const parts: string[] = [];
+
+    parts.push(`Cinematic video game key art for "${game.name}"`);
+
+    if (game.summary) {
+      parts.push(game.summary);
+    }
+
+    if (options.includeStoryline && game.storyline) {
+      parts.push(game.storyline);
+    }
+
+    if (
+      options.includeGenres &&
+      Array.isArray(game.genres) &&
+      game.genres.length > 0
+    ) {
+      parts.push(`Genre: ${(game.genres as string[]).join(', ')}`);
+    }
+
+    if (
+      options.includeThemes &&
+      Array.isArray(game.themes) &&
+      game.themes.length > 0
+    ) {
+      parts.push(`Themes: ${(game.themes as string[]).join(', ')}`);
+    }
+
+    if (Array.isArray(game.keywords) && game.keywords.length > 0) {
+      parts.push(`Keywords: ${(game.keywords as string[]).join(', ')}`);
+    }
+
+    parts.push(
+      'Highly detailed, cinematic lighting, dramatic atmosphere, concept art, professional game cover art, trending on ArtStation, 8K resolution, no text, no letters, no words, no titles, no logos, no watermarks, no labels, no UI elements.',
+    );
+
+    return parts.join('. ');
   }
 }

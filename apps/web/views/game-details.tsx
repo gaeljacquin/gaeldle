@@ -2,12 +2,18 @@
 
 import { use, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getGameByIgdbId, deleteGame, syncGame, generateImage } from '@/lib/services/game.service';
+import { getGameByIgdbId, deleteGame, syncGame, generateImage, generatePrompt, clearPrompt } from '@/lib/services/game.service';
 import BackToDashboard from '@/components/back-to-dashboard';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,10 +33,13 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { IconTrash, IconCalendar, IconDeviceGamepad, IconLayersIntersect, IconExternalLink, IconRefresh, IconBrush } from '@tabler/icons-react';
+import { IconTrash, IconCalendar, IconDeviceGamepad, IconLayersIntersect, IconExternalLink, IconRefresh, IconBrush, IconSparkles, IconEraser } from '@tabler/icons-react';
 import { type ArtworkImage } from '@gaeldle/api-contract';
 import { cn } from '@/lib/utils';
-import { PLACEHOLDER_IMAGE_R2 } from '@/lib/constants';
+import { IMAGE_STYLES, PLACEHOLDER_IMAGE_R2, TEXT_GEN_MODELS } from '@/lib/constants';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 
 interface Company {
   name: string;
@@ -49,7 +58,11 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [aiPrompt, setAiPrompt] = useState('');
+  const [isClearPromptDialogOpen, setIsClearPromptDialogOpen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(TEXT_GEN_MODELS[0].value);
+  const [selectedStyle, setSelectedStyle] = useState(IMAGE_STYLES[0].value);
+  const [includeSummary, setIncludeSummary] = useState(true);
+  const [includeStoryline, setIncludeStoryline] = useState(true);
 
   const { data: game, isLoading, error } = useQuery({
     queryKey: ['game', igdbId],
@@ -63,9 +76,8 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
       queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
       queryClient.invalidateQueries({ queryKey: ['games'] });
     },
-    onError: (err) => {
+    onError: () => {
       toast.error('Failed to sync game info');
-      console.error(err);
     },
   });
 
@@ -76,14 +88,45 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
       queryClient.invalidateQueries({ queryKey: ['games'] });
       router.push('/dashboard');
     },
-    onError: (err) => {
+    onError: () => {
       toast.error('Failed to delete game');
-      console.error(err);
+    },
+  });
+
+  const generatePromptMutation = useMutation({
+    mutationFn: () =>
+      generatePrompt({
+        igdbId: Number.parseInt(igdbId, 10),
+        model: selectedModel,
+        style: selectedStyle,
+        includeSummary,
+        includeStoryline,
+      }),
+    onMutate: () => {
+      toast.loading('Generating prompt...', { id: 'generate-prompt' });
+    },
+    onSuccess: () => {
+      toast.success('Prompt generated successfully', { id: 'generate-prompt' });
+      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+    },
+    onError: () => {
+      toast.error('Failed to generate prompt', { id: 'generate-prompt' });
+    },
+  });
+
+  const clearPromptMutation = useMutation({
+    mutationFn: () => clearPrompt(Number.parseInt(igdbId, 10)),
+    onSuccess: () => {
+      toast.success('Prompt cleared');
+      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+    },
+    onError: () => {
+      toast.error('Failed to clear prompt');
     },
   });
 
   const generateImageMutation = useMutation({
-    mutationFn: () => generateImage(Number.parseInt(igdbId, 10), aiPrompt),
+    mutationFn: () => generateImage(Number.parseInt(igdbId, 10), game!.aiPrompt!),
     onMutate: () => {
       toast.loading('Generating AI image...', { id: 'generate-image' });
     },
@@ -91,8 +134,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
       toast.success('AI image generated successfully', { id: 'generate-image' });
       queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
     },
-    onError: (err) => {
-      console.error(err);
+    onError: () => {
       toast.error('Failed to generate AI image', { id: 'generate-image' });
     },
   });
@@ -313,7 +355,8 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
               Image Gen
             </h2>
             <div className="flex flex-col md:flex-row gap-8">
-              <div className="w-full md:w-64 shrink-0">
+              {/* Left: AI image + Generate AI Image button */}
+              <div className="w-full md:w-64 shrink-0 space-y-3">
                 <Dialog>
                   <DialogTrigger nativeButton={false} render={<Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />}>
                       <div className="relative aspect-square w-full">
@@ -325,7 +368,10 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                           sizes="(max-width: 768px) 100vw, 256px"
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                          <IconExternalLink className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-8" />
+                          <div className="flex flex-col gap-2 items-center justify-center">
+                            {game.aiImageUrl === null && <Badge className="text-xs bg-slate-500">Placeholder image</Badge>}
+                            <IconExternalLink className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-8" />
+                          </div>
                         </div>
                       </div>
                   </DialogTrigger>
@@ -343,24 +389,6 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                     </div>
                   </DialogContent>
                 </Dialog>
-                {game.aiImageUrl === null && <p className='text-xs text-center'>Placeholder image</p>}
-              </div>
-              <div className="flex-1 space-y-3">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">AI Prompt</h3>
-                {game.aiPrompt && (
-                  <div className="bg-muted/30 border border-dashed p-4 rounded-none">
-                    <p className="text-sm italic text-muted-foreground leading-relaxed">
-                      &quot;{game.aiPrompt}&quot;
-                    </p>
-                  </div>
-                )}
-                <Textarea
-                  placeholder="Enter a prompt to generate an AI image..."
-                  className="rounded-none resize-none min-h-30"
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  disabled={generateImageMutation.isPending}
-                />
                 <Button
                   variant="outline"
                   className={cn(
@@ -370,7 +398,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                       : "bg-purple-600 hover:bg-purple-700 cursor-pointer",
                   )}
                   onClick={() => generateImageMutation.mutate()}
-                  disabled={generateImageMutation.isPending || aiPrompt.trim().length === 0}
+                  disabled={generateImageMutation.isPending || !game.aiPrompt}
                 >
                   <IconBrush className={cn(
                     "mr-2 size-4",
@@ -378,6 +406,145 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                   )} />
                   {generateImageMutation.isPending ? 'Generating...' : 'Generate AI Image'}
                 </Button>
+              </div>
+
+              {/* Right: Prompt display + Generate Prompt form */}
+              <div className="flex-1 space-y-4">
+                {game.aiPrompt && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">AI Prompt</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive cursor-pointer"
+                        onClick={() => setIsClearPromptDialogOpen(true)}
+                        disabled={clearPromptMutation.isPending}
+                      >
+                        <IconEraser className="size-3 mr-1" />
+                        Clear
+                      </Button>
+                    </div>
+                    <div className="bg-muted/30 border border-dashed p-4 rounded-none">
+                      <p className="text-sm italic text-muted-foreground leading-relaxed">
+                        &quot;{game.aiPrompt}&quot;
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <AlertDialog open={isClearPromptDialogOpen} onOpenChange={setIsClearPromptDialogOpen}>
+                  <AlertDialogContent className="rounded-none">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-2xl font-black uppercase">Clear prompt?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-base">
+                        This will remove the saved AI prompt for <strong>{game.name}</strong>. The generated image will not be affected.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="mt-4 gap-3">
+                      <AlertDialogCancel className="font-bold rounded-none flex-1 cursor-pointer" onClick={() => setIsClearPromptDialogOpen(false)}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          setIsClearPromptDialogOpen(false);
+                          clearPromptMutation.mutate();
+                        }}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-bold rounded-none flex-1 cursor-pointer"
+                      >
+                        Clear Prompt
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
+                <div className="border border-dashed p-4 space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Generate Prompt</h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Model</Label>
+                      <Select
+                        value={selectedModel}
+                        onValueChange={(val) => { if (val) setSelectedModel(val); }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TEXT_GEN_MODELS.map((m) => (
+                            <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Style</Label>
+                      <Select
+                        value={selectedStyle}
+                        onValueChange={(val) => { if (val) setSelectedStyle(val); }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {IMAGE_STYLES.map((s) => (
+                            <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-4">
+                    <label className={cn(
+                      "flex items-center gap-2 text-xs font-bold uppercase tracking-wider",
+                      game.summary ? "cursor-pointer" : "opacity-40 cursor-not-allowed",
+                    )}>
+                      <Input
+                        type="checkbox"
+                        checked={includeSummary && !!game.summary}
+                        onChange={(e) => setIncludeSummary(e.target.checked)}
+                        disabled={!game.summary}
+                        className="size-3.5 accent-primary"
+                      />
+                      Include Summary
+                    </label>
+
+                    <label className={cn(
+                      "flex items-center gap-2 text-xs font-bold uppercase tracking-wider",
+                      game.storyline ? "cursor-pointer" : "opacity-40 cursor-not-allowed",
+                    )}>
+                      <Input
+                        type="checkbox"
+                        checked={includeStoryline && !!game.storyline}
+                        onChange={(e) => setIncludeStoryline(e.target.checked)}
+                        disabled={!game.storyline}
+                        className="size-3.5 accent-primary"
+                      />
+                      Include Storyline
+                    </label>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full font-bold h-10 rounded-none text-white hover:text-white",
+                      generatePromptMutation.isPending
+                        ? "bg-indigo-400 hover:bg-indigo-400 cursor-not-allowed"
+                        : "bg-indigo-600 hover:bg-indigo-700 cursor-pointer",
+                    )}
+                    onClick={() => generatePromptMutation.mutate()}
+                    disabled={generatePromptMutation.isPending}
+                  >
+                    <IconSparkles className={cn(
+                      "mr-2 size-4",
+                      generatePromptMutation.isPending && "animate-pulse"
+                    )} />
+                    {generatePromptMutation.isPending ? 'Generating...' : 'Generate Prompt'}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

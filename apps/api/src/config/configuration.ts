@@ -16,6 +16,9 @@ export type AppConfiguration = {
   r2PublicUrl: string;
   cfAccountId: string;
   cfApiToken: string;
+  aiGatewayApiKey: string;
+  openAiApiKey: string;
+  geminiApiKey: string;
 };
 
 const configuration = (): AppConfiguration => {
@@ -57,6 +60,9 @@ const configuration = (): AppConfiguration => {
     r2PublicUrl: process.env.R2_PUBLIC_URL ?? '',
     cfAccountId: process.env.CF_ACCOUNT_ID ?? '',
     cfApiToken: process.env.CF_API_TOKEN ?? '',
+    aiGatewayApiKey: process.env.AI_GATEWAY_API_KEY ?? '',
+    openAiApiKey: process.env.OPENAI_API_KEY ?? '',
+    geminiApiKey: process.env.GEMINI_API_KEY ?? '',
   };
 };
 export default configuration;

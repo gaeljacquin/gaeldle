@@ -214,6 +214,69 @@ export class GamesRouter {
     );
   }
 
+  @Implement(contract.games.generatePrompt)
+  @UseGuards(StackAuthGuard)
+  generatePrompt() {
+    return implement(contract.games.generatePrompt).handler(
+      async ({
+        input,
+      }: {
+        input: {
+          igdbId: number;
+          model: string;
+          style: string;
+          includeSummary: boolean;
+          includeStoryline: boolean;
+        };
+      }) => {
+        const { igdbId, model, style, includeSummary, includeStoryline } =
+          input;
+
+        const game = await this.gamesService.getGameByIgdbId(igdbId);
+        if (!game) throw new NotFoundException('Game not found');
+
+        const prompt = await this.aiService.generatePrompt({
+          gameName: game.name,
+          summary: includeSummary ? game.summary : null,
+          storyline: includeStoryline ? game.storyline : null,
+          style,
+          model,
+        });
+
+        const updatedGame = await this.gamesService.updateGame(game.id, {
+          aiPrompt: prompt,
+        });
+
+        if (!updatedGame)
+          throw new NotFoundException('Failed to update game record');
+
+        return { success: true, prompt, data: updatedGame };
+      },
+    );
+  }
+
+  @Implement(contract.games.clearPrompt)
+  @UseGuards(StackAuthGuard)
+  clearPrompt() {
+    return implement(contract.games.clearPrompt).handler(
+      async ({ input }: { input: { igdbId: number } }) => {
+        const { igdbId } = input;
+
+        const game = await this.gamesService.getGameByIgdbId(igdbId);
+        if (!game) throw new NotFoundException('Game not found');
+
+        const updatedGame = await this.gamesService.updateGame(game.id, {
+          aiPrompt: null,
+        });
+
+        if (!updatedGame)
+          throw new NotFoundException('Failed to update game record');
+
+        return { success: true, data: updatedGame };
+      },
+    );
+  }
+
   @Implement(contract.games.generateImage)
   @UseGuards(StackAuthGuard)
   generateImage() {

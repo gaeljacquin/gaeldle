@@ -41,7 +41,7 @@ export const GamesContract = {
     ),
 
   get: oc
-    .route({ method: 'GET', path: '/games/:igdbId' })
+    .route({ method: 'GET', path: '/games/{igdbId}' })
     .input(
       z.object({
         igdbId: z.coerce.number().int().positive(),
@@ -114,7 +114,7 @@ export const GamesContract = {
     ),
 
   update: oc
-    .route({ method: 'PATCH', path: '/games/:id' })
+    .route({ method: 'PATCH', path: '/games/{id}' })
     .input(
       z.object({
         id: z.coerce.number().int().positive(),
@@ -129,7 +129,7 @@ export const GamesContract = {
     ),
 
   delete: oc
-    .route({ method: 'DELETE', path: '/games/:id' })
+    .route({ method: 'DELETE', path: '/games/{id}' })
     .input(
       z.object({
         id: z.coerce.number().int().positive(),
@@ -181,6 +181,39 @@ export const GamesContract = {
       z.object({
         success: z.boolean(),
         url: z.string(),
+        data: GameSelectSchema,
+      }),
+    ),
+
+  generatePrompt: oc
+    .route({ method: 'POST', path: '/games/generate-prompt' })
+    .input(
+      z.object({
+        igdbId: z.coerce.number().int().positive(),
+        model: z.string().min(1),
+        style: z.string().min(1),
+        includeSummary: z.boolean(),
+        includeStoryline: z.boolean(),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        prompt: z.string(),
+        data: GameSelectSchema,
+      }),
+    ),
+
+  clearPrompt: oc
+    .route({ method: 'POST', path: '/games/clear-prompt' })
+    .input(
+      z.object({
+        igdbId: z.coerce.number().int().positive(),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
         data: GameSelectSchema,
       }),
     ),

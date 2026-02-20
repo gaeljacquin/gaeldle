@@ -13,13 +13,4 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-
-  /*
-   * # GET /health
-   * curl -i http://localhost:8080/health
-   */
-  @Get('health')
-  getHealth() {
-    return this.appService.getHealth();
-  }
 }

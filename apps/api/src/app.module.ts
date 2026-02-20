@@ -6,6 +6,7 @@ import { S3Service } from '@/lib/s3.service';
 import { AuthModule } from '@/auth/auth.module';
 import configuration from '@/config/configuration';
 import { GamesModule } from '@/games/games.module';
+import { HealthModule } from '@/health/health.module';
 import { ORPCModule } from '@orpc/nest';
 
 const appEnv = (
@@ -30,6 +31,7 @@ const envFilePath = [
     ORPCModule.forRoot({}),
     AuthModule,
     GamesModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService, S3Service],

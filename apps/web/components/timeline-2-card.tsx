@@ -8,6 +8,7 @@ import Image from 'next/image';
 interface Timeline2CardProps {
   game: Game;
   showDate?: boolean;
+  showTopBanner?: boolean;
   className?: string;
   bannerColor?: 'green' | 'red' | 'slate' | 'none';
 }
@@ -22,7 +23,7 @@ function formatDate(timestamp: number | null): string {
 }
 
 export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
-  ({ game, showDate = false, bannerColor = 'none', className, ...props }, ref) => {
+  ({ game, showDate = false, showTopBanner = true, bannerColor = 'none', className, ...props }, ref) => {
     return (
       <div
         ref={ref}
@@ -51,16 +52,18 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
           )}
         </div>
 
-        <div
-          className={cn(
-            'absolute top-0 left-0 right-0 px-2 py-1 text-center text-sm font-semibold text-white',
-            bannerColor === 'green' && 'bg-green-600',
-            bannerColor === 'red' && 'bg-destructive',
-            bannerColor === 'slate' && 'bg-slate-600'
-          )}
-        >
-          {showDate ? formatDate(game.firstReleaseDate) : '?'}
-        </div>
+        {showTopBanner && (
+          <div
+            className={cn(
+              'absolute top-0 left-0 right-0 px-2 py-1 text-center text-sm font-semibold text-white',
+              bannerColor === 'green' && 'bg-green-600',
+              bannerColor === 'red' && 'bg-destructive',
+              bannerColor === 'slate' && 'bg-slate-600'
+            )}
+          >
+            {showDate && formatDate(game.firstReleaseDate)}
+          </div>
+        )}
 
         <div
           className={cn(

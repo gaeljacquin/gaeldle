@@ -26,6 +26,8 @@ export const GamesContract = {
         page: z.coerce.number().int().positive().optional(),
         pageSize: z.coerce.number().int().positive().optional(),
         q: z.string().optional(),
+        sortBy: z.enum(['name', 'firstReleaseDate', 'igdbId']).optional(),
+        sortDir: z.enum(['asc', 'desc']).optional(),
       }).optional(),
     )
     .output(

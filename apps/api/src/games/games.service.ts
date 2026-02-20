@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   and,
+  asc,
   desc,
   eq,
   inArray,
@@ -58,9 +59,21 @@ export class GamesService {
     page: number,
     pageSize: number,
     q?: string,
+    sortBy: 'name' | 'firstReleaseDate' | 'igdbId' = 'name',
+    sortDir: 'asc' | 'desc' = 'asc',
   ): Promise<{ games: Game[]; total: number }> {
     const offset = (page - 1) * pageSize;
     const where = q ? sql`name ILIKE ${'%' + q + '%'}` : undefined;
+
+    const orderBy = (() => {
+      if (sortBy === 'firstReleaseDate') {
+        return sortDir === 'asc'
+          ? sql`first_release_date ASC NULLS LAST`
+          : sql`first_release_date DESC NULLS LAST`;
+      }
+      const col = sortBy === 'igdbId' ? games.igdbId : games.name;
+      return sortDir === 'asc' ? asc(col) : desc(col);
+    })();
 
     const [gamesList, totalCount] = await Promise.all([
       this.databaseService.db
@@ -69,7 +82,7 @@ export class GamesService {
         .where(where)
         .limit(pageSize)
         .offset(offset)
-        .orderBy(desc(games.id)),
+        .orderBy(orderBy),
       this.databaseService.db
         .select({ count: sql<number>`count(*)` })
         .from(games)

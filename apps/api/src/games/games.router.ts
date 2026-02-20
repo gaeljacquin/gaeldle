@@ -32,11 +32,15 @@ export class GamesRouter {
         const page = input?.page ?? 1;
         const pageSize = input?.pageSize ?? 10;
         const q = input?.q;
+        const sortBy = input?.sortBy ?? 'name';
+        const sortDir = input?.sortDir ?? 'asc';
 
         const { games, total } = await this.gamesService.getGamesPage(
           page,
           Math.min(pageSize, 100),
           q,
+          sortBy,
+          sortDir,
         );
 
         return {
@@ -288,7 +292,9 @@ export class GamesRouter {
   ): string {
     const parts: string[] = [];
 
-    parts.push(`Funko Pop chibi style illustration of iconic characters from "${game.name}" set within the game's distinct world`);
+    parts.push(
+      `Funko Pop chibi style illustration of iconic characters from "${game.name}" set within the game's distinct world`,
+    );
 
     if (game.summary) {
       parts.push(game.summary);

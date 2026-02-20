@@ -60,16 +60,12 @@ export default function Dashboard() {
 
   const deleteMutation = useMutation({
     mutationFn: (ids: number[]) => deleteBulkGames(ids),
-    onSuccess: (success) => {
-      if (success) {
-        const successMessage = `${selectedIds.size} ${selectedIds.size === 1 ? 'game': 'games'} deleted successfully`;
-        queryClient.invalidateQueries({ queryKey: ['games'] });
-        toast.success(successMessage);
-        setSelectedIds(new Set());
-        setIsMultiSelect(false);
-      } else {
-        toast.error('Failed to delete games');
-      }
+    onSuccess: () => {
+      const successMessage = `${selectedIds.size} ${selectedIds.size === 1 ? 'game': 'games'} deleted successfully`;
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+      toast.success(successMessage);
+      setSelectedIds(new Set());
+      setIsMultiSelect(false);
     },
     onError: () => {
       toast.error('An error occurred while deleting games');

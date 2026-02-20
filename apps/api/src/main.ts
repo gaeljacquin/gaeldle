@@ -1,9 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from '@/app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { FILE_SIZE_LIMIT } from '@/lib/constants';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.useBodyParser('json', { limit: FILE_SIZE_LIMIT });
+  app.useBodyParser('urlencoded', { extended: true, limit: FILE_SIZE_LIMIT });
+
   const configService = app.get(ConfigService);
 
   app.enableCors({

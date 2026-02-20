@@ -1,6 +1,7 @@
 import { GameModeCard } from "@/components/game-mode-card";
 import { gameModes } from "@/lib/game-mode";
 import { appInfo } from "@/lib/app-info";
+import Link from "next/link";
 
 export default function HomeView() {
   return (
@@ -30,6 +31,13 @@ export default function HomeView() {
               ))}
             </div>
           </section>
+
+          <p className="text-md text-center">
+            Inspired by&nbsp;
+            <Link href="https://gamedle.wtf" target="_blank" className="underline hover:text-sky-600">
+              Gamedle
+            </Link>
+          </p>
         </div>
       </div>
     </div>

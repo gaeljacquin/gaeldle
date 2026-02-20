@@ -1,12 +1,24 @@
 import { Controller, UseGuards, NotFoundException } from '@nestjs/common';
+import sharp from 'sharp';
 import { Implement, implement } from '@orpc/nest';
 import { contract } from '@gaeldle/api-contract';
 import { GamesService } from '@/games/games.service';
+import { S3Service } from '@/lib/s3.service';
+import { AiService } from '@/lib/ai.service';
 import { StackAuthGuard } from '@/auth/stack-auth.guard';
+import { TEST_DIR, IMAGE_GEN_DIR } from '@/lib/constants';
+import { IMAGE_PROMPT_SUFFIX } from '@gaeldle/constants';
+import { ConfigService } from '@nestjs/config';
+import type { AppConfiguration } from '@/config/configuration';
 
 @Controller()
 export class GamesRouter {
-  constructor(private readonly gamesService: GamesService) {}
+  constructor(
+    private readonly gamesService: GamesService,
+    private readonly s3Service: S3Service,
+    private readonly aiService: AiService,
+    private readonly configService: ConfigService<AppConfiguration>,
+  ) {}
 
   @Implement(contract.games.list)
   list() {
@@ -170,5 +182,144 @@ export class GamesRouter {
         data: { id: deletedId },
       };
     });
+  }
+
+  @Implement(contract.games.testUpload)
+  testUpload() {
+    return implement(contract.games.testUpload).handler(
+      async ({ input }: { input: { image: string; extension: string } }) => {
+        try {
+          const { image, extension } = input;
+
+          // Remove base64 prefix if present
+          const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
+          const buffer = Buffer.from(base64Data, 'base64');
+
+          const timestamp = Date.now();
+          const fileName = `${TEST_DIR}/placeholder_${timestamp}.${extension}`;
+
+          await this.s3Service.uploadImage(
+            fileName,
+            buffer,
+            `image/${extension === 'jpg' ? 'jpeg' : extension}`,
+          );
+
+          return {
+            success: true,
+            url: fileName,
+          };
+        } catch (error) {
+          console.error('Test upload failed:', error);
+          throw error;
+        }
+      },
+    );
+  }
+
+  @Implement(contract.games.generateImage)
+  @UseGuards(StackAuthGuard)
+  generateImage() {
+    return implement(contract.games.generateImage).handler(
+      async ({
+        input,
+      }: {
+        input: {
+          igdbId: number;
+          includeStoryline?: boolean;
+          includeGenres?: boolean;
+          includeThemes?: boolean;
+        };
+      }) => {
+        const { igdbId, includeStoryline, includeGenres, includeThemes } =
+          input;
+
+        const game = await this.gamesService.getGameByIgdbId(igdbId);
+        if (!game) throw new NotFoundException('Game not found');
+
+        const prompt = this.buildImagePrompt(game, {
+          includeStoryline: includeStoryline ?? false,
+          includeGenres: includeGenres ?? false,
+          includeThemes: includeThemes ?? false,
+        });
+
+        const rawBuffer = await this.aiService.generateImage(prompt);
+        const imageBuffer = await sharp(rawBuffer)
+          .jpeg({ quality: 85 })
+          .toBuffer();
+
+        const timestamp = Date.now();
+        const key = `${IMAGE_GEN_DIR}/${igdbId}_${timestamp}.jpg`;
+        await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
+
+        const r2PublicUrlRaw =
+          this.configService.get('r2PublicUrl', { infer: true }) ?? '';
+        const r2PublicUrl = r2PublicUrlRaw.startsWith('http')
+          ? r2PublicUrlRaw
+          : `https://${r2PublicUrlRaw}`;
+        const publicUrl = `${r2PublicUrl}/${key}`;
+
+        const updatedGame = await this.gamesService.updateGame(game.id, {
+          aiImageUrl: publicUrl,
+          aiPrompt: prompt,
+        });
+
+        if (!updatedGame)
+          throw new NotFoundException('Failed to update game record');
+
+        return { success: true, url: publicUrl, data: updatedGame };
+      },
+    );
+  }
+
+  private buildImagePrompt(
+    game: {
+      name: string;
+      summary?: string | null;
+      storyline?: string | null;
+      keywords?: unknown;
+      genres?: unknown;
+      themes?: unknown;
+    },
+    options: {
+      includeStoryline: boolean;
+      includeGenres: boolean;
+      includeThemes: boolean;
+    },
+  ): string {
+    const parts: string[] = [];
+
+    parts.push(`Cinematic video game key art for "${game.name}"`);
+
+    if (game.summary) {
+      parts.push(game.summary);
+    }
+
+    if (options.includeStoryline && game.storyline) {
+      parts.push(game.storyline);
+    }
+
+    if (
+      options.includeGenres &&
+      Array.isArray(game.genres) &&
+      game.genres.length > 0
+    ) {
+      parts.push(`Genre: ${(game.genres as string[]).join(', ')}`);
+    }
+
+    if (
+      options.includeThemes &&
+      Array.isArray(game.themes) &&
+      game.themes.length > 0
+    ) {
+      parts.push(`Themes: ${(game.themes as string[]).join(', ')}`);
+    }
+
+    if (Array.isArray(game.keywords) && game.keywords.length > 0) {
+      parts.push(`Keywords: ${(game.keywords as string[]).join(', ')}`);
+    }
+
+    parts.push(IMAGE_PROMPT_SUFFIX);
+
+    return parts.join('. ');
   }
 }

@@ -185,7 +185,7 @@ export default function Timeline() {
 
   return (
     <div className="min-h-full bg-background text-foreground">
-      <div className="container mx-auto max-w-5xl px-4 py-10">
+      <div className="container mx-auto px-4 py-10">
         <BackToMainMenu />
 
         <div className="mb-8 text-center">
@@ -196,7 +196,7 @@ export default function Timeline() {
         <Card className="border shadow-none bg-muted/5">
           <CardContent className="p-6">
             <div className="space-y-8">
-              <div className="rounded-none border-2 border-dashed border-border p-6 overflow-x-auto flex justify-center bg-card/50">
+              <div className="rounded-none border-2 border-dashed border-border p-6 overflow-x-auto scrollbar-x bg-card/50">
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCenter}
@@ -208,7 +208,7 @@ export default function Timeline() {
                     items={userOrder.map((game) => game.id)}
                     strategy={swapMode ? noOpStrategy : horizontalListSortingStrategy}
                   >
-                    <div className="flex gap-6 min-w-max px-4">
+                    <div className="flex gap-6 min-w-max px-4 mx-auto">
                       {userOrder.map((game, index) => {
                         let isCorrect: boolean | undefined = undefined;
                         let showDate = false;

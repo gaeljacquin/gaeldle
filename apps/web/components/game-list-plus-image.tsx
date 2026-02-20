@@ -65,7 +65,7 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
             className="h-full w-full"
           />
         break;
-      case 'image-ai':
+      case 'image-gen':
         imageDisplayed =
           <CoverDisplay
             game={targetGame}

@@ -68,7 +68,7 @@ export const gameModes: GameMode[] = [
 
 /**
  * Get game mode by slug (pathname without leading slash)
- * @param slug - The game mode slug (e.g., "cover-art", "image-ai")
+ * @param slug - The game mode slug (e.g., "cover-art", "image-gen")
  * @returns GameMode or undefined if not found
  */
 export function getGameModeBySlug(slug: string): GameMode | undefined {

@@ -4,7 +4,7 @@ import { GameSelectSchema, GameUpdateInputSchema, type Game } from './schema';
 
 export const GameModeSlugSchema = z.enum([
   'cover-art',
-  'image-ai',
+  'image-gen',
   'artwork',
   'timeline',
   'timeline-2',
@@ -153,6 +153,39 @@ export const GamesContract = {
         data: z.object({ deletedIds: z.array(z.number()) }),
       }),
     ),
+
+  testUpload: oc
+    .route({ method: 'POST', path: '/games/test-upload' })
+    .input(
+      z.object({
+        image: z.string(), // base64
+        extension: z.string().default('jpg'),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        url: z.string(),
+      }),
+    ),
+
+  generateImage: oc
+    .route({ method: 'POST', path: '/games/generate-image' })
+    .input(
+      z.object({
+        igdbId: z.coerce.number().int().positive(),
+        includeStoryline: z.boolean().optional().default(false),
+        includeGenres: z.boolean().optional().default(false),
+        includeThemes: z.boolean().optional().default(false),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        url: z.string(),
+        data: GameSelectSchema,
+      }),
+    ),
 } as const;
 
 export interface GameApiResponse {
@@ -161,7 +194,7 @@ export interface GameApiResponse {
   error?: string;
 }
 
-export type CoverArtModeSlug = 'cover-art' | 'image-ai' | 'artwork';
+export type CoverArtModeSlug = 'cover-art' | 'image-gen' | 'artwork';
 
 export type GameModeSlug =
   | CoverArtModeSlug

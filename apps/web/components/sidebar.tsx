@@ -11,11 +11,14 @@ import {
   IconChevronDown,
   IconChevronRight,
   IconSettings,
+  IconLayoutSidebarLeftExpand,
+  IconLayoutSidebarLeftCollapse,
+  IconHome,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { appInfo } from "@/lib/app-info";
 import { gameModes } from "@/lib/game-mode";
-import SidebarToggle from "@/components/sidebar-toggle";
+import { Separator } from "@/components/ui/separator";
 
 interface SidebarLinkProps {
   href: string;
@@ -117,26 +120,49 @@ interface SidebarHeaderProps {
 
 function SidebarHeader({ isCollapsed, onToggle }: Readonly<SidebarHeaderProps>) {
   return (
-    <div className={cn(
-      "flex h-16 items-center border-b px-4",
-      isCollapsed ? "justify-center px-0" : null,
-    )}>
-      {isCollapsed ? null : (
-        <Link href="/" className="flex items-center gap-2 font-bold tracking-tight">
+    <button
+      onClick={onToggle}
+      className={cn(
+        "group flex h-16 w-full cursor-pointer items-center border-b px-4",
+        isCollapsed ? "justify-center px-0" : null,
+      )}
+    >
+      {isCollapsed ? (
+        <div
+          className="relative flex h-8 w-8 items-center justify-center"
+          title="Expand sidebar"
+        >
           <Image
             src="/logo.png"
             alt={`${appInfo.title} logo`}
             width={243}
             height={256}
-            className="h-8 rounded-md"
+            className="h-8 rounded-md group-hover:hidden"
             style={{ width: "auto" }}
             loading="eager"
           />
-          <span>{appInfo.title}</span>
-        </Link>
+          <IconLayoutSidebarLeftExpand size={20} className="hidden group-hover:block" />
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center gap-2 font-bold tracking-tight">
+            <Image
+              src="/logo.png"
+              alt={`${appInfo.title} logo`}
+              width={243}
+              height={256}
+              className="h-8 rounded-md"
+              style={{ width: "auto" }}
+              loading="eager"
+            />
+            <span>{appInfo.title}</span>
+          </div>
+          <div className="ml-auto hidden group-hover:block" title="Collapse sidebar">
+            <IconLayoutSidebarLeftCollapse size={20} />
+          </div>
+        </>
       )}
-      <SidebarToggle isCollapsed={isCollapsed} toggleSidebar={onToggle} />
-    </div>
+    </button>
   );
 }
 
@@ -177,7 +203,7 @@ export function Sidebar() {
     <aside
       className={cn(
         "relative flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-12" : "w-64",
+        isCollapsed ? "w-16" : "w-64",
       )}
     >
       <SidebarHeader isCollapsed={isCollapsed} onToggle={toggleSidebar} />
@@ -191,13 +217,6 @@ export function Sidebar() {
           isActive={pathname === "/dashboard"}
         />
 
-        <SidebarGamesSection
-          isCollapsed={isCollapsed}
-          isExpanded={isGamesExpanded}
-          onToggle={toggleGames}
-          pathname={pathname}
-        />
-
         <SidebarLink
           href="/dashboard/settings"
           icon={IconSettings}
@@ -205,7 +224,27 @@ export function Sidebar() {
           isCollapsed={isCollapsed}
           isActive={pathname === "/dashboard/settings"}
         />
+
+        <Separator />
+
+        <SidebarGamesSection
+          isCollapsed={isCollapsed}
+          isExpanded={isGamesExpanded}
+          onToggle={toggleGames}
+          pathname={pathname}
+        />
+
       </nav>
+
+      <div className="space-y-1 p-2">
+        <SidebarLink
+          href="/"
+          icon={IconHome}
+          label="Home"
+          isCollapsed={isCollapsed}
+          isActive={pathname === "/"}
+        />
+      </div>
 
       <SidebarUserFooter isCollapsed={isCollapsed} user={user} />
     </aside>

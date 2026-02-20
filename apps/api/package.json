@@ -35,6 +35,7 @@
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.1.14",
     "@nestjs/platform-express": "^11.1.14",
+    "@nestjs/terminus": "^11.1.1",
     "@orpc/contract": "^1.13.5",
     "@orpc/nest": "^1.13.5",
     "@orpc/openapi": "^1.13.5",

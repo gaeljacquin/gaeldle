@@ -84,7 +84,7 @@ The script must:
 4. **Build the prompt** using the exact same logic as `buildImagePrompt` in `apps/api/src/games/games.router.ts` and `IMAGE_PROMPT_SUFFIX` from `packages/constants/src/index.ts`:
    ```typescript
    const parts: string[] = [];
-   parts.push(`Cinematic video game key art for "${game.name}"`);
+   parts.push(`Funko Pop chibi style illustration of iconic characters from "${game.name}" set within the game's distinct world`);
    if (game.summary) parts.push(game.summary);
    if (options.includeStoryline && game.storyline) parts.push(game.storyline);
    if (options.includeGenres && Array.isArray(game.genres) && game.genres.length > 0)

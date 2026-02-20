@@ -288,7 +288,7 @@ export class GamesRouter {
   ): string {
     const parts: string[] = [];
 
-    parts.push(`Cinematic video game key art for "${game.name}"`);
+    parts.push(`Funko Pop chibi style illustration of iconic characters from "${game.name}" set within the game's distinct world`);
 
     if (game.summary) {
       parts.push(game.summary);

@@ -1,2 +1,2 @@
 export const IMAGE_PROMPT_SUFFIX =
-  'Highly detailed, cinematic lighting, dramatic atmosphere, concept art, professional game cover art, trending on ArtStation, 8K resolution, no text, no letters, no words, no titles, no logos, no watermarks, no labels, no UI elements.';
+  'Funko Pop chibi art style, big head small body, large expressive eyes, scene depicts the game\'s iconic setting and atmosphere, vibrant colorful illustration, highly detailed digital art, no packaging, no box, no shelf, no text, no letters, no words, no titles, no logos, no watermarks, no labels, no UI elements, no written characters of any kind.';

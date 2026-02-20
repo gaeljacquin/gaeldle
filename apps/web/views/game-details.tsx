@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useState } from 'react';
-import { IMAGE_PROMPT_SUFFIX } from '@gaeldle/constants';
+import { DEFAULT_IMAGE_GEN_STYLE, IMAGE_PROMPT_SUFFIX, IMAGE_STYLES } from '@gaeldle/constants';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getGameByIgdbId, deleteGame, syncGame, generateImage } from '@/lib/services/game.service';
 import BackToDashboard from '@/components/back-to-dashboard';
@@ -29,19 +29,27 @@ import {
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { IconTrash, IconCalendar, IconDeviceGamepad, IconLayersIntersect, IconExternalLink, IconRefresh, IconBrush } from '@tabler/icons-react';
-import { Game, type ArtworkImage } from '@gaeldle/api-contract';
+import { Game, type ArtworkImage, type ImageStyle } from '@gaeldle/api-contract';
 import { cn } from '@/lib/utils';
 import { PLACEHOLDER_IMAGE_R2 } from '@/lib/constants';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 function buildPromptPreview(
   game: Game,
-  options: { includeStoryline: boolean; includeGenres: boolean; includeThemes: boolean },
+  options: { includeStoryline: boolean; includeGenres: boolean; includeThemes: boolean; imageStyle: string },
 ): string {
   const parts: string[] = [];
 
-  parts.push(`Cinematic video game key art for "${game.name}"`);
+  const style = IMAGE_STYLES.find((s) => s.value === options.imageStyle) ?? IMAGE_STYLES[0];
+  parts.push(`${style.descriptor} of iconic characters from "${game.name}" set within the game's distinct world`);
 
   if (game.summary) {
     parts.push(game.summary);
@@ -93,6 +101,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
   const [includeThemes, setIncludeThemes] = useState(false);
+  const [imageStyle, setImageStyle] = useState<ImageStyle>(DEFAULT_IMAGE_GEN_STYLE);
   const [promptView, setPromptView] = useState<'preview' | 'saved'>('preview');
 
   const { data: game, isLoading, error } = useQuery({
@@ -132,6 +141,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
         includeStoryline,
         includeGenres,
         includeThemes,
+        imageStyle,
       }),
     onMutate: () => {
       toast.loading('Generating AI image...', { id: 'generate-image' });
@@ -146,7 +156,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
     },
   });
 
-  const buttonText = (game: Game) => {
+  const imageGenButtonText = (game: Game) => {
     if (generateImageMutation.isPending) {
       return  'Generating...';
     }
@@ -408,8 +418,25 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                 {game.aiImageUrl === null && <p className='text-xs text-center'>Placeholder image</p>}
               </div>
               <div className="flex-1 space-y-4">
+                <div className="space-y-1.5">
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Art Style</h3>
+                  <Select value={imageStyle} onValueChange={(v) => { if (v) setImageStyle(v); }} disabled={generateImageMutation.isPending}>
+                    <SelectTrigger className="w-full">
+                  <SelectValue>
+                    {IMAGE_STYLES.find((style) => style.value === imageStyle)?.label}
+                  </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {IMAGE_STYLES.map((style) => (
+                        <SelectItem key={style.value} value={style.value}>
+                          {style.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Prompt Fields</h3>
-                <div className="space-y-2.5">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2.5">
                   {/* Fixed fields */}
                   {(
                     [
@@ -419,7 +446,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                     ] as const
                   ).map(({ id, label, hasValue }) => (
                     <div key={id} className="flex items-center gap-2.5">
-                      <Checkbox id={id} checked={hasValue} disabled />
+                      <Checkbox id={id} checked={hasValue} disabled className="data-checked:bg-blue-600 data-checked:border-blue-600" />
                       <Label
                         htmlFor={id}
                         className="text-sm font-medium cursor-default text-muted-foreground"
@@ -481,7 +508,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                     value={
                       promptView === 'saved' && game.aiPrompt
                         ? game.aiPrompt
-                        : buildPromptPreview(game, { includeStoryline, includeGenres, includeThemes })
+                        : buildPromptPreview(game, { includeStoryline, includeGenres, includeThemes, imageStyle })
                     }
                     className="rounded-none resize-none min-h-30 text-sm text-muted-foreground italic bg-muted/30 border-dashed"
                   />
@@ -503,8 +530,8 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                   className={cn(
                     "w-full font-bold h-10 rounded-none text-white hover:text-white",
                     generateImageMutation.isPending
-                      ? "bg-purple-400 hover:bg-purple-400 cursor-not-allowed"
-                      : "bg-purple-600 hover:bg-purple-700 cursor-pointer",
+                      ? "bg-slate-400 hover:bg-slate-400 cursor-not-allowed"
+                      : "bg-slate-600 hover:bg-slate-700 cursor-pointer",
                   )}
                   onClick={() => generateImageMutation.mutate()}
                   disabled={generateImageMutation.isPending}
@@ -513,7 +540,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                     "mr-2 size-4",
                     generateImageMutation.isPending && "animate-pulse"
                   )} />
-                  {buttonText(game)}
+                  {imageGenButtonText(game)}
                 </Button>
               </div>
             </div>

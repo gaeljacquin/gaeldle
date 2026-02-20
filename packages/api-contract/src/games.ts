@@ -11,6 +11,20 @@ export const GameModeSlugSchema = z.enum([
   'specifications',
 ]);
 
+export const ImageStyleSchema = z.enum([
+  'funko-pop-chibi',
+  'simpsons',
+  'rubber-hose-animation',
+  'muppet',
+  'lego',
+  'claymation',
+  'vector-art',
+  'digital-cel-shaded',
+  'western-animation-concept-art',
+  'graphic-novel-illustration',
+]);
+export type ImageStyle = z.infer<typeof ImageStyleSchema>;
+
 export const SyncOperationSchema = z.enum([
   'created',
   'updated',
@@ -179,6 +193,7 @@ export const GamesContract = {
         includeStoryline: z.boolean().optional().default(false),
         includeGenres: z.boolean().optional().default(false),
         includeThemes: z.boolean().optional().default(false),
+        imageStyle: ImageStyleSchema.optional().default('funko-pop-chibi'),
       }),
     )
     .output(

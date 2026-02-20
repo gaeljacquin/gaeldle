@@ -171,9 +171,9 @@ export default function Timeline2() {
               <div className="text-center">
                 <div
                   ref={timelineRef}
-                  className="border-2 border-dashed border-border p-6 overflow-x-auto flex justify-center items-center bg-card/50 min-h-55"
+                  className="border-2 border-dashed border-border p-6 overflow-x-auto scrollbar-x flex items-center bg-card/50 min-h-55"
                 >
-                  <div className="flex gap-4 items-center px-4">
+                  <div className="flex gap-4 items-center px-4 mx-auto">
                     {timelineCards.map((game, index) => {
                       const correctlyPlacedCardColor = correctlyPlacedCards.has(game.id)
                         ? 'green'

@@ -29,12 +29,16 @@ export async function deleteBulkGames(ids: number[]): Promise<boolean> {
 export async function getPaginatedGames(
   page: number = 1,
   pageSize: number = 10,
-  query?: string
+  query?: string,
+  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
 ) {
   const result = await orpcClient.games.list({
     page,
     pageSize,
     q: query,
+    sortBy,
+    sortDir,
   });
   return result;
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   and,
+  asc,
   desc,
   eq,
   inArray,
@@ -58,9 +59,21 @@ export class GamesService {
     page: number,
     pageSize: number,
     q?: string,
+    sortBy: 'name' | 'firstReleaseDate' | 'igdbId' = 'name',
+    sortDir: 'asc' | 'desc' = 'asc',
   ): Promise<{ games: Game[]; total: number }> {
     const offset = (page - 1) * pageSize;
     const where = q ? sql`name ILIKE ${'%' + q + '%'}` : undefined;
+
+    const orderBy = (() => {
+      if (sortBy === 'firstReleaseDate') {
+        return sortDir === 'asc'
+          ? sql`first_release_date ASC NULLS LAST`
+          : sql`first_release_date DESC NULLS LAST`;
+      }
+      const col = sortBy === 'igdbId' ? games.igdbId : games.name;
+      return sortDir === 'asc' ? asc(col) : desc(col);
+    })();
 
     const [gamesList, totalCount] = await Promise.all([
       this.databaseService.db
@@ -69,7 +82,7 @@ export class GamesService {
         .where(where)
         .limit(pageSize)
         .offset(offset)
-        .orderBy(desc(games.id)),
+        .orderBy(orderBy),
       this.databaseService.db
         .select({ count: sql<number>`count(*)` })
         .from(games)
@@ -107,8 +120,10 @@ export class GamesService {
         sql`artworks IS NOT NULL`,
         sql`json_array_length(artworks) > 0`,
       );
-    } else if (mode === 'cover-art' || mode === 'image-gen') {
+    } else if (mode === 'cover-art') {
       conditions.push(sql`image_url IS NOT NULL`);
+    } else if (mode === 'image-gen') {
+      conditions.push(sql`ai_image_url IS NOT NULL`);
     } else if (mode === 'timeline' || mode === 'timeline-2') {
       conditions.push(sql`first_release_date IS NOT NULL`);
     }

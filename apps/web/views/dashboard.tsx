@@ -39,10 +39,22 @@ import { Game } from '@gaeldle/api-contract';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
+type SortOption = 'name-asc' | 'name-desc' | 'firstReleaseDate-asc' | 'firstReleaseDate-desc' | 'igdbId-asc' | 'igdbId-desc';
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'name-asc', label: 'Title A→Z' },
+  { value: 'name-desc', label: 'Title Z→A' },
+  { value: 'firstReleaseDate-asc', label: 'Release Date ↑' },
+  { value: 'firstReleaseDate-desc', label: 'Release Date ↓' },
+  { value: 'igdbId-asc', label: 'IGDB ID ↑' },
+  { value: 'igdbId-desc', label: 'IGDB ID ↓' },
+];
+
 export default function Dashboard() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState('10');
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<SortOption>('name-asc');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [isMultiSelect, setIsMultiSelect] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -57,6 +69,8 @@ export default function Dashboard() {
     setPrevSearch(debouncedSearch);
     setPage(1);
   }
+
+  const [sortBy, sortDir] = sort.split('-') as ['name' | 'firstReleaseDate' | 'igdbId', 'asc' | 'desc'];
 
   const deleteMutation = useMutation({
     mutationFn: (ids: number[]) => deleteBulkGames(ids),
@@ -93,8 +107,8 @@ export default function Dashboard() {
   };
 
   const { data, isLoading, isPlaceholderData } = useQuery({
-    queryKey: ['games', page, pageSize, debouncedSearch],
-    queryFn: () => getPaginatedGames(page, Number.parseInt(pageSize, 10), debouncedSearch),
+    queryKey: ['games', page, pageSize, debouncedSearch, sortBy, sortDir],
+    queryFn: () => getPaginatedGames(page, Number.parseInt(pageSize, 10), debouncedSearch, sortBy, sortDir),
     placeholderData: (previousData) => previousData,
   });
 
@@ -215,7 +229,7 @@ export default function Dashboard() {
                 >
                   <Timeline2Card
                     game={game}
-                    showDate={false}
+                    showTopBanner={false}
                   />
                 </Link>
                 {view === 'list' && (
@@ -327,7 +341,7 @@ export default function Dashboard() {
             <div className="relative w-1/2 group">
               <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
               <Input
-                placeholder="Search games by name..."
+                placeholder="Search games by title..."
                 className="pl-9 pr-9"
                 value={search}
                 onChange={handleSearchChange}
@@ -435,6 +449,27 @@ export default function Dashboard() {
                   </Button>
                 </div>
               </div>
+
+              <Select
+                value={sort}
+                onValueChange={(val) => {
+                  setSort(val as SortOption);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-40">
+                  <SelectValue>
+                    {SORT_OPTIONS.find((opt) => opt.value === sort)?.label}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {SORT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               <Select value={pageSize} onValueChange={handlePageSizeChange}>
                 <SelectTrigger className="w-20">

@@ -131,15 +131,17 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
                 </div>
               </Card>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground font-medium">Clarity</span>
-                  <span className="font-bold text-foreground">{clarity}%</span>
+              {props.gameModeSlug === 'image-gen' ? null : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground font-medium">Clarity</span>
+                    <span className="font-bold text-foreground">{clarity}%</span>
+                  </div>
+                  <div className="h-2 w-full bg-muted border overflow-hidden">
+                    <div className="h-full bg-primary transition-all duration-500" style={{ width: `${clarity}%` }} />
+                  </div>
                 </div>
-                <div className="h-2 w-full bg-muted border overflow-hidden">
-                  <div className="h-full bg-primary transition-all duration-500" style={{ width: `${clarity}%` }} />
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="flex flex-col gap-6">

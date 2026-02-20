@@ -4,6 +4,7 @@ import {
   IconCalendarDue,
   IconNotes,
   IconWallpaper,
+  IconRobot,
   type TablerIcon,
 } from "@tabler/icons-react";
 import type { GameModeSlug } from "@gaeldle/api-contract";
@@ -36,6 +37,15 @@ export const gameModes: GameMode[] = [
     icon: IconWallpaper,
     gradient: "--gradient-medium-1",
     href: "/artwork",
+  },
+  {
+    id: "image-gen",
+    title: "Image Gen",
+    description: "Identify the game from an AI-generated image.",
+    difficulty: "Medium",
+    icon: IconRobot,
+    gradient: "--gradient-medium-2",
+    href: "/image-gen",
   },
   {
     id: "timeline",

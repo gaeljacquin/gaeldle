@@ -206,12 +206,12 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                   {game.imageUrl ? (
                     <>
                       <Image
-                        src={game.imageUrl}
+                        src={game.imageUrl.replace('t_720p', 't_1080p')}
                         alt={game.name}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         priority
-                        sizes="(max-width: 768px) 100vw, 320px"
+                        sizes="(max-width: 1024px) 100vw, 320px"
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                         <IconExternalLink className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-8" />

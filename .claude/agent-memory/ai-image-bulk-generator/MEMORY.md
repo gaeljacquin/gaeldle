@@ -62,16 +62,22 @@ bun run apps/api/scripts/bulk-generate-images.ts
 
 ## Session Notes
 
-### Latest Run (2026-02-19)
-- 65 total games in database
-- 61 games missing `ai_image_url`
-- First batch: 5 games processed successfully
+### Latest Run (2026-02-20)
+- 53 total games in database (after previous batch of 5)
+- 53 games initially missing `ai_image_url` (before this run)
+- Batch 2: 5 games processed successfully with vector-art style
 - Prompt options: default (storyline/genres/themes all false)
-- 56 games remaining for future batches
+- 48 games remaining for future batches
 
-### Generated Games (Batch 1)
-1. Dark Souls III - 1,376 char prompt
-2. Horizon Zero Dawn - 1,196 char prompt
-3. Half-Life 2 - 1,150 char prompt
-4. Grand Theft Auto V - 3,603 char prompt (longest)
-5. Outer Wilds - 828 char prompt (shortest)
+### Generated Games (Batch 2 - Vector Art Style)
+1. Fallout: New Vegas - 3,610 char prompt
+2. Portal 2 - 1,333 char prompt
+3. The Elder Scrolls V: Skyrim - 2,966 char prompt
+4. The Witcher 3: Wild Hunt - 2,362 char prompt
+5. Undertale - 1,500 char prompt
+
+### Image Style Support
+- Script now supports `IMAGE_STYLE` env variable
+- Vector-art style successfully applied to all 5 games
+- Style resolved via `IMAGE_STYLES` constant lookup (case-insensitive)
+- Descriptor properly injected into prompt based on style selection

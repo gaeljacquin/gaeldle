@@ -8,12 +8,27 @@ import * as schema from '@gaeldle/api-contract';
 import { sql, eq } from 'drizzle-orm';
 import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { IMAGE_PROMPT_SUFFIX } from '@gaeldle/constants';
+import {
+  IMAGE_PROMPT_SUFFIX,
+  IMAGE_STYLES,
+  DEFAULT_IMAGE_GEN_STYLE,
+} from '@gaeldle/constants';
 
 // Parse prompt options from environment variables
 const includeStoryline = process.env.INCLUDE_STORYLINE === 'true';
 const includeGenres = process.env.INCLUDE_GENRES === 'true';
 const includeThemes = process.env.INCLUDE_THEMES === 'true';
+
+// Resolve image style: match by value slug or label (case-insensitive), fall back to default
+const rawStyle = process.env.IMAGE_STYLE?.trim() ?? '';
+const resolvedStyle =
+  IMAGE_STYLES.find(
+    (s) =>
+      s.value.toLowerCase() === rawStyle.toLowerCase() ||
+      s.label.toLowerCase() === rawStyle.toLowerCase(),
+  ) ?? IMAGE_STYLES.find((s) => s.value === DEFAULT_IMAGE_GEN_STYLE)!;
+
+console.log(`Image style: ${resolvedStyle.label} (${resolvedStyle.value})`);
 
 const options = {
   includeStoryline,
@@ -52,11 +67,12 @@ function buildImagePrompt(
     themes?: unknown;
   },
   opts: typeof options,
+  styleDescriptor: string,
 ): string {
   const parts: string[] = [];
 
   parts.push(
-    `Funko Pop chibi style illustration of iconic characters from "${game.name}" set within the game's distinct world`,
+    `${styleDescriptor} of iconic characters from "${game.name}" set within the game's distinct world`,
   );
 
   if (game.summary) {
@@ -168,7 +184,7 @@ try {
       console.log(`\nProcessing game: ${game.name} (ID: ${game.igdbId})`);
 
       // Build the prompt
-      const prompt = buildImagePrompt(game, options);
+      const prompt = buildImagePrompt(game, options, resolvedStyle.descriptor);
       console.log(`Generated prompt (${prompt.length} chars)`);
 
       // Generate the image

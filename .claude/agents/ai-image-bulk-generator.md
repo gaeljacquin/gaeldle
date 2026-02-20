@@ -29,10 +29,28 @@ Always read `AGENTS.md` before starting.
 - `includeStoryline: false`
 - `includeGenres: false`
 - `includeThemes: false`
+- `imageStyle: "funko-pop-chibi"`
 
 **Overrides accepted as:**
 - Plain text keywords: `includeStoryline`, `includeGenres`, `includeThemes`
-- JSON object: `{"includeStoryline": true, "includeGenres": true}`
+- Plain text style (value slug or label): e.g. `simpsons`, `Simpsons Style`, `lego`, `Lego Style`
+- JSON object: `{"includeStoryline": true, "imageStyle": "simpsons"}`
+
+**Available styles** (from `IMAGE_STYLES` in `packages/constants/src/index.ts`):
+| Value | Label |
+|---|---|
+| `funko-pop-chibi` | Funko Pop Chibi Style |
+| `simpsons` | Simpsons Style |
+| `rubber-hose-animation` | Rubber Hose Animation Style |
+| `muppet` | Muppet Style |
+| `lego` | Lego Style |
+| `claymation` | Claymation Style |
+| `vector-art` | Vector Art Style |
+| `digital-cel-shaded` | Digital Cel-shaded Portrait Illustration Style |
+| `western-animation-concept-art` | Western Animation Concept Art Style |
+| `graphic-novel-illustration` | Graphic Novel Illustration Style |
+
+If the provided style cannot be matched by value slug or label (case-insensitive), fall back to `funko-pop-chibi`.
 
 Parse the user's invocation input to extract any overrides before running.
 
@@ -81,10 +99,10 @@ The script must:
      .where(sql`ai_image_url IS NULL`)
      .limit(5);
    ```
-4. **Build the prompt** using the exact same logic as `buildImagePrompt` in `apps/api/src/games/games.router.ts` and `IMAGE_PROMPT_SUFFIX` from `packages/constants/src/index.ts`:
+4. **Build the prompt** using the exact same logic as `buildImagePrompt` in `apps/api/src/games/games.router.ts` and `IMAGE_PROMPT_SUFFIX` / `IMAGE_STYLES` from `packages/constants/src/index.ts`. Resolve the style descriptor from `IMAGE_STYLES` by matching `IMAGE_STYLE` env var against `value` or `label` (case-insensitive); fall back to `DEFAULT_IMAGE_GEN_STYLE`:
    ```typescript
    const parts: string[] = [];
-   parts.push(`Funko Pop chibi style illustration of iconic characters from "${game.name}" set within the game's distinct world`);
+   parts.push(`${resolvedStyle.descriptor} of iconic characters from "${game.name}" set within the game's distinct world`);
    if (game.summary) parts.push(game.summary);
    if (options.includeStoryline && game.storyline) parts.push(game.storyline);
    if (options.includeGenres && Array.isArray(game.genres) && game.genres.length > 0)
@@ -155,10 +173,11 @@ Pass prompt options as environment variables so the script can read them:
 ```bash
 cd /path/to/repo && \
   INCLUDE_STORYLINE=false INCLUDE_GENRES=false INCLUDE_THEMES=false \
+  IMAGE_STYLE=funko-pop-chibi \
   bun run apps/api/scripts/bulk-generate-images.ts
 ```
 
-Set the variables to `true` based on the user's override input.
+Set `INCLUDE_*` variables to `true` based on the user's override input. Set `IMAGE_STYLE` to the resolved style value slug (e.g. `simpsons`). Omit or leave empty to use the default (`funko-pop-chibi`).
 
 ### Step 3: Report Results
 

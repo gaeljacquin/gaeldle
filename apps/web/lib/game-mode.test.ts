@@ -3,8 +3,8 @@ import { getGameModeBySlug, gameModes } from './game-mode';
 
 describe('game-mode utilities', () => {
   describe('gameModes array', () => {
-    it('should have exactly 5 game modes', () => {
-      expect(gameModes.length).toBe(5);
+    it('should have exactly 6 game modes', () => {
+      expect(gameModes.length).toBe(6);
     });
 
     it('should contain cover-art mode', () => {
@@ -18,6 +18,13 @@ describe('game-mode utilities', () => {
       const mode = gameModes.find((m) => m.id === 'artwork');
       expect(mode).toBeDefined();
       expect(mode?.title).toBe('Artwork');
+      expect(mode?.difficulty).toBe('Medium');
+    });
+
+    it('should contain image-gen mode', () => {
+      const mode = gameModes.find((m) => m.id === 'image-gen');
+      expect(mode).toBeDefined();
+      expect(mode?.title).toBe('Image Gen');
       expect(mode?.difficulty).toBe('Medium');
     });
 
@@ -99,6 +106,13 @@ describe('game-mode utilities', () => {
       expect(result).toBeDefined();
       expect(result?.id).toBe('artwork');
       expect(result?.title).toBe('Artwork');
+    });
+
+    it('should return image-gen mode when slug is "image-gen"', () => {
+      const result = getGameModeBySlug('image-gen');
+      expect(result).toBeDefined();
+      expect(result?.id).toBe('image-gen');
+      expect(result?.title).toBe('Image Gen');
     });
 
     it('should return timeline mode when slug is "timeline"', () => {

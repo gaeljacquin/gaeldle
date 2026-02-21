@@ -23,7 +23,11 @@ export class AiService {
         Authorization: `Bearer ${this.apiToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({
+        prompt,
+        negative_prompt:
+          'text, letters, words, title, logo, watermark, label, caption, typography, font, inscription, written characters, game title, brand name, signature, UI, HUD, subtitles',
+      }),
     });
 
     if (!response.ok) {

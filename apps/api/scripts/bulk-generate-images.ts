@@ -119,7 +119,11 @@ async function generateImage(prompt: string): Promise<Buffer> {
       Authorization: `Bearer ${process.env.CF_API_TOKEN}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({
+      prompt,
+      negative_prompt:
+        'text, letters, words, title, logo, watermark, label, caption, typography, font, inscription, written characters, game title, brand name, signature, UI, HUD, subtitles',
+    }),
   });
 
   if (!response.ok) {

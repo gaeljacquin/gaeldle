@@ -7,7 +7,8 @@
 - Game mode config (titles, descriptions, difficulty, slugs): `apps/web/lib/game-mode.ts`.
 - Game hook files: `apps/web/lib/hooks/use-<mode>-game.ts` — contain `MAX_ATTEMPTS` and game logic.
 - Docs: `docs/agents/` contains architecture.md, backend-conventions.md, commands.md, frontend-conventions.md, workflows.md.
-- Public README at repo root `/Users/gael/Documents/projects/gaeldle/README.md` is user-facing (non-developer).
+- Game modes user-facing doc: `docs/game-modes.md` (full rules and mechanics for all six modes).
+- Public README at repo root `/Users/gael/Documents/projects/gaeldle/README.md` is a glossary/doc index only.
 
 ## Game Modes (as of 2026-02-20)
 
@@ -24,9 +25,10 @@ Cover Art, Artwork, and Image Gen all use the `GameListPlusImage` component and 
 
 ## README Convention
 
-- Root README is public-facing and user-friendly (not developer docs).
+- Root README is a glossary/doc index: brief project intro + a table linking to every file in `docs/`.
+- Game modes detail lives in `docs/game-modes.md`, not the README.
 - Developer/architecture rules go in `docs/agents/` files (see AGENTS.md for the list).
-- README should not include environment variables, ports, or build commands — those belong in docs/agents/.
+- README must not contain detailed content (env vars, ports, build commands, game mode rules) — link to the relevant doc file instead.
 
 ## Key Behavioral Details (for README accuracy)
 

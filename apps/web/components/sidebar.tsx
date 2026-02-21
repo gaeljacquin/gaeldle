@@ -203,7 +203,7 @@ export function Sidebar() {
     <aside
       className={cn(
         "relative flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-16" : "w-64",
+        isCollapsed ? "w-24" : "w-64",
       )}
     >
       <SidebarHeader isCollapsed={isCollapsed} onToggle={toggleSidebar} />

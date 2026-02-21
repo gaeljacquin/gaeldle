@@ -47,7 +47,8 @@ bun run apps/api/scripts/bulk-generate-images.ts
 ### Script Requirements
 - Must use dotenv to load `apps/api/.env` (Bun supports native .env loading)
 - All credentials must be present in `.env`: DATABASE_URL, CF_ACCOUNT_ID, CF_API_TOKEN, R2_* vars
-- Processes exactly 5 games per invocation (max 5 limit in query)
+- Supports `NUM_GAMES` env variable (default 5, max 50)
+- Defaults to 5 games per invocation if NUM_GAMES not specified
 
 ### Success Patterns
 - Each game takes approximately 9-12 seconds to process (Cloudflare AI generation time varies)
@@ -62,16 +63,23 @@ bun run apps/api/scripts/bulk-generate-images.ts
 
 ## Session Notes
 
-### Latest Run (2026-02-19)
-- 65 total games in database
-- 61 games missing `ai_image_url`
-- First batch: 5 games processed successfully
-- Prompt options: default (storyline/genres/themes all false)
-- 56 games remaining for future batches
+### Latest Run (2026-02-20 - Batch 3)
+- 47 total games in database (after batches 1 & 2)
+- 47 games initially missing `ai_image_url` before run
+- Batch 3: 7 games processed successfully with Simpsons style
+- Prompt options: INCLUDE_GENRES=true (genres added to prompts)
+- 40 games remaining for future batches
 
-### Generated Games (Batch 1)
-1. Dark Souls III - 1,376 char prompt
-2. Horizon Zero Dawn - 1,196 char prompt
-3. Half-Life 2 - 1,150 char prompt
-4. Grand Theft Auto V - 3,603 char prompt (longest)
-5. Outer Wilds - 828 char prompt (shortest)
+### Generated Games (Batch 3 - Simpsons Style + Genres)
+1. Hollow Knight - 1,592 char prompt (249 KB optimized)
+2. Stardew Valley - 2,110 char prompt (251 KB optimized)
+3. Red Dead Redemption 2 - 1,362 char prompt (221 KB optimized)
+4. Sekiro: Shadows Die Twice - 1,196 char prompt (236 KB optimized)
+5. Hades - 1,381 char prompt (256 KB optimized)
+6. Elden Ring - 2,790 char prompt (297 KB optimized)
+7. God of War - 1,790 char prompt (242 KB optimized)
+
+### Feature Updates
+- Script now supports dynamic `NUM_GAMES` parameter (default 5, max 50)
+- `NUM_GAMES=7` successfully tested in batch 3
+- Genres are correctly injected into prompts when INCLUDE_GENRES=true

@@ -1,51 +1,31 @@
-# [Gaeldle](https://gaeldle.gaeljacquin.com) 🎮
+# [Gaeldle](https://gaeldle.gaeljacquin.com)
 
-A collection of daily video game guessing challenges! Test your gaming knowledge across different game modes, each with unique mechanics and difficulty levels.
+A collection of video game guessing challenges. Test your gaming knowledge across six different modes, each with its own mechanics and difficulty level.
 
-## 🎯 Game Modes
-
-### Cover Art (Easy)
-Identify the game from its cover art. The image starts pixelated and gradually becomes clearer with each incorrect guess. Can you recognize it before running out of attempts?
-
-**How to play:**
-- Look at the pixelated cover art
-- Search and select a game from the list
-- Submit your guess
-- The image becomes clearer with each attempt
-- Earn a hint after 5 incorrect attempts
-
-### Timeline (Medium)
-Test your knowledge of gaming history! Arrange video games in chronological order based on their release dates.
-
-**How to play:**
-- Review the list of games to order
-- Drag and drop games to arrange them chronologically
-- Submit your timeline when ready
-- See how many you got in the correct order
-
-### Timeline 2 (Hard)
-A more challenging version of Timeline. Place each game one by one into the correct position on a growing timeline.
-
-**How to play:**
-- A game is presented to you
-- Place it in the correct chronological position on the timeline
-- Each correct placement adds to your timeline
-- Build your way to a complete chronological order
-
-### Specifications (Hard)
-Deduce the mystery game by analyzing its specifications. Each guess reveals which specs match the target game.
-
-**How to play:**
-- Search for and guess a game
-- See which specifications match (green), partially match (yellow), or don't match (red)
-- Use the hints to narrow down your search
-- Platforms, genres, themes, release year, and more provide clues
-- Earn a hint after 5 incorrect attempts (costs 1 attempt)
-
-## 📝 License
-
-MIT License
 
 ---
 
-**Enjoy the game! 🎉**
+## Documentation Index
+
+### Game
+
+| File | Description |
+|---|---|
+| [docs/game-modes.md](docs/game-modes.md) | All game modes: rules, mechanics, attempt limits, and how to play each one. |
+
+### Developer Docs
+
+| File | Description |
+|---|---|
+| [docs/agents/architecture.md](docs/agents/architecture.md) | Monorepo topology, ports, CORS config, health checks, environment variables, and code quality standards. |
+| [docs/agents/backend-conventions.md](docs/agents/backend-conventions.md) | NestJS API structure, contract-first approach with oRPC and Zod, router and service separation rules. |
+| [docs/agents/frontend-conventions.md](docs/agents/frontend-conventions.md) | Next.js 15 tech stack, theming, component/view/hook separation rules, and agent skills. |
+| [docs/agents/commands.md](docs/agents/commands.md) | CLI commands for running, building, testing, linting, and cleaning the monorepo. |
+| [docs/agents/workflows.md](docs/agents/workflows.md) | Step-by-step workflows for common tasks such as adding a new API endpoint or web page. |
+
+
+---
+
+## License
+
+MIT License

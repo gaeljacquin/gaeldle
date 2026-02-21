@@ -1,5 +1,5 @@
 import { orpcClient } from '@/lib/orpc';
-import type { Game, GameModeSlug } from '@gaeldle/api-contract';
+import type { Game, GameModeSlug, ImageStyle } from '@gaeldle/api-contract';
 
 export async function getAllGames(mode?: GameModeSlug): Promise<Game[]> {
   if (mode === 'artwork') {
@@ -80,7 +80,7 @@ export async function testUpload(image: string, extension: string = 'jpg') {
 
 export async function generateImage(
   igdbId: number,
-  options: { includeStoryline: boolean; includeGenres: boolean; includeThemes: boolean },
+  options: { includeStoryline: boolean; includeGenres: boolean; includeThemes: boolean; imageStyle: ImageStyle },
 ) {
   const result = await orpcClient.games.generateImage({ igdbId, ...options });
   return result;

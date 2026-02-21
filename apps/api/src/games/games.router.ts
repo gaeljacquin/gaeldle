@@ -1,7 +1,7 @@
 import { Controller, UseGuards, NotFoundException } from '@nestjs/common';
 import sharp from 'sharp';
 import { Implement, implement } from '@orpc/nest';
-import { contract } from '@gaeldle/api-contract';
+import { contract, type ImageStyle } from '@gaeldle/api-contract';
 import { GamesService } from '@/games/games.service';
 import { S3Service } from '@/lib/s3.service';
 import { AiService } from '@/lib/ai.service';
@@ -232,10 +232,16 @@ export class GamesRouter {
           includeStoryline?: boolean;
           includeGenres?: boolean;
           includeThemes?: boolean;
+          imageStyle?: ImageStyle;
         };
       }) => {
-        const { igdbId, includeStoryline, includeGenres, includeThemes } =
-          input;
+        const {
+          igdbId,
+          includeStoryline,
+          includeGenres,
+          includeThemes,
+          imageStyle,
+        } = input;
 
         const game = await this.gamesService.getGameByIgdbId(igdbId);
         if (!game) throw new NotFoundException('Game not found');
@@ -244,6 +250,7 @@ export class GamesRouter {
           includeStoryline: includeStoryline ?? false,
           includeGenres: includeGenres ?? false,
           includeThemes: includeThemes ?? false,
+          imageStyle: imageStyle ?? 'funko-pop-chibi',
         });
 
         const rawBuffer = await this.aiService.generateImage(prompt);
@@ -275,6 +282,21 @@ export class GamesRouter {
     );
   }
 
+  private static readonly IMAGE_STYLE_DESCRIPTORS: Record<ImageStyle, string> =
+    {
+      'funko-pop-chibi': 'Funko Pop chibi style illustration',
+      simpsons: 'Simpsons style illustration',
+      'rubber-hose-animation': 'Rubber hose animation style illustration',
+      muppet: 'Muppet style illustration',
+      lego: 'Lego style illustration',
+      claymation: 'Claymation style illustration',
+      'vector-art': 'Vector art style illustration',
+      'digital-cel-shaded': 'Digital cel-shaded portrait illustration style',
+      'western-animation-concept-art':
+        'Western animation concept art style illustration',
+      'graphic-novel-illustration': 'Graphic novel illustration style',
+    };
+
   private buildImagePrompt(
     game: {
       name: string;
@@ -288,12 +310,14 @@ export class GamesRouter {
       includeStoryline: boolean;
       includeGenres: boolean;
       includeThemes: boolean;
+      imageStyle: ImageStyle;
     },
   ): string {
     const parts: string[] = [];
 
+    const descriptor = GamesRouter.IMAGE_STYLE_DESCRIPTORS[options.imageStyle];
     parts.push(
-      `Funko Pop chibi style illustration of iconic characters from "${game.name}" set within the game's distinct world`,
+      `${descriptor} of iconic characters from "${game.name}" set within the game's distinct world`,
     );
 
     if (game.summary) {

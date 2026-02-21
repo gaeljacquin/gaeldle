@@ -8,12 +8,30 @@ import * as schema from '@gaeldle/api-contract';
 import { sql, eq } from 'drizzle-orm';
 import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { IMAGE_PROMPT_SUFFIX } from '@gaeldle/constants';
+import {
+  IMAGE_PROMPT_SUFFIX,
+  IMAGE_STYLES,
+  DEFAULT_IMAGE_GEN_STYLE,
+} from '@gaeldle/constants';
 
 // Parse prompt options from environment variables
 const includeStoryline = process.env.INCLUDE_STORYLINE === 'true';
 const includeGenres = process.env.INCLUDE_GENRES === 'true';
 const includeThemes = process.env.INCLUDE_THEMES === 'true';
+
+// Parse NUM_GAMES (default to 5 if not specified)
+const numGames = Math.max(1, Math.min(50, parseInt(process.env.NUM_GAMES ?? '5', 10)));
+
+// Resolve image style: match by value slug or label (case-insensitive), fall back to default
+const rawStyle = process.env.IMAGE_STYLE?.trim() ?? '';
+const resolvedStyle =
+  IMAGE_STYLES.find(
+    (s) =>
+      s.value.toLowerCase() === rawStyle.toLowerCase() ||
+      s.label.toLowerCase() === rawStyle.toLowerCase(),
+  ) ?? IMAGE_STYLES.find((s) => s.value === DEFAULT_IMAGE_GEN_STYLE)!;
+
+console.log(`Image style: ${resolvedStyle.label} (${resolvedStyle.value})`);
 
 const options = {
   includeStoryline,
@@ -22,6 +40,7 @@ const options = {
 };
 
 console.log('Prompt options:', options);
+console.log(`Processing up to ${numGames} games`);
 
 // Initialize database connection
 const pool = new Pool({
@@ -52,11 +71,12 @@ function buildImagePrompt(
     themes?: unknown;
   },
   opts: typeof options,
+  styleDescriptor: string,
 ): string {
   const parts: string[] = [];
 
   parts.push(
-    `Funko Pop chibi style illustration of iconic characters from "${game.name}" set within the game's distinct world`,
+    `${styleDescriptor} of iconic characters from "${game.name}" set within the game's distinct world`,
   );
 
   if (game.summary) {
@@ -103,7 +123,11 @@ async function generateImage(prompt: string): Promise<Buffer> {
       Authorization: `Bearer ${process.env.CF_API_TOKEN}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({
+      prompt,
+      negative_prompt:
+        'text, letters, words, title, logo, watermark, label, caption, typography, font, inscription, written characters, game title, brand name, signature, UI, HUD, subtitles',
+    }),
   });
 
   if (!response.ok) {
@@ -143,12 +167,12 @@ async function uploadImageToR2(
 
 // Main processing
 try {
-  // Step 1: Query up to 5 games where ai_image_url IS NULL
+  // Step 1: Query up to numGames games where ai_image_url IS NULL
   const pending = await db
     .select()
     .from(schema.games)
     .where(sql`${schema.games.aiImageUrl} IS NULL`)
-    .limit(5);
+    .limit(numGames);
 
   console.log(`Found ${pending.length} games with null ai_image_url`);
 
@@ -168,7 +192,7 @@ try {
       console.log(`\nProcessing game: ${game.name} (ID: ${game.igdbId})`);
 
       // Build the prompt
-      const prompt = buildImagePrompt(game, options);
+      const prompt = buildImagePrompt(game, options, resolvedStyle.descriptor);
       console.log(`Generated prompt (${prompt.length} chars)`);
 
       // Generate the image

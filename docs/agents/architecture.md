@@ -28,8 +28,7 @@
 
 ## Health Checks
 
-- API: `GET /health`.
-- API actuator: `GET /actuator/health`.
+- API: `GET /health` — powered by `@nestjs/terminus` via `HealthModule` (`apps/api/src/health/`). Runs a live database check (`SELECT 1`) and returns a terminus-formatted response: `{ status, info, error, details }`.
 - Web dashboard: `http://localhost:3000/health`.
 
 ## Code Quality & Standards

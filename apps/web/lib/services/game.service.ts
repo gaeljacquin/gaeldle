@@ -85,3 +85,24 @@ export async function generateImage(
   const result = await orpcClient.games.generateImage({ igdbId, ...options });
   return result;
 }
+
+export async function bulkGenerateImages(params: {
+  numGames: number;
+  imageStyle: ImageStyle;
+  includeStoryline: boolean;
+  includeGenres: boolean;
+  includeThemes: boolean;
+}) {
+  const result = await orpcClient.games.bulkGenerateImages(params);
+  return result;
+}
+
+export async function getBulkJobStatus(jobId: string) {
+  const result = await orpcClient.games.getBulkJobStatus({ jobId });
+  return result;
+}
+
+export async function listBulkJobs(limit?: number) {
+  const result = await orpcClient.games.listBulkJobs({ limit });
+  return result;
+}

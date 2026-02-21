@@ -127,6 +127,7 @@
       "name": "@gaeldle/api-contract",
       "version": "0.1.0",
       "dependencies": {
+        "@gaeldle/constants": "workspace:*",
         "@orpc/contract": "^1.13.4",
         "@orpc/server": "^1.13.4",
         "drizzle-orm": "^0.45.1",

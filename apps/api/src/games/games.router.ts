@@ -7,7 +7,10 @@ import { S3Service } from '@/lib/s3.service';
 import { AiService } from '@/lib/ai.service';
 import { StackAuthGuard } from '@/auth/stack-auth.guard';
 import { TEST_DIR, IMAGE_GEN_DIR } from '@/lib/constants';
-import { IMAGE_PROMPT_SUFFIX } from '@gaeldle/constants';
+import {
+  DEFAULT_IMAGE_GEN_STYLE,
+  IMAGE_PROMPT_SUFFIX,
+} from '@gaeldle/constants';
 import { ConfigService } from '@nestjs/config';
 import type { AppConfiguration } from '@/config/configuration';
 
@@ -250,7 +253,7 @@ export class GamesRouter {
           includeStoryline: includeStoryline ?? false,
           includeGenres: includeGenres ?? false,
           includeThemes: includeThemes ?? false,
-          imageStyle: imageStyle ?? 'funko-pop-chibi',
+          imageStyle: imageStyle ?? DEFAULT_IMAGE_GEN_STYLE,
         });
 
         const rawBuffer = await this.aiService.generateImage(prompt);
@@ -280,6 +283,39 @@ export class GamesRouter {
         return { success: true, url: publicUrl, data: updatedGame };
       },
     );
+  }
+
+  @Implement(contract.games.bulkGenerateImages)
+  @UseGuards(StackAuthGuard)
+  bulkGenerateImages() {
+    return implement(contract.games.bulkGenerateImages).handler(
+      async ({ input }) => {
+        const { jobId, gamesQueued } =
+          await this.gamesService.bulkGenerateImages(input);
+        return { success: true, jobId, gamesQueued };
+      },
+    );
+  }
+
+  @Implement(contract.games.getBulkJobStatus)
+  @UseGuards(StackAuthGuard)
+  getBulkJobStatus() {
+    return implement(contract.games.getBulkJobStatus).handler(
+      async ({ input }) => {
+        const job = await this.gamesService.getBulkJobStatus(input.jobId);
+        return { success: true, ...job };
+      },
+    );
+  }
+
+  @Implement(contract.games.listBulkJobs)
+  @UseGuards(StackAuthGuard)
+  listBulkJobs() {
+    return implement(contract.games.listBulkJobs).handler(async ({ input }) => {
+      const limit = input?.limit ?? 10;
+      const data = await this.gamesService.listBulkJobs(limit);
+      return { success: true, data };
+    });
   }
 
   private static readonly IMAGE_STYLE_DESCRIPTORS: Record<ImageStyle, string> =

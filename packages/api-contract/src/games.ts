@@ -1,6 +1,15 @@
 import { oc } from '@orpc/contract';
 import { z } from 'zod';
-import { GameSelectSchema, GameUpdateInputSchema, type Game } from './schema';
+import {
+  GameSelectSchema,
+  GameUpdateInputSchema,
+  BulkJobSummarySchema,
+  BulkJobFailureSchema,
+  BulkJobParamsSchema,
+  BulkJobStatusEnum,
+  type Game,
+} from './schema';
+import { DEFAULT_IMAGE_GEN_STYLE, IMAGE_GEN_MIN, IMAGE_GEN_MAX } from '@gaeldle/constants';
 
 export const GameModeSlugSchema = z.enum([
   'cover-art',
@@ -193,7 +202,7 @@ export const GamesContract = {
         includeStoryline: z.boolean().optional().default(false),
         includeGenres: z.boolean().optional().default(false),
         includeThemes: z.boolean().optional().default(false),
-        imageStyle: ImageStyleSchema.optional().default('funko-pop-chibi'),
+        imageStyle: ImageStyleSchema.optional().default(DEFAULT_IMAGE_GEN_STYLE),
       }),
     )
     .output(
@@ -201,6 +210,62 @@ export const GamesContract = {
         success: z.boolean(),
         url: z.string(),
         data: GameSelectSchema,
+      }),
+    ),
+  bulkGenerateImages: oc
+    .route({ method: 'POST', path: '/games/bulk-generate-images' })
+    .input(
+      z.object({
+        numGames: z.number().int().min(IMAGE_GEN_MIN).max(IMAGE_GEN_MAX),
+        imageStyle: ImageStyleSchema,
+        includeStoryline: z.boolean().default(false),
+        includeGenres: z.boolean().default(false),
+        includeThemes: z.boolean().default(false),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        jobId: z.string(),
+        gamesQueued: z.number(),
+      }),
+    ),
+
+  getBulkJobStatus: oc
+    .route({ method: 'GET', path: '/games/bulk-generate-images/:jobId/status' })
+    .input(
+      z.object({
+        jobId: z.string(),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        jobId: z.string(),
+        status: BulkJobStatusEnum,
+        total: z.number(),
+        processed: z.number(),
+        succeeded: z.number(),
+        failed: z.number(),
+        failures: z.array(BulkJobFailureSchema),
+        params: BulkJobParamsSchema,
+        startedAt: z.date().nullable(),
+        completedAt: z.date().nullable(),
+        createdAt: z.date(),
+      }),
+    ),
+
+  listBulkJobs: oc
+    .route({ method: 'GET', path: '/games/bulk-generate-images/history' })
+    .input(
+      z.object({
+        limit: z.number().int().max(20).default(10).optional(),
+      }).optional(),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        data: z.array(BulkJobSummarySchema),
       }),
     ),
 } as const;

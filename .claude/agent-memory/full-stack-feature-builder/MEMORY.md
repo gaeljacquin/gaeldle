@@ -53,5 +53,14 @@ export default function SomePage() { return <SomeView />; }
 - Size variants: `default`, `xs`, `sm`, `lg`, `icon`, `icon-xs`, `icon-sm`, `icon-lg`
 - All corners are sharp (radius: 0)
 
+### oRPC Date Serialization (CRITICAL)
+- oRPC OpenAPI fetch client returns Date fields as ISO strings, NOT Date objects
+- Frontend prop types must use `Date | string | null` not `Date | null`
+- See patterns.md for full notes
+
+### SSE Auth Pattern
+- Use `?token=<accessToken>` query param (can't send headers via EventSource)
+- See patterns.md for frontend token-fetching pattern
+
 ## Details File
-See `patterns.md` for extended notes.
+See `patterns.md` for extended notes including SSE auth, background jobs, Drizzle migration commands, and Checkbox usage.

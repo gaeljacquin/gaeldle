@@ -19,6 +19,9 @@ const includeStoryline = process.env.INCLUDE_STORYLINE === 'true';
 const includeGenres = process.env.INCLUDE_GENRES === 'true';
 const includeThemes = process.env.INCLUDE_THEMES === 'true';
 
+// Parse NUM_GAMES (default to 5 if not specified)
+const numGames = Math.max(1, Math.min(50, parseInt(process.env.NUM_GAMES ?? '5', 10)));
+
 // Resolve image style: match by value slug or label (case-insensitive), fall back to default
 const rawStyle = process.env.IMAGE_STYLE?.trim() ?? '';
 const resolvedStyle =
@@ -37,6 +40,7 @@ const options = {
 };
 
 console.log('Prompt options:', options);
+console.log(`Processing up to ${numGames} games`);
 
 // Initialize database connection
 const pool = new Pool({
@@ -163,12 +167,12 @@ async function uploadImageToR2(
 
 // Main processing
 try {
-  // Step 1: Query up to 5 games where ai_image_url IS NULL
+  // Step 1: Query up to numGames games where ai_image_url IS NULL
   const pending = await db
     .select()
     .from(schema.games)
     .where(sql`${schema.games.aiImageUrl} IS NULL`)
-    .limit(5);
+    .limit(numGames);
 
   console.log(`Found ${pending.length} games with null ai_image_url`);
 

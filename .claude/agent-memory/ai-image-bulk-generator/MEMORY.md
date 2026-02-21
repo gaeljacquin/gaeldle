@@ -47,7 +47,8 @@ bun run apps/api/scripts/bulk-generate-images.ts
 ### Script Requirements
 - Must use dotenv to load `apps/api/.env` (Bun supports native .env loading)
 - All credentials must be present in `.env`: DATABASE_URL, CF_ACCOUNT_ID, CF_API_TOKEN, R2_* vars
-- Processes exactly 5 games per invocation (max 5 limit in query)
+- Supports `NUM_GAMES` env variable (default 5, max 50)
+- Defaults to 5 games per invocation if NUM_GAMES not specified
 
 ### Success Patterns
 - Each game takes approximately 9-12 seconds to process (Cloudflare AI generation time varies)
@@ -62,22 +63,23 @@ bun run apps/api/scripts/bulk-generate-images.ts
 
 ## Session Notes
 
-### Latest Run (2026-02-20)
-- 53 total games in database (after previous batch of 5)
-- 53 games initially missing `ai_image_url` (before this run)
-- Batch 2: 5 games processed successfully with vector-art style
-- Prompt options: default (storyline/genres/themes all false)
-- 48 games remaining for future batches
+### Latest Run (2026-02-20 - Batch 3)
+- 47 total games in database (after batches 1 & 2)
+- 47 games initially missing `ai_image_url` before run
+- Batch 3: 7 games processed successfully with Simpsons style
+- Prompt options: INCLUDE_GENRES=true (genres added to prompts)
+- 40 games remaining for future batches
 
-### Generated Games (Batch 2 - Vector Art Style)
-1. Fallout: New Vegas - 3,610 char prompt
-2. Portal 2 - 1,333 char prompt
-3. The Elder Scrolls V: Skyrim - 2,966 char prompt
-4. The Witcher 3: Wild Hunt - 2,362 char prompt
-5. Undertale - 1,500 char prompt
+### Generated Games (Batch 3 - Simpsons Style + Genres)
+1. Hollow Knight - 1,592 char prompt (249 KB optimized)
+2. Stardew Valley - 2,110 char prompt (251 KB optimized)
+3. Red Dead Redemption 2 - 1,362 char prompt (221 KB optimized)
+4. Sekiro: Shadows Die Twice - 1,196 char prompt (236 KB optimized)
+5. Hades - 1,381 char prompt (256 KB optimized)
+6. Elden Ring - 2,790 char prompt (297 KB optimized)
+7. God of War - 1,790 char prompt (242 KB optimized)
 
-### Image Style Support
-- Script now supports `IMAGE_STYLE` env variable
-- Vector-art style successfully applied to all 5 games
-- Style resolved via `IMAGE_STYLES` constant lookup (case-insensitive)
-- Descriptor properly injected into prompt based on style selection
+### Feature Updates
+- Script now supports dynamic `NUM_GAMES` parameter (default 5, max 50)
+- `NUM_GAMES=7` successfully tested in batch 3
+- Genres are correctly injected into prompts when INCLUDE_GENRES=true

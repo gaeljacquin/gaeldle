@@ -102,7 +102,4 @@ export async function getBulkJobStatus(jobId: string) {
   return result;
 }
 
-export async function listBulkJobs(limit?: number) {
-  const result = await orpcClient.games.listBulkJobs({ limit });
-  return result;
-}
+

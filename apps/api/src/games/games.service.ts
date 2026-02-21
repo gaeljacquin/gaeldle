@@ -488,33 +488,6 @@ export class GamesService {
     };
   }
 
-  async listBulkJobs(limit: number = 10) {
-    const jobs = await this.databaseService.db
-      .select()
-      .from(bulkImageGenJobs)
-      .orderBy(desc(bulkImageGenJobs.createdAt))
-      .limit(limit);
-
-    return jobs.map((job) => ({
-      jobId: job.jobId,
-      status: job.status as 'pending' | 'running' | 'completed' | 'failed',
-      total: job.total,
-      processed: job.processed,
-      succeeded: job.succeeded,
-      failed: job.failed,
-      params: job.params as {
-        numGames: number;
-        imageStyle: string;
-        includeStoryline: boolean;
-        includeGenres: boolean;
-        includeThemes: boolean;
-      },
-      startedAt: job.startedAt,
-      completedAt: job.completedAt,
-      createdAt: job.createdAt!,
-    }));
-  }
-
   buildImagePromptFromGame(
     game: {
       name: string;

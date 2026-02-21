@@ -308,16 +308,6 @@ export class GamesRouter {
     );
   }
 
-  @Implement(contract.games.listBulkJobs)
-  @UseGuards(StackAuthGuard)
-  listBulkJobs() {
-    return implement(contract.games.listBulkJobs).handler(async ({ input }) => {
-      const limit = input?.limit ?? 10;
-      const data = await this.gamesService.listBulkJobs(limit);
-      return { success: true, data };
-    });
-  }
-
   private static readonly IMAGE_STYLE_DESCRIPTORS: Record<ImageStyle, string> =
     {
       'funko-pop-chibi': 'Funko Pop chibi style illustration',

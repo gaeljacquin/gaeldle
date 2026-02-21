@@ -12,6 +12,12 @@ import { BulkImageGenController } from '@/games/bulk-image-gen.controller';
 @Module({
   imports: [DatabaseModule, AuthModule],
   controllers: [GamesRouter, BulkImageGenController],
-  providers: [GamesService, IgdbService, S3Service, AiService, BulkImageJobStore],
+  providers: [
+    GamesService,
+    IgdbService,
+    S3Service,
+    AiService,
+    BulkImageJobStore,
+  ],
 })
 export class GamesModule {}

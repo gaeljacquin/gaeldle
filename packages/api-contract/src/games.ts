@@ -3,7 +3,6 @@ import { z } from 'zod';
 import {
   GameSelectSchema,
   GameUpdateInputSchema,
-  BulkJobSummarySchema,
   BulkJobFailureSchema,
   BulkJobParamsSchema,
   BulkJobStatusEnum,
@@ -255,19 +254,7 @@ export const GamesContract = {
       }),
     ),
 
-  listBulkJobs: oc
-    .route({ method: 'GET', path: '/games/bulk-generate-images/history' })
-    .input(
-      z.object({
-        limit: z.number().int().max(20).default(10).optional(),
-      }).optional(),
-    )
-    .output(
-      z.object({
-        success: z.boolean(),
-        data: z.array(BulkJobSummarySchema),
-      }),
-    ),
+
 } as const;
 
 export interface GameApiResponse {

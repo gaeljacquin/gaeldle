@@ -71,6 +71,13 @@
       "when": 1771701123404,
       "tag": "0009_glorious_kat_farrell",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1771875286974,
+      "tag": "0010_daily_grey_gargoyle",
+      "breakpoints": true
     }
   ]
 }

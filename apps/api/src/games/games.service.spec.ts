@@ -976,11 +976,6 @@ describe('GamesService', () => {
               platform: 'PC',
             },
           ],
-          info: {
-            url: 'https://igdb.com/game/101',
-            rating: 85,
-            ratingCount: 1000,
-          },
         }),
       );
     });

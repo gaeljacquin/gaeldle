@@ -18,7 +18,6 @@ export const games = pgTable(
     id: serial('id').primaryKey(),
     igdbId: integer('igdb_id').notNull().unique('games_igdb_key'),
     name: varchar('name', { length: 255 }).notNull(),
-    info: json('info').$type<any>(),
     createdAt: timestamp('created_at', {
       withTimezone: true,
       mode: 'date',
@@ -52,7 +51,6 @@ export const gameObject = {
   id: games.id,
   igdbId: games.igdbId,
   name: games.name,
-  info: games.info,
   imageUrl: games.imageUrl,
   aiImageUrl: games.aiImageUrl,
   aiPrompt: games.aiPrompt,

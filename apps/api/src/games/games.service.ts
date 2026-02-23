@@ -578,11 +578,6 @@ export class GamesService {
         date: rd.date,
         platform: rd.platform?.name,
       })),
-      info: {
-        url: igdbGame.url,
-        rating: igdbGame.total_rating,
-        ratingCount: igdbGame.total_rating_count,
-      },
     };
   }
 }

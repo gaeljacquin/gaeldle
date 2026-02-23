@@ -87,12 +87,6 @@ interface Company {
   publisher: boolean;
 }
 
-interface Info {
-  url?: string;
-  rating?: number;
-  ratingCount?: number;
-}
-
 export default function GameDetails({ params }: Readonly<{ params: Promise<{ igdbId: string }> }>) {
   const { igdbId } = use(params);
   const router = useRouter();
@@ -201,7 +195,6 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
   const platforms = game.platforms as string[] | null;
   const genres = game.genres as string[] | null;
   const involvedCompanies = game.involvedCompanies as Company[] | null;
-  const info = game.info as Info | null;
 
   return (
     <div className="container mx-auto px-4 py-10 min-h-screen">
@@ -252,7 +245,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
           </Dialog>
 
           <div className="space-y-3 pt-2">
-            <Button
+            {/* <Button
               variant="outline"
               className={cn(
                 "w-full font-bold h-10 rounded-none bg-primary/90 hover:bg-primary text-white hover:text-white",
@@ -263,7 +256,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
             >
               <IconExternalLink className="mr-2 size-4" />
               View on IGDB
-            </Button>
+            </Button> */}
 
             <Button
               variant="outline"

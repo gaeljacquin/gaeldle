@@ -3,16 +3,19 @@ import type { Game, GameModeSlug, ImageStyle } from '@gaeldle/api-contract';
 
 export async function getAllGames(mode?: GameModeSlug): Promise<Game[]> {
   if (mode === 'artwork') {
-    const result = await orpcClient.games.getArtwork();
+    const res = await fetch('/api/games/artwork');
+    const result = await res.json();
     return result.data;
   }
 
-  const result = await orpcClient.games.list({});
+  const res = await fetch('/api/games?pageSize=10000');
+  const result = await res.json();
   return result.data;
 }
 
 export async function getGameByIgdbId(igdbId: number): Promise<Game> {
-  const result = await orpcClient.games.get({ igdbId });
+  const res = await fetch(`/api/games/${igdbId}`);
+  const result = await res.json();
   return result.data;
 }
 
@@ -33,21 +36,36 @@ export async function getPaginatedGames(
   sortBy: 'name' | 'firstReleaseDate' | 'igdbId' = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
 ) {
-  const result = await orpcClient.games.list({
-    page,
-    pageSize,
-    q: query,
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
     sortBy,
     sortDir,
   });
+
+  if (query) {
+    params.set('q', query);
+  }
+
+  const res = await fetch(`/api/games?${params.toString()}`);
+  const result = await res.json();
   return result;
 }
 
 export async function getRandomGame(excludeIds: number[] = [], mode?: GameModeSlug): Promise<Game> {
-  const result = await orpcClient.games.getRandom({
-    excludeIds,
-    mode: mode,
-  });
+  const params = new URLSearchParams();
+
+  if (excludeIds.length > 0) {
+    params.set('excludeIds', excludeIds.join(','));
+  }
+
+  if (mode) {
+    params.set('mode', mode);
+  }
+
+  const query = params.toString();
+  const res = await fetch(`/api/games/random${query ? `?${query}` : ''}`);
+  const result = await res.json();
   return result.data;
 }
 
@@ -56,12 +74,14 @@ export async function searchGames(query: string, limit: number = 100, mode?: Gam
     return [];
   }
 
-  const result = await orpcClient.games.search({
-    q: query,
-    limit,
-    mode: mode,
-  });
+  const params = new URLSearchParams({ q: query, limit: String(limit) });
 
+  if (mode) {
+    params.set('mode', mode);
+  }
+
+  const res = await fetch(`/api/games/search?${params.toString()}`);
+  const result = await res.json();
   return result.data;
 }
 
@@ -101,5 +121,3 @@ export async function getBulkJobStatus(jobId: string) {
   const result = await orpcClient.games.getBulkJobStatus({ jobId });
   return result;
 }
-
-

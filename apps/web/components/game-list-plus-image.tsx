@@ -154,6 +154,7 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
                       wrongGuesses={wrongGuessIds}
                       onSelectGame={handleSelectGame}
                       disabled={isGameOver}
+                      mode={props.gameModeSlug}
                     />
                   </div>
                   <Button

@@ -3,17 +3,7 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  inArray,
-  notInArray,
-  sql,
-  InferInsertModel,
-  type SQL,
-} from 'drizzle-orm';
+import { eq, inArray, sql, InferInsertModel } from 'drizzle-orm';
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { randomUUID } from 'node:crypto';
@@ -27,7 +17,6 @@ import {
   GameUpdate,
   type ImageStyle,
 } from '@gaeldle/api-contract';
-import type { GameModeSlug } from '@/games/game-mode';
 import { IgdbService, type IgdbGame } from '@/games/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
@@ -47,13 +36,7 @@ export class GamesService {
     private readonly configService: ConfigService<AppConfiguration>,
   ) {}
 
-  async getAllGames(): Promise<Game[]> {
-    return await this.databaseService.db
-      .select(gameObject)
-      .from(games)
-      .orderBy(desc(games.id));
-  }
-
+  // Kept for internal use by generateImage in the router (not exposed as a standalone endpoint).
   async getGameByIgdbId(igdbId: number): Promise<Game | null> {
     const [game] = await this.databaseService.db
       .select(gameObject)
@@ -64,56 +47,6 @@ export class GamesService {
     return game || null;
   }
 
-  async getArtworkGames(): Promise<Game[]> {
-    return this.databaseService.db
-      .select(gameObject)
-      .from(games)
-      .where(
-        and(sql`artworks IS NOT NULL`, sql`json_array_length(artworks) > 0`),
-      )
-      .orderBy(desc(games.id));
-  }
-
-  async getGamesPage(
-    page: number,
-    pageSize: number,
-    q?: string,
-    sortBy: 'name' | 'firstReleaseDate' | 'igdbId' = 'name',
-    sortDir: 'asc' | 'desc' = 'asc',
-  ): Promise<{ games: Game[]; total: number }> {
-    const offset = (page - 1) * pageSize;
-    const where = q ? sql`name ILIKE ${'%' + q + '%'}` : undefined;
-
-    const orderBy = (() => {
-      if (sortBy === 'firstReleaseDate') {
-        return sortDir === 'asc'
-          ? sql`first_release_date ASC NULLS LAST`
-          : sql`first_release_date DESC NULLS LAST`;
-      }
-      const col = sortBy === 'igdbId' ? games.igdbId : games.name;
-      return sortDir === 'asc' ? asc(col) : desc(col);
-    })();
-
-    const [gamesList, totalCount] = await Promise.all([
-      this.databaseService.db
-        .select(gameObject)
-        .from(games)
-        .where(where)
-        .limit(pageSize)
-        .offset(offset)
-        .orderBy(orderBy),
-      this.databaseService.db
-        .select({ count: sql<number>`count(*)` })
-        .from(games)
-        .where(where),
-    ]);
-
-    return {
-      games: gamesList,
-      total: Number(totalCount[0]?.count ?? 0),
-    };
-  }
-
   async refreshAllGamesView() {
     try {
       await this.databaseService.db.execute(
@@ -122,63 +55,6 @@ export class GamesService {
     } catch (e) {
       console.error('Failed to refresh materialized view', e);
     }
-  }
-
-  async getRandomGame(
-    excludeIds: number[],
-    mode?: GameModeSlug,
-  ): Promise<Game | null> {
-    const conditions: (SQL | undefined)[] = [];
-
-    if (excludeIds.length > 0) {
-      conditions.push(notInArray(games.id, excludeIds));
-    }
-
-    if (mode === 'artwork') {
-      conditions.push(
-        sql`artworks IS NOT NULL`,
-        sql`json_array_length(artworks) > 0`,
-      );
-    } else if (mode === 'cover-art') {
-      conditions.push(sql`image_url IS NOT NULL`);
-    } else if (mode === 'image-gen') {
-      conditions.push(sql`ai_image_url IS NOT NULL`);
-    } else if (mode === 'timeline' || mode === 'timeline-2') {
-      conditions.push(sql`first_release_date IS NOT NULL`);
-    }
-
-    const [game] = await this.databaseService.db
-      .select(gameObject)
-      .from(games)
-      .where(and(...conditions))
-      .orderBy(sql`RANDOM()`)
-      .limit(1);
-
-    return game || null;
-  }
-
-  async searchGames(
-    query: string,
-    limit: number,
-    mode?: GameModeSlug,
-  ): Promise<Game[]> {
-    const whereClause: SQL[] = [sql`name ILIKE ${'%' + query + '%'}`];
-
-    if (mode === 'artwork') {
-      whereClause.push(
-        sql`artworks IS NOT NULL`,
-        sql`json_array_length(artworks) > 0`,
-      );
-    }
-
-    const gamesList = await this.databaseService.db
-      .select(gameObject)
-      .from(games)
-      .where(and(...whereClause))
-      .limit(limit)
-      .orderBy(desc(games.id));
-
-    return gamesList;
   }
 
   async syncGameByIgdbId(igdbId: number): Promise<{

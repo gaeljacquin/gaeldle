@@ -112,7 +112,7 @@ export default function HealthView() {
                 <h1 className="text-2xl font-bold tracking-tight">System Health</h1>
               </div>
               <p className="text-sm text-muted-foreground">
-                Live status of API services and infrastructure.
+                Live status of APIs and database.
               </p>
             </div>
 

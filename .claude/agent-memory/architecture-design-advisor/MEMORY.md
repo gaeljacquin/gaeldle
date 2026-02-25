@@ -1,7 +1,7 @@
 # Architecture Design Advisor - Memory
 
 ## Project Summary
-Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 15 App Router web (`apps/web`, port 3000). Package manager: `bun`. See `docs/agents/architecture.md` for topology.
+Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App Router web (`apps/web`, port 3000). Package manager: `bun`. See `docs/agents/architecture.md` for topology.
 
 ## Key Packages
 - `packages/api-contract`: oRPC contracts + Zod schemas + Drizzle schema. Package: `@gaeldle/api-contract`. Entry: `src/index.ts`, `src/games.ts`, `src/schema.ts`.

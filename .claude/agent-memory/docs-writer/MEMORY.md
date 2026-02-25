@@ -2,7 +2,7 @@
 
 ## Project Structure
 
-- Monorepo: Turborepo with `apps/web` (Next.js 15) and `apps/api` (NestJS).
+- Monorepo: Turborepo with `apps/web` (Next.js 16) and `apps/api` (NestJS).
 - Web app router pages: `apps/web/app/` (routes), views: `apps/web/views/`, components: `apps/web/components/`.
 - Game mode config (titles, descriptions, difficulty, slugs): `apps/web/lib/game-mode.ts`.
 - Game hook files: `apps/web/lib/hooks/use-<mode>-game.ts` — contain `MAX_ATTEMPTS` and game logic.

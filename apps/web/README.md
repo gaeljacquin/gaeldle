@@ -4,7 +4,7 @@ The Next.js frontend for Gaeldle.
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Styling**: Tailwind CSS v4
 - **Theming**: Teal theme (Radius 0, Figtree font) generated via [shadcn/ui](https://ui.shadcn.com/create?base=base&style=lyra&baseColor=gray&theme=teal&iconLibrary=tabler&font=figtree&radius=none)
 - **UI Foundations**: Base UI

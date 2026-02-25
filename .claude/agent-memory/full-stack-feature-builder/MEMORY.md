@@ -6,7 +6,7 @@
 - Do NOT run `pnpm type-check` (global rule)
 
 ## Monorepo Structure
-- `apps/web` — Next.js 15 App Router frontend
+- `apps/web` — Next.js 16 App Router frontend
 - `apps/api` — NestJS backend
 - `packages/api-contract` — oRPC contracts (source of truth for types)
 

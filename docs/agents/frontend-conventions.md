@@ -2,7 +2,7 @@
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router).
+- **Framework**: Next.js 16 (App Router).
 - **Styling**: Tailwind CSS v4.
 - **UI Components**: Base UI + custom components.
 - **Icons**: Tabler Icons (`@tabler/icons-react`).

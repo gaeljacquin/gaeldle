@@ -3,7 +3,7 @@
 ## Topology
 
 - `apps/api`: NestJS API using oRPC (TypeScript, Bun runtime), default port 8080.
-- `apps/web`: Next.js 15 App Router app (TypeScript, Tailwind v4), default port 3000.
+- `apps/web`: Next.js 16 App Router app (TypeScript, Tailwind v4), default port 3000.
 - `packages/api-contract`: Shared oRPC contract and Zod schemas used by both API and Web. Package name: `@gaeldle/api-contract`.
 - `packages/constants`: Shared constants consumed by both API and Web. Package name: `@gaeldle/constants`.
 - Monorepo: Turborepo workspace with apps under `apps/` and packages under `packages/`.

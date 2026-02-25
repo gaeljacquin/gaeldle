@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, it, expect, jest } from '@jest/globals';
 import { HealthCheckService, HealthCheckResult } from '@nestjs/terminus';
 import { HealthController } from '@/health/health.controller';
 import { DatabaseHealthIndicator } from '@/health/database.health';
@@ -19,13 +20,17 @@ describe('HealthController', () => {
       providers: [
         {
           provide: HealthCheckService,
-          useValue: { check: jest.fn().mockResolvedValue(mockResult) },
+          useValue: {
+            check: jest
+              .fn<() => Promise<HealthCheckResult>>()
+              .mockResolvedValue(mockResult),
+          },
         },
         {
           provide: DatabaseHealthIndicator,
           useValue: {
             isHealthy: jest
-              .fn()
+              .fn<() => Promise<{ database: { status: string } }>>()
               .mockResolvedValue({ database: { status: 'up' } }),
           },
         },

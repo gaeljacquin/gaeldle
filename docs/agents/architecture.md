@@ -8,10 +8,21 @@
 - `packages/constants`: Shared constants consumed by both API and Web. Package name: `@gaeldle/constants`.
 - Monorepo: Turborepo workspace with apps under `apps/` and packages under `packages/`.
 
+## API Responsibility Split
+
+Game operations are split across two APIs:
+
+| Operation type | API | Transport |
+|---|---|---|
+| Read (list, search, random, artwork, get by IGDB ID) | Next.js (`apps/web`) | plain `fetch` to local routes |
+| Write (delete, sync, image gen) | NestJS (`apps/api`) | oRPC client (`orpcClient`) |
+
+Read operations are implemented as Next.js App Router API route handlers under `apps/web/app/api/games/`. They query the database directly using a Drizzle client (`apps/web/lib/db.ts`). Write operations remain in the NestJS API and are called via the oRPC contract.
+
 ## Data & Auth
 
 - Database: PostgreSQL 17 (default port 5432).
-- oRPC: Used for end-to-end type-safe API communication.
+- oRPC: Used for end-to-end type-safe communication with the NestJS API (write operations only).
 - Auth: Stack Auth used in both frontend and backend.
 
 ## Ports
@@ -28,8 +39,11 @@
 
 ## Health Checks
 
-- API: `GET /health` — powered by `@nestjs/terminus` via `HealthModule` (`apps/api/src/health/`). Runs a live database check (`SELECT 1`) and returns a terminus-formatted response: `{ status, info, error, details }`.
-- Web dashboard: `http://localhost:3000/health`.
+- NestJS API: `GET /health` — powered by `@nestjs/terminus` via `HealthModule` (`apps/api/src/health/`). Runs a live database check (`SELECT 1`) and returns a terminus-formatted response: `{ status, info, error, details }`.
+- Web dashboard: `http://localhost:3000/health`. Monitors two APIs:
+  - **"writes api"** — NestJS (port 8080). Pinged via `GET /` to confirm reachability.
+  - **"reads api"** — Next.js (port 3000). Pinged via `GET /api/games?pageSize=1` to confirm the local DB route is up.
+- Health service: `apps/web/lib/services/health.service.ts`. Uses `NEXT_PUBLIC_APP_URL` for the reads-api base URL and `serverUrl` (server-side) for the writes-api base URL.
 
 ## Code Quality & Standards
 
@@ -52,5 +66,7 @@ These standards apply across the entire monorepo (API, Web, and Packages).
 
 ### Web (`apps/web`)
 
-- `SERVER_URL` (server-side)
+- `SERVER_URL` (server-side, base URL for the NestJS API)
 - `CLIENT_PORT`
+- `DATABASE_URL` (required for the Next.js Drizzle DB client in `lib/db.ts`)
+- `NEXT_PUBLIC_APP_URL` (base URL for the Next.js app, used by the health service to ping the reads API)

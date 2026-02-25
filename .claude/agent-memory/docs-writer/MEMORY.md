@@ -30,6 +30,20 @@ Cover Art, Artwork, and Image Gen all use the `GameListPlusImage` component and 
 - Developer/architecture rules go in `docs/agents/` files (see AGENTS.md for the list).
 - README must not contain detailed content (env vars, ports, build commands, game mode rules) — link to the relevant doc file instead.
 
+## API Architecture (as of 2026-02-24)
+
+Game operations are split between two APIs:
+- **Reads** (list, search, random, artwork, get-by-igdbId): Next.js route handlers in `apps/web/app/api/games/`. DB accessed directly via Drizzle singleton at `apps/web/lib/db.ts`. Service layer uses plain `fetch`. No oRPC contract.
+- **Writes** (delete, sync, generateImage, bulkGenerateImages): NestJS via `orpcClient`. Still covered by `packages/api-contract`.
+
+Health page (`/health`) monitors both APIs:
+- "writes api" = NestJS ping via `GET /`
+- "reads api" = Next.js ping via `GET /api/games?pageSize=1`
+
+Architecture doc updated: `docs/agents/architecture.md` — see "API Responsibility Split" section.
+Backend doc updated: `docs/agents/backend-conventions.md` — see "Next.js API Routes" section.
+Frontend doc updated: `docs/agents/frontend-conventions.md` — revised "Read vs. write transport" rule.
+
 ## Key Behavioral Details (for README accuracy)
 
 - Cover Art / Artwork: pixelated image that clears with each wrong guess; clarity bar shown.

@@ -31,3 +31,41 @@ apps/api/src/
 - **Validation**: Use Zod in the contract for automated input/output validation.
 - **Config**: Use NestJS `ConfigService` or the typed config exports in `src/config/`.
 - **Utils**: Pure and side-effect free helpers.
+
+## Next.js API Routes (Read-Only Game Operations)
+
+Read-only game operations are implemented as Next.js App Router route handlers, not in NestJS. These routes live in `apps/web/app/api/games/` and access the database directly via a Drizzle singleton (`apps/web/lib/db.ts`).
+
+### Route handlers
+
+| Route | Auth | Description |
+|---|---|---|
+| `GET /api/games` | Public | Paginated game list. Params: `page`, `pageSize`, `q` (ILIKE), `sortBy` (`name`\|`firstReleaseDate`\|`igdbId`), `sortDir` (`asc`\|`desc`). |
+| `GET /api/games/artwork` | Public | All games that have at least one artwork entry. |
+| `GET /api/games/search` | Public | ILIKE search with optional game-mode filter. Params: `q` (min 2 chars), `limit`, `mode` (GameModeSlug). |
+| `GET /api/games/random` | Public | One random game. Params: `excludeIds` (comma-separated), `mode` (GameModeSlug). |
+| `GET /api/games/[igdbId]` | Stack Auth (user required) | Single game by IGDB ID. Returns 401 if not authenticated. |
+
+### DB client
+
+`apps/web/lib/db.ts` exports a singleton `db` (Drizzle over `node-postgres` pool). It reads `DATABASE_URL` from the environment. Import it in server-only files (route handlers, server actions).
+
+```ts
+import { db } from '@/lib/db';
+```
+
+### Response shape
+
+All route handlers return `NextResponse.json` with a consistent envelope:
+
+```ts
+{ success: true, data: ... }           // success
+{ success: true, data: ..., meta: { page, pageSize, total } }  // paginated
+{ success: false, error: '...' }       // failure (paired with an HTTP error status)
+```
+
+### Rules
+
+- **Read routes only**: Next.js API routes handle reads. Write operations (delete, sync, generateImage, bulkGenerateImages) stay in NestJS and are called via oRPC.
+- **No oRPC contract needed**: These routes are not part of the oRPC contract in `packages/api-contract`. They are plain HTTP endpoints consumed by `fetch`.
+- **Server-only DB access**: Import `db` from `@/lib/db` only in server-side code (route handlers, server components, server actions). Never import it in client components.

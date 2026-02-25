@@ -51,8 +51,11 @@ apps/web/
 ### Rules
 
 - **Pure Components**: Components in `components/` are presentational only and receive data via props. They should not have side effects or fetch data.
-- **Type-safe API**: Use the oRPC client for all API communication. This ensures end-to-end type safety between backend and frontend.
-- **No Direct Data Access**: No raw `fetch` or `axios` calls inside components. Use oRPC hooks or server-side calls.
+- **API calls via services**: All API communication must go through service functions in `lib/services/`. Components and hooks must not call `fetch` directly.
+- **Read vs. write transport**:
+  - Read operations (game lists, search, random, artwork) call the local Next.js API routes via plain `fetch` inside `lib/services/game.service.ts`.
+  - Write operations (delete, sync, image gen) use the oRPC client (`orpcClient`) to communicate with NestJS.
+- **No Direct Data Access**: No raw `fetch` or `axios` calls inside components or hooks. Call the service layer instead.
 - **Custom Hooks**: Complex stateful logic, especially game logic, belongs in `lib/hooks/`.
 - **Views**: Complex pages should have their main content in `views/` to keep `app/` files clean.
 - **Centralized Providers**: All context providers (Stack Auth, Query Client, etc.) are consolidated in `apps/web/app/providers.tsx`.

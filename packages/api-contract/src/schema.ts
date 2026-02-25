@@ -18,7 +18,6 @@ export const games = pgTable(
     id: serial('id').primaryKey(),
     igdbId: integer('igdb_id').notNull().unique('games_igdb_key'),
     name: varchar('name', { length: 255 }).notNull(),
-    info: json('info').$type<any>(),
     createdAt: timestamp('created_at', {
       withTimezone: true,
       mode: 'date',
@@ -52,7 +51,6 @@ export const gameObject = {
   id: games.id,
   igdbId: games.igdbId,
   name: games.name,
-  info: games.info,
   imageUrl: games.imageUrl,
   aiImageUrl: games.aiImageUrl,
   aiPrompt: games.aiPrompt,
@@ -86,3 +84,62 @@ export const GameUpdateInputSchema = GameInsertSchema.omit({
 }).partial();
 export type GameUpdate = z.infer<typeof GameUpdateInputSchema>;
 export type Game = typeof allGames.$inferSelect;
+
+// ─── Bulk Image Job ────────────────────────────────────────────────────────────
+
+export const bulkImageGenJobs = pgTable('bulk_image_gen_job', {
+  id: serial('id').primaryKey(),
+  jobId: varchar('job_id').unique().notNull(),
+  status: varchar('status').notNull(), // 'pending'|'running'|'completed'|'failed'
+  total: integer('total').notNull(),
+  processed: integer('processed').notNull().default(0),
+  succeeded: integer('succeeded').notNull().default(0),
+  failed: integer('failed').notNull().default(0),
+  failures: json('failures').$type<Array<{ igdbId: number; gameName: string; error: string }>>(),
+  params: json('params')
+    .notNull()
+    .$type<{
+      numGames: number;
+      imageStyle: string;
+      includeStoryline: boolean;
+      includeGenres: boolean;
+      includeThemes: boolean;
+    }>(),
+  startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }),
+  completedAt: timestamp('completed_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow(),
+});
+
+export type BulkImageJob = typeof bulkImageGenJobs.$inferSelect;
+export type BulkImageJobInsert = typeof bulkImageGenJobs.$inferInsert;
+
+export const BulkJobFailureSchema = z.object({
+  igdbId: z.number(),
+  gameName: z.string(),
+  error: z.string(),
+});
+
+export const BulkJobParamsSchema = z.object({
+  numGames: z.number(),
+  imageStyle: z.string(),
+  includeStoryline: z.boolean(),
+  includeGenres: z.boolean(),
+  includeThemes: z.boolean(),
+});
+
+export const BulkJobStatusEnum = z.enum(['pending', 'running', 'completed', 'failed']);
+
+export const BulkJobSummarySchema = z.object({
+  jobId: z.string(),
+  status: BulkJobStatusEnum,
+  total: z.number(),
+  processed: z.number(),
+  succeeded: z.number(),
+  failed: z.number(),
+  params: BulkJobParamsSchema,
+  startedAt: z.date().nullable(),
+  completedAt: z.date().nullable(),
+  createdAt: z.date(),
+});
+
+export type BulkJobSummary = z.infer<typeof BulkJobSummarySchema>;

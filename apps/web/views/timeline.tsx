@@ -15,6 +15,7 @@ import {
   DragOverlay,
   DragStartEvent,
   DragEndEvent,
+  DragOverEvent,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -44,12 +45,14 @@ function SortableCard({
   showDate,
   disabled,
   isGameOver,
+  showSwapIndicator,
 }: Readonly<{
   game: Game;
   isCorrect?: boolean;
   showDate?: boolean;
   disabled?: boolean;
   isGameOver?: boolean;
+  showSwapIndicator?: boolean;
 }>) {
   const {
     attributes,
@@ -71,6 +74,7 @@ function SortableCard({
       style={style}
       layout
       transition={{ duration: 0.3 }}
+      className="relative"
       {...attributes}
       {...(disabled ? {} : listeners)}
     >
@@ -82,6 +86,9 @@ function SortableCard({
         isGameOver={isGameOver}
         className={disabled ? 'cursor-default' : 'cursor-grab'}
       />
+      {showSwapIndicator ? (
+        <div className="absolute inset-y-0 -right-3 w-0.5 bg-green-500/60 z-20 pointer-events-none" />
+      ) : null}
     </motion.div>
   );
 }
@@ -89,6 +96,7 @@ function SortableCard({
 export default function Timeline() {
   const gameMode = getGameModeBySlug('timeline');
   const [activeId, setActiveId] = useState<number | null>(null);
+  const [overId, setOverId] = useState<number | null>(null);
   const { swapMode, setSwapMode } = useTimelineStore();
 
   const {
@@ -123,9 +131,18 @@ export default function Timeline() {
     }
 
     setActiveId(e.active.id);
+    setOverId(null);
+  }
+
+  function handleDragOver(event: DragOverEvent) {
+    const id = event.over?.id;
+    setOverId(typeof id === 'number' ? id : null);
   }
 
   function handleDragEnd(event: DragEndEvent) {
+    setActiveId(null);
+    setOverId(null);
+
     if (!event.over) {
       return;
     }
@@ -147,12 +164,11 @@ export default function Timeline() {
 
       handleReorder(newOrder);
     }
-
-    setActiveId(null);
   }
 
   function handleDragCancel() {
     setActiveId(null);
+    setOverId(null);
   }
 
   if (isLoading) {
@@ -185,7 +201,7 @@ export default function Timeline() {
 
   return (
     <div className="min-h-full bg-background text-foreground">
-      <div className="container mx-auto px-4 py-10">
+      <div className="w-full max-w-screen-2xl mx-auto px-4 py-10">
         <BackToMainMenu />
 
         <div className="mb-8 text-center">
@@ -201,6 +217,7 @@ export default function Timeline() {
                   sensors={sensors}
                   collisionDetection={closestCenter}
                   onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
                   onDragEnd={handleDragEnd}
                   onDragCancel={handleDragCancel}
                 >
@@ -238,6 +255,7 @@ export default function Timeline() {
                             showDate={showDate}
                             disabled={isLocked || isGameOver}
                             isGameOver={isGameOver}
+                            showSwapIndicator={swapMode && overId === game.id && activeId !== game.id}
                           />
                         );
                       })}

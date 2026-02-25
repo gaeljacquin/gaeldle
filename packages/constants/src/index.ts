@@ -3,6 +3,12 @@ export const IMAGE_PROMPT_SUFFIX =
 
 export const DEFAULT_IMAGE_GEN_STYLE = 'funko-pop-chibi';
 
+export const DEFAULT_IMAGE_GEN_NUM = 5;
+
+export const IMAGE_GEN_MIN = 1;
+
+export const IMAGE_GEN_MAX = 50;
+
 export const IMAGE_STYLES: {
   value: string;
   label: string;

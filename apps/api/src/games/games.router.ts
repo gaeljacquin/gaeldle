@@ -7,7 +7,10 @@ import { S3Service } from '@/lib/s3.service';
 import { AiService } from '@/lib/ai.service';
 import { StackAuthGuard } from '@/auth/stack-auth.guard';
 import { TEST_DIR, IMAGE_GEN_DIR } from '@/lib/constants';
-import { IMAGE_PROMPT_SUFFIX } from '@gaeldle/constants';
+import {
+  DEFAULT_IMAGE_GEN_STYLE,
+  IMAGE_PROMPT_SUFFIX,
+} from '@gaeldle/constants';
 import { ConfigService } from '@nestjs/config';
 import type { AppConfiguration } from '@/config/configuration';
 
@@ -19,106 +22,6 @@ export class GamesRouter {
     private readonly aiService: AiService,
     private readonly configService: ConfigService<AppConfiguration>,
   ) {}
-
-  @Implement(contract.games.list)
-  list() {
-    return implement(contract.games.list).handler(async ({ input }) => {
-      const hasPagination =
-        input?.page !== undefined ||
-        input?.pageSize !== undefined ||
-        input?.q !== undefined;
-
-      if (hasPagination) {
-        const page = input?.page ?? 1;
-        const pageSize = input?.pageSize ?? 10;
-        const q = input?.q;
-        const sortBy = input?.sortBy ?? 'name';
-        const sortDir = input?.sortDir ?? 'asc';
-
-        const { games, total } = await this.gamesService.getGamesPage(
-          page,
-          Math.min(pageSize, 100),
-          q,
-          sortBy,
-          sortDir,
-        );
-
-        return {
-          success: true,
-          data: games,
-          meta: {
-            page,
-            pageSize,
-            total,
-          },
-        };
-      }
-
-      const games = await this.gamesService.getAllGames();
-      return {
-        success: true,
-        data: games,
-      };
-    });
-  }
-
-  @Implement(contract.games.getArtwork)
-  getArtwork() {
-    return implement(contract.games.getArtwork).handler(async () => {
-      const games = await this.gamesService.getArtworkGames();
-      return {
-        success: true,
-        data: games,
-      };
-    });
-  }
-
-  @Implement(contract.games.search)
-  search() {
-    return implement(contract.games.search).handler(async ({ input }) => {
-      const { q, limit, mode } = input;
-      const games = await this.gamesService.searchGames(q, limit, mode);
-      return {
-        success: true,
-        data: games,
-      };
-    });
-  }
-
-  @Implement(contract.games.getRandom)
-  getRandom() {
-    return implement(contract.games.getRandom).handler(async ({ input }) => {
-      const game = await this.gamesService.getRandomGame(
-        input?.excludeIds ?? [],
-        input?.mode,
-      );
-
-      if (!game) {
-        throw new NotFoundException('No games available');
-      }
-
-      return {
-        success: true,
-        data: game,
-      };
-    });
-  }
-
-  @Implement(contract.games.get)
-  get() {
-    return implement(contract.games.get).handler(async ({ input }) => {
-      const game = await this.gamesService.getGameByIgdbId(input.igdbId);
-
-      if (!game) {
-        throw new NotFoundException('Game not found');
-      }
-
-      return {
-        success: true,
-        data: game,
-      };
-    });
-  }
 
   @Implement(contract.games.sync)
   @UseGuards(StackAuthGuard)
@@ -250,7 +153,7 @@ export class GamesRouter {
           includeStoryline: includeStoryline ?? false,
           includeGenres: includeGenres ?? false,
           includeThemes: includeThemes ?? false,
-          imageStyle: imageStyle ?? 'funko-pop-chibi',
+          imageStyle: imageStyle ?? DEFAULT_IMAGE_GEN_STYLE,
         });
 
         const rawBuffer = await this.aiService.generateImage(prompt);
@@ -278,6 +181,29 @@ export class GamesRouter {
           throw new NotFoundException('Failed to update game record');
 
         return { success: true, url: publicUrl, data: updatedGame };
+      },
+    );
+  }
+
+  @Implement(contract.games.bulkGenerateImages)
+  @UseGuards(StackAuthGuard)
+  bulkGenerateImages() {
+    return implement(contract.games.bulkGenerateImages).handler(
+      async ({ input }) => {
+        const { jobId, gamesQueued } =
+          await this.gamesService.bulkGenerateImages(input);
+        return { success: true, jobId, gamesQueued };
+      },
+    );
+  }
+
+  @Implement(contract.games.getBulkJobStatus)
+  @UseGuards(StackAuthGuard)
+  getBulkJobStatus() {
+    return implement(contract.games.getBulkJobStatus).handler(
+      async ({ input }) => {
+        const job = await this.gamesService.getBulkJobStatus(input.jobId);
+        return { success: true, ...job };
       },
     );
   }

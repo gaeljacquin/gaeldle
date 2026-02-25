@@ -14,6 +14,7 @@ import {
   IconLayoutSidebarLeftExpand,
   IconLayoutSidebarLeftCollapse,
   IconHome,
+  IconRobotFace,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { appInfo } from "@/lib/app-info";
@@ -85,12 +86,12 @@ function SidebarGamesSection({ isCollapsed, isExpanded, onToggle, pathname }: Re
           "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer",
           isCollapsed ? "justify-center px-0" : null,
         )}
-        title={isCollapsed ? "Games" : undefined}
+        title={isCollapsed ? "Game Modes" : undefined}
       >
         <IconDeviceGamepad2 size={20} />
         {isCollapsed ? null : (
           <>
-            <span>Games</span>
+            <span>Game Modes</span>
             <span className="ml-auto">
               {isExpanded ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
             </span>
@@ -218,6 +219,14 @@ export function Sidebar() {
         />
 
         <SidebarLink
+          href="/dashboard/image-gen"
+          icon={IconRobotFace}
+          label="Bulk Image Gen"
+          isCollapsed={isCollapsed}
+          isActive={pathname === "/dashboard/image-gen"}
+        />
+
+        <SidebarLink
           href="/dashboard/settings"
           icon={IconSettings}
           label="Settings"
@@ -233,7 +242,6 @@ export function Sidebar() {
           onToggle={toggleGames}
           pathname={pathname}
         />
-
       </nav>
 
       <div className="space-y-1 p-2">

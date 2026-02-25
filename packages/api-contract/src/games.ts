@@ -1,6 +1,14 @@
 import { oc } from '@orpc/contract';
 import { z } from 'zod';
-import { GameSelectSchema, GameUpdateInputSchema, type Game } from './schema';
+import {
+  GameSelectSchema,
+  GameUpdateInputSchema,
+  BulkJobFailureSchema,
+  BulkJobParamsSchema,
+  BulkJobStatusEnum,
+  type Game,
+} from './schema';
+import { DEFAULT_IMAGE_GEN_STYLE, IMAGE_GEN_MIN, IMAGE_GEN_MAX } from '@gaeldle/constants';
 
 export const GameModeSlugSchema = z.enum([
   'cover-art',
@@ -33,86 +41,6 @@ export const SyncOperationSchema = z.enum([
 export type SyncOperation = z.infer<typeof SyncOperationSchema>;
 
 export const GamesContract = {
-  list: oc
-    .route({ method: 'GET', path: '/games' })
-    .input(
-      z.object({
-        page: z.coerce.number().int().positive().optional(),
-        pageSize: z.coerce.number().int().positive().optional(),
-        q: z.string().optional(),
-        sortBy: z.enum(['name', 'firstReleaseDate', 'igdbId']).optional(),
-        sortDir: z.enum(['asc', 'desc']).optional(),
-      }).optional(),
-    )
-    .output(
-      z.object({
-        success: z.boolean(),
-        data: z.array(GameSelectSchema),
-        meta: z.object({
-          page: z.number(),
-          pageSize: z.number(),
-          total: z.number(),
-        }).optional(),
-      }),
-    ),
-
-  get: oc
-    .route({ method: 'GET', path: '/games/:igdbId' })
-    .input(
-      z.object({
-        igdbId: z.coerce.number().int().positive(),
-      }),
-    )
-    .output(
-      z.object({
-        success: z.boolean(),
-        data: GameSelectSchema,
-      }),
-    ),
-
-  getArtwork: oc
-    .route({ method: 'GET', path: '/games/artwork' })
-    .output(
-      z.object({
-        success: z.boolean(),
-        data: z.array(GameSelectSchema),
-      }),
-    ),
-
-  search: oc
-    .route({ method: 'GET', path: '/games/search' })
-    .input(
-      z.object({
-        q: z.string().min(2),
-        limit: z.coerce.number().int().positive().optional().default(100),
-        mode: GameModeSlugSchema.optional(),
-      }),
-    )
-    .output(
-      z.object({
-        success: z.boolean(),
-        data: z.array(GameSelectSchema),
-      }),
-    ),
-
-  getRandom: oc
-    .route({ method: 'GET', path: '/games/random' })
-    .input(
-      z.object({
-        excludeIds: z.preprocess((val) => {
-          if (!val) return [];
-          return Array.isArray(val) ? val : [val];
-        }, z.array(z.coerce.number())).optional(),
-        mode: GameModeSlugSchema.optional(),
-      }).optional(),
-    )
-    .output(
-      z.object({
-        success: z.boolean(),
-        data: GameSelectSchema,
-      }),
-    ),
-
   sync: oc
     .route({ method: 'POST', path: '/games/sync' })
     .input(
@@ -193,7 +121,7 @@ export const GamesContract = {
         includeStoryline: z.boolean().optional().default(false),
         includeGenres: z.boolean().optional().default(false),
         includeThemes: z.boolean().optional().default(false),
-        imageStyle: ImageStyleSchema.optional().default('funko-pop-chibi'),
+        imageStyle: ImageStyleSchema.optional().default(DEFAULT_IMAGE_GEN_STYLE),
       }),
     )
     .output(
@@ -203,6 +131,50 @@ export const GamesContract = {
         data: GameSelectSchema,
       }),
     ),
+  bulkGenerateImages: oc
+    .route({ method: 'POST', path: '/games/bulk-generate-images' })
+    .input(
+      z.object({
+        numGames: z.number().int().min(IMAGE_GEN_MIN).max(IMAGE_GEN_MAX),
+        imageStyle: ImageStyleSchema,
+        includeStoryline: z.boolean().default(false),
+        includeGenres: z.boolean().default(false),
+        includeThemes: z.boolean().default(false),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        jobId: z.string(),
+        gamesQueued: z.number(),
+      }),
+    ),
+
+  getBulkJobStatus: oc
+    .route({ method: 'GET', path: '/games/bulk-generate-images/:jobId/status' })
+    .input(
+      z.object({
+        jobId: z.string(),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        jobId: z.string(),
+        status: BulkJobStatusEnum,
+        total: z.number(),
+        processed: z.number(),
+        succeeded: z.number(),
+        failed: z.number(),
+        failures: z.array(BulkJobFailureSchema),
+        params: BulkJobParamsSchema,
+        startedAt: z.date().nullable(),
+        completedAt: z.date().nullable(),
+        createdAt: z.date(),
+      }),
+    ),
+
+
 } as const;
 
 export interface GameApiResponse {

@@ -1,14 +1,12 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query'; // Import from TanStack Query
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getPixelSizeForAttempt } from '@/lib/utils/pixelate';
-import { orpc } from '@/lib/orpc';
+import { getAllGames, getRandomGame } from '@/lib/services/game.service';
 import type { CoverArtModeSlug, Game, ArtworkImage } from '@gaeldle/api-contract';
 
 export const MAX_ATTEMPTS = 5;
 
-// Helper to pick a random artwork from the artworks array
 function getRandomArtwork(artworks: unknown): string | null {
   if (!artworks || !Array.isArray(artworks) || artworks.length === 0) {
     return null;
@@ -20,38 +18,35 @@ function getRandomArtwork(artworks: unknown): string | null {
 }
 
 export function useCoverArtGame(mode: CoverArtModeSlug) {
+  const [allGames, setAllGames] = useState<Game[]>([]);
+  const [targetGame, setTargetGame] = useState<Game | null>(null);
   const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
   const [wrongGuesses, setWrongGuesses] = useState<Game[]>([]);
   const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Use oRPC with TanStack Query's useQuery hook
-  const { data: allGamesData, isLoading: isLoadingAll } = useQuery(
-    orpc.games.list.queryOptions({
-      input: {}, // list() now takes an object
-      select: (res) => res.data,
-    })
-  );
+  useEffect(() => {
+    async function loadGames() {
+      try {
+        setIsLoading(true);
+        const [games, target] = await Promise.all([
+          getAllGames(),
+          getRandomGame([], mode),
+        ]);
+        setAllGames(games);
+        setTargetGame(target);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load games');
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
-  const {
-    data: targetGameData,
-    isLoading: isLoadingTarget,
-    refetch: refetchTarget,
-    isRefetching: isRefetchingTarget
-  } = useQuery(
-    orpc.games.getRandom.queryOptions({
-      input: {
-        mode
-      },
-      select: (res) => res.data,
-      enabled: true,
-      staleTime: Infinity, // Ensure it stays until we explicitly refetch
-    })
-  );
-
-  const allGames = useMemo(() => allGamesData ?? [], [allGamesData]);
-  const targetGame = targetGameData ?? null;
+    loadGames();
+  }, [mode]);
 
   const currentPixelSize = getPixelSizeForAttempt(MAX_ATTEMPTS - attemptsLeft, MAX_ATTEMPTS);
 
@@ -61,8 +56,6 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     }
     return null;
   }, [mode, targetGame]);
-
-  const isLoading = isLoadingAll || isLoadingTarget || isRefetchingTarget;
 
   const handleSelectGame = useCallback((gameId: number) => {
     setSelectedGameId(gameId);
@@ -92,13 +85,21 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   }, [targetGame, selectedGameId, isGameOver, attemptsLeft, allGames]);
 
   const resetGame = useCallback(async () => {
-    setWrongGuesses([]);
-    setAttemptsLeft(MAX_ATTEMPTS);
-    setIsGameOver(false);
-    setIsCorrect(false);
-    setSelectedGameId(null);
-    await refetchTarget();
-  }, [refetchTarget]);
+    try {
+      setIsLoading(true);
+      setWrongGuesses([]);
+      setAttemptsLeft(MAX_ATTEMPTS);
+      setIsGameOver(false);
+      setIsCorrect(false);
+      setSelectedGameId(null);
+      const target = await getRandomGame([], mode);
+      setTargetGame(target);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reset game');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [mode]);
 
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft(prev => {
@@ -117,7 +118,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     isGameOver,
     isCorrect,
     isLoading,
-    error: null, // TanStack Query handles error state
+    error,
     currentPixelSize,
     selectedArtworkUrl,
     handleSelectGame,

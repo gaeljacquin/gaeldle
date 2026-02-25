@@ -28,15 +28,15 @@ export function useTimelineGame() {
         setIsLoading(true);
         const games = await getAllGames();
 
-        // Filter games with release dates and shuffle
         const gamesWithDates = games.filter(g => g.firstReleaseDate !== null);
         const shuffled = [...gamesWithDates].sort(() => Math.random() - 0.5);
         const selected = shuffled.slice(0, GAMES_COUNT);
 
+        // Set all derived state in one update to avoid a visible re-shuffle
         setAllGames(games);
         setSelectedGames(selected);
         setUserOrder(selected);
-        setSavedOrder(selected); // Set initial saved order
+        setSavedOrder(selected);
       } catch (err) {
         console.error('Error loading games:', err);
         setError(err instanceof Error ? err.message : 'Failed to load games');

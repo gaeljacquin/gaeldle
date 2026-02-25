@@ -12,6 +12,9 @@ import {
   IMAGE_PROMPT_SUFFIX,
   IMAGE_STYLES,
   DEFAULT_IMAGE_GEN_STYLE,
+  DEFAULT_IMAGE_GEN_NUM,
+  IMAGE_GEN_MIN,
+  IMAGE_GEN_MAX,
 } from '@gaeldle/constants';
 
 // Parse prompt options from environment variables
@@ -20,7 +23,13 @@ const includeGenres = process.env.INCLUDE_GENRES === 'true';
 const includeThemes = process.env.INCLUDE_THEMES === 'true';
 
 // Parse NUM_GAMES (default to 5 if not specified)
-const numGames = Math.max(1, Math.min(50, parseInt(process.env.NUM_GAMES ?? '5', 10)));
+const numGames = Math.max(
+  IMAGE_GEN_MIN,
+  Math.min(
+    IMAGE_GEN_MAX,
+    Number.parseInt(process.env.NUM_GAMES ?? String(DEFAULT_IMAGE_GEN_NUM), 10),
+  ),
+);
 
 // Resolve image style: match by value slug or label (case-insensitive), fall back to default
 const rawStyle = process.env.IMAGE_STYLE?.trim() ?? '';

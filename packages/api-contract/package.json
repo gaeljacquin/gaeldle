@@ -11,7 +11,8 @@
     "@orpc/server": "^1.13.4",
     "@orpc/contract": "^1.13.4",
     "drizzle-zod": "^0.7.0",
-    "drizzle-orm": "^0.45.1"
+    "drizzle-orm": "^0.45.1",
+    "@gaeldle/constants": "workspace:*"
   },
   "peerDependencies": {
     "zod": "^3.x"

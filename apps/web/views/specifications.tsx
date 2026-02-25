@@ -75,7 +75,7 @@ export default function Specifications() {
           <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
         </div>
 
-        <div className="mx-auto max-w-6xl space-y-8">
+        <div className="mx-auto max-w-screen-2xl space-y-8">
           {isGameOver ? null : (
             <div className="mx-auto flex max-w-2xl flex-col gap-4">
               <div className="flex flex-col gap-3 sm:flex-row items-stretch">

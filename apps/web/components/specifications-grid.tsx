@@ -424,7 +424,7 @@ export default function SpecificationsGrid({
   const showHeaders = guesses.length > 0 || showAnswerOnly || bestMatches;
 
   return (
-    <div className={cn('overflow-x-auto w-full border border-border/50 bg-card/5', className)}>
+    <div className={cn('overflow-x-scroll w-full border border-border/50 bg-card/5', className)}>
       <table className="w-full border-collapse min-w-max">
         <thead>
           {bestMatches ? (

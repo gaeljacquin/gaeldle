@@ -32,12 +32,21 @@ export default function HomeView() {
             </div>
           </section>
 
-          <p className="text-md text-center">
-            Inspired by&nbsp;
-            <Link href="https://gamedle.wtf" target="_blank" className="underline hover:text-sky-600">
-              Gamedle
-            </Link>
-          </p>
+          <div className="flex flex-col gap-4">
+            <p className="text-md text-center">
+              Inspired by&nbsp;
+              <Link href="https://gamedle.wtf" target="_blank" className="underline hover:text-sky-600">
+                Gamedle
+              </Link>
+            </p>
+            <p className="text-md text-center">
+              Be sure to check out these other&nbsp;
+              <Link href="https://tr.ee/uBF_3IDko-" target="_blank" className="underline hover:text-sky-600">
+                games
+              </Link>
+              !
+            </p>
+          </div>
         </div>
       </div>
     </div>

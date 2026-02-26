@@ -30,6 +30,7 @@ import {
 } from '@tabler/icons-react';
 import { toast } from 'sonner';
 import { REPLACE_GAME_MAX_ROWS } from '@gaeldle/constants';
+import { DashboardPageHeader } from '@/components/dashboard-header';
 
 function createEmptyRow(): IgdbIdPairRowData {
   return { id: crypto.randomUUID(), current: '', replacement: '' };
@@ -177,19 +178,11 @@ export default function ReplaceGameByIgdbId() {
       {/* Sticky header */}
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <IconArrowsExchange
-                size={22}
-                className="text-primary"
-                aria-hidden="true"
-              />
-              Replace Game
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Swap games by IGDB ID.
-            </p>
-          </div>
+          <DashboardPageHeader
+            title='Replace Game'
+            description='Swap games by IGDB ID.'
+            icon={IconArrowsExchange}
+          />
         </div>
       </div>
 

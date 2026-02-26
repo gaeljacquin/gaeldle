@@ -24,6 +24,7 @@ import {
 } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 import { ADD_GAME_MAX_ROWS } from '@gaeldle/constants';
+import { DashboardPageHeader } from '@/components/dashboard-header';
 
 interface AddGameRowData {
   id: string;
@@ -309,19 +310,11 @@ export function AddGame() {
       {/* Sticky header */}
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <IconCirclePlus
-                size={22}
-                className="text-primary"
-                aria-hidden="true"
-              />
-              Add Game
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Add games to the database by IGDB ID.
-            </p>
-          </div>
+          <DashboardPageHeader
+            title='Add Game'
+            description='Add games by IGDB ID.'
+            icon={IconCirclePlus}
+          />
         </div>
       </div>
 
@@ -333,9 +326,9 @@ export function AddGame() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Games to Add</CardTitle>
+                    <CardTitle>Add</CardTitle>
                     <CardDescription className="mt-1">
-                      Up to {ADD_GAME_MAX_ROWS} games at a time.
+                      Up to {ADD_GAME_MAX_ROWS} games.
                     </CardDescription>
                   </div>
                   <Button

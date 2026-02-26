@@ -139,3 +139,13 @@ export async function replaceGameByIdgbId(
   const result = await orpcClient.games.replaceGames(pairs);
   return result;
 }
+
+export async function validateIgdbIdAdd(igdbId: number) {
+  const result = await orpcClient.games.validateIgdbIdAdd({ igdbId });
+  return result;
+}
+
+export async function addGame(igdbId: number) {
+  const result = await orpcClient.games.sync({ igdb_id: igdbId });
+  return result;
+}

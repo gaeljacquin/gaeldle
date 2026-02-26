@@ -16,6 +16,7 @@ import {
   IconHome,
   IconRobotFace,
   IconArrowsExchange,
+  IconCirclePlus,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { appInfo } from "@/lib/app-info";
@@ -225,6 +226,14 @@ export function Sidebar() {
           label="Bulk Image Gen"
           isCollapsed={isCollapsed}
           isActive={pathname === "/dashboard/image-gen"}
+        />
+
+        <SidebarLink
+          href="/dashboard/add-game"
+          icon={IconCirclePlus}
+          label="Add Game"
+          isCollapsed={isCollapsed}
+          isActive={pathname === "/dashboard/add-game"}
         />
 
         <SidebarLink

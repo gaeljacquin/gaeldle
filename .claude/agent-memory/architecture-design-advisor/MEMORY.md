@@ -72,3 +72,20 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 ## games Table Schema Key Points
 - Primary key: `id` (serial). Unique key: `igdbId` (integer).
 - After any mutation, call `REFRESH MATERIALIZED VIEW all_games` (already handled by `refreshAllGamesView()` in GamesService).
+
+## Replace Game Feature Anatomy (confirmed, 2026-02-26)
+- View: `apps/web/views/replace-game.tsx` — uses `RowWithValidation` wrapper component pattern: each row gets its own hook invocation to avoid Rules of Hooks violations.
+- Validation hook: `apps/web/lib/hooks/use-igdb-id-fix-validation.ts` — debounces inputs (600ms), calls `validateIgdbIdFix` service, returns `IgdbIdFixValidationState` with `canApply`, `isLoading`, `isReady` etc.
+- Row component: `apps/web/components/id-pair-row.tsx` — presentational, receives `validationState` as prop, renders `CurrentBadge` and `ReplacementBadge` sub-components inline.
+- Results table: `apps/web/components/igdb-fix-results-table.tsx` — separate presentational component.
+- Max rows constant: `REPLACE_GAME_MAX_ROWS = 20` in `packages/constants/src/index.ts`.
+- The `sync` contract procedure (POST /games/sync) already handles "upsert by IGDB ID" — it creates OR updates a game. This is the correct backend target for Add Game.
+
+## Add Game Feature (designed 2026-02-26, not yet implemented)
+- Uses `games.sync` contract (already exists) — no new NestJS endpoint needed.
+- Validation: needs a NEW `games.validateIgdbIdAdd` oRPC procedure (checks IGDB exists + not already in DB).
+- New constant: `ADD_GAME_MAX_ROWS` in `packages/constants/src/index.ts`.
+- New hook: `use-igdb-id-add-validation.ts` — single-field variant of the fix validation hook.
+- New component: `igdb-id-add-row.tsx` — single-field row (no "current" ID, just the new IGDB ID).
+- New view: `apps/web/views/add-game.tsx`.
+- New page: `apps/web/app/dashboard/add-game/page.tsx`.

@@ -230,6 +230,14 @@ export class GamesRouter {
     });
   }
 
+  @Implement(contract.games.validateIgdbIdAdd)
+  @UseGuards(StackAuthGuard)
+  validateIgdbIdAdd() {
+    return implement(contract.games.validateIgdbIdAdd).handler(({ input }) =>
+      this.gamesService.validateGameForAdd(input.igdbId),
+    );
+  }
+
   private static readonly IMAGE_STYLE_DESCRIPTORS: Record<ImageStyle, string> =
     {
       'funko-pop-chibi': 'Funko Pop chibi style illustration',

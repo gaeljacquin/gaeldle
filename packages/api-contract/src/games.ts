@@ -227,6 +227,23 @@ export const GamesContract = {
       }),
     ),
 
+  validateIgdbIdAdd: oc
+    .route({ method: 'POST', path: '/games/add/validate-one' })
+    .input(
+      z.object({
+        igdbId: z.number().int().positive(),
+      }),
+    )
+    .output(
+      z.object({
+        igdbId: z.number(),
+        existsOnIgdb: z.boolean(),
+        alreadyInDb: z.boolean(),
+        gameName: z.string().nullable(),
+        canAdd: z.boolean(),
+      }),
+    ),
+
 } as const;
 
 export interface GameApiResponse {

@@ -68,6 +68,7 @@ export default function SomePage() { return <SomeView />; }
 - The wrapper component propagates state up via a stable `onValidationChange(id, state)` callback
 - Parent collects per-row validation into a `Record<string, ValidationState>` via `useState`
 - Use equality check inside the callback setter to avoid infinite re-render loops
+- Pattern confirmed in both ReplaceGame and AddGame features
 
 ### IgdbService batch fetch
 - `igdbService.getGamesByIds(ids[])` now exists — use it for batch IGDB operations
@@ -75,6 +76,12 @@ export default function SomePage() { return <SomeView />; }
 
 ### Tabler icons confirmed available
 - `IconArrowsExchange` — confirmed in @tabler/icons-react for Replace IGDB IDs feature
+- `IconCirclePlus` — confirmed in @tabler/icons-react for Add Game feature
+
+### oRPC router handler — no-await pattern
+- When the handler body is a single `return someService.asyncMethod(...)`, omit `async` on the arrow function
+- Use `({ input }) => this.service.method(input.field)` (not `async ({ input }) => { return ... }`)
+- This avoids the TS "async function has no await" lint error
 
 ## Details File
 See `patterns.md` for extended notes including SSE auth, background jobs, Drizzle migration commands, and Checkbox usage.

@@ -160,6 +160,62 @@ export class GamesService {
     return deletedRows.map((row) => row.id);
   }
 
+  // ─── Add Game by IGDB ID ─────────────────────────────────────────────────────────────
+
+  async validateGameForAdd(igdbId: number): Promise<{
+    igdbId: number;
+    existsOnIgdb: boolean;
+    alreadyInDb: boolean;
+    gameName: string | null;
+    canAdd: boolean;
+  }> {
+    const [existingRow] = await this.databaseService.db
+      .select({ id: games.id, name: games.name })
+      .from(games)
+      .where(eq(games.igdbId, igdbId))
+      .limit(1);
+
+    if (existingRow) {
+      return {
+        igdbId,
+        existsOnIgdb: true,
+        alreadyInDb: true,
+        gameName: existingRow.name ?? null,
+        canAdd: false,
+      };
+    }
+
+    try {
+      const igdbGame = await this.igdbService.getGameById(igdbId);
+
+      if (!igdbGame) {
+        return {
+          igdbId,
+          existsOnIgdb: false,
+          alreadyInDb: false,
+          gameName: null,
+          canAdd: false,
+        };
+      }
+
+      return {
+        igdbId,
+        existsOnIgdb: true,
+        alreadyInDb: false,
+        gameName: igdbGame.name ?? null,
+        canAdd: true,
+      };
+    } catch {
+      return {
+        igdbId,
+        existsOnIgdb: false,
+        alreadyInDb: false,
+        gameName: null,
+        canAdd: false,
+      };
+    }
+  }
+
   // ─── Replace Game by IGDB ID ──────────────────────────────────────────────────────────
 
   async validateGameByIgdbId(

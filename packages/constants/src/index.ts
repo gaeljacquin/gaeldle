@@ -70,6 +70,8 @@ export const IMAGE_GEN_DIR = 'res';
 
 export const REPLACE_GAME_MAX_ROWS = 20;
 
+export const ADD_GAME_MAX_ROWS = 20;
+
 export const PLACEHOLDER_IMAGE = 'placeholder.jpg';
 
 export const PLACEHOLDER_IMAGE_R2 = (r2PublicUrl: string) => `${r2PublicUrl}/${PLACEHOLDER_IMAGE}`;

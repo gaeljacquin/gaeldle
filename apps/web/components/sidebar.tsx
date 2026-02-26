@@ -15,6 +15,7 @@ import {
   IconLayoutSidebarLeftCollapse,
   IconHome,
   IconRobotFace,
+  IconArrowsExchange,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { appInfo } from "@/lib/app-info";
@@ -224,6 +225,14 @@ export function Sidebar() {
           label="Bulk Image Gen"
           isCollapsed={isCollapsed}
           isActive={pathname === "/dashboard/image-gen"}
+        />
+
+        <SidebarLink
+          href="/dashboard/replace-game"
+          icon={IconArrowsExchange}
+          label="Replace Game"
+          isCollapsed={isCollapsed}
+          isActive={pathname === "/dashboard/replace-game"}
         />
 
         <SidebarLink

@@ -62,5 +62,19 @@ export default function SomePage() { return <SomeView />; }
 - Use `?token=<accessToken>` query param (can't send headers via EventSource)
 - See patterns.md for frontend token-fetching pattern
 
+### Hook-per-row validation pattern (CRITICAL)
+- Never call hooks in a loop (violates Rules of Hooks)
+- When each list row needs its own hook, wrap each row in a small component that calls the hook once
+- The wrapper component propagates state up via a stable `onValidationChange(id, state)` callback
+- Parent collects per-row validation into a `Record<string, ValidationState>` via `useState`
+- Use equality check inside the callback setter to avoid infinite re-render loops
+
+### IgdbService batch fetch
+- `igdbService.getGamesByIds(ids[])` now exists — use it for batch IGDB operations
+- `igdbService.getGameById(id)` — single-game lookup (used for validate endpoint)
+
+### Tabler icons confirmed available
+- `IconArrowsExchange` — confirmed in @tabler/icons-react for Replace IGDB IDs feature
+
 ## Details File
 See `patterns.md` for extended notes including SSE auth, background jobs, Drizzle migration commands, and Checkbox usage.

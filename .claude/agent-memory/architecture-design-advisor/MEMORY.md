@@ -42,3 +42,33 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 ## Key Architectural Tension Observed
 - Bulk image gen is long-running (serial Cloudflare AI calls, each takes seconds). HTTP request timeout is a real risk for any naive "run all at once" endpoint. Fire-and-forget or job/polling patterns needed for >5 games.
 - No job/queue infrastructure currently exists in the API. BullMQ/Redis would be a new dependency.
+
+## Read vs. Write Transport Split (Confirmed)
+- Reads: Next.js route handlers at `apps/web/app/api/games/` — use plain `fetch` in service, no oRPC.
+- Writes: NestJS API via oRPC — all in `GamesContract` in `packages/api-contract/src/games.ts`.
+- Validation or existence checks that are read-only but belong to admin flows: route them through NestJS oRPC if they are part of a write workflow (the fixIgdbIds feature validates then mutates).
+
+## NestJS Games Module Structure
+- `apps/api/src/games/games.module.ts` — registers providers: GamesService, IgdbService, S3Service, AiService, BulkImageJobStore.
+- `apps/api/src/games/igdb.service.ts` — `IgdbService.getGameById(igdbId)` fetches from IGDB API. Caches token internally.
+- `apps/api/src/games/games.service.ts` — `getGameByIgdbId`, `syncGameByIgdbId`, `updateGame`, `deleteGame`, `deleteGames`, `refreshAllGamesView`, bulk image gen.
+- Pattern: Service methods use `this.databaseService.db` (Drizzle). View refresh called after every mutation.
+
+## Hooks Pattern (apps/web/lib/hooks/)
+- Named `use-[feature].ts`. Import service functions (not raw fetch). Use TanStack Query hooks internally.
+- Example: `use-bulk-image-job.ts` polls job status and manages SSE connection.
+
+## Sidebar Pattern (apps/web/components/sidebar.tsx)
+- Uses `SidebarLink` sub-component with `href`, `icon`, `label`, `isCollapsed`, `isActive` props.
+- Active state: `pathname === href` comparison.
+- New admin links added inline in the `<nav>` section, above the Separator that precedes Game Modes.
+- Icon import: `@tabler/icons-react`.
+
+## View + Page Pattern
+- `apps/web/app/dashboard/[page]/page.tsx`: single line, imports from `views/`.
+- `apps/web/views/[name].tsx`: main client component with all state, mutations, and sub-components.
+- Sub-components defined in same file or extracted to `apps/web/components/` if reusable.
+
+## games Table Schema Key Points
+- Primary key: `id` (serial). Unique key: `igdbId` (integer).
+- After any mutation, call `REFRESH MATERIALIZED VIEW all_games` (already handled by `refreshAllGamesView()` in GamesService).

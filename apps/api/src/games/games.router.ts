@@ -6,10 +6,11 @@ import { GamesService } from '@/games/games.service';
 import { S3Service } from '@/lib/s3.service';
 import { AiService } from '@/lib/ai.service';
 import { StackAuthGuard } from '@/auth/stack-auth.guard';
-import { TEST_DIR, IMAGE_GEN_DIR } from '@/lib/constants';
 import {
   DEFAULT_IMAGE_GEN_STYLE,
+  IMAGE_GEN_DIR,
   IMAGE_PROMPT_SUFFIX,
+  TEST_DIR,
 } from '@gaeldle/constants';
 import { ConfigService } from '@nestjs/config';
 import type { AppConfiguration } from '@/config/configuration';
@@ -206,6 +207,27 @@ export class GamesRouter {
         return { success: true, ...job };
       },
     );
+  }
+
+  @Implement(contract.games.validateReplaceGame)
+  @UseGuards(StackAuthGuard)
+  validateReplaceGame() {
+    return implement(contract.games.validateReplaceGame).handler(
+      async ({ input }) => {
+        return this.gamesService.validateGameByIgdbId(
+          input.current,
+          input.replacement,
+        );
+      },
+    );
+  }
+
+  @Implement(contract.games.replaceGames)
+  @UseGuards(StackAuthGuard)
+  replaceGames() {
+    return implement(contract.games.replaceGames).handler(async ({ input }) => {
+      return this.gamesService.replaceGameByIgdbId(input);
+    });
   }
 
   private static readonly IMAGE_STYLE_DESCRIPTORS: Record<ImageStyle, string> =

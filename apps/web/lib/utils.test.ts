@@ -18,7 +18,7 @@ describe('cn utility', () => {
   });
 
   it('should handle boolean values', () => {
-    const result = cn('px-4', false, true && 'py-2');
+    const result = cn('px-4', false, 'py-2');
     expect(result).toBe('px-4 py-2');
   });
 

@@ -22,8 +22,19 @@ import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { BulkImageJobStore } from '@/games/bulk-image-job.store';
 import type { AppConfiguration } from '@/config/configuration';
-import { IMAGE_STYLES, IMAGE_PROMPT_SUFFIX } from '@gaeldle/constants';
-import { IMAGE_GEN_DIR } from '@/lib/constants';
+import {
+  IMAGE_STYLES,
+  IMAGE_PROMPT_SUFFIX,
+  IMAGE_GEN_DIR,
+} from '@gaeldle/constants';
+
+type Result = {
+  current: number;
+  replacement: number;
+  status: 'updated' | 'skipped' | 'error';
+  message: string;
+  gameName: string | null;
+};
 
 @Injectable()
 export class GamesService {
@@ -147,6 +158,227 @@ export class GamesService {
     }
 
     return deletedRows.map((row) => row.id);
+  }
+
+  // ─── Replace Game by IGDB ID ──────────────────────────────────────────────────────────
+
+  async validateGameByIgdbId(
+    current: number,
+    replacement: number,
+  ): Promise<{
+    current: number;
+    replacement: number;
+    currentExistsInDb: boolean;
+    replacementExistsOnIgdb: boolean;
+    replacementAlreadyInDb: boolean;
+    replacementGameName: string | null;
+    canApply: boolean;
+    currentGameName: string | null;
+  }> {
+    const [currentRow] = await this.databaseService.db
+      .select({ id: games.id, name: games.name })
+      .from(games)
+      .where(eq(games.igdbId, current))
+      .limit(1);
+
+    const currentExistsInDb = !!currentRow;
+    const currentGameName = currentRow?.name ?? null;
+
+    let replacementAlreadyInDb = false;
+    let replacementExistsOnIgdb = false;
+    let replacementGameName: string | null = null;
+
+    if (currentExistsInDb) {
+      const [replacementRow] = await this.databaseService.db
+        .select({ id: games.id })
+        .from(games)
+        .where(eq(games.igdbId, replacement))
+        .limit(1);
+
+      replacementAlreadyInDb = !!replacementRow;
+
+      try {
+        const igdbGame = await this.igdbService.getGameById(replacement);
+        if (igdbGame) {
+          replacementExistsOnIgdb = true;
+          replacementGameName = igdbGame.name ?? null;
+        }
+      } catch {
+        replacementExistsOnIgdb = false;
+      }
+    }
+
+    const canApply =
+      currentExistsInDb &&
+      replacementExistsOnIgdb &&
+      !replacementAlreadyInDb &&
+      current !== replacement;
+
+    return {
+      current,
+      replacement,
+      currentExistsInDb,
+      currentGameName,
+      replacementExistsOnIgdb,
+      replacementAlreadyInDb,
+      replacementGameName,
+      canApply,
+    };
+  }
+
+  // Helper: build a skipped/error result inline (replaces repeated result.push blocks)
+  private makeResult(
+    pair: { current: number; replacement: number },
+    status: 'skipped' | 'error',
+    message: string,
+  ): Result {
+    return { ...pair, status, message, gameName: null };
+  }
+
+  // Helper: separate valid pairs from immediately-skippable ones
+  private partitionPairs(
+    pairs: Array<{ current: number; replacement: number }>,
+    existingReplacementSet: Set<number>,
+  ): { validPairs: typeof pairs; skippedResults: Result[] } {
+    const validPairs: typeof pairs = [];
+    const skippedResults: Result[] = [];
+
+    for (const pair of pairs) {
+      if (pair.current === pair.replacement) {
+        skippedResults.push(
+          this.makeResult(
+            pair,
+            'skipped',
+            'Current and replacement IGDB IDs are the same',
+          ),
+        );
+      } else if (existingReplacementSet.has(pair.replacement)) {
+        skippedResults.push(
+          this.makeResult(
+            pair,
+            'skipped',
+            'Replacement IGDB ID already exists in the database',
+          ),
+        );
+      } else {
+        validPairs.push(pair);
+      }
+    }
+
+    return { validPairs, skippedResults };
+  }
+
+  // Helper: fetch IGDB data or return error results for all pairs
+  private async fetchIgdbGameMap(
+    validPairs: Array<{ current: number; replacement: number }>,
+  ): Promise<
+    | { igdbGameMap: Map<number, ReturnType<typeof this.mapIgdbToGame>> }
+    | Result[]
+  > {
+    const replacementIds = validPairs.map((p) => p.replacement);
+    try {
+      const igdbGames = await this.igdbService.getGamesByIds(replacementIds);
+      return {
+        igdbGameMap: new Map(
+          igdbGames.map((g) => [g.id, this.mapIgdbToGame(g)]),
+        ),
+      };
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? `IGDB fetch failed: ${err.message}`
+          : 'IGDB fetch failed';
+      return validPairs.map((pair) => this.makeResult(pair, 'error', message));
+    }
+  }
+
+  private async updateGameHelper(
+    gameData: ReturnType<typeof this.mapIgdbToGame>,
+    pair: { current: number; replacement: number },
+    results: Result[],
+  ): Promise<boolean> {
+    const updated = await this.databaseService.db
+      .update(games)
+      .set({ ...gameData, updatedAt: new Date() })
+      .where(eq(games.igdbId, pair.current))
+      .returning({ igdbId: games.igdbId, name: games.name });
+
+    if (updated.length === 0) {
+      results.push(
+        this.makeResult(
+          pair,
+          'skipped',
+          `No row found with igdb_id=${pair.current}`,
+        ),
+      );
+      return false;
+    }
+
+    results.push({
+      ...pair,
+      status: 'updated',
+      message: `Updated IGDB ID ${pair.current} → ${pair.replacement}`,
+      gameName: updated[0].name ?? null,
+    });
+    return true;
+  }
+
+  async replaceGameByIgdbId(
+    pairs: Array<{ current: number; replacement: number }>,
+  ): Promise<{ success: boolean; results: Array<Result> }> {
+    // Check which replacement IDs already exist in DB
+    const allReplacementIds = pairs.map((p) => p.replacement);
+    const existingReplacements = await this.databaseService.db
+      .select({ igdbId: games.igdbId })
+      .from(games)
+      .where(inArray(games.igdbId, allReplacementIds));
+
+    const existingReplacementSet = new Set(
+      existingReplacements.map((r) => r.igdbId),
+    );
+    const { validPairs, skippedResults } = this.partitionPairs(
+      pairs,
+      existingReplacementSet,
+    );
+    const results: Array<Result> = [...skippedResults];
+
+    if (validPairs.length === 0) return { success: true, results };
+
+    // Fetch from IGDB — returns map on success, error results on failure
+    const igdbResult = await this.fetchIgdbGameMap(validPairs);
+    if (Array.isArray(igdbResult))
+      return { success: false, results: [...results, ...igdbResult] };
+
+    const { igdbGameMap } = igdbResult;
+    let anyUpdated = false;
+
+    for (const pair of validPairs) {
+      const gameData = igdbGameMap.get(pair.replacement);
+      if (!gameData) {
+        results.push(
+          this.makeResult(
+            pair,
+            'skipped',
+            `No data returned from IGDB for IGDB ID ${pair.replacement}`,
+          ),
+        );
+        continue;
+      }
+      try {
+        anyUpdated = await this.updateGameHelper(gameData, pair, results);
+      } catch (err) {
+        results.push(
+          this.makeResult(
+            pair,
+            'error',
+            err instanceof Error ? err.message : 'Database update failed',
+          ),
+        );
+      }
+    }
+
+    if (anyUpdated) await this.refreshAllGamesView();
+    return { success: true, results };
   }
 
   // ─── Bulk Image Generation ─────────────────────────────────────────────────

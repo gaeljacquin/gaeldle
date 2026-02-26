@@ -145,3 +145,6 @@ vite.config.ts.timestamp-*
 
 # Previous apps
 */*-old
+
+# Misc
+TODO.md

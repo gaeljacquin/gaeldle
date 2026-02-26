@@ -52,6 +52,64 @@ export class IgdbService {
       this.configService.get<string>('twitchClientSecret') ?? '';
   }
 
+  async getGamesByIds(igdbIds: number[]): Promise<IgdbGame[]> {
+    if (igdbIds.length === 0) return [];
+
+    if (!this.twitchClientId || !this.twitchClientSecret) {
+      throw new Error(
+        'TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET must be configured',
+      );
+    }
+
+    const accessToken = await this.getAccessToken();
+    const fields = [
+      'id',
+      'name',
+      'summary',
+      'storyline',
+      'url',
+      'total_rating',
+      'total_rating_count',
+      'first_release_date',
+      'cover.image_id',
+      'cover.url',
+      'artworks.image_id',
+      'artworks.url',
+      'keywords.name',
+      'franchises.name',
+      'game_engines.name',
+      'game_modes.name',
+      'genres.name',
+      'involved_companies.company.name',
+      'involved_companies.publisher',
+      'involved_companies.developer',
+      'platforms.name',
+      'player_perspectives.name',
+      'release_dates.human',
+      'release_dates.date',
+      'release_dates.platform.name',
+      'themes.name',
+    ];
+
+    const idsStr = igdbIds.join(',');
+    const response = await fetch('https://api.igdb.com/v4/games', {
+      method: 'POST',
+      headers: {
+        'Client-ID': this.twitchClientId,
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+      },
+      body: `fields ${fields.join(',')}; where id = (${idsStr}); limit ${igdbIds.length};`,
+    });
+
+    if (!response.ok) {
+      const details = await response.text();
+      throw new Error(`IGDB request failed (${response.status}): ${details}`);
+    }
+
+    return (await response.json()) as IgdbGame[];
+  }
+
   async getGameById(igdbId: number): Promise<IgdbGame | null> {
     if (!this.twitchClientId || !this.twitchClientSecret) {
       throw new Error(

@@ -174,6 +174,58 @@ export const GamesContract = {
       }),
     ),
 
+  validateReplaceGame: oc
+    .route({ method: 'POST', path: '/games/replace-game/validate-one' })
+    .input(
+      z.object({
+        current: z.number().int().positive(),
+        replacement: z.number().int().positive(),
+      }),
+    )
+    .output(
+      z.object({
+        current: z.number(),
+        replacement: z.number(),
+        currentExistsInDb: z.boolean(),
+        currentGameName: z.string().nullable(),
+        replacementExistsOnIgdb: z.boolean(),
+        replacementAlreadyInDb: z.boolean(),
+        replacementGameName: z.string().nullable(),
+        canApply: z.boolean(),
+      }),
+    ),
+
+  replaceGames: oc
+    .route({ method: 'POST', path: '/games/replace-games' })
+    .input(
+      z
+        .array(
+          z
+            .object({
+              current: z.number().int().positive(),
+              replacement: z.number().int().positive(),
+            })
+            .refine((p) => p.current !== p.replacement, {
+              message: 'IDs must differ',
+            }),
+        )
+        .min(1)
+        .max(20),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        results: z.array(
+          z.object({
+            current: z.number(),
+            replacement: z.number(),
+            status: z.enum(['updated', 'skipped', 'error']),
+            message: z.string(),
+            gameName: z.string().nullable(),
+          }),
+        ),
+      }),
+    ),
 
 } as const;
 

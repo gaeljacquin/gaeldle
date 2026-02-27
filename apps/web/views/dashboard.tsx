@@ -33,11 +33,13 @@ import {
   IconX,
   IconChecklist,
   IconTrash,
+  IconDashboard,
 } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 import { Game } from '@gaeldle/api-contract';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { DashboardPageHeader } from '@/components/dashboard-header';
 
 type SortOption = 'name-asc' | 'name-desc' | 'firstReleaseDate-asc' | 'firstReleaseDate-desc' | 'igdbId-asc' | 'igdbId-desc';
 
@@ -330,12 +332,11 @@ export default function Dashboard() {
     <div className="flex flex-col min-h-full bg-background">
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 space-y-4">
-          <div className="flex flex-col items-start gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage and explore games.
-            </p>
-          </div>
+          <DashboardPageHeader
+            title='Dashboard'
+            description='Manage and explore games.'
+            icon={IconDashboard}
+          />
 
           <div className="flex flex-row justify-between items-start">
             <div className="relative w-1/2 group">

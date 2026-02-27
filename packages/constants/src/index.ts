@@ -61,3 +61,17 @@ export const IMAGE_STYLES: {
     descriptor: 'Graphic novel illustration style',
   },
 ];
+
+export const FILE_SIZE_LIMIT = '10mb';
+
+export const TEST_DIR = 'test-dir';
+
+export const IMAGE_GEN_DIR = 'res';
+
+export const REPLACE_GAME_MAX_ROWS = 20;
+
+export const ADD_GAME_MAX_ROWS = 20;
+
+export const PLACEHOLDER_IMAGE = 'placeholder.jpg';
+
+export const PLACEHOLDER_IMAGE_R2 = (r2PublicUrl: string) => `${r2PublicUrl}/${PLACEHOLDER_IMAGE}`;

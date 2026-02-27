@@ -64,7 +64,7 @@ export async function getRandomGame(excludeIds: number[] = [], mode?: GameModeSl
   }
 
   const query = params.toString();
-  const res = await fetch(`/api/games/random${query ? `?${query}` : ''}`);
+  const res = await fetch(`/api/games/random${query ? '?' + query : ''}`);
   const result = await res.json();
   return result.data;
 }
@@ -119,5 +119,33 @@ export async function bulkGenerateImages(params: {
 
 export async function getBulkJobStatus(jobId: string) {
   const result = await orpcClient.games.getBulkJobStatus({ jobId });
+  return result;
+}
+
+export async function validateReplaceGame(
+  current: number,
+  replacement: number,
+) {
+  const result = await orpcClient.games.validateReplaceGame({
+    current,
+    replacement,
+  });
+  return result;
+}
+
+export async function replaceGameByIdgbId(
+  pairs: Array<{ current: number; replacement: number }>,
+) {
+  const result = await orpcClient.games.replaceGames(pairs);
+  return result;
+}
+
+export async function validateIgdbIdAdd(igdbId: number) {
+  const result = await orpcClient.games.validateIgdbIdAdd({ igdbId });
+  return result;
+}
+
+export async function addGame(igdbId: number) {
+  const result = await orpcClient.games.sync({ igdb_id: igdbId });
   return result;
 }

@@ -10,7 +10,9 @@ import { useMutation } from "@tanstack/react-query";
 import { testUpload } from "@/lib/services/game.service";
 import { toast } from "sonner";
 import { useState } from "react";
-import { IconUpload, IconLoader2 } from "@tabler/icons-react";
+import { IconUpload, IconLoader2, IconSettings } from "@tabler/icons-react";
+import { DashboardPageHeader } from "@/components/dashboard-header";
+import { Separator } from "@/components/ui/separator";
 
 export default function Settings() {
   const [isUploading, setIsUploading] = useState(false);
@@ -56,65 +58,78 @@ export default function Settings() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="mb-8 text-3xl font-bold">Settings</h1>
+    <div className="flex flex-col min-h-full bg-background">
+      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <DashboardPageHeader
+            title='Settings'
+            description='Configs, tweaks, etc...'
+            icon={IconSettings}
+          />
+        </div>
+      </div>
 
-      <div className="grid gap-6 max-w-2xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>
-              Customize how {appInfo.title} looks on your device.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Theme</Label>
-                <p className="text-sm text-muted-foreground">
-                  Switch between light and dark mode.
-                </p>
+      <div className="container mx-auto px-4 py-8 flex-1">
+        <div className="max-w-2xl space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Appearance</CardTitle>
+              <CardDescription>
+                Customize how {appInfo.title} looks on your device.
+              </CardDescription>
+            </CardHeader>
+            <Separator />
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Theme</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Switch between light and dark mode.
+                  </p>
+                </div>
+                <ThemeToggle />
               </div>
-              <ThemeToggle />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Cloudflare R2 Test</CardTitle>
-            <CardDescription>
-              Test image upload to your Cloudflare R2 bucket.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative size-40 border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-muted/50 overflow-hidden">
-                <Image
-                  src="/placeholder.jpg"
-                  alt="Test Placeholder"
-                  fill
-                  className="object-cover"
-                />
+          <Card>
+            <CardHeader>
+              <CardTitle>Cloudflare R2 Test</CardTitle>
+              <CardDescription>
+                Test image upload to your Cloudflare R2 bucket.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative size-40 border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-muted/50 overflow-hidden">
+                  <Image
+                    src="/placeholder.jpg"
+                    alt="Test Placeholder"
+                    fill
+                    className="object-cover"
+                    loading='eager'
+                    sizes="1vw,2vw,10vw"
+                  />
+                </div>
+                <div className="text-center space-y-2">
+                  <p className="text-xs font-mono text-muted-foreground">public/placeholder.jpg</p>
+                  <Button
+                    onClick={handleTestUpload}
+                    disabled={isUploading}
+                    className="font-bold cursor-pointer"
+                  >
+                    {isUploading ? (
+                      <IconLoader2 className="mr-2 size-4 animate-spin" />
+                    ) : (
+                      <IconUpload className="mr-2 size-4" />
+                    )}
+                    {isUploading ? "Uploading..." : "Upload to R2"}
+                  </Button>
+                </div>
               </div>
-              <div className="text-center space-y-2">
-                <p className="text-xs font-mono text-muted-foreground">public/placeholder.jpg</p>
-                <Button
-                  onClick={handleTestUpload}
-                  disabled={isUploading}
-                  className="font-bold cursor-pointer"
-                >
-                  {isUploading ? (
-                    <IconLoader2 className="mr-2 size-4 animate-spin" />
-                  ) : (
-                    <IconUpload className="mr-2 size-4" />
-                  )}
-                  {isUploading ? "Uploading..." : "Upload to R2"}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

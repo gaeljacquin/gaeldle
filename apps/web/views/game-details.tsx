@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useState } from 'react';
-import { DEFAULT_IMAGE_GEN_STYLE, IMAGE_PROMPT_SUFFIX, IMAGE_STYLES } from '@gaeldle/constants';
+import { DEFAULT_IMAGE_GEN_STYLE, IMAGE_PROMPT_SUFFIX, IMAGE_STYLES, PLACEHOLDER_IMAGE_R2 } from '@gaeldle/constants';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getGameByIgdbId, deleteGame, syncGame, generateImage } from '@/lib/services/game.service';
 import BackToDashboard from '@/components/back-to-dashboard';
@@ -31,7 +31,6 @@ import { useRouter } from 'next/navigation';
 import { IconTrash, IconCalendar, IconDeviceGamepad, IconLayersIntersect, IconExternalLink, IconRefresh, IconBrush } from '@tabler/icons-react';
 import { Game, type ArtworkImage, type ImageStyle } from '@gaeldle/api-contract';
 import { cn } from '@/lib/utils';
-import { PLACEHOLDER_IMAGE_R2 } from '@/lib/constants';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import {
@@ -382,7 +381,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                   <DialogTrigger nativeButton={false} render={<Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />}>
                       <div className="relative aspect-square w-full">
                         <Image
-                          src={game.aiImageUrl || PLACEHOLDER_IMAGE_R2}
+                          src={game.aiImageUrl || PLACEHOLDER_IMAGE_R2(process.env.r2PublicUrl ?? '')}
                           alt={`${game.name} AI Image`}
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -399,7 +398,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                     </DialogHeader>
                     <div className="relative w-full h-[85vh]">
                       <Image
-                        src={game.aiImageUrl || PLACEHOLDER_IMAGE_R2}
+                        src={game.aiImageUrl || PLACEHOLDER_IMAGE_R2(process.env.r2PublicUrl ?? '')}
                         alt={`${game.name} AI Image`}
                         fill
                         className="object-contain"

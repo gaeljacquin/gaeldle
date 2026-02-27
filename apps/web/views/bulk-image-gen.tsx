@@ -37,6 +37,7 @@ import {
 } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { DashboardPageHeader } from '@/components/dashboard-header';
 
 type JobStatus = 'pending' | 'running' | 'completed' | 'failed';
 
@@ -229,15 +230,11 @@ export default function BulkImageGen() {
       {/* Sticky header */}
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <IconRobotFace size={22} className="text-primary" aria-hidden="true" />
-              Bulk Image Generation
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Generate AI images for games that don&apos;t have one yet.
-            </p>
-          </div>
+          <DashboardPageHeader
+            title='Bulk Image Generation'
+            description='Generate AI images for games that don&apos;t have one yet.'
+            icon={IconRobotFace}
+          />
         </div>
       </div>
 

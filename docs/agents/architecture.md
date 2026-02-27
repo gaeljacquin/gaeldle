@@ -15,7 +15,7 @@ Game operations are split across two APIs:
 | Operation type | API | Transport |
 |---|---|---|
 | Read (list, search, random, artwork, get by IGDB ID) | Next.js (`apps/web`) | plain `fetch` to local routes |
-| Write (delete, sync, image gen) | NestJS (`apps/api`) | oRPC client (`orpcClient`) |
+| Write (delete, sync, image gen, add game, replace game, validate IGDB IDs) | NestJS (`apps/api`) | oRPC client (`orpcClient`) |
 
 Read operations are implemented as Next.js App Router API route handlers under `apps/web/app/api/games/`. They query the database directly using a Drizzle client (`apps/web/lib/db.ts`). Write operations remain in the NestJS API and are called via the oRPC contract.
 

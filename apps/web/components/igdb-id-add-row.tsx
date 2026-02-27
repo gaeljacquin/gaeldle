@@ -24,6 +24,7 @@ interface IgdbIdAddRowProps {
   isLastRow: boolean;
   rowId: string;
   onValidationChange: (id: string, state: IgdbIdAddValidationState) => void;
+  isDuplicate?: boolean;
 }
 
 export function IgdbIdAddRow({
@@ -33,6 +34,7 @@ export function IgdbIdAddRow({
   isLastRow,
   rowId,
   onValidationChange,
+  isDuplicate = false,
 }: Readonly<IgdbIdAddRowProps>) {
   const validationState = useIgdbIdAddValidation(value);
 
@@ -46,7 +48,10 @@ export function IgdbIdAddRow({
     !validationState.canAdd;
 
   return (
-    <div className="flex flex-col gap-2 p-4 border bg-card">
+    <div className={cn(
+      'flex flex-col gap-2 p-4 border bg-card',
+      isDuplicate && 'border-destructive',
+    )}>
       <div className="flex items-start gap-3">
         <div className="flex flex-col gap-1.5 flex-1">
           <Label htmlFor={`igdb-add-${rowId}`} className="text-xs">

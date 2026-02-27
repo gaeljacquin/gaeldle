@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useUser } from '@stackframe/stack';
 import { addGame } from '@/lib/services/game.service';
 import { IgdbIdAddRow } from '@/components/igdb-id-add-row';
@@ -33,6 +33,14 @@ interface AddGameRowData {
 
 function createEmptyRow(): AddGameRowData {
   return { id: crypto.randomUUID(), igdbId: '' };
+}
+
+function parsePositiveInt(value: string): number | null {
+  const trimmed = value.trim();
+  if (trimmed === '') return null;
+  const n = Number.parseInt(trimmed, 10);
+  if (Number.isNaN(n) || n <= 0 || String(n) !== trimmed) return null;
+  return n;
 }
 
 export interface AddGameResult {
@@ -174,6 +182,7 @@ interface RowWithValidationProps {
   onIgdbIdChange: (id: string, value: string) => void;
   onRemove: (id: string) => void;
   onValidationChange: (id: string, state: IgdbIdAddValidationState) => void;
+  isDuplicate: boolean;
 }
 
 function RowWithValidation({
@@ -182,6 +191,7 @@ function RowWithValidation({
   onIgdbIdChange,
   onRemove,
   onValidationChange,
+  isDuplicate,
 }: Readonly<RowWithValidationProps>) {
   return (
     <IgdbIdAddRow
@@ -191,6 +201,7 @@ function RowWithValidation({
       onRemove={() => onRemove(row.id)}
       isLastRow={isLastRow}
       onValidationChange={onValidationChange}
+      isDuplicate={isDuplicate}
     />
   );
 }
@@ -255,8 +266,28 @@ export function AddGame() {
     setValidationMap({});
   }, []);
 
+  const duplicateRowIds = useMemo(() => {
+    const idToRowIds = new Map<number, string[]>();
+    for (const row of rows) {
+      const n = parsePositiveInt(row.igdbId);
+      if (n === null) continue;
+      const state = validationMap[row.id];
+      if (!state?.isReady || state.existsOnIgdb !== true) continue;
+      if (!idToRowIds.has(n)) idToRowIds.set(n, []);
+      idToRowIds.get(n)!.push(row.id);
+    }
+    const dupes = new Set<string>();
+    for (const rowIds of idToRowIds.values()) {
+      if (rowIds.length > 1) rowIds.forEach((id) => dupes.add(id));
+    }
+    return dupes;
+  }, [rows, validationMap]);
+
+  const hasDuplicates = duplicateRowIds.size > 0;
+
   const allCanAdd =
     rows.length > 0 &&
+    !hasDuplicates &&
     rows.every((row) => validationMap[row.id]?.canAdd === true);
 
   const hasAnyNotFound =
@@ -353,6 +384,7 @@ export function AddGame() {
                     onIgdbIdChange={handleIgdbIdChange}
                     onRemove={handleRemove}
                     onValidationChange={handleValidationChange}
+                    isDuplicate={duplicateRowIds.has(row.id)}
                   />
                 ))}
 
@@ -360,6 +392,13 @@ export function AddGame() {
                   <p className="text-xs text-destructive pt-1">
                     One or more IGDB IDs were not found. Fix them or remove the
                     affected rows before applying.
+                  </p>
+                ) : null}
+
+                {hasDuplicates ? (
+                  <p className="text-xs text-destructive pt-1">
+                    Duplicate IGDB IDs detected. Fix or remove the highlighted
+                    rows before applying.
                   </p>
                 ) : null}
 

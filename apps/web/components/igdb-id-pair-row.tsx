@@ -26,6 +26,7 @@ interface IgdbIdPairRowProps {
   onReplacementChange: (id: string, value: string) => void;
   onRemove: (id: string) => void;
   canRemove: boolean;
+  isDuplicate?: boolean;
 }
 
 function CurrentBadge({
@@ -130,6 +131,7 @@ export function IgdbIdPairRow({
   onReplacementChange,
   onRemove,
   canRemove,
+  isDuplicate = false,
 }: Readonly<IgdbIdPairRowProps>) {
   const currentHasError =
     validationState.isReady &&
@@ -143,7 +145,10 @@ export function IgdbIdPairRow({
     !validationState.canApply;
 
   return (
-    <div className="flex flex-col gap-2 p-4 border bg-card">
+    <div className={cn(
+      'flex flex-col gap-2 p-4 border bg-card',
+      isDuplicate && 'border-destructive',
+    )}>
       <div className="flex items-start gap-3">
         {/* Current IGDB ID */}
         <div className="flex flex-col gap-1.5 flex-1">

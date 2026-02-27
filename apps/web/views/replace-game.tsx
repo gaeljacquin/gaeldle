@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useUser } from '@stackframe/stack';
 import { replaceGameByIdgbId } from '@/lib/services/game.service';
@@ -36,6 +36,42 @@ function createEmptyRow(): IgdbIdPairRowData {
   return { id: crypto.randomUUID(), current: '', replacement: '' };
 }
 
+function parsePositiveInt(value: string): number | null {
+  const trimmed = value.trim();
+  if (trimmed === '') return null;
+  const n = Number.parseInt(trimmed, 10);
+  if (Number.isNaN(n) || n <= 0 || String(n) !== trimmed) return null;
+  return n;
+}
+
+function pushToMap(map: Map<number, string[]>, key: number, rowId: string) {
+  const existing = map.get(key);
+  if (existing) {
+    existing.push(rowId);
+  } else {
+    map.set(key, [rowId]);
+  }
+}
+
+function addDupesFromMap(idToRows: Map<number, string[]>, dupes: Set<string>) {
+  for (const rowIds of idToRows.values()) {
+    if (rowIds.length > 1) rowIds.forEach((id) => dupes.add(id));
+  }
+}
+
+function addCrossFieldDupes(
+  currentIdToRows: Map<number, string[]>,
+  replacementIdToRows: Map<number, string[]>,
+  dupes: Set<string>,
+) {
+  for (const [currentId, currentRowIds] of currentIdToRows) {
+    const replacementRowIds = replacementIdToRows.get(currentId);
+    if (!replacementRowIds) continue;
+    currentRowIds.forEach((id) => dupes.add(id));
+    replacementRowIds.forEach((id) => dupes.add(id));
+  }
+}
+
 // Each row is wrapped in a component so each gets its own hook invocation
 interface RowWithValidationProps {
   row: IgdbIdPairRowData;
@@ -44,6 +80,7 @@ interface RowWithValidationProps {
   onRemove: (id: string) => void;
   canRemove: boolean;
   onValidationChange: (id: string, state: ReplaceGameValidationState) => void;
+  isDuplicate: boolean;
 }
 
 function RowWithValidation({
@@ -53,6 +90,7 @@ function RowWithValidation({
   onRemove,
   canRemove,
   onValidationChange,
+  isDuplicate,
 }: Readonly<RowWithValidationProps>) {
   const validationState = useReplaceGameValidation(row.current, row.replacement);
 
@@ -68,6 +106,7 @@ function RowWithValidation({
       onReplacementChange={onReplacementChange}
       onRemove={onRemove}
       canRemove={canRemove}
+      isDuplicate={isDuplicate}
     />
   );
 }
@@ -98,8 +137,37 @@ export default function ReplaceGameByIgdbId() {
     [],
   );
 
+  const duplicateRowIds = useMemo(() => {
+    const currentIdToRows = new Map<number, string[]>();
+    const replacementIdToRows = new Map<number, string[]>();
+
+    for (const row of rows) {
+      const state = validationMap[row.id];
+      if (!state?.isReady) continue;
+
+      const currentInt = parsePositiveInt(row.current);
+      if (currentInt !== null && state.currentExistsInDb === true) {
+        pushToMap(currentIdToRows, currentInt, row.id);
+      }
+
+      const replacementInt = parsePositiveInt(row.replacement);
+      if (replacementInt !== null && state.replacementExistsOnIgdb === true) {
+        pushToMap(replacementIdToRows, replacementInt, row.id);
+      }
+    }
+
+    const dupes = new Set<string>();
+    addDupesFromMap(currentIdToRows, dupes);
+    addDupesFromMap(replacementIdToRows, dupes);
+    addCrossFieldDupes(currentIdToRows, replacementIdToRows, dupes);
+    return dupes;
+  }, [rows, validationMap]);
+
+  const hasDuplicates = duplicateRowIds.size > 0;
+
   const allPairsValid =
     rows.length > 0 &&
+    !hasDuplicates &&
     rows.every((row) => validationMap[row.id]?.canApply === true);
 
   const applyMutation = useMutation({
@@ -222,8 +290,16 @@ export default function ReplaceGameByIgdbId() {
                   onRemove={handleRemove}
                   canRemove={rows.length > 1}
                   onValidationChange={handleValidationChange}
+                  isDuplicate={duplicateRowIds.has(row.id)}
                 />
               ))}
+
+              {hasDuplicates ? (
+                <p className="text-xs text-destructive pt-1">
+                  Duplicate IGDB IDs detected. Fix or remove the highlighted
+                  rows before applying.
+                </p>
+              ) : null}
 
               <div className="pt-2 flex items-center gap-3">
                 <Button

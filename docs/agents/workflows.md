@@ -27,7 +27,7 @@ Dashboard pages that perform write operations (add, replace, delete) follow a co
 5. **Row component**: If the form is a variable-length list of inputs, create one row component in `apps/web/components/<feature>-row.tsx`. Each row gets its own hook invocation (wrapped in a small intermediate component) so React's rules of hooks are not violated.
 6. **Service functions**: Add the API call wrappers to `apps/web/lib/services/game.service.ts`. Validation calls go to NestJS via `orpcClient`.
 7. **Contract**: Add the oRPC route to `packages/api-contract/src/games.ts`, implement it in `apps/api/src/games/games.router.ts`, and add the business logic to `apps/api/src/games/games.service.ts`.
-8. **Sidebar**: Add a `<SidebarLink>` entry in `apps/web/components/sidebar.tsx` with a Tabler icon and a label.
+8. **Utilities hub**: Add a `MenuCard` entry in `apps/web/views/utilities.tsx` linking to the new page. The sidebar exposes a single **Utilities** link (`/dashboard/utilities`, icon `IconTools`) that routes to this hub — do not add individual `<SidebarLink>` entries for each admin tool page.
 9. **Shared constants**: If the feature needs a max-rows limit or other shareable constant, add it to `packages/constants/src/index.ts` and import from `@gaeldle/constants` in both web and API code.
 
 ## Validate-then-Commit Pattern

@@ -61,11 +61,11 @@ apps/web/
 - **Centralized Providers**: All context providers (Stack Auth, Query Client, etc.) are consolidated in `apps/web/app/providers.tsx`.
 - **Layout Constraints**: The `LayoutWrapper` handles the conditional visibility of the Navbar and Footer. For example, they are hidden for `/handler` and `/dashboard` routes.
 
-## Shared Dashboard Components
+## Shared UI Components
 
 ### DashboardPageHeader
 
-`apps/web/components/dashboard-header.tsx` — reusable sticky-header component used across all dashboard pages (Dashboard, Settings, Bulk Image Gen, Add Game, Replace Game).
+`apps/web/components/dashboard-header.tsx` — reusable sticky-header component used across all dashboard pages (Dashboard, Settings, Bulk Image Gen, Add Game, Replace Game, Utilities).
 
 ```tsx
 import { DashboardPageHeader } from '@/components/dashboard-header';
@@ -84,16 +84,56 @@ Props:
 
 All dashboard views should use this component inside the sticky `border-b bg-card/50 backdrop-blur-sm` header wrapper rather than writing their own heading markup.
 
+### MenuCard
+
+`apps/web/components/menu-card.tsx` — generic gradient card component used to render clickable navigation tiles. Renders a gradient background, icon in the top-right corner, title, description, and an optional `badge` slot (used by `GameModeCard` to render the difficulty label).
+
+```tsx
+import { MenuCard, type MenuCardProps } from '@/components/menu-card';
+
+<MenuCard
+  href="/dashboard/some-page"
+  title="Some Page"
+  description="Short description."
+  icon={IconSomeTablerIcon}
+  gradient="--gradient-easy"
+/>
+```
+
+Props:
+- `href?: string` — if omitted or `disabled`, renders a non-linked `<div>` instead of a `<Link>`.
+- `title: string` — card heading.
+- `description: string` — subtitle below the heading.
+- `icon: TablerIcon` — Tabler icon rendered in the top-right corner.
+- `gradient: string` — CSS variable name for the card background (e.g. `'--gradient-easy'`).
+- `disabled?: boolean` — disables the link and reduces opacity.
+- `badge?: React.ReactNode` — optional slot rendered above the icon (used by `GameModeCard` for the difficulty badge).
+
+`GameModeCard` (`apps/web/components/game-mode-card.tsx`) extends `MenuCard` and adds a `difficulty: 'Easy' | 'Medium' | 'Hard'` prop, rendering the value as a `badge`.
+
+### Stuck
+
+`apps/web/components/stuck.tsx` — shared loading/stuck-state display component used in place of inline loading markup.
+
+Props:
+- `stuckState: 'none' | 'loading'` — `'loading'` renders a full-screen centered layout; `'none'` renders a compact inline block suitable for embedding inside a card or image placeholder.
+- `className?: string` — forwarded to the wrapper `div` when `stuckState === 'none'`.
+
+Usage: import `Stuck` from `@/components/stuck` and render `<Stuck stuckState='loading' />` for game loading states, or `<Stuck stuckState='none' className="..." />` when embedding inside a fixed-size container.
+
 ## Admin Dashboard Pages
 
-Two new dashboard pages handle game catalogue management:
+Dashboard pages for game catalogue management and utilities. The sidebar exposes a single **Utilities** link (`/dashboard/utilities`) that acts as a hub for all admin tool pages.
 
 | Route | View file | Description |
 |---|---|---|
+| `/dashboard/utilities` | `apps/web/views/utilities.tsx` | Hub page listing all admin utility tools as `MenuCard` tiles. |
 | `/dashboard/add-game` | `apps/web/views/add-game.tsx` | Add one or more new games to the DB by IGDB ID. Max `ADD_GAME_MAX_ROWS` (20) rows per submission. |
 | `/dashboard/replace-game` | `apps/web/views/replace-game.tsx` | Replace existing games by swapping IGDB IDs. Max `REPLACE_GAME_MAX_ROWS` (20) pairs per submission. |
+| `/dashboard/image-gen` | `apps/web/views/image-gen.tsx` | Bulk AI image generation for games. |
+| `/dashboard/discover-games` | `apps/web/views/discover-games.tsx` | Browse and discover games from IGDB; select games to add to the library. |
 
-Both pages use a validate-then-commit pattern: each row validates in real time via a debounced TanStack Query call, and the submit button is only enabled when all rows pass validation.
+The Add Game and Replace Game pages use a validate-then-commit pattern: each row validates in real time via a debounced TanStack Query call, and the submit button is only enabled when all rows pass validation.
 
 ### Validation Hooks
 
@@ -147,3 +187,41 @@ Query key: `['replace-game-validate', debouncedCurrentInt, debouncedReplacementI
 ### Duplicate Detection (Replace Game)
 
 The Replace Game view tracks duplicate IGDB IDs across all rows client-side. A row is flagged as a duplicate if the same IGDB ID appears more than once in the current column, more than once in the replacement column, or the same ID appears in both the current column of one row and the replacement column of another. Duplicate rows are highlighted and excluded from submission.
+
+## Game Search
+
+### `useGameSearch` Hook
+
+`apps/web/lib/hooks/use-game-search.ts` — TanStack Query hook that wraps `searchGames()` from `game.service.ts` with debouncing and idle-state tracking.
+
+```ts
+const { results, isLoading, isIdle, debouncedQuery } = useGameSearch(query, { mode, limit });
+```
+
+Options:
+- `mode?: GameModeSlug` — filters results to games eligible for that game mode.
+- `limit?: number` — passed to the search endpoint (server default is 20).
+
+Return values:
+- `results: Game[]` — search results, empty array while idle or loading.
+- `isLoading: boolean` — `true` while the live query differs from the debounced query (typing lag) OR while the query is fetching. Use this to show a "Searching..." indicator.
+- `isIdle: boolean` — `true` when `debouncedQuery.length < GAME_SEARCH_MIN_CHARS` (3). No API call is made in this state.
+- `debouncedQuery: string` — the debounced value of the raw query input (debounce delay: 300 ms). Pass this to `highlightMatch` to bold the query in rendered results.
+
+Query key: `['game-search', debouncedQuery, mode]`. Stale time: 30 s. Query is disabled when `isIdle` is `true`.
+
+### Match Highlighting
+
+`GameSearch` (`apps/web/components/game-search.tsx`) contains a `highlightMatch(name, query)` helper that bolds the first case-insensitive occurrence of the debounced query within a result name. It wraps the matched substring in `<strong>` and returns a `<span>` with surrounding text as plain text nodes. No match is highlighted when `query.length < GAME_SEARCH_MIN_CHARS`.
+
+## Game Mode Behavioral Contracts
+
+### Skip Button (Cover Art and Artwork)
+
+The Cover Art and Artwork game modes expose a **Skip** button in `GameListPlusImage` (`apps/web/components/game-list-plus-image.tsx`). The skip button is absent in Image Gen (same component, different `gameModeSlug`).
+
+- Clicking Skip calls `handleSkip()` from `useCoverArtGame` (`apps/web/lib/hooks/use-cover-art-game.ts`), then clears the search input.
+- `handleSkip` appends `null` to the `wrongGuesses` array (instead of a `Game` object) and decrements `attemptsLeft`. This preserves attempt-slot alignment while recording that a guess was skipped.
+- If decrementing brings `attemptsLeft` to 0, `isGameOver` is set to `true` immediately.
+- The `wrongGuesses` array type is `(Game | null)[]`. Code that derives `wrongGuessIds` from this array must filter out `null` entries before mapping to `.id`.
+- The Skip button is disabled when `isGameOver` is `true`.

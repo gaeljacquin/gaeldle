@@ -79,3 +79,5 @@ export const PLACEHOLDER_IMAGE_R2 = (r2PublicUrl: string) => `${r2PublicUrl}/${P
 export const DISCOVER_GAMES_MAX = 50;
 
 export const DISCOVER_GAMES_DEFAULT = 10;
+
+export const GAME_SEARCH_MIN_CHARS = 3;

@@ -1,16 +1,18 @@
+// ORDER BY uses similarity() from the pg_trgm extension (GIN index: game_name_trgm_idx)
 import { NextRequest, NextResponse } from 'next/server';
-import { and, desc, sql, type SQL } from 'drizzle-orm';
+import { and, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { games, gameObject, type GameModeSlug } from '@gaeldle/api-contract';
+import { GAME_SEARCH_MIN_CHARS } from '@gaeldle/constants';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
 
   const q = searchParams.get('q') ?? '';
-  const limit = Math.max(1, Number(searchParams.get('limit') ?? 100));
+  const limit = Math.max(1, Number(searchParams.get('limit') ?? 20));
   const mode = (searchParams.get('mode') ?? undefined) as GameModeSlug | undefined;
 
-  if (q.length < 2) {
+  if (q.length < GAME_SEARCH_MIN_CHARS) {
     return NextResponse.json({ success: true, data: [] });
   }
 
@@ -31,7 +33,7 @@ export async function GET(request: NextRequest) {
     .from(games)
     .where(and(...whereClause))
     .limit(limit)
-    .orderBy(desc(games.id));
+    .orderBy(sql`similarity(name, ${q}) DESC`);
 
   return NextResponse.json({ success: true, data: gamesList });
 }

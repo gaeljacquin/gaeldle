@@ -101,5 +101,28 @@ export default function SomePage() { return <SomeView />; }
 - `domainEvents` table added to `packages/api-contract/src/schema.ts`
 - Migration generated at `apps/api/drizzle/0011_simple_whirlwind.sql`
 
+### pg_trgm GIN index migration (migration 0012)
+- GIN index `game_name_trgm_idx` created on `game.name` with `gin_trgm_ops`
+- Use `CREATE INDEX` (NOT `CONCURRENTLY`) — Drizzle runs migrations in a transaction
+- No `CREATE EXTENSION` needed — already installed on all environments
+- `similarity(name, ${q}) DESC` via Drizzle `sql` template tag for relevance ordering
+- Snapshot files: copy previous snapshot verbatim, update only `id` (new UUID) and `prevId` (previous snapshot id)
+
+### Drizzle manual migration workflow
+- SQL file: `apps/api/drizzle/<idx>_<tag>.sql`
+- Journal: `apps/api/drizzle/meta/_journal.json` — add new entry with idx, version, when (ms timestamp), tag, breakpoints: true
+- Snapshot: `apps/api/drizzle/meta/<idx>_snapshot.json` — copy previous, update `id` and `prevId`
+- Run with: `bun run db:migrate` inside `apps/api`
+
+### lib/hooks barrel
+- No `index.ts` barrel exists in `apps/web/lib/hooks/` — hooks are imported by direct file path
+
+### useGameSearch hook pattern
+- Located at `apps/web/lib/hooks/use-game-search.ts`
+- Debounces query internally with `useDebounce(query, 300)`
+- `isLoading` = `query !== debouncedQuery || isFetching` (covers both typing lag and network lag)
+- `isIdle` = `debouncedQuery.length < 2`
+- `staleTime: 30_000` consistent with other validation hooks
+
 ## Details File
 See `patterns.md` for extended notes including SSE auth, background jobs, Drizzle migration commands, and Checkbox usage.

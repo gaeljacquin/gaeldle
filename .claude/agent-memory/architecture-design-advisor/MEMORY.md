@@ -120,3 +120,13 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 - Count: number input, default 10, range 1–50. New constants: `DISCOVER_GAMES_MAX = 50`, `DISCOVER_GAMES_DEFAULT = 10`.
 - New component: `discovered-game-card.tsx` (cover image at t_cover_big, title, release year, genres, checkbox overlay).
 - New service: `apps/web/lib/services/discover.service.ts`. New hook: `use-discover-games.ts`.
+
+## Game Search Architecture (confirmed 2026-03-03)
+- Game guessing UI search: `GameSearch` component (`apps/web/components/game-search.tsx`) — debounces 300ms, raw `useEffect`/`fetch` loop (NOT TanStack Query). Calls `searchGames()` in `game.service.ts`.
+- Search route: Next.js route handler `GET /api/games/search` (`apps/web/app/api/games/search/route.ts`) — runs `name ILIKE '%q%'` on `game` table, ordered by `desc(games.id)` (insertion order, NOT relevance). Returns up to 100 results.
+- Paginated list: `GET /api/games` (`apps/web/app/api/games/route.ts`) — supports `q`, `page`, `pageSize`, `sortBy`, `sortDir`. Also uses `ILIKE`.
+- `game` table has a B-tree index on `name` (`game_name_idx`) — leading wildcard `ILIKE '%q%'` cannot use it.
+- `pg_trgm` extension already installed on local, dev, and prod (Neon). No enablement migration needed.
+- Stray file: `apps/api/drizzle/0001_add_name_search_tsvector.sql` — NOT in the journal, never applied. Previous partial attempt. Builder must not renumber around it or treat it as applied.
+- Approved improvement: GIN trigram index on `game.name` + `similarity()` ordering + `useQuery` refactor in `GameSearch`. Migration is a single handwritten SQL file (Drizzle Kit cannot generate it — no schema.ts change needed).
+- Drizzle Kit config: `apps/api/drizzle.config.ts` — schema from `packages/api-contract/src/schema.ts`, output to `apps/api/drizzle/`. Next migration number is 0012.

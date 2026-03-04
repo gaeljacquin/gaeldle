@@ -14,6 +14,7 @@ import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
 import type { CoverArtModeSlug } from '@gaeldle/api-contract';
 import BackToMainMenu from '@/components/back-to-main-menu';
+import Stuck from '@/components/stuck';
 
 interface GameListPlusImageProps {
   gameModeSlug: CoverArtModeSlug;
@@ -38,6 +39,7 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
     handleSelectGame,
     clearSelection,
     handleSubmit,
+    handleSkip,
     resetGame,
     adjustAttempts,
   } = useCoverArtGame(props.gameModeSlug);
@@ -47,8 +49,13 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
     setSearchKey(prev => prev + 1);
   };
 
+  const handleSkipWithClear = () => {
+    handleSkip();
+    setSearchKey(prev => prev + 1);
+  };
+
   const selectedGame = allGames.find((game) => game.id === selectedGameId) || null;
-  const wrongGuessIds = wrongGuesses.map(game => game.id);
+  const wrongGuessIds = wrongGuesses.filter((g): g is NonNullable<typeof g> => g !== null).map(g => g.id);
   const clarity = Math.min(100, Math.round(((MAX_ATTEMPTS - attemptsLeft) / MAX_ATTEMPTS) * 100));
 
   const imageDisplayComp = () => {
@@ -95,12 +102,7 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
   }
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
-        <p className="text-lg">Loading game...</p>
-        <p className="text-muted-foreground">Stuck? Try refreshing the page 😅</p>
-      </div>
-    );
+    return <Stuck stuckState='loading' />;
   }
 
   if (error) {
@@ -124,7 +126,7 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
 
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 w-full max-w-120 mx-auto lg:max-w-none">
               <Card className="p-0 border shadow-none bg-muted/20">
                 <div className="relative aspect-4/5 w-full">
                   {imageDisplayComp()}
@@ -165,6 +167,16 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
                   >
                     Submit
                   </Button>
+                  {(props.gameModeSlug === 'cover-art' || props.gameModeSlug === 'artwork') && (
+                    <Button
+                      onClick={handleSkipWithClear}
+                      disabled={isGameOver}
+                      className="cursor-pointer h-10 font-bold bg-blue-600 hover:bg-blue-700 text-white"
+                      size="lg"
+                    >
+                      Skip
+                    </Button>
+                  )}
                 </div>
 
                 {isGameOver ? null : (

@@ -13,6 +13,7 @@ import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';
 import BackToMainMenu from '@/components/back-to-main-menu';
+import Stuck from '@/components/stuck';
 
 export default function Specifications() {
   const gameMode = getGameModeBySlug('specifications');
@@ -46,12 +47,7 @@ export default function Specifications() {
   const selectedGame = allGames.find(g => g.id === selectedGameId) || null;
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
-        <p className="text-lg">Loading game...</p>
-        <p className="text-muted-foreground">Stuck? Try refreshing the page 😅</p>
-      </div>
-    );
+    return <Stuck stuckState='loading' />;
   }
 
   if (error) {

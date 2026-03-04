@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { pixelateImage } from '@/lib/utils/pixelate';
 import { cn } from '@/lib/utils';
 import type { Game } from '@gaeldle/api-contract';
+import Stuck from '@/components/stuck';
 
 interface CoverDisplayProps {
   game: Game | null;
@@ -48,7 +49,7 @@ export default function CoverDisplay({
         setPixelatedData({ url: pixelated, sourceUrl: sourceImageUrl });
       } catch (error) {
         console.error('Failed to pixelate image:', error);
-        setPixelatedData(null);
+        setPixelatedData({ url: sourceImageUrl, sourceUrl: sourceImageUrl });
       } finally {
         setIsProcessing(false);
       }
@@ -58,17 +59,7 @@ export default function CoverDisplay({
   }, [sourceImageUrl, pixelSize, usePixelation, isGameOver, isLoading]);
 
   if (!game) {
-    return (
-      <div
-        className={cn(
-          'flex flex-col items-center justify-center bg-muted border',
-          className
-        )}
-      >
-        <p className="text-sm text-muted-foreground">Loading game...</p>
-        <p className="text-sm text-muted-foreground">Stuck? Try refreshing the page 😅</p>
-      </div>
-    );
+    return <Stuck stuckState='none' className={className} />;
   }
 
   // Determine what to display
@@ -111,7 +102,7 @@ export default function CoverDisplay({
           alt={isGameOver ? game.name : 'Game cover'}
           className="object-contain"
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          sizes="(max-width: 1024px) min(100vw, 480px), 50vw"
           priority
         />
       ) : null}

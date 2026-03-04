@@ -21,7 +21,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   const [allGames, setAllGames] = useState<Game[]>([]);
   const [targetGame, setTargetGame] = useState<Game | null>(null);
   const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
-  const [wrongGuesses, setWrongGuesses] = useState<Game[]>([]);
+  const [wrongGuesses, setWrongGuesses] = useState<(Game | null)[]>([]);
   const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -84,6 +84,16 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     setSelectedGameId(null);
   }, [targetGame, selectedGameId, isGameOver, attemptsLeft, allGames]);
 
+  const handleSkip = useCallback(() => {
+    if (!targetGame || isGameOver) return;
+
+    setWrongGuesses((prev) => [...prev, null]);
+    setAttemptsLeft((prev) => prev - 1);
+    if (attemptsLeft - 1 <= 0) {
+      setIsGameOver(true);
+    }
+  }, [targetGame, isGameOver, attemptsLeft]);
+
   const resetGame = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -124,6 +134,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     handleSelectGame,
     clearSelection,
     handleSubmit,
+    handleSkip,
     resetGame,
     adjustAttempts,
   };

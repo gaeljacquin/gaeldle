@@ -17,6 +17,7 @@ import {
   IconRobotFace,
   IconArrowsExchange,
   IconCirclePlus,
+  IconZoomScan,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { appInfo } from "@/lib/app-info";
@@ -242,6 +243,14 @@ export function Sidebar() {
           label="Replace Game"
           isCollapsed={isCollapsed}
           isActive={pathname === "/dashboard/replace-game"}
+        />
+
+        <SidebarLink
+          href="/dashboard/discover-games"
+          icon={IconZoomScan}
+          label="Discover Games"
+          isCollapsed={isCollapsed}
+          isActive={pathname === "/dashboard/discover-games"}
         />
 
         <SidebarLink

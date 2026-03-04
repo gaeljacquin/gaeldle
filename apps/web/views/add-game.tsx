@@ -371,7 +371,7 @@ export function AddGame() {
                     className="flex items-center gap-1.5 shrink-0 cursor-pointer"
                   >
                     <IconPlus size={14} aria-hidden="true" />
-                    Add Row
+                    Add row
                   </Button>
                 </div>
               </CardHeader>

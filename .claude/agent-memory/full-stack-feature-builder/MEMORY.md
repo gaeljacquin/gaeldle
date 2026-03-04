@@ -83,5 +83,23 @@ export default function SomePage() { return <SomeView />; }
 - Use `({ input }) => this.service.method(input.field)` (not `async ({ input }) => { return ... }`)
 - This avoids the TS "async function has no await" lint error
 
+### actorId injection in oRPC routers
+- `@orpc/nest` does NOT support a context factory in `ORPCModule.forRoot({})`
+- Use `@Req() req: AuthenticatedRequest` on the router method, then close over it inside `implement().handler()`
+- Pattern: `scan(@Req() req: AuthenticatedRequest) { return implement(...).handler(({ input }) => { const actorId = req.stackAuth?.sub ?? 'unknown'; ... }); }`
+
+### New contract namespace pattern
+- A new `discover` namespace was added to the root contract in `packages/api-contract/src/index.ts`
+- Add to `oc.prefix('/api').router({ games: ..., discover: DiscoverContract })`
+- Export from `index.ts` via `export * from './discover'`
+
+### GamesModule exports
+- `GamesService` and `IgdbService` are now exported from `GamesModule`
+- Other modules (like `DiscoverModule`) can import `GamesModule` and inject these services
+
+### Domain Events table
+- `domainEvents` table added to `packages/api-contract/src/schema.ts`
+- Migration generated at `apps/api/drizzle/0011_simple_whirlwind.sql`
+
 ## Details File
 See `patterns.md` for extended notes including SSE auth, background jobs, Drizzle migration commands, and Checkbox usage.

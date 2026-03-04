@@ -75,3 +75,7 @@ export const ADD_GAME_MAX_ROWS = 20;
 export const PLACEHOLDER_IMAGE = 'placeholder.jpg';
 
 export const PLACEHOLDER_IMAGE_R2 = (r2PublicUrl: string) => `${r2PublicUrl}/${PLACEHOLDER_IMAGE}`;
+
+export const DISCOVER_GAMES_MAX = 50;
+
+export const DISCOVER_GAMES_DEFAULT = 10;

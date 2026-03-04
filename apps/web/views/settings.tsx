@@ -108,7 +108,7 @@ export default function Settings() {
                     fill
                     className="object-cover"
                     loading='eager'
-                    sizes="1vw,2vw,10vw"
+                    sizes="10vw"
                   />
                 </div>
                 <div className="text-center space-y-2">

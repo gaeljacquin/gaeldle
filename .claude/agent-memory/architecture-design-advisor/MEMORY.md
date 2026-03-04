@@ -81,11 +81,42 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 - Max rows constant: `REPLACE_GAME_MAX_ROWS = 20` in `packages/constants/src/index.ts`.
 - The `sync` contract procedure (POST /games/sync) already handles "upsert by IGDB ID" — it creates OR updates a game. This is the correct backend target for Add Game.
 
-## Add Game Feature (designed 2026-02-26, not yet implemented)
-- Uses `games.sync` contract (already exists) — no new NestJS endpoint needed.
-- Validation: needs a NEW `games.validateIgdbIdAdd` oRPC procedure (checks IGDB exists + not already in DB).
-- New constant: `ADD_GAME_MAX_ROWS` in `packages/constants/src/index.ts`.
-- New hook: `use-igdb-id-add-validation.ts` — single-field variant of the fix validation hook.
-- New component: `igdb-id-add-row.tsx` — single-field row (no "current" ID, just the new IGDB ID).
-- New view: `apps/web/views/add-game.tsx`.
-- New page: `apps/web/app/dashboard/add-game/page.tsx`.
+## Add Game Feature (implemented as of 2026-02-26)
+- Uses `games.sync` contract (POST /games/sync) — `syncGameByIgdbId` in GamesService.
+- Validation: `games.validateIgdbIdAdd` oRPC procedure (POST /games/add/validate-one).
+- Constant: `ADD_GAME_MAX_ROWS = 20` in `packages/constants/src/index.ts`.
+- Hook: `use-igdb-id-add-validation.ts` — debounces 600ms, TanStack Query, returns `IgdbIdAddValidationState`.
+- Component: `igdb-id-add-row.tsx` — single-field row with inline validation badge.
+- View: `apps/web/views/add-game.tsx` — `RowWithValidation` wrapper pattern (Rules of Hooks avoidance).
+- Page: `apps/web/app/dashboard/add-game/page.tsx` — thin wrapper.
+
+## IgdbService Key Facts
+- `getGameById(igdbId)`: single game fetch, returns null if not found.
+- `getGamesByIds(igdbIds[])`: batch fetch.
+- Token cached in-memory, refreshed automatically.
+- IGDB API fields: id, name, summary, storyline, first_release_date, cover, themes, genres, platforms, franchises, keywords, game_engines, game_modes, player_perspectives, release_dates, involved_companies, artworks, total_rating, total_rating_count.
+- `category` and `status` NOT yet fetched — will be added for Discover Games feature.
+
+## UI Checkbox Component
+- `apps/web/components/ui/checkbox.tsx` — wraps Base UI `CheckboxPrimitive`. Already exists, no need to create.
+- Uses `data-checked` attribute for styling.
+
+## Sidebar Nav Order (confirmed)
+- Dashboard → Bulk Image Gen → Add Game → Replace Game → Discover Games → Settings → [Separator] → Game Modes → [bottom] Home.
+
+## actorId Extraction Pattern (confirmed 2026-03-03)
+- StackAuthGuard sets `request.stackAuth = JWTPayload` on the Express request after verifying the JWT.
+- JWT `sub` claim = Stack Auth user ID (actorId).
+- No existing oRPC handler reads this — Discover Games is the FIRST to use it.
+- Approach: inject `@Req()` NestJS decorator on the router method, read `req.stackAuth?.sub`.
+- If @orpc/nest does not support mixing @Req() with implement().handler(), fallback: pass actorId via oRPC input from the frontend Stack Auth session. Builder to resolve.
+
+## Discover Games Feature (final design 2026-03-03, approved for handoff)
+- Full notes in `.claude/agent-memory/architecture-design-advisor/discover-games.md`.
+- New `DiscoverContract` in `packages/api-contract/src/discover.ts`; new `DiscoverModule` in `apps/api/src/discover/`.
+- IGDB query: NO exclusion list. `category=0 & status=0 & total_rating_count > 50 & themes != (42)`, sort by total_rating_count desc, limit=count param.
+- Post-filter: backend checks returned igdbIds against DB; marks with `isAlreadyAdded: boolean` on each candidate.
+- Two events: `discover_games.scanned` at scan time, `discover_games.applied` at apply time. Both written to `domain_event` table.
+- Count: number input, default 10, range 1–50. New constants: `DISCOVER_GAMES_MAX = 50`, `DISCOVER_GAMES_DEFAULT = 10`.
+- New component: `discovered-game-card.tsx` (cover image at t_cover_big, title, release year, genres, checkbox overlay).
+- New service: `apps/web/lib/services/discover.service.ts`. New hook: `use-discover-games.ts`.

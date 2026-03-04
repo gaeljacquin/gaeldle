@@ -19,5 +19,6 @@ import { BulkImageGenController } from '@/games/bulk-image-gen.controller';
     AiService,
     BulkImageJobStore,
   ],
+  exports: [GamesService, IgdbService],
 })
 export class GamesModule {}

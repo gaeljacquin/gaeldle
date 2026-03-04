@@ -201,7 +201,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
 
       <div className="flex flex-col lg:flex-row gap-10">
         {/* Sidebar: Cover Art & Actions */}
-        <div className="w-full lg:w-80 shrink-0 space-y-6">
+        <div className="w-full max-w-80 mx-auto lg:mx-0 lg:w-80 shrink-0 space-y-6">
           <Dialog>
             <DialogTrigger nativeButton={false} render={<Card className="overflow-hidden border-2 rounded-none shadow-xl cursor-pointer group hover:border-primary/50 transition-colors" />}>
                 <div className="relative aspect-3/4 w-full">
@@ -304,7 +304,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
         {/* Main Content: Info & Artworks */}
         <div className="flex-1 space-y-10">
           <div className="space-y-4">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase leading-tight">{game.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-tight">{game.name}</h1>
             <div className="flex flex-wrap gap-3 text-muted-foreground">
               {game.firstReleaseDate && (
                 <div className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-none text-xs font-bold uppercase tracking-wider">
@@ -340,7 +340,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                     <DialogTrigger nativeButton={false} render={<Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />}>
                         <div className="relative aspect-video w-full">
                           <Image
-                            src={art.url.replace('t_720p', 't_cover_big')}
+                            src={art.url.replace('t_720p', 't_1080p')}
                             alt={`${game.name} artwork ${index + 1}`}
                             fill
                             className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -402,7 +402,7 @@ export default function GameDetails({ params }: Readonly<{ params: Promise<{ igd
                         alt={`${game.name} AI Image`}
                         fill
                         className="object-contain"
-                        sizes="(max-width: 768px) 100vw, 320px"
+                        sizes="(max-width: 896px) 100vw, 896px"
                       />
                     </div>
                   </DialogContent>

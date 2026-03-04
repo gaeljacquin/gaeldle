@@ -11,6 +11,7 @@ import { motion, useMotionValue } from 'motion/react';
 import { cn } from '@/lib/utils';
 import Timeline2DevToggle from '@/components/timeline-2-dev-toggle';
 import BackToMainMenu from '@/components/back-to-main-menu';
+import Stuck from '@/components/stuck';
 
 export default function Timeline2() {
   const gameMode = getGameModeBySlug('timeline-2');
@@ -99,12 +100,7 @@ export default function Timeline2() {
   };
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
-        <p className="text-lg">Loading game...</p>
-        <p className="text-muted-foreground">Stuck? Try refreshing the page 😅</p>
-      </div>
-    );
+    return <Stuck stuckState='loading' />;
   }
 
   return (

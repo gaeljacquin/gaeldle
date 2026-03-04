@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef, ChangeEvent } from 'react';
+import { useState, useRef, ChangeEvent } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@/lib/utils';
-import type { Game, GameModeSlug } from '@gaeldle/api-contract';
+import type { GameModeSlug } from '@gaeldle/api-contract';
+import { GAME_SEARCH_MIN_CHARS } from '@gaeldle/constants';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import {
   InputGroup,
@@ -12,8 +13,7 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Card } from '@/components/ui/card';
-import { useDebounce } from '@/lib/hooks/use-debounce';
-import { searchGames } from '@/lib/services/game.service';
+import { useGameSearch } from '@/lib/hooks/use-game-search';
 
 interface GameSearchProps {
   selectedGameId: number | null;
@@ -22,6 +22,30 @@ interface GameSearchProps {
   disabled?: boolean;
   className?: string;
   mode?: GameModeSlug;
+}
+
+function highlightMatch(name: string, query: string) {
+  if (!query || query.length < GAME_SEARCH_MIN_CHARS) {
+    return <span>{name}</span>;
+  }
+
+  const index = name.toLowerCase().indexOf(query.toLowerCase());
+
+  if (index === -1) {
+    return <span>{name}</span>;
+  }
+
+  const before = name.slice(0, index);
+  const match = name.slice(index, index + query.length);
+  const after = name.slice(index + query.length);
+
+  return (
+    <span>
+      {before}
+      <strong>{match}</strong>
+      {after}
+    </span>
+  );
 }
 
 export default function GameSearch({
@@ -34,13 +58,15 @@ export default function GameSearch({
 }: Readonly<GameSearchProps>) {
   const [searchValue, setSearchValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [searchResults, setSearchResults] = useState<Game[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const debouncedSearch = useDebounce(searchValue, 300);
   const parentRef = useRef<HTMLDivElement>(null);
 
+  const { results, isLoading, isIdle, debouncedQuery } = useGameSearch(searchValue, { mode });
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  "use no memo";
+  // eslint-disable-next-line react-hooks/incompatible-library -- opted out of memoization via "use no memo"
   const virtualizer = useVirtualizer({
-    count: searchResults.length,
+    count: results.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 40,
     overscan: 2,
@@ -62,42 +88,18 @@ export default function GameSearch({
   const handleClear = () => {
     setSearchValue('');
     setIsOpen(false);
-    setSearchResults([]);
   };
 
-  useEffect(() => {
-    if (debouncedSearch.length < 2) {
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
-    }
-
-    const performSearch = async () => {
-      setIsSearching(true);
-      try {
-        const results = await searchGames(debouncedSearch, 100, mode);
-        setSearchResults(results);
-      } catch (error) {
-        console.error('Search error:', error);
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    };
-
-    performSearch();
-  }, [debouncedSearch, mode]);
-
   const renderSearchContent = () => {
-    if (searchValue.length < 2) {
+    if (isIdle) {
       return (
         <div className="py-4 text-center text-xs text-muted-foreground">
-          Type at least 2 characters to search...
+          Type at least {GAME_SEARCH_MIN_CHARS} characters to search...
         </div>
       );
     }
 
-    if (isSearching) {
+    if (isLoading) {
       return (
         <div className="py-4 text-center text-xs text-muted-foreground">
           Searching...
@@ -105,7 +107,7 @@ export default function GameSearch({
       );
     }
 
-    if (searchResults.length === 0) {
+    if (results.length === 0) {
       return (
         <div className="py-4 text-center text-xs text-muted-foreground">
           No games found.
@@ -118,7 +120,7 @@ export default function GameSearch({
         ref={parentRef}
         className="overflow-y-auto"
         style={{
-          height: `${Math.min(searchResults.length, 6) * 40}px`,
+          height: `${Math.min(results.length, 6) * 40}px`,
           maxHeight: '240px',
         }}
       >
@@ -130,7 +132,7 @@ export default function GameSearch({
           }}
         >
           {virtualizer.getVirtualItems().map((virtualItem) => {
-            const game = searchResults[virtualItem.index];
+            const game = results[virtualItem.index];
             const isWrongGuess = wrongGuesses.includes(game.id);
             const isSelected = selectedGameId === game.id;
             const isDisabled = isWrongGuess || disabled;
@@ -151,7 +153,9 @@ export default function GameSearch({
                   transform: `translateY(${virtualItem.start}px)`,
                 }}
               >
-                <span className="block truncate">{game.name}</span>
+                <span className="block truncate">
+                  {highlightMatch(game.name, debouncedQuery)}
+                </span>
               </button>
             );
           })}

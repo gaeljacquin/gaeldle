@@ -78,6 +78,20 @@
       "when": 1771875286974,
       "tag": "0010_daily_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1772588079289,
+      "tag": "0011_simple_whirlwind",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1772557200000,
+      "tag": "0012_game_name_trgm_idx",
+      "breakpoints": true
     }
   ]
 }

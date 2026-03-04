@@ -44,7 +44,7 @@ export default function ArtworkDisplay({
         setPixelatedData({ url: pixelated, sourceUrl: imageUrl });
       } catch (error) {
         console.error('Failed to pixelate artwork:', error);
-        setPixelatedData(null);
+        setPixelatedData({ url: imageUrl, sourceUrl: imageUrl });
       } finally {
         setIsProcessing(false);
       }
@@ -84,7 +84,7 @@ export default function ArtworkDisplay({
             alt="Game artwork"
             className="object-contain"
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="(max-width: 1024px) min(100vw, 480px), 50vw"
             priority
           />
         ) : null}

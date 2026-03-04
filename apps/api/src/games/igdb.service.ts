@@ -29,7 +29,9 @@ type IgdbGame = {
     date?: number;
     platform?: { name?: string };
   }>;
-  themes?: Array<{ name?: string }>;
+  themes?: Array<{ id?: number; name?: string }>;
+  category?: number;
+  status?: number;
 };
 
 type TwitchTokenResponse = {
@@ -164,6 +166,44 @@ export class IgdbService {
 
     const games = (await response.json()) as IgdbGame[];
     return games[0] ?? null;
+  }
+
+  async discoverCandidates(count: number): Promise<IgdbGame[]> {
+    if (!this.twitchClientId || !this.twitchClientSecret) {
+      throw new Error(
+        'TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET must be configured',
+      );
+    }
+
+    const accessToken = await this.getAccessToken();
+
+    const now = Math.floor(Date.now() / 1000);
+    const fetchLimit = Math.min(count * 3, 500);
+    const offset = Math.floor(Math.random() * 200);
+    const body = `fields id,name,first_release_date,cover.url,cover.image_id,total_rating,total_rating_count,genres.name,platforms.name,themes.id,category; where id > 0 & total_rating_count != null & total_rating_count > 50 & first_release_date != null & first_release_date < ${now}; sort total_rating_count desc; limit ${fetchLimit}; offset ${offset};`;
+
+    const response = await fetch('https://api.igdb.com/v4/games', {
+      method: 'POST',
+      headers: {
+        'Client-ID': this.twitchClientId,
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+      },
+      body,
+    });
+
+    if (!response.ok) {
+      const details = await response.text();
+      throw new Error(`IGDB request failed (${response.status}): ${details}`);
+    }
+
+    const all = (await response.json()) as IgdbGame[];
+    // Filter to main games only (category 0) and exclude erotic theme (42) post-fetch,
+    // since IGDB's default pool does not support filtering on these fields server-side.
+    return all
+      .filter((g) => g.category === 0 || g.category === undefined)
+      .filter((g) => !g.themes?.some((t) => t.id === 42))
+      .slice(0, count);
   }
 
   private async getAccessToken(): Promise<string> {

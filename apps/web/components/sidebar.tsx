@@ -14,9 +14,7 @@ import {
   IconLayoutSidebarLeftExpand,
   IconLayoutSidebarLeftCollapse,
   IconHome,
-  IconRobotFace,
-  IconArrowsExchange,
-  IconCirclePlus,
+  IconTools,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { appInfo } from "@/lib/app-info";
@@ -221,27 +219,16 @@ export function Sidebar() {
         />
 
         <SidebarLink
-          href="/dashboard/image-gen"
-          icon={IconRobotFace}
-          label="Bulk Image Gen"
+          href="/dashboard/utilities"
+          icon={IconTools}
+          label="Utilities"
           isCollapsed={isCollapsed}
-          isActive={pathname === "/dashboard/image-gen"}
-        />
-
-        <SidebarLink
-          href="/dashboard/add-game"
-          icon={IconCirclePlus}
-          label="Add Game"
-          isCollapsed={isCollapsed}
-          isActive={pathname === "/dashboard/add-game"}
-        />
-
-        <SidebarLink
-          href="/dashboard/replace-game"
-          icon={IconArrowsExchange}
-          label="Replace Game"
-          isCollapsed={isCollapsed}
-          isActive={pathname === "/dashboard/replace-game"}
+          isActive={pathname.startsWith("/dashboard/utilities") || [
+            "/dashboard/image-gen",
+            "/dashboard/add-game",
+            "/dashboard/replace-game",
+            "/dashboard/discover-games",
+          ].includes(pathname)}
         />
 
         <SidebarLink

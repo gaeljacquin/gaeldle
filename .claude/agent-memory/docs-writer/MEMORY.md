@@ -51,24 +51,41 @@ Architecture doc updated: `docs/agents/architecture.md` — see "API Responsibil
 Backend doc updated: `docs/agents/backend-conventions.md` — see "Next.js API Routes" section.
 Frontend doc updated: `docs/agents/frontend-conventions.md` — revised "Read vs. write transport" rule.
 
-## Admin Dashboard Pages (as of 2026-02-26)
+## Admin Dashboard Pages (as of 2026-03-04)
 
-Two new dashboard pages added:
+All admin utility pages are accessed via a **Utilities hub** at `/dashboard/utilities` (view: `apps/web/views/utilities.tsx`). The sidebar has a single "Utilities" link (`IconTools`) instead of individual links per tool page.
+
+Pages in the hub (rendered as `MenuCard` tiles):
 - `/dashboard/add-game` — view: `apps/web/views/add-game.tsx`. Add games by IGDB ID (max 20). Uses `useIgdbIdAddValidation` hook.
 - `/dashboard/replace-game` — view: `apps/web/views/replace-game.tsx`. Replace games by IGDB ID pair (max 20). Uses `useReplaceGameValidation` hook.
+- `/dashboard/image-gen` — bulk AI image generation.
+- `/dashboard/discover-games` — view: `apps/web/views/discover-games.tsx`. Browse IGDB and add games.
 
-Both use a validate-then-commit pattern with 600 ms debounce on inputs.
+New admin pages must be added as `MenuCard` entries in `utilities.tsx`, NOT as new `<SidebarLink>` entries.
 
-Shared dashboard UI component: `DashboardPageHeader` in `apps/web/components/dashboard-header.tsx`. All dashboard views must use it.
+Shared dashboard UI components:
+- `DashboardPageHeader` in `apps/web/components/dashboard-header.tsx` — all dashboard views must use it.
+- `MenuCard` in `apps/web/components/menu-card.tsx` — generic gradient card tile with optional badge slot. `GameModeCard` extends it with a difficulty badge.
+- `Stuck` in `apps/web/components/stuck.tsx` — loading/stuck-state display. Props: `stuckState: 'none' | 'loading'`, `className?`.
 
-Shared constants consolidated into `packages/constants/src/index.ts`: `TEST_DIR`, `IMAGE_GEN_DIR`, `REPLACE_GAME_MAX_ROWS`, `ADD_GAME_MAX_ROWS`, `PLACEHOLDER_IMAGE`, `PLACEHOLDER_IMAGE_R2`, `FILE_SIZE_LIMIT`. Import from `@gaeldle/constants` in both web and API code — do not add to app-local constants files.
+Shared constants in `packages/constants/src/index.ts` (import from `@gaeldle/constants`):
+`TEST_DIR`, `IMAGE_GEN_DIR`, `REPLACE_GAME_MAX_ROWS`, `ADD_GAME_MAX_ROWS`, `PLACEHOLDER_IMAGE`, `PLACEHOLDER_IMAGE_R2`, `FILE_SIZE_LIMIT`, `DISCOVER_GAMES_MAX`, `DISCOVER_GAMES_DEFAULT`, `GAME_SEARCH_MIN_CHARS` (= 3).
 
 Timeline swap-mode visual indicator (green line on drag-over) was reverted (commit 64beaa8) because the green line was inaccurate and broke shift mode. `DragOverEvent` handler and `overId` state were removed from `apps/web/views/timeline.tsx`.
 
 ## Key Behavioral Details (for README accuracy)
 
-- Cover Art / Artwork: pixelated image that clears with each wrong guess; clarity bar shown.
-- Image Gen: AI-generated image, no pixelation, image never changes.
+- Cover Art / Artwork: pixelated image that clears with each wrong guess; clarity bar shown. Both modes have a Skip button — skipping pushes `null` into `wrongGuesses` and costs 1 attempt. `wrongGuesses` type is `(Game | null)[]`; filter nulls before mapping to `.id`.
+- Image Gen: AI-generated image, no pixelation, image never changes. No skip button.
 - Timeline: 10 random games, drag-and-drop to sort chronologically; Shift/Swap drag modes; correctly placed cards lock.
 - Timeline 2: growing timeline, one card dealt at a time, drag into correct slot; wrong placements add card at correct position and cost an attempt; score = correct placements.
 - Specifications: 8 fields compared (Platforms, Genres, Themes, Release Year, Game Modes, Game Engines, Publisher, Player Perspective); green/yellow/red feedback; one hint available per game (costs 1 attempt).
+
+## Game Search Architecture (as of 2026-03-04)
+
+- Hook: `useGameSearch` at `apps/web/lib/hooks/use-game-search.ts` — TanStack Query, 300 ms debounce, staleTime 30 s. Returns `{ results, isLoading, isIdle, debouncedQuery }`.
+- `isIdle` = `debouncedQuery.length < 3`. `isLoading` = `query !== debouncedQuery || isFetching`.
+- Search route: `GET /api/games/search` — min 3 chars (`GAME_SEARCH_MIN_CHARS`), default limit 20, ordered by `similarity(name, q) DESC`.
+- Paginated list: `GET /api/games` — when `q` is present, also ordered by `similarity(name, q) DESC`; `sortBy`/`sortDir` are ignored.
+- DB index: GIN trigram index `game_name_trgm_idx` on `game.name` (migration 0012). Extension pre-installed on all envs.
+- No barrel index in `apps/web/lib/hooks/` — import hooks by direct file path.

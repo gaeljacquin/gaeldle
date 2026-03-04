@@ -5,7 +5,7 @@ import type { Game } from '@gaeldle/api-contract';
 import { cn } from '@/lib/utils';
 
 interface GuessHistoryInlineProps {
-  guesses: Game[];
+  guesses: (Game | null)[];
   className?: string;
 }
 
@@ -26,6 +26,24 @@ export default function GuessHistoryInline({ guesses, className }: Readonly<Gues
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {reversedGuesses.map((guess, index) => {
           const originalIndex = guesses.length - index;
+
+          if (guess === null) {
+            return (
+              <div
+                key={`skip-${originalIndex}`}
+                className="flex items-center gap-3 border border-border bg-card/70 p-2"
+              >
+                <div className="h-16 w-12 bg-muted flex items-center justify-center shrink-0 border">
+                  <span className="text-xs text-muted-foreground font-mono">-</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold truncate uppercase tracking-tight">Skipped</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-widest">Guess #{originalIndex}</p>
+                </div>
+              </div>
+            );
+          }
+
           return (
             <div
               key={`${guess.id}-${index}`}

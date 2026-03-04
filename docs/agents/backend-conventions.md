@@ -40,11 +40,20 @@ Read-only game operations are implemented as Next.js App Router route handlers, 
 
 | Route | Auth | Description |
 |---|---|---|
-| `GET /api/games` | Public | Paginated game list. Params: `page`, `pageSize`, `q` (ILIKE), `sortBy` (`name`\|`firstReleaseDate`\|`igdbId`), `sortDir` (`asc`\|`desc`). |
+| `GET /api/games` | Public | Paginated game list. Params: `page`, `pageSize`, `q` (ILIKE), `sortBy` (`name`\|`firstReleaseDate`\|`igdbId`), `sortDir` (`asc`\|`desc`). When `q` is present, results are ordered by `similarity(name, q) DESC` via `pg_trgm` (ignores `sortBy`/`sortDir`). |
 | `GET /api/games/artwork` | Public | All games that have at least one artwork entry. |
-| `GET /api/games/search` | Public | ILIKE search with optional game-mode filter. Params: `q` (min 2 chars), `limit`, `mode` (GameModeSlug). |
+| `GET /api/games/search` | Public | Trigram similarity search with optional game-mode filter. Params: `q` (min `GAME_SEARCH_MIN_CHARS` = 3 chars), `limit` (default 20, min 1), `mode` (GameModeSlug). Results ordered by `similarity(name, q) DESC`. Returns empty array when `q` is below the minimum. |
 | `GET /api/games/random` | Public | One random game. Params: `excludeIds` (comma-separated), `mode` (GameModeSlug). |
 | `GET /api/games/[igdbId]` | Stack Auth (user required) | Single game by IGDB ID. Returns 401 if not authenticated. |
+
+### pg_trgm Trigram Index
+
+A GIN trigram index (`game_name_trgm_idx`) exists on `game.name` (migration `0012_game_name_trgm_idx.sql`). This makes mid-word `ILIKE '%q%'` queries efficient for any query length, unlike the B-tree index (`game_name_idx`) which cannot use leading-wildcard patterns.
+
+- Extension: `pg_trgm` is pre-installed on all environments (local, dev, prod/Neon). No `CREATE EXTENSION` migration is needed.
+- Ordering: both `GET /api/games` (when `q` is present) and `GET /api/games/search` use `similarity(name, q) DESC` from `pg_trgm` so the most relevant matches appear first.
+- Minimum query length: `GAME_SEARCH_MIN_CHARS = 3` — `pg_trgm` needs at least 3 characters to generate trigrams, so queries shorter than 3 chars return an empty result immediately without hitting the DB.
+- Migration note: the index is created with plain `CREATE INDEX` (not `CONCURRENTLY`) so it can run inside a Drizzle transaction. Drizzle Kit cannot generate this migration automatically — it was written by hand and registered in `apps/api/drizzle/meta/_journal.json`.
 
 ### DB client
 
@@ -107,3 +116,6 @@ Constants previously duplicated between `apps/api/src/lib/constants.ts` and `app
 | `PLACEHOLDER_IMAGE` | `'placeholder.jpg'` | Filename of the placeholder image. |
 | `PLACEHOLDER_IMAGE_R2` | `(r2PublicUrl) => string` | Builds the full R2 URL for the placeholder image. |
 | `FILE_SIZE_LIMIT` | `'10mb'` | Body size limit for the NestJS API. |
+| `DISCOVER_GAMES_MAX` | `50` | Maximum number of games returnable by the Discover Games endpoint. |
+| `DISCOVER_GAMES_DEFAULT` | `10` | Default count for the Discover Games endpoint. |
+| `GAME_SEARCH_MIN_CHARS` | `3` | Minimum query length for `GET /api/games/search` and the `useGameSearch` hook. Matches `pg_trgm`'s minimum trigram requirement. |

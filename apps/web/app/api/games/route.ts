@@ -1,3 +1,4 @@
+// When q is present, ORDER BY uses similarity() from the pg_trgm extension (GIN index: game_name_trgm_idx)
 import { NextRequest, NextResponse } from 'next/server';
 import { asc, desc, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
@@ -16,6 +17,9 @@ export async function GET(request: NextRequest) {
   const where = q ? sql`name ILIKE ${'%' + q + '%'}` : undefined;
 
   const orderBy = (() => {
+    if (q) {
+      return sql`similarity(name, ${q}) DESC`;
+    }
     if (sortBy === 'firstReleaseDate') {
       return sortDir === 'asc'
         ? sql`first_release_date ASC NULLS LAST`

@@ -5,13 +5,13 @@
     "": {
       "name": "gaeldle",
       "dependencies": {
-        "motion": "^12.34.3",
+        "motion": "^12.34.5",
         "zod": "^4.3.6",
       },
       "devDependencies": {
-        "@commitlint/cli": "^20.4.2",
-        "@commitlint/config-conventional": "^20.4.2",
-        "@types/node": "^25.3.2",
+        "@commitlint/cli": "^20.4.3",
+        "@commitlint/config-conventional": "^20.4.3",
+        "@types/node": "^25.3.3",
         "husky": "^9.1.7",
         "turbo": "^2.8.13",
       },

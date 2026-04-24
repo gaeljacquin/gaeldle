@@ -7,7 +7,6 @@ if [ -f .env ]; then
 fi
 
 # Configuration
-PROJECT_NAME="gaeldle"
 LOCAL_PATH="${LOCAL_PATH:-$HOME/$PROJECT_NAME}"
 REMOTE_USER="${REMOTE_USER:-demouser}"
 REMOTE_HOST="${REMOTE_HOST:-demohost}"

@@ -1,21 +1,29 @@
 import { orpcClient } from '@/lib/orpc';
 import type { Game, GameModeSlug, ImageStyle } from '@gaeldle/api-contract';
 
+async function handleResponse<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error || `Server error: ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function getAllGames(mode?: GameModeSlug): Promise<Game[]> {
   if (mode === 'artwork') {
     const res = await fetch('/api/games/artwork');
-    const result = await res.json();
+    const result = await handleResponse<{ data: Game[] }>(res);
     return result.data;
   }
 
   const res = await fetch('/api/games?pageSize=10000');
-  const result = await res.json();
+  const result = await handleResponse<{ data: Game[] }>(res);
   return result.data;
 }
 
 export async function getGameByIgdbId(igdbId: number): Promise<Game> {
   const res = await fetch(`/api/games/${igdbId}`);
-  const result = await res.json();
+  const result = await handleResponse<{ data: Game }>(res);
   return result.data;
 }
 
@@ -29,13 +37,22 @@ export async function deleteBulkGames(ids: number[]): Promise<boolean> {
   return result.success;
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+  };
+}
+
 export async function getPaginatedGames(
   page: number = 1,
   pageSize: number = 10,
   query?: string,
   sortBy: 'name' | 'firstReleaseDate' | 'igdbId' = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
-) {
+): Promise<PaginatedResponse<Game>> {
   const params = new URLSearchParams({
     page: String(page),
     pageSize: String(pageSize),
@@ -48,8 +65,7 @@ export async function getPaginatedGames(
   }
 
   const res = await fetch(`/api/games?${params.toString()}`);
-  const result = await res.json();
-  return result;
+  return handleResponse<PaginatedResponse<Game>>(res);
 }
 
 export async function getRandomGame(excludeIds: number[] = [], mode?: GameModeSlug): Promise<Game> {
@@ -65,7 +81,7 @@ export async function getRandomGame(excludeIds: number[] = [], mode?: GameModeSl
 
   const query = params.toString();
   const res = await fetch(`/api/games/random${query ? '?' + query : ''}`);
-  const result = await res.json();
+  const result = await handleResponse<{ data: Game }>(res);
   return result.data;
 }
 
@@ -81,7 +97,7 @@ export async function searchGames(query: string, limit: number = 100, mode?: Gam
   }
 
   const res = await fetch(`/api/games/search?${params.toString()}`);
-  const result = await res.json();
+  const result = await handleResponse<{ data: Game[] }>(res);
   return result.data;
 }
 

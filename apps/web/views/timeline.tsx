@@ -32,7 +32,6 @@ import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';
 import TimelineDevToggle from '@/components/timeline-dev-toggle';
 import { cn } from '@/lib/utils';
-import BackToMainMenu from '@/components/back-to-main-menu';
 import Stuck from '@/components/stuck';
 
 const noOpStrategy: SortingStrategy = () => {
@@ -181,18 +180,18 @@ export default function Timeline() {
 
   return (
     <div className="min-h-full bg-background text-foreground">
-      <div className="w-full max-w-screen-2xl mx-auto px-4 py-10">
-        <BackToMainMenu />
-
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
-          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+      <div className="container mx-auto py-10">
+        <div className="relative mb-12">
+          <div className="text-center pt-8 md:pt-0">
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
+            <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+          </div>
         </div>
 
         <Card className="border shadow-none bg-muted/5">
-          <CardContent className="p-6">
+          <CardContent>
             <div className="space-y-8">
-              <div className="rounded-none border-2 border-dashed border-border p-6 overflow-x-auto scrollbar-x bg-card/50">
+              <div className="rounded-none border-2 border-dashed border-border py-4 overflow-x-auto scrollbar-x bg-card/50">
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCenter}
@@ -204,7 +203,7 @@ export default function Timeline() {
                     items={userOrder.map((game) => game.id)}
                     strategy={swapMode ? noOpStrategy : horizontalListSortingStrategy}
                   >
-                    <div className="flex gap-6 min-w-max px-4 mx-auto">
+                    <div className="flex gap-6 min-w-max px-2 mx-auto">
                       {userOrder.map((game, index) => {
                         let isCorrect: boolean | undefined = undefined;
                         let showDate = false;

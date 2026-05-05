@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getPixelSizeForAttempt } from '@/lib/utils/pixelate';
 import { getAllGames, getRandomGame } from '@/lib/services/game.service';
 import type { CoverArtModeSlug, Game, ArtworkImage } from '@gaeldle/api-contract';
+import { getFriendlyErrorMessage } from '@/lib/utils';
 
 export const MAX_ATTEMPTS = 5;
 
@@ -39,7 +40,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
         setAllGames(games);
         setTargetGame(target);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load games');
+        setError(getFriendlyErrorMessage(err, 'Failed to load games'));
       } finally {
         setIsLoading(false);
       }
@@ -105,7 +106,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
       const target = await getRandomGame([], mode);
       setTargetGame(target);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reset game');
+      setError(getFriendlyErrorMessage(err, 'Failed to reset game'));
     } finally {
       setIsLoading(false);
     }

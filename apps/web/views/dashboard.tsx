@@ -2,7 +2,7 @@
 
 import { useState, useMemo, ChangeEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPaginatedGames, deleteBulkGames } from '@/lib/services/game.service';
+import { getPaginatedGames, deleteBulkGames, PaginatedResponse } from '@/lib/services/game.service';
 import { Timeline2Card } from '@/components/timeline-2-card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -66,12 +66,6 @@ export default function Dashboard() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
-  if (debouncedSearch !== prevSearch) {
-    setPrevSearch(debouncedSearch);
-    setPage(1);
-  }
-
   const [sortBy, sortDir] = sort.split('-') as ['name' | 'firstReleaseDate' | 'igdbId', 'asc' | 'desc'];
 
   const deleteMutation = useMutation({
@@ -108,7 +102,7 @@ export default function Dashboard() {
     setSelectedIds(new Set());
   };
 
-  const { data, isLoading, isPlaceholderData } = useQuery({
+  const { data, isLoading, isPlaceholderData } = useQuery<PaginatedResponse<Game>>({
     queryKey: ['games', page, pageSize, debouncedSearch, sortBy, sortDir],
     queryFn: () => getPaginatedGames(page, Number.parseInt(pageSize, 10), debouncedSearch, sortBy, sortDir),
     placeholderData: (previousData) => previousData,
@@ -153,10 +147,12 @@ export default function Dashboard() {
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
+    setPage(1);
   };
 
   const clearSearch = () => {
     setSearch('');
+    setPage(1);
   };
 
   const handlePageSizeChange = (val: string | null) => {

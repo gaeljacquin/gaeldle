@@ -639,13 +639,7 @@ export class GamesService {
         gameName: string;
         error: string;
       }>,
-      params: job.params as {
-        numGames: number;
-        imageStyle: string;
-        includeStoryline: boolean;
-        includeGenres: boolean;
-        includeThemes: boolean;
-      },
+      params: job.params,
       startedAt: job.startedAt,
       completedAt: job.completedAt,
       createdAt: job.createdAt!,

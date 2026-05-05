@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAllGames, getRandomGame } from '@/lib/services/game.service';
 import type { Game, SpecificationGuess, RevealedClue, MatchType } from '@gaeldle/api-contract';
+import { getFriendlyErrorMessage } from '@/lib/utils';
 
 export const MAX_ATTEMPTS = 10;
 
@@ -164,7 +165,7 @@ export function useSpecificationsGame() {
         setTargetGame(randomGame);
       } catch (err) {
         console.error('Error loading games:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load games');
+        setError(getFriendlyErrorMessage(err, 'Failed to load games'));
       } finally {
         setIsLoading(false);
       }
@@ -313,7 +314,7 @@ export function useSpecificationsGame() {
       const randomGame = await getRandomGame([], 'specifications');
       setTargetGame(randomGame);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reset game');
+      setError(getFriendlyErrorMessage(err, 'Failed to reset game'));
     } finally {
       setIsLoading(false);
     }

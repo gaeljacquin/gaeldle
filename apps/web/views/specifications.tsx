@@ -12,7 +12,6 @@ import { getGameModeBySlug } from '@/lib/game-mode';
 import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';
-import BackToMainMenu from '@/components/back-to-main-menu';
 import Stuck from '@/components/stuck';
 
 export default function Specifications() {
@@ -64,11 +63,11 @@ export default function Specifications() {
   return (
     <div className="min-h-full bg-background text-foreground">
       <div className="container mx-auto px-4 py-10">
-        <BackToMainMenu />
-
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
-          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+        <div className="relative mb-12">
+          <div className="text-center pt-8 md:pt-0">
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
+            <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+          </div>
         </div>
 
         <div className="mx-auto max-w-screen-2xl space-y-8">

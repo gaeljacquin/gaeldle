@@ -13,7 +13,6 @@ import { getGameModeBySlug } from '@/lib/game-mode';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
 import type { CoverArtModeSlug } from '@gaeldle/api-contract';
-import BackToMainMenu from '@/components/back-to-main-menu';
 import Stuck from '@/components/stuck';
 
 interface GameListPlusImageProps {
@@ -117,11 +116,11 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
   return (
     <div className="min-h-full bg-background text-foreground">
       <div className="container mx-auto px-4 py-10">
-        <BackToMainMenu />
-
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
-          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+        <div className="relative mb-12">
+          <div className="text-center pt-8 md:pt-0">
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
+            <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+          </div>
         </div>
 
         <div className="mx-auto max-w-6xl">

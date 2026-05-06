@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    '.agents/skills/deploy-to-vercel/**',
+    '.agents/skills/vercel-cli-with-tokens/**',
+    '.agents/skills/vercel-composition-patterns/**',
+    '.agents/skills/vercel-react-best-practices/**',
+    '.agents/skills/vercel-react-view-transitions/**',
+    '.agents/skills/web-design-guideline/**',
   ]),
 ]);
 

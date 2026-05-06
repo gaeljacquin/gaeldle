@@ -14,7 +14,7 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "../../",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -26,5 +26,11 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "test/**/*", "scripts/**/*"]
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "scripts/**/*",
+    "../../packages/api-contract/src/**/*",
+    "../../packages/constants/src/**/*"
+  ]
 }

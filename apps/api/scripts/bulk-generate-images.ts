@@ -175,115 +175,123 @@ async function uploadImageToR2(
 }
 
 // Main processing
-try {
-  // Step 1: Query up to numGames games where ai_image_url IS NULL
-  const pending = await db
-    .select()
-    .from(schema.games)
-    .where(sql`${schema.games.aiImageUrl} IS NULL`)
-    .limit(numGames);
+async function main() {
+  try {
+    // Step 1: Query up to numGames games where ai_image_url IS NULL
+    const pending = await db
+      .select()
+      .from(schema.games)
+      .where(sql`${schema.games.aiImageUrl} IS NULL`)
+      .limit(numGames);
 
-  console.log(`Found ${pending.length} games with null ai_image_url`);
+    console.log(`Found ${pending.length} games with null ai_image_url`);
 
-  if (pending.length === 0) {
-    console.log('No games to process. Exiting.');
+    if (pending.length === 0) {
+      console.log('No games to process. Exiting.');
+      await pool.end();
+      process.exit(0);
+    }
+
+    let successCount = 0;
+    let failureCount = 0;
+    const failures: { gameId: number; gameName: string; error: string }[] = [];
+
+    // Step 2: Process each game
+    for (const game of pending) {
+      try {
+        console.log(`\nProcessing game: ${game.name} (ID: ${game.igdbId})`);
+
+        // Build the prompt
+        const prompt = buildImagePrompt(game, options, resolvedStyle.descriptor);
+        console.log(`Generated prompt (${prompt.length} chars)`);
+
+        // Generate the image
+        console.log('Generating image via Cloudflare AI...');
+        const rawBuffer = await generateImage(prompt);
+        console.log(`Image buffer size: ${rawBuffer.length} bytes`);
+
+        // Optimize with sharp
+        const imageBuffer = await sharp(rawBuffer)
+          .jpeg({ quality: 85 })
+          .toBuffer();
+        console.log(`Optimized image size: ${imageBuffer.length} bytes`);
+
+        // Upload to R2
+        const key = `res/${game.igdbId}_${Date.now()}.jpg`;
+        console.log(`Uploading to R2 with key: ${key}`);
+        await uploadImageToR2(key, imageBuffer, 'image/jpeg');
+
+        // Build public URL
+        const r2PublicUrlRaw = process.env.R2_PUBLIC_URL ?? '';
+        const r2PublicUrl = r2PublicUrlRaw.startsWith('http')
+          ? r2PublicUrlRaw
+          : `https://${r2PublicUrlRaw}`;
+        const publicUrl = `${r2PublicUrl}/${key}`;
+        console.log(`Public URL: ${publicUrl}`);
+
+        // Update database
+        await db
+          .update(schema.games)
+          .set({
+            aiImageUrl: publicUrl,
+            aiPrompt: prompt,
+            updatedAt: new Date(),
+          })
+          .where(eq(schema.games.id, game.id));
+
+        console.log(`Successfully updated game ${game.name}`);
+        successCount++;
+      } catch (error) {
+        failureCount++;
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        failures.push({
+          gameId: game.igdbId,
+          gameName: game.name,
+          error: errorMessage,
+        });
+        console.error(
+          `Failed to process game ${game.name} (${game.igdbId}):`,
+          errorMessage,
+        );
+      }
+    }
+
+    // Step 3: Report results
+    console.log('\n=== BULK IMAGE GENERATION SUMMARY ===');
+    console.log(
+      `Total games found with ai_image_url IS NULL: ${pending.length}`,
+    );
+    console.log(`Games processed: ${pending.length}`);
+    console.log(`Successes: ${successCount}`);
+    console.log(`Failures: ${failureCount}`);
+
+    if (failures.length > 0) {
+      console.log('\nFailed games:');
+      for (const failure of failures) {
+        console.log(
+          `  - ${failure.gameName} (ID: ${failure.gameId}): ${failure.error}`,
+        );
+      }
+    }
+
+    // Check for remaining games
+    const remaining = await db
+      .select()
+      .from(schema.games)
+      .where(sql`${schema.games.aiImageUrl} IS NULL`);
+
+    console.log(
+      `Remaining games with ai_image_url IS NULL: ${remaining.length}`,
+    );
+
     await pool.end();
-    process.exit(0);
+    process.exit(failureCount > 0 ? 1 : 0);
+  } catch (error) {
+    console.error('Fatal error:', error);
+    await pool.end();
+    process.exit(1);
   }
-
-  let successCount = 0;
-  let failureCount = 0;
-  const failures: { gameId: number; gameName: string; error: string }[] = [];
-
-  // Step 2: Process each game
-  for (const game of pending) {
-    try {
-      console.log(`\nProcessing game: ${game.name} (ID: ${game.igdbId})`);
-
-      // Build the prompt
-      const prompt = buildImagePrompt(game, options, resolvedStyle.descriptor);
-      console.log(`Generated prompt (${prompt.length} chars)`);
-
-      // Generate the image
-      console.log('Generating image via Cloudflare AI...');
-      const rawBuffer = await generateImage(prompt);
-      console.log(`Image buffer size: ${rawBuffer.length} bytes`);
-
-      // Optimize with sharp
-      const imageBuffer = await sharp(rawBuffer)
-        .jpeg({ quality: 85 })
-        .toBuffer();
-      console.log(`Optimized image size: ${imageBuffer.length} bytes`);
-
-      // Upload to R2
-      const key = `res/${game.igdbId}_${Date.now()}.jpg`;
-      console.log(`Uploading to R2 with key: ${key}`);
-      await uploadImageToR2(key, imageBuffer, 'image/jpeg');
-
-      // Build public URL
-      const r2PublicUrlRaw = process.env.R2_PUBLIC_URL ?? '';
-      const r2PublicUrl = r2PublicUrlRaw.startsWith('http')
-        ? r2PublicUrlRaw
-        : `https://${r2PublicUrlRaw}`;
-      const publicUrl = `${r2PublicUrl}/${key}`;
-      console.log(`Public URL: ${publicUrl}`);
-
-      // Update database
-      await db
-        .update(schema.games)
-        .set({
-          aiImageUrl: publicUrl,
-          aiPrompt: prompt,
-          updatedAt: new Date(),
-        })
-        .where(eq(schema.games.id, game.id));
-
-      console.log(`Successfully updated game ${game.name}`);
-      successCount++;
-    } catch (error) {
-      failureCount++;
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      failures.push({
-        gameId: game.igdbId,
-        gameName: game.name,
-        error: errorMessage,
-      });
-      console.error(
-        `Failed to process game ${game.name} (${game.igdbId}):`,
-        errorMessage,
-      );
-    }
-  }
-
-  // Step 3: Report results
-  console.log('\n=== BULK IMAGE GENERATION SUMMARY ===');
-  console.log(`Total games found with ai_image_url IS NULL: ${pending.length}`);
-  console.log(`Games processed: ${pending.length}`);
-  console.log(`Successes: ${successCount}`);
-  console.log(`Failures: ${failureCount}`);
-
-  if (failures.length > 0) {
-    console.log('\nFailed games:');
-    for (const failure of failures) {
-      console.log(
-        `  - ${failure.gameName} (ID: ${failure.gameId}): ${failure.error}`,
-      );
-    }
-  }
-
-  // Check for remaining games
-  const remaining = await db
-    .select()
-    .from(schema.games)
-    .where(sql`${schema.games.aiImageUrl} IS NULL`);
-
-  console.log(`Remaining games with ai_image_url IS NULL: ${remaining.length}`);
-
-  await pool.end();
-  process.exit(failureCount > 0 ? 1 : 0);
-} catch (error) {
-  console.error('Fatal error:', error);
-  await pool.end();
-  process.exit(1);
 }
+
+main();

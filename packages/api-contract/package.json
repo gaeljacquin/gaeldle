@@ -1,18 +1,23 @@
 {
-  "name": "@gaeldle/api-contract",
+  "name": "@workspace/api-contract",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
   },
+  "scripts": {
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "type-check": "tsc --noEmit"
+  },
   "dependencies": {
-    "zod": "^3.24.2",
-    "@orpc/server": "^1.13.4",
-    "@orpc/contract": "^1.13.4",
-    "drizzle-zod": "^0.7.0",
-    "drizzle-orm": "^0.45.1",
-    "@gaeldle/constants": "workspace:*"
+    "zod": "^3.25.76",
+    "@orpc/server": "^1.14.1",
+    "@orpc/contract": "^1.14.1",
+    "drizzle-zod": "^0.7.1",
+    "drizzle-orm": "^0.45.2",
+    "@workspace/constants": "workspace:*"
   },
   "peerDependencies": {
     "zod": "^3.x"

@@ -4,16 +4,26 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": ["SERVER_URL", "STACK_SECRET_SERVER_KEY"]
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
     },
-    "lint": {},
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
+    "lint": {
+      "dependsOn": ["transit"],
+      "outputs": []
+    },
+    "format": {
+      "dependsOn": ["transit"]
+    },
+    "typecheck": {
+      "dependsOn": ["transit"]
+    },
     "test": {
-      "dependsOn": ["^build"],
-      "cache": false,
-      "inputs": ["src/**/*.ts", "src/**/*.spec.ts", "tsconfig.json"]
+      "dependsOn": ["transit"],
+      "outputs": ["coverage/**"]
     },
-    "type-check": {},
     "dev": {
       "cache": false,
       "persistent": true

@@ -48,16 +48,23 @@ export function useReplaceGameValidation(
   const debouncedCurrentInt = parsePositiveInt(debouncedCurrent);
   const debouncedReplacementInt = parsePositiveInt(debouncedReplacement);
 
-  const bothValid = debouncedCurrentInt !== null && debouncedReplacementInt !== null;
+  const bothValid =
+    debouncedCurrentInt !== null && debouncedReplacementInt !== null;
   const sameIds = bothValid && debouncedCurrentInt === debouncedReplacementInt;
 
   // True while the user is still typing (live value differs from debounced value)
   const isTyping =
-    currentInt !== debouncedCurrentInt || replacementInt !== debouncedReplacementInt;
+    currentInt !== debouncedCurrentInt ||
+    replacementInt !== debouncedReplacementInt;
 
   const { data, isFetching } = useQuery({
-    queryKey: ['replace-game-validate', debouncedCurrentInt, debouncedReplacementInt],
-    queryFn: () => validateReplaceGame(debouncedCurrentInt!, debouncedReplacementInt!),
+    queryKey: [
+      'replace-game-validate',
+      debouncedCurrentInt,
+      debouncedReplacementInt,
+    ],
+    queryFn: () =>
+      validateReplaceGame(debouncedCurrentInt!, debouncedReplacementInt!),
     enabled: bothValid,
     staleTime: 30_000,
   });

@@ -1,8 +1,8 @@
-import { cn } from "@/lib/utils";
+import { cn } from '@workspace/ui/lib/utils';
 
 interface StuckProps {
   stuckState: 'none' | 'loading';
-  className?: string
+  className?: string;
 }
 
 export default function Stuck({ stuckState, className }: Readonly<StuckProps>) {
@@ -14,13 +14,13 @@ export default function Stuck({ stuckState, className }: Readonly<StuckProps>) {
       <div
         className={cn(
           'flex flex-col items-center justify-center bg-muted border',
-          className
+          className,
         )}
       >
         <p className="text-sm text-muted-foreground">{loadingGameText}</p>
         <p className="text-sm text-muted-foreground">{stuckText}</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -28,5 +28,5 @@ export default function Stuck({ stuckState, className }: Readonly<StuckProps>) {
       <p className="text-lg">{loadingGameText}</p>
       <p className="text-muted-foreground">{stuckText}</p>
     </div>
-  )
+  );
 }

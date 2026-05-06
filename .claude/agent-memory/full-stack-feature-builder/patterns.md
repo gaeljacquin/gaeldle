@@ -7,6 +7,7 @@ Frontend prop types for data coming from `orpcClient` must use `Date | string` (
 for timestamp fields — NOT `Date`. If you write `Date` you'll get a TS type error at build time.
 
 Example:
+
 ```ts
 // WRONG - causes build error:
 startedAt: Date | null;
@@ -17,6 +18,7 @@ startedAt: Date | string | null;
 ## SSE Authentication Pattern
 
 For SSE endpoints that need auth (can't send custom headers with EventSource):
+
 - Pass the Stack Auth JWT as `?token=<accessToken>` query param
 - Controller verifies using the same JWKS as StackAuthGuard (copy the verifyToken logic)
 - Get token on frontend: `await user.getAccessToken()` from `useUser({ or: 'redirect' })`
@@ -24,16 +26,19 @@ For SSE endpoints that need auth (can't send custom headers with EventSource):
 ## Drizzle Migrations
 
 Run from `apps/api` dir:
-- Generate: `bun drizzle-kit generate`
-- Apply: `bun drizzle-kit migrate`
-Schema source: `packages/api-contract/src/schema.ts`
+
+- Generate: `pnpm drizzle-kit generate`
+- Apply: `pnpm drizzle-kit migrate`
+  Schema source: `packages/api-contract/src/schema.ts`
 
 ## Background Jobs (fire-and-forget) in NestJS
 
 For async background processing, launch with `.catch()` from service method:
+
 ```ts
 this.runGenerationLoop(jobId, ...).catch((err) => console.error(err));
 ```
+
 No separate queue needed for single-job-at-a-time pattern. Concurrent job rejection:
 check for `status IN ('pending', 'running')` before inserting.
 
@@ -52,7 +57,7 @@ including `/api/` since the `@Controller()` decorator on the SSE controller uses
 
 ## Checkbox in Views
 
-Use Base UI `Checkbox` from `@/components/ui/checkbox` with `onCheckedChange`.
+Use Base UI `Checkbox` from `@workspace/ui/checkbox` with `onCheckedChange`.
 Checked state value is `boolean | 'indeterminate'`, guard with `checked === true`.
 
 ## Access Token in View for SSE
@@ -65,6 +70,8 @@ useEffect(() => {
   user.getAccessToken().then((token) => {
     if (!cancelled && token) setAccessToken(token);
   });
-  return () => { cancelled = true; };
+  return () => {
+    cancelled = true;
+  };
 }, [user]);
 ```

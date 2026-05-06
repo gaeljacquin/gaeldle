@@ -1,18 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { MAX_ATTEMPTS, useSpecificationsGame } from '@/lib/hooks/use-specifications-game';
+import {
+  MAX_ATTEMPTS,
+  useSpecificationsGame,
+} from '@/lib/hooks/use-specifications-game';
 import SpecificationsGrid from '@/components/specifications-grid';
 import GameSearch from '@/components/game-search';
 import DevModeToggle from '@/components/dev-mode-toggle';
 import SpecificationsGameOver from '@/components/specifications-game-over';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@workspace/ui/button';
+import { Card, CardContent } from '@workspace/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';
-import BackToMainMenu from '@/components/back-to-main-menu';
 import Stuck from '@/components/stuck';
 
 export default function Specifications() {
@@ -44,10 +46,10 @@ export default function Specifications() {
     resetGame();
   };
 
-  const selectedGame = allGames.find(g => g.id === selectedGameId) || null;
+  const selectedGame = allGames.find((g) => g.id === selectedGameId) || null;
 
   if (isLoading) {
-    return <Stuck stuckState='loading' />;
+    return <Stuck stuckState="loading" />;
   }
 
   if (error) {
@@ -59,16 +61,20 @@ export default function Specifications() {
     );
   }
 
-  const wrongGuesses = guesses.map(g => g.gameId);
+  const wrongGuesses = guesses.map((g) => g.gameId);
 
   return (
     <div className="min-h-full bg-background text-foreground">
       <div className="container mx-auto px-4 py-10">
-        <BackToMainMenu />
-
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
-          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+        <div className="relative mb-12">
+          <div className="text-center pt-8 md:pt-0">
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">
+              {gameMode?.title}
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {gameMode?.description}
+            </p>
+          </div>
         </div>
 
         <div className="mx-auto max-w-screen-2xl space-y-8">
@@ -106,8 +112,14 @@ export default function Specifications() {
 
           <div className="flex flex-col items-center gap-4">
             <div className="flex flex-col items-center gap-2">
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Attempts</p>
-              <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Attempts
+              </p>
+              <Attempts
+                maxAttempts={MAX_ATTEMPTS}
+                attemptsLeft={attemptsLeft}
+                variant="primary"
+              />
             </div>
 
             {isGameOver ? null : (

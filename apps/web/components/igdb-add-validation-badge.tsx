@@ -39,8 +39,7 @@ export function IgdbAddValidationBadge({
           {state.gameName ? (
             <>
               {' '}
-              &mdash;{' '}
-              <span className="font-medium">{state.gameName}</span>
+              &mdash; <span className="font-medium">{state.gameName}</span>
             </>
           ) : null}
         </span>

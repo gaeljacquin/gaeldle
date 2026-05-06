@@ -1,9 +1,14 @@
 {
-  "name": "@gaeldle/constants",
+  "name": "@workspace/constants",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
+  },
+  "scripts": {
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "type-check": "tsc --noEmit"
   }
 }

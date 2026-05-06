@@ -1,18 +1,24 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Label } from "@/components/ui/label";
-import { appInfo } from "@/lib/app-info";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { useMutation } from "@tanstack/react-query";
-import { testUpload } from "@/lib/services/game.service";
-import { toast } from "sonner";
-import { useState } from "react";
-import { IconUpload, IconLoader2, IconSettings } from "@tabler/icons-react";
-import { DashboardPageHeader } from "@/components/dashboard-header";
-import { Separator } from "@/components/ui/separator";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@workspace/ui/card';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { Label } from '@workspace/ui/label';
+import { appInfo } from '@/lib/app-info';
+import { Button } from '@workspace/ui/button';
+import Image from 'next/image';
+import { useMutation } from '@tanstack/react-query';
+import { testUpload } from '@/lib/services/game.service';
+import { toast } from 'sonner';
+import { useState } from 'react';
+import { IconUpload, IconLoader2, IconSettings } from '@tabler/icons-react';
+import { DashboardPageHeader } from '@/components/dashboard-header';
+import { Separator } from '@workspace/ui/separator';
 
 export default function Settings() {
   const [isUploading, setIsUploading] = useState(false);
@@ -21,12 +27,12 @@ export default function Settings() {
     mutationFn: ({ image, extension }: { image: string; extension: string }) =>
       testUpload(image, extension),
     onSuccess: () => {
-      toast.success("Test image uploaded to R2 bucket successfully!");
+      toast.success('Test image uploaded to R2 bucket successfully!');
       setIsUploading(false);
     },
     onError: (error) => {
-      console.error("Upload failed:", error);
-      toast.error("Failed to upload test image to R2 bucket");
+      console.error('Upload failed:', error);
+      toast.error('Failed to upload test image to R2 bucket');
       setIsUploading(false);
     },
   });
@@ -51,8 +57,8 @@ export default function Settings() {
         });
       };
     } catch (error) {
-      console.error("Preparation failed:", error);
-      toast.error("Failed to prepare image for upload");
+      console.error('Preparation failed:', error);
+      toast.error('Failed to prepare image for upload');
       setIsUploading(false);
     }
   };
@@ -62,8 +68,8 @@ export default function Settings() {
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <DashboardPageHeader
-            title='Settings'
-            description='Configs, tweaks, etc...'
+            title="Settings"
+            description="Configs, tweaks, etc..."
             icon={IconSettings}
           />
         </div>
@@ -107,12 +113,14 @@ export default function Settings() {
                     alt="Test Placeholder"
                     fill
                     className="object-cover"
-                    loading='eager'
+                    loading="eager"
                     sizes="10vw"
                   />
                 </div>
                 <div className="text-center space-y-2">
-                  <p className="text-xs font-mono text-muted-foreground">public/placeholder.jpg</p>
+                  <p className="text-xs font-mono text-muted-foreground">
+                    public/placeholder.jpg
+                  </p>
                   <Button
                     onClick={handleTestUpload}
                     disabled={isUploading}
@@ -123,7 +131,7 @@ export default function Settings() {
                     ) : (
                       <IconUpload className="mr-2 size-4" />
                     )}
-                    {isUploading ? "Uploading..." : "Upload to R2"}
+                    {isUploading ? 'Uploading...' : 'Upload to R2'}
                   </Button>
                 </div>
               </div>

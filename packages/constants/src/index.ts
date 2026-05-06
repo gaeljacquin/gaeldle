@@ -1,5 +1,5 @@
 export const IMAGE_PROMPT_SUFFIX =
-  'Funko Pop chibi art style, big head small body, large expressive eyes, scene depicts the game\'s iconic setting and atmosphere, vibrant colorful illustration, highly detailed digital art, no packaging, no box, no shelf, no text, no letters, no words, no titles, no logos, no watermarks, no labels, no UI elements, no written characters of any kind.';
+  "Funko Pop chibi art style, big head small body, large expressive eyes, scene depicts the game's iconic setting and atmosphere, vibrant colorful illustration, highly detailed digital art, no packaging, no box, no shelf, no text, no letters, no words, no titles, no logos, no watermarks, no labels, no UI elements, no written characters of any kind.";
 
 export const DEFAULT_IMAGE_GEN_STYLE = 'funko-pop-chibi';
 
@@ -74,7 +74,8 @@ export const ADD_GAME_MAX_ROWS = 20;
 
 export const PLACEHOLDER_IMAGE = 'placeholder.jpg';
 
-export const PLACEHOLDER_IMAGE_R2 = (r2PublicUrl: string) => `${r2PublicUrl}/${PLACEHOLDER_IMAGE}`;
+export const PLACEHOLDER_IMAGE_R2 = (r2PublicUrl: string) =>
+  `${r2PublicUrl}/${PLACEHOLDER_IMAGE}`;
 
 export const DISCOVER_GAMES_MAX = 50;
 

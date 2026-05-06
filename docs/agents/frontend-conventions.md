@@ -12,6 +12,7 @@
 ## Best Practices & Specialized Skills
 
 This project follows Vercel's React best practices. Agents MUST use the following skills when developing frontend features:
+
 - `vercel-react-best-practices`: Core React/Next.js implementation standards.
 - `vercel-composition-patterns`: Component composition and structure patterns.
 - `web-design-guidelines`: UI/UX and design consistency.
@@ -22,7 +23,7 @@ These skills are located in `apps/web/.agents/skills/`.
 
 - **Theme**: Teal (Gray base, Radius 0, Lyra style).
 - **Generator**: [shadcn/ui Theme Generator](https://ui.shadcn.com/create?base=base&style=lyra&baseColor=gray&theme=teal&iconLibrary=tabler&font=figtree&radius=none)
-- **Typography**: 
+- **Typography**:
   - Sans: **Figtree** (Primary)
   - Mono: **JetBrains Mono** (Technical details/Dev mode)
 - **Global Styles**: Scrollbars are disabled globally via `globals.css`.
@@ -74,10 +75,11 @@ import { DashboardPageHeader } from '@/components/dashboard-header';
   title="My Page"
   description="Short description shown below the title."
   icon={IconSomeTablerIcon}
-/>
+/>;
 ```
 
 Props:
+
 - `title: string` — page title rendered in an `<h1>`.
 - `description: string` — subtitle rendered in a `<p>` with muted foreground color.
 - `icon: Icon` — a Tabler Icons `Icon` component rendered inline before the title (22px, `text-primary`).
@@ -97,10 +99,11 @@ import { MenuCard, type MenuCardProps } from '@/components/menu-card';
   description="Short description."
   icon={IconSomeTablerIcon}
   gradient="--gradient-easy"
-/>
+/>;
 ```
 
 Props:
+
 - `href?: string` — if omitted or `disabled`, renders a non-linked `<div>` instead of a `<Link>`.
 - `title: string` — card heading.
 - `description: string` — subtitle below the heading.
@@ -116,6 +119,7 @@ Props:
 `apps/web/components/stuck.tsx` — shared loading/stuck-state display component used in place of inline loading markup.
 
 Props:
+
 - `stuckState: 'none' | 'loading'` — `'loading'` renders a full-screen centered layout; `'none'` renders a compact inline block suitable for embedding inside a card or image placeholder.
 - `className?: string` — forwarded to the wrapper `div` when `stuckState === 'none'`.
 
@@ -125,13 +129,13 @@ Usage: import `Stuck` from `@/components/stuck` and render `<Stuck stuckState='l
 
 Dashboard pages for game catalogue management and utilities. The sidebar exposes a single **Utilities** link (`/dashboard/utilities`) that acts as a hub for all admin tool pages.
 
-| Route | View file | Description |
-|---|---|---|
-| `/dashboard/utilities` | `apps/web/views/utilities.tsx` | Hub page listing all admin utility tools as `MenuCard` tiles. |
-| `/dashboard/add-game` | `apps/web/views/add-game.tsx` | Add one or more new games to the DB by IGDB ID. Max `ADD_GAME_MAX_ROWS` (20) rows per submission. |
-| `/dashboard/replace-game` | `apps/web/views/replace-game.tsx` | Replace existing games by swapping IGDB IDs. Max `REPLACE_GAME_MAX_ROWS` (20) pairs per submission. |
-| `/dashboard/image-gen` | `apps/web/views/image-gen.tsx` | Bulk AI image generation for games. |
-| `/dashboard/discover-games` | `apps/web/views/discover-games.tsx` | Browse and discover games from IGDB; select games to add to the library. |
+| Route                       | View file                           | Description                                                                                         |
+| --------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `/dashboard/utilities`      | `apps/web/views/utilities.tsx`      | Hub page listing all admin utility tools as `MenuCard` tiles.                                       |
+| `/dashboard/add-game`       | `apps/web/views/add-game.tsx`       | Add one or more new games to the DB by IGDB ID. Max `ADD_GAME_MAX_ROWS` (20) rows per submission.   |
+| `/dashboard/replace-game`   | `apps/web/views/replace-game.tsx`   | Replace existing games by swapping IGDB IDs. Max `REPLACE_GAME_MAX_ROWS` (20) pairs per submission. |
+| `/dashboard/image-gen`      | `apps/web/views/image-gen.tsx`      | Bulk AI image generation for games.                                                                 |
+| `/dashboard/discover-games` | `apps/web/views/discover-games.tsx` | Browse and discover games from IGDB; select games to add to the library.                            |
 
 The Add Game and Replace Game pages use a validate-then-commit pattern: each row validates in real time via a debounced TanStack Query call, and the submit button is only enabled when all rows pass validation.
 
@@ -145,12 +149,12 @@ Validates a single IGDB ID string for addition. Debounces the input by 600 ms be
 
 ```ts
 interface IgdbIdAddValidationState {
-  isLoading: boolean;      // true while typing or fetching
-  isReady: boolean;        // true once a result has been received
+  isLoading: boolean; // true while typing or fetching
+  isReady: boolean; // true once a result has been received
   existsOnIgdb: boolean | null;
   alreadyInDb: boolean | null;
   gameName: string | null;
-  canAdd: boolean;         // true only when existsOnIgdb && !alreadyInDb
+  canAdd: boolean; // true only when existsOnIgdb && !alreadyInDb
 }
 ```
 
@@ -166,11 +170,11 @@ Validates a current/replacement IGDB ID pair string. Both fields are debounced b
 interface ReplaceGameValidationState {
   isLoading: boolean;
   isReady: boolean;
-  sameIds: boolean;                          // true when both IDs are equal
+  sameIds: boolean; // true when both IDs are equal
   currentExistsInDb: boolean | null;
   currentGameName: string | null;
-  replacementExistsOnIgdb: boolean | null;   // null if current doesn't exist in DB
-  replacementAlreadyInDb: boolean | null;    // null if current doesn't exist in DB
+  replacementExistsOnIgdb: boolean | null; // null if current doesn't exist in DB
+  replacementAlreadyInDb: boolean | null; // null if current doesn't exist in DB
   replacementGameName: string | null;
   canApply: boolean;
 }
@@ -195,14 +199,19 @@ The Replace Game view tracks duplicate IGDB IDs across all rows client-side. A r
 `apps/web/lib/hooks/use-game-search.ts` — TanStack Query hook that wraps `searchGames()` from `game.service.ts` with debouncing and idle-state tracking.
 
 ```ts
-const { results, isLoading, isIdle, debouncedQuery } = useGameSearch(query, { mode, limit });
+const { results, isLoading, isIdle, debouncedQuery } = useGameSearch(query, {
+  mode,
+  limit,
+});
 ```
 
 Options:
+
 - `mode?: GameModeSlug` — filters results to games eligible for that game mode.
 - `limit?: number` — passed to the search endpoint (server default is 20).
 
 Return values:
+
 - `results: Game[]` — search results, empty array while idle or loading.
 - `isLoading: boolean` — `true` while the live query differs from the debounced query (typing lag) OR while the query is fetching. Use this to show a "Searching..." indicator.
 - `isIdle: boolean` — `true` when `debouncedQuery.length < GAME_SEARCH_MIN_CHARS` (3). No API call is made in this state.

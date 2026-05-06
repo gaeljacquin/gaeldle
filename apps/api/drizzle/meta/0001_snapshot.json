@@ -132,9 +132,7 @@
         "games_igdb_key": {
           "name": "games_igdb_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "igdb_id"
-          ]
+          "columns": ["igdb_id"]
         }
       },
       "policies": {},
@@ -146,12 +144,7 @@
     "public.theme": {
       "name": "theme",
       "schema": "public",
-      "values": [
-        "cream",
-        "pink",
-        "blue",
-        "green"
-      ]
+      "values": ["cream", "pink", "blue", "green"]
     }
   },
   "schemas": {},

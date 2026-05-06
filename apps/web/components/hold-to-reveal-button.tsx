@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Button } from '@workspace/ui/button';
+import { cn } from '@workspace/ui/lib/utils';
 
 interface HoldToRevealButtonProps {
   onReveal: () => void;
@@ -12,7 +12,11 @@ interface HoldToRevealButtonProps {
 
 const HOLD_DURATION = 3000;
 
-export default function HoldToRevealButton({ onReveal, disabled, className }: Readonly<HoldToRevealButtonProps>) {
+export default function HoldToRevealButton({
+  onReveal,
+  disabled,
+  className,
+}: Readonly<HoldToRevealButtonProps>) {
   const [isHolding, setIsHolding] = useState(false);
   const [progress, setProgress] = useState(0);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -80,7 +84,7 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Re
       disabled={disabled}
       className={cn(
         'relative overflow-hidden cursor-pointer font-bold h-10',
-        className
+        className,
       )}
       size="lg"
       variant="outline"
@@ -88,7 +92,7 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Re
       <div
         className={cn(
           'absolute inset-0 bg-primary/20 transition-transform origin-left',
-          isHolding ? 'duration-0' : 'duration-200'
+          isHolding ? 'duration-0' : 'duration-200',
         )}
         style={{
           transform: `scaleX(${progress / 100})`,
@@ -96,7 +100,9 @@ export default function HoldToRevealButton({ onReveal, disabled, className }: Re
       />
 
       <span className="relative z-10">
-        {isHolding ? `Holding (${Math.ceil((HOLD_DURATION - (progress / 100) * HOLD_DURATION) / 1000)}s)` : 'Hold to Reveal Hint'}
+        {isHolding
+          ? `Holding (${Math.ceil((HOLD_DURATION - (progress / 100) * HOLD_DURATION) / 1000)}s)`
+          : 'Hold to Reveal Hint'}
       </span>
     </Button>
   );

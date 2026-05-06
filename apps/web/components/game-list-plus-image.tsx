@@ -7,20 +7,21 @@ import CoverDisplay from '@/components/cover-display';
 import GameSearch from '@/components/game-search';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import GuessHistoryInline from '@/components/guess-history-inline';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Button } from '@workspace/ui/button';
+import { Card } from '@workspace/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
-import type { CoverArtModeSlug } from '@gaeldle/api-contract';
-import BackToMainMenu from '@/components/back-to-main-menu';
+import type { CoverArtModeSlug } from '@workspace/api-contract';
 import Stuck from '@/components/stuck';
 
 interface GameListPlusImageProps {
   gameModeSlug: CoverArtModeSlug;
 }
 
-export default function GameListPlusImage(props: Readonly<GameListPlusImageProps>) {
+export default function GameListPlusImage(
+  props: Readonly<GameListPlusImageProps>,
+) {
   const gameMode = getGameModeBySlug(props.gameModeSlug);
   const [searchKey, setSearchKey] = useState(0);
 
@@ -46,24 +47,30 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
 
   const handleSubmitWithClear = () => {
     handleSubmit();
-    setSearchKey(prev => prev + 1);
+    setSearchKey((prev) => prev + 1);
   };
 
   const handleSkipWithClear = () => {
     handleSkip();
-    setSearchKey(prev => prev + 1);
+    setSearchKey((prev) => prev + 1);
   };
 
-  const selectedGame = allGames.find((game) => game.id === selectedGameId) || null;
-  const wrongGuessIds = wrongGuesses.filter((g): g is NonNullable<typeof g> => g !== null).map(g => g.id);
-  const clarity = Math.min(100, Math.round(((MAX_ATTEMPTS - attemptsLeft) / MAX_ATTEMPTS) * 100));
+  const selectedGame =
+    allGames.find((game) => game.id === selectedGameId) || null;
+  const wrongGuessIds = wrongGuesses
+    .filter((g): g is NonNullable<typeof g> => g !== null)
+    .map((g) => g.id);
+  const clarity = Math.min(
+    100,
+    Math.round(((MAX_ATTEMPTS - attemptsLeft) / MAX_ATTEMPTS) * 100),
+  );
 
   const imageDisplayComp = () => {
     let imageDisplayed;
 
     switch (props.gameModeSlug) {
       case 'artwork':
-        imageDisplayed =
+        imageDisplayed = (
           <ArtworkDisplay
             imageUrl={selectedArtworkUrl}
             pixelSize={currentPixelSize}
@@ -71,9 +78,10 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
             isLoading={isLoading}
             className="h-full w-full"
           />
+        );
         break;
       case 'image-gen':
-        imageDisplayed =
+        imageDisplayed = (
           <CoverDisplay
             game={targetGame}
             pixelSize={0}
@@ -83,9 +91,10 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
             className="h-full w-full"
             sourceImageUrl={targetGame?.aiImageUrl}
           />
+        );
         break;
       default:
-        imageDisplayed =
+        imageDisplayed = (
           <CoverDisplay
             game={targetGame}
             pixelSize={currentPixelSize}
@@ -95,14 +104,15 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
             className="h-full w-full"
             sourceImageUrl={targetGame?.imageUrl}
           />
+        );
         break;
     }
 
     return imageDisplayed;
-  }
+  };
 
   if (isLoading) {
-    return <Stuck stuckState='loading' />;
+    return <Stuck stuckState="loading" />;
   }
 
   if (error) {
@@ -117,11 +127,15 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
   return (
     <div className="min-h-full bg-background text-foreground">
       <div className="container mx-auto px-4 py-10">
-        <BackToMainMenu />
-
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
-          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+        <div className="relative mb-12">
+          <div className="text-center pt-8 md:pt-0">
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">
+              {gameMode?.title}
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {gameMode?.description}
+            </p>
+          </div>
         </div>
 
         <div className="mx-auto max-w-6xl">
@@ -136,11 +150,18 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
               {props.gameModeSlug === 'image-gen' ? null : (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground font-medium">Clarity</span>
-                    <span className="font-bold text-foreground">{clarity}%</span>
+                    <span className="text-muted-foreground font-medium">
+                      Clarity
+                    </span>
+                    <span className="font-bold text-foreground">
+                      {clarity}%
+                    </span>
                   </div>
                   <div className="h-2 w-full bg-muted border overflow-hidden">
-                    <div className="h-full bg-primary transition-all duration-500" style={{ width: `${clarity}%` }} />
+                    <div
+                      className="h-full bg-primary transition-all duration-500"
+                      style={{ width: `${clarity}%` }}
+                    />
                   </div>
                 </div>
               )}
@@ -167,7 +188,8 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
                   >
                     Submit
                   </Button>
-                  {(props.gameModeSlug === 'cover-art' || props.gameModeSlug === 'artwork') && (
+                  {(props.gameModeSlug === 'cover-art' ||
+                    props.gameModeSlug === 'artwork') && (
                     <Button
                       onClick={handleSkipWithClear}
                       disabled={isGameOver}
@@ -193,21 +215,34 @@ export default function GameListPlusImage(props: Readonly<GameListPlusImageProps
               <GuessHistoryInline guesses={wrongGuesses} className="max-h-60" />
 
               <div className="flex flex-col items-center gap-4 border p-4">
-                 <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Attempts</p>
-                 <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  Attempts
+                </p>
+                <Attempts
+                  maxAttempts={MAX_ATTEMPTS}
+                  attemptsLeft={attemptsLeft}
+                  variant="primary"
+                />
               </div>
 
               {isGameOver ? (
                 <div className="border border-border bg-card/60 p-6 text-center animate-in fade-in zoom-in duration-300">
                   {isCorrect ? (
                     <div className="space-y-2">
-                      <p className="text-2xl font-bold text-green-600">Correct!</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        Correct!
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <p className="text-2xl font-bold text-destructive">Game Over!</p>
+                      <p className="text-2xl font-bold text-destructive">
+                        Game Over!
+                      </p>
                       <p className="text-muted-foreground">
-                        The game was: <span className="font-bold text-foreground">{targetGame?.name}</span>
+                        The game was:{' '}
+                        <span className="font-bold text-foreground">
+                          {targetGame?.name}
+                        </span>
                       </p>
                     </div>
                   )}

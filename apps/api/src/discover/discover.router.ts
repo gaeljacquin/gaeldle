@@ -2,7 +2,7 @@ import { Controller, UseGuards, Req } from '@nestjs/common';
 import { Implement, implement } from '@orpc/nest';
 import type { Request } from 'express';
 import type { JWTPayload } from 'jose';
-import { contract } from '@gaeldle/api-contract';
+import { contract } from '@workspace/api-contract';
 import { DiscoverService } from '@/discover/discover.service';
 import { StackAuthGuard } from '@/auth/stack-auth.guard';
 

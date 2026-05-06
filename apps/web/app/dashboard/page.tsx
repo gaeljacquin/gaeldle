@@ -1,7 +1,5 @@
-import Dashboard from "@/views/dashboard";
+import Dashboard from '@/views/dashboard';
 
 export default function DashboardPage() {
-  return (
-    <Dashboard />
-  )
+  return <Dashboard />;
 }

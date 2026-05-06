@@ -28,33 +28,33 @@
 ## Project setup
 
 ```bash
-$ bun install
+$ pnpm install
 ```
 
 ## Compile and run the project
 
 ```bash
 # development
-$ bun run start
+$ pnpm run start
 
 # watch mode
-$ bun run start:dev
+$ pnpm run start:dev
 
 # production mode
-$ bun run start:prod
+$ pnpm run start:prod
 ```
 
 ## Run tests
 
 ```bash
 # unit tests
-$ bun run test
+$ pnpm run test
 
 # e2e tests
-$ bun run test:e2e
+$ pnpm run test:e2e
 
 # test coverage
-$ bun run test:cov
+$ pnpm run test:cov
 ```
 
 ## Deployment
@@ -64,7 +64,7 @@ When you're ready to deploy your NestJS application to production, there are som
 If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
 
 ```bash
-$ bun install -g @nestjs/mau
+$ pnpm install -g @nestjs/mau
 $ mau deploy
 ```
 

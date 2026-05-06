@@ -5,6 +5,7 @@
 Identify the mystery game from its cover art. The image starts fully pixelated and gradually becomes clearer with each wrong guess.
 
 **How to play:**
+
 - A pixelated cover image is shown on screen along with a clarity bar indicating how revealed the image is
 - Search for a game by name and select it from the list
 - Submit your guess
@@ -18,6 +19,7 @@ Identify the mystery game from its cover art. The image starts fully pixelated a
 Similar to Cover Art, but instead of a box cover you are shown in-game artwork or a wallpaper for the mystery title. The image starts pixelated and clears up as you use attempts.
 
 **How to play:**
+
 - A pixelated artwork image is shown along with a clarity bar
 - Search for a game by name and select it from the list
 - Submit your guess
@@ -31,6 +33,7 @@ Similar to Cover Art, but instead of a box cover you are shown in-game artwork o
 An AI-generated image representing the mystery game is shown in full from the start. The image is an artistic interpretation, not official art, so you will need to read into the visual clues.
 
 **How to play:**
+
 - An AI-generated image is shown on screen (no pixelation)
 - Search for a game by name and select it from the list
 - Submit your guess
@@ -44,6 +47,7 @@ An AI-generated image representing the mystery game is shown in full from the st
 Ten games are dealt to you in a random order. Arrange them all into the correct chronological order by release date.
 
 **How to play:**
+
 - Ten game cards are displayed in a row
 - Drag and drop the cards to rearrange them from oldest to newest
 - Use the **Shift** mode (default) to slide cards into a new position, or switch to **Swap** mode to exchange two cards directly
@@ -59,6 +63,7 @@ Ten games are dealt to you in a random order. Arrange them all into the correct 
 A growing timeline is built one card at a time. For each round a new game card is dealt to you and you must drag it into the right chronological slot on the timeline.
 
 **How to play:**
+
 - A starting game card with its release date is placed on the timeline automatically
 - A new card is dealt to you with its release date hidden
 - Drag the dealt card and drop it into the position you think is chronologically correct on the timeline
@@ -74,6 +79,7 @@ A growing timeline is built one card at a time. For each round a new game card i
 Deduce the mystery game by guessing games and comparing their specifications against the target. Each guess reveals how closely the guessed game matches across eight categories.
 
 **How to play:**
+
 - Search for a game by name and submit it as your guess
 - A comparison grid shows how each of the eight specifications match the target game:
   - **Green** — exact match

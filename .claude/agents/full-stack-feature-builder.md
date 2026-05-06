@@ -18,6 +18,7 @@ Before writing any code, read `AGENTS.md` at the project root. All project rules
 You ALWAYS follow this sequence. Never implement before the contract is defined and exported.
 
 ### Step 1 — Define the oRPC Contract (`packages/api-contract`)
+
 - Create or update the relevant contract file in `packages/api-contract`
 - Define all Zod input and output schemas with precise types — no `any`, no loose schemas
 - Define and export the oRPC route(s) using the schemas
@@ -25,6 +26,7 @@ You ALWAYS follow this sequence. Never implement before the contract is defined 
 - Validate that schema names are descriptive and follow existing naming conventions in the package
 
 ### Step 2 — Implement the NestJS Service (`apps/api`)
+
 - Create a service class that contains ALL business logic for the feature
 - Services must be pure: no direct HTTP request/response handling, no oRPC-specific code
 - Inject dependencies via NestJS DI — no manual instantiation
@@ -33,6 +35,7 @@ You ALWAYS follow this sequence. Never implement before the contract is defined 
 - Register the service in the relevant module
 
 ### Step 3 — Implement the NestJS Router (`apps/api`)
+
 - Create or update the oRPC router that maps the contract route(s) to service methods
 - Routers handle I/O mapping ONLY: extract inputs, call service, return outputs
 - No business logic in routers — delegate everything to the service
@@ -44,17 +47,20 @@ You ALWAYS follow this sequence. Never implement before the contract is defined 
 Consult the `vercel-react-best-practices`, `vercel-composition-patterns`, and `web-design-guidelines` skills before writing any frontend code. Apply their guidance throughout.
 
 #### API Hooks (`apps/web/lib/hooks/`)
+
 - Create a custom hook for each oRPC operation (query or mutation)
 - Use the oRPC client exclusively — never raw fetch or axios
 - Hooks handle loading, error, and data states
 - Export hooks from `lib/hooks/index.ts` or a feature-specific barrel
 
 #### Global State (`apps/web/lib/stores/` or equivalent Zustand location)
+
 - If the feature requires shared/global state, create or update a Zustand store
 - Keep store slices focused — one store per domain concern
 - Do not store server state in Zustand; use hooks + oRPC client for that
 
 #### Components (`apps/web/components/`)
+
 - Components are PURELY presentational
 - They receive data and callbacks as props — no direct API calls inside components
 - Use the `cn` utility for className construction; if className contains conditionals, put each conditional on its own line separate from static classes
@@ -62,6 +68,7 @@ Consult the `vercel-react-best-practices`, `vercel-composition-patterns`, and `w
 - Follow visual/UX guidelines from `web-design-guidelines`
 
 #### Views and Pages
+
 - Views compose components and wire hooks to props
 - Pages (in `app/`) are thin — they render views and handle routing concerns only
 - Use Next.js App Router conventions (Server Components where possible, Client Components only when interactivity or hooks are needed)
@@ -78,6 +85,7 @@ Consult the `vercel-react-best-practices`, `vercel-composition-patterns`, and `w
 ## Quality Checklist (Run Before Declaring Done)
 
 Before finishing, verify:
+
 - [ ] oRPC contract is defined and exported from `packages/api-contract` index
 - [ ] All Zod schemas are precise with no `any`
 - [ ] Service contains all business logic and is registered in its module
@@ -107,6 +115,7 @@ Before finishing, verify:
 **Update your agent memory** as you discover architectural patterns, module structures, naming conventions, existing contract shapes, and cross-cutting concerns in this codebase. This builds up institutional knowledge across conversations.
 
 Examples of what to record:
+
 - Location and naming patterns of existing oRPC contracts
 - NestJS module structure and how features are organized
 - Zustand store locations and slice patterns
@@ -120,6 +129,7 @@ You have a persistent Persistent Agent Memory directory at `/Users/gael/Document
 As you work, consult your memory files to build on previous experience. When you encounter a mistake that seems like it could be common, check your Persistent Agent Memory for relevant notes — and if nothing is written yet, record what you learned.
 
 Guidelines:
+
 - `MEMORY.md` is always loaded into your system prompt — lines after 200 will be truncated, so keep it concise
 - Create separate topic files (e.g., `debugging.md`, `patterns.md`) for detailed notes and link to them from MEMORY.md
 - Update or remove memories that turn out to be wrong or outdated
@@ -127,19 +137,22 @@ Guidelines:
 - Use the Write and Edit tools to update your memory files
 
 What to save:
+
 - Stable patterns and conventions confirmed across multiple interactions
 - Key architectural decisions, important file paths, and project structure
 - User preferences for workflow, tools, and communication style
 - Solutions to recurring problems and debugging insights
 
 What NOT to save:
+
 - Session-specific context (current task details, in-progress work, temporary state)
 - Information that might be incomplete — verify against project docs before writing
 - Anything that duplicates or contradicts existing CLAUDE.md instructions
 - Speculative or unverified conclusions from reading a single file
 
 Explicit user requests:
-- When the user asks you to remember something across sessions (e.g., "always use bun", "never auto-commit"), save it — no need to wait for multiple interactions
+
+- When the user asks you to remember something across sessions (e.g., "always use pnpm", "never auto-commit"), save it — no need to wait for multiple interactions
 - When the user asks to forget or stop remembering something, find and remove the relevant entries from your memory files
 - Since this memory is project-scope and shared with your team via version control, tailor your memories to this project
 

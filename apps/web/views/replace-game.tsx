@@ -14,14 +14,14 @@ import {
   ReplaceGameResultsTable,
   type ReplaceGameResult,
 } from '@/components/replace-game-results-table';
-import { Button } from '@/components/ui/button';
+import { Button } from '@workspace/ui/button';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from '@/components/ui/card';
+} from '@workspace/ui/card';
 import {
   IconArrowsExchange,
   IconPlus,
@@ -29,7 +29,7 @@ import {
   IconLoader,
 } from '@tabler/icons-react';
 import { toast } from 'sonner';
-import { REPLACE_GAME_MAX_ROWS } from '@gaeldle/constants';
+import { REPLACE_GAME_MAX_ROWS } from '@workspace/constants';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 
 function createEmptyRow(): IgdbIdPairRowData {
@@ -92,7 +92,10 @@ function RowWithValidation({
   onValidationChange,
   isDuplicate,
 }: Readonly<RowWithValidationProps>) {
-  const validationState = useReplaceGameValidation(row.current, row.replacement);
+  const validationState = useReplaceGameValidation(
+    row.current,
+    row.replacement,
+  );
 
   useEffect(() => {
     onValidationChange(row.id, validationState);
@@ -216,9 +219,7 @@ export default function ReplaceGameByIgdbId() {
 
   const handleReplacementChange = useCallback((id: string, value: string) => {
     setRows((prev) =>
-      prev.map((row) =>
-        row.id === id ? { ...row, replacement: value } : row,
-      ),
+      prev.map((row) => (row.id === id ? { ...row, replacement: value } : row)),
     );
   }, []);
 
@@ -247,8 +248,8 @@ export default function ReplaceGameByIgdbId() {
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <DashboardPageHeader
-            title='Replace Game'
-            description='Swap games by IGDB ID.'
+            title="Replace Game"
+            description="Swap games by IGDB ID."
             icon={IconArrowsExchange}
           />
         </div>
@@ -272,7 +273,10 @@ export default function ReplaceGameByIgdbId() {
                   variant="outline"
                   size="sm"
                   onClick={handleAddRow}
-                  disabled={rows.length >= REPLACE_GAME_MAX_ROWS || applyMutation.isPending}
+                  disabled={
+                    rows.length >= REPLACE_GAME_MAX_ROWS ||
+                    applyMutation.isPending
+                  }
                   className="flex items-center gap-1.5 shrink-0 cursor-pointer"
                 >
                   <IconPlus size={14} aria-hidden="true" />

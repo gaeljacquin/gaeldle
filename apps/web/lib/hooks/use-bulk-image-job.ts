@@ -4,7 +4,12 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getBulkJobStatus } from '@/lib/services/game.service';
 
-export type BulkJobStatus = 'pending' | 'running' | 'completed' | 'failed' | 'idle';
+export type BulkJobStatus =
+  | 'pending'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'idle';
 
 export interface BulkJobFailure {
   igdbId: number;
@@ -38,7 +43,13 @@ const IDLE_STATE: BulkJobState = {
 
 type ProgressEvent = {
   type: 'progress';
-  data: { processed: number; succeeded: number; failed: number; total: number; latestGame: string };
+  data: {
+    processed: number;
+    succeeded: number;
+    failed: number;
+    total: number;
+    latestGame: string;
+  };
 };
 
 type CompletedEvent = {
@@ -146,7 +157,10 @@ export function useBulkImageJob({
         isTerminalRef.current = true;
         setState((prev) => ({
           ...prev,
-          status: prev.failed === prev.total && prev.total > 0 ? 'failed' : 'completed',
+          status:
+            prev.failed === prev.total && prev.total > 0
+              ? 'failed'
+              : 'completed',
           succeeded: event.data.succeeded,
           failed: event.data.failed,
           failures: event.data.failures,

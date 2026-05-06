@@ -2,15 +2,14 @@
 
 import { useTimeline2Game } from '@/lib/hooks/use-timeline-2-game';
 import { Timeline2Card } from '@/components/timeline-2-card';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@workspace/ui/button';
+import { Card, CardContent } from '@workspace/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import { useState, useRef } from 'react';
 import Attempts from '@/components/attempts';
 import { motion, useMotionValue } from 'motion/react';
-import { cn } from '@/lib/utils';
+import { cn } from '@workspace/ui/lib/utils';
 import Timeline2DevToggle from '@/components/timeline-2-dev-toggle';
-import BackToMainMenu from '@/components/back-to-main-menu';
 import Stuck from '@/components/stuck';
 
 export default function Timeline2() {
@@ -69,12 +68,18 @@ export default function Timeline2() {
     setIsDragging(true);
   };
 
-  const handleDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: { point: { x: number; y: number } }) => {
+  const handleDrag = (
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: { point: { x: number; y: number } },
+  ) => {
     const dropZone = findDropZone(info.point.x, info.point.y);
     setDraggedOverIndex(dropZone);
   };
 
-  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: { point: { x: number; y: number }; offset: { x: number; y: number } }) => {
+  const handleDragEnd = (
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: { point: { x: number; y: number }; offset: { x: number; y: number } },
+  ) => {
     const dragDistance = Math.hypot(info.offset.x, info.offset.y);
     const MIN_DRAG_DISTANCE = 40;
 
@@ -100,69 +105,94 @@ export default function Timeline2() {
   };
 
   if (isLoading) {
-    return <Stuck stuckState='loading' />;
+    return <Stuck stuckState="loading" />;
   }
 
   return (
     <div className="min-h-full bg-background text-foreground">
-      <div className="container mx-auto max-w-450 px-4 py-10">
-        <BackToMainMenu />
-
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
-          <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+      <div className="container mx-auto px-4 py-10">
+        <div className="relative mb-12">
+          <div className="text-center pt-8 md:pt-0">
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">
+              {gameMode?.title}
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {gameMode?.description}
+            </p>
+          </div>
         </div>
 
         <Card className="border shadow-none bg-muted/5">
-          <CardContent className="p-8">
-            <div className="space-y-8">
-              <div className="flex justify-center">
-                <div className="border-2 border-dashed border-border p-4 flex justify-center items-center w-36 h-48 bg-card/50">
-                  {isDealingCard || isGameOver || !dealtCard ? (
-                    <div className="w-32 h-44 bg-muted animate-pulse border" />
-                  ) : (
-                    <div className="relative">
-                      {isDragging && (
-                        <div className="absolute inset-0 opacity-50 pointer-events-none">
+          <CardContent>
+            <div className="space-y-20">
+              {isGameOver ? (
+                <div className="border border-border bg-card/60 p-8 text-center animate-in fade-in zoom-in duration-300">
+                  <div className="space-y-4">
+                    <p className="text-2xl font-bold text-destructive">
+                      Game Over!
+                    </p>
+                    <p className="text-lg font-semibold">
+                      Score: {score} card{score === 1 ? '' : 's'} placed
+                      correctly
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={resetGame}
+                    size="lg"
+                    className="mt-8 cursor-pointer font-bold px-8"
+                  >
+                    Play Again
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex justify-center">
+                  <div className="border-2 border-dashed border-border p-4 flex justify-center items-center w-36 h-48 bg-card/50">
+                    {isDealingCard || isGameOver || !dealtCard ? (
+                      <div className="w-32 h-44 bg-muted animate-pulse border" />
+                    ) : (
+                      <div className="relative">
+                        {isDragging && (
+                          <div className="absolute inset-0 opacity-50 pointer-events-none">
+                            <Timeline2Card
+                              game={dealtCard}
+                              showDate={isAnimating}
+                              bannerColor={getBannerColor()}
+                            />
+                          </div>
+                        )}
+
+                        <motion.div
+                          drag
+                          dragMomentum={false}
+                          dragElastic={0.1}
+                          onDragStart={handleDragStart}
+                          onDrag={handleDrag}
+                          onDragEnd={handleDragEnd}
+                          style={{ x, y }}
+                          className="cursor-grab active:cursor-grabbing touch-none"
+                          initial={{ scale: 1 }}
+                          whileDrag={{ scale: 1.05, zIndex: 50 }}
+                          animate={
+                            isAnimating
+                              ? {
+                                  scale: [1, 0.95, 1],
+                                  transition: { duration: 0.3 },
+                                }
+                              : {}
+                          }
+                        >
                           <Timeline2Card
                             game={dealtCard}
                             showDate={isAnimating}
                             bannerColor={getBannerColor()}
                           />
-                        </div>
-                      )}
-
-                      <motion.div
-                        drag
-                        dragMomentum={false}
-                        dragElastic={0.1}
-                        onDragStart={handleDragStart}
-                        onDrag={handleDrag}
-                        onDragEnd={handleDragEnd}
-                        style={{ x, y }}
-                        className="cursor-grab active:cursor-grabbing touch-none"
-                        initial={{ scale: 1 }}
-                        whileDrag={{ scale: 1.05, zIndex: 50 }}
-                        animate={isAnimating ? {
-                          scale: [1, 0.95, 1],
-                          transition: { duration: 0.3 }
-                        } : {}}
-                      >
-                        <Timeline2Card
-                          game={dealtCard}
-                          showDate={isAnimating}
-                          bannerColor={getBannerColor()}
-                        />
-                      </motion.div>
-                    </div>
-                  )}
+                        </motion.div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              <div className="flex flex-col items-center gap-2">
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Attempts</p>
-                  <Attempts maxAttempts={maxAttempts} attemptsLeft={attemptsLeft} variant="primary" />
-              </div>
+              )}
 
               <div className="text-center">
                 <div
@@ -171,15 +201,15 @@ export default function Timeline2() {
                 >
                   <div className="flex gap-4 items-center px-4 mx-auto">
                     {timelineCards.map((game, index) => {
-                      const correctlyPlacedCardColor = correctlyPlacedCards.has(game.id)
+                      const correctlyPlacedCardColor = correctlyPlacedCards.has(
+                        game.id,
+                      )
                         ? 'green'
-                        : 'red'
-                      ;
-                      const bannerColor = game.id === firstCardId
-                        ? 'slate'
-                        : correctlyPlacedCardColor
-                      ;
-
+                        : 'red';
+                      const bannerColor =
+                        game.id === firstCardId
+                          ? 'slate'
+                          : correctlyPlacedCardColor;
                       return (
                         <motion.div
                           key={game.id}
@@ -191,10 +221,10 @@ export default function Timeline2() {
                         >
                           <div
                             className={cn(
-                              "transition-all duration-200",
+                              'transition-all duration-200',
                               isDragging && draggedOverIndex === index
-                                ? "w-32 mx-2 border-2 border-dashed border-primary h-44 bg-primary/10"
-                                : "w-0"
+                                ? 'w-32 mx-2 border-2 border-dashed border-primary h-44 bg-primary/10'
+                                : 'w-0',
                             )}
                           />
 
@@ -211,34 +241,26 @@ export default function Timeline2() {
 
                     <div
                       className={cn(
-                        "transition-all duration-200",
+                        'transition-all duration-200',
                         isDragging && draggedOverIndex === timelineCards.length
-                          ? "w-32 mx-2 border-2 border-dashed border-primary h-44 bg-primary/10"
-                          : "w-0"
+                          ? 'w-32 mx-2 border-2 border-dashed border-primary h-44 bg-primary/10'
+                          : 'w-0',
                       )}
                     />
                   </div>
                 </div>
               </div>
 
-              {isGameOver ? (
-                <div className="mt-8 border border-border bg-card/60 p-8 text-center animate-in fade-in zoom-in duration-300">
-                  <div className="space-y-4">
-                    <p className="text-2xl font-bold text-destructive">Game Over!</p>
-                    <p className="text-lg font-semibold">
-                      Score: {score} card{score === 1 ? '' : 's'} placed correctly
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={resetGame}
-                    size="lg"
-                    className="mt-8 cursor-pointer font-bold px-8"
-                  >
-                    Play Again
-                  </Button>
-                </div>
-              ) : null}
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  Attempts
+                </p>
+                <Attempts
+                  maxAttempts={maxAttempts}
+                  attemptsLeft={attemptsLeft}
+                  variant="primary"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

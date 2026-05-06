@@ -1,8 +1,8 @@
 'use client';
 
 import { forwardRef } from 'react';
-import { cn } from '@/lib/utils';
-import type { Game } from '@gaeldle/api-contract';
+import { cn } from '@workspace/ui/lib/utils';
+import type { Game } from '@workspace/api-contract';
 import Image from 'next/image';
 
 interface TimelineCardProps {
@@ -24,7 +24,18 @@ function formatDate(timestamp: number | null): string {
 }
 
 export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
-  ({ game, isCorrect, showDate = false, isDragging = false, isGameOver = false, className, ...props }, ref) => {
+  (
+    {
+      game,
+      isCorrect,
+      showDate = false,
+      isDragging = false,
+      isGameOver = false,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
     const shouldGrayscale = isGameOver && isCorrect === false;
 
     return (
@@ -34,7 +45,7 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
           'relative overflow-hidden border-2 border-border bg-card',
           'w-32 h-44',
           isDragging && 'opacity-50',
-          className
+          className,
         )}
         {...props}
       >
@@ -45,7 +56,7 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
               alt={game.name}
               className={cn(
                 'w-full h-full object-cover',
-                shouldGrayscale && 'grayscale'
+                shouldGrayscale && 'grayscale',
               )}
               fill
               sizes="10vw"
@@ -62,7 +73,7 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
             'absolute top-0 left-0 right-0 px-2 py-1 text-center text-sm font-semibold text-white',
             isCorrect === true && 'bg-green-600',
             isCorrect === false && 'bg-destructive',
-            isCorrect === undefined && 'bg-slate-600'
+            isCorrect === undefined && 'bg-slate-600',
           )}
         >
           {showDate ? formatDate(game.firstReleaseDate) : '?'}
@@ -73,7 +84,7 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
             'absolute inset-x-0 bottom-0 px-2 py-1 text-center border-t',
             isCorrect === true && 'bg-green-600/90 text-white',
             isCorrect === false && 'bg-destructive/90 text-white',
-            isCorrect === undefined && 'bg-primary/90 text-primary-foreground'
+            isCorrect === undefined && 'bg-primary/90 text-primary-foreground',
           )}
         >
           <p className="truncate text-xs font-medium" title={game.name}>
@@ -82,7 +93,7 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 TimelineCard.displayName = 'TimelineCard';

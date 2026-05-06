@@ -1,20 +1,21 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { IconMenu2, IconX } from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { cn } from "@/lib/utils";
-import { useUser } from "@stackframe/stack";
-import { appInfo } from "@/lib/app-info";
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { IconMenu2, IconX } from '@tabler/icons-react';
+import { Button } from '@workspace/ui/button';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { cn } from '@workspace/ui/lib/utils';
+import { useUser } from '@stackframe/stack';
+import { appInfo } from '@/lib/app-info';
+import ViewportDebugger from './viewport-debugger';
 
 const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Privacy", href: "/privacy" },
-  { label: "Terms", href: "/terms" },
+  { label: 'Home', href: '/' },
+  { label: 'Privacy', href: '/privacy' },
+  { label: 'Terms', href: '/terms' },
 ];
 
 export function Navbar() {
@@ -22,8 +23,8 @@ export function Navbar() {
   const pathname = usePathname();
   const user = useUser();
   const isSignedIn = Boolean(user);
-  const authLabel = isSignedIn ? "Dashboard" : "Sign in";
-  const authHref = isSignedIn ? "/dashboard" : "/handler/sign-in";
+  const authLabel = isSignedIn ? 'Dashboard' : 'Sign in';
+  const authHref = isSignedIn ? '/dashboard' : '/handler/sign-in';
   const isActive = (path: string) => pathname === path;
 
   return (
@@ -36,11 +37,17 @@ export function Navbar() {
             width={243}
             height={256}
             className="h-8"
-            style={{ width: "auto" }}
+            style={{ width: 'auto' }}
             loading="eager"
           />
-          <span className="text-xl font-bold tracking-tight text-foreground">{appInfo.title}</span>
+          <span className="text-xl font-bold tracking-tight text-foreground">
+            {appInfo.title}
+          </span>
         </Link>
+
+        <div>
+          <ViewportDebugger />
+        </div>
 
         <div className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
@@ -48,10 +55,10 @@ export function Navbar() {
               key={link.href}
               href={link.href}
               className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                'rounded-md px-3 py-2 text-sm font-medium transition-colors',
                 isActive(link.href)
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
               )}
             >
               {link.label}
@@ -62,25 +69,25 @@ export function Navbar() {
           <Link
             href={authHref}
             className={cn(
-              "rounded-md px-3 py-2 text-sm font-medium transition-colors ml-2",
+              'rounded-md px-3 py-2 text-sm font-medium transition-colors ml-2',
               isActive(authHref)
-                ? "bg-primary text-primary-foreground"
-                : "bg-primary/90 text-primary-foreground hover:bg-primary"
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-primary/90 text-primary-foreground hover:bg-primary',
             )}
           >
             {authLabel}
           </Link>
-          {user &&
+          {user && (
             <Link
-              href='/handler/sign-out'
+              href="/handler/sign-out"
               className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors ml-4",
-                "bg-secondary text-primary-foreground"
+                'rounded-md px-3 py-2 text-sm font-medium transition-colors ml-4',
+                'bg-secondary text-primary-foreground',
               )}
             >
               Sign Out
             </Link>
-          }
+          )}
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
@@ -105,10 +112,10 @@ export function Navbar() {
                 href={link.href}
                 onClick={() => setIsOpen(false)}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  'rounded-md px-3 py-2 text-sm font-medium transition-colors',
                   isActive(link.href)
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
                 )}
               >
                 {link.label}
@@ -118,24 +125,24 @@ export function Navbar() {
               href={authHref}
               onClick={() => setIsOpen(false)}
               className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                "bg-primary text-primary-foreground"
+                'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                'bg-primary text-primary-foreground',
               )}
             >
               {authLabel}
             </Link>
-            {user &&
+            {user && (
               <Link
-                href='/handler/sign-out'
+                href="/handler/sign-out"
                 onClick={() => setIsOpen(false)}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  "bg-secondary text-primary-foreground"
+                  'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'bg-secondary text-primary-foreground',
                 )}
               >
                 Sign Out
               </Link>
-            }
+            )}
           </div>
         </div>
       )}

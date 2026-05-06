@@ -1,12 +1,14 @@
 import { createORPCClient } from '@orpc/client';
 import { OpenAPILink } from '@orpc/openapi-client/fetch';
-import { contract } from '@gaeldle/api-contract';
+import { contract } from '@workspace/api-contract';
 import { createORPCReactQueryUtils } from '@orpc/react-query';
 import type { JsonifiedClient } from '@orpc/openapi-client';
 import type { ContractRouterClient } from '@orpc/contract';
 import { stackClientApp } from '@/stack/client';
 
-export const orpcClient = createORPCClient<JsonifiedClient<ContractRouterClient<typeof contract>>>(
+export const orpcClient = createORPCClient<
+  JsonifiedClient<ContractRouterClient<typeof contract>>
+>(
   new OpenAPILink(contract, {
     url: `${process.env.serverUrl || 'http://localhost:8080'}`,
     fetch: async (request: Request, init: { redirect?: RequestRedirect }) => {

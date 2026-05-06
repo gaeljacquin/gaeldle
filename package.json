@@ -3,29 +3,38 @@
   "author": "Gaël Jacquin",
   "license": "MIT",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
-    "dev": "turbo dev",
     "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint --filter '!@workspace/ui'",
+    "lint:web": "turbo lint --filter @workspace/web",
     "test": "turbo test",
-    "lint": "turbo lint",
-    "type-check": "turbo type-check",
+    "test:web": "turbo test --filter @workspace/web",
+    "format": "prettier --check .",
+    "format:write": "prettier --write . --ignore-unknown",
+    "typecheck": "turbo typecheck",
+    "sync": "./remote-sync.sh",
+    "sync:list": "mutagen sync list",
+    "sync:list-long": "mutagen sync list --long",
+    "sync:monitor": "mutagen sync monitor gaeldle",
+    "sync:pause": "mutagen sync pause gaeldle",
+    "sync:resume": "mutagen sync resume gaeldle",
+    "sync:terminate": "mutagen sync terminate gaeldle",
+    "sync:reset": "mutagen sync reset gaeldle",
     "prepare": "husky"
   },
   "keywords": [],
-  "packageManager": "bun@1.2.2",
+  "packageManager": "pnpm@10.33.2",
   "devDependencies": {
-    "@commitlint/cli": "^20.4.3",
-    "@commitlint/config-conventional": "^20.4.3",
-    "@types/node": "^25.3.3",
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
+    "@types/node": "^25.6.0",
     "husky": "^9.1.7",
-    "turbo": "^2.8.13"
+    "prettier": "^3.8.3",
+    "turbo": "^2.9.9"
   },
   "dependencies": {
-    "motion": "^12.34.5",
-    "zod": "^4.3.6"
+    "motion": "^12.38.0",
+    "zod": "^4.4.3"
   }
 }

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { UserButton, useUser } from "@stackframe/stack";
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { UserButton, useUser } from '@stackframe/stack';
 import {
   IconDashboard,
   IconDeviceGamepad2,
@@ -15,11 +15,11 @@ import {
   IconLayoutSidebarLeftCollapse,
   IconHome,
   IconTools,
-} from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
-import { appInfo } from "@/lib/app-info";
-import { gameModes } from "@/lib/game-mode";
-import { Separator } from "@/components/ui/separator";
+} from '@tabler/icons-react';
+import { cn } from '@workspace/ui/lib/utils';
+import { appInfo } from '@/lib/app-info';
+import { gameModes } from '@/lib/game-mode';
+import { Separator } from '@workspace/ui/separator';
 
 interface SidebarLinkProps {
   href: string;
@@ -29,14 +29,22 @@ interface SidebarLinkProps {
   isActive: boolean;
 }
 
-function SidebarLink({ href, icon: Icon, label, isCollapsed, isActive }: Readonly<SidebarLinkProps>) {
+function SidebarLink({
+  href,
+  icon: Icon,
+  label,
+  isCollapsed,
+  isActive,
+}: Readonly<SidebarLinkProps>) {
   return (
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-        isCollapsed ? "justify-center px-0" : null,
-        isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "transparent",
+        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+        isCollapsed ? 'justify-center px-0' : null,
+        isActive
+          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+          : 'transparent',
       )}
       title={isCollapsed ? label : undefined}
     >
@@ -54,20 +62,26 @@ interface SidebarGamesSectionProps {
 }
 
 interface SidebarGameLinkProps {
-  mode: typeof gameModes[number];
+  mode: (typeof gameModes)[number];
   isCollapsed: boolean;
   pathname: string;
 }
 
-function SidebarGameLink({ mode, isCollapsed, pathname }: Readonly<SidebarGameLinkProps>) {
+function SidebarGameLink({
+  mode,
+  isCollapsed,
+  pathname,
+}: Readonly<SidebarGameLinkProps>) {
   const isActive = pathname === mode.href;
   return (
     <Link
       href={mode.href}
       className={cn(
-        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-        isCollapsed ? "justify-center px-0" : null,
-        isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold" : "text-muted-foreground",
+        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+        isCollapsed ? 'justify-center px-0' : null,
+        isActive
+          ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
+          : 'text-muted-foreground',
       )}
       title={isCollapsed ? mode.title : undefined}
     >
@@ -77,29 +91,38 @@ function SidebarGameLink({ mode, isCollapsed, pathname }: Readonly<SidebarGameLi
   );
 }
 
-function SidebarGamesSection({ isCollapsed, isExpanded, onToggle, pathname }: Readonly<SidebarGamesSectionProps>) {
+function SidebarGamesSection({
+  isCollapsed,
+  isExpanded,
+  onToggle,
+  pathname,
+}: Readonly<SidebarGamesSectionProps>) {
   return (
     <div>
       <button
         onClick={onToggle}
         className={cn(
-          "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer",
-          isCollapsed ? "justify-center px-0" : null,
+          'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer',
+          isCollapsed ? 'justify-center px-0' : null,
         )}
-        title={isCollapsed ? "Game Modes" : undefined}
+        title={isCollapsed ? 'Game Modes' : undefined}
       >
         <IconDeviceGamepad2 size={20} />
         {isCollapsed ? null : (
           <>
             <span>Game Modes</span>
             <span className="ml-auto">
-              {isExpanded ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
+              {isExpanded ? (
+                <IconChevronDown size={16} />
+              ) : (
+                <IconChevronRight size={16} />
+              )}
             </span>
           </>
         )}
       </button>
       {isExpanded && (
-        <div className={cn("mt-1 space-y-1", isCollapsed ? null : "ml-4")}>
+        <div className={cn('mt-1 space-y-1', isCollapsed ? null : 'ml-4')}>
           {gameModes.map((mode) => (
             <SidebarGameLink
               key={mode.href}
@@ -119,13 +142,16 @@ interface SidebarHeaderProps {
   onToggle: () => void;
 }
 
-function SidebarHeader({ isCollapsed, onToggle }: Readonly<SidebarHeaderProps>) {
+function SidebarHeader({
+  isCollapsed,
+  onToggle,
+}: Readonly<SidebarHeaderProps>) {
   return (
     <button
       onClick={onToggle}
       className={cn(
-        "group flex h-16 w-full cursor-pointer items-center border-b px-4",
-        isCollapsed ? "justify-center px-0" : null,
+        'group flex h-16 w-full cursor-pointer items-center border-b px-4',
+        isCollapsed ? 'justify-center px-0' : null,
       )}
     >
       {isCollapsed ? (
@@ -139,10 +165,13 @@ function SidebarHeader({ isCollapsed, onToggle }: Readonly<SidebarHeaderProps>) 
             width={243}
             height={256}
             className="h-8 rounded-md group-hover:hidden"
-            style={{ width: "auto" }}
+            style={{ width: 'auto' }}
             loading="eager"
           />
-          <IconLayoutSidebarLeftExpand size={20} className="hidden group-hover:block" />
+          <IconLayoutSidebarLeftExpand
+            size={20}
+            className="hidden group-hover:block"
+          />
         </div>
       ) : (
         <>
@@ -153,12 +182,15 @@ function SidebarHeader({ isCollapsed, onToggle }: Readonly<SidebarHeaderProps>) 
               width={243}
               height={256}
               className="h-8 rounded-md"
-              style={{ width: "auto" }}
+              style={{ width: 'auto' }}
               loading="eager"
             />
             <span>{appInfo.title}</span>
           </div>
-          <div className="ml-auto hidden group-hover:block" title="Collapse sidebar">
+          <div
+            className="ml-auto hidden group-hover:block"
+            title="Collapse sidebar"
+          >
             <IconLayoutSidebarLeftCollapse size={20} />
           </div>
         </>
@@ -172,18 +204,30 @@ interface SidebarUserFooterProps {
   user: { displayName?: string | null };
 }
 
-function SidebarUserFooter({ isCollapsed, user }: Readonly<SidebarUserFooterProps>) {
+function SidebarUserFooter({
+  isCollapsed,
+  user,
+}: Readonly<SidebarUserFooterProps>) {
   return (
-    <div className={cn("mt-auto border-t p-4 flex items-center", isCollapsed ? "justify-center px-0" : null)}>
-      <div className={cn(
-        "flex items-center gap-3",
-        isCollapsed ? "justify-center" : null,
-        isCollapsed ? null : "w-full",
-      )}>
+    <div
+      className={cn(
+        'mt-auto border-t p-4 flex items-center',
+        isCollapsed ? 'justify-center px-0' : null,
+      )}
+    >
+      <div
+        className={cn(
+          'flex items-center gap-3',
+          isCollapsed ? 'justify-center' : null,
+          isCollapsed ? null : 'w-full',
+        )}
+      >
         <UserButton />
         {isCollapsed ? null : (
           <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-medium truncate">{user.displayName}</span>
+            <span className="text-sm font-medium truncate">
+              {user.displayName}
+            </span>
           </div>
         )}
       </div>
@@ -195,7 +239,7 @@ export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isGamesExpanded, setIsGamesExpanded] = useState(false);
   const pathname = usePathname();
-  const user = useUser({ or: "redirect" });
+  const user = useUser({ or: 'redirect' });
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
   const toggleGames = () => setIsGamesExpanded((prev) => !prev);
@@ -203,8 +247,8 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "relative flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-24" : "w-64",
+        'relative flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out',
+        isCollapsed ? 'w-24' : 'w-64',
       )}
     >
       <SidebarHeader isCollapsed={isCollapsed} onToggle={toggleSidebar} />
@@ -215,7 +259,7 @@ export function Sidebar() {
           icon={IconDashboard}
           label="Dashboard"
           isCollapsed={isCollapsed}
-          isActive={pathname === "/dashboard"}
+          isActive={pathname === '/dashboard'}
         />
 
         <SidebarLink
@@ -223,12 +267,15 @@ export function Sidebar() {
           icon={IconTools}
           label="Utilities"
           isCollapsed={isCollapsed}
-          isActive={pathname.startsWith("/dashboard/utilities") || [
-            "/dashboard/image-gen",
-            "/dashboard/add-game",
-            "/dashboard/replace-game",
-            "/dashboard/discover-games",
-          ].includes(pathname)}
+          isActive={
+            pathname.startsWith('/dashboard/utilities') ||
+            [
+              '/dashboard/image-gen',
+              '/dashboard/add-game',
+              '/dashboard/replace-game',
+              '/dashboard/discover-games',
+            ].includes(pathname)
+          }
         />
 
         <SidebarLink
@@ -236,7 +283,7 @@ export function Sidebar() {
           icon={IconSettings}
           label="Settings"
           isCollapsed={isCollapsed}
-          isActive={pathname === "/dashboard/settings"}
+          isActive={pathname === '/dashboard/settings'}
         />
 
         <Separator />
@@ -255,7 +302,7 @@ export function Sidebar() {
           icon={IconHome}
           label="Home"
           isCollapsed={isCollapsed}
-          isActive={pathname === "/"}
+          isActive={pathname === '/'}
         />
       </div>
 

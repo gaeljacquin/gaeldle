@@ -1,11 +1,7 @@
 'use client';
 
-import {
-  IconCircleCheck,
-  IconCircleX,
-  IconMinus,
-} from '@tabler/icons-react';
-import { cn } from '@/lib/utils';
+import { IconCircleCheck, IconCircleX, IconMinus } from '@tabler/icons-react';
+import { cn } from '@workspace/ui/lib/utils';
 
 export interface ReplaceGameResult {
   current: number;
@@ -19,7 +15,9 @@ interface ReplaceGameResultsTableProps {
   results: ReplaceGameResult[];
 }
 
-function StatusCell({ status }: Readonly<{ status: ReplaceGameResult['status'] }>) {
+function StatusCell({
+  status,
+}: Readonly<{ status: ReplaceGameResult['status'] }>) {
   if (status === 'updated') {
     return (
       <div className="flex items-center gap-1.5 text-green-600">

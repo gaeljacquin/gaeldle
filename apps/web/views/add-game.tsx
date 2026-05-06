@@ -5,14 +5,14 @@ import { useUser } from '@stackframe/stack';
 import { addGame } from '@/lib/services/game.service';
 import { IgdbIdAddRow } from '@/components/igdb-id-add-row';
 import type { IgdbIdAddValidationState } from '@/lib/hooks/use-igdb-id-add-validation';
-import { Button } from '@/components/ui/button';
+import { Button } from '@workspace/ui/button';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from '@/components/ui/card';
+} from '@workspace/ui/card';
 import {
   IconCirclePlus,
   IconPlus,
@@ -22,8 +22,8 @@ import {
   IconCircleX,
   IconExternalLink,
 } from '@tabler/icons-react';
-import { cn } from '@/lib/utils';
-import { ADD_GAME_MAX_ROWS } from '@gaeldle/constants';
+import { cn } from '@workspace/ui/lib/utils';
+import { ADD_GAME_MAX_ROWS } from '@workspace/constants';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 
 interface AddGameRowData {
@@ -51,9 +51,7 @@ export interface AddGameResult {
   error: string | null;
 }
 
-function OperationCell({
-  result,
-}: Readonly<{ result: AddGameResult }>) {
+function OperationCell({ result }: Readonly<{ result: AddGameResult }>) {
   if (result.error) {
     return (
       <div className="flex items-center gap-1.5 text-destructive">
@@ -342,8 +340,8 @@ export function AddGame() {
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <DashboardPageHeader
-            title='Add Game'
-            description='Add games by IGDB ID.'
+            title="Add Game"
+            description="Add games by IGDB ID."
             icon={IconCirclePlus}
           />
         </div>

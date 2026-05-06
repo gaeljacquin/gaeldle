@@ -54,7 +54,7 @@ describe('GamesService', () => {
       values: jest.fn(),
       delete: jest.fn(),
       returning: jest.fn(),
-      execute: jest.fn() as AsyncMock,
+      execute: jest.fn(),
     };
 
     const makeLink = (): Promise<unknown> => {
@@ -473,7 +473,7 @@ describe('GamesService', () => {
         values: jest.fn(),
         delete: jest.fn(),
         returning: jest.fn(),
-        execute: jest.fn() as AsyncMock,
+        execute: jest.fn(),
       };
 
       const makeLink = (): Promise<unknown> =>

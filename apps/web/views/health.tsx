@@ -2,12 +2,22 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchHealthStatus } from '@/lib/services/health.service';
-import type { HealthCheckResult, HealthIndicatorDetail } from '@/lib/services/health.service';
-import { IconCircleCheck, IconCircleX, IconRefresh, IconHeartbeat } from '@tabler/icons-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import type {
+  HealthCheckResult,
+  HealthIndicatorDetail,
+} from '@/lib/services/health.service';
+import {
+  IconCircleCheck,
+  IconCircleX,
+  IconRefresh,
+  IconHeartbeat,
+} from '@tabler/icons-react';
+import { Button } from '@workspace/ui/button';
+import { cn } from '@workspace/ui/lib/utils';
 
-function StatusIcon({ status }: Readonly<{ status: HealthIndicatorDetail['status'] }>) {
+function StatusIcon({
+  status,
+}: Readonly<{ status: HealthIndicatorDetail['status'] }>) {
   if (status === 'up') {
     return (
       <IconCircleCheck
@@ -26,7 +36,9 @@ function StatusIcon({ status }: Readonly<{ status: HealthIndicatorDetail['status
   );
 }
 
-function OverallStatusBadge({ status }: Readonly<{ status: HealthCheckResult['status'] }>) {
+function OverallStatusBadge({
+  status,
+}: Readonly<{ status: HealthCheckResult['status'] }>) {
   const isOk = status === 'ok';
   return (
     <span
@@ -34,7 +46,7 @@ function OverallStatusBadge({ status }: Readonly<{ status: HealthCheckResult['st
         'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium font-mono border',
         isOk
           ? 'bg-primary/10 text-primary border-primary/30'
-          : 'bg-destructive/10 text-destructive border-destructive/30'
+          : 'bg-destructive/10 text-destructive border-destructive/30',
       )}
       aria-live="polite"
     >
@@ -73,7 +85,7 @@ function ServiceRow({
           'text-xs font-mono shrink-0 px-1.5 py-0.5 border',
           detail.status === 'up'
             ? 'text-primary border-primary/30 bg-primary/5'
-            : 'text-destructive border-destructive/30 bg-destructive/5'
+            : 'text-destructive border-destructive/30 bg-destructive/5',
         )}
       >
         {detail.status}
@@ -97,9 +109,7 @@ export default function HealthView() {
       })
     : null;
 
-  const serviceEntries = data
-    ? Object.entries(data.details)
-    : [];
+  const serviceEntries = data ? Object.entries(data.details) : [];
 
   return (
     <div className="flex flex-col min-h-full bg-background">
@@ -108,8 +118,14 @@ export default function HealthView() {
           <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
-                <IconHeartbeat size={20} className="text-primary" aria-hidden="true" />
-                <h1 className="text-2xl font-bold tracking-tight">System Health</h1>
+                <IconHeartbeat
+                  size={20}
+                  className="text-primary"
+                  aria-hidden="true"
+                />
+                <h1 className="text-2xl font-bold tracking-tight">
+                  System Health
+                </h1>
               </div>
               <p className="text-sm text-muted-foreground">
                 Live status of APIs and database.
@@ -183,10 +199,16 @@ export default function HealthView() {
                 </p>
                 <ul className="space-y-1" aria-live="polite">
                   {Object.entries(data.error).map(([name, detail]) => (
-                    <li key={name} className="text-sm text-destructive font-mono">
+                    <li
+                      key={name}
+                      className="text-sm text-destructive font-mono"
+                    >
                       <span className="font-semibold capitalize">{name}</span>
                       {detail.message && (
-                        <span className="text-destructive/70"> — {detail.message}</span>
+                        <span className="text-destructive/70">
+                          {' '}
+                          — {detail.message}
+                        </span>
                       )}
                     </li>
                   ))}

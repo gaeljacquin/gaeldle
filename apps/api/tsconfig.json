@@ -15,7 +15,6 @@
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": ".",
-    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -27,5 +26,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "test/**/*", "scripts/**/*"],
+  "include": ["src/**/*", "test/**/*", "scripts/**/*"]
 }

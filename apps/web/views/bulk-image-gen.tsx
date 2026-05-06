@@ -3,29 +3,35 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useUser } from '@stackframe/stack';
-import { DEFAULT_IMAGE_GEN_NUM, DEFAULT_IMAGE_GEN_STYLE, IMAGE_GEN_MIN, IMAGE_GEN_MAX, IMAGE_STYLES } from '@gaeldle/constants';
-import type { ImageStyle } from '@gaeldle/api-contract';
+import {
+  DEFAULT_IMAGE_GEN_NUM,
+  DEFAULT_IMAGE_GEN_STYLE,
+  IMAGE_GEN_MIN,
+  IMAGE_GEN_MAX,
+  IMAGE_STYLES,
+} from '@workspace/constants';
+import type { ImageStyle } from '@workspace/api-contract';
 import { bulkGenerateImages } from '@/lib/services/game.service';
 import { useBulkImageJob } from '@/lib/hooks/use-bulk-image-job';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@workspace/ui/button';
+import { Input } from '@workspace/ui/input';
+import { Label } from '@workspace/ui/label';
+import { Checkbox } from '@workspace/ui/checkbox';
+import { Badge } from '@workspace/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@workspace/ui/select';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from '@/components/ui/card';
+} from '@workspace/ui/card';
 import {
   IconPlayerPlay,
   IconCircleCheck,
@@ -35,14 +41,17 @@ import {
   IconAlertTriangle,
   IconRobotFace,
 } from '@tabler/icons-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@workspace/ui/lib/utils';
 import { toast } from 'sonner';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 
 type JobStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 function StatusBadge({ status }: Readonly<{ status: JobStatus | 'idle' }>) {
-  const variantMap: Record<JobStatus | 'idle', 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  const variantMap: Record<
+    JobStatus | 'idle',
+    'default' | 'secondary' | 'destructive' | 'outline'
+  > = {
     idle: 'outline',
     pending: 'secondary',
     running: 'default',
@@ -58,11 +67,7 @@ function StatusBadge({ status }: Readonly<{ status: JobStatus | 'idle' }>) {
     failed: 'Failed',
   };
 
-  return (
-    <Badge variant={variantMap[status]}>
-      {labelMap[status]}
-    </Badge>
-  );
+  return <Badge variant={variantMap[status]}>{labelMap[status]}</Badge>;
 }
 
 interface ActiveJobPanelProps {
@@ -84,7 +89,10 @@ function ActiveJobPanel({ jobId, accessToken }: Readonly<ActiveJobPanelProps>) {
         <CardTitle className="flex items-center gap-2">
           <IconRefresh
             size={16}
-            className={cn('text-primary', jobState.isConnected && 'animate-spin')}
+            className={cn(
+              'text-primary',
+              jobState.isConnected && 'animate-spin',
+            )}
             aria-hidden="true"
           />
           Active Job
@@ -94,11 +102,7 @@ function ActiveJobPanel({ jobId, accessToken }: Readonly<ActiveJobPanelProps>) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div
-          className="space-y-4"
-          aria-live="polite"
-          aria-label="Job progress"
-        >
+        <div className="space-y-4" aria-live="polite" aria-label="Job progress">
           {/* Status */}
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Status</span>
@@ -125,14 +129,24 @@ function ActiveJobPanel({ jobId, accessToken }: Readonly<ActiveJobPanelProps>) {
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-1.5">
-                <IconCircleCheck size={14} className="text-green-500" aria-hidden="true" />
+                <IconCircleCheck
+                  size={14}
+                  className="text-green-500"
+                  aria-hidden="true"
+                />
                 <span className="text-muted-foreground">Succeeded</span>
               </div>
-              <span className="font-medium font-mono">{jobState.succeeded}</span>
+              <span className="font-medium font-mono">
+                {jobState.succeeded}
+              </span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-1.5">
-                <IconCircleX size={14} className="text-destructive" aria-hidden="true" />
+                <IconCircleX
+                  size={14}
+                  className="text-destructive"
+                  aria-hidden="true"
+                />
                 <span className="text-muted-foreground">Failed</span>
               </div>
               <span className="font-medium font-mono">{jobState.failed}</span>
@@ -142,7 +156,10 @@ function ActiveJobPanel({ jobId, accessToken }: Readonly<ActiveJobPanelProps>) {
           {/* Latest game (while running) */}
           {jobState.latestGame && (
             <div className="text-xs text-muted-foreground border-t pt-3">
-              Latest: <span className="font-medium text-foreground">{jobState.latestGame}</span>
+              Latest:{' '}
+              <span className="font-medium text-foreground">
+                {jobState.latestGame}
+              </span>
             </div>
           )}
 
@@ -150,7 +167,8 @@ function ActiveJobPanel({ jobId, accessToken }: Readonly<ActiveJobPanelProps>) {
           {jobState.processedGames.length > 0 && !jobState.latestGame && (
             <details className="text-xs border-t pt-3" open>
               <summary className="cursor-pointer text-muted-foreground mb-2">
-                {jobState.processedGames.length} game{jobState.processedGames.length === 1 ? '' : 's'} processed
+                {jobState.processedGames.length} game
+                {jobState.processedGames.length === 1 ? '' : 's'} processed
               </summary>
               <ul className="space-y-0.5 max-h-40 overflow-y-auto">
                 {jobState.processedGames.map((name, i) => (
@@ -167,7 +185,8 @@ function ActiveJobPanel({ jobId, accessToken }: Readonly<ActiveJobPanelProps>) {
             <details className="text-xs border-t pt-3">
               <summary className="cursor-pointer text-muted-foreground flex items-center gap-1">
                 <IconAlertTriangle size={12} aria-hidden="true" />
-                {jobState.failures.length} failure{jobState.failures.length === 1 ? '' : 's'}
+                {jobState.failures.length} failure
+                {jobState.failures.length === 1 ? '' : 's'}
               </summary>
               <ul className="mt-2 space-y-1 max-h-32 overflow-y-auto">
                 {jobState.failures.map((f) => (
@@ -191,7 +210,9 @@ export default function BulkImageGen() {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
 
   const [numGames, setNumGames] = useState(DEFAULT_IMAGE_GEN_NUM);
-  const [imageStyle, setImageStyle] = useState<ImageStyle>(DEFAULT_IMAGE_GEN_STYLE);
+  const [imageStyle, setImageStyle] = useState<ImageStyle>(
+    DEFAULT_IMAGE_GEN_STYLE,
+  );
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
   const [includeThemes, setIncludeThemes] = useState(false);
@@ -202,15 +223,31 @@ export default function BulkImageGen() {
     user.getAccessToken().then((token) => {
       if (!cancelled && token) setAccessToken(token);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
-  const jobState = useBulkImageJob({ jobId: activeJobId, enabled: !!activeJobId, accessToken });
-  const isJobActive = activeJobId !== null && (jobState.status === 'pending' || jobState.status === 'running' || jobState.status === 'idle');
+  const jobState = useBulkImageJob({
+    jobId: activeJobId,
+    enabled: !!activeJobId,
+    accessToken,
+  });
+  const isJobActive =
+    activeJobId !== null &&
+    (jobState.status === 'pending' ||
+      jobState.status === 'running' ||
+      jobState.status === 'idle');
 
   const startMutation = useMutation({
     mutationFn: () =>
-      bulkGenerateImages({ numGames, imageStyle, includeStoryline, includeGenres, includeThemes }),
+      bulkGenerateImages({
+        numGames,
+        imageStyle,
+        includeStoryline,
+        includeGenres,
+        includeThemes,
+      }),
     onSuccess: (result) => {
       setActiveJobId(result.jobId);
       toast.success(`Job started — ${result.gamesQueued} games queued`);
@@ -221,7 +258,10 @@ export default function BulkImageGen() {
   });
 
   const handleNumGamesChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const val = Math.max(IMAGE_GEN_MIN, Math.min(IMAGE_GEN_MAX, Number(e.target.value)));
+    const val = Math.max(
+      IMAGE_GEN_MIN,
+      Math.min(IMAGE_GEN_MAX, Number(e.target.value)),
+    );
     setNumGames(val);
   };
 
@@ -231,8 +271,8 @@ export default function BulkImageGen() {
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <DashboardPageHeader
-            title='Bulk Image Generation'
-            description='Generate AI images for games that don&apos;t have one yet.'
+            title="Bulk Image Generation"
+            description="Generate AI images for games that don't have one yet."
             icon={IconRobotFace}
           />
         </div>
@@ -250,7 +290,10 @@ export default function BulkImageGen() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <fieldset disabled={startMutation.isPending || isJobActive} className="space-y-5">
+              <fieldset
+                disabled={startMutation.isPending || isJobActive}
+                className="space-y-5"
+              >
                 {/* Number of games */}
                 <div className="space-y-1.5">
                   <Label htmlFor="num-games">
@@ -274,9 +317,15 @@ export default function BulkImageGen() {
                     value={imageStyle}
                     onValueChange={(val) => setImageStyle(val as ImageStyle)}
                   >
-                    <SelectTrigger id="image-style-trigger" className="w-full max-w-xs">
+                    <SelectTrigger
+                      id="image-style-trigger"
+                      className="w-full max-w-xs"
+                    >
                       <SelectValue>
-                        {IMAGE_STYLES.find((s) => s.value === imageStyle)?.label}
+                        {
+                          IMAGE_STYLES.find((s) => s.value === imageStyle)
+                            ?.label
+                        }
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
@@ -330,7 +379,11 @@ export default function BulkImageGen() {
                   className="cursor-pointer flex items-center gap-2"
                 >
                   {startMutation.isPending ? (
-                    <IconLoader size={16} className="animate-spin" aria-hidden="true" />
+                    <IconLoader
+                      size={16}
+                      className="animate-spin"
+                      aria-hidden="true"
+                    />
                   ) : (
                     <IconPlayerPlay size={16} aria-hidden="true" />
                   )}
@@ -339,7 +392,8 @@ export default function BulkImageGen() {
 
                 {isJobActive && (
                   <p className="text-xs text-muted-foreground">
-                    A job is currently active. Wait for it to finish before starting a new one.
+                    A job is currently active. Wait for it to finish before
+                    starting a new one.
                   </p>
                 )}
               </fieldset>

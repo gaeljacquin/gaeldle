@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { pixelateImage, getPixelSizeForAttempt } from './pixelate';
 
 describe('pixelate utilities', () => {
@@ -113,29 +113,31 @@ describe('pixelate utilities', () => {
       // Mock canvas context
       mockCtx = {
         imageSmoothingEnabled: true,
-        drawImage: mock(() => {}),
+        drawImage: vi.fn(() => {}),
       };
 
       // Mock canvas
       mockCanvas = {
         width: 0,
         height: 0,
-        getContext: mock(() => mockCtx),
-        toDataURL: mock(() => 'data:image/png;base64,mock'),
+        getContext: vi.fn(() => mockCtx),
+        toDataURL: vi.fn(() => 'data:image/png;base64,mock'),
       };
 
       // Mock document.createElement
-      originalDocument = (globalThis as Record<string, unknown>).document as typeof document;
+      originalDocument = (globalThis as Record<string, unknown>)
+        .document as typeof document;
       (globalThis as Record<string, unknown>).document = {
-        createElement: mock((tag: string) => {
+        createElement: vi.fn((tag: string) => {
           if (tag === 'canvas') return mockCanvas;
           return {};
         }),
       };
 
       // Mock Image constructor
-      originalImage = (globalThis as Record<string, unknown>).Image as typeof Image;
-      (globalThis as Record<string, unknown>).Image = mock(function() {
+      originalImage = (globalThis as Record<string, unknown>)
+        .Image as typeof Image;
+      (globalThis as Record<string, unknown>).Image = vi.fn(function () {
         return mockImage;
       });
     });
@@ -190,8 +192,10 @@ describe('pixelate utilities', () => {
     });
 
     it('should handle canvas context not available', async () => {
-      (globalThis as unknown as Record<string, Record<string, unknown>>).document.createElement = mock(() => ({
-        getContext: mock(() => null),
+      (
+        globalThis as unknown as Record<string, Record<string, unknown>>
+      ).document.createElement = vi.fn(() => ({
+        getContext: vi.fn(() => null),
       }));
 
       const promise = pixelateImage('https://example.com/image.jpg');
@@ -244,7 +248,7 @@ describe('pixelate utilities', () => {
       await promise;
 
       // drawImage should be called twice - once to draw small, once to scale up
-      const drawCalls = (mockCtx.drawImage).mock.calls;
+      const drawCalls = mockCtx.drawImage.mock.calls;
       expect(drawCalls.length).toBeGreaterThanOrEqual(2);
     });
 

@@ -2,17 +2,21 @@
 
 import { useState, useMemo, ChangeEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPaginatedGames, deleteBulkGames } from '@/lib/services/game.service';
+import {
+  getPaginatedGames,
+  deleteBulkGames,
+  PaginatedResponse,
+} from '@/lib/services/game.service';
 import { Timeline2Card } from '@/components/timeline-2-card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@workspace/ui/input';
+import { Button } from '@workspace/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@workspace/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +26,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from '@workspace/ui/alert-dialog';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import {
   IconLayoutGrid,
@@ -35,13 +39,19 @@ import {
   IconTrash,
   IconDashboard,
 } from '@tabler/icons-react';
-import { cn } from '@/lib/utils';
-import { Game } from '@gaeldle/api-contract';
+import { cn } from '@workspace/ui/lib/utils';
+import { Game } from '@workspace/api-contract';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 
-type SortOption = 'name-asc' | 'name-desc' | 'firstReleaseDate-asc' | 'firstReleaseDate-desc' | 'igdbId-asc' | 'igdbId-desc';
+type SortOption =
+  | 'name-asc'
+  | 'name-desc'
+  | 'firstReleaseDate-asc'
+  | 'firstReleaseDate-desc'
+  | 'igdbId-asc'
+  | 'igdbId-desc';
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'name-asc', label: 'Title A→Z' },
@@ -66,18 +76,15 @@ export default function Dashboard() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
-  if (debouncedSearch !== prevSearch) {
-    setPrevSearch(debouncedSearch);
-    setPage(1);
-  }
-
-  const [sortBy, sortDir] = sort.split('-') as ['name' | 'firstReleaseDate' | 'igdbId', 'asc' | 'desc'];
+  const [sortBy, sortDir] = sort.split('-') as [
+    'name' | 'firstReleaseDate' | 'igdbId',
+    'asc' | 'desc',
+  ];
 
   const deleteMutation = useMutation({
     mutationFn: (ids: number[]) => deleteBulkGames(ids),
     onSuccess: () => {
-      const successMessage = `${selectedIds.size} ${selectedIds.size === 1 ? 'game': 'games'} deleted successfully`;
+      const successMessage = `${selectedIds.size} ${selectedIds.size === 1 ? 'game' : 'games'} deleted successfully`;
       queryClient.invalidateQueries({ queryKey: ['games'] });
       toast.success(successMessage);
       setSelectedIds(new Set());
@@ -108,13 +115,24 @@ export default function Dashboard() {
     setSelectedIds(new Set());
   };
 
-  const { data, isLoading, isPlaceholderData } = useQuery({
+  const { data, isLoading, isPlaceholderData } = useQuery<
+    PaginatedResponse<Game>
+  >({
     queryKey: ['games', page, pageSize, debouncedSearch, sortBy, sortDir],
-    queryFn: () => getPaginatedGames(page, Number.parseInt(pageSize, 10), debouncedSearch, sortBy, sortDir),
+    queryFn: () =>
+      getPaginatedGames(
+        page,
+        Number.parseInt(pageSize, 10),
+        debouncedSearch,
+        sortBy,
+        sortDir,
+      ),
     placeholderData: (previousData) => previousData,
   });
 
-  const totalPages = data?.meta?.total ? Math.ceil(data.meta.total / Number.parseInt(pageSize, 10)) : 0;
+  const totalPages = data?.meta?.total
+    ? Math.ceil(data.meta.total / Number.parseInt(pageSize, 10))
+    : 0;
 
   const paginationRange = useMemo(() => {
     if (!totalPages) return [];
@@ -141,7 +159,8 @@ export default function Dashboard() {
     } else if (shouldShowLeftDots && !shouldShowRightDots) {
       const rightItemCount = 3 + 2 * siblingCount;
       range.push(1, '...');
-      for (let i = totalPages - rightItemCount + 1; i <= totalPages; i++) range.push(i);
+      for (let i = totalPages - rightItemCount + 1; i <= totalPages; i++)
+        range.push(i);
     } else {
       range.push(1, '...');
       for (let i = leftSiblingIndex; i <= rightSiblingIndex; i++) range.push(i);
@@ -153,10 +172,12 @@ export default function Dashboard() {
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
+    setPage(1);
   };
 
   const clearSearch = () => {
     setSearch('');
+    setPage(1);
   };
 
   const handlePageSizeChange = (val: string | null) => {
@@ -167,174 +188,183 @@ export default function Dashboard() {
   };
 
   const dataLengthZero = () => {
-    return (
-      data?.data.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="rounded-full bg-muted p-6 mb-4">
-            <IconSearch size={48} className="text-muted-foreground/40" />
-          </div>
-          <h3 className="text-lg font-semibold">No games found</h3>
-          <p className="text-muted-foreground max-w-xs mx-auto">
-            {search
-              ? `We couldn't find any games matching "${search}".`
-              : "The library is currently empty."}
-          </p>
-          {search && (
-            <Button
-              variant="link"
-              onClick={clearSearch}
-              className="mt-2"
-            >
-              Clear search
-            </Button>
-          )}
+    return data?.data.length === 0 ? (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="rounded-full bg-muted p-6 mb-4">
+          <IconSearch size={48} className="text-muted-foreground/40" />
         </div>
-      ) : (
-        <div className="space-y-8">
-          <div
-            className={cn(
-              'grid gap-6',
-              view === 'grid'
-                ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 justify-items-center'
-                : 'grid-cols-1'
-            )}
-          >
-            {data?.data.map((game: Game) => (
-              <div
-                key={game.id}
+        <h3 className="text-lg font-semibold">No games found</h3>
+        <p className="text-muted-foreground max-w-xs mx-auto">
+          {search
+            ? `We couldn't find any games matching "${search}".`
+            : 'The library is currently empty.'}
+        </p>
+        {search && (
+          <Button variant="link" onClick={clearSearch} className="mt-2">
+            Clear search
+          </Button>
+        )}
+      </div>
+    ) : (
+      <div className="space-y-8">
+        <div
+          className={cn(
+            'grid gap-6',
+            view === 'grid'
+              ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 justify-items-center'
+              : 'grid-cols-1',
+          )}
+        >
+          {data?.data.map((game: Game) => (
+            <div
+              key={game.id}
+              className={cn(
+                'transition-opacity duration-200 relative group/game',
+                isPlaceholderData && 'opacity-50',
+                view === 'list' &&
+                  'flex gap-6 p-4 border border-border bg-card hover:bg-accent/50 transition-colors',
+              )}
+            >
+              {isMultiSelect && (
+                <div className="absolute top-2 right-2 z-20">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(game.id)}
+                    onChange={() => toggleSelect(game.id)}
+                    className="w-5 h-5 rounded border-primary bg-background text-primary focus:ring-primary cursor-pointer accent-primary"
+                  />
+                </div>
+              )}
+              <Link
+                href={isMultiSelect ? '#' : `/dashboard/games/${game.igdbId}`}
+                onClick={(e) => {
+                  if (isMultiSelect) {
+                    e.preventDefault();
+                    toggleSelect(game.id);
+                  }
+                }}
                 className={cn(
-                  'transition-opacity duration-200 relative group/game',
-                  isPlaceholderData && 'opacity-50',
-                  view === 'list' &&
-                    'flex gap-6 p-4 border border-border bg-card hover:bg-accent/50 transition-colors'
+                  view === 'grid'
+                    ? 'block hover:scale-105 transition-transform'
+                    : 'shrink-0',
                 )}
               >
-                {isMultiSelect && (
-                  <div className="absolute top-2 right-2 z-20">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.has(game.id)}
-                      onChange={() => toggleSelect(game.id)}
-                      className="w-5 h-5 rounded border-primary bg-background text-primary focus:ring-primary cursor-pointer accent-primary"
-                    />
-                  </div>
-                )}
-                <Link
-                  href={isMultiSelect ? '#' : `/dashboard/games/${game.igdbId}`}
-                  onClick={(e) => {
-                    if (isMultiSelect) {
-                      e.preventDefault();
-                      toggleSelect(game.id);
+                <Timeline2Card game={game} showTopBanner={false} />
+              </Link>
+              {view === 'list' && (
+                <div className="flex flex-col justify-center min-w-0 flex-1">
+                  <Link
+                    href={
+                      isMultiSelect ? '#' : `/dashboard/games/${game.igdbId}`
                     }
-                  }}
-                  className={cn(view === 'grid' ? 'block hover:scale-105 transition-transform' : 'shrink-0')}
-                >
-                  <Timeline2Card
-                    game={game}
-                    showTopBanner={false}
-                  />
-                </Link>
-                {view === 'list' && (
-                  <div className="flex flex-col justify-center min-w-0 flex-1">
-                    <Link
-                      href={isMultiSelect ? '#' : `/dashboard/games/${game.igdbId}`}
-                      onClick={(e) => {
-                        if (isMultiSelect) {
-                          e.preventDefault();
-                          toggleSelect(game.id);
-                        }
-                      }}
-                      className="hover:text-primary transition-colors"
-                    >
-                      <h3 className="text-xl font-bold truncate">{game.name}</h3>
-                    </Link>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1 mb-3">
-                      {game.firstReleaseDate && (
-                        <span className="bg-muted px-2 py-0.5 rounded text-xs font-medium">
-                          {new Date(game.firstReleaseDate * 1000).toLocaleDateString()}
-                        </span>
-                      )}
-                      {!!(game.igdbId) && (
-                        <span className="text-[10px] uppercase tracking-wider">
-                          IGDB ID: {game.igdbId}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-                      {game.summary || 'No description available for this game.'}
-                    </p>
+                    onClick={(e) => {
+                      if (isMultiSelect) {
+                        e.preventDefault();
+                        toggleSelect(game.id);
+                      }
+                    }}
+                    className="hover:text-primary transition-colors"
+                  >
+                    <h3 className="text-xl font-bold truncate">{game.name}</h3>
+                  </Link>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1 mb-3">
+                    {game.firstReleaseDate && (
+                      <span className="bg-muted px-2 py-0.5 rounded text-xs font-medium">
+                        {new Date(
+                          game.firstReleaseDate * 1000,
+                        ).toLocaleDateString()}
+                      </span>
+                    )}
+                    {!!game.igdbId && (
+                      <span className="text-[10px] uppercase tracking-wider">
+                        IGDB ID: {game.igdbId}
+                      </span>
+                    )}
                   </div>
+                  <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                    {game.summary || 'No description available for this game.'}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t pt-8 pb-12">
+            <p className="text-sm text-muted-foreground order-2 sm:order-1">
+              Showing{' '}
+              <span className="font-medium">
+                {(page - 1) * Number.parseInt(pageSize, 10) + 1}
+              </span>{' '}
+              to{' '}
+              <span className="font-medium">
+                {Math.min(
+                  page * Number.parseInt(pageSize, 10),
+                  data?.meta?.total || 0,
+                )}
+              </span>{' '}
+              of <span className="font-medium">{data?.meta?.total}</span> games
+            </p>
+
+            <div className="flex items-center gap-1 order-1 sm:order-2">
+              <Button
+                variant="outline"
+                size="icon-xs"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                <IconChevronLeft size={16} />
+              </Button>
+
+              <div className="flex items-center gap-1 mx-1">
+                {paginationRange.map((p, i) =>
+                  p === '...' ? (
+                    <span
+                      key={`dots-${i + 1}`}
+                      className="w-8 flex justify-center text-muted-foreground select-none"
+                    >
+                      ...
+                    </span>
+                  ) : (
+                    <Button
+                      key={p}
+                      variant={page === p ? 'default' : 'ghost'}
+                      size="icon-xs"
+                      className={cn(
+                        'w-8 h-8',
+                        page === p && 'pointer-events-none',
+                      )}
+                      onClick={() => setPage(p as number)}
+                    >
+                      {p}
+                    </Button>
+                  ),
                 )}
               </div>
-            ))}
-          </div>
 
-          {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t pt-8 pb-12">
-              <p className="text-sm text-muted-foreground order-2 sm:order-1">
-                Showing <span className="font-medium">{(page - 1) * Number.parseInt(pageSize, 10) + 1}</span> to{' '}
-                <span className="font-medium">
-                  {Math.min(page * Number.parseInt(pageSize, 10), data?.meta?.total || 0)}
-                </span>{' '}
-                of <span className="font-medium">{data?.meta?.total}</span> games
-              </p>
-
-              <div className="flex items-center gap-1 order-1 sm:order-2">
-                <Button
-                  variant="outline"
-                  size="icon-xs"
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  <IconChevronLeft size={16} />
-                </Button>
-
-                <div className="flex items-center gap-1 mx-1">
-                  {paginationRange.map((p, i) =>
-                    p === '...' ? (
-                      <span
-                        key={`dots-${i + 1}`}
-                        className="w-8 flex justify-center text-muted-foreground select-none"
-                      >
-                        ...
-                      </span>
-                    ) : (
-                      <Button
-                        key={p}
-                        variant={page === p ? 'default' : 'ghost'}
-                        size="icon-xs"
-                        className={cn('w-8 h-8', page === p && 'pointer-events-none')}
-                        onClick={() => setPage(p as number)}
-                      >
-                        {p}
-                      </Button>
-                    )
-                  )}
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="icon-xs"
-                  disabled={page === totalPages}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  <IconChevronRight size={16} />
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                size="icon-xs"
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                <IconChevronRight size={16} />
+              </Button>
             </div>
-          )}
-        </div>
-      )
-    )
-  }
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col min-h-full bg-background">
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 space-y-4">
           <DashboardPageHeader
-            title='Dashboard'
-            description='Manage and explore games.'
+            title="Dashboard"
+            description="Manage and explore games."
             icon={IconDashboard}
           />
 
@@ -362,15 +392,22 @@ export default function Dashboard() {
               <div className="flex items-center gap-2">
                 {isMultiSelect && (
                   <div className="flex items-center gap-2 mr-2 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                    <AlertDialog
+                      open={isDeleteDialogOpen}
+                      onOpenChange={setIsDeleteDialogOpen}
+                    >
                       <Button
                         variant="destructive"
                         size="sm"
-                        disabled={selectedIds.size === 0 || deleteMutation.isPending}
+                        disabled={
+                          selectedIds.size === 0 || deleteMutation.isPending
+                        }
                         onClick={() => setIsDeleteDialogOpen(true)}
                         className={cn(
-                          "h-8",
-                          (selectedIds.size === 0 || deleteMutation.isPending) ? 'cursor-not-allowed' : 'cursor-pointer'
+                          'h-8',
+                          selectedIds.size === 0 || deleteMutation.isPending
+                            ? 'cursor-not-allowed'
+                            : 'cursor-pointer',
                         )}
                       >
                         <IconTrash size={16} className="mr-2" />
@@ -378,16 +415,18 @@ export default function Dashboard() {
                       </Button>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogTitle>
+                            Are you absolutely sure?
+                          </AlertDialogTitle>
                           <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete {selectedIds.size}{' '}
-                            {selectedIds.size === 1 ? 'game' : 'games'} from your library.
+                            This action cannot be undone. This will permanently
+                            delete {selectedIds.size}{' '}
+                            {selectedIds.size === 1 ? 'game' : 'games'} from
+                            your library.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel
-                            className="cursor-pointer"
-                          >
+                          <AlertDialogCancel className="cursor-pointer">
                             Cancel
                           </AlertDialogCancel>
                           <AlertDialogAction
@@ -406,8 +445,10 @@ export default function Dashboard() {
                       onClick={clearSelection}
                       disabled={selectedIds.size === 0}
                       className={cn(
-                        "h-8",
-                        (selectedIds.size === 0 || deleteMutation.isPending) ? 'cursor-not-allowed' : 'cursor-pointer'
+                        'h-8',
+                        selectedIds.size === 0 || deleteMutation.isPending
+                          ? 'cursor-not-allowed'
+                          : 'cursor-pointer',
                       )}
                     >
                       Clear
@@ -424,8 +465,8 @@ export default function Dashboard() {
                   }}
                   title="Multi-select"
                   className={cn(
-                    "cursor-pointer",
-                    isMultiSelect && "bg-primary text-primary-foreground"
+                    'cursor-pointer',
+                    isMultiSelect && 'bg-primary text-primary-foreground',
                   )}
                 >
                   <IconChecklist size={16} />
@@ -493,7 +534,9 @@ export default function Dashboard() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             <p className="text-sm font-medium">Loading your library...</p>
           </div>
-        ) : dataLengthZero()}
+        ) : (
+          dataLengthZero()
+        )}
       </div>
     </div>
   );

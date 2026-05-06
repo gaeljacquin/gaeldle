@@ -2,20 +2,20 @@
 
 ## Topology
 
-- `apps/api`: NestJS API using oRPC (TypeScript, Bun runtime), default port 8080.
+- `apps/api`: NestJS API using oRPC (TypeScript), default port 8080.
 - `apps/web`: Next.js 16 App Router app (TypeScript, Tailwind v4), default port 3000.
-- `packages/api-contract`: Shared oRPC contract and Zod schemas used by both API and Web. Package name: `@gaeldle/api-contract`.
-- `packages/constants`: Shared constants consumed by both API and Web. Package name: `@gaeldle/constants`.
+- `packages/api-contract`: Shared oRPC contract and Zod schemas used by both API and Web. Package name: `@workspace/api-contract`.
+- `packages/constants`: Shared constants consumed by both API and Web. Package name: `@workspace/constants`.
 - Monorepo: Turborepo workspace with apps under `apps/` and packages under `packages/`.
 
 ## API Responsibility Split
 
 Game operations are split across two APIs:
 
-| Operation type | API | Transport |
-|---|---|---|
-| Read (list, search, random, artwork, get by IGDB ID) | Next.js (`apps/web`) | plain `fetch` to local routes |
-| Write (delete, sync, image gen, add game, replace game, validate IGDB IDs) | NestJS (`apps/api`) | oRPC client (`orpcClient`) |
+| Operation type                                                             | API                  | Transport                     |
+| -------------------------------------------------------------------------- | -------------------- | ----------------------------- |
+| Read (list, search, random, artwork, get by IGDB ID)                       | Next.js (`apps/web`) | plain `fetch` to local routes |
+| Write (delete, sync, image gen, add game, replace game, validate IGDB IDs) | NestJS (`apps/api`)  | oRPC client (`orpcClient`)    |
 
 Read operations are implemented as Next.js App Router API route handlers under `apps/web/app/api/games/`. They query the database directly using a Drizzle client (`apps/web/lib/db.ts`). Write operations remain in the NestJS API and are called via the oRPC contract.
 

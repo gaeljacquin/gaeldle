@@ -1,8 +1,8 @@
 'use client';
 
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Input } from '@workspace/ui/input';
+import { Button } from '@workspace/ui/button';
+import { Label } from '@workspace/ui/label';
 import {
   IconTrash,
   IconArrowRight,
@@ -10,7 +10,7 @@ import {
   IconCircleX,
   IconLoader,
 } from '@tabler/icons-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@workspace/ui/lib/utils';
 import type { ReplaceGameValidationState } from '@/lib/hooks/use-replace-game-validation';
 
 export interface IgdbIdPairRowData {
@@ -40,8 +40,7 @@ function CurrentBadge({
       <div className="flex items-center gap-1.5 text-xs text-destructive">
         <IconCircleX size={12} aria-hidden="true" />
         <span>
-          Not found &mdash;{' '}
-          <span className="font-mono">{igdbId}</span>
+          Not found &mdash; <span className="font-mono">{igdbId}</span>
         </span>
       </div>
     );
@@ -145,10 +144,12 @@ export function IgdbIdPairRow({
     !validationState.canApply;
 
   return (
-    <div className={cn(
-      'flex flex-col gap-2 p-4 border bg-card',
-      isDuplicate && 'border-destructive',
-    )}>
+    <div
+      className={cn(
+        'flex flex-col gap-2 p-4 border bg-card',
+        isDuplicate && 'border-destructive',
+      )}
+    >
       <div className="flex items-start gap-3">
         {/* Current IGDB ID */}
         <div className="flex flex-col gap-1.5 flex-1">
@@ -164,7 +165,8 @@ export function IgdbIdPairRow({
             placeholder="e.g. 132181"
             className={cn(
               'font-mono',
-              currentHasError && 'border-destructive focus-visible:ring-destructive',
+              currentHasError &&
+                'border-destructive focus-visible:ring-destructive',
             )}
             aria-invalid={currentHasError}
           />
@@ -176,7 +178,11 @@ export function IgdbIdPairRow({
         {/* Arrow / spinner separator */}
         <div className="pt-7 text-muted-foreground shrink-0">
           {validationState.isLoading ? (
-            <IconLoader size={16} className="animate-spin" aria-label="Validating" />
+            <IconLoader
+              size={16}
+              className="animate-spin"
+              aria-label="Validating"
+            />
           ) : (
             <IconArrowRight size={16} aria-hidden="true" />
           )}
@@ -196,7 +202,8 @@ export function IgdbIdPairRow({
             placeholder="e.g. 2"
             className={cn(
               'font-mono',
-              replacementHasError && 'border-destructive focus-visible:ring-destructive',
+              replacementHasError &&
+                'border-destructive focus-visible:ring-destructive',
             )}
             aria-invalid={replacementHasError}
           />

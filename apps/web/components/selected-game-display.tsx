@@ -2,8 +2,8 @@
 
 import { IconX } from '@tabler/icons-react';
 import Image from 'next/image';
-import type { Game, GameModeSlug } from '@gaeldle/api-contract';
-import { cn } from '@/lib/utils';
+import type { Game, GameModeSlug } from '@workspace/api-contract';
+import { cn } from '@workspace/ui/lib/utils';
 
 interface SelectedGameDisplayProps {
   selectedGame: Game | null;
@@ -22,7 +22,12 @@ export default function SelectedGameDisplay({
 }: Readonly<SelectedGameDisplayProps>) {
   if (showSkeleton || !selectedGame) {
     return (
-      <div className={cn('flex items-center gap-3 border bg-card/80 p-3', className)}>
+      <div
+        className={cn(
+          'flex items-center gap-3 border bg-card/80 p-3',
+          className,
+        )}
+      >
         <div className="h-14 w-10 bg-muted animate-pulse" />
         <div className="flex-1 min-w-0 space-y-2">
           <div className="h-4 bg-muted animate-pulse w-3/4" />
@@ -33,7 +38,12 @@ export default function SelectedGameDisplay({
   }
 
   return (
-    <div className={cn('group relative flex items-center gap-3 border bg-card/90 p-3', className)}>
+    <div
+      className={cn(
+        'group relative flex items-center gap-3 border bg-card/90 p-3',
+        className,
+      )}
+    >
       {selectedGame.imageUrl && mode !== 'cover-art' ? (
         <Image
           src={selectedGame.imageUrl}
@@ -49,8 +59,12 @@ export default function SelectedGameDisplay({
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold truncate text-foreground uppercase tracking-tight">{selectedGame.name}</p>
-        <p className="text-xs text-muted-foreground uppercase tracking-widest">Selected</p>
+        <p className="text-sm font-bold truncate text-foreground uppercase tracking-tight">
+          {selectedGame.name}
+        </p>
+        <p className="text-xs text-muted-foreground uppercase tracking-widest">
+          Selected
+        </p>
       </div>
       {onClearSelection ? (
         <button

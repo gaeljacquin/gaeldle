@@ -1,8 +1,8 @@
 'use client';
 
 import { forwardRef } from 'react';
-import { cn } from '@/lib/utils';
-import type { Game } from '@gaeldle/api-contract';
+import { cn } from '@workspace/ui/lib/utils';
+import type { Game } from '@workspace/api-contract';
 import Image from 'next/image';
 
 interface Timeline2CardProps {
@@ -23,14 +23,24 @@ function formatDate(timestamp: number | null): string {
 }
 
 export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
-  ({ game, showDate = false, showTopBanner = true, bannerColor = 'none', className, ...props }, ref) => {
+  (
+    {
+      game,
+      showDate = false,
+      showTopBanner = true,
+      bannerColor = 'none',
+      className,
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <div
         ref={ref}
         className={cn(
           'relative overflow-hidden border-2 border-border bg-card shadow-sm select-none',
           'w-32 h-44',
-          className
+          className,
         )}
         {...props}
       >
@@ -58,7 +68,7 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
               'absolute top-0 left-0 right-0 px-2 py-1 text-center text-sm font-semibold text-white',
               bannerColor === 'green' && 'bg-green-600',
               bannerColor === 'red' && 'bg-destructive',
-              bannerColor === 'slate' && 'bg-slate-600'
+              bannerColor === 'slate' && 'bg-slate-600',
             )}
           >
             {showDate && formatDate(game.firstReleaseDate)}
@@ -71,7 +81,7 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
             bannerColor === 'green' && 'bg-green-600/90 text-white',
             bannerColor === 'red' && 'bg-destructive/90 text-white',
             bannerColor === 'slate' && 'bg-slate-600/90 text-white',
-            bannerColor === 'none' && 'bg-primary/90 text-primary-foreground'
+            bannerColor === 'none' && 'bg-primary/90 text-primary-foreground',
           )}
         >
           <p className="truncate text-xs font-medium" title={game.name}>
@@ -80,7 +90,7 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 Timeline2Card.displayName = 'Timeline2Card';

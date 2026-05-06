@@ -12,9 +12,9 @@
 1. Create the page in `apps/web/app/*/page.tsx`.
 2. **Specialized Skills**: Refer to `vercel-react-best-practices` and `vercel-composition-patterns` to ensure high-quality component implementation.
 3. **API Access**: Use the oRPC client from `apps/web/lib/orpc.ts`. For client components, use the React Query hooks provided by oRPC; for server components, use the server-side client.
-3. Keep components in `apps/web/components/` presentation-only.
-4. Use App Router conventions (server components by default).
-5. Use `SERVER_URL` for server-side calls.
+4. Keep components in `apps/web/components/` presentation-only.
+5. Use App Router conventions (server components by default).
+6. Use `SERVER_URL` for server-side calls.
 
 ## Add a New Dashboard Admin Page
 
@@ -28,7 +28,7 @@ Dashboard pages that perform write operations (add, replace, delete) follow a co
 6. **Service functions**: Add the API call wrappers to `apps/web/lib/services/game.service.ts`. Validation calls go to NestJS via `orpcClient`.
 7. **Contract**: Add the oRPC route to `packages/api-contract/src/games.ts`, implement it in `apps/api/src/games/games.router.ts`, and add the business logic to `apps/api/src/games/games.service.ts`.
 8. **Utilities hub**: Add a `MenuCard` entry in `apps/web/views/utilities.tsx` linking to the new page. The sidebar exposes a single **Utilities** link (`/dashboard/utilities`, icon `IconTools`) that routes to this hub — do not add individual `<SidebarLink>` entries for each admin tool page.
-9. **Shared constants**: If the feature needs a max-rows limit or other shareable constant, add it to `packages/constants/src/index.ts` and import from `@gaeldle/constants` in both web and API code.
+9. **Shared constants**: If the feature needs a max-rows limit or other shareable constant, add it to `packages/constants/src/index.ts` and import from `@workspace/constants` in both web and API code.
 
 ## Validate-then-Commit Pattern
 

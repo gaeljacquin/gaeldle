@@ -12,14 +12,14 @@
 
 ## Game Modes (as of 2026-02-20)
 
-| Slug | Title | Difficulty | Max Attempts | Hook file |
-|---|---|---|---|---|
-| cover-art | Cover Art | Easy | 5 | use-cover-art-game.ts |
-| artwork | Artwork | Medium | 5 | use-cover-art-game.ts (shared) |
-| image-gen | Image Gen | Medium | 5 | use-cover-art-game.ts (shared) |
-| timeline | Timeline | Medium | 3 | use-timeline-game.ts |
-| timeline-2 | Timeline 2 | Hard | 7 | use-timeline-2-game.ts |
-| specifications | Specifications | Hard | 10 | use-specifications-game.ts |
+| Slug           | Title          | Difficulty | Max Attempts | Hook file                      |
+| -------------- | -------------- | ---------- | ------------ | ------------------------------ |
+| cover-art      | Cover Art      | Easy       | 5            | use-cover-art-game.ts          |
+| artwork        | Artwork        | Medium     | 5            | use-cover-art-game.ts (shared) |
+| image-gen      | Image Gen      | Medium     | 5            | use-cover-art-game.ts (shared) |
+| timeline       | Timeline       | Medium     | 3            | use-timeline-game.ts           |
+| timeline-2     | Timeline 2     | Hard       | 7            | use-timeline-2-game.ts         |
+| specifications | Specifications | Hard       | 10           | use-specifications-game.ts     |
 
 Cover Art, Artwork, and Image Gen all use the `GameListPlusImage` component and `useCoverArtGame` hook.
 
@@ -33,10 +33,12 @@ Cover Art, Artwork, and Image Gen all use the `GameListPlusImage` component and 
 ## API Architecture (as of 2026-02-26)
 
 Game operations are split between two APIs:
+
 - **Reads** (list, search, random, artwork, get-by-igdbId): Next.js route handlers in `apps/web/app/api/games/`. DB accessed directly via Drizzle singleton at `apps/web/lib/db.ts`. Service layer uses plain `fetch`. No oRPC contract.
 - **Writes** (delete, sync, generateImage, bulkGenerateImages, validateIgdbIdAdd, validateReplaceGame, replaceGames): NestJS via `orpcClient`. Covered by `packages/api-contract`.
 
 New NestJS write endpoints added 2026-02-25/26:
+
 - `POST /games/add/validate-one` — validate a single IGDB ID before adding.
 - `POST /games/replace-game/validate-one` — validate a current/replacement IGDB ID pair.
 - `POST /games/replace-games` — replace up to 20 games by swapping IGDB IDs. Returns `status: 'updated'|'skipped'|'error'` per pair.
@@ -44,6 +46,7 @@ New NestJS write endpoints added 2026-02-25/26:
 IgdbService (`apps/api/src/games/igdb.service.ts`) added as a NestJS injectable with `getGameById` and `getGamesByIds`. Caches Twitch OAuth token internally.
 
 Health page (`/health`) monitors both APIs:
+
 - "writes api" = NestJS ping via `GET /`
 - "reads api" = Next.js ping via `GET /api/games?pageSize=1`
 
@@ -56,6 +59,7 @@ Frontend doc updated: `docs/agents/frontend-conventions.md` — revised "Read vs
 All admin utility pages are accessed via a **Utilities hub** at `/dashboard/utilities` (view: `apps/web/views/utilities.tsx`). The sidebar has a single "Utilities" link (`IconTools`) instead of individual links per tool page.
 
 Pages in the hub (rendered as `MenuCard` tiles):
+
 - `/dashboard/add-game` — view: `apps/web/views/add-game.tsx`. Add games by IGDB ID (max 20). Uses `useIgdbIdAddValidation` hook.
 - `/dashboard/replace-game` — view: `apps/web/views/replace-game.tsx`. Replace games by IGDB ID pair (max 20). Uses `useReplaceGameValidation` hook.
 - `/dashboard/image-gen` — bulk AI image generation.
@@ -64,11 +68,12 @@ Pages in the hub (rendered as `MenuCard` tiles):
 New admin pages must be added as `MenuCard` entries in `utilities.tsx`, NOT as new `<SidebarLink>` entries.
 
 Shared dashboard UI components:
+
 - `DashboardPageHeader` in `apps/web/components/dashboard-header.tsx` — all dashboard views must use it.
 - `MenuCard` in `apps/web/components/menu-card.tsx` — generic gradient card tile with optional badge slot. `GameModeCard` extends it with a difficulty badge.
 - `Stuck` in `apps/web/components/stuck.tsx` — loading/stuck-state display. Props: `stuckState: 'none' | 'loading'`, `className?`.
 
-Shared constants in `packages/constants/src/index.ts` (import from `@gaeldle/constants`):
+Shared constants in `packages/constants/src/index.ts` (import from `@workspace/constants`):
 `TEST_DIR`, `IMAGE_GEN_DIR`, `REPLACE_GAME_MAX_ROWS`, `ADD_GAME_MAX_ROWS`, `PLACEHOLDER_IMAGE`, `PLACEHOLDER_IMAGE_R2`, `FILE_SIZE_LIMIT`, `DISCOVER_GAMES_MAX`, `DISCOVER_GAMES_DEFAULT`, `GAME_SEARCH_MIN_CHARS` (= 3).
 
 Timeline swap-mode visual indicator (green line on drag-over) was reverted (commit 64beaa8) because the green line was inaccurate and broke shift mode. `DragOverEvent` handler and `overId` state were removed from `apps/web/views/timeline.tsx`.

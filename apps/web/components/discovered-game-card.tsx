@@ -1,6 +1,6 @@
 import Image from 'next/image';
-import { Checkbox } from '@/components/ui/checkbox';
-import { cn } from '@/lib/utils';
+import { Checkbox } from '@workspace/ui/checkbox';
+import { cn } from '@workspace/ui/lib/utils';
 import { ReactNode } from 'react';
 
 interface DiscoveredGameCardProps {
@@ -82,10 +82,7 @@ export function DiscoveredGameCard({
       </div>
 
       {/* Bottom bar: checkbox, truncated title, year */}
-      <div
-        className="flex items-start gap-2 px-2 py-2"
-        title={name}
-      >
+      <div className="flex items-start gap-2 px-2 py-2" title={name}>
         <div className="mt-0.5 shrink-0">
           <Checkbox
             checked={isSelected || isAlreadyAdded || isApplied}
@@ -97,14 +94,17 @@ export function DiscoveredGameCard({
             }}
             aria-label={`Select ${name}`}
             className={cn(
-              (isAlreadyAdded || isApplied)
+              isAlreadyAdded || isApplied
                 ? 'data-checked:bg-blue-500 data-checked:border-blue-500 border-blue-500'
                 : null,
             )}
           />
         </div>
         <div className="min-w-0 flex flex-col">
-          <p className="text-[10px] font-medium leading-snug truncate" title={name}>
+          <p
+            className="text-[10px] font-medium leading-snug truncate"
+            title={name}
+          >
             {name}
           </p>
           {date ? (

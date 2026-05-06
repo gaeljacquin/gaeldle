@@ -3,21 +3,21 @@
 ## Project Architecture (Accessibility-Relevant)
 
 - Next.js app at `apps/web/`; custom components in `components/` and `views/`
-- Third-party UI primitives at `components/ui/` — DO NOT audit these files
-- Design tokens in `apps/web/app/globals.css` using CSS custom properties / HSL
-- Tailwind CSS with a custom theme; `cn()` utility in `lib/utils.ts`
+- Third-party UI primitives at `packages/ui/src/components/` — DO NOT audit these files
+- Design tokens in `@workspace/ui/globals.css`
+- Tailwind CSS with a custom theme; `cn()` utility in `@workspace/ui/lib/utils`
 - Dark mode via `.dark` class (next-themes)
 
 ## Color Token Resolved Values (Light / Dark)
 
-| Token | Light | Dark |
-|-------|-------|------|
-| `--primary` | `hsl(171 77% 37%)` ≈ `#14916a` | `hsl(171 77% 45%)` ≈ `#18b382` |
-| `--destructive` | `hsl(0 72% 50%)` ≈ `#dc2626` | `hsl(0 62% 30%)` ≈ `#7f1d1d` |
-| `--secondary` | `hsl(240 5% 33%)` ≈ `#4d4d57` | `hsl(240 5% 15%)` ≈ `#222226` |
-| `--background` | `hsl(240 4% 95%)` ≈ `#f2f2f4` | `hsl(240 10% 4%)` ≈ `#090910` |
-| `--card` | `hsl(0 0% 98%)` ≈ `#fafafa` | `hsl(240 10% 6%)` ≈ `#0f0f14` |
-| `--muted-foreground` | `hsl(240 5% 33%)` | `hsl(240 5% 65%)` |
+| Token                | Light                          | Dark                           |
+| -------------------- | ------------------------------ | ------------------------------ |
+| `--primary`          | `hsl(171 77% 37%)` ≈ `#14916a` | `hsl(171 77% 45%)` ≈ `#18b382` |
+| `--destructive`      | `hsl(0 72% 50%)` ≈ `#dc2626`   | `hsl(0 62% 30%)` ≈ `#7f1d1d`   |
+| `--secondary`        | `hsl(240 5% 33%)` ≈ `#4d4d57`  | `hsl(240 5% 15%)` ≈ `#222226`  |
+| `--background`       | `hsl(240 4% 95%)` ≈ `#f2f2f4`  | `hsl(240 10% 4%)` ≈ `#090910`  |
+| `--card`             | `hsl(0 0% 98%)` ≈ `#fafafa`    | `hsl(240 10% 6%)` ≈ `#0f0f14`  |
+| `--muted-foreground` | `hsl(240 5% 33%)`              | `hsl(240 5% 65%)`              |
 
 **Dark mode primary fails contrast with white text:** `#18b382` on white = ~3.4:1. FAIL.
 
@@ -43,13 +43,13 @@ The project uses `<span className="sr-only">` for visually hidden text (confirme
 
 ## Scope Exclusions
 
-- `apps/web/components/ui/**` — third-party, do not audit
+- `packages/ui/src/components/**` — third-party, do not audit
 - Auth handler pages (`/handler/**`) — third-party Stack Auth
 - `dev-mode-toggle.tsx` — production-invisible, low priority
 
 ## Key Files for Future Audits
 
-- `apps/web/app/globals.css` — All design token values
+- `@workspace/ui/globals.css` — All design token values
 - `apps/web/components/specifications-grid.tsx` — Most complex color-semantic component
 - `apps/web/components/timeline-card.tsx` + `timeline-2-card.tsx` — Color-coded game cards
 - `apps/web/views/game-details.tsx` — Hardcoded non-token colors (sky, purple)

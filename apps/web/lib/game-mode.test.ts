@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect } from 'vitest';
 import { getGameModeBySlug, gameModes } from './game-mode';
 
 describe('game-mode utilities', () => {

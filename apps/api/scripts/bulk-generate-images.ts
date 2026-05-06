@@ -4,7 +4,7 @@ config({ path: './apps/api/.env' });
 
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import * as schema from '@gaeldle/api-contract';
+import * as schema from '@workspace/api-contract';
 import { sql, eq } from 'drizzle-orm';
 import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -15,7 +15,7 @@ import {
   DEFAULT_IMAGE_GEN_NUM,
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
-} from '@gaeldle/constants';
+} from '@workspace/constants';
 
 // Parse prompt options from environment variables
 const includeStoryline = process.env.INCLUDE_STORYLINE === 'true';

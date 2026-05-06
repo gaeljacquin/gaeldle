@@ -8,7 +8,11 @@ import {
   BulkJobStatusEnum,
   type Game,
 } from './schema';
-import { DEFAULT_IMAGE_GEN_STYLE, IMAGE_GEN_MIN, IMAGE_GEN_MAX } from '@gaeldle/constants';
+import {
+  DEFAULT_IMAGE_GEN_STYLE,
+  IMAGE_GEN_MIN,
+  IMAGE_GEN_MAX,
+} from '@workspace/constants';
 
 export const GameModeSlugSchema = z.enum([
   'cover-art',
@@ -88,9 +92,7 @@ export const GamesContract = {
 
   deleteBulk: oc
     .route({ method: 'DELETE', path: '/games/bulk' })
-    .input(
-      z.array(z.coerce.number().int().positive()),
-    )
+    .input(z.array(z.coerce.number().int().positive()))
     .output(
       z.object({
         success: z.boolean(),
@@ -121,7 +123,9 @@ export const GamesContract = {
         includeStoryline: z.boolean().optional().default(false),
         includeGenres: z.boolean().optional().default(false),
         includeThemes: z.boolean().optional().default(false),
-        imageStyle: ImageStyleSchema.optional().default(DEFAULT_IMAGE_GEN_STYLE),
+        imageStyle: ImageStyleSchema.optional().default(
+          DEFAULT_IMAGE_GEN_STYLE,
+        ),
       }),
     )
     .output(
@@ -243,7 +247,6 @@ export const GamesContract = {
         canAdd: z.boolean(),
       }),
     ),
-
 } as const;
 
 export interface GameApiResponse {

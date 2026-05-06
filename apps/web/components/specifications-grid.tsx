@@ -1,10 +1,19 @@
 'use client';
 
 import { ReactNode, Fragment } from 'react';
-import { cn } from '@/lib/utils';
-import type { SpecificationGuess, RevealedClue, Game, CellMatch } from '@gaeldle/api-contract';
+import { cn } from '@workspace/ui/lib/utils';
+import type {
+  SpecificationGuess,
+  RevealedClue,
+  Game,
+  CellMatch,
+} from '@workspace/api-contract';
 import Image from 'next/image';
-import { IconArrowUp, IconArrowDown, IconArrowRight } from '@tabler/icons-react';
+import {
+  IconArrowUp,
+  IconArrowDown,
+  IconArrowRight,
+} from '@tabler/icons-react';
 
 interface SpecificationsGridProps {
   guesses: SpecificationGuess[];
@@ -14,7 +23,7 @@ interface SpecificationsGridProps {
   className?: string;
 }
 
-type CellValue = string | string[] | null
+type CellValue = string | string[] | null;
 
 const COLUMN_HEADERS = [
   { key: 'name', label: 'Name' },
@@ -41,7 +50,10 @@ const MATCH_COLUMNS: Array<{ key: MatchKey; isReleaseDate?: boolean }> = [
   { key: 'perspective' },
 ];
 
-function getCellColor(matchType: 'exact' | 'partial' | 'none', hasData: boolean): string {
+function getCellColor(
+  matchType: 'exact' | 'partial' | 'none',
+  hasData: boolean,
+): string {
   if (!hasData) {
     return 'bg-muted/70 text-foreground';
   }
@@ -82,7 +94,7 @@ function hasData(value: string | string[] | null): boolean {
 function extractArray(data: unknown): string[] {
   if (!data) return [];
   if (Array.isArray(data)) {
-    return data.map(item => {
+    return data.map((item) => {
       if (typeof item === 'string') return item;
       if (typeof item === 'object' && item !== null && 'name' in item) {
         return (item as { name: string }).name;
@@ -102,14 +114,22 @@ function extractReleaseYear(firstReleaseDate: number | null): string | null {
 function extractPublisher(involved_companies: unknown): string | null {
   if (!involved_companies || !Array.isArray(involved_companies)) return null;
 
-  const publisher = involved_companies.find((company: unknown) =>
-    typeof company === 'object' && company !== null && 'publisher' in company && (company as { publisher: boolean }).publisher === true
+  const publisher = involved_companies.find(
+    (company: unknown) =>
+      typeof company === 'object' &&
+      company !== null &&
+      'publisher' in company &&
+      (company as { publisher: boolean }).publisher === true,
   );
 
   if (publisher && typeof publisher === 'object') {
     if ('company' in publisher) {
       const companyData = publisher.company;
-      if (typeof companyData === 'object' && companyData !== null && 'name' in companyData) {
+      if (
+        typeof companyData === 'object' &&
+        companyData !== null &&
+        'name' in companyData
+      ) {
         return (companyData as { name: string }).name;
       }
     }
@@ -124,7 +144,7 @@ function extractPublisher(involved_companies: unknown): string | null {
 function getBestMatch(
   guesses: SpecificationGuess[],
   field: keyof SpecificationGuess['matches'],
-  revealedClue?: RevealedClue | null
+  revealedClue?: RevealedClue | null,
 ): CellMatch {
   if (revealedClue?.field === field) {
     return { type: 'exact', value: revealedClue.value };
@@ -134,12 +154,12 @@ function getBestMatch(
     return { type: 'none', value: null };
   }
 
-  const exactMatch = guesses.find(g => g.matches[field].type === 'exact');
+  const exactMatch = guesses.find((g) => g.matches[field].type === 'exact');
   if (exactMatch) {
     return exactMatch.matches[field];
   }
 
-  const partialMatch = guesses.find(g => g.matches[field].type === 'partial');
+  const partialMatch = guesses.find((g) => g.matches[field].type === 'partial');
   if (partialMatch) {
     return partialMatch.matches[field];
   }
@@ -161,19 +181,26 @@ function renderHintRow(revealedClue: RevealedClue) {
           key={header.key}
           className={cn(
             'border border-border/50 px-3 py-2 text-xs',
-            revealedClue.field === header.key ? 'bg-primary/10 font-bold text-foreground' : 'text-muted-foreground'
+            revealedClue.field === header.key
+              ? 'bg-primary/10 font-bold text-foreground'
+              : 'text-muted-foreground',
           )}
         >
-          {revealedClue.field === header.key
-            ? <CellValueDisplay value={revealedClue.value} />
-            : '???'}
+          {revealedClue.field === header.key ? (
+            <CellValueDisplay value={revealedClue.value} />
+          ) : (
+            '???'
+          )}
         </td>
       ))}
     </tr>
   );
 }
 
-function getYearArrow(guessYear: string | null, targetYear: string | null): ReactNode {
+function getYearArrow(
+  guessYear: string | null,
+  targetYear: string | null,
+): ReactNode {
   if (!guessYear || !targetYear) return null;
 
   const guessYearNum = Number.parseInt(guessYear, 10);
@@ -190,7 +217,10 @@ function getYearArrow(guessYear: string | null, targetYear: string | null): Reac
   return null;
 }
 
-function ImageCell({ imageUrl, name }: Readonly<{ imageUrl: string | null; name: string }>) {
+function ImageCell({
+  imageUrl,
+  name,
+}: Readonly<{ imageUrl: string | null; name: string }>) {
   return (
     <td className="border border-border/50 p-0 w-32">
       <div className="relative w-32 h-44 bg-muted/20">
@@ -230,14 +260,14 @@ function ReleaseDateCell({
 }: Readonly<{ match: CellMatch; targetYear: string | null }>) {
   const arrow = getYearArrow(
     typeof match.value === 'string' ? match.value : null,
-    targetYear
+    targetYear,
   );
 
   return (
     <td
       className={cn(
         'border border-border/50 px-3 py-2 text-xs relative text-center',
-        getCellColor(match.type, hasData(match.value))
+        getCellColor(match.type, hasData(match.value)),
       )}
     >
       <div className="flex flex-col items-center justify-center gap-1">
@@ -253,7 +283,7 @@ function MatchCell({ match }: Readonly<{ match: CellMatch }>) {
     <td
       className={cn(
         'border border-border/50 px-3 py-2 text-xs text-center wrap-break-word',
-        getCellColor(match.type, hasData(match.value))
+        getCellColor(match.type, hasData(match.value)),
       )}
     >
       <CellValueDisplay value={match.value} />
@@ -287,7 +317,7 @@ function getAnswerSpecs(targetGame?: Game | null) {
 function getBestMatches(
   guesses: SpecificationGuess[],
   revealedClue?: RevealedClue | null,
-  showAnswerOnly?: boolean
+  showAnswerOnly?: boolean,
 ) {
   if (showAnswerOnly) return null;
 
@@ -324,7 +354,7 @@ function SummaryRow({
           />
         ) : (
           <MatchCell key={column.key} match={bestMatches[column.key]} />
-        )
+        ),
       )}
     </tr>
   );
@@ -338,7 +368,7 @@ function HeaderRow() {
           key={header.key}
           className={cn(
             'border border-border/50 px-3 py-2 text-sm font-semibold text-slate-100',
-            'text-center min-w-30'
+            'text-center min-w-30',
           )}
         >
           {header.label}
@@ -357,15 +387,34 @@ function AnswerRow({
 }>) {
   return (
     <tr>
-      <ImageCell imageUrl={targetGame.imageUrl || null} name={targetGame.name} />
-      <AnswerCell value={answerSpecs.platforms.length > 0 ? answerSpecs.platforms : null} />
-      <AnswerCell value={answerSpecs.genres.length > 0 ? answerSpecs.genres : null} />
-      <AnswerCell value={answerSpecs.themes.length > 0 ? answerSpecs.themes : null} />
+      <ImageCell
+        imageUrl={targetGame.imageUrl || null}
+        name={targetGame.name}
+      />
+      <AnswerCell
+        value={answerSpecs.platforms.length > 0 ? answerSpecs.platforms : null}
+      />
+      <AnswerCell
+        value={answerSpecs.genres.length > 0 ? answerSpecs.genres : null}
+      />
+      <AnswerCell
+        value={answerSpecs.themes.length > 0 ? answerSpecs.themes : null}
+      />
       <AnswerCell value={answerSpecs.releaseDate} />
-      <AnswerCell value={answerSpecs.gameModes.length > 0 ? answerSpecs.gameModes : null} />
-      <AnswerCell value={answerSpecs.gameEngines.length > 0 ? answerSpecs.gameEngines : null} />
+      <AnswerCell
+        value={answerSpecs.gameModes.length > 0 ? answerSpecs.gameModes : null}
+      />
+      <AnswerCell
+        value={
+          answerSpecs.gameEngines.length > 0 ? answerSpecs.gameEngines : null
+        }
+      />
       <AnswerCell value={answerSpecs.publisher} />
-      <AnswerCell value={answerSpecs.perspective.length > 0 ? answerSpecs.perspective : null} />
+      <AnswerCell
+        value={
+          answerSpecs.perspective.length > 0 ? answerSpecs.perspective : null
+        }
+      />
     </tr>
   );
 }
@@ -385,7 +434,9 @@ function GuessRows({
     <>
       {guesses.map((guess, index) => (
         <Fragment key={`${guess.gameId}-${index}`}>
-          {revealedClue && index === hintInsertIndex ? renderHintRow(revealedClue) : null}
+          {revealedClue && index === hintInsertIndex
+            ? renderHintRow(revealedClue)
+            : null}
           <tr>
             <ImageCell imageUrl={guess.imageUrl} name={guess.gameName} />
             {MATCH_COLUMNS.map((column) =>
@@ -397,12 +448,14 @@ function GuessRows({
                 />
               ) : (
                 <MatchCell key={column.key} match={guess.matches[column.key]} />
-              )
+              ),
             )}
           </tr>
         </Fragment>
       ))}
-      {revealedClue && hintInsertIndex === guesses.length ? renderHintRow(revealedClue) : null}
+      {revealedClue && hintInsertIndex === guesses.length
+        ? renderHintRow(revealedClue)
+        : null}
     </>
   );
 }
@@ -412,7 +465,7 @@ export default function SpecificationsGrid({
   revealedClue,
   targetGame,
   showAnswerOnly = false,
-  className
+  className,
 }: Readonly<SpecificationsGridProps>) {
   const reversedGuesses = [...guesses].reverse();
   const hintInsertIndex = revealedClue
@@ -424,11 +477,19 @@ export default function SpecificationsGrid({
   const showHeaders = guesses.length > 0 || showAnswerOnly || bestMatches;
 
   return (
-    <div className={cn('overflow-x-scroll w-full border border-border/50 bg-card/5', className)}>
+    <div
+      className={cn(
+        'overflow-x-scroll w-full border border-border/50 bg-card/5',
+        className,
+      )}
+    >
       <table className="w-full border-collapse min-w-max">
         <thead>
           {bestMatches ? (
-            <SummaryRow bestMatches={bestMatches} targetYear={answerSpecs?.releaseDate || null} />
+            <SummaryRow
+              bestMatches={bestMatches}
+              targetYear={answerSpecs?.releaseDate || null}
+            />
           ) : null}
           {showHeaders ? <HeaderRow /> : null}
         </thead>

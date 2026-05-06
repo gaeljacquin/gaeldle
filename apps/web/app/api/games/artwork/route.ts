@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { and, desc, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { games, gameObject } from '@gaeldle/api-contract';
+import { games, gameObject } from '@workspace/api-contract';
 
 export async function GET() {
   const gamesList = await db

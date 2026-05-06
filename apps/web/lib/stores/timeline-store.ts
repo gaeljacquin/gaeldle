@@ -14,6 +14,6 @@ export const useTimelineStore = create<TimelineStore>()(
     }),
     {
       name: 'timeline-settings',
-    }
-  )
+    },
+  ),
 );

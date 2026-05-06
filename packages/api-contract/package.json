@@ -1,5 +1,5 @@
 {
-  "name": "@gaeldle/api-contract",
+  "name": "@workspace/api-contract",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -7,6 +7,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -15,7 +17,7 @@
     "@orpc/contract": "^1.14.1",
     "drizzle-zod": "^0.7.1",
     "drizzle-orm": "^0.45.2",
-    "@gaeldle/constants": "workspace:*"
+    "@workspace/constants": "workspace:*"
   },
   "peerDependencies": {
     "zod": "^3.x"

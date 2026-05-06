@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { asc, desc, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { games, gameObject } from '@gaeldle/api-contract';
+import { games, gameObject } from '@workspace/api-contract';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,7 +11,10 @@ export async function GET(request: NextRequest) {
     const page = Math.max(1, Number(searchParams.get('page') ?? 1));
     const pageSize = Math.max(1, Number(searchParams.get('pageSize') ?? 10));
     const q = searchParams.get('q') ?? undefined;
-    const sortBy = (searchParams.get('sortBy') ?? 'name') as 'name' | 'firstReleaseDate' | 'igdbId';
+    const sortBy = (searchParams.get('sortBy') ?? 'name') as
+      | 'name'
+      | 'firstReleaseDate'
+      | 'igdbId';
     const sortDir = (searchParams.get('sortDir') ?? 'asc') as 'asc' | 'desc';
 
     const offset = (page - 1) * pageSize;
@@ -31,8 +34,17 @@ export async function GET(request: NextRequest) {
     })();
 
     const [gamesList, totalCount] = await Promise.all([
-      db.select(gameObject).from(games).where(where).limit(pageSize).offset(offset).orderBy(orderBy),
-      db.select({ count: sql<number>`count(*)` }).from(games).where(where),
+      db
+        .select(gameObject)
+        .from(games)
+        .where(where)
+        .limit(pageSize)
+        .offset(offset)
+        .orderBy(orderBy),
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(games)
+        .where(where),
     ]);
 
     const total = Number(totalCount[0]?.count ?? 0);
@@ -47,9 +59,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Connection failed. Please try again later.'
+        error: 'Connection failed. Please try again later.',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -92,9 +92,7 @@
         "bulk_image_gen_job_job_id_unique": {
           "name": "bulk_image_gen_job_job_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "job_id"
-          ]
+          "columns": ["job_id"]
         }
       },
       "policies": {},
@@ -269,9 +267,7 @@
         "games_igdb_key": {
           "name": "games_igdb_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "igdb_id"
-          ]
+          "columns": ["igdb_id"]
         }
       },
       "policies": {},

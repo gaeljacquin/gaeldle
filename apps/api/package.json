@@ -1,5 +1,5 @@
 {
-  "name": "@gaeldle/api",
+  "name": "@workspace/api",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --check .",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "type-check": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
@@ -24,8 +24,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1043.0",
     "@aws-sdk/s3-request-presigner": "^3.1043.0",
-    "@gaeldle/api-contract": "workspace:*",
-    "@gaeldle/constants": "workspace:*",
+    "@workspace/api-contract": "workspace:*",
+    "@workspace/constants": "workspace:*",
     "@nestjs/common": "^11.1.19",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.19",
@@ -64,7 +64,6 @@
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^17.6.0",
     "jest": "^30.3.0",
-    "prettier": "^3.8.3",
     "source-map-support": "^0.5.21",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.9",
@@ -73,9 +72,6 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.2"
-  },
-  "engines": {
-    "node": ">=22"
   },
   "jest": {
     "preset": "ts-jest/presets/default-esm",
@@ -101,8 +97,8 @@
     "coverageDirectory": "../coverage",
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
-      "^@gaeldle/api-contract$": "<rootDir>/../../../packages/api-contract/src/index.ts",
-      "^@gaeldle/constants$": "<rootDir>/../../../packages/constants/src/index.ts"
+      "^@workspace/api-contract$": "<rootDir>/../../../packages/api-contract/src/index.ts",
+      "^@workspace/constants$": "<rootDir>/../../../packages/constants/src/index.ts"
     },
     "extensionsToTreatAsEsm": [
       ".ts"

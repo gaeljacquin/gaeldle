@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Input } from '@workspace/ui/input';
+import { Button } from '@workspace/ui/button';
+import { Label } from '@workspace/ui/label';
 import { IconTrash, IconLoader } from '@tabler/icons-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@workspace/ui/lib/utils';
 import {
   useIgdbIdAddValidation,
   type IgdbIdAddValidationState,
@@ -48,10 +48,12 @@ export function IgdbIdAddRow({
     !validationState.canAdd;
 
   return (
-    <div className={cn(
-      'flex flex-col gap-2 p-4 border bg-card',
-      isDuplicate && 'border-destructive',
-    )}>
+    <div
+      className={cn(
+        'flex flex-col gap-2 p-4 border bg-card',
+        isDuplicate && 'border-destructive',
+      )}
+    >
       <div className="flex items-start gap-3">
         <div className="flex flex-col gap-1.5 flex-1">
           <Label htmlFor={`igdb-add-${rowId}`} className="text-xs">

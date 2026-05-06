@@ -4,8 +4,14 @@ import { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { discoverScan, discoverApply } from '@/lib/services/discover.service';
-import { DISCOVER_GAMES_DEFAULT, DISCOVER_GAMES_MAX } from '@gaeldle/constants';
-import type { DiscoverCandidate, DiscoverApplyResult } from '@gaeldle/api-contract';
+import {
+  DISCOVER_GAMES_DEFAULT,
+  DISCOVER_GAMES_MAX,
+} from '@workspace/constants';
+import type {
+  DiscoverCandidate,
+  DiscoverApplyResult,
+} from '@workspace/api-contract';
 
 export function useDiscoverGames() {
   const [countInput, setCountInput] = useState(DISCOVER_GAMES_DEFAULT);
@@ -13,7 +19,9 @@ export function useDiscoverGames() {
   const [scanEventId, setScanEventId] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [appliedIds, setAppliedIds] = useState<Set<number>>(new Set());
-  const [applyResults, setApplyResults] = useState<DiscoverApplyResult[] | null>(null);
+  const [applyResults, setApplyResults] = useState<
+    DiscoverApplyResult[] | null
+  >(null);
 
   const scanMutation = useMutation({
     mutationFn: (count: number) => discoverScan(count),
@@ -32,10 +40,9 @@ export function useDiscoverGames() {
       );
     },
     onError: (err) => {
-      toast.error(
-        err instanceof Error ? err.message : 'Scan failed',
-        { id: 'discover-scan' },
-      );
+      toast.error(err instanceof Error ? err.message : 'Scan failed', {
+        id: 'discover-scan',
+      });
     },
   });
 
@@ -73,10 +80,9 @@ export function useDiscoverGames() {
       }
     },
     onError: (err) => {
-      toast.error(
-        err instanceof Error ? err.message : 'Apply failed',
-        { id: 'discover-apply' },
-      );
+      toast.error(err instanceof Error ? err.message : 'Apply failed', {
+        id: 'discover-apply',
+      });
     },
   });
 
@@ -120,9 +126,7 @@ export function useDiscoverGames() {
   }, [scanEventId, selectedIds, applyMutation]);
 
   const canApply =
-    selectedIds.size > 0 &&
-    scanEventId !== null &&
-    !applyMutation.isPending;
+    selectedIds.size > 0 && scanEventId !== null && !applyMutation.isPending;
 
   return {
     // scan

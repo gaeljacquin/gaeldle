@@ -8,7 +8,7 @@ import {
   AlertDialogTitle,
   AlertDialogCancel,
   AlertDialogFooter,
-} from '@/components/ui/alert-dialog';
+} from '@workspace/ui/alert-dialog';
 import HoldToRevealButton from '@/components/hold-to-reveal-button';
 
 interface HintConfirmationModalProps {
@@ -17,7 +17,11 @@ interface HintConfirmationModalProps {
   onReveal: () => void;
 }
 
-export default function HintConfirmationModal({ isOpen, onClose, onReveal }: Readonly<HintConfirmationModalProps>) {
+export default function HintConfirmationModal({
+  isOpen,
+  onClose,
+  onReveal,
+}: Readonly<HintConfirmationModalProps>) {
   const handleReveal = () => {
     onReveal();
     onClose();

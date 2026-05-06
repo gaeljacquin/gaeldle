@@ -6,7 +6,7 @@ import {
   domainEvents,
   DiscoverCandidate,
   DiscoverApplyResult,
-} from '@gaeldle/api-contract';
+} from '@workspace/api-contract';
 import { IgdbService } from '@/games/igdb.service';
 import { GamesService } from '@/games/games.service';
 

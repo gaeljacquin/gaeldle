@@ -3,12 +3,14 @@
 ## Project: Gaeldle Monorepo
 
 ### Testing Setup
+
 - **Test Runner**: `pnpm test` (configured in `bunfig.toml`)
 - **Test Conventions**: Follow backend tests pattern using Jest-compatible mocks
 - **Web app test script**: `pnpm test:coverage` in `/apps/web/package.json`
 - **Backend uses**: NestJS with Jest (seen in `apps/api/src/games/games.service.spec.ts`)
 
 ### Frontend Utilities Coverage (100% achieved)
+
 Tests created for `/apps/web/lib/` utilities:
 
 1. **lib/utils.ts** - `cn()` utility (clsx + tailwind-merge)
@@ -37,18 +39,21 @@ Tests created for `/apps/web/lib/` utilities:
    - 12 tests covering: placeholder images, R2 URLs, env variable usage
 
 ### Overall Coverage
+
 - **Total Tests**: 93 passing tests
 - **Total Assertions**: 227 expect() calls
 - **Line Coverage**: 100.00%
 - **Function Coverage**: 100.00%
 
 ### Testing Patterns Used
+
 - Pure function unit tests (no mocking needed for pure utilities)
 - Mock factory pattern for complex objects (canvas API mocking)
 - Edge case coverage: empty inputs, null/undefined, boundary conditions
 - Type validation for complex objects (TablerIcon components, GameMode objects)
 
 ### Not Covered (Out of Scope)
+
 - Hooks (use-debounce, use-mobile, use-cover-art-game, etc.) - require React Testing Library
 - Services (game.service.ts) - require dependency injection and API mocking
 - Stores (timeline-store.ts) - require Zustand store testing

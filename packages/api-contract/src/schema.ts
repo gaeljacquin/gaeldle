@@ -95,19 +95,23 @@ export const bulkImageGenJobs = pgTable('bulk_image_gen_job', {
   processed: integer('processed').notNull().default(0),
   succeeded: integer('succeeded').notNull().default(0),
   failed: integer('failed').notNull().default(0),
-  failures: json('failures').$type<Array<{ igdbId: number; gameName: string; error: string }>>(),
-  params: json('params')
-    .notNull()
-    .$type<{
-      numGames: number;
-      imageStyle: string;
-      includeStoryline: boolean;
-      includeGenres: boolean;
-      includeThemes: boolean;
-    }>(),
+  failures:
+    json('failures').$type<
+      Array<{ igdbId: number; gameName: string; error: string }>
+    >(),
+  params: json('params').notNull().$type<{
+    numGames: number;
+    imageStyle: string;
+    includeStoryline: boolean;
+    includeGenres: boolean;
+    includeThemes: boolean;
+  }>(),
   startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }),
   completedAt: timestamp('completed_at', { withTimezone: true, mode: 'date' }),
-  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow(),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).defaultNow(),
 });
 
 export type BulkImageJob = typeof bulkImageGenJobs.$inferSelect;
@@ -127,7 +131,12 @@ export const BulkJobParamsSchema = z.object({
   includeThemes: z.boolean(),
 });
 
-export const BulkJobStatusEnum = z.enum(['pending', 'running', 'completed', 'failed']);
+export const BulkJobStatusEnum = z.enum([
+  'pending',
+  'running',
+  'completed',
+  'failed',
+]);
 
 export const BulkJobSummarySchema = z.object({
   jobId: z.string(),
@@ -149,11 +158,14 @@ export type BulkJobSummary = z.infer<typeof BulkJobSummarySchema>;
 export const domainEvents = pgTable(
   'domain_event',
   {
-    id:         serial('id').primaryKey(),
-    eventType:  varchar('event_type', { length: 64 }).notNull(),
-    actorId:    varchar('actor_id', { length: 255 }).notNull(),
-    occurredAt: timestamp('occurred_at', { withTimezone: true, mode: 'date' }).defaultNow(),
-    payload:    json('payload').notNull(),
+    id: serial('id').primaryKey(),
+    eventType: varchar('event_type', { length: 64 }).notNull(),
+    actorId: varchar('actor_id', { length: 255 }).notNull(),
+    occurredAt: timestamp('occurred_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).defaultNow(),
+    payload: json('payload').notNull(),
   },
   (table) => [
     index('domain_event_type_idx').on(table.eventType),

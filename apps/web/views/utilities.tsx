@@ -4,38 +4,38 @@ import {
   IconArrowsExchange,
   IconZoomScan,
   IconTools,
-} from "@tabler/icons-react";
-import { MenuCard } from "@/components/menu-card";
-import { DashboardPageHeader } from "@/components/dashboard-header";
+} from '@tabler/icons-react';
+import { MenuCard } from '@/components/menu-card';
+import { DashboardPageHeader } from '@/components/dashboard-header';
 
 const utilityItems = [
   {
-    href: "/dashboard/add-game",
-    title: "Add Game",
-    description: "Add new games to the library by IGDB ID.",
+    href: '/dashboard/add-game',
+    title: 'Add Game',
+    description: 'Add new games to the library by IGDB ID.',
     icon: IconCirclePlus,
-    gradient: "--gradient-easy",
+    gradient: '--gradient-easy',
   },
   {
-    href: "/dashboard/image-gen",
-    title: "Bulk Image Gen",
-    description: "Generate AI images for games in bulk.",
+    href: '/dashboard/image-gen',
+    title: 'Bulk Image Gen',
+    description: 'Generate AI images for games in bulk.',
     icon: IconRobotFace,
-    gradient: "--gradient-medium-1",
+    gradient: '--gradient-medium-1',
   },
   {
-    href: "/dashboard/replace-game",
-    title: "Replace Game",
-    description: "Swap games using IGDB IDs.",
+    href: '/dashboard/replace-game',
+    title: 'Replace Game',
+    description: 'Swap games using IGDB IDs.',
     icon: IconArrowsExchange,
-    gradient: "--gradient-medium-2",
+    gradient: '--gradient-medium-2',
   },
   {
-    href: "/dashboard/discover-games",
-    title: "Discover Games",
-    description: "Browse and discover new games on IGDB.",
+    href: '/dashboard/discover-games',
+    title: 'Discover Games',
+    description: 'Browse and discover new games on IGDB.',
     icon: IconZoomScan,
-    gradient: "--gradient-hard-1",
+    gradient: '--gradient-hard-1',
   },
 ] as const;
 

@@ -1,7 +1,7 @@
-import { MenuCard, type MenuCardProps } from "@/components/menu-card";
+import { MenuCard, type MenuCardProps } from '@/components/menu-card';
 
-interface GameModeCardProps extends Omit<MenuCardProps, "badge"> {
-  difficulty: "Easy" | "Medium" | "Hard";
+interface GameModeCardProps extends Omit<MenuCardProps, 'badge'> {
+  difficulty: 'Easy' | 'Medium' | 'Hard';
 }
 
 export function GameModeCard({

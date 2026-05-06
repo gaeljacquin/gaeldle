@@ -1,18 +1,26 @@
 'use client';
 
 import Image from 'next/image';
-import type { Game } from '@gaeldle/api-contract';
-import { cn } from '@/lib/utils';
+import type { Game } from '@workspace/api-contract';
+import { cn } from '@workspace/ui/lib/utils';
 
 interface GuessHistoryInlineProps {
   guesses: (Game | null)[];
   className?: string;
 }
 
-export default function GuessHistoryInline({ guesses, className }: Readonly<GuessHistoryInlineProps>) {
+export default function GuessHistoryInline({
+  guesses,
+  className,
+}: Readonly<GuessHistoryInlineProps>) {
   if (guesses.length === 0) {
     return (
-      <div className={cn('border border-border bg-card/60 p-4 text-center text-sm text-muted-foreground', className)}>
+      <div
+        className={cn(
+          'border border-border bg-card/60 p-4 text-center text-sm text-muted-foreground',
+          className,
+        )}
+      >
         No guesses yet
       </div>
     );
@@ -34,11 +42,17 @@ export default function GuessHistoryInline({ guesses, className }: Readonly<Gues
                 className="flex items-center gap-3 border border-border bg-card/70 p-2"
               >
                 <div className="h-16 w-12 bg-muted flex items-center justify-center shrink-0 border">
-                  <span className="text-xs text-muted-foreground font-mono">-</span>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    -
+                  </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate uppercase tracking-tight">Skipped</p>
-                  <p className="text-xs text-muted-foreground uppercase tracking-widest">Guess #{originalIndex}</p>
+                  <p className="text-sm font-bold truncate uppercase tracking-tight">
+                    Skipped
+                  </p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-widest">
+                    Guess #{originalIndex}
+                  </p>
                 </div>
               </div>
             );
@@ -60,12 +74,18 @@ export default function GuessHistoryInline({ guesses, className }: Readonly<Gues
                 />
               ) : (
                 <div className="h-16 w-12 bg-muted flex items-center justify-center shrink-0 border">
-                  <span className="text-xs text-muted-foreground font-mono">?</span>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    ?
+                  </span>
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold truncate uppercase tracking-tight">{guess.name}</p>
-                <p className="text-xs text-muted-foreground uppercase tracking-widest">Guess #{originalIndex}</p>
+                <p className="text-sm font-bold truncate uppercase tracking-tight">
+                  {guess.name}
+                </p>
+                <p className="text-xs text-muted-foreground uppercase tracking-widest">
+                  Guess #{originalIndex}
+                </p>
               </div>
             </div>
           );

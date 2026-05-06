@@ -9,28 +9,37 @@ import {
   IconCircleCheck,
   IconCircleX,
 } from '@tabler/icons-react';
-import { DISCOVER_GAMES_MAX } from '@gaeldle/constants';
+import { DISCOVER_GAMES_MAX } from '@workspace/constants';
 import { DashboardPageHeader } from '@/components/dashboard-header';
-import { Button } from '@/components/ui/button';
+import { Button } from '@workspace/ui/button';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from '@/components/ui/card';
+} from '@workspace/ui/card';
 import { DiscoveredGameCard } from '@/components/discovered-game-card';
 import { useDiscoverGames } from '@/lib/hooks/use-discover-games';
-import type { DiscoverCandidate, DiscoverApplyResult } from '@gaeldle/api-contract';
+import type {
+  DiscoverCandidate,
+  DiscoverApplyResult,
+} from '@workspace/api-contract';
 
-function ApplyResultsRow({ result }: Readonly<{ result: DiscoverApplyResult }>) {
+function ApplyResultsRow({
+  result,
+}: Readonly<{ result: DiscoverApplyResult }>) {
   if (result.status === 'error') {
     return (
       <div className="flex items-center gap-1.5 text-destructive">
         <IconCircleX size={14} aria-hidden="true" />
-        <span className="text-xs font-medium">{result.name ?? `IGDB #${result.igdbId}`}</span>
+        <span className="text-xs font-medium">
+          {result.name ?? `IGDB #${result.igdbId}`}
+        </span>
         {result.error ? (
-          <span className="text-xs text-muted-foreground">— {result.error}</span>
+          <span className="text-xs text-muted-foreground">
+            — {result.error}
+          </span>
         ) : null}
       </div>
     );
@@ -53,7 +62,12 @@ interface IdlePhaseProps {
   isScanning: boolean;
 }
 
-function IdlePhase({ countInput, setCountInput, onScan, isScanning }: Readonly<IdlePhaseProps>) {
+function IdlePhase({
+  countInput,
+  setCountInput,
+  onScan,
+  isScanning,
+}: Readonly<IdlePhaseProps>) {
   return (
     <div className="flex flex-col items-start gap-4">
       <div className="flex items-center gap-3">
@@ -216,9 +230,13 @@ export function DiscoverGames() {
                 <CardHeader>
                   <CardTitle>Results</CardTitle>
                   <CardDescription className="mt-1">
-                    {candidates.length} candidate{candidates.length === 1 ? '' : 's'} returned
-                    &mdash; {candidates.filter((c) => c.isAlreadyAdded).length} already in library
-                    {appliedIds.size > 0 ? `, ${appliedIds.size} just added` : null}
+                    {candidates.length} candidate
+                    {candidates.length === 1 ? '' : 's'} returned &mdash;{' '}
+                    {candidates.filter((c) => c.isAlreadyAdded).length} already
+                    in library
+                    {appliedIds.size > 0
+                      ? `, ${appliedIds.size} just added`
+                      : null}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -229,7 +247,9 @@ export function DiscoverGames() {
                     canApply={canApply}
                     isApplying={isApplying}
                     isScanning={isScanning}
-                    onSelectAllNew={() => selectAllNew(candidates as DiscoverCandidate[])}
+                    onSelectAllNew={() =>
+                      selectAllNew(candidates as DiscoverCandidate[])
+                    }
                     onDeselectAll={deselectAll}
                     onApply={handleApply}
                     onScanAgain={handleScan}
@@ -264,8 +284,10 @@ export function DiscoverGames() {
                   <CardHeader>
                     <CardTitle>Results</CardTitle>
                     <CardDescription className="mt-1">
-                      {applyResults.filter((r) => r.status !== 'error').length} games added,{' '}
-                      {applyResults.filter((r) => r.status === 'error').length} error(s)
+                      {applyResults.filter((r) => r.status !== 'error').length}{' '}
+                      games added,{' '}
+                      {applyResults.filter((r) => r.status === 'error').length}{' '}
+                      error(s)
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-1">

@@ -1,7 +1,7 @@
 import { Controller, UseGuards, NotFoundException } from '@nestjs/common';
 import sharp from 'sharp';
 import { Implement, implement } from '@orpc/nest';
-import { contract, type ImageStyle } from '@gaeldle/api-contract';
+import { contract, type ImageStyle } from '@workspace/api-contract';
 import { GamesService } from '@/games/games.service';
 import { S3Service } from '@/lib/s3.service';
 import { AiService } from '@/lib/ai.service';
@@ -11,7 +11,7 @@ import {
   IMAGE_GEN_DIR,
   IMAGE_PROMPT_SUFFIX,
   TEST_DIR,
-} from '@gaeldle/constants';
+} from '@workspace/constants';
 import { ConfigService } from '@nestjs/config';
 import type { AppConfiguration } from '@/config/configuration';
 

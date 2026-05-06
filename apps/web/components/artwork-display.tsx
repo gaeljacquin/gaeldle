@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
+import { cn } from '@workspace/ui/lib/utils';
 import { pixelateImage } from '@/lib/utils/pixelate';
 
 interface ArtworkDisplayProps {
@@ -20,52 +20,68 @@ export default function ArtworkDisplay({
   isLoading = false,
   className,
 }: Readonly<ArtworkDisplayProps>) {
-  const [pixelatedData, setPixelatedData] = useState<{url: string; sourceUrl: string} | null>(null);
+  const [pixelatedData, setPixelatedData] = useState<{
+    url: string;
+    sourceUrl: string;
+  } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Apply pixelation when image URL or pixel size changes
   useEffect(() => {
-    // Early return for invalid states - don't clear cached data yet
+    // Early return for invalid states
     if (!imageUrl || isGameOver || isLoading) {
       setIsProcessing(false);
       return;
     }
 
-    // Clear old pixelated image only when we're about to generate a new one
-    setPixelatedData(null);
+    const timer = setTimeout(() => {
+      // Clear old pixelated image only when we're about to generate a new one
+      setPixelatedData(null);
 
-    async function applyPixelation() {
-      if (!imageUrl) return;
+      async function applyPixelation() {
+        if (!imageUrl) return;
 
-      try {
-        setIsProcessing(true);
-        const pixelated = await pixelateImage(imageUrl, pixelSize);
-        // Store both the pixelated URL and the source it came from
-        setPixelatedData({ url: pixelated, sourceUrl: imageUrl });
-      } catch (error) {
-        console.error('Failed to pixelate artwork:', error);
-        setPixelatedData({ url: imageUrl, sourceUrl: imageUrl });
-      } finally {
-        setIsProcessing(false);
+        try {
+          setIsProcessing(true);
+          const pixelated = await pixelateImage(imageUrl, pixelSize);
+          // Store both the pixelated URL and the source it came from
+          setPixelatedData({ url: pixelated, sourceUrl: imageUrl });
+        } catch (error) {
+          console.error('Failed to pixelate artwork:', error);
+          setPixelatedData({ url: imageUrl, sourceUrl: imageUrl });
+        } finally {
+          setIsProcessing(false);
+        }
       }
-    }
 
-    applyPixelation();
+      void applyPixelation();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [imageUrl, pixelSize, isGameOver, isLoading]);
 
   // Determine what to display
   const shouldShowPixelated = !isGameOver;
   // Only use pixelated URL if it matches the current source
-  const pixelatedImageUrl = (pixelatedData?.sourceUrl === imageUrl) ? pixelatedData.url : null;
+  const pixelatedImageUrl =
+    pixelatedData?.sourceUrl === imageUrl ? pixelatedData.url : null;
   const displayUrl = shouldShowPixelated ? pixelatedImageUrl : imageUrl;
 
   // Don't show original image if we're waiting for pixelation
-  const shouldShowImage = !shouldShowPixelated || (shouldShowPixelated && pixelatedImageUrl);
+  const shouldShowImage =
+    !shouldShowPixelated || (shouldShowPixelated && pixelatedImageUrl);
 
   if (!imageUrl) {
     return (
-      <div className={cn('relative bg-muted flex items-center justify-center border aspect-video', className)}>
-        <span className="text-muted-foreground text-sm">No artwork available</span>
+      <div
+        className={cn(
+          'relative bg-muted flex items-center justify-center border aspect-video',
+          className,
+        )}
+      >
+        <span className="text-muted-foreground text-sm">
+          No artwork available
+        </span>
       </div>
     );
   }

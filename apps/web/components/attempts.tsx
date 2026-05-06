@@ -19,7 +19,9 @@ export default function Attempts({
   const usedClass = 'border-foreground/20 bg-foreground/10';
 
   return (
-    <div className={`flex items-center justify-center gap-2 ${className ?? ''}`}>
+    <div
+      className={`flex items-center justify-center gap-2 ${className ?? ''}`}
+    >
       {Array.from({ length: maxAttempts }).map((_, index) => {
         const isUsed = index >= maxAttempts - attemptsUsed;
         return (

@@ -1,7 +1,7 @@
 'use client';
 
-import { appInfo } from "@/lib/app-info";
-import Link from "next/link";
+import { appInfo } from '@/lib/app-info';
+import Link from 'next/link';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,7 +11,8 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center gap-4 text-center text-sm text-muted-foreground">
           <p>
-            &copy; 2025 {currentYear > 2025 ? <span>- {currentYear} </span> : null}
+            &copy; 2025{' '}
+            {currentYear > 2025 ? <span>- {currentYear} </span> : null}
             <Link
               href={`${appInfo.authorUrl}`}
               target="_blank"

@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { StackProvider, StackTheme } from "@stackframe/stack";
-import { ThemeProvider } from "next-themes";
-import { stackClientApp } from "@/stack/client";
-import { Toaster } from "sonner";
-import type { ReactNode } from "react";
-import { useState } from "react";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { StackProvider, StackTheme } from '@stackframe/stack';
+import { ThemeProvider } from 'next-themes';
+import { stackClientApp } from '@/stack/client';
+import { Toaster } from 'sonner';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
 
 type ProvidersProps = {
   children: ReactNode;
@@ -24,7 +24,7 @@ export default function Providers({ children }: Readonly<ProvidersProps>) {
             refetchOnWindowFocus: false,
           },
         },
-      })
+      }),
   );
 
   return (

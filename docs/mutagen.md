@@ -5,11 +5,13 @@ Automatically sync changes in this project from your local machine to a remote L
 ## Setup
 
 1. **Install Mutagen** (if not already installed):
+
    ```bash
    brew install mutagen-io/mutagen/mutagen
    ```
 
 2. **Configure environment variables**:
+
    ```bash
    cp .env.example .env
    # Edit .env with your actual values
@@ -25,6 +27,7 @@ Automatically sync changes in this project from your local machine to a remote L
 The script loads `.env` automatically if it exists — no need to source it manually.
 
 ### Via package.json (recommended):
+
 ```bash
 pnpm run sync
 # OR
@@ -32,6 +35,7 @@ pnpm run sync
 ```
 
 ### Directly:
+
 ```bash
 ./remote-sync.sh
 ```
@@ -40,9 +44,9 @@ pnpm run sync
 
 If a variable is not set in `.env`, the script falls back to these defaults:
 
-| Variable | Default |
-|---|---|
-| `LOCAL_PATH` | `$HOME/gaeldle` |
+| Variable      | Default              |
+| ------------- | -------------------- |
+| `LOCAL_PATH`  | `$HOME/gaeldle`      |
 | `REMOTE_USER` | `<your-remote-user>` |
 | `REMOTE_HOST` | `<your-remote-host>` |
 | `REMOTE_PATH` | `<your-remote-path>` |
@@ -53,15 +57,15 @@ If a variable is not set in `.env`, the script falls back to these defaults:
 
 After creating the sync session, use either the `pnpm run sync:*` shorthands or raw `mutagen` commands:
 
-| Action | pnpm shorthand | mutagen command |
-|---|---|---|
-| View all sessions | `pnpm run sync:list` | `mutagen sync list` |
-| View all sessions (verbose) | `pnpm run sync:list-long` | `mutagen sync list --long` |
-| Monitor real-time progress | `pnpm run sync:monitor` | `mutagen sync monitor gaeldle` |
-| Pause syncing | `pnpm run sync:pause` | `mutagen sync pause gaeldle` |
-| Resume syncing | `pnpm run sync:resume` | `mutagen sync resume gaeldle` |
-| Stop and remove session | `pnpm run sync:terminate` | `mutagen sync terminate gaeldle` |
-| Reset session (if issues occur) | `pnpm run sync:reset` | `mutagen sync reset gaeldle` |
+| Action                          | pnpm shorthand            | mutagen command                  |
+| ------------------------------- | ------------------------- | -------------------------------- |
+| View all sessions               | `pnpm run sync:list`      | `mutagen sync list`              |
+| View all sessions (verbose)     | `pnpm run sync:list-long` | `mutagen sync list --long`       |
+| Monitor real-time progress      | `pnpm run sync:monitor`   | `mutagen sync monitor gaeldle`   |
+| Pause syncing                   | `pnpm run sync:pause`     | `mutagen sync pause gaeldle`     |
+| Resume syncing                  | `pnpm run sync:resume`    | `mutagen sync resume gaeldle`    |
+| Stop and remove session         | `pnpm run sync:terminate` | `mutagen sync terminate gaeldle` |
+| Reset session (if issues occur) | `pnpm run sync:reset`     | `mutagen sync reset gaeldle`     |
 
 ## Ignored Files and Folders
 

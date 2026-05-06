@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { type TablerIcon } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
+import Link from 'next/link';
+import { type TablerIcon } from '@tabler/icons-react';
+import { cn } from '@workspace/ui/lib/utils';
 
 export interface MenuCardProps {
   href?: string;
@@ -24,15 +24,15 @@ export function MenuCard({
   const cardContent = (
     <div
       className={cn(
-        "group relative flex h-44 w-full flex-col justify-end overflow-hidden rounded-xl p-5 text-left transition-all duration-300",
-        "hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]",
-        disabled && "cursor-not-allowed opacity-70"
+        'group relative flex h-44 w-full flex-col justify-end overflow-hidden rounded-xl p-5 text-left transition-all duration-300',
+        'hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]',
+        disabled && 'cursor-not-allowed opacity-70',
       )}
       style={{ background: `var(${gradient})` }}
     >
       <div
         className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{ background: "var(--gradient-card-overlay)" }}
+        style={{ background: 'var(--gradient-card-overlay)' }}
       />
 
       {badge}

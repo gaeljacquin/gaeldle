@@ -3,8 +3,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getPixelSizeForAttempt } from '@/lib/utils/pixelate';
 import { getAllGames, getRandomGame } from '@/lib/services/game.service';
-import type { CoverArtModeSlug, Game, ArtworkImage } from '@gaeldle/api-contract';
-import { getFriendlyErrorMessage } from '@/lib/utils';
+import type {
+  CoverArtModeSlug,
+  Game,
+  ArtworkImage,
+} from '@workspace/api-contract';
+import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
 
 export const MAX_ATTEMPTS = 5;
 
@@ -49,7 +53,10 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     loadGames();
   }, [mode]);
 
-  const currentPixelSize = getPixelSizeForAttempt(MAX_ATTEMPTS - attemptsLeft, MAX_ATTEMPTS);
+  const currentPixelSize = getPixelSizeForAttempt(
+    MAX_ATTEMPTS - attemptsLeft,
+    MAX_ATTEMPTS,
+  );
 
   const selectedArtworkUrl = useMemo(() => {
     if (mode === 'artwork' && targetGame) {
@@ -69,7 +76,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   const handleSubmit = useCallback(() => {
     if (!targetGame || selectedGameId === null || isGameOver) return;
 
-    const selectedGame = allGames.find(g => g.id === selectedGameId);
+    const selectedGame = allGames.find((g) => g.id === selectedGameId);
     if (!selectedGame) return;
 
     if (selectedGameId === targetGame.id) {
@@ -113,7 +120,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   }, [mode]);
 
   const adjustAttempts = useCallback((delta: number) => {
-    setAttemptsLeft(prev => {
+    setAttemptsLeft((prev) => {
       const newValue = prev + delta;
       if (newValue < 1 || newValue > MAX_ATTEMPTS) return prev;
       return newValue;

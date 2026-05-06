@@ -21,7 +21,7 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@gaeldle/api-contract": ["../../packages/api-contract/src/index.ts"]
+      "@workspace/api-contract": ["../../packages/api-contract/src/index.ts"]
     }
   },
   "include": [

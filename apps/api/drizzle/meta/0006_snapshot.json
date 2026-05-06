@@ -160,9 +160,7 @@
         "games_igdb_key": {
           "name": "games_igdb_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "igdb_id"
-          ]
+          "columns": ["igdb_id"]
         }
       },
       "policies": {},

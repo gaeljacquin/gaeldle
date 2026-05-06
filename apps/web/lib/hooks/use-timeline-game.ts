@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getAllGames } from '@/lib/services/game.service';
-import type { Game } from '@gaeldle/api-contract';
-import { getFriendlyErrorMessage } from '@/lib/utils';
+import type { Game } from '@workspace/api-contract';
+import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
 
 export const MAX_ATTEMPTS = 3;
 const GAMES_COUNT = 10;
@@ -14,7 +14,9 @@ export function useTimelineGame() {
   const [userOrder, setUserOrder] = useState<Game[]>([]);
   const [savedOrder, setSavedOrder] = useState<Game[]>([]); // Order at last submit (or initial)
   const [correctGameIds, setCorrectGameIds] = useState<Set<number>>(new Set()); // IDs of games that were correct
-  const [correctPositionMap, setCorrectPositionMap] = useState<Map<number, number>>(new Map()); // position → correct game ID
+  const [correctPositionMap, setCorrectPositionMap] = useState<
+    Map<number, number>
+  >(new Map()); // position → correct game ID
   const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isWinner, setIsWinner] = useState(false);
@@ -29,7 +31,7 @@ export function useTimelineGame() {
         setIsLoading(true);
         const games = await getAllGames();
 
-        const gamesWithDates = games.filter(g => g.firstReleaseDate !== null);
+        const gamesWithDates = games.filter((g) => g.firstReleaseDate !== null);
         const shuffled = [...gamesWithDates].sort(() => Math.random() - 0.5);
         const selected = shuffled.slice(0, GAMES_COUNT);
 
@@ -119,7 +121,9 @@ export function useTimelineGame() {
       setIsWinner(false);
 
       // Select new random games
-      const gamesWithDates = allGames.filter(g => g.firstReleaseDate !== null);
+      const gamesWithDates = allGames.filter(
+        (g) => g.firstReleaseDate !== null,
+      );
       const shuffled = [...gamesWithDates].sort(() => Math.random() - 0.5);
       const selected = shuffled.slice(0, GAMES_COUNT);
 
@@ -143,7 +147,7 @@ export function useTimelineGame() {
   }, [selectedGames]);
 
   const adjustAttempts = useCallback((delta: number) => {
-    setAttemptsLeft(prev => {
+    setAttemptsLeft((prev) => {
       const newValue = prev + delta;
       if (newValue < 1 || newValue > MAX_ATTEMPTS) return prev;
       return newValue;

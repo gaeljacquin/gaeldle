@@ -15,12 +15,12 @@ module.exports = {
         'refactor',
         'revert',
         'style',
-        'test'
-      ]
+        'test',
+      ],
     ],
     'subject-case': [2, 'never', ['start-case', 'pascal-case']],
     'subject-max-length': [2, 'always', 100],
     'body-max-line-length': [2, 'always', 100],
-    'footer-max-line-length': [2, 'always', 100]
-  }
-}
+    'footer-max-line-length': [2, 'always', 100],
+  },
+};

@@ -2,8 +2,8 @@
 
 import { MAX_ATTEMPTS, useTimelineGame } from '@/lib/hooks/use-timeline-game';
 import { TimelineCard } from '@/components/timeline-card';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@workspace/ui/button';
+import { Card, CardContent } from '@workspace/ui/card';
 import { getGameModeBySlug } from '@/lib/game-mode';
 import {
   DndContext,
@@ -26,12 +26,12 @@ import {
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
-import type { Game } from '@gaeldle/api-contract';
+import type { Game } from '@workspace/api-contract';
 import Attempts from '@/components/attempts';
 import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';
 import TimelineDevToggle from '@/components/timeline-dev-toggle';
-import { cn } from '@/lib/utils';
+import { cn } from '@workspace/ui/lib/utils';
 import Stuck from '@/components/stuck';
 
 const noOpStrategy: SortingStrategy = () => {
@@ -114,7 +114,7 @@ export default function Timeline() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   function handleDragStart(e: DragStartEvent) {
@@ -140,7 +140,10 @@ export default function Timeline() {
 
       if (swapMode) {
         newOrder = [...userOrder];
-        [newOrder[oldIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[oldIndex]];
+        [newOrder[oldIndex], newOrder[newIndex]] = [
+          newOrder[newIndex],
+          newOrder[oldIndex],
+        ];
       } else {
         newOrder = arrayMove(userOrder, oldIndex, newIndex);
       }
@@ -156,7 +159,7 @@ export default function Timeline() {
   }
 
   if (isLoading) {
-    return <Stuck stuckState='loading' />;
+    return <Stuck stuckState="loading" />;
   }
 
   if (error) {
@@ -168,13 +171,17 @@ export default function Timeline() {
     );
   }
 
-  const activeGame = activeId ? userOrder.find((game) => game.id === activeId) : null;
+  const activeGame = activeId
+    ? userOrder.find((game) => game.id === activeId)
+    : null;
 
-  const hasMovedCorrectCard = hasSubmitted && userOrder.some((game, index) => {
-    const wasCorrect = correctGameIds.has(game.id);
-    const isInCorrectPosition = correctPositionMap.get(index) === game.id;
-    return wasCorrect && !isInCorrectPosition;
-  });
+  const hasMovedCorrectCard =
+    hasSubmitted &&
+    userOrder.some((game, index) => {
+      const wasCorrect = correctGameIds.has(game.id);
+      const isInCorrectPosition = correctPositionMap.get(index) === game.id;
+      return wasCorrect && !isInCorrectPosition;
+    });
 
   const buttonsDisabled = isOrderSameAsSaved() || hasMovedCorrectCard;
 
@@ -183,8 +190,12 @@ export default function Timeline() {
       <div className="container mx-auto py-10">
         <div className="relative mb-12">
           <div className="text-center pt-8 md:pt-0">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">{gameMode?.title}</h1>
-            <p className="mt-2 text-muted-foreground">{gameMode?.description}</p>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">
+              {gameMode?.title}
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {gameMode?.description}
+            </p>
           </div>
         </div>
 
@@ -201,7 +212,9 @@ export default function Timeline() {
                 >
                   <SortableContext
                     items={userOrder.map((game) => game.id)}
-                    strategy={swapMode ? noOpStrategy : horizontalListSortingStrategy}
+                    strategy={
+                      swapMode ? noOpStrategy : horizontalListSortingStrategy
+                    }
                   >
                     <div className="flex gap-6 min-w-max px-2 mx-auto">
                       {userOrder.map((game, index) => {
@@ -211,7 +224,8 @@ export default function Timeline() {
 
                         if (hasSubmitted) {
                           const wasCorrect = correctGameIds.has(game.id);
-                          const isInCorrectPosition = correctPositionMap.get(index) === game.id;
+                          const isInCorrectPosition =
+                            correctPositionMap.get(index) === game.id;
 
                           if (wasCorrect && isInCorrectPosition) {
                             isCorrect = true;
@@ -241,7 +255,10 @@ export default function Timeline() {
 
                   <DragOverlay>
                     {activeGame ? (
-                      <TimelineCard game={activeGame} className="opacity-100 ring-2 ring-primary" />
+                      <TimelineCard
+                        game={activeGame}
+                        className="opacity-100 ring-2 ring-primary"
+                      />
                     ) : null}
                   </DragOverlay>
                 </DndContext>
@@ -252,8 +269,10 @@ export default function Timeline() {
                   <button
                     onClick={() => setSwapMode(false)}
                     className={cn(
-                      "px-6 py-2 text-sm font-bold transition-colors cursor-pointer",
-                      swapMode ? "text-muted-foreground hover:text-foreground" : "bg-primary text-primary-foreground",
+                      'px-6 py-2 text-sm font-bold transition-colors cursor-pointer',
+                      swapMode
+                        ? 'text-muted-foreground hover:text-foreground'
+                        : 'bg-primary text-primary-foreground',
                     )}
                     disabled={isGameOver}
                   >
@@ -262,8 +281,10 @@ export default function Timeline() {
                   <button
                     onClick={() => setSwapMode(true)}
                     className={cn(
-                      "px-6 py-2 text-sm font-bold transition-colors cursor-pointer",
-                      swapMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                      'px-6 py-2 text-sm font-bold transition-colors cursor-pointer',
+                      swapMode
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:text-foreground',
                     )}
                     disabled={isGameOver}
                   >
@@ -272,8 +293,14 @@ export default function Timeline() {
                 </div>
 
                 <div className="flex flex-col items-center gap-2">
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Attempts</p>
-                  <Attempts maxAttempts={MAX_ATTEMPTS} attemptsLeft={attemptsLeft} variant="primary" />
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Attempts
+                  </p>
+                  <Attempts
+                    maxAttempts={MAX_ATTEMPTS}
+                    attemptsLeft={attemptsLeft}
+                    variant="primary"
+                  />
                 </div>
               </div>
 
@@ -303,15 +330,20 @@ export default function Timeline() {
                 <div className="mt-8 border border-border bg-card/60 p-8 text-center animate-in fade-in zoom-in duration-300">
                   {isWinner ? (
                     <div className="space-y-2">
-                      <p className="text-2xl font-bold text-green-600">Congratulations!</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        Congratulations!
+                      </p>
                       <p className="text-muted-foreground">
-                        You arranged all games in the correct chronological order!
+                        You arranged all games in the correct chronological
+                        order!
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <p className="text-2xl font-bold text-destructive">Game Over!</p>
+                        <p className="text-2xl font-bold text-destructive">
+                          Game Over!
+                        </p>
                         <p className="text-muted-foreground">
                           Here&apos;s the correct order:
                         </p>

@@ -1,5 +1,5 @@
-import { IconArrowLeft } from "@tabler/icons-react";
-import Link from "next/link";
+import { IconArrowLeft } from '@tabler/icons-react';
+import Link from 'next/link';
 
 export default function BackToDashboard() {
   return (
@@ -10,5 +10,5 @@ export default function BackToDashboard() {
       <IconArrowLeft className="size-4" />
       Dashboard
     </Link>
-  )
+  );
 }

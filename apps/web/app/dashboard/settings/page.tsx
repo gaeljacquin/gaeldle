@@ -1,7 +1,5 @@
-import Settings from "@/views/settings";
+import Settings from '@/views/settings';
 
 export default function SettingsPage() {
-  return (
-    <Settings />
-  )
+  return <Settings />;
 }

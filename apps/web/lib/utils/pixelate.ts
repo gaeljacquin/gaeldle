@@ -6,7 +6,7 @@
  */
 export function pixelateImage(
   imageUrl: string,
-  pixelSize: number = 10
+  pixelSize: number = 10,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -44,7 +44,7 @@ export function pixelateImage(
         0,
         0,
         canvas.width,
-        canvas.height
+        canvas.height,
       );
 
       resolve(canvas.toDataURL());
@@ -66,7 +66,7 @@ export function pixelateImage(
  */
 export function getPixelSizeForAttempt(
   attempt: number,
-  maxAttempts: number = 5
+  maxAttempts: number = 5,
 ): number {
   const maxPixelSize = 12;
   const minPixelSize = 5;

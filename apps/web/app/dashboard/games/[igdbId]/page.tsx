@@ -1,4 +1,4 @@
-import GameDetails from "@/views/game-details";
+import GameDetails from '@/views/game-details';
 
 export default function GameDetailsPage({
   params,

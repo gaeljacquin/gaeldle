@@ -1,8 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import type { Game } from '@gaeldle/api-contract';
+import { Button } from '@workspace/ui/button';
+import type { Game } from '@workspace/api-contract';
 
 interface SpecificationsGameOverProps {
   isCorrect: boolean;
@@ -40,14 +40,16 @@ export default function SpecificationsGameOver({
           <div className="space-y-2 text-center">
             <h2 className="text-3xl font-bold text-green-600">Correct!</h2>
             <p className="text-md font-semibold">
-              The game was: <span className="text-primary">{targetGame?.name}</span>
+              The game was:{' '}
+              <span className="text-primary">{targetGame?.name}</span>
             </p>
           </div>
         ) : (
           <div className="space-y-2 text-center">
             <h2 className="text-3xl font-bold text-destructive">Game Over!</h2>
             <p className="text-md font-semibold">
-              The game was: <span className="text-primary">{targetGame?.name}</span>
+              The game was:{' '}
+              <span className="text-primary">{targetGame?.name}</span>
             </p>
           </div>
         )}

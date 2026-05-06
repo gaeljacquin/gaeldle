@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { IconMoon, IconSun } from "@tabler/icons-react";
-import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
-import { useSyncExternalStore } from "react";
+import { IconMoon, IconSun } from '@tabler/icons-react';
+import { useTheme } from 'next-themes';
+import { Button } from '@workspace/ui/button';
+import { useSyncExternalStore } from 'react';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
-    () => false
+    () => false,
   );
 
   if (!mounted) {
@@ -30,7 +30,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+      onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
       title="Toggle theme"
       className="cursor-pointer"
     >

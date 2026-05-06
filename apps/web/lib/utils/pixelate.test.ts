@@ -125,7 +125,8 @@ describe('pixelate utilities', () => {
       };
 
       // Mock document.createElement
-      originalDocument = (globalThis as Record<string, unknown>).document as typeof document;
+      originalDocument = (globalThis as Record<string, unknown>)
+        .document as typeof document;
       (globalThis as Record<string, unknown>).document = {
         createElement: vi.fn((tag: string) => {
           if (tag === 'canvas') return mockCanvas;
@@ -134,8 +135,9 @@ describe('pixelate utilities', () => {
       };
 
       // Mock Image constructor
-      originalImage = (globalThis as Record<string, unknown>).Image as typeof Image;
-      (globalThis as Record<string, unknown>).Image = vi.fn(function() {
+      originalImage = (globalThis as Record<string, unknown>)
+        .Image as typeof Image;
+      (globalThis as Record<string, unknown>).Image = vi.fn(function () {
         return mockImage;
       });
     });
@@ -190,7 +192,9 @@ describe('pixelate utilities', () => {
     });
 
     it('should handle canvas context not available', async () => {
-      (globalThis as unknown as Record<string, Record<string, unknown>>).document.createElement = vi.fn(() => ({
+      (
+        globalThis as unknown as Record<string, Record<string, unknown>>
+      ).document.createElement = vi.fn(() => ({
         getContext: vi.fn(() => null),
       }));
 
@@ -244,7 +248,7 @@ describe('pixelate utilities', () => {
       await promise;
 
       // drawImage should be called twice - once to draw small, once to scale up
-      const drawCalls = (mockCtx.drawImage).mock.calls;
+      const drawCalls = mockCtx.drawImage.mock.calls;
       expect(drawCalls.length).toBeGreaterThanOrEqual(2);
     });
 

@@ -1,7 +1,7 @@
-import { GameModeCard } from "@/components/game-mode-card";
-import { gameModes } from "@/lib/game-mode";
-import { appInfo } from "@/lib/app-info";
-import Link from "next/link";
+import { GameModeCard } from '@/components/game-mode-card';
+import { gameModes } from '@/lib/game-mode';
+import { appInfo } from '@/lib/app-info';
+import Link from 'next/link';
 
 export default function HomeView() {
   return (
@@ -12,8 +12,12 @@ export default function HomeView() {
 
         <div className="container mx-auto px-4 py-12 relative z-10">
           <header className="mx-auto max-w-2xl text-center mb-12">
-            <h1 className="text-4xl font-bold tracking-tight md:text-5xl">{appInfo.title}</h1>
-            <p className="mt-3 text-lg text-muted-foreground">{appInfo.description}</p>
+            <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+              {appInfo.title}
+            </h1>
+            <p className="mt-3 text-lg text-muted-foreground">
+              {appInfo.description}
+            </p>
           </header>
 
           <section className="mb-14">
@@ -35,25 +39,41 @@ export default function HomeView() {
           <div className="flex flex-col gap-4">
             <p className="text-md text-center">
               Inspired by&nbsp;
-              <Link href="https://gamedle.wtf" target="_blank" className="underline hover:text-sky-600">
+              <Link
+                href="https://gamedle.wtf"
+                target="_blank"
+                className="underline hover:text-sky-600"
+              >
                 Gamedle
               </Link>
               &nbsp;and&nbsp;
-              <Link href="https://wikitrivia.tomjwatson.com/" target="_blank" className="underline hover:text-sky-600">
+              <Link
+                href="https://wikitrivia.tomjwatson.com/"
+                target="_blank"
+                className="underline hover:text-sky-600"
+              >
                 Wikitrivia
               </Link>
               .
             </p>
             <p className="text-md text-center">
               All game data sourced from&nbsp;
-              <Link href="https://www.igdb.com/" target="_blank" className="underline hover:text-sky-600">
+              <Link
+                href="https://www.igdb.com/"
+                target="_blank"
+                className="underline hover:text-sky-600"
+              >
                 IGDB
               </Link>
               .
             </p>
             <p className="text-md text-center">
               Be sure to check out&nbsp;
-              <Link href="https://tr.ee/uBF_3IDko-" target="_blank" className="underline hover:text-sky-600">
+              <Link
+                href="https://tr.ee/uBF_3IDko-"
+                target="_blank"
+                className="underline hover:text-sky-600"
+              >
                 my other games
               </Link>
               !

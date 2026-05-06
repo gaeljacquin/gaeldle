@@ -1,4 +1,4 @@
-import { Icon } from "@tabler/icons-react";
+import { Icon } from '@tabler/icons-react';
 
 interface DashboardPageHeaderProps {
   title: string;
@@ -13,9 +13,7 @@ export function DashboardPageHeader(props: Readonly<DashboardPageHeaderProps>) {
         <props.icon size={22} className="text-primary" aria-hidden="true" />
         {props.title}
       </h1>
-      <p className="text-sm text-muted-foreground">
-        {props.description}
-      </p>
+      <p className="text-sm text-muted-foreground">{props.description}</p>
     </div>
-  )
+  );
 }

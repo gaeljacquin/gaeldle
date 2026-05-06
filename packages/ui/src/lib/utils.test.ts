@@ -39,7 +39,7 @@ describe('cn utility', () => {
     const result = cn(
       'border rounded-lg',
       { 'bg-red-500': true, 'bg-blue-500': false },
-      'p-4'
+      'p-4',
     );
     expect(result).toContain('border');
     expect(result).toContain('rounded-lg');
@@ -60,9 +60,9 @@ describe('cn utility', () => {
 
   it('should handle object with multiple conditions', () => {
     const result = cn({
-      'flex': true,
+      flex: true,
       'gap-2': true,
-      'hidden': false,
+      hidden: false,
     });
     expect(result).toContain('flex');
     expect(result).toContain('gap-2');
@@ -72,8 +72,8 @@ describe('cn utility', () => {
   it('should combine strings and objects', () => {
     const result = cn(
       'text-sm',
-      { 'font-bold': true, 'italic': false },
-      'text-gray-700'
+      { 'font-bold': true, italic: false },
+      'text-gray-700',
     );
     expect(result).toContain('text-sm');
     expect(result).toContain('font-bold');

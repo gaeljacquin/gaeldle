@@ -1,5 +1,5 @@
 import { orpcClient } from '@/lib/orpc';
-import type { Game, GameModeSlug, ImageStyle } from '@gaeldle/api-contract';
+import type { Game, GameModeSlug, ImageStyle } from '@workspace/api-contract';
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -68,7 +68,10 @@ export async function getPaginatedGames(
   return handleResponse<PaginatedResponse<Game>>(res);
 }
 
-export async function getRandomGame(excludeIds: number[] = [], mode?: GameModeSlug): Promise<Game> {
+export async function getRandomGame(
+  excludeIds: number[] = [],
+  mode?: GameModeSlug,
+): Promise<Game> {
   const params = new URLSearchParams();
 
   if (excludeIds.length > 0) {
@@ -85,7 +88,11 @@ export async function getRandomGame(excludeIds: number[] = [], mode?: GameModeSl
   return result.data;
 }
 
-export async function searchGames(query: string, limit: number = 100, mode?: GameModeSlug): Promise<Game[]> {
+export async function searchGames(
+  query: string,
+  limit: number = 100,
+  mode?: GameModeSlug,
+): Promise<Game[]> {
   if (query.length < 2) {
     return [];
   }
@@ -116,7 +123,12 @@ export async function testUpload(image: string, extension: string = 'jpg') {
 
 export async function generateImage(
   igdbId: number,
-  options: { includeStoryline: boolean; includeGenres: boolean; includeThemes: boolean; imageStyle: ImageStyle },
+  options: {
+    includeStoryline: boolean;
+    includeGenres: boolean;
+    includeThemes: boolean;
+    imageStyle: ImageStyle;
+  },
 ) {
   const result = await orpcClient.games.generateImage({ igdbId, ...options });
   return result;

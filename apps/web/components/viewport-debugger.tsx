@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Separator } from './ui/separator'
+import { useEffect, useState } from 'react';
+import { Separator } from '@workspace/ui/separator';
 
 export default function ViewportDebugger() {
   const [dimensions, setDimensions] = useState({
@@ -9,7 +9,7 @@ export default function ViewportDebugger() {
       typeof window !== 'undefined'
         ? parseFloat(getComputedStyle(document.documentElement).fontSize)
         : 16,
-  })
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -17,27 +17,27 @@ export default function ViewportDebugger() {
         width: window.innerWidth,
         height: window.innerHeight,
         rem: parseFloat(getComputedStyle(document.documentElement).fontSize),
-      })
-    }
+      });
+    };
 
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (process.env.NODE_ENV !== 'development') {
     return null;
   }
 
   const getBreakpoint = (width: number) => {
-    if (width >= 1536) return '2xl'
-    if (width >= 1280) return 'xl'
-    if (width >= 1024) return 'lg'
-    if (width >= 768) return 'md'
-    if (width >= 640) return 'sm'
-    return 'xs'
-  }
+    if (width >= 1536) return '2xl';
+    if (width >= 1280) return 'xl';
+    if (width >= 1024) return 'lg';
+    if (width >= 768) return 'md';
+    if (width >= 640) return 'sm';
+    return 'xs';
+  };
 
-  const breakpoint = getBreakpoint(dimensions.width)
+  const breakpoint = getBreakpoint(dimensions.width);
 
   return (
     <div className="flex items-center gap-2 border border-sky-500/30 bg-sky-500/10 px-3 py-1 shadow-sm">
@@ -55,5 +55,5 @@ export default function ViewportDebugger() {
         </span>
       </div>
     </div>
-  )
+  );
 }

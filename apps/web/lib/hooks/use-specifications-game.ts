@@ -2,8 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getAllGames, getRandomGame } from '@/lib/services/game.service';
-import type { Game, SpecificationGuess, RevealedClue, MatchType } from '@gaeldle/api-contract';
-import { getFriendlyErrorMessage } from '@/lib/utils';
+import type {
+  Game,
+  SpecificationGuess,
+  RevealedClue,
+  MatchType,
+} from '@workspace/api-contract';
+import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
 
 export const MAX_ATTEMPTS = 10;
 
@@ -11,7 +16,7 @@ export const MAX_ATTEMPTS = 10;
 function extractArray(data: unknown): string[] {
   if (!data) return [];
   if (Array.isArray(data)) {
-    return data.map(item => {
+    return data.map((item) => {
       // If it's already a string, use it directly
       if (typeof item === 'string') {
         return item;
@@ -38,15 +43,20 @@ function extractReleaseYear(firstReleaseDate: number | null): string | null {
 function extractPublisher(involved_companies: unknown): string | null {
   if (!involved_companies || !Array.isArray(involved_companies)) return null;
 
-  const publisher = involved_companies.find((company: typeof involved_companies[number]) =>
-    company?.publisher === true
+  const publisher = involved_companies.find(
+    (company: (typeof involved_companies)[number]) =>
+      company?.publisher === true,
   );
 
   if (publisher && typeof publisher === 'object') {
     // Check if there's a nested company object with name
     if ('company' in publisher) {
       const companyData = publisher.company;
-      if (typeof companyData === 'object' && companyData !== null && 'name' in companyData) {
+      if (
+        typeof companyData === 'object' &&
+        companyData !== null &&
+        'name' in companyData
+      ) {
         return (companyData as { name: string }).name;
       }
     }
@@ -64,22 +74,27 @@ function compareArrays(target: string[], guess: string[]): MatchType {
   if (!target.length && !guess.length) return 'exact';
   if (!target.length || !guess.length) return 'none';
 
-  const targetSet = new Set(target.map(s => s.toLowerCase()));
-  const guessSet = new Set(guess.map(s => s.toLowerCase()));
+  const targetSet = new Set(target.map((s) => s.toLowerCase()));
+  const guessSet = new Set(guess.map((s) => s.toLowerCase()));
 
   // Check if they're exactly the same
-  if (targetSet.size === guessSet.size &&
-      [...targetSet].every(item => guessSet.has(item))) {
+  if (
+    targetSet.size === guessSet.size &&
+    [...targetSet].every((item) => guessSet.has(item))
+  ) {
     return 'exact';
   }
 
   // Check if there's any overlap
-  const hasOverlap = [...targetSet].some(item => guessSet.has(item));
+  const hasOverlap = [...targetSet].some((item) => guessSet.has(item));
   return hasOverlap ? 'partial' : 'none';
 }
 
 // Compare specification fields
-function compareGames(target: Game, guess: Game): SpecificationGuess['matches'] {
+function compareGames(
+  target: Game,
+  guess: Game,
+): SpecificationGuess['matches'] {
   const targetPlatforms = extractArray(target.platforms);
   const guessPlatforms = extractArray(guess.platforms);
 
@@ -130,7 +145,10 @@ function compareGames(target: Game, guess: Game): SpecificationGuess['matches'] 
       value: guessEngines.length > 0 ? guessEngines : null,
     },
     publisher: {
-      type: targetPublisher?.toLowerCase() === guessPublisher?.toLowerCase() ? 'exact' : 'none',
+      type:
+        targetPublisher?.toLowerCase() === guessPublisher?.toLowerCase()
+          ? 'exact'
+          : 'none',
       value: guessPublisher,
     },
     perspective: {
@@ -185,7 +203,7 @@ export function useSpecificationsGame() {
   const handleSubmit = useCallback(() => {
     if (!targetGame || selectedGameId === null || isGameOver) return;
 
-    const selectedGame = allGames.find(g => g.id === selectedGameId);
+    const selectedGame = allGames.find((g) => g.id === selectedGameId);
     if (!selectedGame) return;
 
     // Check if the selected game is correct
@@ -198,7 +216,7 @@ export function useSpecificationsGame() {
         aiImageUrl: selectedGame.aiImageUrl,
         matches,
       };
-      setGuesses(prev => [...prev, newGuess]);
+      setGuesses((prev) => [...prev, newGuess]);
       setIsCorrect(true);
       setIsGameOver(true);
     } else {
@@ -212,8 +230,8 @@ export function useSpecificationsGame() {
         matches,
       };
 
-      setGuesses(prev => [...prev, newGuess]);
-      setAttemptsLeft(prev => prev - 1);
+      setGuesses((prev) => [...prev, newGuess]);
+      setAttemptsLeft((prev) => prev - 1);
 
       // Check if game is over
       if (attemptsLeft - 1 <= 0) {
@@ -240,12 +258,14 @@ export function useSpecificationsGame() {
     ];
 
     // Filter out fields that are already exact matches (green) in guesses
-    const availableFields = fields.filter(field => {
+    const availableFields = fields.filter((field) => {
       // If no guesses yet, all fields are available
       if (guesses.length === 0) return true;
 
       // Check if any guess has an exact match for this field
-      const hasExactMatch = guesses.some(guess => guess.matches[field].type === 'exact');
+      const hasExactMatch = guesses.some(
+        (guess) => guess.matches[field].type === 'exact',
+      );
       return !hasExactMatch;
     });
 
@@ -253,7 +273,8 @@ export function useSpecificationsGame() {
     if (availableFields.length === 0) return;
 
     // Pick a random field from available fields
-    const randomField = availableFields[Math.floor(Math.random() * availableFields.length)];
+    const randomField =
+      availableFields[Math.floor(Math.random() * availableFields.length)];
 
     let value: string | string[];
     switch (randomField) {
@@ -288,11 +309,11 @@ export function useSpecificationsGame() {
     setRevealedClue({
       field: randomField,
       value,
-      revealedAtGuessCount: guesses.length
+      revealedAtGuessCount: guesses.length,
     });
 
     // Revealing a hint costs 1 attempt
-    setAttemptsLeft(prev => prev - 1);
+    setAttemptsLeft((prev) => prev - 1);
 
     // Check if game is over after revealing hint
     if (attemptsLeft - 1 <= 0) {
@@ -321,7 +342,7 @@ export function useSpecificationsGame() {
   }, []);
 
   const adjustAttempts = useCallback((delta: number) => {
-    setAttemptsLeft(prev => {
+    setAttemptsLeft((prev) => {
       const newValue = prev + delta;
       if (newValue < 1 || newValue > MAX_ATTEMPTS) return prev;
       return newValue;

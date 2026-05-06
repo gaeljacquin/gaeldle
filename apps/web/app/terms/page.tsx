@@ -1,5 +1,5 @@
-import { appInfo } from "@/lib/app-info";
-import TermsView from "@/views/terms";
+import { appInfo } from '@/lib/app-info';
+import TermsView from '@/views/terms';
 
 export const metadata = {
   title: `Terms of Service | ${appInfo.title}`,

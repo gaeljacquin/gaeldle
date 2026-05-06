@@ -16,7 +16,7 @@ import {
   type SyncOperation,
   GameUpdate,
   type ImageStyle,
-} from '@gaeldle/api-contract';
+} from '@workspace/api-contract';
 import { IgdbService, type IgdbGame } from '@/games/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
@@ -26,7 +26,7 @@ import {
   IMAGE_STYLES,
   IMAGE_PROMPT_SUFFIX,
   IMAGE_GEN_DIR,
-} from '@gaeldle/constants';
+} from '@workspace/constants';
 
 type Result = {
   current: number;

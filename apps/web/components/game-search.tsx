@@ -2,17 +2,17 @@
 
 import { useState, useRef, ChangeEvent } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { cn } from '@/lib/utils';
-import type { GameModeSlug } from '@gaeldle/api-contract';
-import { GAME_SEARCH_MIN_CHARS } from '@gaeldle/constants';
+import { cn } from '@workspace/ui/lib/utils';
+import type { GameModeSlug } from '@workspace/api-contract';
+import { GAME_SEARCH_MIN_CHARS } from '@workspace/constants';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from '@/components/ui/input-group';
-import { Card } from '@/components/ui/card';
+} from '@workspace/ui/input-group';
+import { Card } from '@workspace/ui/card';
 import { useGameSearch } from '@/lib/hooks/use-game-search';
 
 interface GameSearchProps {
@@ -60,10 +60,13 @@ export default function GameSearch({
   const [isOpen, setIsOpen] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const { results, isLoading, isIdle, debouncedQuery } = useGameSearch(searchValue, { mode });
+  const { results, isLoading, isIdle, debouncedQuery } = useGameSearch(
+    searchValue,
+    { mode },
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  "use no memo";
+  ('use no memo');
   // eslint-disable-next-line react-hooks/incompatible-library -- opted out of memoization via "use no memo"
   const virtualizer = useVirtualizer({
     count: results.length,
@@ -146,7 +149,7 @@ export default function GameSearch({
                   'w-full text-left px-3 py-2 text-xs transition-colors absolute top-0 left-0 leading-relaxed uppercase tracking-tight',
                   'hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none',
                   isSelected && 'bg-primary text-primary-foreground',
-                  isWrongGuess && 'line-through opacity-50'
+                  isWrongGuess && 'line-through opacity-50',
                 )}
                 style={{
                   height: `${virtualItem.size}px`,

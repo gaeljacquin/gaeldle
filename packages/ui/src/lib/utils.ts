@@ -1,8 +1,8 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
@@ -10,21 +10,28 @@ export function cn(...inputs: ClassValue[]) {
  * Specifically handles JSON parsing errors that occur when the server is unreachable
  * or returns a non-JSON error page.
  */
-export function getFriendlyErrorMessage(error: unknown, fallback: string = 'An unexpected error occurred'): string {
+export function getFriendlyErrorMessage(
+  error: unknown,
+  fallback: string = 'An unexpected error occurred',
+): string {
   if (error instanceof Error) {
     const message = error.message.toLowerCase();
 
     // Handle JSON parsing errors (server down/wrong response)
-    if (message.includes('json.parse') ||
-        message.includes('unexpected end of json') ||
-        message.includes('unexpected token')) {
+    if (
+      message.includes('json.parse') ||
+      message.includes('unexpected end of json') ||
+      message.includes('unexpected token')
+    ) {
       return 'Could not reach server. The database might be offline.';
     }
 
     // Handle network errors
-    if (message.includes('fetch failed') ||
-        message.includes('network error') ||
-        message.includes('failed to fetch')) {
+    if (
+      message.includes('fetch failed') ||
+      message.includes('network error') ||
+      message.includes('failed to fetch')
+    ) {
       return 'Network error. Please check your connection.';
     }
 

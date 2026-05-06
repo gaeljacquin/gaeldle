@@ -2,7 +2,7 @@
 
 ## Package Manager
 - Use `bun` for all commands (not pnpm or npm)
-- `bun run lint` — runs turbo lint across all packages
+- `pnpm run lint` — runs turbo lint across all packages
 - Do NOT run `pnpm type-check` (global rule)
 
 ## Monorepo Structure
@@ -112,7 +112,7 @@ export default function SomePage() { return <SomeView />; }
 - SQL file: `apps/api/drizzle/<idx>_<tag>.sql`
 - Journal: `apps/api/drizzle/meta/_journal.json` — add new entry with idx, version, when (ms timestamp), tag, breakpoints: true
 - Snapshot: `apps/api/drizzle/meta/<idx>_snapshot.json` — copy previous, update `id` and `prevId`
-- Run with: `bun run db:migrate` inside `apps/api`
+- Run with: `pnpm run db:migrate` inside `apps/api`
 
 ### lib/hooks barrel
 - No `index.ts` barrel exists in `apps/web/lib/hooks/` — hooks are imported by direct file path

@@ -6,15 +6,15 @@
 # Using Turbo (from root)
 turbo dev
 # or
-bun run dev
+pnpm run dev
 
 # Specific projects
 turbo dev --filter @gaeldle/web
-turbo dev --filter games-api
+turbo dev --filter @gaeldle/api
 
 # Direct commands
-cd apps/api && bun run dev
-cd apps/web && bun run dev
+cd apps/api && pnpm run dev
+cd apps/web && pnpm run dev
 ```
 
 ## Building
@@ -23,15 +23,15 @@ cd apps/web && bun run dev
 # Build all projects
 turbo build
 # or
-bun run build
+pnpm run build
 
 # Build specific project
-turbo build --filter games-api
+turbo build --filter @gaeldle/api
 turbo build --filter @gaeldle/web
 
 # Direct build commands
-cd apps/api && bun run build
-cd apps/web && bun run build
+cd apps/api && pnpm run build
+cd apps/web && pnpm run build
 ```
 
 ## Testing
@@ -40,11 +40,11 @@ cd apps/web && bun run build
 # Test all projects
 turbo test
 # or
-bun run test
+pnpm run test
 
 # Test API
-turbo test --filter games-api
-cd apps/api && bun test
+turbo test --filter @gaeldle/api
+cd apps/api && pnpm test
 ```
 
 ## Type Checking & Linting
@@ -55,11 +55,11 @@ turbo type-check
 turbo lint
 
 # API
-cd apps/api && bun run type-check
+cd apps/api && pnpm run type-check
 
 # Web
-cd apps/web && bun run type-check
-cd apps/web && bun run lint
+cd apps/web && pnpm run type-check
+cd apps/web && pnpm run lint
 ```
 
 ## Cleaning

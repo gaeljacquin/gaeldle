@@ -1,6 +1,5 @@
 {
   "name": "@gaeldle/web",
-  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "type-check": "tsc --noEmit"
+    "format": "prettier --check .",
+    "check": "prettier --write . && eslint --fix",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
@@ -46,7 +48,6 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.4",
     "@tanstack/react-query-devtools": "^5.100.9",
-    "@types/bun": "latest",
     "@types/node": "^25.6.0",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",

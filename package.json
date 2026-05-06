@@ -3,16 +3,12 @@
   "author": "Gaël Jacquin",
   "license": "MIT",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
     "test": "turbo test",
     "lint": "turbo lint",
-    "type-check": "turbo type-check",
+    "typecheck": "turbo typecheck",
     "sync": "./remote-sync.sh",
     "sync:list": "mutagen sync list",
     "sync:list-long": "mutagen sync list --long",
@@ -24,7 +20,7 @@
     "prepare": "husky"
   },
   "keywords": [],
-  "packageManager": "bun@1.2.2",
+  "packageManager": "pnpm@10.33.2",
   "devDependencies": {
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",

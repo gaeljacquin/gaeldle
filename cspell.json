@@ -72,7 +72,7 @@
     "node_modules",
     "dist",
     ".git",
-    "bun.lock",
+    "pnpm-lock.yaml",
     "package.json",
     "apps/api/dist",
     "apps/web/dist",

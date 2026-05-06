@@ -43,7 +43,7 @@ Document every SonarQube finding with:
 - Proposed fix
 
 ### Step 4: Run Linting
-Execute: `bun run lint`
+Execute: `pnpm run lint`
 
 Capture all output. For each linting error or warning:
 - Identify the file and line
@@ -51,10 +51,8 @@ Capture all output. For each linting error or warning:
 - Cross-reference with `frontend-conventions.md` or `backend-conventions.md` for the correct pattern
 - Apply the fix
 
-Do NOT run `pnpm type-check`. Use `bun` for all package and script execution.
-
 ### Step 5: Run Type Checking
-Execute: `bun run type-check`
+Execute: `pnpm run type-check`
 
 Capture all TypeScript errors. For each error:
 - Identify the root cause (missing type, incorrect interface, implicit any, etc.)
@@ -84,8 +82,8 @@ For every issue found across Steps 3–5, apply fixes that follow the exact patt
 
 ### Step 7: Verification Pass
 After applying all fixes:
-1. Re-run `bun run lint` — confirm zero errors
-2. Re-run `bun run type-check` — confirm zero errors
+1. Re-run `pnpm run lint` — confirm zero errors
+2. Re-run `pnpm run type-check` — confirm zero errors
 3. Re-check SonarQube issues if tools allow — confirm resolved issues
 
 If new issues are introduced by your fixes, resolve them before concluding.
@@ -122,8 +120,7 @@ Produce a structured summary:
 
 ## Behavioral Rules
 
-- **Always use `bun`** for running scripts — never `pnpm`, `npm`, or `yarn` unless conventions explicitly require it
-- **Never use `pnpm type-check`** — use `bun run type-check`
+- **Always use `pnpm`** for running scripts — never `npm` or `yarn` unless conventions explicitly require it
 - **Conditional classNames**: Always use the `cn` utility; put conditionals on a new line, not inline with static classes
 - **Do not guess conventions** — if you are unsure, re-read the relevant conventions file before applying a fix
 - **Do not over-fix** — only change what is necessary to resolve the identified issue; do not refactor unrelated code
@@ -134,8 +131,8 @@ Produce a structured summary:
 
 Before concluding the audit, verify:
 - [ ] All Blocker and Critical SonarQube issues are resolved or explicitly acknowledged
-- [ ] `bun run lint` exits with code 0
-- [ ] `bun run type-check` exits with code 0
+- [ ] `pnpm run lint` exits with code 0
+- [ ] `pnpm run type-check` exits with code 0
 - [ ] All applied fixes follow patterns from the conventions files
 - [ ] No new issues were introduced by the fixes
 - [ ] The audit report is complete and accurate
@@ -175,7 +172,7 @@ What NOT to save:
 - Speculative or unverified conclusions from reading a single file
 
 Explicit user requests:
-- When the user asks you to remember something across sessions (e.g., "always use bun", "never auto-commit"), save it — no need to wait for multiple interactions
+- When the user asks you to remember something across sessions (e.g., "always use pnpm", "never auto-commit"), save it — no need to wait for multiple interactions
 - When the user asks to forget or stop remembering something, find and remove the relevant entries from your memory files
 - Since this memory is project-scope and shared with your team via version control, tailor your memories to this project
 

@@ -142,7 +142,7 @@ What NOT to save:
 - Speculative or unverified conclusions from reading a single file
 
 Explicit user requests:
-- When the user asks you to remember something across sessions (e.g., "always use bun", "never auto-commit"), save it — no need to wait for multiple interactions
+- When the user asks you to remember something across sessions (e.g., "always use pnpm", "never auto-commit"), save it — no need to wait for multiple interactions
 - When the user asks to forget or stop remembering something, find and remove the relevant entries from your memory files
 - Since this memory is project-scope and shared with your team via version control, tailor your memories to this project
 

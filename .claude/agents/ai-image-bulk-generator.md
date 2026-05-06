@@ -91,7 +91,7 @@ Check if `apps/api/scripts/bulk-generate-images.ts` exists. If not, write it. If
 
 The script must:
 
-1. **Load env** from `apps/api/.env` using Bun's native `.env` support (no dotenv needed)
+1. **Load env** from `apps/api/.env` using tsx's native `.env` support (no dotenv needed)
 2. **Connect to DB** with the same pattern as `DatabaseService`:
    ```typescript
    import { Pool } from 'pg';
@@ -186,7 +186,7 @@ cd /path/to/repo && \
   NUM_GAMES=5 \
   INCLUDE_STORYLINE=false INCLUDE_GENRES=false INCLUDE_THEMES=false \
   IMAGE_STYLE=funko-pop-chibi \
-  bun run apps/api/scripts/bulk-generate-images.ts
+  pnpm run apps/api/scripts/bulk-generate-images.ts
 ```
 
 Set `NUM_GAMES` to the resolved `num_games` value (clamped to [1, 50], default 5). Set `INCLUDE_*` variables to `true` based on the user's override input. Set `IMAGE_STYLE` to the resolved style value slug (e.g. `simpsons`). Omit or leave empty to use the default (`funko-pop-chibi`).
@@ -236,7 +236,7 @@ What NOT to save:
 - Speculative or unverified conclusions from reading a single file
 
 Explicit user requests:
-- When the user asks you to remember something across sessions (e.g., "always use bun", "never auto-commit"), save it — no need to wait for multiple interactions
+- When the user asks you to remember something across sessions (e.g., "always use pnpm", "never auto-commit"), save it — no need to wait for multiple interactions
 - When the user asks to forget or stop remembering something, find and remove the relevant entries from your memory files
 - Since this memory is project-scope and shared with your team via version control, tailor your memories to this project
 

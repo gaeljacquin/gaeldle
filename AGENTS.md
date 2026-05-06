@@ -4,13 +4,13 @@ Gaeldle is a Turborepo monorepo with a Next.js web app and a NestJS API.
 
 ## Essentials
 
-- Package manager: `bun` (unified for root and apps).
+- Package manager: `pnpm` (unified for root and apps).
 - Commands:
-  - `bun run build` (or `turbo build`)
-  - `bun run test` (or `turbo test`)
-  - `bun run type-check` (or `turbo type-check`)
-  - `bun run lint` (or `turbo lint`)
-  - `bun run dev` (or `turbo dev`)
+  - `pnpm run build` (or `turbo build`)
+  - `pnpm run test` (or `turbo test`)
+  - `pnpm run type-check` (or `turbo type-check`)
+  - `pnpm run lint` (or `turbo lint`)
+  - `pnpm run dev` (or `turbo dev`)
 
 ## More guidance
 

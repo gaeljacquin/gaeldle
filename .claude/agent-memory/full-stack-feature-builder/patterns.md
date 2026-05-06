@@ -24,8 +24,8 @@ For SSE endpoints that need auth (can't send custom headers with EventSource):
 ## Drizzle Migrations
 
 Run from `apps/api` dir:
-- Generate: `bun drizzle-kit generate`
-- Apply: `bun drizzle-kit migrate`
+- Generate: `pnpm drizzle-kit generate`
+- Apply: `pnpm drizzle-kit migrate`
 Schema source: `packages/api-contract/src/schema.ts`
 
 ## Background Jobs (fire-and-forget) in NestJS

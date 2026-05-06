@@ -3,9 +3,9 @@
 ## Project: Gaeldle Monorepo
 
 ### Testing Setup
-- **Test Runner**: `bun test` (configured in `bunfig.toml`)
-- **Test Conventions**: Follow backend tests pattern using Jest-compatible mocks with Bun
-- **Web app test script**: `bun test:coverage` in `/apps/web/package.json`
+- **Test Runner**: `pnpm test` (configured in `bunfig.toml`)
+- **Test Conventions**: Follow backend tests pattern using Jest-compatible mocks
+- **Web app test script**: `pnpm test:coverage` in `/apps/web/package.json`
 - **Backend uses**: NestJS with Jest (seen in `apps/api/src/games/games.service.spec.ts`)
 
 ### Frontend Utilities Coverage (100% achieved)

@@ -22,10 +22,10 @@ Ensure you have configured the environment variables in `.env.local` (see `.env.
 ### Commands
 
 ```bash
-bun dev          # Start development server
-bun run build    # Build for production
-bun run lint     # Run ESLint
-bun run type-check # Run TypeScript type checking
+pnpm dev          # Start development server
+pnpm build        # Build for production
+pnpm lint         # Run ESLint
+pnpm typecheck    # Run TypeScript type checking
 ```
 
 ## Architecture

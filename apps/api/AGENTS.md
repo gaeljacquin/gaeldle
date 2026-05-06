@@ -2,9 +2,9 @@
 
 This repository is a NestJS backend API for games data and Stack Auth-protected endpoints, with Postgres via Drizzle ORM.
 
-- Package manager: `bun` (use `bun run`, not `pnpm` or `npm`).
-- Core checks used across tasks: `bun run type-check`, `bun run lint`, `bun run test`.
-- Build command: `bun run build`.
+- Package manager: `pnpm` (use `pnpm run`, not `npm`).
+- Core checks used across tasks: `pnpm run type-check`, `pnpm run lint`, `pnpm run test`.
+- Build command: `pnpm run build`.
 - Do not commit secrets from `.env` or credentials copied from local environment files.
 
 Use progressive disclosure for task-specific rules:

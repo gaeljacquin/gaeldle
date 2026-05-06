@@ -4,7 +4,7 @@
 
 ### Key Paths & Files
 - **Script location**: `/Users/gael/Documents/projects/gaeldle/apps/api/scripts/bulk-generate-images.ts`
-- **Package manager**: Bun (use `bun run` for all executions)
+- **Package manager**: tsx (use `pnpm run` for all executions)
 - **Database ORM**: Drizzle ORM with PostgreSQL
 - **Schema**: `@gaeldle/api-contract` package (located at `/Users/gael/Documents/projects/gaeldle/packages/api-contract/src/schema.ts`)
 - **Constants**: `IMAGE_PROMPT_SUFFIX` from `@gaeldle/constants`
@@ -41,11 +41,11 @@ includeThemes: false
 ### Command Format
 ```bash
 INCLUDE_STORYLINE=false INCLUDE_GENRES=false INCLUDE_THEMES=false \
-bun run apps/api/scripts/bulk-generate-images.ts
+pnpm run apps/api/scripts/bulk-generate-images.ts
 ```
 
 ### Script Requirements
-- Must use dotenv to load `apps/api/.env` (Bun supports native .env loading)
+- Must use dotenv to load `apps/api/.env` (tsx supports native .env loading)
 - All credentials must be present in `.env`: DATABASE_URL, CF_ACCOUNT_ID, CF_API_TOKEN, R2_* vars
 - Supports `NUM_GAMES` env variable (default 5, max 50)
 - Defaults to 5 games per invocation if NUM_GAMES not specified

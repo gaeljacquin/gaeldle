@@ -26,9 +26,9 @@ The script loads `.env` automatically if it exists — no need to source it manu
 
 ### Via package.json (recommended):
 ```bash
-bun run sync
+pnpm run sync
 # OR
-bun sync
+pnpm run sync
 ```
 
 ### Directly:
@@ -51,17 +51,17 @@ If a variable is not set in `.env`, the script falls back to these defaults:
 
 ## Management Commands
 
-After creating the sync session, use either the `bun run sync:*` shorthands or raw `mutagen` commands:
+After creating the sync session, use either the `pnpm run sync:*` shorthands or raw `mutagen` commands:
 
-| Action | bun shorthand | mutagen command |
+| Action | pnpm shorthand | mutagen command |
 |---|---|---|
-| View all sessions | `bun run sync:list` | `mutagen sync list` |
-| View all sessions (verbose) | `bun run sync:list-long` | `mutagen sync list --long` |
-| Monitor real-time progress | `bun run sync:monitor` | `mutagen sync monitor gaeldle` |
-| Pause syncing | `bun run sync:pause` | `mutagen sync pause gaeldle` |
-| Resume syncing | `bun run sync:resume` | `mutagen sync resume gaeldle` |
-| Stop and remove session | `bun run sync:terminate` | `mutagen sync terminate gaeldle` |
-| Reset session (if issues occur) | `bun run sync:reset` | `mutagen sync reset gaeldle` |
+| View all sessions | `pnpm run sync:list` | `mutagen sync list` |
+| View all sessions (verbose) | `pnpm run sync:list-long` | `mutagen sync list --long` |
+| Monitor real-time progress | `pnpm run sync:monitor` | `mutagen sync monitor gaeldle` |
+| Pause syncing | `pnpm run sync:pause` | `mutagen sync pause gaeldle` |
+| Resume syncing | `pnpm run sync:resume` | `mutagen sync resume gaeldle` |
+| Stop and remove session | `pnpm run sync:terminate` | `mutagen sync terminate gaeldle` |
+| Reset session (if issues occur) | `pnpm run sync:reset` | `mutagen sync reset gaeldle` |
 
 ## Ignored Files and Folders
 
@@ -79,8 +79,8 @@ If sync is not working:
 
 1. Check the SSH connection: `ssh <REMOTE_USER>@<REMOTE_HOST>`
 2. Verify the remote path exists: `ssh <REMOTE_USER>@<REMOTE_HOST> "ls -la <REMOTE_PATH>"`
-3. Check sync status: `bun run sync:list`
-4. View detailed sync problems: `bun run sync:list-long`
-5. Reset the session if needed: `bun run sync:reset`
+3. Check sync status: `pnpm run sync:list`
+4. View detailed sync problems: `pnpm run sync:list-long`
+5. Reset the session if needed: `pnpm run sync:reset`
 
 Replace `<REMOTE_USER>`, `<REMOTE_HOST>`, and `<REMOTE_PATH>` with the values from your `.env` file.

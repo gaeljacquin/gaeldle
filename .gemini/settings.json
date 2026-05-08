@@ -1,5 +1,1 @@
-{
-  "experimental": {
-    "enableSubagents": true
-  }
-}
+../.mcp.json

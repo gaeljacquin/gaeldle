@@ -36,6 +36,8 @@ type Result = {
   gameName: string | null;
 };
 
+type GameInsert = InferInsertModel<typeof games>;
+
 @Injectable()
 export class GamesService {
   constructor(
@@ -327,10 +329,7 @@ export class GamesService {
   // Helper: fetch IGDB data or return error results for all pairs
   private async fetchIgdbGameMap(
     validPairs: Array<{ current: number; replacement: number }>,
-  ): Promise<
-    | { igdbGameMap: Map<number, ReturnType<typeof this.mapIgdbToGame>> }
-    | Result[]
-  > {
+  ): Promise<{ igdbGameMap: Map<number, GameInsert> } | Result[]> {
     const replacementIds = validPairs.map((p) => p.replacement);
     try {
       const igdbGames = await this.igdbService.getGamesByIds(replacementIds);
@@ -349,7 +348,7 @@ export class GamesService {
   }
 
   private async updateGameHelper(
-    gameData: ReturnType<typeof this.mapIgdbToGame>,
+    gameData: GameInsert,
     pair: { current: number; replacement: number },
     results: Result[],
   ): Promise<boolean> {
@@ -547,11 +546,27 @@ export class GamesService {
 
         const publicUrl = `${r2PublicUrl}/${key}`;
 
+        const currentImageGen = game.imageGen || {};
+        const providerKey = 'cloudflare';
+        const styleKey = params.imageStyle;
+
+        const updatedImageGen = {
+          ...currentImageGen,
+          [providerKey]: {
+            ...(currentImageGen[providerKey] || {}),
+            [styleKey]: {
+              url: publicUrl,
+              prompt: prompt,
+            },
+          },
+        };
+
         await this.databaseService.db
           .update(games)
           .set({
             aiImageUrl: publicUrl,
             aiPrompt: prompt,
+            imageGen: updatedImageGen,
             updatedAt: new Date(),
           })
           .where(eq(games.id, game.id));
@@ -701,7 +716,7 @@ export class GamesService {
     return parts.join('. ');
   }
 
-  private mapIgdbToGame(igdbGame: IgdbGame): InferInsertModel<typeof games> {
+  private mapIgdbToGame(igdbGame: IgdbGame): GameInsert {
     const formatUrl = (url?: string) => {
       if (!url) return undefined;
       const fullUrl = url.startsWith('//') ? `https:${url}` : url;

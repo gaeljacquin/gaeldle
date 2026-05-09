@@ -92,6 +92,13 @@
       "when": 1772557200000,
       "tag": "0012_game_name_trgm_idx",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1778292319662,
+      "tag": "0013_modern_giant_man",
+      "breakpoints": true
     }
   ]
 }

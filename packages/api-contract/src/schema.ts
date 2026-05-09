@@ -29,6 +29,10 @@ export const games = pgTable(
     imageUrl: varchar('image_url'),
     aiImageUrl: varchar('ai_image_url'),
     aiPrompt: varchar('ai_prompt'),
+    imageGen:
+      json('image_gen').$type<
+        Record<string, Record<string, { url: string; prompt: string }>>
+      >(),
     artworks: json('artworks').$type<any>(),
     keywords: json('keywords').$type<any>(),
     franchises: json('franchises').$type<any>(),
@@ -54,6 +58,7 @@ export const gameObject = {
   imageUrl: games.imageUrl,
   aiImageUrl: games.aiImageUrl,
   aiPrompt: games.aiPrompt,
+  imageGen: games.imageGen,
   artworks: games.artworks,
   keywords: games.keywords,
   franchises: games.franchises,

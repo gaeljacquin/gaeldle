@@ -202,7 +202,11 @@ async function main() {
         console.log(`\nProcessing game: ${game.name} (ID: ${game.igdbId})`);
 
         // Build the prompt
-        const prompt = buildImagePrompt(game, options, resolvedStyle.descriptor);
+        const prompt = buildImagePrompt(
+          game,
+          options,
+          resolvedStyle.descriptor,
+        );
         console.log(`Generated prompt (${prompt.length} chars)`);
 
         // Generate the image

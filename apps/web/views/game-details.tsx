@@ -62,6 +62,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@workspace/ui/select';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@workspace/ui/tabs';
 
 function buildPromptPreview(
   game: Game,
@@ -240,75 +246,81 @@ export default function GameDetails({
       <BackToDashboard />
 
       <div className="flex flex-col lg:flex-row gap-10">
-        {/* Sidebar: Cover Art & Actions */}
+        {/* Sidebar: Cover Art & Badges & Actions */}
         <div className="w-full max-w-80 mx-auto lg:mx-0 lg:w-80 shrink-0 space-y-6">
-          <Dialog>
-            <DialogTrigger
-              nativeButton={false}
-              render={
-                <Card className="overflow-hidden border-2 rounded-none shadow-xl cursor-pointer group hover:border-primary/50 transition-colors" />
-              }
-            >
-              <div className="relative aspect-3/4 w-full">
-                {game.imageUrl ? (
-                  <>
+          <div className="space-y-4">
+            <Dialog>
+              <DialogTrigger
+                nativeButton={false}
+                render={
+                  <Card className="overflow-hidden border-2 rounded-none shadow-xl cursor-pointer group hover:border-primary/50 transition-colors" />
+                }
+              >
+                <div className="relative aspect-3/4 w-full">
+                  {game.imageUrl ? (
+                    <>
+                      <Image
+                        src={game.imageUrl.replace('t_720p', 't_1080p')}
+                        alt={game.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        priority
+                        sizes="(max-width: 1024px) 100vw, 320px"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <IconExternalLink
+                          aria-hidden="true"
+                          className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-8"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
+                      No Cover Art
+                    </div>
+                  )}
+                </div>
+              </DialogTrigger>
+              {game.imageUrl && (
+                <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
+                  <DialogHeader className="sr-only">
+                    <DialogTitle>{game.name} Cover Art</DialogTitle>
+                  </DialogHeader>
+                  <div className="relative w-full h-[85vh]">
                     <Image
-                      src={game.imageUrl.replace('t_720p', 't_1080p')}
+                      src={game.imageUrl.replace('t_720p', 't_original')}
                       alt={game.name}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      priority
-                      sizes="(max-width: 1024px) 100vw, 320px"
+                      className="object-contain"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                      <IconExternalLink className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-8" />
-                    </div>
-                  </>
-                ) : (
-                  <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
-                    No Cover Art
                   </div>
-                )}
-              </div>
-            </DialogTrigger>
-            {game.imageUrl && (
-              <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
-                <DialogHeader className="sr-only">
-                  <DialogTitle>{game.name} Cover Art</DialogTitle>
-                </DialogHeader>
-                <div className="relative w-full h-[85vh]">
-                  <Image
-                    src={game.imageUrl.replace('t_720p', 't_original')}
-                    alt={game.name}
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-              </DialogContent>
-            )}
-          </Dialog>
-
-          <div className="space-y-3 pt-2">
-            {/* <Button
-              variant="outline"
-              className={cn(
-                "w-full font-bold h-10 rounded-none bg-primary/90 hover:bg-primary text-white hover:text-white",
-                info?.url ? 'cursor-pointer' : 'cursor-not-allowed',
+                </DialogContent>
               )}
-              onClick={() => window.open(info?.url, '_blank')}
-              disabled={!info?.url}
-            >
-              <IconExternalLink className="mr-2 size-4" />
-              View on IGDB
-            </Button> */}
+            </Dialog>
 
+            <div className="flex flex-wrap gap-2 justify-center">
+              {game.firstReleaseDate && (
+                <div className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-none text-[10px] font-bold uppercase tracking-wider">
+                  <IconCalendar aria-hidden="true" size={12} />
+                  {new Date(game.firstReleaseDate * 1000).toLocaleDateString()}
+                </div>
+              )}
+              <div className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-none text-[10px] font-bold uppercase tracking-wider">
+                <IconDeviceGamepad aria-hidden="true" size={12} />
+                IGDB ID: {game.igdbId}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
             <Button
               variant="outline"
-              className="w-full font-bold h-10 rounded-none cursor-pointer bg-sky-400 hover:bg-sky-500 text-white hover:text-white"
+              className="w-full font-bold h-10 rounded-none cursor-pointer bg-sky-600 hover:bg-sky-700 text-white hover:text-white"
               disabled={syncMutation.isPending}
               onClick={() => syncMutation.mutate()}
             >
               <IconRefresh
+                aria-hidden="true"
                 className={cn(
                   'mr-2 size-4',
                   syncMutation.isPending && 'animate-spin',
@@ -323,7 +335,7 @@ export default function GameDetails({
               disabled={deleteMutation.isPending}
               onClick={() => setIsDeleteDialogOpen(true)}
             >
-              <IconTrash className="mr-2 size-4" />
+              <IconTrash aria-hidden="true" className="mr-2 size-4" />
               Delete Game
             </Button>
 
@@ -360,375 +372,406 @@ export default function GameDetails({
           </div>
         </div>
 
-        {/* Main Content: Info & Artworks */}
-        <div className="flex-1 space-y-10">
-          <div className="space-y-4">
-            <h1 className="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-tight">
-              {game.name}
-            </h1>
-            <div className="flex flex-wrap gap-3 text-muted-foreground">
-              {game.firstReleaseDate && (
-                <div className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-none text-xs font-bold uppercase tracking-wider">
-                  <IconCalendar size={14} />
-                  {new Date(game.firstReleaseDate * 1000).toLocaleDateString()}
+        {/* Main Content: Title & Tabs */}
+        <div className="flex-1 space-y-6">
+          <h1 className="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-tight">
+            {game.name}
+          </h1>
+
+          <Tabs defaultValue="info" className="w-full flex flex-col gap-0">
+            <TabsList
+              variant="line"
+              className="mb-8 gap-0 border-b border-border w-full justify-start"
+            >
+              <TabsTrigger
+                value="info"
+                className="text-sm font-black uppercase tracking-widest px-8 py-3 cursor-pointer"
+              >
+                Info
+              </TabsTrigger>
+              <TabsTrigger
+                value="artworks"
+                className="text-sm font-black uppercase tracking-widest px-8 py-3 cursor-pointer"
+              >
+                Artworks
+              </TabsTrigger>
+              <TabsTrigger
+                value="image-gen"
+                className="text-sm font-black uppercase tracking-widest px-8 py-3 cursor-pointer"
+              >
+                Image Gen
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="info" className="space-y-10 outline-none">
+              {game.summary && (
+                <div className="space-y-4">
+                  <h2 className="text-lg font-black uppercase tracking-widest border-l-4 border-primary pl-4">
+                    Summary
+                  </h2>
+                  <p className="text-muted-foreground leading-relaxed text-lg">
+                    {game.summary}
+                  </p>
                 </div>
               )}
-              <div className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-none text-xs font-bold uppercase tracking-wider">
-                <IconDeviceGamepad size={14} />
-                IGDB ID: {game.igdbId}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-4">
+                {platforms && platforms.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Platforms
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {platforms.map((p: string) => (
+                        <span
+                          key={p}
+                          className="bg-primary/5 text-primary border border-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-wider"
+                        >
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {genres && genres.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Genres
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {genres.map((g: string) => (
+                        <span
+                          key={g}
+                          className="bg-muted px-3 py-1 text-xs font-bold uppercase tracking-wider border border-border"
+                        >
+                          {g}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
 
-          {game.summary && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-black uppercase tracking-widest border-l-4 border-primary pl-4">
-                Summary
-              </h2>
-              <p className="text-muted-foreground leading-relaxed text-lg">
-                {game.summary}
-              </p>
-            </div>
-          )}
+              {involvedCompanies && involvedCompanies.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                    Companies
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {involvedCompanies.map((c: Company, idx: number) => (
+                      <div
+                        key={`${c.name}-${idx}`}
+                        className="flex flex-col border border-dashed p-3 min-w-37.5"
+                      >
+                        <span className="font-bold text-sm">{c.name}</span>
+                        <span className="text-[10px] uppercase text-muted-foreground font-bold">
+                          {c.developer ? 'Developer' : ''}{' '}
+                          {c.developer && c.publisher ? '& ' : ''}{' '}
+                          {c.publisher ? 'Publisher' : ''}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
 
-          {artworks && artworks.length > 0 && (
-            <div className="space-y-6">
-              <h2 className="text-lg font-black uppercase tracking-widest border-l-4 border-primary pl-4 flex items-center gap-2">
-                <IconLayersIntersect size={20} />
-                Artworks ({artworks.length})
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {artworks.map((art: ArtworkImage, index: number) => (
-                  <Dialog key={art.image_id || index}>
+            <TabsContent value="artworks" className="space-y-10 outline-none">
+              {artworks && artworks.length > 0 && (
+                <div className="space-y-6">
+                  <h2 className="text-lg font-black uppercase tracking-widest border-l-4 border-primary pl-4 flex items-center gap-2">
+                    <IconLayersIntersect aria-hidden="true" size={20} />
+                    Artworks ({artworks.length})
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    {artworks.map((art: ArtworkImage, index: number) => (
+                      <Dialog key={art.image_id || index}>
+                        <DialogTrigger
+                          nativeButton={false}
+                          render={
+                            <Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />
+                          }
+                        >
+                          <div className="relative aspect-video w-full">
+                            <Image
+                              src={art.url.replace('t_720p', 't_1080p')}
+                              alt={`${game.name} artwork ${index + 1}`}
+                              fill
+                              className="object-cover transition-transform duration-500 group-hover:scale-110"
+                              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 200px"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                              <IconExternalLink
+                                aria-hidden="true"
+                                className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-5"
+                              />
+                            </div>
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-6xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-6xl">
+                          <DialogHeader className="sr-only">
+                            <DialogTitle>
+                              {game.name} Artwork {index + 1}
+                            </DialogTitle>
+                          </DialogHeader>
+                          <div className="relative w-full h-[85vh]">
+                            <Image
+                              src={art.url.replace('t_720p', 't_original')}
+                              alt={`${game.name} artwork ${index + 1}`}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="image-gen" className="space-y-6 outline-none">
+              <div className="flex flex-col md:flex-row gap-8">
+                <div className="w-full md:w-64 shrink-0">
+                  <Dialog>
                     <DialogTrigger
                       nativeButton={false}
                       render={
                         <Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />
                       }
                     >
-                      <div className="relative aspect-video w-full">
+                      <div className="relative aspect-square w-full">
                         <Image
-                          src={art.url.replace('t_720p', 't_1080p')}
-                          alt={`${game.name} artwork ${index + 1}`}
+                          src={
+                            game.aiImageUrl ||
+                            PLACEHOLDER_IMAGE_R2(
+                              process.env.r2PublicUrl ?? '',
+                            )
+                          }
+                          alt={`${game.name} AI Image`}
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
-                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 200px"
+                          sizes="(max-width: 768px) 100vw, 256px"
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                          <IconExternalLink className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-5" />
+                          <IconExternalLink
+                            aria-hidden="true"
+                            className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-8"
+                          />
                         </div>
                       </div>
                     </DialogTrigger>
-                    <DialogContent className="max-w-6xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-6xl">
+                    <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
                       <DialogHeader className="sr-only">
-                        <DialogTitle>
-                          {game.name} Artwork {index + 1}
-                        </DialogTitle>
+                        <DialogTitle>{game.name} AI Image</DialogTitle>
                       </DialogHeader>
                       <div className="relative w-full h-[85vh]">
                         <Image
-                          src={art.url.replace('t_720p', 't_original')}
-                          alt={`${game.name} artwork ${index + 1}`}
+                          src={
+                            game.aiImageUrl ||
+                            PLACEHOLDER_IMAGE_R2(
+                              process.env.r2PublicUrl ?? '',
+                            )
+                          }
+                          alt={`${game.name} AI Image`}
                           fill
                           className="object-contain"
+                          sizes="(max-width: 896px) 100vw, 896px"
                         />
                       </div>
                     </DialogContent>
                   </Dialog>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-6">
-            <h2 className="text-lg font-black uppercase tracking-widest border-l-4 border-primary pl-4 flex items-center gap-2">
-              <IconBrush size={20} />
-              Image Gen
-            </h2>
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="w-full md:w-64 shrink-0">
-                <Dialog>
-                  <DialogTrigger
-                    nativeButton={false}
-                    render={
-                      <Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />
-                    }
-                  >
-                    <div className="relative aspect-square w-full">
-                      <Image
-                        src={
-                          game.aiImageUrl ||
-                          PLACEHOLDER_IMAGE_R2(process.env.r2PublicUrl ?? '')
-                        }
-                        alt={`${game.name} AI Image`}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        sizes="(max-width: 768px) 100vw, 256px"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                        <IconExternalLink className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-8" />
-                      </div>
-                    </div>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
-                    <DialogHeader className="sr-only">
-                      <DialogTitle>{game.name} AI Image</DialogTitle>
-                    </DialogHeader>
-                    <div className="relative w-full h-[85vh]">
-                      <Image
-                        src={
-                          game.aiImageUrl ||
-                          PLACEHOLDER_IMAGE_R2(process.env.r2PublicUrl ?? '')
-                        }
-                        alt={`${game.name} AI Image`}
-                        fill
-                        className="object-contain"
-                        sizes="(max-width: 896px) 100vw, 896px"
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                {game.aiImageUrl === null && (
-                  <p className="text-xs text-center">Placeholder image</p>
-                )}
-              </div>
-              <div className="flex-1 space-y-4">
-                <div className="space-y-1.5">
+                  {game.aiImageUrl === null && (
+                    <p className="text-xs text-center">Placeholder image</p>
+                  )}
+                </div>
+                <div className="flex-1 space-y-4">
+                  <div className="space-y-1.5">
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Art Style
+                    </h3>
+                    <Select
+                      value={imageStyle}
+                      onValueChange={(v) => {
+                        if (v) setImageStyle(v);
+                      }}
+                      disabled={generateImageMutation.isPending}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue>
+                          {
+                            IMAGE_STYLES.find(
+                              (style) => style.value === imageStyle,
+                            )?.label
+                          }
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover border border-border shadow-xl">
+                        {IMAGE_STYLES.map((style) => (
+                          <SelectItem key={style.value} value={style.value}>
+                            {style.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                    Art Style
+                    Prompt Fields
                   </h3>
-                  <Select
-                    value={imageStyle}
-                    onValueChange={(v) => {
-                      if (v) setImageStyle(v);
-                    }}
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2.5">
+                    {/* Fixed fields */}
+                    {(
+                      [
+                        {
+                          id: 'field-title',
+                          label: 'Title',
+                          hasValue: !!game.name,
+                        },
+                        {
+                          id: 'field-summary',
+                          label: 'Summary',
+                          hasValue: !!game.summary,
+                        },
+                        {
+                          id: 'field-keywords',
+                          label: 'Keywords',
+                          hasValue: !!(game.keywords as string[] | null)
+                            ?.length,
+                        },
+                      ] as const
+                    ).map(({ id, label, hasValue }) => (
+                      <div key={id} className="flex items-center gap-2.5">
+                        <Checkbox
+                          id={id}
+                          checked={hasValue}
+                          disabled
+                          className="data-checked:bg-blue-600 data-checked:border-blue-600"
+                        />
+                        <Label
+                          htmlFor={id}
+                          className="text-sm font-medium cursor-default text-muted-foreground"
+                        >
+                          {label}
+                        </Label>
+                      </div>
+                    ))}
+
+                    {/* Optional fields */}
+                    {(
+                      [
+                        {
+                          id: 'field-storyline',
+                          label: 'Storyline',
+                          hasValue: !!game.storyline,
+                          checked: includeStoryline,
+                          onCheckedChange: setIncludeStoryline,
+                        },
+                        {
+                          id: 'field-genres',
+                          label: 'Genres',
+                          hasValue: !!(game.genres as string[] | null)
+                            ?.length,
+                          checked: includeGenres,
+                          onCheckedChange: setIncludeGenres,
+                        },
+                        {
+                          id: 'field-themes',
+                          label: 'Themes',
+                          hasValue: !!(game.themes as string[] | null)
+                            ?.length,
+                          checked: includeThemes,
+                          onCheckedChange: setIncludeThemes,
+                        },
+                      ] as const
+                    ).map(
+                      ({ id, label, hasValue, checked, onCheckedChange }) => (
+                        <div key={id} className="flex items-center gap-2.5">
+                          <Checkbox
+                            id={id}
+                            checked={hasValue ? checked : false}
+                            disabled={
+                              !hasValue || generateImageMutation.isPending
+                            }
+                            onCheckedChange={(v) => onCheckedChange(v === true)}
+                          />
+                          <Label
+                            htmlFor={id}
+                            className={cn(
+                              'text-sm font-medium',
+                              hasValue
+                                ? 'cursor-pointer'
+                                : 'cursor-default line-through text-muted-foreground/50',
+                            )}
+                          >
+                            {label}
+                          </Label>
+                        </div>
+                      ),
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <Textarea
+                      readOnly
+                      value={
+                        promptView === 'saved' && game.aiPrompt
+                          ? game.aiPrompt
+                          : buildPromptPreview(game, {
+                              includeStoryline,
+                              includeGenres,
+                              includeThemes,
+                              imageStyle,
+                            })
+                      }
+                      className="rounded-none resize-none min-h-30 text-sm text-muted-foreground italic bg-muted/30 border-dashed"
+                    />
+                    {game.aiPrompt && (
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPromptView(
+                              promptView === 'preview' ? 'saved' : 'preview',
+                            )
+                          }
+                          className="text-xs text-muted-foreground hover:text-muted-foreground underline-offset-2 hover:underline cursor-pointer"
+                        >
+                          {promptView === 'preview'
+                            ? 'View saved prompt'
+                            : 'View preview'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'w-full font-bold h-10 rounded-none text-white hover:text-white',
+                      generateImageMutation.isPending
+                        ? 'bg-slate-500 hover:bg-slate-500 cursor-not-allowed'
+                        : 'bg-slate-600 hover:bg-slate-700 cursor-pointer',
+                    )}
+                    onClick={() => generateImageMutation.mutate()}
                     disabled={generateImageMutation.isPending}
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue>
-                        {
-                          IMAGE_STYLES.find(
-                            (style) => style.value === imageStyle,
-                          )?.label
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {IMAGE_STYLES.map((style) => (
-                        <SelectItem key={style.value} value={style.value}>
-                          {style.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                  Prompt Fields
-                </h3>
-                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2.5">
-                  {/* Fixed fields */}
-                  {(
-                    [
-                      {
-                        id: 'field-title',
-                        label: 'Title',
-                        hasValue: !!game.name,
-                      },
-                      {
-                        id: 'field-summary',
-                        label: 'Summary',
-                        hasValue: !!game.summary,
-                      },
-                      {
-                        id: 'field-keywords',
-                        label: 'Keywords',
-                        hasValue: !!(game.keywords as string[] | null)?.length,
-                      },
-                    ] as const
-                  ).map(({ id, label, hasValue }) => (
-                    <div key={id} className="flex items-center gap-2.5">
-                      <Checkbox
-                        id={id}
-                        checked={hasValue}
-                        disabled
-                        className="data-checked:bg-blue-600 data-checked:border-blue-600"
-                      />
-                      <Label
-                        htmlFor={id}
-                        className="text-sm font-medium cursor-default text-muted-foreground"
-                      >
-                        {label}
-                      </Label>
-                    </div>
-                  ))}
-
-                  {/* Optional fields */}
-                  {(
-                    [
-                      {
-                        id: 'field-storyline',
-                        label: 'Storyline',
-                        hasValue: !!game.storyline,
-                        checked: includeStoryline,
-                        onCheckedChange: setIncludeStoryline,
-                      },
-                      {
-                        id: 'field-genres',
-                        label: 'Genres',
-                        hasValue: !!(game.genres as string[] | null)?.length,
-                        checked: includeGenres,
-                        onCheckedChange: setIncludeGenres,
-                      },
-                      {
-                        id: 'field-themes',
-                        label: 'Themes',
-                        hasValue: !!(game.themes as string[] | null)?.length,
-                        checked: includeThemes,
-                        onCheckedChange: setIncludeThemes,
-                      },
-                    ] as const
-                  ).map(({ id, label, hasValue, checked, onCheckedChange }) => (
-                    <div key={id} className="flex items-center gap-2.5">
-                      <Checkbox
-                        id={id}
-                        checked={hasValue ? checked : false}
-                        disabled={!hasValue || generateImageMutation.isPending}
-                        onCheckedChange={(v) => onCheckedChange(v === true)}
-                      />
-                      <Label
-                        htmlFor={id}
-                        className={cn(
-                          'text-sm font-medium',
-                          hasValue
-                            ? 'cursor-pointer'
-                            : 'cursor-default line-through text-muted-foreground/50',
-                        )}
-                      >
-                        {label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-1">
-                  <Textarea
-                    readOnly
-                    value={
-                      promptView === 'saved' && game.aiPrompt
-                        ? game.aiPrompt
-                        : buildPromptPreview(game, {
-                            includeStoryline,
-                            includeGenres,
-                            includeThemes,
-                            imageStyle,
-                          })
-                    }
-                    className="rounded-none resize-none min-h-30 text-sm text-muted-foreground italic bg-muted/30 border-dashed"
-                  />
-                  {game.aiPrompt && (
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setPromptView(
-                            promptView === 'preview' ? 'saved' : 'preview',
-                          )
-                        }
-                        className="text-xs text-muted-foreground/60 hover:text-muted-foreground underline-offset-2 hover:underline cursor-pointer"
-                      >
-                        {promptView === 'preview'
-                          ? 'View saved prompt'
-                          : 'View preview'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <Button
-                  variant="outline"
-                  className={cn(
-                    'w-full font-bold h-10 rounded-none text-white hover:text-white',
-                    generateImageMutation.isPending
-                      ? 'bg-slate-400 hover:bg-slate-400 cursor-not-allowed'
-                      : 'bg-slate-600 hover:bg-slate-700 cursor-pointer',
-                  )}
-                  onClick={() => generateImageMutation.mutate()}
-                  disabled={generateImageMutation.isPending}
-                >
-                  <IconBrush
-                    className={cn(
-                      'mr-2 size-4',
-                      generateImageMutation.isPending && 'animate-pulse',
-                    )}
-                  />
-                  {imageGenButtonText(game)}
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-4">
-            {platforms && platforms.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                  Platforms
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {platforms.map((p: string) => (
-                    <span
-                      key={p}
-                      className="bg-primary/5 text-primary border border-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-wider"
-                    >
-                      {p}
-                    </span>
-                  ))}
+                    <IconBrush
+                      aria-hidden="true"
+                      className={cn(
+                        'mr-2 size-4',
+                        generateImageMutation.isPending && 'animate-pulse',
+                      )}
+                    />
+                    {imageGenButtonText(game)}
+                  </Button>
                 </div>
               </div>
-            )}
-
-            {genres && genres.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                  Genres
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {genres.map((g: string) => (
-                    <span
-                      key={g}
-                      className="bg-muted px-3 py-1 text-xs font-bold uppercase tracking-wider border border-border"
-                    >
-                      {g}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {involvedCompanies && involvedCompanies.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                Companies
-              </h3>
-              <div className="flex flex-wrap gap-3">
-                {involvedCompanies.map((c: Company, idx: number) => (
-                  <div
-                    key={`${c.name}-${idx}`}
-                    className="flex flex-col border border-dashed p-3 min-w-37.5"
-                  >
-                    <span className="font-bold text-sm">{c.name}</span>
-                    <span className="text-[10px] uppercase text-muted-foreground font-bold">
-                      {c.developer ? 'Developer' : ''}{' '}
-                      {c.developer && c.publisher ? '& ' : ''}{' '}
-                      {c.publisher ? 'Publisher' : ''}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
   );
 }
+

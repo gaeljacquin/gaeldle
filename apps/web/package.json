@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "infisical run --path=/web --env=dev -- next dev",
+    "dev": "INFISICAL_DISABLE_KEYRING=true ../../scripts/infisical-dev.sh run --path=/web --env=dev -- next dev || next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

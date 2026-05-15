@@ -186,7 +186,8 @@ function SidebarHeader({
               loading="eager"
               priority
               unoptimized
-            />            <span>{appInfo.title}</span>
+            />{' '}
+            <span>{appInfo.title}</span>
           </div>
           <div
             className="ml-auto hidden group-hover:block"

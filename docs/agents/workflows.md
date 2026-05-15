@@ -1,5 +1,8 @@
 # Common Workflows
 
+> [!IMPORTANT]
+> **Dev Container Reminder**: All steps in these workflows (installing packages, running scripts, building) MUST be performed inside the Dev Container. Never run these commands on your bare metal.
+
 ## Add a New API Endpoint
 
 1. **Contract**: Define the new route in `packages/api-contract/src/`. Add it to the resource file (e.g., `games.ts`) and ensure it's exported via the main `contract` in `index.ts`.

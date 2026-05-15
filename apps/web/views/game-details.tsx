@@ -62,12 +62,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@workspace/ui/select';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@workspace/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/tabs';
 
 function buildPromptPreview(
   game: Game,
@@ -545,9 +540,7 @@ export default function GameDetails({
                         <Image
                           src={
                             game.aiImageUrl ||
-                            PLACEHOLDER_IMAGE_R2(
-                              process.env.r2PublicUrl ?? '',
-                            )
+                            PLACEHOLDER_IMAGE_R2(process.env.r2PublicUrl ?? '')
                           }
                           alt={`${game.name} AI Image`}
                           fill
@@ -570,9 +563,7 @@ export default function GameDetails({
                         <Image
                           src={
                             game.aiImageUrl ||
-                            PLACEHOLDER_IMAGE_R2(
-                              process.env.r2PublicUrl ?? '',
-                            )
+                            PLACEHOLDER_IMAGE_R2(process.env.r2PublicUrl ?? '')
                           }
                           alt={`${game.name} AI Image`}
                           fill
@@ -670,16 +661,14 @@ export default function GameDetails({
                         {
                           id: 'field-genres',
                           label: 'Genres',
-                          hasValue: !!(game.genres as string[] | null)
-                            ?.length,
+                          hasValue: !!(game.genres as string[] | null)?.length,
                           checked: includeGenres,
                           onCheckedChange: setIncludeGenres,
                         },
                         {
                           id: 'field-themes',
                           label: 'Themes',
-                          hasValue: !!(game.themes as string[] | null)
-                            ?.length,
+                          hasValue: !!(game.themes as string[] | null)?.length,
                           checked: includeThemes,
                           onCheckedChange: setIncludeThemes,
                         },
@@ -774,4 +763,3 @@ export default function GameDetails({
     </div>
   );
 }
-

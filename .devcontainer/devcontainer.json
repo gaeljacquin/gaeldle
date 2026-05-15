@@ -1,0 +1,45 @@
+{
+  "name": "Gaeldle Dev Container",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/gaeldle",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "yoavbls.pretty-ts-errors",
+        "ms-python.pylance",
+        "ms-python.python",
+        "ms-python.debugpy",
+        "ms-python.python-environment-manager",
+        "ms-vscode-remote.remote-ssh",
+        "ms-vscode-remote.remote-ssh-edit",
+        "ms-vscode.remote-tunnels",
+        "ms-vscode.remote-explorer",
+        "bradlc.vscode-tailwindcss",
+        // "ms-azuretools.vscode-docker",
+        // "kilocode.kilo-code",
+        "ms-playwright.playwright",
+        "alefragnani.Bookmarks",
+        "streetsidesoftware.code-spell-checker",
+        "dbaeumer.vscode-eslint",
+        "Google.gemini-cli-companion",
+        "Google.gemini-code-assist",
+        "kisstkondoros.vscode-gutter-preview",
+        "IBM.output-colorizer",
+        "quicktype.quicktype"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "js/ts.tsdk": "node_modules/typescript/lib",
+        "npm.packageManager": "pnpm"
+      }
+    }
+  },
+  "remoteUser": "root",
+  "postCreateCommand": "pnpm install"
+}

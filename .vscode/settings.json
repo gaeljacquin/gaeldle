@@ -2,5 +2,6 @@
   "sonarlint.connectedMode.project": {
     "connectionId": "homelab-sonar",
     "projectKey": "gaeldle"
-  }
+  },
+  "npm.packageManager": "pnpm"
 }

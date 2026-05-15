@@ -162,11 +162,12 @@ function SidebarHeader({
           <Image
             src="/logo.png"
             alt={`${appInfo.title} logo`}
-            width={243}
-            height={256}
-            className="h-8 rounded-md group-hover:hidden"
-            style={{ width: 'auto' }}
+            width={32}
+            height={32}
+            className="h-8 w-auto rounded-md group-hover:hidden dark:invert"
             loading="eager"
+            priority
+            unoptimized
           />
           <IconLayoutSidebarLeftExpand
             size={20}
@@ -179,12 +180,13 @@ function SidebarHeader({
             <Image
               src="/logo.png"
               alt={`${appInfo.title} logo`}
-              width={243}
-              height={256}
-              className="h-8 rounded-md"
-              style={{ width: 'auto' }}
+              width={32}
+              height={32}
+              className="h-8 w-auto rounded-md dark:invert"
               loading="eager"
-            />
+              priority
+              unoptimized
+            />{' '}
             <span>{appInfo.title}</span>
           </div>
           <div

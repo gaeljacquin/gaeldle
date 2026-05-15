@@ -29,33 +29,34 @@ export default function CoverDisplay({
   const [pixelatedData, setPixelatedData] = useState<{
     url: string;
     sourceUrl: string;
+    pixelSize: number;
   } | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     // Early return for invalid states
     if (!sourceImageUrl || !usePixelation || isGameOver || isLoading) {
-      setIsProcessing(false);
       return;
     }
 
     const timer = setTimeout(() => {
-      // Clear old pixelated image only when we're about to generate a new one
-      setPixelatedData(null);
-
       async function applyPixelation() {
         if (!sourceImageUrl) return;
 
         try {
-          setIsProcessing(true);
           const pixelated = await pixelateImage(sourceImageUrl, pixelSize);
-          // Store both the pixelated URL and the source it came from
-          setPixelatedData({ url: pixelated, sourceUrl: sourceImageUrl });
+          // Store both the pixelated URL and the source/params it came from
+          setPixelatedData({
+            url: pixelated,
+            sourceUrl: sourceImageUrl,
+            pixelSize,
+          });
         } catch (error) {
           console.error('Failed to pixelate image:', error);
-          setPixelatedData({ url: sourceImageUrl, sourceUrl: sourceImageUrl });
-        } finally {
-          setIsProcessing(false);
+          setPixelatedData({
+            url: sourceImageUrl,
+            sourceUrl: sourceImageUrl,
+            pixelSize,
+          });
         }
       }
 
@@ -71,16 +72,16 @@ export default function CoverDisplay({
 
   // Determine what to display
   const shouldShowPixelated = usePixelation && !isGameOver;
-  // Only use pixelated URL if it matches the current source
-  const pixelatedUrl =
-    pixelatedData && pixelatedData.sourceUrl === sourceImageUrl
-      ? pixelatedData.url
-      : null;
+  // Only use pixelated URL if it matches the current source and parameters
+  const isDataValid =
+    pixelatedData?.sourceUrl === sourceImageUrl &&
+    pixelatedData?.pixelSize === pixelSize;
+  const pixelatedUrl = isDataValid ? pixelatedData.url : null;
   const displayUrl = shouldShowPixelated ? pixelatedUrl : sourceImageUrl;
 
   // Don't show original image if we're waiting for pixelation
   const shouldShowImage =
-    !shouldShowPixelated || (shouldShowPixelated && pixelatedUrl);
+    !shouldShowPixelated || (shouldShowPixelated && !!pixelatedUrl);
 
   if (!sourceImageUrl) {
     return (
@@ -97,7 +98,7 @@ export default function CoverDisplay({
 
   return (
     <div className={cn('relative overflow-hidden bg-muted border', className)}>
-      {isProcessing || !shouldShowImage ? (
+      {isLoading || !shouldShowImage ? (
         <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
           <p className="text-sm text-muted-foreground">Loading...</p>
         </div>

@@ -4,6 +4,25 @@ A collection of video game guessing challenges. Test your gaming knowledge acros
 
 ---
 
+## Getting Started
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [VS Code](https://code.visualstudio.com/download)
+- [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
+### Setup
+
+1. Clone the repository.
+2. Open the folder in VS Code.
+3. When prompted, click **Reopen in Container** (or use the Command Palette: `Dev Containers: Reopen in Container`).
+
+> [!IMPORTANT]
+> **Security Requirement**: Never run `pnpm install` or any development commands on your host machine. All work must happen inside the container to isolate the host from potentially compromised npm packages.
+
+---
+
 ## Documentation Index
 
 ### Game

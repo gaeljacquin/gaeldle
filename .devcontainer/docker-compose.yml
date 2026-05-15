@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: gaeldle
+    ports:
+      - '5433:5432'
+    volumes:
+      - gaeldle_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U user -d gaeldle']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ..:/workspaces/gaeldle:cached
+      # Anonymous volumes for node_modules to ensure they stay in the container
+      - /workspaces/gaeldle/node_modules
+      - /workspaces/gaeldle/apps/api/node_modules
+      - /workspaces/gaeldle/apps/web/node_modules
+      - /workspaces/gaeldle/packages/api-contract/node_modules
+      - /workspaces/gaeldle/packages/constants/node_modules
+      - /workspaces/gaeldle/packages/ui/node_modules
+      - /workspaces/gaeldle/.kilocode/node_modules
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/gaeldle
+      - COREPACK_ENABLE_STRICT=0
+      - COREPACK_ENABLE_AUTO_PIN=0
+    depends_on:
+      db:
+        condition: service_healthy
+    # Keep the container running
+    command: sleep infinity
+
+volumes:
+  gaeldle_postgres_data:

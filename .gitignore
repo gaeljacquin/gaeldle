@@ -146,5 +146,8 @@ vite.config.ts.timestamp-*
 # Previous apps
 */*-old
 
+# pnpm
+.pnpm-store
+
 # Misc
 TODO.md

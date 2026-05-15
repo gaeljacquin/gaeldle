@@ -12,6 +12,16 @@ Gaeldle is a Turborepo monorepo with a Next.js web app and a NestJS API.
   - `pnpm run lint` (or `turbo lint`)
   - `pnpm run dev` (or `turbo dev`)
 
+## Development Environment & Security
+
+> [!IMPORTANT]
+> **Hard Requirement**: All development, including package installations and updates, MUST be performed inside the Dev Container.
+
+- **Security Isolation**: This requirement is strictly enforced to protect your host machine. NPM/PNPM packages can be compromised; by using a Dev Container, any malicious code remains isolated from your bare metal.
+- **No Bare Metal**: Never run `pnpm install`, `npm install`, or any package updates on your host machine. I don't want `node_modules` anywhere on the bare machine.
+- **Node Modules Management**: The project uses Docker volumes to keep `node_modules` strictly within the container.
+- **Tools**: Use VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+
 ## More guidance
 
 - [Architecture overview](docs/agents/architecture.md)

@@ -1,5 +1,15 @@
 # Development Commands
 
+> [!CAUTION]
+> **Run all commands inside the Dev Container.**
+> For security and host isolation, never run `pnpm` or `npm` commands (especially `install` or `update`) on your bare metal.
+
+## Terminal Utilities
+
+The Dev Container includes several productivity tools:
+- **[ni](https://github.com/antfu/ni)**: Use the right package manager commands automatically (`ni`, `nr`, `nx`, `nu`, `nun`).
+- **[zoxide](https://github.com/ajeetdsouza/zoxide)**: A smarter `cd` command (use `z` instead of `cd`).
+
 ## Running Services Locally
 
 ```bash

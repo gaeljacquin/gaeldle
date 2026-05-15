@@ -34,11 +34,12 @@ export function Navbar() {
           <Image
             src="/logo.png"
             alt={`${appInfo.title} logo`}
-            width={243}
-            height={256}
-            className="h-8"
-            style={{ width: 'auto' }}
+            width={32}
+            height={32}
+            className="h-8 w-auto dark:invert"
             loading="eager"
+            priority
+            unoptimized
           />
           <span className="text-xl font-bold tracking-tight text-foreground">
             {appInfo.title}

@@ -13,6 +13,8 @@
     "format": "prettier --check .",
     "format:write": "prettier --write . --ignore-unknown",
     "typecheck": "turbo typecheck",
+    "add:web": "pnpm --filter ./apps/web add",
+    "add:ui": "pnpm --filter ./packages/ui add",
     "sync": "./remote-sync.sh",
     "sync:list": "mutagen sync list",
     "sync:list-long": "mutagen sync list --long",
@@ -24,14 +26,14 @@
     "prepare": "husky"
   },
   "keywords": [],
-  "packageManager": "pnpm@10.33.2",
+  "packageManager": "pnpm@11.1.2+sha512.415a1cc25974731e75455c1468371be74c5aa5fb7621b50d4056d222451609f11412f23fd602e6169f1e060466641f798597e1be961a10688836a67b16569499",
   "devDependencies": {
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
-    "@types/node": "^25.6.0",
+    "@types/node": "^25.6.2",
     "husky": "^9.1.7",
     "prettier": "^3.8.3",
-    "turbo": "^2.9.9"
+    "turbo": "^2.9.14"
   },
   "dependencies": {
     "motion": "^12.38.0",

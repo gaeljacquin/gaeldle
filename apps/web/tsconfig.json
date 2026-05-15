@@ -20,7 +20,7 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./*", "../../packages/ui/src/*"],
       "@workspace/api-contract": ["../../packages/api-contract/src/index.ts"]
     }
   },

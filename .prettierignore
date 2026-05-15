@@ -10,7 +10,10 @@ pnpm-lock.yaml
 package-lock.json
 yarn.lock
 
-# Ignore other files
+# Ignore other files and folders
 *.log
 .env
 .env.*
+*.md
+next-env.d.ts
+packages/ui

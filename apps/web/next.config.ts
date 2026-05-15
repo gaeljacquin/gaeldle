@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  allowedDevOrigins: [
+    'dev-client.gaeljacquin.com',
+  ],
 };
 
 export default nextConfig;

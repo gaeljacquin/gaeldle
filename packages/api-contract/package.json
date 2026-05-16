@@ -11,8 +11,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@orpc/contract": "^1.14.2",
-    "@orpc/server": "^1.14.2",
+    "@orpc/contract": "^1.14.3",
+    "@orpc/server": "^1.14.3",
     "@workspace/constants": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.7.1",

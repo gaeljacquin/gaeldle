@@ -30,17 +30,10 @@
   "devDependencies": {
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
-    "@types/node": "^25.6.2",
+    "@types/node": "^25.8.0",
     "husky": "^9.1.7",
     "prettier": "^3.8.3",
     "turbo": "^2.9.14"
-  },
-  "pnpm": {
-    "overrides": {
-      "postcss": "^8.5.10",
-      "ip-address": "10.1.1",
-      "esbuild": "^0.25.0"
-    }
   },
   "dependencies": {
     "motion": "^12.38.0",

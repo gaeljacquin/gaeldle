@@ -9,9 +9,12 @@ import {
   IconCircleCheck,
   IconCircleX,
   IconLoader,
+  IconRefresh,
+  IconSquareRoundedX,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import type { ReplaceGameValidationState } from '@/lib/hooks/use-replace-game-validation';
+import { toast } from 'sonner';
 
 export interface IgdbIdPairRowData {
   id: string;
@@ -33,7 +36,7 @@ function CurrentBadge({
   state,
   igdbId,
 }: Readonly<{ state: ReplaceGameValidationState; igdbId: string }>) {
-  if (!state.isReady) return null;
+  if (!state.isReady && !state.isLoading) return null;
 
   if (state.currentExistsInDb === false) {
     return (
@@ -143,6 +146,13 @@ export function IgdbIdPairRow({
     validationState.currentExistsInDb === true &&
     !validationState.canApply;
 
+  const canSync = row.replacement.trim() !== '' && !validationState.isLoading;
+
+  const handleStop = () => {
+    validationState.stop();
+    toast.info('Syncing stopped');
+  };
+
   return (
     <div
       className={cn(
@@ -156,36 +166,39 @@ export function IgdbIdPairRow({
           <Label htmlFor={`current-${row.id}`} className="text-xs">
             Current IGDB ID
           </Label>
-          <Input
-            id={`current-${row.id}`}
-            type="number"
-            min={1}
-            value={row.current}
-            onChange={(e) => onCurrentChange(row.id, e.target.value)}
-            placeholder="e.g. 132181"
-            className={cn(
-              'font-mono',
-              currentHasError &&
-                'border-destructive focus-visible:ring-destructive',
+          <div className="relative">
+            <Input
+              id={`current-${row.id}`}
+              type="number"
+              min={1}
+              value={row.current}
+              onChange={(e) => onCurrentChange(row.id, e.target.value)}
+              placeholder="e.g. 132181"
+              className={cn(
+                'font-mono pr-8',
+                currentHasError &&
+                  'border-destructive focus-visible:ring-destructive',
+              )}
+              aria-invalid={currentHasError}
+            />
+            {validationState.isLoading && !validationState.isReady && (
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                <IconLoader
+                  size={14}
+                  className="animate-spin text-muted-foreground"
+                  aria-label="Validating current ID"
+                />
+              </div>
             )}
-            aria-invalid={currentHasError}
-          />
+          </div>
           <div aria-live="polite" aria-atomic="true" className="min-h-4">
             <CurrentBadge state={validationState} igdbId={row.current} />
           </div>
         </div>
 
-        {/* Arrow / spinner separator */}
+        {/* Arrow separator */}
         <div className="pt-7 text-muted-foreground shrink-0">
-          {validationState.isLoading ? (
-            <IconLoader
-              size={16}
-              className="animate-spin"
-              aria-label="Validating"
-            />
-          ) : (
-            <IconArrowRight size={16} aria-hidden="true" />
-          )}
+          <IconArrowRight size={16} aria-hidden="true" />
         </div>
 
         {/* Replacement IGDB ID */}
@@ -193,20 +206,55 @@ export function IgdbIdPairRow({
           <Label htmlFor={`replacement-${row.id}`} className="text-xs">
             Replacement IGDB ID
           </Label>
-          <Input
-            id={`replacement-${row.id}`}
-            type="number"
-            min={1}
-            value={row.replacement}
-            onChange={(e) => onReplacementChange(row.id, e.target.value)}
-            placeholder="e.g. 2"
-            className={cn(
-              'font-mono',
-              replacementHasError &&
-                'border-destructive focus-visible:ring-destructive',
+          <div className="flex items-center gap-2">
+            <Input
+              id={`replacement-${row.id}`}
+              type="number"
+              min={1}
+              value={row.replacement}
+              onChange={(e) => onReplacementChange(row.id, e.target.value)}
+              placeholder="e.g. 2"
+              className={cn(
+                'font-mono',
+                replacementHasError &&
+                  'border-destructive focus-visible:ring-destructive',
+              )}
+              aria-invalid={replacementHasError}
+            />
+            {validationState.isLoading && validationState.isReady ? (
+              <div className="relative group w-8 h-8 flex items-center justify-center shrink-0">
+                <IconLoader
+                  size={16}
+                  className="animate-spin text-primary group-hover:opacity-0 transition-opacity"
+                  aria-label="Validating replacement"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={handleStop}
+                  aria-label="Stop syncing"
+                  title="Stop syncing"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10 transition-opacity cursor-pointer"
+                >
+                  <IconSquareRoundedX size={16} aria-hidden="true" />
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => validationState.refetch()}
+                disabled={!canSync}
+                aria-label="Sync IGDB info"
+                title="Sync IGDB info"
+                className="text-muted-foreground hover:text-primary cursor-pointer shrink-0"
+              >
+                <IconRefresh size={14} aria-hidden="true" />
+              </Button>
             )}
-            aria-invalid={replacementHasError}
-          />
+          </div>
           <div aria-live="polite" aria-atomic="true" className="min-h-4">
             <ReplacementBadge state={validationState} />
           </div>
@@ -221,6 +269,7 @@ export function IgdbIdPairRow({
             onClick={() => onRemove(row.id)}
             disabled={!canRemove}
             aria-label="Remove row"
+            title="Remove row"
             className="text-muted-foreground hover:text-destructive cursor-pointer"
           >
             <IconTrash size={14} aria-hidden="true" />

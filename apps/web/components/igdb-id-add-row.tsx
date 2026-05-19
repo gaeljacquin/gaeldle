@@ -4,13 +4,19 @@ import { useEffect } from 'react';
 import { Input } from '@workspace/ui/input';
 import { Button } from '@workspace/ui/button';
 import { Label } from '@workspace/ui/label';
-import { IconTrash, IconLoader } from '@tabler/icons-react';
+import {
+  IconTrash,
+  IconLoader,
+  IconRefresh,
+  IconSquareRoundedX,
+} from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import {
   useIgdbIdAddValidation,
   type IgdbIdAddValidationState,
 } from '@/lib/hooks/use-igdb-id-add-validation';
 import { IgdbAddValidationBadge } from '@/components/igdb-add-validation-badge';
+import { toast } from 'sonner';
 
 export interface IgdbIdAddRowData {
   id: string;
@@ -47,6 +53,13 @@ export function IgdbIdAddRow({
     !validationState.isLoading &&
     !validationState.canAdd;
 
+  const canSync = value.trim() !== '' && !validationState.isLoading;
+
+  const handleStop = () => {
+    validationState.stop();
+    toast.info('Syncing stopped');
+  };
+
   return (
     <div
       className={cn(
@@ -73,20 +86,46 @@ export function IgdbIdAddRow({
               )}
               aria-invalid={hasError}
             />
-            {validationState.isLoading ? (
-              <IconLoader
-                size={16}
-                className="animate-spin text-muted-foreground shrink-0"
-                aria-label="Validating"
-              />
-            ) : null}
           </div>
           <div aria-live="polite" aria-atomic="true" className="min-h-4">
             <IgdbAddValidationBadge state={validationState} />
           </div>
         </div>
 
-        <div className="pt-6">
+        <div className="pt-6 flex items-center gap-1">
+          {validationState.isLoading ? (
+            <div className="relative group w-8 h-8 flex items-center justify-center">
+              <IconLoader
+                size={16}
+                className="animate-spin text-primary group-hover:opacity-0 transition-opacity"
+                aria-label="Validating"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={handleStop}
+                aria-label="Stop syncing"
+                title="Stop syncing"
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10 transition-opacity cursor-pointer"
+              >
+                <IconSquareRoundedX size={16} aria-hidden="true" />
+              </Button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => validationState.refetch()}
+              disabled={!canSync}
+              aria-label="Sync IGDB info"
+              title="Sync IGDB info"
+              className="text-muted-foreground hover:text-primary cursor-pointer"
+            >
+              <IconRefresh size={14} aria-hidden="true" />
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"
@@ -94,6 +133,7 @@ export function IgdbIdAddRow({
             onClick={onRemove}
             disabled={isLastRow}
             aria-label="Remove row"
+            title="Remove row"
             className="text-muted-foreground hover:text-destructive cursor-pointer"
           >
             <IconTrash size={14} aria-hidden="true" />

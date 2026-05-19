@@ -153,11 +153,15 @@ export async function getBulkJobStatus(jobId: string) {
 export async function validateReplaceGame(
   current: number,
   replacement: number,
+  signal?: AbortSignal,
 ) {
-  const result = await orpcClient.games.validateReplaceGame({
-    current,
-    replacement,
-  });
+  const result = await orpcClient.games.validateReplaceGame(
+    {
+      current,
+      replacement,
+    },
+    { signal },
+  );
   return result;
 }
 
@@ -168,8 +172,11 @@ export async function replaceGameByIdgbId(
   return result;
 }
 
-export async function validateIgdbIdAdd(igdbId: number) {
-  const result = await orpcClient.games.validateIgdbIdAdd({ igdbId });
+export async function validateIgdbIdAdd(igdbId: number, signal?: AbortSignal) {
+  const result = await orpcClient.games.validateIgdbIdAdd(
+    { igdbId },
+    { signal },
+  );
   return result;
 }
 

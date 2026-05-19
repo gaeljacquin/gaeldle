@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pnpm (matching package.json version) and @antfu/ni
-RUN npm install -g pnpm@11.1.2 @antfu/ni
+RUN npm install -g pnpm@11 @antfu/ni
 
 # Install Infisical CLI
 RUN curl -1sLf 'https://artifacts-cli.infisical.com/setup.deb.sh' | bash \

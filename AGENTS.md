@@ -19,6 +19,9 @@ Gaeldle is a Turborepo monorepo with a Next.js web app and a NestJS API.
 
 - **Security Isolation**: This requirement is strictly enforced to protect your host machine. NPM/PNPM packages can be compromised; by using a Dev Container, any malicious code remains isolated from your bare metal.
 - **No Bare Metal**: Never run `pnpm install`, `npm install`, or any package updates on your host machine. I don't want `node_modules` anywhere on the bare machine.
+- **Shell Commands on Host**: If the `DEVBOX` environment variable is NOT set (meaning you are on bare metal), you MUST only run shell commands via `docker exec`.
+  - Use `docker exec -i gaeldle_devcontainer-app-1 <command>` or `docker exec -i gaeldle_devcontainer-db-1 <command>` to proxy commands into the container.
+  - If `docker exec` fails because Docker is not running or installed, **DO NOT** attempt to run the commands directly on the host.
 - **Node Modules Management**: The project uses Docker volumes to keep `node_modules` strictly within the container.
 - **Tools**: Use VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
 

@@ -150,4 +150,9 @@ vite.config.ts.timestamp-*
 .pnpm-store
 
 # Misc
+uwu/
+temp/
 TODO.md
+
+# Kilo
+.kilo*/

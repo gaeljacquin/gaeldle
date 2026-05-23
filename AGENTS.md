@@ -4,21 +4,21 @@ Gaeldle is a Turborepo monorepo with a Next.js web app and a NestJS API.
 
 ## Essentials
 
-- Package manager: `pnpm` (unified for root and apps).
+- Package manager: `nr` (unified for root and apps).
 - Commands:
-  - `pnpm run build` (or `turbo build`)
-  - `pnpm run test` (or `turbo test`)
-  - `pnpm run type-check` (or `turbo type-check`)
-  - `pnpm run lint` (or `turbo lint`)
-  - `pnpm run dev` (or `turbo dev`)
+  - `nr build` (or `turbo build`)
+  - `nr test` (or `turbo test`)
+  - `nr typecheck` (or `turbo type-check`)
+  - `nr lint` (or `turbo lint`)
+  - `nr dev` (or `turbo dev`)
 
 ## Development Environment & Security
 
 > [!IMPORTANT]
 > **Hard Requirement**: All development, including package installations and updates, MUST be performed inside the Dev Container.
 
-- **Security Isolation**: This requirement is strictly enforced to protect your host machine. NPM/PNPM packages can be compromised; by using a Dev Container, any malicious code remains isolated from your bare metal.
-- **No Bare Metal**: Never run `pnpm install`, `npm install`, or any package updates on your host machine. I don't want `node_modules` anywhere on the bare machine.
+- **Security Isolation**: This requirement is strictly enforced to protect your host machine. npm packages can be compromised; by using a Dev Container, any malicious code remains isolated from your bare metal.
+- **No Bare Metal**: Never run `ni`, `nr`, `nup`, or any package updates on your host machine. I don't want `node_modules` anywhere on the bare machine.
 - **Shell Commands on Host**: If the `DEVBOX` environment variable is NOT set (meaning you are on bare metal), you MUST only run shell commands via `docker exec`.
   - Use `docker exec -i gaeldle_devcontainer-app-1 <command>` or `docker exec -i gaeldle_devcontainer-db-1 <command>` to proxy commands into the container.
   - If `docker exec` fails because Docker is not running or installed, **DO NOT** attempt to run the commands directly on the host.

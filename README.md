@@ -19,7 +19,7 @@ A collection of video game guessing challenges. Test your gaming knowledge acros
 3. When prompted, click **Reopen in Container** (or use the Command Palette: `Dev Containers: Reopen in Container`).
 
 > [!IMPORTANT]
-> **Security Requirement**: Never run `pnpm install` or any development commands on your host machine. All work must happen inside the container to isolate the host from potentially compromised npm packages.
+> **Security Requirement**: Never run `ni` or any development commands on your host machine. All work must happen inside the container to isolate the host from potentially compromised npm packages.
 
 ---
 
@@ -35,6 +35,7 @@ A collection of video game guessing challenges. Test your gaming knowledge acros
 
 | File                                                                       | Description                                                                                              |
 | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| [docs/tech-stack.md](docs/tech-stack.md)                                   | The technology stack: monorepo tools, frontend/backend frameworks, database, and auth.                   |
 | [docs/agents/architecture.md](docs/agents/architecture.md)                 | Monorepo topology, ports, CORS config, health checks, environment variables, and code quality standards. |
 | [docs/agents/backend-conventions.md](docs/agents/backend-conventions.md)   | NestJS API structure, contract-first approach with oRPC and Zod, router and service separation rules.    |
 | [docs/agents/frontend-conventions.md](docs/agents/frontend-conventions.md) | Next.js 16 tech stack, theming, component/view/hook separation rules, and agent skills.                  |

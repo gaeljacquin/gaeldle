@@ -143,5 +143,3 @@ Before finalizing the script, verify:
 - [ ] Script matches project DB schema (validated against existing models/migrations)
 - [ ] Dry-run mode is available
 - [ ] Error handling logs failures without crashing the entire run
-
-**Update your agent memory** as you discover patterns in this codebase.

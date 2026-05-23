@@ -160,10 +160,13 @@ export function IgdbIdPairRow({
         isDuplicate && 'border-destructive',
       )}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-6">
         {/* Current IGDB ID */}
-        <div className="flex flex-col gap-1.5 flex-1">
-          <Label htmlFor={`current-${row.id}`} className="text-xs">
+        <div className="flex flex-col gap-1.5 shrink-0">
+          <Label
+            htmlFor={`current-${row.id}`}
+            className="text-xs"
+          >
             Current IGDB ID
           </Label>
           <div className="relative">
@@ -175,38 +178,38 @@ export function IgdbIdPairRow({
               onChange={(e) => onCurrentChange(row.id, e.target.value)}
               placeholder="e.g. 132181"
               className={cn(
-                'font-mono pr-8',
+                'font-mono pr-8 h-11 w-48',
                 currentHasError &&
-                  'border-destructive focus-visible:ring-destructive',
+                'border-destructive focus-visible:ring-destructive',
               )}
               aria-invalid={currentHasError}
             />
             {validationState.isLoading && !validationState.isReady && (
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
                 <IconLoader
-                  size={14}
+                  size={16}
                   className="animate-spin text-muted-foreground"
                   aria-label="Validating current ID"
                 />
               </div>
             )}
           </div>
-          <div aria-live="polite" aria-atomic="true" className="min-h-4">
-            <CurrentBadge state={validationState} igdbId={row.current} />
-          </div>
         </div>
 
         {/* Arrow separator */}
-        <div className="pt-7 text-muted-foreground shrink-0">
-          <IconArrowRight size={16} aria-hidden="true" />
+        <div className="pt-6 text-muted-foreground shrink-0">
+          <IconArrowRight size={20} aria-hidden="true" />
         </div>
 
         {/* Replacement IGDB ID */}
         <div className="flex flex-col gap-1.5 flex-1">
-          <Label htmlFor={`replacement-${row.id}`} className="text-xs">
+          <Label
+            htmlFor={`replacement-${row.id}`}
+            className="text-xs"
+          >
             Replacement IGDB ID
           </Label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Input
               id={`replacement-${row.id}`}
               type="number"
@@ -215,65 +218,66 @@ export function IgdbIdPairRow({
               onChange={(e) => onReplacementChange(row.id, e.target.value)}
               placeholder="e.g. 2"
               className={cn(
-                'font-mono',
+                'font-mono h-11 w-48',
                 replacementHasError &&
-                  'border-destructive focus-visible:ring-destructive',
+                'border-destructive focus-visible:ring-destructive',
               )}
               aria-invalid={replacementHasError}
             />
-            {validationState.isLoading && validationState.isReady ? (
-              <div className="relative group w-8 h-8 flex items-center justify-center shrink-0">
-                <IconLoader
-                  size={16}
-                  className="animate-spin text-primary group-hover:opacity-0 transition-opacity"
-                  aria-label="Validating replacement"
-                />
+            {/* Buttons */}
+            <div className="flex items-center gap-2">
+              {validationState.isLoading && validationState.isReady ? (
+                <div className="relative group h-11 px-4 py-3 flex items-center justify-center border border-border bg-muted/20 shrink-0">
+                  <IconLoader
+                    size={20}
+                    className="animate-spin text-primary group-hover:opacity-0 transition-opacity"
+                    aria-label="Validating replacement"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleStop}
+                    aria-label="Stop syncing"
+                    title="Stop syncing"
+                    className="absolute inset-0 size-full opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10 transition-opacity cursor-pointer rounded-none"
+                  >
+                    <IconSquareRoundedX size={20} aria-hidden="true" />
+                  </Button>
+                </div>
+              ) : (
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={handleStop}
-                  aria-label="Stop syncing"
-                  title="Stop syncing"
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10 transition-opacity cursor-pointer"
+                  variant="outline"
+                  onClick={() => validationState.refetch()}
+                  disabled={!canSync}
+                  aria-label="Sync IGDB info"
+                  title="Sync IGDB info"
+                  className="text-muted-foreground hover:text-primary cursor-pointer h-11 px-4 py-1 rounded-none flex items-center justify-center shrink-0"
                 >
-                  <IconSquareRoundedX size={16} aria-hidden="true" />
+                  <IconRefresh size={20} aria-hidden="true" />
                 </Button>
-              </div>
-            ) : (
+              )}
               <Button
                 type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => validationState.refetch()}
-                disabled={!canSync}
-                aria-label="Sync IGDB info"
-                title="Sync IGDB info"
-                className="text-muted-foreground hover:text-primary cursor-pointer shrink-0"
+                variant="outline"
+                onClick={() => onRemove(row.id)}
+                disabled={!canRemove}
+                aria-label="Remove row"
+                title="Remove row"
+                className="text-muted-foreground hover:text-destructive cursor-pointer h-11 px-4 py-1 rounded-none flex items-center justify-center shrink-0"
               >
-                <IconRefresh size={14} aria-hidden="true" />
+                <IconTrash size={20} aria-hidden="true" />
               </Button>
-            )}
-          </div>
-          <div aria-live="polite" aria-atomic="true" className="min-h-4">
-            <ReplacementBadge state={validationState} />
+            </div>
           </div>
         </div>
-
-        {/* Remove button */}
-        <div className="pt-6">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => onRemove(row.id)}
-            disabled={!canRemove}
-            aria-label="Remove row"
-            title="Remove row"
-            className="text-muted-foreground hover:text-destructive cursor-pointer"
-          >
-            <IconTrash size={14} aria-hidden="true" />
-          </Button>
+      </div>
+      <div className="flex gap-40 min-h-4">
+        <div aria-live="polite" aria-atomic="true" className="flex-1">
+          <CurrentBadge state={validationState} igdbId={row.current} />
+        </div>
+        <div aria-live="polite" aria-atomic="true" className="flex-1">
+          <ReplacementBadge state={validationState} />
         </div>
       </div>
     </div>

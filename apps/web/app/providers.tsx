@@ -30,6 +30,7 @@ export default function Providers({ children }: Readonly<ProvidersProps>) {
   return (
     <StackProvider app={stackClientApp}>
       <StackTheme>
+        {/* @ts-expect-error - next-themes version mismatch with React 19 children types */}
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <QueryClientProvider client={queryClient}>
             {children}

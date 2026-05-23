@@ -328,7 +328,7 @@ export default function BulkImageGen() {
                         }
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-popover min-w-[var(--anchor-width)]">
                       {IMAGE_STYLES.map((style) => (
                         <SelectItem key={style.value} value={style.value}>
                           {style.label}

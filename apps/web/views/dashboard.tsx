@@ -41,6 +41,7 @@ import {
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { Game } from '@workspace/api-contract';
+import { Checkbox } from '@workspace/ui/checkbox';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { DashboardPageHeader } from '@/components/dashboard-header';
@@ -227,17 +228,16 @@ export default function Dashboard() {
             >
               {isMultiSelect && (
                 <div className="absolute top-2 right-2 z-20">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={selectedIds.has(game.id)}
-                    onChange={() => toggleSelect(game.id)}
-                    className="w-5 h-5 rounded border-primary bg-background text-primary focus:ring-primary cursor-pointer accent-primary"
+                    onCheckedChange={() => toggleSelect(game.id)}
+                    className="size-5"
                   />
                 </div>
               )}
               <Link
                 href={isMultiSelect ? '#' : `/dashboard/games/${game.igdbId}`}
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent) => {
                   if (isMultiSelect) {
                     e.preventDefault();
                     toggleSelect(game.id);
@@ -257,7 +257,7 @@ export default function Dashboard() {
                     href={
                       isMultiSelect ? '#' : `/dashboard/games/${game.igdbId}`
                     }
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       if (isMultiSelect) {
                         e.preventDefault();
                         toggleSelect(game.id);
@@ -368,8 +368,8 @@ export default function Dashboard() {
             icon={IconDashboard}
           />
 
-          <div className="flex flex-row justify-between items-start">
-            <div className="relative w-1/2 group">
+          <div className="flex flex-row justify-between items-start gap-8">
+            <div className="relative flex-1 group">
               <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
               <Input
                 placeholder="Search games by title..."
@@ -388,23 +388,23 @@ export default function Dashboard() {
               ) : null}
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4">
                 {isMultiSelect && (
-                  <div className="flex items-center gap-2 mr-2 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="flex items-center gap-4 mr-4 animate-in fade-in slide-in-from-right-4 duration-300">
                     <AlertDialog
                       open={isDeleteDialogOpen}
                       onOpenChange={setIsDeleteDialogOpen}
                     >
                       <Button
-                        variant="destructive"
+                        variant="default"
                         size="sm"
                         disabled={
                           selectedIds.size === 0 || deleteMutation.isPending
                         }
                         onClick={() => setIsDeleteDialogOpen(true)}
                         className={cn(
-                          'h-8',
+                          'h-8 bg-destructive text-destructive-foreground hover:bg-destructive/90',
                           selectedIds.size === 0 || deleteMutation.isPending
                             ? 'cursor-not-allowed'
                             : 'cursor-pointer',
@@ -440,7 +440,7 @@ export default function Dashboard() {
                       </AlertDialogContent>
                     </AlertDialog>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       onClick={clearSelection}
                       disabled={selectedIds.size === 0}
@@ -465,17 +465,17 @@ export default function Dashboard() {
                   }}
                   title="Multi-select"
                   className={cn(
-                    'cursor-pointer',
+                    'cursor-pointer size-10',
                     isMultiSelect && 'bg-primary text-primary-foreground',
                   )}
                 >
-                  <IconChecklist size={16} />
+                  <IconChecklist size={22} />
                 </Button>
 
                 <div className="flex bg-muted p-1 border border-border">
                   <Button
                     variant={view === 'grid' ? 'default' : 'ghost'}
-                    size="icon-xs"
+                    size="icon-sm"
                     onClick={() => setView('grid')}
                     title="Grid view"
                   >
@@ -483,7 +483,7 @@ export default function Dashboard() {
                   </Button>
                   <Button
                     variant={view === 'list' ? 'default' : 'ghost'}
-                    size="icon-xs"
+                    size="icon-sm"
                     onClick={() => setView('list')}
                     title="List view"
                   >
@@ -504,7 +504,7 @@ export default function Dashboard() {
                     {SORT_OPTIONS.find((opt) => opt.value === sort)?.label}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="!bg-popover opacity-100 min-w-[var(--anchor-width)]">
                   {SORT_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
@@ -517,7 +517,7 @@ export default function Dashboard() {
                 <SelectTrigger className="w-20">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="!bg-popover opacity-100 min-w-[var(--anchor-width)]">
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="25">25</SelectItem>
                   <SelectItem value="50">50</SelectItem>

@@ -22,12 +22,12 @@
     "test:e2e": "NODE_OPTIONS='--experimental-vm-modules' jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1052.0",
-    "@aws-sdk/s3-request-presigner": "^3.1052.0",
-    "@nestjs/common": "^11.1.23",
+    "@aws-sdk/client-s3": "^3.1055.0",
+    "@aws-sdk/s3-request-presigner": "^3.1055.0",
+    "@nestjs/common": "^11.1.24",
     "@nestjs/config": "^4.0.4",
-    "@nestjs/core": "^11.1.23",
-    "@nestjs/platform-express": "^11.1.23",
+    "@nestjs/core": "^11.1.24",
+    "@nestjs/platform-express": "^11.1.24",
     "@nestjs/terminus": "^11.1.1",
     "@orpc/contract": "^1.14.3",
     "@orpc/nest": "^1.14.3",
@@ -51,7 +51,7 @@
     "@jest/globals": "^30.4.1",
     "@nestjs/cli": "^11.0.21",
     "@nestjs/schematics": "^11.1.0",
-    "@nestjs/testing": "^11.1.23",
+    "@nestjs/testing": "^11.1.24",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.9.1",
@@ -71,7 +71,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.59.4"
+    "typescript-eslint": "^8.60.0"
   },
   "jest": {
     "preset": "ts-jest/presets/default-esm",

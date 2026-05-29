@@ -26,14 +26,14 @@
     "prepare": "husky"
   },
   "keywords": [],
-  "packageManager": "pnpm@11.2.2",
+  "packageManager": "pnpm@11.4.0",
   "devDependencies": {
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
     "@types/node": "^25.9.1",
     "husky": "^9.1.7",
     "prettier": "^3.8.3",
-    "turbo": "^2.9.14"
+    "turbo": "^2.9.16"
   },
   "dependencies": {
     "motion": "^12.40.0",

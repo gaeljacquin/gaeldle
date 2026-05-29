@@ -570,6 +570,7 @@ export default function GameDetails({
                             }
                             alt={`${game.name} AI Image`}
                             fill
+                            unoptimized
                             className="object-cover transition-transform duration-500 group-hover:scale-110"
                             sizes="(max-width: 768px) 100vw, 256px"
                           />
@@ -595,6 +596,7 @@ export default function GameDetails({
                             }
                             alt={`${game.name} AI Image`}
                             fill
+                            unoptimized
                             className="object-contain"
                             sizes="(max-width: 896px) 100vw, 896px"
                           />

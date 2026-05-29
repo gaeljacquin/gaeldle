@@ -109,6 +109,7 @@ export default function CoverDisplay({
           alt={isGameOver ? game.name : 'Game cover'}
           className="object-contain"
           fill
+          unoptimized
           sizes="(max-width: 1024px) min(100vw, 480px), 50vw"
           priority
         />

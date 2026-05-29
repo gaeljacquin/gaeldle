@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     r2PublicUrl: process.env.NEXT_PUBLIC_R2_PUBLIC_URL,
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',

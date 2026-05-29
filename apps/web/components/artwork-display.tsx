@@ -96,6 +96,7 @@ export default function ArtworkDisplay({
             alt="Game artwork"
             className="object-contain"
             fill
+            unoptimized
             sizes="(max-width: 1024px) min(100vw, 480px), 50vw"
             priority
           />

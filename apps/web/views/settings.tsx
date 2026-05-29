@@ -7,9 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@workspace/ui/card';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { Label } from '@workspace/ui/label';
-import { appInfo } from '@/lib/app-info';
 import { Button } from '@workspace/ui/button';
 import Image from 'next/image';
 import { useMutation } from '@tanstack/react-query';
@@ -18,7 +15,6 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { IconUpload, IconLoader2, IconSettings } from '@tabler/icons-react';
 import { DashboardPageHeader } from '@/components/dashboard-header';
-import { Separator } from '@workspace/ui/separator';
 
 export default function Settings() {
   const [isUploading, setIsUploading] = useState(false);
@@ -77,27 +73,6 @@ export default function Settings() {
 
       <div className="container mx-auto px-4 py-8 flex-1">
         <div className="max-w-2xl space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Appearance</CardTitle>
-              <CardDescription>
-                Customize how {appInfo.title} looks on your device.
-              </CardDescription>
-            </CardHeader>
-            <Separator />
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Theme</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Switch between light and dark mode.
-                  </p>
-                </div>
-                <ThemeToggle />
-              </div>
-            </CardContent>
-          </Card>
-
           <Card>
             <CardHeader>
               <CardTitle>Cloudflare R2 Test</CardTitle>

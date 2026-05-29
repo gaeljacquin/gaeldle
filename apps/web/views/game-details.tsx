@@ -706,11 +706,11 @@ export default function GameDetails({
                         promptView === 'saved' && game.aiPrompt
                           ? game.aiPrompt
                           : buildPromptPreview(game, {
-                            includeStoryline,
-                            includeGenres,
-                            includeThemes,
-                            imageStyle,
-                          })
+                              includeStoryline,
+                              includeGenres,
+                              includeThemes,
+                              imageStyle,
+                            })
                       }
                       className="rounded-none resize-none min-h-30 text-sm text-muted-foreground italic bg-muted/30 border-dashed"
                     />

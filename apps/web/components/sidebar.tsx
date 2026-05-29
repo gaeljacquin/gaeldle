@@ -164,7 +164,7 @@ function SidebarHeader({
             alt={`${appInfo.title} logo`}
             width={32}
             height={32}
-            className="h-8 w-auto rounded-md group-hover:hidden dark:invert"
+            className="h-8 w-auto rounded-md group-hover:hidden"
             loading="eager"
             priority
             unoptimized
@@ -182,7 +182,7 @@ function SidebarHeader({
               alt={`${appInfo.title} logo`}
               width={32}
               height={32}
-              className="h-8 w-auto rounded-md dark:invert"
+              className="h-8 w-auto rounded-md"
               loading="eager"
               priority
               unoptimized

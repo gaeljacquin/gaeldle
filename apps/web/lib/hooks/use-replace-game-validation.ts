@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { validateReplaceGame } from '@/lib/services/game.service';
 import { useDebounce } from '@/lib/hooks/use-debounce';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 export interface ReplaceGameValidationState {
   isLoading: boolean;
@@ -54,11 +54,6 @@ export function useReplaceGameValidation(
   const debouncedCurrentInt = parsePositiveInt(debouncedCurrent);
   const replacementInt = parsePositiveInt(replacement);
 
-  // Reset forced replacement when replacement input changes
-  useEffect(() => {
-    setForcedReplacementInt(null);
-  }, [replacement]);
-
   const bothValid =
     debouncedCurrentInt !== null && forcedReplacementInt !== null;
   const sameIds = bothValid && debouncedCurrentInt === forcedReplacementInt;
@@ -66,11 +61,10 @@ export function useReplaceGameValidation(
   // True while the user is still typing the current ID
   const isTypingCurrent = currentInt !== debouncedCurrentInt;
 
-  const queryKey = [
-    'replace-game-validate',
-    debouncedCurrentInt,
-    forcedReplacementInt,
-  ];
+  const queryKey = useMemo(
+    () => ['replace-game-validate', debouncedCurrentInt, forcedReplacementInt],
+    [debouncedCurrentInt, forcedReplacementInt],
+  );
 
   const { data, isFetching, refetch } = useQuery({
     queryKey,

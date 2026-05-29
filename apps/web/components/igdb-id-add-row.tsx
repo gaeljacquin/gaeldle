@@ -68,10 +68,7 @@ export function IgdbIdAddRow({
       )}
     >
       <div className="flex flex-col gap-1.5">
-        <Label
-          htmlFor={`igdb-add-${rowId}`}
-          className="text-xs"
-        >
+        <Label htmlFor={`igdb-add-${rowId}`} className="text-xs">
           IGDB ID
         </Label>
         <div className="flex items-center gap-3">

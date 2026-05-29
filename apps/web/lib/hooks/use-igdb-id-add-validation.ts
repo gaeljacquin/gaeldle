@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { validateIgdbIdAdd } from '@/lib/services/game.service';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 export interface IgdbIdAddValidationState {
   isLoading: boolean;
@@ -38,14 +38,8 @@ export function useIgdbIdAddValidation(
   const queryClient = useQueryClient();
   const [forcedInt, setForcedInt] = useState<number | null>(null);
   const liveInt = parsePositiveInt(igdbId);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Reset forcedInt when live input changes so we clear previous validation
-  useEffect(() => {
-    setForcedInt(null);
-  }, [igdbId]);
-
-  const queryKey = ['igdb-add-validate', forcedInt];
+  const queryKey = useMemo(() => ['igdb-add-validate', forcedInt], [forcedInt]);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey,

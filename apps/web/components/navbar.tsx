@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { IconMenu2, IconX } from '@tabler/icons-react';
 import { Button } from '@workspace/ui/button';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { cn } from '@workspace/ui/lib/utils';
 import { useUser } from '@stackframe/stack';
 import { appInfo } from '@/lib/app-info';
@@ -36,7 +35,7 @@ export function Navbar() {
             alt={`${appInfo.title} logo`}
             width={32}
             height={32}
-            className="h-8 w-auto dark:invert"
+            className="h-8 w-auto"
             loading="eager"
             priority
             unoptimized
@@ -66,7 +65,6 @@ export function Navbar() {
             </Link>
           ))}
           <div className="mx-2 h-4 w-px bg-border" />
-          <ThemeToggle />
           <Link
             href={authHref}
             className={cn(
@@ -92,7 +90,6 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle />
           <Button
             variant="ghost"
             size="icon"

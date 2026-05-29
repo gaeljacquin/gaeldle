@@ -163,10 +163,7 @@ export function IgdbIdPairRow({
       <div className="flex items-center gap-6">
         {/* Current IGDB ID */}
         <div className="flex flex-col gap-1.5 shrink-0">
-          <Label
-            htmlFor={`current-${row.id}`}
-            className="text-xs"
-          >
+          <Label htmlFor={`current-${row.id}`} className="text-xs">
             Current IGDB ID
           </Label>
           <div className="relative">
@@ -180,7 +177,7 @@ export function IgdbIdPairRow({
               className={cn(
                 'font-mono pr-8 h-11 w-48',
                 currentHasError &&
-                'border-destructive focus-visible:ring-destructive',
+                  'border-destructive focus-visible:ring-destructive',
               )}
               aria-invalid={currentHasError}
             />
@@ -203,10 +200,7 @@ export function IgdbIdPairRow({
 
         {/* Replacement IGDB ID */}
         <div className="flex flex-col gap-1.5 flex-1">
-          <Label
-            htmlFor={`replacement-${row.id}`}
-            className="text-xs"
-          >
+          <Label htmlFor={`replacement-${row.id}`} className="text-xs">
             Replacement IGDB ID
           </Label>
           <div className="flex items-center gap-3">
@@ -220,7 +214,7 @@ export function IgdbIdPairRow({
               className={cn(
                 'font-mono h-11 w-48',
                 replacementHasError &&
-                'border-destructive focus-visible:ring-destructive',
+                  'border-destructive focus-visible:ring-destructive',
               )}
               aria-invalid={replacementHasError}
             />

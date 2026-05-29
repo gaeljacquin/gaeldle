@@ -25,7 +25,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" className={figtree.variable} suppressHydrationWarning>
+    <html lang="en" className={figtree.variable}>
       <body className={`${jetbrainsMono.variable} font-sans antialiased`}>
         <Providers>
           <Suspense fallback={<Loading />}>

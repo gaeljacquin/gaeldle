@@ -207,10 +207,7 @@ export default function GameDetails({
       <div className="flex flex-col min-h-full bg-background">
         <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4">
-            <DashboardPageHeader
-              title="Loading..."
-              icon={IconDashboard}
-            />
+            <DashboardPageHeader title="Loading..." icon={IconDashboard} />
           </div>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh]">
@@ -228,10 +225,7 @@ export default function GameDetails({
       <div className="flex flex-col min-h-full bg-background">
         <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4">
-            <DashboardPageHeader
-              title="Game Not Found"
-              icon={IconDashboard}
-            />
+            <DashboardPageHeader title="Game Not Found" icon={IconDashboard} />
           </div>
         </div>
 
@@ -268,10 +262,7 @@ export default function GameDetails({
     <div className="flex flex-col min-h-full bg-background">
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <DashboardPageHeader
-            title={game.name}
-            icon={IconDashboard}
-          />
+          <DashboardPageHeader title={game.name} icon={IconDashboard} />
         </div>
       </div>
 
@@ -333,7 +324,9 @@ export default function GameDetails({
                 {game.firstReleaseDate && (
                   <Badge className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-none text-[10px] font-bold uppercase tracking-wider text-black">
                     <IconCalendar aria-hidden="true" size={12} />
-                    {new Date(game.firstReleaseDate * 1000).toLocaleDateString()}
+                    {new Date(
+                      game.firstReleaseDate * 1000,
+                    ).toLocaleDateString()}
                   </Badge>
                 )}
                 <Badge className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-none text-[10px] font-bold uppercase tracking-wider text-black">
@@ -746,11 +739,11 @@ export default function GameDetails({
                           promptView === 'saved' && game.aiPrompt
                             ? game.aiPrompt
                             : buildPromptPreview(game, {
-                              includeStoryline,
-                              includeGenres,
-                              includeThemes,
-                              imageStyle,
-                            })
+                                includeStoryline,
+                                includeGenres,
+                                includeThemes,
+                                imageStyle,
+                              })
                         }
                         className="rounded-none resize-none min-h-30 text-sm text-muted-foreground italic bg-muted/30 border-dashed"
                       />

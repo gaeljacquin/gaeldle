@@ -7,6 +7,7 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint --filter '!@workspace/ui'",
+    "lint:fix": "turbo lint --filter '!@workspace/ui' -- --fix",
     "lint:web": "turbo lint --filter @workspace/web",
     "test": "turbo test",
     "test:web": "turbo test --filter @workspace/web",

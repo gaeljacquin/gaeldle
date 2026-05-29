@@ -308,21 +308,21 @@ export default function GameDetails({
           </div>
 
           <div className="space-y-3">
-          <Button
-            variant="default"
-            className="w-full font-bold h-10 rounded-none cursor-pointer !bg-sky-600 hover:!bg-sky-700 !text-white hover:!text-white border-none"
-            disabled={syncMutation.isPending}
-            onClick={() => syncMutation.mutate()}
-          >
-            <IconRefresh
-              aria-hidden="true"
-              className={cn(
-                'mr-2 size-4',
-                syncMutation.isPending && 'animate-spin',
-              )}
-            />
-            {syncMutation.isPending ? 'Syncing...' : 'Sync with IGDB'}
-          </Button>
+            <Button
+              variant="default"
+              className="w-full font-bold h-10 rounded-none cursor-pointer bg-sky-600! hover:bg-sky-700! text-white! hover:text-white! border-none"
+              disabled={syncMutation.isPending}
+              onClick={() => syncMutation.mutate()}
+            >
+              <IconRefresh
+                aria-hidden="true"
+                className={cn(
+                  'mr-2 size-4',
+                  syncMutation.isPending && 'animate-spin',
+                )}
+              />
+              {syncMutation.isPending ? 'Syncing...' : 'Sync with IGDB'}
+            </Button>
             <Button
               variant="destructive"
               className="w-full font-bold h-10 rounded-none cursor-pointer"
@@ -379,19 +379,19 @@ export default function GameDetails({
             >
               <TabsTrigger
                 value="info"
-                className="text-sm font-black uppercase tracking-widest px-8 py-3 cursor-pointer data-active:text-primary data-active:after:!bg-primary data-active:after:!opacity-100"
+                className="text-sm font-black uppercase tracking-widest px-8 py-3 cursor-pointer data-active:text-primary data-active:after:bg-primary! data-active:after:opacity-100!"
               >
                 Info
               </TabsTrigger>
               <TabsTrigger
                 value="artworks"
-                className="text-sm font-black uppercase tracking-widest px-8 py-3 cursor-pointer data-active:text-primary data-active:after:!bg-primary data-active:after:!opacity-100"
+                className="text-sm font-black uppercase tracking-widest px-8 py-3 cursor-pointer data-active:text-primary data-active:after:bg-primary! data-active:after:opacity-100!"
               >
                 Artworks
               </TabsTrigger>
               <TabsTrigger
                 value="image-gen"
-                className="text-sm font-black uppercase tracking-widest px-8 py-3 cursor-pointer data-active:text-primary data-active:after:!bg-primary data-active:after:!opacity-100"
+                className="text-sm font-black uppercase tracking-widest px-8 py-3 cursor-pointer data-active:text-primary data-active:after:bg-primary! data-active:after:opacity-100!"
               >
                 Image Gen
               </TabsTrigger>
@@ -597,7 +597,7 @@ export default function GameDetails({
                           }
                         </SelectValue>
                       </SelectTrigger>
-                      <SelectContent className="bg-popover border border-border shadow-xl min-w-[var(--anchor-width)]">
+                      <SelectContent className="bg-popover border border-border shadow-xl min-w-(--anchor-width)">
                         {IMAGE_STYLES.map((style) => (
                           <SelectItem key={style.value} value={style.value}>
                             {style.label}
@@ -706,11 +706,11 @@ export default function GameDetails({
                         promptView === 'saved' && game.aiPrompt
                           ? game.aiPrompt
                           : buildPromptPreview(game, {
-                              includeStoryline,
-                              includeGenres,
-                              includeThemes,
-                              imageStyle,
-                            })
+                            includeStoryline,
+                            includeGenres,
+                            includeThemes,
+                            imageStyle,
+                          })
                       }
                       className="rounded-none resize-none min-h-30 text-sm text-muted-foreground italic bg-muted/30 border-dashed"
                     />

@@ -80,7 +80,7 @@ Timeline swap-mode visual indicator (green line on drag-over) was reverted (comm
 
 ## Key Behavioral Details (for README accuracy)
 
-- Cover Art / Artwork: pixelated image that clears with each wrong guess; clarity bar shown. Both modes have a Skip button — skipping pushes `null` into `wrongGuesses` and costs 1 attempt. `wrongGuesses` type is `(Game | null)[]`; filter nulls before mapping to `.id`.
+- Cover Art / Artwork: pixelated image that clears with each wrong guess. Both modes have a Skip button — skipping pushes `null` into `wrongGuesses` and costs 1 attempt. `wrongGuesses` type is `(Game | null)[]`; filter nulls before mapping to `.id`.
 - Image Gen: AI-generated image, no pixelation, image never changes. No skip button.
 - Timeline: 10 random games, drag-and-drop to sort chronologically; Shift/Swap drag modes; correctly placed cards lock.
 - Timeline 2: growing timeline, one card dealt at a time, drag into correct slot; wrong placements add card at correct position and cost an attempt; score = correct placements.

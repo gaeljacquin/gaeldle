@@ -9,7 +9,6 @@ import { Button } from '@workspace/ui/button';
 import { cn } from '@workspace/ui/lib/utils';
 import { useUser } from '@stackframe/stack';
 import { appInfo } from '@/lib/app-info';
-import ViewportDebugger from './viewport-debugger';
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -44,10 +43,6 @@ export function Navbar() {
             {appInfo.title}
           </span>
         </Link>
-
-        <div>
-          <ViewportDebugger />
-        </div>
 
         <div className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (

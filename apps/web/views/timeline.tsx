@@ -305,11 +305,11 @@ export default function Timeline() {
               </div>
 
               {isGameOver ? null : (
-                <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+                <div className="flex flex-wrap items-center justify-center gap-4">
                   <Button
                     onClick={handleSubmit}
                     size="lg"
-                    className="cursor-pointer font-bold px-8"
+                    className="cursor-pointer font-bold px-8 py-4"
                     disabled={buttonsDisabled}
                   >
                     Submit
@@ -318,7 +318,7 @@ export default function Timeline() {
                     onClick={handleResetToSaved}
                     size="lg"
                     variant="outline"
-                    className="cursor-pointer font-bold px-8"
+                    className="cursor-pointer font-bold px-8 py-4"
                     disabled={buttonsDisabled}
                   >
                     Reset
@@ -377,7 +377,7 @@ export default function Timeline() {
           </CardContent>
         </Card>
 
-        <div className="mx-auto mt-8 max-w-md border border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
+        <div className="mx-auto mt-8 max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
           <TimelineDevToggle
             getCorrectOrder={getCorrectOrder}
             attemptsLeft={attemptsLeft}

@@ -194,6 +194,17 @@ export default function Timeline2() {
                 </div>
               )}
 
+              <div className="flex flex-col items-center gap-2 -mt-8">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  Attempts
+                </p>
+                <Attempts
+                  maxAttempts={maxAttempts}
+                  attemptsLeft={attemptsLeft}
+                  variant="primary"
+                />
+              </div>
+
               <div className="text-center">
                 <div
                   ref={timelineRef}
@@ -250,22 +261,11 @@ export default function Timeline2() {
                   </div>
                 </div>
               </div>
-
-              <div className="flex flex-col items-center gap-2">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Attempts
-                </p>
-                <Attempts
-                  maxAttempts={maxAttempts}
-                  attemptsLeft={attemptsLeft}
-                  variant="primary"
-                />
-              </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="mx-auto mt-8 max-w-md border border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
+        <div className="mx-auto mt-8 max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
           <Timeline2DevToggle
             dealtCard={dealtCard}
             attemptsLeft={attemptsLeft}

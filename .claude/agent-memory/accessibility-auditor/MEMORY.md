@@ -34,7 +34,7 @@
 1. **Color-only status communication** — green/yellow/red used without icons or sr-only text. Affects: SpecificationsGrid cells, TimelineCard banners, Timeline2Card banners.
 2. **Missing `aria-expanded`** — Sidebar Games toggle button; no ARIA state on open/closed submenus.
 3. **Custom combobox without ARIA pattern** — GameSearch uses a floating dropdown but lacks `role="combobox"`, `role="listbox"`, `aria-expanded`, etc.
-4. **Progress indicators without ARIA** — Attempts dots, Clarity bar, HoldToReveal progress bar — none use `role="progressbar"` / `aria-valuenow`.
+4. **Progress indicators without ARIA** — Attempts dots, HoldToReveal progress bar — none use `role="progressbar"` / `aria-valuenow`.
 5. **Hold-to-reveal keyboard inaccessibility** — Only mouse/touch events; no keyboard equivalent.
 
 ## Screen-Reader Text (sr-only) — Established Pattern

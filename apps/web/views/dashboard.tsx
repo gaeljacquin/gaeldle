@@ -362,10 +362,10 @@ export default function Dashboard() {
             <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
               <div className="flex flex-col sm:flex-row flex-1 gap-4">
                 <div className="relative flex-1 group">
-                  <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
+                  <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
                   <Input
                     placeholder="Search games by title..."
-                    className="pl-9 pr-9"
+                    className="px-9"
                     value={search}
                     onChange={handleSearchChange}
                   />
@@ -381,7 +381,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="relative w-full sm:w-64 group">
-                  <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
+                  <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
                   <Input
                     placeholder="Search by IGDB ID..."
                     className="pl-9 pr-9"
@@ -420,7 +420,7 @@ export default function Dashboard() {
                     }
                   />
                   <DropdownMenuContent
-                    className="w-(--anchor-width) min-w-0"
+                    className="w-(--anchor-width) min-w-0 p-1"
                     align="end"
                   >
                     <DropdownMenuRadioGroup
@@ -436,7 +436,7 @@ export default function Dashboard() {
                         <DropdownMenuRadioItem
                           key={opt.value}
                           value={opt.value}
-                          className="pl-4 cursor-pointer"
+                          className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
                           closeOnClick={true}
                         >
                           {opt.label}
@@ -460,7 +460,7 @@ export default function Dashboard() {
                     }
                   />
                   <DropdownMenuContent
-                    className="w-(--anchor-width) min-w-0"
+                    className="w-(--anchor-width) min-w-0 p-1"
                     align="end"
                   >
                     <DropdownMenuRadioGroup
@@ -473,21 +473,21 @@ export default function Dashboard() {
                     >
                       <DropdownMenuRadioItem
                         value="10"
-                        className="pl-4 cursor-pointer"
+                        className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
                         closeOnClick={true}
                       >
                         10
                       </DropdownMenuRadioItem>
                       <DropdownMenuRadioItem
                         value="25"
-                        className="pl-4 cursor-pointer"
+                        className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
                         closeOnClick={true}
                       >
                         25
                       </DropdownMenuRadioItem>
                       <DropdownMenuRadioItem
                         value="50"
-                        className="pl-4 cursor-pointer"
+                        className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
                         closeOnClick={true}
                       >
                         50
@@ -632,7 +632,7 @@ export default function Dashboard() {
                       size="icon-xs"
                       disabled={page === 1}
                       onClick={() => setPage((p) => p - 1)}
-                      className="w-8 h-8 cursor-pointer"
+                      className="size-8 cursor-pointer"
                     >
                       <IconChevronLeft size={16} />
                     </Button>
@@ -652,7 +652,7 @@ export default function Dashboard() {
                             variant={page === p ? 'default' : 'ghost'}
                             size="icon-xs"
                             className={cn(
-                              'w-8 h-8 cursor-pointer',
+                              'size-8 cursor-pointer',
                               page === p && 'pointer-events-none',
                             )}
                             onClick={() => setPage(p as number)}
@@ -668,7 +668,7 @@ export default function Dashboard() {
                       size="icon-xs"
                       disabled={page === totalPages}
                       onClick={() => setPage((p) => p + 1)}
-                      className="w-8 h-8 cursor-pointer"
+                      className="size-8 cursor-pointer"
                     >
                       <IconChevronRight size={16} />
                     </Button>
@@ -683,7 +683,7 @@ export default function Dashboard() {
       <div className="container mx-auto px-4 py-8 flex-1">
         {isLoading && !data ? (
           <div className="flex flex-col items-center justify-center py-24 space-y-4 text-muted-foreground">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            <div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
             <p className="text-sm font-medium">Loading your library...</p>
           </div>
         ) : (

@@ -297,10 +297,10 @@ export function DiscoverGames() {
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Discover</CardTitle>
-                <CardDescription className="mt-1">
-                  Up to {DISCOVER_GAMES_MAX} games.
-                </CardDescription>
+                <CardTitle>
+                  Fetch up to {DISCOVER_GAMES_MAX} games from IGDB.
+                </CardTitle>
+                <CardDescription />
               </CardHeader>
               <CardContent>
                 <IdlePhase

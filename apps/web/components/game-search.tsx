@@ -171,7 +171,7 @@ export default function GameSearch({
     <div className={cn('relative', className)}>
       <InputGroup className="h-10">
         <InputGroupAddon align="inline-start">
-          <IconSearch className="size-4" />
+          <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
         </InputGroupAddon>
         <InputGroupInput
           placeholder="Search for a game..."
@@ -179,7 +179,7 @@ export default function GameSearch({
           onChange={handleInputChange}
           disabled={disabled}
           onFocus={() => (searchValue.length > 0 ? setIsOpen(true) : null)}
-          className="h-full"
+          className="h-full px-9"
         />
         {searchValue.length > 0 ? (
           <InputGroupAddon align="inline-end">

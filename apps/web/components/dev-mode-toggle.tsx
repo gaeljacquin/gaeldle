@@ -57,7 +57,7 @@ export default function DevModeToggle({
             )}
             title="Decrease attempts"
           >
-            <IconMinus className="h-3 w-3" />
+            <IconMinus className="size-3" />
           </button>
           <span className="text-xs font-mono">
             {attemptsLeft}/{maxAttempts}
@@ -71,7 +71,7 @@ export default function DevModeToggle({
             )}
             title="Increase attempts"
           >
-            <IconPlus className="h-3 w-3" />
+            <IconPlus className="size-3" />
           </button>
         </div>
       )}

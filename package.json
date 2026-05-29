@@ -27,7 +27,7 @@
     "prepare": "husky"
   },
   "keywords": [],
-  "packageManager": "pnpm@11.4.0",
+  "packageManager": "pnpm@11.5.0",
   "devDependencies": {
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",

@@ -144,15 +144,15 @@ export default function Specifications() {
           {!isGameOver && guesses.length > 0 ? (
             <div className="flex flex-wrap items-center justify-center gap-6 text-[10px] uppercase tracking-widest font-bold">
               <div className="flex items-center gap-2">
-                <div className="h-3 w-3 bg-green-600/50 border border-green-600"></div>
+                <div className="size-3 bg-green-600/50 border border-green-600"></div>
                 <span className="text-muted-foreground">Correct</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-3 w-3 bg-yellow-600/50 border border-yellow-600"></div>
+                <div className="size-3 bg-yellow-600/50 border border-yellow-600"></div>
                 <span className="text-muted-foreground">Partially correct</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-3 w-3 bg-destructive/50 border border-destructive"></div>
+                <div className="size-3 bg-destructive/50 border border-destructive"></div>
                 <span className="text-muted-foreground">Incorrect</span>
               </div>
             </div>
@@ -182,7 +182,7 @@ export default function Specifications() {
             </CardContent>
           </Card>
 
-          <div className="mx-auto max-w-md border border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
+          <div className="mx-auto max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
             <DevModeToggle
               targetGame={targetGame}
               attemptsLeft={attemptsLeft}

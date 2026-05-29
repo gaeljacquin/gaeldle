@@ -2,6 +2,7 @@ import { GameModeCard } from '@/components/game-mode-card';
 import { gameModes } from '@/lib/game-mode';
 import { appInfo } from '@/lib/app-info';
 import Link from 'next/link';
+import ViewportDebugger from '@/components/viewport-debugger';
 
 export default function HomeView() {
   return (
@@ -79,6 +80,10 @@ export default function HomeView() {
               !
             </p>
           </div>
+        </div>
+
+        <div className="flex flex-row justify-center">
+          <ViewportDebugger />
         </div>
       </div>
     </div>

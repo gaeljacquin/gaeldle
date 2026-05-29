@@ -211,7 +211,7 @@ export default function GameDetails({
           </div>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+          <div className="animate-spin rounded-full size-12 border-b-2 border-primary" />
           <p className="mt-4 text-muted-foreground font-medium">
             Loading game details...
           </p>
@@ -297,7 +297,7 @@ export default function GameDetails({
                         </div>
                       </>
                     ) : (
-                      <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
+                      <div className="size-full bg-muted flex items-center justify-center text-muted-foreground">
                         No Cover Art
                       </div>
                     )}

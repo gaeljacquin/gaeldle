@@ -41,7 +41,7 @@ export const gameModes: GameMode[] = [
   {
     id: 'image-gen',
     title: 'Image Gen',
-    description: 'Identify the game from an AI-generated image.',
+    description: 'Guess the game from a text-to-image rendition.',
     difficulty: 'Medium',
     icon: IconRobot,
     gradient: '--gradient-medium-2',

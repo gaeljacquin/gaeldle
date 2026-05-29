@@ -156,7 +156,7 @@ function SidebarHeader({
     >
       {isCollapsed ? (
         <div
-          className="relative flex h-8 w-8 items-center justify-center"
+          className="relative flex size-8 items-center justify-center"
           title="Expand sidebar"
         >
           <Image

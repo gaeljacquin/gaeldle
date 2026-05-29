@@ -259,21 +259,19 @@ export default function ReplaceGameByIgdbId() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Swap</CardTitle>
-                  <CardDescription className="mt-1">
-                    Up to {REPLACE_GAME_MAX_ROWS} games.
-                  </CardDescription>
+                  <CardTitle>Up to {REPLACE_GAME_MAX_ROWS} games.</CardTitle>
+                  <CardDescription />
                 </div>
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size="icon"
                   onClick={handleAddRow}
                   disabled={
                     rows.length >= REPLACE_GAME_MAX_ROWS ||
                     applyMutation.isPending
                   }
-                  className="flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  className="w-24 flex items-center gap-1.5 shrink-0 cursor-pointer"
                 >
                   <IconPlus size={14} aria-hidden="true" />
                   Add row

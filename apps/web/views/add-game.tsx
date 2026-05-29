@@ -351,18 +351,16 @@ export function AddGame() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Add</CardTitle>
-                    <CardDescription className="mt-1">
-                      Up to {ADD_GAME_MAX_ROWS} games.
-                    </CardDescription>
+                    <CardTitle>Up to {ADD_GAME_MAX_ROWS} games</CardTitle>
+                    <CardDescription />
                   </div>
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
+                    size="icon"
                     onClick={handleAddRow}
                     disabled={rows.length >= ADD_GAME_MAX_ROWS || isMutating}
-                    className="flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    className="w-24 flex items-center gap-1.5 shrink-0 cursor-pointer"
                   >
                     <IconPlus size={14} aria-hidden="true" />
                     Add row

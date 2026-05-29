@@ -52,6 +52,7 @@ export async function getPaginatedGames(
   query?: string,
   sortBy: 'name' | 'firstReleaseDate' | 'igdbId' = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
 ): Promise<PaginatedResponse<Game>> {
   const params = new URLSearchParams({
     page: String(page),
@@ -62,6 +63,10 @@ export async function getPaginatedGames(
 
   if (query) {
     params.set('q', query);
+  }
+
+  if (igdbId) {
+    params.set('igdbId', igdbId);
   }
 
   const res = await fetch(`/api/games?${params.toString()}`);

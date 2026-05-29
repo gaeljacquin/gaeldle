@@ -71,6 +71,7 @@ export default function Dashboard() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState('10');
   const [search, setSearch] = useState('');
+  const [searchIgdbId, setSearchIgdbId] = useState('');
   const [sort, setSort] = useState<SortOption>('name-asc');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [isMultiSelect, setIsMultiSelect] = useState(false);
@@ -80,6 +81,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
 
   const debouncedSearch = useDebounce(search, 500);
+  const debouncedSearchIgdbId = useDebounce(searchIgdbId, 500);
 
   const [sortBy, sortDir] = sort.split('-') as [
     'name' | 'firstReleaseDate' | 'igdbId',
@@ -123,7 +125,15 @@ export default function Dashboard() {
   const { data, isLoading, isPlaceholderData } = useQuery<
     PaginatedResponse<Game>
   >({
-    queryKey: ['games', page, pageSize, debouncedSearch, sortBy, sortDir],
+    queryKey: [
+      'games',
+      page,
+      pageSize,
+      debouncedSearch,
+      debouncedSearchIgdbId,
+      sortBy,
+      sortDir,
+    ],
     queryFn: () =>
       getPaginatedGames(
         page,
@@ -131,6 +141,7 @@ export default function Dashboard() {
         debouncedSearch,
         sortBy,
         sortDir,
+        debouncedSearchIgdbId,
       ),
     placeholderData: (previousData) => previousData,
   });
@@ -180,8 +191,18 @@ export default function Dashboard() {
     setPage(1);
   };
 
+  const handleSearchIgdbIdChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchIgdbId(e.target.value);
+    setPage(1);
+  };
+
   const clearSearch = () => {
     setSearch('');
+    setPage(1);
+  };
+
+  const clearSearchIgdbId = () => {
+    setSearchIgdbId('');
     setPage(1);
   };
 
@@ -200,12 +221,19 @@ export default function Dashboard() {
         </div>
         <h3 className="text-lg font-semibold">No games found</h3>
         <p className="text-muted-foreground max-w-xs mx-auto">
-          {search
-            ? `We couldn't find any games matching "${search}".`
+          {search || searchIgdbId
+            ? `We couldn't find any games matching your search criteria.`
             : 'The library is currently empty.'}
         </p>
-        {search && (
-          <Button variant="link" onClick={clearSearch} className="mt-2">
+        {(search || searchIgdbId) && (
+          <Button
+            variant="link"
+            onClick={() => {
+              clearSearch();
+              clearSearchIgdbId();
+            }}
+            className="mt-2"
+          >
             Clear search
           </Button>
         )}
@@ -331,34 +359,55 @@ export default function Dashboard() {
           <DashboardPageHeader title="Dashboard" icon={IconDashboard} />
 
           <div className="flex flex-col gap-4">
-            <div className="flex flex-row justify-between items-center gap-8">
-              <div className="relative flex-1 group">
-                <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
-                <Input
-                  placeholder="Search games by title..."
-                  className="pl-9 pr-9"
-                  value={search}
-                  onChange={handleSearchChange}
-                />
-                {search ? (
-                  <button
-                    onClick={clearSearch}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 cursor-pointer"
-                    title="Clear search"
-                  >
-                    <IconX size={14} />
-                  </button>
-                ) : null}
+            <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
+              <div className="flex flex-col sm:flex-row flex-1 gap-4">
+                <div className="relative flex-1 group">
+                  <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
+                  <Input
+                    placeholder="Search games by title..."
+                    className="pl-9 pr-9"
+                    value={search}
+                    onChange={handleSearchChange}
+                  />
+                  {search ? (
+                    <button
+                      onClick={clearSearch}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 cursor-pointer"
+                      title="Clear search"
+                    >
+                      <IconX size={14} />
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="relative w-full sm:w-64 group">
+                  <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
+                  <Input
+                    placeholder="Search by IGDB ID..."
+                    className="pl-9 pr-9"
+                    value={searchIgdbId}
+                    onChange={handleSearchIgdbIdChange}
+                  />
+                  {searchIgdbId ? (
+                    <button
+                      onClick={clearSearchIgdbId}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 cursor-pointer"
+                      title="Clear search"
+                    >
+                      <IconX size={14} />
+                    </button>
+                  ) : null}
+                </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 justify-between sm:justify-end">
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     render={
                       <Button
                         variant="outline"
                         size="default"
-                        className="w-40 justify-between px-4 font-normal cursor-pointer"
+                        className="flex-1 sm:w-40 sm:flex-none justify-between px-4 font-normal cursor-pointer"
                       >
                         <span className="truncate">
                           {
@@ -370,7 +419,10 @@ export default function Dashboard() {
                       </Button>
                     }
                   />
-                  <DropdownMenuContent className="w-40" align="end">
+                  <DropdownMenuContent
+                    className="w-(--anchor-width) min-w-0"
+                    align="end"
+                  >
                     <DropdownMenuRadioGroup
                       value={sort}
                       onValueChange={(val) => {
@@ -400,14 +452,17 @@ export default function Dashboard() {
                       <Button
                         variant="outline"
                         size="default"
-                        className="w-20 justify-between px-4 font-normal cursor-pointer"
+                        className="flex-1 sm:w-20 sm:flex-none justify-between px-4 font-normal cursor-pointer"
                       >
                         <span>{pageSize}</span>
                         <IconSelector className="text-muted-foreground size-4 shrink-0" />
                       </Button>
                     }
                   />
-                  <DropdownMenuContent className="w-20" align="end">
+                  <DropdownMenuContent
+                    className="w-(--anchor-width) min-w-0"
+                    align="end"
+                  >
                     <DropdownMenuRadioGroup
                       value={pageSize}
                       onValueChange={(val) => {
@@ -443,8 +498,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="flex flex-row justify-between items-center gap-4">
-              <div className="flex flex-row items-center gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-start">
                 <div className="flex bg-muted p-1 border border-border">
                   <Button
                     variant={view === 'grid' ? 'default' : 'ghost'}
@@ -466,7 +521,7 @@ export default function Dashboard() {
                   </Button>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-row-reverse md:flex-row items-center gap-4">
                   <Button
                     variant={isMultiSelect ? 'default' : 'outline'}
                     size="icon-lg"
@@ -484,7 +539,7 @@ export default function Dashboard() {
                   </Button>
 
                   {isMultiSelect && (
-                    <div className="flex items-center gap-4 animate-in fade-in slide-in-from-left-4 duration-300">
+                    <div className="flex items-center gap-4 animate-in fade-in md:slide-in-from-left-4 slide-in-from-right-4 duration-300">
                       <AlertDialog
                         open={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
@@ -552,8 +607,8 @@ export default function Dashboard() {
               </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center gap-4">
-                  <div className="text-sm text-muted-foreground whitespace-nowrap">
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                  <div className="text-sm text-muted-foreground whitespace-nowrap order-2 sm:order-1">
                     Showing{' '}
                     <span className="font-medium text-foreground">
                       {(page - 1) * Number.parseInt(pageSize, 10) + 1}
@@ -571,7 +626,7 @@ export default function Dashboard() {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 order-1 sm:order-2">
                     <Button
                       variant="outline"
                       size="icon-xs"

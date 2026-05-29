@@ -1,6 +1,6 @@
 // When q is present, ORDER BY uses similarity() from the pg_trgm extension (GIN index: game_name_trgm_idx)
 import { NextRequest, NextResponse } from 'next/server';
-import { asc, desc, sql } from 'drizzle-orm';
+import { and, asc, desc, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { games, gameObject } from '@workspace/api-contract';
 
@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const page = Math.max(1, Number(searchParams.get('page') ?? 1));
     const pageSize = Math.max(1, Number(searchParams.get('pageSize') ?? 10));
     const q = searchParams.get('q') ?? undefined;
+    const igdbId = searchParams.get('igdbId') ?? undefined;
     const sortBy = (searchParams.get('sortBy') ?? 'name') as
       | 'name'
       | 'firstReleaseDate'
@@ -18,7 +19,11 @@ export async function GET(request: NextRequest) {
     const sortDir = (searchParams.get('sortDir') ?? 'asc') as 'asc' | 'desc';
 
     const offset = (page - 1) * pageSize;
-    const where = q ? sql`name ILIKE ${'%' + q + '%'}` : undefined;
+
+    const where = and(
+      q ? sql`name ILIKE ${'%' + q + '%'}` : undefined,
+      igdbId ? sql`igdb_id::text ILIKE ${'%' + igdbId + '%'}` : undefined,
+    );
 
     const orderBy = (() => {
       if (q) {

@@ -65,7 +65,6 @@ export default function Settings() {
         <div className="container mx-auto px-4 py-4">
           <DashboardPageHeader
             title="Settings"
-            description="Configs, tweaks, etc..."
             icon={IconSettings}
           />
         </div>

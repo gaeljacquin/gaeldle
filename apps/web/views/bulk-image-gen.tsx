@@ -272,7 +272,6 @@ export default function BulkImageGen() {
         <div className="container mx-auto px-4 py-4">
           <DashboardPageHeader
             title="Bulk Image Generation"
-            description="Generate AI images for games that don't have one yet."
             icon={IconRobotFace}
           />
         </div>

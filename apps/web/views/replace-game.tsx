@@ -249,7 +249,6 @@ export default function ReplaceGameByIgdbId() {
         <div className="container mx-auto px-4 py-4">
           <DashboardPageHeader
             title="Replace Game"
-            description="Swap games by IGDB ID."
             icon={IconArrowsExchange}
           />
         </div>

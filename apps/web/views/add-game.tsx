@@ -341,7 +341,6 @@ export function AddGame() {
         <div className="container mx-auto px-4 py-4">
           <DashboardPageHeader
             title="Add Game"
-            description="Add games by IGDB ID."
             icon={IconCirclePlus}
           />
         </div>

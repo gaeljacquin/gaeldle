@@ -46,7 +46,6 @@ export default function UtilitiesView() {
         <div className="container mx-auto px-4 py-4">
           <DashboardPageHeader
             title="Utilities"
-            description="Library management tools."
             icon={IconTools}
           />
         </div>

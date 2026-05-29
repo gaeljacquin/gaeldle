@@ -364,7 +364,6 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 py-4 space-y-4">
           <DashboardPageHeader
             title="Dashboard"
-            description="Manage and explore games."
             icon={IconDashboard}
           />
 

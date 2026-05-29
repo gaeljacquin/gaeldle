@@ -214,7 +214,6 @@ export function DiscoverGames() {
         <div className="container mx-auto px-4 py-4">
           <DashboardPageHeader
             title="Discover Games"
-            description="Query IGDB for new titles and add your picks."
             icon={IconZoomScan}
           />
         </div>

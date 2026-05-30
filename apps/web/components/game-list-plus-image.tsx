@@ -26,9 +26,8 @@ export default function GameListPlusImage(
   const [searchKey, setSearchKey] = useState(0);
 
   const {
-    allGames,
     targetGame,
-    selectedGameId,
+    selectedGame,
     wrongGuesses,
     attemptsLeft,
     isGameOver,
@@ -55,8 +54,7 @@ export default function GameListPlusImage(
     setSearchKey((prev) => prev + 1);
   };
 
-  const selectedGame =
-    allGames.find((game) => game.id === selectedGameId) || null;
+  const selectedGameId = selectedGame?.id ?? null;
   const wrongGuessIds = wrongGuesses
     .filter((g): g is NonNullable<typeof g> => g !== null)
     .map((g) => g.id);

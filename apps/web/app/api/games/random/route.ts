@@ -11,6 +11,10 @@ export async function GET(request: NextRequest) {
     const excludeIds = excludeIdsParam
       ? excludeIdsParam.split(',').map(Number).filter(Boolean)
       : [];
+    const count = Math.max(
+      1,
+      Math.min(50, Number(searchParams.get('count') ?? 1)),
+    );
     const mode = (searchParams.get('mode') ?? undefined) as
       | GameModeSlug
       | undefined;
@@ -34,21 +38,25 @@ export async function GET(request: NextRequest) {
       conditions.push(sql`first_release_date IS NOT NULL`);
     }
 
-    const [game] = await db
+    const gamesList = await db
       .select(gameObject)
       .from(games)
       .where(and(...conditions))
       .orderBy(sql`RANDOM()`)
-      .limit(1);
+      .limit(count);
 
-    if (!game) {
+    if (gamesList.length === 0) {
       return NextResponse.json(
         { success: false, error: 'No game found' },
         { status: 404 },
       );
     }
 
-    return NextResponse.json({ success: true, data: game });
+    if (count === 1 && !searchParams.has('count')) {
+      return NextResponse.json({ success: true, data: gamesList[0] });
+    }
+
+    return NextResponse.json({ success: true, data: gamesList });
   } catch (error) {
     console.error('Error fetching random game:', error);
     return NextResponse.json(

@@ -5,6 +5,7 @@ import { createORPCReactQueryUtils } from '@orpc/react-query';
 import type { JsonifiedClient } from '@orpc/openapi-client';
 import type { ContractRouterClient } from '@orpc/contract';
 import { stackClientApp } from '@/stack/client';
+import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 export const orpcClient = createORPCClient<
   JsonifiedClient<ContractRouterClient<typeof contract>>
@@ -35,11 +36,12 @@ export const orpcClient = createORPCClient<
           }
         }
 
-        const response = await fetch(request, {
+        const response = await fetchWithTimeout(request, {
           ...init,
           headers,
           signal,
           mode: 'cors',
+          timeout: 10000,
         });
         return response;
       } catch (e) {

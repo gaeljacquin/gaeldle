@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getAllGames } from '@/lib/services/game.service';
+import { getRandomGames } from '@/lib/services/game.service';
 import type { Game } from '@workspace/api-contract';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
 
@@ -9,7 +9,6 @@ export const MAX_ATTEMPTS = 3;
 const GAMES_COUNT = 10;
 
 export function useTimelineGame() {
-  const [allGames, setAllGames] = useState<Game[]>([]);
   const [selectedGames, setSelectedGames] = useState<Game[]>([]);
   const [userOrder, setUserOrder] = useState<Game[]>([]);
   const [savedOrder, setSavedOrder] = useState<Game[]>([]); // Order at last submit (or initial)
@@ -24,19 +23,14 @@ export function useTimelineGame() {
   const [error, setError] = useState<string | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  // Load games and select 10 random ones
+  // Load random games on mount
   useEffect(() => {
     async function loadGames() {
       try {
         setIsLoading(true);
-        const games = await getAllGames();
-
-        const gamesWithDates = games.filter((g) => g.firstReleaseDate !== null);
-        const shuffled = [...gamesWithDates].sort(() => Math.random() - 0.5);
-        const selected = shuffled.slice(0, GAMES_COUNT);
+        const selected = await getRandomGames(GAMES_COUNT, [], 'timeline');
 
         // Set all derived state in one update to avoid a visible re-shuffle
-        setAllGames(games);
         setSelectedGames(selected);
         setUserOrder(selected);
         setSavedOrder(selected);
@@ -121,11 +115,7 @@ export function useTimelineGame() {
       setIsWinner(false);
 
       // Select new random games
-      const gamesWithDates = allGames.filter(
-        (g) => g.firstReleaseDate !== null,
-      );
-      const shuffled = [...gamesWithDates].sort(() => Math.random() - 0.5);
-      const selected = shuffled.slice(0, GAMES_COUNT);
+      const selected = await getRandomGames(GAMES_COUNT, [], 'timeline');
 
       setSelectedGames(selected);
       setUserOrder(selected);
@@ -135,7 +125,7 @@ export function useTimelineGame() {
     } finally {
       setIsLoading(false);
     }
-  }, [allGames]);
+  }, []);
 
   // Get correct order for display
   const getCorrectOrder = useCallback(() => {

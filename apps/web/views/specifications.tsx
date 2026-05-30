@@ -23,9 +23,8 @@ export default function Specifications() {
   const [isHintModalOpen, setIsHintModalOpen] = useState(false);
 
   const {
-    allGames,
     targetGame,
-    selectedGameId,
+    selectedGame,
     guesses,
     attemptsLeft,
     isGameOver,
@@ -46,7 +45,7 @@ export default function Specifications() {
     resetGame();
   };
 
-  const selectedGame = allGames.find((g) => g.id === selectedGameId) || null;
+  const selectedGameId = selectedGame?.id ?? null;
 
   if (isLoading) {
     return <Stuck stuckState="loading" />;

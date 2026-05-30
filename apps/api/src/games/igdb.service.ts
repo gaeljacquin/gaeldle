@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { fetchWithTimeout } from '@/lib/utils';
 
 type IgdbGame = {
   id: number;
@@ -94,7 +95,7 @@ export class IgdbService {
     ];
 
     const idsStr = igdbIds.join(',');
-    const response = await fetch('https://api.igdb.com/v4/games', {
+    const response = await fetchWithTimeout('https://api.igdb.com/v4/games', {
       method: 'POST',
       headers: {
         'Client-ID': this.twitchClientId,
@@ -102,6 +103,7 @@ export class IgdbService {
         Accept: 'application/json',
       },
       body: `fields ${fields.join(',')}; where id = (${idsStr}); limit ${igdbIds.length};`,
+      timeout: 20000,
     });
 
     if (!response.ok) {
@@ -149,7 +151,7 @@ export class IgdbService {
       'themes.name',
     ];
 
-    const response = await fetch('https://api.igdb.com/v4/games', {
+    const response = await fetchWithTimeout('https://api.igdb.com/v4/games', {
       method: 'POST',
       headers: {
         'Client-ID': this.twitchClientId,
@@ -157,6 +159,7 @@ export class IgdbService {
         Accept: 'application/json',
       },
       body: `fields ${fields.join(',')}; where id = ${igdbId}; limit 1;`,
+      timeout: 20000,
     });
 
     if (!response.ok) {
@@ -182,7 +185,7 @@ export class IgdbService {
     const offset = Math.floor(Math.random() * 200);
     const body = `fields id,name,first_release_date,cover.url,cover.image_id,total_rating,total_rating_count,genres.name,platforms.name,themes.id,category; where id > 0 & total_rating_count != null & total_rating_count > 50 & first_release_date != null & first_release_date < ${now}; sort total_rating_count desc; limit ${fetchLimit}; offset ${offset};`;
 
-    const response = await fetch('https://api.igdb.com/v4/games', {
+    const response = await fetchWithTimeout('https://api.igdb.com/v4/games', {
       method: 'POST',
       headers: {
         'Client-ID': this.twitchClientId,
@@ -190,6 +193,7 @@ export class IgdbService {
         Accept: 'application/json',
       },
       body,
+      timeout: 20000,
     });
 
     if (!response.ok) {
@@ -212,15 +216,19 @@ export class IgdbService {
       return this.accessToken;
     }
 
-    const tokenResponse = await fetch('https://id.twitch.tv/oauth2/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        client_id: this.twitchClientId,
-        client_secret: this.twitchClientSecret,
-        grant_type: 'client_credentials',
-      }),
-    });
+    const tokenResponse = await fetchWithTimeout(
+      'https://id.twitch.tv/oauth2/token',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: this.twitchClientId,
+          client_secret: this.twitchClientSecret,
+          grant_type: 'client_credentials',
+        }),
+        timeout: 10000,
+      },
+    );
 
     if (!tokenResponse.ok) {
       const details = await tokenResponse.text();

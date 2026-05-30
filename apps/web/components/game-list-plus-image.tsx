@@ -222,8 +222,8 @@ export default function GameListPlusImage(
                   )}
                   <Button
                     onClick={resetGame}
-                    className="mt-6 cursor-pointer font-bold"
                     size="lg"
+                    className="mt-8 cursor-pointer font-bold px-12"
                   >
                     {isCorrect ? 'Keep Playing' : 'Play Again'}
                   </Button>

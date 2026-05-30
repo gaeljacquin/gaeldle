@@ -29,9 +29,9 @@ The script loads `.env` automatically if it exists — no need to source it manu
 ### Via package.json (recommended):
 
 ```bash
-pnpm run sync
+nr sync
 # OR
-pnpm run sync
+nr sync
 ```
 
 ### Directly:
@@ -55,17 +55,17 @@ If a variable is not set in `.env`, the script falls back to these defaults:
 
 ## Management Commands
 
-After creating the sync session, use either the `pnpm run sync:*` shorthands or raw `mutagen` commands:
+After creating the sync session, use either the `nr sync:*` shorthands or raw `mutagen` commands:
 
-| Action                          | pnpm shorthand            | mutagen command                  |
-| ------------------------------- | ------------------------- | -------------------------------- |
-| View all sessions               | `pnpm run sync:list`      | `mutagen sync list`              |
-| View all sessions (verbose)     | `pnpm run sync:list-long` | `mutagen sync list --long`       |
-| Monitor real-time progress      | `pnpm run sync:monitor`   | `mutagen sync monitor gaeldle`   |
-| Pause syncing                   | `pnpm run sync:pause`     | `mutagen sync pause gaeldle`     |
-| Resume syncing                  | `pnpm run sync:resume`    | `mutagen sync resume gaeldle`    |
-| Stop and remove session         | `pnpm run sync:terminate` | `mutagen sync terminate gaeldle` |
-| Reset session (if issues occur) | `pnpm run sync:reset`     | `mutagen sync reset gaeldle`     |
+| Action                          | nr shorthand            | mutagen command                  |
+| ------------------------------- | ----------------------- | -------------------------------- |
+| View all sessions               | `nr sync:list`          | `mutagen sync list`              |
+| View all sessions (verbose)     | `nr sync:list-long`     | `mutagen sync list --long`       |
+| Monitor real-time progress      | `nr sync:monitor`       | `mutagen sync monitor gaeldle`   |
+| Pause syncing                   | `nr sync:pause`         | `mutagen sync pause gaeldle`     |
+| Resume syncing                  | `nr sync:resume`        | `mutagen sync resume gaeldle`    |
+| Stop and remove session         | `nr sync:terminate`     | `mutagen sync terminate gaeldle` |
+| Reset session (if issues occur) | `nr sync:reset`         | `mutagen sync reset gaeldle`     |
 
 ## Ignored Files and Folders
 
@@ -83,8 +83,8 @@ If sync is not working:
 
 1. Check the SSH connection: `ssh <REMOTE_USER>@<REMOTE_HOST>`
 2. Verify the remote path exists: `ssh <REMOTE_USER>@<REMOTE_HOST> "ls -la <REMOTE_PATH>"`
-3. Check sync status: `pnpm run sync:list`
-4. View detailed sync problems: `pnpm run sync:list-long`
-5. Reset the session if needed: `pnpm run sync:reset`
+3. Check sync status: `nr sync:list`
+4. View detailed sync problems: `nr sync:list-long`
+5. Reset the session if needed: `nr sync:reset`
 
 Replace `<REMOTE_USER>`, `<REMOTE_HOST>`, and `<REMOTE_PATH>` with the values from your `.env` file.

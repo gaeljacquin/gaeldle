@@ -47,9 +47,9 @@ Document every SonarQube finding with:
 - Severity
 - Proposed fix
 
-### Step 4: Run Linting
+### Step 3: Run Linting
 
-Execute: `pnpm run lint`
+Execute: `nr lint`
 
 Capture all output. For each linting error or warning:
 
@@ -58,9 +58,10 @@ Capture all output. For each linting error or warning:
 - Cross-reference with `frontend-conventions.md` or `backend-conventions.md` for the correct pattern
 - Apply the fix
 
-### Step 5: Run Type Checking
+### Step 4: Run Type Checking
 
-Execute: `pnpm run type-check`
+Execute: `nr typecheck`
+
 
 Capture all TypeScript errors. For each error:
 
@@ -97,8 +98,8 @@ For every issue found across Steps 3–5, apply fixes that follow the exact patt
 
 After applying all fixes:
 
-1. Re-run `pnpm run lint` — confirm zero errors
-2. Re-run `pnpm run type-check` — confirm zero errors
+1. Re-run `nr lint` — confirm zero errors
+2. Re-run `nr typecheck` — confirm zero errors
 3. Re-check SonarQube issues if tools allow — confirm resolved issues
 
 If new issues are introduced by your fixes, resolve them before concluding.
@@ -148,56 +149,8 @@ Produce a structured summary:
 Before concluding the audit, verify:
 
 - [ ] All Blocker and Critical SonarQube issues are resolved or explicitly acknowledged
-- [ ] `pnpm run lint` exits with code 0
-- [ ] `pnpm run type-check` exits with code 0
+- [ ] `nr lint` exits with code 0
+- [ ] `nr typecheck` exits with code 0
 - [ ] All applied fixes follow patterns from the conventions files
 - [ ] No new issues were introduced by the fixes
 - [ ] The audit report is complete and accurate
-
-**Update your agent memory** as you discover project-specific patterns, recurring violation types, architectural constraints, and convention nuances in this codebase. This builds institutional knowledge across conversations.
-
-Examples of what to record:
-
-- Recurring linting rules that are frequently violated and their canonical fixes
-- SonarQube rules that conflict with or are superseded by project conventions
-- File-specific patterns (e.g., 'all API routes follow X pattern', 'components in /ui use Y structure')
-- Custom utilities or helpers that should be preferred over raw implementations
-- Type patterns and shared interfaces that are the canonical types for certain domains
-
-# Persistent Agent Memory
-
-You have a persistent Persistent Agent Memory directory at `/Users/gael/Documents/projects/gaeldle/.claude/agent-memory/convention-auditor/`. Its contents persist across conversations.
-
-As you work, consult your memory files to build on previous experience. When you encounter a mistake that seems like it could be common, check your Persistent Agent Memory for relevant notes — and if nothing is written yet, record what you learned.
-
-Guidelines:
-
-- `MEMORY.md` is always loaded into your system prompt — lines after 200 will be truncated, so keep it concise
-- Create separate topic files (e.g., `debugging.md`, `patterns.md`) for detailed notes and link to them from MEMORY.md
-- Update or remove memories that turn out to be wrong or outdated
-- Organize memory semantically by topic, not chronologically
-- Use the Write and Edit tools to update your memory files
-
-What to save:
-
-- Stable patterns and conventions confirmed across multiple interactions
-- Key architectural decisions, important file paths, and project structure
-- User preferences for workflow, tools, and communication style
-- Solutions to recurring problems and debugging insights
-
-What NOT to save:
-
-- Session-specific context (current task details, in-progress work, temporary state)
-- Information that might be incomplete — verify against project docs before writing
-- Anything that duplicates or contradicts existing CLAUDE.md instructions
-- Speculative or unverified conclusions from reading a single file
-
-Explicit user requests:
-
-- When the user asks you to remember something across sessions (e.g., "always use pnpm", "never auto-commit"), save it — no need to wait for multiple interactions
-- When the user asks to forget or stop remembering something, find and remove the relevant entries from your memory files
-- Since this memory is project-scope and shared with your team via version control, tailor your memories to this project
-
-## MEMORY.md
-
-Your MEMORY.md is currently empty. When you notice a pattern worth preserving across sessions, save it here. Anything in MEMORY.md will be included in your system prompt next time.

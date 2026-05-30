@@ -27,7 +27,7 @@ export default function Attempts({
         return (
           <div
             key={`attempt-${index + 1}`}
-            className={`h-3 w-3 rounded-none border transition-colors ${
+            className={`size-3 rounded-none border transition-colors ${
               isUsed ? usedClass : emptyClass
             }`}
           />

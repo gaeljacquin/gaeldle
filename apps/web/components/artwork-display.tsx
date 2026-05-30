@@ -89,13 +89,14 @@ export default function ArtworkDisplay({
         </div>
       ) : null}
 
-      <div className="aspect-video relative w-full h-full overflow-hidden">
+      <div className="aspect-video relative size-full overflow-hidden">
         {shouldShowImage && displayUrl ? (
           <Image
             src={displayUrl}
             alt="Game artwork"
             className="object-contain"
             fill
+            unoptimized
             sizes="(max-width: 1024px) min(100vw, 480px), 50vw"
             priority
           />

@@ -40,6 +40,10 @@
       }
     }
   },
+  "remoteEnv": {
+    "DEVBOX": "true"
+  },
+  "forwardPorts": [3000, 8080],
   "remoteUser": "root",
   "postCreateCommand": "pnpm install"
 }

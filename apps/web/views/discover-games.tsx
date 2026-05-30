@@ -212,11 +212,7 @@ export function DiscoverGames() {
       {/* Sticky header */}
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <DashboardPageHeader
-            title="Discover Games"
-            description="Query IGDB for new titles and add your picks."
-            icon={IconZoomScan}
-          />
+          <DashboardPageHeader title="Discover Games" icon={IconZoomScan} />
         </div>
       </div>
 
@@ -301,10 +297,10 @@ export function DiscoverGames() {
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Discover</CardTitle>
-                <CardDescription className="mt-1">
-                  Up to {DISCOVER_GAMES_MAX} games.
-                </CardDescription>
+                <CardTitle>
+                  Fetch up to {DISCOVER_GAMES_MAX} games from IGDB.
+                </CardTitle>
+                <CardDescription />
               </CardHeader>
               <CardContent>
                 <IdlePhase

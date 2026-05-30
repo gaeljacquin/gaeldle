@@ -1,8 +1,8 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { validateIgdbIdAdd } from '@/lib/services/game.service';
-import { useDebounce } from '@/lib/hooks/use-debounce';
+import { useState, useCallback, useMemo } from 'react';
 
 export interface IgdbIdAddValidationState {
   isLoading: boolean;
@@ -11,9 +11,11 @@ export interface IgdbIdAddValidationState {
   alreadyInDb: boolean | null;
   gameName: string | null;
   canAdd: boolean;
+  refetch: () => void;
+  stop: () => void;
 }
 
-const DEFAULT_STATE: IgdbIdAddValidationState = {
+const DEFAULT_STATE: Omit<IgdbIdAddValidationState, 'refetch' | 'stop'> = {
   isLoading: false,
   isReady: false,
   existsOnIgdb: null,
@@ -33,37 +35,44 @@ function parsePositiveInt(value: string): number | null {
 export function useIgdbIdAddValidation(
   igdbId: string,
 ): IgdbIdAddValidationState {
-  const debouncedIgdbId = useDebounce(igdbId, 600);
-
+  const queryClient = useQueryClient();
+  const [forcedInt, setForcedInt] = useState<number | null>(null);
   const liveInt = parsePositiveInt(igdbId);
-  const debouncedInt = parsePositiveInt(debouncedIgdbId);
 
-  const isValid = debouncedInt !== null;
+  const queryKey = useMemo(() => ['igdb-add-validate', forcedInt], [forcedInt]);
 
-  // True while the user is still typing (live value differs from debounced value)
-  const isTyping = liveInt !== debouncedInt;
-
-  const { data, isFetching } = useQuery({
-    queryKey: ['igdb-add-validate', debouncedInt],
-    queryFn: () => validateIgdbIdAdd(debouncedInt!),
-    enabled: isValid,
+  const { data, isFetching, refetch } = useQuery({
+    queryKey,
+    queryFn: ({ signal }) => validateIgdbIdAdd(forcedInt!, signal),
+    enabled: forcedInt !== null,
     staleTime: 30_000,
   });
 
-  if (!isValid && !isTyping) {
-    return DEFAULT_STATE;
-  }
+  const handleStop = useCallback(() => {
+    void queryClient.cancelQueries({ queryKey });
+    setForcedInt(null);
+  }, [queryClient, queryKey]);
 
-  // While typing or waiting for debounce, show spinner and suppress stale result
-  if (isTyping || isFetching) {
+  const handleRefetch = useCallback(() => {
+    if (liveInt !== null) {
+      setForcedInt(liveInt);
+      if (liveInt === forcedInt) {
+        void refetch();
+      }
+    }
+  }, [liveInt, forcedInt, refetch]);
+
+  if (isFetching) {
     return {
       ...DEFAULT_STATE,
       isLoading: true,
+      refetch: handleRefetch,
+      stop: handleStop,
     };
   }
 
-  if (!data) {
-    return DEFAULT_STATE;
+  if (!data || forcedInt === null) {
+    return { ...DEFAULT_STATE, refetch: handleRefetch, stop: handleStop };
   }
 
   return {
@@ -73,5 +82,7 @@ export function useIgdbIdAddValidation(
     alreadyInDb: data.alreadyInDb,
     gameName: data.gameName,
     canAdd: data.canAdd,
+    refetch: handleRefetch,
+    stop: handleStop,
   };
 }

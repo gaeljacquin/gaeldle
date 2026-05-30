@@ -9,9 +9,12 @@ import {
   IconCircleCheck,
   IconCircleX,
   IconLoader,
+  IconRefresh,
+  IconSquareRoundedX,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import type { ReplaceGameValidationState } from '@/lib/hooks/use-replace-game-validation';
+import { toast } from 'sonner';
 
 export interface IgdbIdPairRowData {
   id: string;
@@ -33,7 +36,7 @@ function CurrentBadge({
   state,
   igdbId,
 }: Readonly<{ state: ReplaceGameValidationState; igdbId: string }>) {
-  if (!state.isReady) return null;
+  if (!state.isReady && !state.isLoading) return null;
 
   if (state.currentExistsInDb === false) {
     return (
@@ -143,6 +146,13 @@ export function IgdbIdPairRow({
     validationState.currentExistsInDb === true &&
     !validationState.canApply;
 
+  const canSync = row.replacement.trim() !== '' && !validationState.isLoading;
+
+  const handleStop = () => {
+    validationState.stop();
+    toast.info('Syncing stopped');
+  };
+
   return (
     <div
       className={cn(
@@ -150,42 +160,42 @@ export function IgdbIdPairRow({
         isDuplicate && 'border-destructive',
       )}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-6">
         {/* Current IGDB ID */}
-        <div className="flex flex-col gap-1.5 flex-1">
+        <div className="flex flex-col gap-1.5 shrink-0">
           <Label htmlFor={`current-${row.id}`} className="text-xs">
             Current IGDB ID
           </Label>
-          <Input
-            id={`current-${row.id}`}
-            type="number"
-            min={1}
-            value={row.current}
-            onChange={(e) => onCurrentChange(row.id, e.target.value)}
-            placeholder="e.g. 132181"
-            className={cn(
-              'font-mono',
-              currentHasError &&
-                'border-destructive focus-visible:ring-destructive',
+          <div className="relative">
+            <Input
+              id={`current-${row.id}`}
+              type="number"
+              min={1}
+              value={row.current}
+              onChange={(e) => onCurrentChange(row.id, e.target.value)}
+              placeholder="e.g. 132181"
+              className={cn(
+                'font-mono pr-8 h-11 w-48',
+                currentHasError &&
+                  'border-destructive focus-visible:ring-destructive',
+              )}
+              aria-invalid={currentHasError}
+            />
+            {validationState.isLoading && !validationState.isReady && (
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                <IconLoader
+                  size={16}
+                  className="animate-spin text-muted-foreground"
+                  aria-label="Validating current ID"
+                />
+              </div>
             )}
-            aria-invalid={currentHasError}
-          />
-          <div aria-live="polite" aria-atomic="true" className="min-h-4">
-            <CurrentBadge state={validationState} igdbId={row.current} />
           </div>
         </div>
 
-        {/* Arrow / spinner separator */}
-        <div className="pt-7 text-muted-foreground shrink-0">
-          {validationState.isLoading ? (
-            <IconLoader
-              size={16}
-              className="animate-spin"
-              aria-label="Validating"
-            />
-          ) : (
-            <IconArrowRight size={16} aria-hidden="true" />
-          )}
+        {/* Arrow separator */}
+        <div className="pt-6 text-muted-foreground shrink-0">
+          <IconArrowRight size={20} aria-hidden="true" />
         </div>
 
         {/* Replacement IGDB ID */}
@@ -193,38 +203,75 @@ export function IgdbIdPairRow({
           <Label htmlFor={`replacement-${row.id}`} className="text-xs">
             Replacement IGDB ID
           </Label>
-          <Input
-            id={`replacement-${row.id}`}
-            type="number"
-            min={1}
-            value={row.replacement}
-            onChange={(e) => onReplacementChange(row.id, e.target.value)}
-            placeholder="e.g. 2"
-            className={cn(
-              'font-mono',
-              replacementHasError &&
-                'border-destructive focus-visible:ring-destructive',
-            )}
-            aria-invalid={replacementHasError}
-          />
-          <div aria-live="polite" aria-atomic="true" className="min-h-4">
-            <ReplacementBadge state={validationState} />
+          <div className="flex items-center gap-3">
+            <Input
+              id={`replacement-${row.id}`}
+              type="number"
+              min={1}
+              value={row.replacement}
+              onChange={(e) => onReplacementChange(row.id, e.target.value)}
+              placeholder="e.g. 2"
+              className={cn(
+                'font-mono h-11 w-48',
+                replacementHasError &&
+                  'border-destructive focus-visible:ring-destructive',
+              )}
+              aria-invalid={replacementHasError}
+            />
+            {/* Buttons */}
+            <div className="flex items-center gap-2">
+              {validationState.isLoading && validationState.isReady ? (
+                <div className="relative group h-11 px-4 py-3 flex items-center justify-center border border-border bg-muted/20 shrink-0">
+                  <IconLoader
+                    size={20}
+                    className="animate-spin text-primary group-hover:opacity-0 transition-opacity"
+                    aria-label="Validating replacement"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleStop}
+                    aria-label="Stop syncing"
+                    title="Stop syncing"
+                    className="absolute inset-0 size-full opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10 transition-opacity cursor-pointer rounded-none"
+                  >
+                    <IconSquareRoundedX size={20} aria-hidden="true" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => validationState.refetch()}
+                  disabled={!canSync}
+                  aria-label="Sync IGDB info"
+                  title="Sync IGDB info"
+                  className="text-muted-foreground hover:text-primary cursor-pointer h-11 px-4 py-1 rounded-none flex items-center justify-center shrink-0"
+                >
+                  <IconRefresh size={20} aria-hidden="true" />
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onRemove(row.id)}
+                disabled={!canRemove}
+                aria-label="Remove row"
+                title="Remove row"
+                className="text-muted-foreground hover:text-destructive cursor-pointer h-11 px-4 py-1 rounded-none flex items-center justify-center shrink-0"
+              >
+                <IconTrash size={20} aria-hidden="true" />
+              </Button>
+            </div>
           </div>
         </div>
-
-        {/* Remove button */}
-        <div className="pt-6">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => onRemove(row.id)}
-            disabled={!canRemove}
-            aria-label="Remove row"
-            className="text-muted-foreground hover:text-destructive cursor-pointer"
-          >
-            <IconTrash size={14} aria-hidden="true" />
-          </Button>
+      </div>
+      <div className="flex gap-40 min-h-4">
+        <div aria-live="polite" aria-atomic="true" className="flex-1">
+          <CurrentBadge state={validationState} igdbId={row.current} />
+        </div>
+        <div aria-live="polite" aria-atomic="true" className="flex-1">
+          <ReplacementBadge state={validationState} />
         </div>
       </div>
     </div>

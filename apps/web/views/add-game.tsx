@@ -339,11 +339,7 @@ export function AddGame() {
       {/* Sticky header */}
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <DashboardPageHeader
-            title="Add Game"
-            description="Add games by IGDB ID."
-            icon={IconCirclePlus}
-          />
+          <DashboardPageHeader title="Add Game" icon={IconCirclePlus} />
         </div>
       </div>
 
@@ -355,18 +351,16 @@ export function AddGame() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Add</CardTitle>
-                    <CardDescription className="mt-1">
-                      Up to {ADD_GAME_MAX_ROWS} games.
-                    </CardDescription>
+                    <CardTitle>Up to {ADD_GAME_MAX_ROWS} games</CardTitle>
+                    <CardDescription />
                   </div>
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
+                    size="icon"
                     onClick={handleAddRow}
                     disabled={rows.length >= ADD_GAME_MAX_ROWS || isMutating}
-                    className="flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    className="w-24 flex items-center gap-1.5 shrink-0 cursor-pointer"
                   >
                     <IconPlus size={14} aria-hidden="true" />
                     Add row

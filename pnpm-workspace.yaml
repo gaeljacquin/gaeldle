@@ -8,3 +8,11 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 engineStrict: true
+minimumReleaseAgeExclude:
+  - '@turbo/darwin-64@2.9.16'
+  - '@turbo/darwin-arm64@2.9.16'
+  - '@turbo/linux-64@2.9.16'
+  - '@turbo/linux-arm64@2.9.16'
+  - '@turbo/windows-64@2.9.16'
+  - '@turbo/windows-arm64@2.9.16'
+  - turbo@2.9.16

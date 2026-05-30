@@ -43,7 +43,9 @@ export function MenuCard({
 
       <div className="relative z-10">
         <h2 className="text-xl font-bold text-primary-foreground">{title}</h2>
-        <p className="mt-1 text-sm text-primary-foreground/80">{description}</p>
+        <p className="mt-1 text-sm text-primary-foreground/80 truncate">
+          {description}
+        </p>
       </div>
     </div>
   );

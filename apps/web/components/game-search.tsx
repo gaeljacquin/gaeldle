@@ -3,7 +3,7 @@
 import { useState, useRef, ChangeEvent } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@workspace/ui/lib/utils';
-import type { GameModeSlug } from '@workspace/api-contract';
+import type { Game, GameModeSlug } from '@workspace/api-contract';
 import { GAME_SEARCH_MIN_CHARS } from '@workspace/constants';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import {
@@ -18,7 +18,7 @@ import { useGameSearch } from '@/lib/hooks/use-game-search';
 interface GameSearchProps {
   selectedGameId: number | null;
   wrongGuesses: number[];
-  onSelectGame: (gameId: number) => void;
+  onSelectGame: (game: Game) => void;
   disabled?: boolean;
   className?: string;
   mode?: GameModeSlug;
@@ -75,9 +75,9 @@ export default function GameSearch({
     overscan: 2,
   });
 
-  const handleSelect = (gameId: number) => {
-    if (wrongGuesses.includes(gameId) || disabled) return;
-    onSelectGame(gameId);
+  const handleSelect = (game: Game) => {
+    if (wrongGuesses.includes(game.id) || disabled) return;
+    onSelectGame(game);
     setSearchValue('');
     setIsOpen(false);
   };
@@ -143,7 +143,7 @@ export default function GameSearch({
             return (
               <button
                 key={game.id}
-                onClick={() => handleSelect(game.id)}
+                onClick={() => handleSelect(game)}
                 disabled={isDisabled}
                 className={cn(
                   'w-full text-left px-3 py-2 text-xs transition-colors absolute top-0 left-0 leading-relaxed uppercase tracking-tight',
@@ -171,7 +171,7 @@ export default function GameSearch({
     <div className={cn('relative', className)}>
       <InputGroup className="h-10">
         <InputGroupAddon align="inline-start">
-          <IconSearch className="size-4" />
+          <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
         </InputGroupAddon>
         <InputGroupInput
           placeholder="Search for a game..."
@@ -179,7 +179,7 @@ export default function GameSearch({
           onChange={handleInputChange}
           disabled={disabled}
           onFocus={() => (searchValue.length > 0 ? setIsOpen(true) : null)}
-          className="h-full"
+          className="h-full px-9"
         />
         {searchValue.length > 0 ? (
           <InputGroupAddon align="inline-end">

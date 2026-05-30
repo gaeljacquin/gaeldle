@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getPixelSizeForAttempt } from '@/lib/utils/pixelate';
-import { getAllGames, getRandomGame } from '@/lib/services/game.service';
+import { getRandomGame } from '@/lib/services/game.service';
 import type {
   CoverArtModeSlug,
   Game,
@@ -23,9 +23,8 @@ function getRandomArtwork(artworks: unknown): string | null {
 }
 
 export function useCoverArtGame(mode: CoverArtModeSlug) {
-  const [allGames, setAllGames] = useState<Game[]>([]);
   const [targetGame, setTargetGame] = useState<Game | null>(null);
-  const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [wrongGuesses, setWrongGuesses] = useState<(Game | null)[]>([]);
   const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
@@ -34,23 +33,19 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadGames() {
+    async function loadTarget() {
       try {
         setIsLoading(true);
-        const [games, target] = await Promise.all([
-          getAllGames(),
-          getRandomGame([], mode),
-        ]);
-        setAllGames(games);
+        const target = await getRandomGame([], mode);
         setTargetGame(target);
       } catch (err) {
-        setError(getFriendlyErrorMessage(err, 'Failed to load games'));
+        setError(getFriendlyErrorMessage(err, 'Failed to load game'));
       } finally {
         setIsLoading(false);
       }
     }
 
-    loadGames();
+    loadTarget();
   }, [mode]);
 
   const currentPixelSize = getPixelSizeForAttempt(
@@ -65,21 +60,27 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     return null;
   }, [mode, targetGame]);
 
-  const handleSelectGame = useCallback((gameId: number) => {
-    setSelectedGameId(gameId);
+  const handleSelectGame = useCallback((game: Game | number | null) => {
+    if (game === null) {
+      setSelectedGame(null);
+      return;
+    }
+
+    if (typeof game === 'number') {
+      return;
+    }
+
+    setSelectedGame(game);
   }, []);
 
   const clearSelection = useCallback(() => {
-    setSelectedGameId(null);
+    setSelectedGame(null);
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (!targetGame || selectedGameId === null || isGameOver) return;
+    if (!targetGame || !selectedGame || isGameOver) return;
 
-    const selectedGame = allGames.find((g) => g.id === selectedGameId);
-    if (!selectedGame) return;
-
-    if (selectedGameId === targetGame.id) {
+    if (selectedGame.id === targetGame.id) {
       setIsCorrect(true);
       setIsGameOver(true);
     } else {
@@ -89,8 +90,8 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
         setIsGameOver(true);
       }
     }
-    setSelectedGameId(null);
-  }, [targetGame, selectedGameId, isGameOver, attemptsLeft, allGames]);
+    setSelectedGame(null);
+  }, [targetGame, selectedGame, isGameOver, attemptsLeft]);
 
   const handleSkip = useCallback(() => {
     if (!targetGame || isGameOver) return;
@@ -109,7 +110,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
       setAttemptsLeft(MAX_ATTEMPTS);
       setIsGameOver(false);
       setIsCorrect(false);
-      setSelectedGameId(null);
+      setSelectedGame(null);
       const target = await getRandomGame([], mode);
       setTargetGame(target);
     } catch (err) {
@@ -128,9 +129,8 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   }, []);
 
   return {
-    allGames,
     targetGame,
-    selectedGameId,
+    selectedGame,
     wrongGuesses,
     attemptsLeft,
     isGameOver,

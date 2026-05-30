@@ -13,19 +13,6 @@ export default function GuessHistoryInline({
   guesses,
   className,
 }: Readonly<GuessHistoryInlineProps>) {
-  if (guesses.length === 0) {
-    return (
-      <div
-        className={cn(
-          'border border-border bg-card/60 p-4 text-center text-sm text-muted-foreground',
-          className,
-        )}
-      >
-        No guesses yet
-      </div>
-    );
-  }
-
   // Reverse to show newest first
   const reversedGuesses = [...guesses].reverse();
 

@@ -44,11 +44,7 @@ export default function UtilitiesView() {
     <div className="flex flex-col min-h-full bg-background">
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <DashboardPageHeader
-            title="Utilities"
-            description="Library management tools."
-            icon={IconTools}
-          />
+          <DashboardPageHeader title="Utilities" icon={IconTools} />
         </div>
       </div>
 

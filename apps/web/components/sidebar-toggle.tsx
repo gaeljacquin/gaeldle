@@ -17,7 +17,7 @@ export default function SidebarToggle({
     <button
       onClick={toggleSidebar}
       className={cn(
-        'flex h-8 w-8 items-center justify-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer',
+        'flex size-8 items-center justify-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer',
         !isCollapsed && 'ml-auto',
       )}
       title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}

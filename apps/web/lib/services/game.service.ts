@@ -1,5 +1,6 @@
 import { orpcClient } from '@/lib/orpc';
 import type { Game, GameModeSlug, ImageStyle } from '@workspace/api-contract';
+import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -9,20 +10,8 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json();
 }
 
-export async function getAllGames(mode?: GameModeSlug): Promise<Game[]> {
-  if (mode === 'artwork') {
-    const res = await fetch('/api/games/artwork');
-    const result = await handleResponse<{ data: Game[] }>(res);
-    return result.data;
-  }
-
-  const res = await fetch('/api/games?pageSize=10000');
-  const result = await handleResponse<{ data: Game[] }>(res);
-  return result.data;
-}
-
 export async function getGameByIgdbId(igdbId: number): Promise<Game> {
-  const res = await fetch(`/api/games/${igdbId}`);
+  const res = await fetchWithTimeout(`/api/games/${igdbId}`);
   const result = await handleResponse<{ data: Game }>(res);
   return result.data;
 }
@@ -52,6 +41,7 @@ export async function getPaginatedGames(
   query?: string,
   sortBy: 'name' | 'firstReleaseDate' | 'igdbId' = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
 ): Promise<PaginatedResponse<Game>> {
   const params = new URLSearchParams({
     page: String(page),
@@ -64,7 +54,11 @@ export async function getPaginatedGames(
     params.set('q', query);
   }
 
-  const res = await fetch(`/api/games?${params.toString()}`);
+  if (igdbId) {
+    params.set('igdbId', igdbId);
+  }
+
+  const res = await fetchWithTimeout(`/api/games?${params.toString()}`);
   return handleResponse<PaginatedResponse<Game>>(res);
 }
 
@@ -83,8 +77,31 @@ export async function getRandomGame(
   }
 
   const query = params.toString();
-  const res = await fetch(`/api/games/random${query ? '?' + query : ''}`);
+  const res = await fetchWithTimeout(
+    `/api/games/random${query ? '?' + query : ''}`,
+  );
   const result = await handleResponse<{ data: Game }>(res);
+  return result.data;
+}
+
+export async function getRandomGames(
+  count: number,
+  excludeIds: number[] = [],
+  mode?: GameModeSlug,
+): Promise<Game[]> {
+  const params = new URLSearchParams({ count: String(count) });
+
+  if (excludeIds.length > 0) {
+    params.set('excludeIds', excludeIds.join(','));
+  }
+
+  if (mode) {
+    params.set('mode', mode);
+  }
+
+  const query = params.toString();
+  const res = await fetchWithTimeout(`/api/games/random?${query}`);
+  const result = await handleResponse<{ data: Game[] }>(res);
   return result.data;
 }
 
@@ -103,7 +120,7 @@ export async function searchGames(
     params.set('mode', mode);
   }
 
-  const res = await fetch(`/api/games/search?${params.toString()}`);
+  const res = await fetchWithTimeout(`/api/games/search?${params.toString()}`);
   const result = await handleResponse<{ data: Game[] }>(res);
   return result.data;
 }
@@ -153,11 +170,15 @@ export async function getBulkJobStatus(jobId: string) {
 export async function validateReplaceGame(
   current: number,
   replacement: number,
+  signal?: AbortSignal,
 ) {
-  const result = await orpcClient.games.validateReplaceGame({
-    current,
-    replacement,
-  });
+  const result = await orpcClient.games.validateReplaceGame(
+    {
+      current,
+      replacement,
+    },
+    { signal },
+  );
   return result;
 }
 
@@ -168,8 +189,11 @@ export async function replaceGameByIdgbId(
   return result;
 }
 
-export async function validateIgdbIdAdd(igdbId: number) {
-  const result = await orpcClient.games.validateIgdbIdAdd({ igdbId });
+export async function validateIgdbIdAdd(igdbId: number, signal?: AbortSignal) {
+  const result = await orpcClient.games.validateIgdbIdAdd(
+    { igdbId },
+    { signal },
+  );
   return result;
 }
 

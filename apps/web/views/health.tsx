@@ -161,7 +161,7 @@ export default function HealthView() {
       <div className="container mx-auto px-4 py-8 flex-1 max-w-2xl">
         {isLoading && !data ? (
           <div className="flex flex-col items-center justify-center py-24 space-y-4 text-muted-foreground">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            <div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
             <p className="text-sm font-medium">Checking service health...</p>
           </div>
         ) : (

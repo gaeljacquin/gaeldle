@@ -55,14 +55,14 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
               src={game.imageUrl}
               alt={game.name}
               className={cn(
-                'w-full h-full object-cover',
+                'size-full object-cover',
                 shouldGrayscale && 'grayscale',
               )}
               fill
               sizes="10vw"
             />
           ) : (
-            <div className="w-full h-full bg-muted flex items-center justify-center text-[10px] uppercase tracking-widest text-muted-foreground">
+            <div className="size-full bg-muted flex items-center justify-center text-[10px] uppercase tracking-widest text-muted-foreground">
               No Data
             </div>
           )}

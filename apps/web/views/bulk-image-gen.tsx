@@ -14,17 +14,17 @@ import type { ImageStyle } from '@workspace/api-contract';
 import { bulkGenerateImages } from '@/lib/services/game.service';
 import { useBulkImageJob } from '@/lib/hooks/use-bulk-image-job';
 import { Button } from '@workspace/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@workspace/ui/dropdown-menu';
 import { Input } from '@workspace/ui/input';
 import { Label } from '@workspace/ui/label';
 import { Checkbox } from '@workspace/ui/checkbox';
 import { Badge } from '@workspace/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@workspace/ui/select';
 import {
   Card,
   CardContent,
@@ -40,6 +40,7 @@ import {
   IconLoader,
   IconAlertTriangle,
   IconRobotFace,
+  IconChevronDown,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { toast } from 'sonner';
@@ -272,7 +273,6 @@ export default function BulkImageGen() {
         <div className="container mx-auto px-4 py-4">
           <DashboardPageHeader
             title="Bulk Image Generation"
-            description="Generate AI images for games that don't have one yet."
             icon={IconRobotFace}
           />
         </div>
@@ -283,12 +283,6 @@ export default function BulkImageGen() {
         <div className="max-w-lg space-y-6">
           {/* Configuration form */}
           <Card>
-            <CardHeader>
-              <CardTitle>Configuration</CardTitle>
-              <CardDescription>
-                Set the parameters for the bulk generation job.
-              </CardDescription>
-            </CardHeader>
             <CardContent>
               <fieldset
                 disabled={startMutation.isPending || isJobActive}
@@ -296,7 +290,7 @@ export default function BulkImageGen() {
               >
                 {/* Number of games */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="num-games">
+                  <Label htmlFor="num-games" className="text-sm">
                     Number of games ({IMAGE_GEN_MIN}–{IMAGE_GEN_MAX})
                   </Label>
                   <Input
@@ -312,35 +306,53 @@ export default function BulkImageGen() {
 
                 {/* Image style */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="image-style-trigger">Image style</Label>
-                  <Select
-                    value={imageStyle}
-                    onValueChange={(val) => setImageStyle(val as ImageStyle)}
-                  >
-                    <SelectTrigger
-                      id="image-style-trigger"
-                      className="w-full max-w-xs"
-                    >
-                      <SelectValue>
-                        {
-                          IMAGE_STYLES.find((s) => s.value === imageStyle)
-                            ?.label
+                  <Label htmlFor="image-style-trigger" className="text-sm">
+                    Image style
+                  </Label>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Button
+                        id="image-style-trigger"
+                        variant="outline"
+                        className="w-80 justify-between font-normal"
+                      >
+                        <span className="truncate">
+                          {
+                            IMAGE_STYLES.find((s) => s.value === imageStyle)
+                              ?.label
+                          }
+                        </span>
+                        <IconChevronDown
+                          size={16}
+                          className="ml-2 shrink-0 text-muted-foreground"
+                          aria-hidden="true"
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-80 p-1">
+                      <DropdownMenuRadioGroup
+                        value={imageStyle}
+                        onValueChange={(val) =>
+                          setImageStyle(val as ImageStyle)
                         }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {IMAGE_STYLES.map((style) => (
-                        <SelectItem key={style.value} value={style.value}>
-                          {style.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      >
+                        {IMAGE_STYLES.map((style) => (
+                          <DropdownMenuRadioItem
+                            key={style.value}
+                            value={style.value}
+                            className="pl-3 data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
+                          >
+                            {style.label}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
 
                 {/* Checkboxes */}
                 <div className="space-y-3">
-                  <Label>Prompt extras</Label>
+                  <Label className="text-sm">Prompt extras</Label>
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 cursor-pointer text-xs">
                       <Checkbox

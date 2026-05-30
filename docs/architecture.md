@@ -13,11 +13,11 @@
 The project is designed to run exclusively within a **VS Code Dev Container**. This architecture serves two primary purposes:
 
 1.  **Security Boundary**: By isolating the development environment within a Docker container, the host machine ("bare metal") is protected from potentially compromised npm packages. Malicious code execution is confined to the container.
-2.  **Environment Consistency**: Every developer uses the exact same versions of Node.js, pnpm, and PostgreSQL, eliminating "it works on my machine" issues.
+2.  **Environment Consistency**: Every developer uses the exact same versions of Node.js, `ni`, and PostgreSQL, eliminating "it works on my machine" issues.
 
 ### Requirements
 
-- **No Bare Metal `node_modules`**: All package installations (`pnpm install`) and updates MUST happen inside the container. The host machine must remain free of `node_modules`.
+- **No Bare Metal `node_modules`**: All package installations (`ni`) and updates (`nup`) MUST happen inside the container. The host machine must remain free of `node_modules`.
 - **Docker Volumes**: The `node_modules` directories are mounted as anonymous Docker volumes to ensure they stay within the container's lifecycle and don't leak to the host filesystem.
 
 ## API Responsibility Split

@@ -60,17 +60,53 @@ export class GamesService {
     return game || null;
   }
 
-  async refreshAllGamesView() {
-    try {
-      await this.databaseService.db.execute(
-        sql`REFRESH MATERIALIZED VIEW all_games`,
-      );
-    } catch (e) {
-      console.error('Failed to refresh materialized view', e);
+  private refreshTimeout: NodeJS.Timeout | null = null;
+  private pendingRefresh: Promise<void> | null = null;
+
+  async refreshAllGamesView(immediate = false) {
+    if (this.refreshTimeout) {
+      clearTimeout(this.refreshTimeout);
+      this.refreshTimeout = null;
     }
+
+    if (immediate) {
+      await this.performRefresh();
+      return;
+    }
+
+    // Debounce for 1 second
+    return new Promise<void>((resolve) => {
+      this.refreshTimeout = setTimeout(() => {
+        void this.performRefresh().then(() => resolve());
+      }, 1000);
+    });
   }
 
-  async syncGameByIgdbId(igdbId: number): Promise<{
+  private async performRefresh() {
+    // Prevent concurrent executions
+    if (this.pendingRefresh) {
+      return this.pendingRefresh;
+    }
+
+    this.pendingRefresh = (async () => {
+      try {
+        await this.databaseService.db.execute(
+          sql`REFRESH MATERIALIZED VIEW all_games`,
+        );
+      } catch (e) {
+        console.error('Failed to refresh materialized view', e);
+      } finally {
+        this.pendingRefresh = null;
+      }
+    })();
+
+    return this.pendingRefresh;
+  }
+
+  async syncGameByIgdbId(
+    igdbId: number,
+    shouldRefresh = true,
+  ): Promise<{
     game: Game;
     operation: SyncOperation;
   } | null> {
@@ -98,7 +134,9 @@ export class GamesService {
         .where(eq(games.igdbId, igdbId))
         .returning();
 
-      await this.refreshAllGamesView();
+      if (shouldRefresh) {
+        void this.refreshAllGamesView();
+      }
 
       return {
         game: updatedGame as unknown as Game,
@@ -111,7 +149,9 @@ export class GamesService {
       .values(gameData)
       .returning();
 
-    await this.refreshAllGamesView();
+    if (shouldRefresh) {
+      void this.refreshAllGamesView();
+    }
 
     return {
       game: newGame as unknown as Game,
@@ -119,7 +159,11 @@ export class GamesService {
     };
   }
 
-  async updateGame(id: number, updates: GameUpdate): Promise<Game | null> {
+  async updateGame(
+    id: number,
+    updates: GameUpdate,
+    shouldRefresh = true,
+  ): Promise<Game | null> {
     const [updatedGame] = await this.databaseService.db
       .update(games)
       .set({
@@ -129,34 +173,34 @@ export class GamesService {
       .where(eq(games.id, id))
       .returning();
 
-    if (updatedGame) {
-      await this.refreshAllGamesView();
+    if (updatedGame && shouldRefresh) {
+      void this.refreshAllGamesView();
     }
 
     return updatedGame || null;
   }
 
-  async deleteGame(id: number): Promise<number | null> {
+  async deleteGame(id: number, shouldRefresh = true): Promise<number | null> {
     const [deletedGame] = await this.databaseService.db
       .delete(games)
       .where(eq(games.id, id))
       .returning({ id: games.id });
 
-    if (deletedGame) {
-      await this.refreshAllGamesView();
+    if (deletedGame && shouldRefresh) {
+      void this.refreshAllGamesView();
     }
 
     return deletedGame?.id ?? null;
   }
 
-  async deleteGames(ids: number[]): Promise<number[]> {
+  async deleteGames(ids: number[], shouldRefresh = true): Promise<number[]> {
     const deletedRows = await this.databaseService.db
       .delete(games)
       .where(inArray(games.id, ids))
       .returning({ id: games.id });
 
-    if (deletedRows.length > 0) {
-      await this.refreshAllGamesView();
+    if (deletedRows.length > 0 && shouldRefresh) {
+      void this.refreshAllGamesView();
     }
 
     return deletedRows.map((row) => row.id);

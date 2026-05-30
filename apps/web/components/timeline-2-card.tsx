@@ -49,14 +49,14 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
             <Image
               src={game.imageUrl}
               alt={game.name}
-              className="w-full h-full object-cover"
+              className="size-full object-cover"
               draggable={false}
               fill
               sizes="10vw"
               loading="eager"
             />
           ) : (
-            <div className="w-full h-full bg-muted flex items-center justify-center text-[10px] uppercase tracking-widest text-muted-foreground">
+            <div className="size-full bg-muted flex items-center justify-center text-[10px] uppercase tracking-widest text-muted-foreground">
               No Data
             </div>
           )}

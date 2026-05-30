@@ -1,20 +1,19 @@
 import { Separator } from '@workspace/ui/separator';
-import Link from 'next/link';
-import { IconArrowLeft } from '@tabler/icons-react';
 import { appInfo } from '@/lib/app-info';
+import ViewportDebugger from '@/components/viewport-debugger';
 
 export default function PrivacyView() {
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-6">
-      <Link
-        href="/"
-        className="hover:underline flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <IconArrowLeft size={24} />
-        <span>Home</span>
-      </Link>
-      <h1 className="text-4xl font-bold tracking-tight">Privacy Policy</h1>
-      <p className="text-xl text-muted-foreground">Last updated: 2024.09.02</p>
+      <div className="flex flex-row items-center justify-between">
+        <div className="flex flex-col">
+          <h1 className="text-4xl font-bold tracking-tight">Privacy Policy</h1>
+          <p className="text-xl text-muted-foreground">
+            Last updated: 2024.09.02
+          </p>
+        </div>
+        <ViewportDebugger />
+      </div>
 
       <Separator />
 

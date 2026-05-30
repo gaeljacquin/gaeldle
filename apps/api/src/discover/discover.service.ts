@@ -109,7 +109,10 @@ export class DiscoverService {
 
     for (const igdbId of selectedIgdbIds) {
       try {
-        const syncResult = await this.gamesService.syncGameByIgdbId(igdbId);
+        const syncResult = await this.gamesService.syncGameByIgdbId(
+          igdbId,
+          false,
+        );
         if (syncResult) {
           results.push({
             igdbId,
@@ -150,7 +153,7 @@ export class DiscoverService {
       })
       .returning({ id: domainEvents.id });
 
-    await this.gamesService.refreshAllGamesView();
+    await this.gamesService.refreshAllGamesView(true);
 
     return {
       success: true,

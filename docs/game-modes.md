@@ -6,7 +6,7 @@ Identify the mystery game from its cover art. The image starts fully pixelated a
 
 **How to play:**
 
-- A pixelated cover image is shown on screen along with a clarity bar indicating how revealed the image is
+- A pixelated cover image is shown on screen
 - Search for a game by name and select it from the list
 - Submit your guess
 - A wrong guess costs one attempt and sharpens the image
@@ -20,7 +20,7 @@ Similar to Cover Art, but instead of a box cover you are shown in-game artwork o
 
 **How to play:**
 
-- A pixelated artwork image is shown along with a clarity bar
+- A pixelated artwork image is shown
 - Search for a game by name and select it from the list
 - Submit your guess
 - A wrong guess costs one attempt and sharpens the image

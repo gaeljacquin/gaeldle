@@ -229,7 +229,7 @@ function ImageCell({
             <Image
               src={imageUrl}
               alt={name}
-              className="w-full h-full object-cover"
+              className="size-full object-cover"
               fill
               sizes="10vw"
             />
@@ -240,7 +240,7 @@ function ImageCell({
             </div>
           </>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center">
+          <div className="size-full flex flex-col items-center justify-center">
             <span className="text-xs text-muted-foreground">No image</span>
             <div className="absolute bottom-0 left-0 right-0 bg-primary/90 px-2 py-1">
               <p className="text-xs font-semibold text-primary-foreground truncate text-center">

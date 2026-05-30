@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getAllGames, getRandomGame } from '@/lib/services/game.service';
+import { getRandomGame } from '@/lib/services/game.service';
 import type {
   Game,
   SpecificationGuess,
@@ -159,9 +159,8 @@ function compareGames(
 }
 
 export function useSpecificationsGame() {
-  const [allGames, setAllGames] = useState<Game[]>([]);
   const [targetGame, setTargetGame] = useState<Game | null>(null);
-  const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [guesses, setGuesses] = useState<SpecificationGuess[]>([]);
   const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
@@ -170,44 +169,51 @@ export function useSpecificationsGame() {
   const [error, setError] = useState<string | null>(null);
   const [revealedClue, setRevealedClue] = useState<RevealedClue | null>(null);
 
-  // Load all games on mount
+  // Load target game on mount
   useEffect(() => {
-    async function loadGames() {
+    async function loadTarget() {
       try {
         setIsLoading(true);
-        const games = await getAllGames();
-        setAllGames(games);
-
         // Get a random game for the answer
         const randomGame = await getRandomGame([], 'specifications');
         setTargetGame(randomGame);
       } catch (err) {
-        console.error('Error loading games:', err);
-        setError(getFriendlyErrorMessage(err, 'Failed to load games'));
+        console.error('Error loading target game:', err);
+        setError(getFriendlyErrorMessage(err, 'Failed to load game'));
       } finally {
         setIsLoading(false);
       }
     }
 
-    loadGames();
+    loadTarget();
   }, []);
 
-  const handleSelectGame = useCallback((gameId: number) => {
-    setSelectedGameId(gameId);
+  const handleSelectGame = useCallback((game: Game | number | null) => {
+    if (game === null) {
+      setSelectedGame(null);
+      return;
+    }
+
+    if (typeof game === 'number') {
+      // This is a fallback in case we only have the ID
+      // We should ideally pass the whole object from the search results
+      // For now, we'll just set it to null and let the UI handle it or fetch it
+      // But we want to avoid getAllGames
+      return;
+    }
+
+    setSelectedGame(game);
   }, []);
 
   const clearSelection = useCallback(() => {
-    setSelectedGameId(null);
+    setSelectedGame(null);
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (!targetGame || selectedGameId === null || isGameOver) return;
-
-    const selectedGame = allGames.find((g) => g.id === selectedGameId);
-    if (!selectedGame) return;
+    if (!targetGame || !selectedGame || isGameOver) return;
 
     // Check if the selected game is correct
-    if (selectedGameId === targetGame.id) {
+    if (selectedGame.id === targetGame.id) {
       const matches = compareGames(targetGame, selectedGame);
       const newGuess: SpecificationGuess = {
         gameId: selectedGame.id,
@@ -240,8 +246,8 @@ export function useSpecificationsGame() {
     }
 
     // Reset selection
-    setSelectedGameId(null);
-  }, [targetGame, selectedGameId, isGameOver, attemptsLeft, allGames]);
+    setSelectedGame(null);
+  }, [targetGame, selectedGame, isGameOver, attemptsLeft]);
 
   const revealClue = useCallback(() => {
     if (!targetGame || revealedClue) return;
@@ -328,7 +334,7 @@ export function useSpecificationsGame() {
       setAttemptsLeft(MAX_ATTEMPTS);
       setIsGameOver(false);
       setIsCorrect(false);
-      setSelectedGameId(null);
+      setSelectedGame(null);
       setRevealedClue(null);
 
       // Get a new random game
@@ -351,9 +357,8 @@ export function useSpecificationsGame() {
 
   return {
     // Game state
-    allGames,
     targetGame,
-    selectedGameId,
+    selectedGame,
     guesses,
     attemptsLeft,
     isGameOver,

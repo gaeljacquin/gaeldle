@@ -26,9 +26,8 @@ export default function GameListPlusImage(
   const [searchKey, setSearchKey] = useState(0);
 
   const {
-    allGames,
     targetGame,
-    selectedGameId,
+    selectedGame,
     wrongGuesses,
     attemptsLeft,
     isGameOver,
@@ -55,15 +54,10 @@ export default function GameListPlusImage(
     setSearchKey((prev) => prev + 1);
   };
 
-  const selectedGame =
-    allGames.find((game) => game.id === selectedGameId) || null;
+  const selectedGameId = selectedGame?.id ?? null;
   const wrongGuessIds = wrongGuesses
     .filter((g): g is NonNullable<typeof g> => g !== null)
     .map((g) => g.id);
-  const clarity = Math.min(
-    100,
-    Math.round(((MAX_ATTEMPTS - attemptsLeft) / MAX_ATTEMPTS) * 100),
-  );
 
   const imageDisplayComp = () => {
     let imageDisplayed;
@@ -76,7 +70,7 @@ export default function GameListPlusImage(
             pixelSize={currentPixelSize}
             isGameOver={isGameOver}
             isLoading={isLoading}
-            className="h-full w-full"
+            className="size-full"
           />
         );
         break;
@@ -88,7 +82,7 @@ export default function GameListPlusImage(
             usePixelation={false}
             isGameOver={isGameOver}
             isLoading={isLoading}
-            className="h-full w-full"
+            className="size-full"
             sourceImageUrl={targetGame?.aiImageUrl}
           />
         );
@@ -101,7 +95,7 @@ export default function GameListPlusImage(
             usePixelation={true}
             isGameOver={isGameOver}
             isLoading={isLoading}
-            className="h-full w-full"
+            className="size-full"
             sourceImageUrl={targetGame?.imageUrl}
           />
         );
@@ -146,29 +140,21 @@ export default function GameListPlusImage(
                   {imageDisplayComp()}
                 </div>
               </Card>
-
-              {props.gameModeSlug === 'image-gen' ? null : (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground font-medium">
-                      Clarity
-                    </span>
-                    <span className="font-bold text-foreground">
-                      {clarity}%
-                    </span>
-                  </div>
-                  <div className="h-2 w-full bg-muted border overflow-hidden">
-                    <div
-                      className="h-full bg-primary transition-all duration-500"
-                      style={{ width: `${clarity}%` }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-4">
+                <div className="flex flex-col items-center gap-4 border p-4">
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Attempts
+                  </p>
+                  <Attempts
+                    maxAttempts={MAX_ATTEMPTS}
+                    attemptsLeft={attemptsLeft}
+                    variant="primary"
+                  />
+                </div>
+
                 <div className="flex flex-col gap-3 sm:flex-row items-stretch">
                   <div className="flex-1">
                     <GameSearch
@@ -200,7 +186,6 @@ export default function GameListPlusImage(
                     </Button>
                   )}
                 </div>
-
                 {isGameOver ? null : (
                   <SelectedGameDisplay
                     selectedGame={selectedGame}
@@ -213,17 +198,6 @@ export default function GameListPlusImage(
               </div>
 
               <GuessHistoryInline guesses={wrongGuesses} className="max-h-60" />
-
-              <div className="flex flex-col items-center gap-4 border p-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Attempts
-                </p>
-                <Attempts
-                  maxAttempts={MAX_ATTEMPTS}
-                  attemptsLeft={attemptsLeft}
-                  variant="primary"
-                />
-              </div>
 
               {isGameOver ? (
                 <div className="border border-border bg-card/60 p-6 text-center animate-in fade-in zoom-in duration-300">
@@ -255,17 +229,17 @@ export default function GameListPlusImage(
                   </Button>
                 </div>
               ) : null}
-
-              <div className="border border-dashed p-4 text-center opacity-70 hover:opacity-100 transition-opacity">
-                <DevModeToggle
-                  targetGame={targetGame}
-                  attemptsLeft={attemptsLeft}
-                  maxAttempts={MAX_ATTEMPTS}
-                  onAdjustAttempts={adjustAttempts}
-                />
-              </div>
             </div>
           </div>
+        </div>
+
+        <div className="flex items-center justify-center border-2 border-dashed p-4 text-center opacity-70 hover:opacity-100 transition-opacity mt-8">
+          <DevModeToggle
+            targetGame={targetGame}
+            attemptsLeft={attemptsLeft}
+            maxAttempts={MAX_ATTEMPTS}
+            onAdjustAttempts={adjustAttempts}
+          />
         </div>
       </div>
     </div>

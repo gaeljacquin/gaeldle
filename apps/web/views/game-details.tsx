@@ -1,11 +1,10 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useMemo } from 'react';
 import {
   DEFAULT_IMAGE_GEN_STYLE,
   IMAGE_PROMPT_SUFFIX,
   IMAGE_STYLES,
-  PLACEHOLDER_IMAGE_R2,
 } from '@workspace/constants';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -56,13 +55,7 @@ import {
 import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@workspace/ui/select';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/tabs';
 import { Badge } from '@/components/badge';
 
@@ -130,7 +123,6 @@ export default function GameDetails({
   const [imageStyle, setImageStyle] = useState<ImageStyle>(
     DEFAULT_IMAGE_GEN_STYLE,
   );
-  const [promptView, setPromptView] = useState<'preview' | 'saved'>('preview');
 
   const {
     data: game,
@@ -190,12 +182,50 @@ export default function GameDetails({
     },
   });
 
-  const imageGenButtonText = (game: Game) => {
+  const generatedImage = useMemo(() => {
+    if (!game || !Array.isArray(game.imageGen)) return null;
+    const entry = game.imageGen.find(
+      (item) => item && typeof item === 'object' && imageStyle in item,
+    );
+    return entry
+      ? (entry[imageStyle] as {
+          url: string;
+          prompt: string;
+          provider: string;
+        })
+      : null;
+  }, [game, imageStyle]);
+
+  const savedPrompt = generatedImage?.prompt;
+
+  const savedPromptRows = useMemo(() => {
+    if (!savedPrompt) return 4;
+    const estimatedLines = Math.ceil(savedPrompt.length / 28);
+    return Math.min(15, Math.max(4, estimatedLines));
+  }, [savedPrompt]);
+
+  const previewPrompt = useMemo(() => {
+    if (!game) return '';
+    return buildPromptPreview(game, {
+      includeStoryline,
+      includeGenres,
+      includeThemes,
+      imageStyle,
+    });
+  }, [game, includeStoryline, includeGenres, includeThemes, imageStyle]);
+
+  const previewPromptRows = useMemo(() => {
+    if (!previewPrompt) return 4;
+    const estimatedLines = Math.ceil(previewPrompt.length / 50);
+    return Math.min(15, Math.max(4, estimatedLines));
+  }, [previewPrompt]);
+
+  const imageGenButtonText = () => {
     if (generateImageMutation.isPending) {
       return 'Generating...';
     }
 
-    if (game?.aiImageUrl) {
+    if (generatedImage) {
       return 'Regenerate AI Image';
     }
 
@@ -552,23 +582,17 @@ export default function GameDetails({
 
               <TabsContent value="image-gen" className="space-y-6 outline-none">
                 <div className="flex flex-col md:flex-row gap-8">
-                  <div className="w-full md:w-64 shrink-0">
-                    <Dialog>
-                      <DialogTrigger
-                        nativeButton={false}
-                        render={
-                          <Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />
-                        }
-                      >
-                        <div className="relative aspect-square w-full">
+                  <div className="w-full md:w-64 shrink-0 flex flex-col gap-4">
+                    {generatedImage ? (
+                      <Dialog>
+                        <DialogTrigger
+                          className="relative aspect-square w-full overflow-hidden border-2 border-solid border-muted-foreground/30 bg-muted/5 group cursor-pointer hover:border-primary/50 transition-colors p-0 m-0 bg-transparent block"
+                        >
                           <Image
-                            src={
-                              game.aiImageUrl ||
-                              PLACEHOLDER_IMAGE_R2(
-                                process.env.r2PublicUrl ?? '',
-                              )
-                            }
-                            alt={`${game.name} AI Image`}
+                            src={generatedImage.url}
+                            alt={`${game.name} AI Image - ${
+                              IMAGE_STYLES.find((s) => s.value === imageStyle)?.label ?? imageStyle
+                            }`}
                             fill
                             unoptimized
                             className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -580,67 +604,100 @@ export default function GameDetails({
                               className="text-white opacity-0 group-hover:opacity-100 transition-opacity size-8"
                             />
                           </div>
-                        </div>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
-                        <DialogHeader className="sr-only">
-                          <DialogTitle>{game.name} AI Image</DialogTitle>
-                        </DialogHeader>
-                        <div className="relative w-full h-[85vh]">
-                          <Image
-                            src={
-                              game.aiImageUrl ||
-                              PLACEHOLDER_IMAGE_R2(
-                                process.env.r2PublicUrl ?? '',
-                              )
-                            }
-                            alt={`${game.name} AI Image`}
-                            fill
-                            unoptimized
-                            className="object-contain"
-                            sizes="(max-width: 896px) 100vw, 896px"
-                          />
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    {game.aiImageUrl === null && (
-                      <p className="text-xs text-center">Placeholder image</p>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
+                          <DialogHeader className="sr-only">
+                            <DialogTitle>
+                              {game.name} AI Image - {
+                                IMAGE_STYLES.find((s) => s.value === imageStyle)?.label ?? imageStyle
+                              }
+                            </DialogTitle>
+                          </DialogHeader>
+                          <div className="relative w-full h-[85vh]">
+                            <Image
+                              src={generatedImage.url}
+                              alt={`${game.name} AI Image - ${
+                                IMAGE_STYLES.find((s) => s.value === imageStyle)?.label ?? imageStyle
+                              }`}
+                              fill
+                              unoptimized
+                              className="object-contain"
+                              sizes="(max-width: 896px) 100vw, 896px"
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    ) : (
+                      <div className="relative aspect-square w-full flex flex-col items-center justify-center border-2 border-dashed border-muted-foreground/30 bg-muted/5">
+                        <span className="text-xs uppercase font-black tracking-widest text-muted-foreground/60">
+                          N/A
+                        </span>
+                      </div>
                     )}
+
+                    {/* Saved Prompt Block */}
+                    <div className="flex flex-col gap-2 min-h-32 mt-2">
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                        Saved Prompt
+                      </h3>
+                      {savedPrompt ? (
+                        <Textarea
+                          readOnly
+                          value={savedPrompt}
+                          rows={savedPromptRows}
+                          className="rounded-none resize-none w-full text-sm text-muted-foreground italic bg-muted/30 border-dashed h-40 lg:h-auto"
+                        />
+                      ) : (
+                        <div className="flex-1 flex items-center justify-center border border-dashed border-muted-foreground/20 bg-muted/5 min-h-32 py-8">
+                          <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/40">
+                            N/A
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="flex-1 space-y-4">
                     <div className="space-y-1.5">
                       <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
                         Art Style
                       </h3>
-                      <Select
-                        value={imageStyle}
-                        onValueChange={(v) => {
-                          if (v) setImageStyle(v);
-                        }}
-                        disabled={generateImageMutation.isPending}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue>
-                            {
-                              IMAGE_STYLES.find(
-                                (style) => style.value === imageStyle,
-                              )?.label
-                            }
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover border border-border shadow-xl min-w-(--anchor-width)">
-                          {IMAGE_STYLES.map((style) => (
-                            <SelectItem key={style.value} value={style.value}>
-                              {style.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="border border-border bg-card/50 overflow-y-scroll scrollbar-y max-h-60 rounded-none divide-y divide-border">
+                        {IMAGE_STYLES.map((style) => {
+                          const isSelected = style.value === imageStyle;
+                          const hasImage = Array.isArray(game?.imageGen) && game.imageGen.some(
+                            (item) => item && typeof item === 'object' && style.value in item
+                          );
+                          return (
+                            <button
+                              key={style.value}
+                              type="button"
+                              onClick={() => setImageStyle(style.value as ImageStyle)}
+                              disabled={generateImageMutation.isPending}
+                              className={cn(
+                                "w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between",
+                                isSelected
+                                  ? "bg-primary text-primary-foreground font-semibold"
+                                  : "hover:bg-muted text-foreground"
+                              )}
+                            >
+                              <span>{style.label}</span>
+                              {hasImage && (
+                                <span className={cn(
+                                  "text-[10px] px-1.5 py-0.5 font-bold uppercase tracking-wider",
+                                  isSelected ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted-foreground/10 text-muted-foreground"
+                                )}>
+                                  generated
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                     <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
                       Prompt Fields
                     </h3>
-                    <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2.5">
+                    <div className="flex flex-col xl:flex-row xl:flex-wrap gap-2.5">
                       {/* Fixed fields */}
                       {(
                         [
@@ -734,38 +791,17 @@ export default function GameDetails({
                       )}
                     </div>
 
-                    <div className="space-y-1">
+                    {/* Preview Prompt Block */}
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                        Preview Prompt
+                      </h3>
                       <Textarea
                         readOnly
-                        value={
-                          promptView === 'saved' && game.aiPrompt
-                            ? game.aiPrompt
-                            : buildPromptPreview(game, {
-                                includeStoryline,
-                                includeGenres,
-                                includeThemes,
-                                imageStyle,
-                              })
-                        }
-                        className="rounded-none resize-none min-h-30 text-sm text-muted-foreground italic bg-muted/30 border-dashed"
+                        value={previewPrompt}
+                        rows={previewPromptRows}
+                        className="rounded-none resize-none w-full text-sm text-muted-foreground italic bg-muted/30 border-dashed h-32 lg:h-auto"
                       />
-                      {game.aiPrompt && (
-                        <div className="flex justify-end">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setPromptView(
-                                promptView === 'preview' ? 'saved' : 'preview',
-                              )
-                            }
-                            className="text-xs text-muted-foreground hover:text-muted-foreground underline-offset-2 hover:underline cursor-pointer"
-                          >
-                            {promptView === 'preview'
-                              ? 'View saved prompt'
-                              : 'View preview'}
-                          </button>
-                        </div>
-                      )}
                     </div>
 
                     <Button
@@ -786,10 +822,87 @@ export default function GameDetails({
                           generateImageMutation.isPending && 'animate-pulse',
                         )}
                       />
-                      {imageGenButtonText(game)}
+                      {imageGenButtonText()}
                     </Button>
                   </div>
                 </div>
+
+                {Array.isArray(game.imageGen) && game.imageGen.length > 0 && (
+                  <div className="mt-8 space-y-4">
+                    <div className="border-t pt-6">
+                      <h3 className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-4">
+                        Generation History ({game.imageGen.length} {game.imageGen.length === 1 ? 'image' : 'images'})
+                      </h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {game.imageGen.map((entry, index) => {
+                          if (!entry || typeof entry !== 'object') return null;
+                          const keys = Object.keys(entry);
+                          if (keys.length === 0) return null;
+                          const styleKey = keys[0];
+                          const data = entry[styleKey];
+                          if (!data || typeof data !== 'object') return null;
+
+                          const styleLabel =
+                            IMAGE_STYLES.find((s) => s.value === styleKey)
+                              ?.label ?? styleKey;
+                          return (
+                            <Dialog key={index}>
+                              <DialogTrigger
+                                nativeButton={false}
+                                render={
+                                  <div className="group relative aspect-square w-full cursor-pointer overflow-hidden border bg-muted/20 hover:border-primary/50 transition-colors" />
+                                }
+                              >
+                                <Image
+                                  src={data.url}
+                                  alt={`${game.name} - ${styleLabel}`}
+                                  fill
+                                  unoptimized
+                                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                  sizes="(max-width: 768px) 50vw, 200px"
+                                />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 text-white text-[10px]">
+                                  <p className="font-bold truncate">
+                                    {styleLabel}
+                                  </p>
+                                  <p className="opacity-70">
+                                    {data.provider}
+                                  </p>
+                                </div>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
+                                <DialogHeader className="sr-only">
+                                  <DialogTitle>
+                                    {game.name} - {styleLabel}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <div className="relative w-full h-[70vh]">
+                                  <Image
+                                    src={data.url}
+                                    alt={`${game.name} - ${styleLabel}`}
+                                    fill
+                                    unoptimized
+                                    className="object-contain"
+                                    sizes="(max-width: 896px) 100vw, 896px"
+                                  />
+                                </div>
+                                <div className="bg-card p-4 text-sm border-t">
+                                  <div className="flex justify-between font-bold text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                                    <span>Style: {styleLabel}</span>
+                                    <span>Provider: {data.provider}</span>
+                                  </div>
+                                  <p className="italic text-muted-foreground">
+                                    {data.prompt}
+                                  </p>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </div>

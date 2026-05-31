@@ -36,6 +36,7 @@ export default function GameListPlusImage(
     error,
     currentPixelSize,
     selectedArtworkUrl,
+    selectedAiImage,
     handleSelectGame,
     clearSelection,
     handleSubmit,
@@ -83,7 +84,7 @@ export default function GameListPlusImage(
             isGameOver={isGameOver}
             isLoading={isLoading}
             className="size-full"
-            sourceImageUrl={targetGame?.aiImageUrl}
+            sourceImageUrl={selectedAiImage?.url ?? targetGame?.aiImageUrl}
           />
         );
         break;

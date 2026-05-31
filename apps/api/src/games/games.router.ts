@@ -172,10 +172,31 @@ export class GamesRouter {
           ? r2PublicUrlRaw
           : `https://${r2PublicUrlRaw}`;
         const publicUrl = `${r2PublicUrl}/${key}`;
+        const list = Array.isArray(game.imageGen)
+          ? JSON.parse(JSON.stringify(game.imageGen))
+          : [];
+        const styleKey = imageStyle ?? DEFAULT_IMAGE_GEN_STYLE;
+        const newItem = {
+          [styleKey]: {
+            url: publicUrl,
+            prompt: prompt,
+            provider: 'cloudflare',
+          },
+        };
+        const existingIndex = list.findIndex(
+          (item: any) => item && typeof item === 'object' && styleKey in item,
+        );
+        if (existingIndex >= 0) {
+          list[existingIndex] = newItem;
+        } else {
+          list.push(newItem);
+        }
+        const updatedImageGen = list;
 
         const updatedGame = await this.gamesService.updateGame(game.id, {
           aiImageUrl: publicUrl,
           aiPrompt: prompt,
+          imageGen: updatedImageGen,
         });
 
         if (!updatedGame)

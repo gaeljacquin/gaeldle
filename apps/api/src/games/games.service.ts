@@ -590,20 +590,26 @@ export class GamesService {
 
         const publicUrl = `${r2PublicUrl}/${key}`;
 
-        const currentImageGen = game.imageGen || {};
-        const providerKey = 'cloudflare';
+        const list = Array.isArray(game.imageGen)
+          ? JSON.parse(JSON.stringify(game.imageGen))
+          : [];
         const styleKey = params.imageStyle;
-
-        const updatedImageGen = {
-          ...currentImageGen,
-          [providerKey]: {
-            ...(currentImageGen[providerKey] || {}),
-            [styleKey]: {
-              url: publicUrl,
-              prompt: prompt,
-            },
+        const newItem = {
+          [styleKey]: {
+            url: publicUrl,
+            prompt: prompt,
+            provider: 'cloudflare',
           },
         };
+        const existingIndex = list.findIndex(
+          (item: any) => item && typeof item === 'object' && styleKey in item,
+        );
+        if (existingIndex >= 0) {
+          list[existingIndex] = newItem;
+        } else {
+          list.push(newItem);
+        }
+        const updatedImageGen = list;
 
         await this.databaseService.db
           .update(games)

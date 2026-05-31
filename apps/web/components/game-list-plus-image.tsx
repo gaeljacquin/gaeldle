@@ -85,6 +85,7 @@ export default function GameListPlusImage(
             isLoading={isLoading}
             className="size-full"
             sourceImageUrl={selectedAiImage?.url ?? targetGame?.aiImageUrl}
+            objectFit="cover"
           />
         );
         break;

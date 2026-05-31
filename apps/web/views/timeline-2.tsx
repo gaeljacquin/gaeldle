@@ -139,8 +139,8 @@ export default function Timeline2() {
 
                   <Button
                     onClick={resetGame}
-                    size="lg"
-                    className="mt-8 cursor-pointer font-bold px-8"
+                    size="icon"
+                    className="mt-8 cursor-pointer font-bold px-12"
                   >
                     Play Again
                   </Button>

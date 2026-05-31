@@ -199,4 +199,20 @@
     background-color: var(--border);
     border-radius: 3px;
   }
+
+  .scrollbar-y {
+    -ms-overflow-style: auto;
+    scrollbar-width: thin;
+  }
+  .scrollbar-y::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+  }
+  .scrollbar-y::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-y::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 3px;
+  }
 }

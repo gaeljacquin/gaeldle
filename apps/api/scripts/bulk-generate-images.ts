@@ -233,12 +233,34 @@ async function main() {
         const publicUrl = `${r2PublicUrl}/${key}`;
         console.log(`Public URL: ${publicUrl}`);
 
+        const list = Array.isArray(game.imageGen)
+          ? JSON.parse(JSON.stringify(game.imageGen))
+          : [];
+        const styleKey = resolvedStyle.value;
+        const newItem = {
+          [styleKey]: {
+            url: publicUrl,
+            prompt: prompt,
+            provider: 'cloudflare',
+          },
+        };
+        const existingIndex = list.findIndex(
+          (item: any) => item && typeof item === 'object' && styleKey in item,
+        );
+        if (existingIndex >= 0) {
+          list[existingIndex] = newItem;
+        } else {
+          list.push(newItem);
+        }
+        const updatedImageGen = list;
+
         // Update database
         await db
           .update(schema.games)
           .set({
             aiImageUrl: publicUrl,
             aiPrompt: prompt,
+            imageGen: updatedImageGen,
             updatedAt: new Date(),
           })
           .where(eq(schema.games.id, game.id));

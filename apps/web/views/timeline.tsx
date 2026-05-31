@@ -366,8 +366,8 @@ export default function Timeline() {
 
                   <Button
                     onClick={resetGame}
-                    className="mt-8 cursor-pointer font-bold"
                     size="lg"
+                    className="mt-8 cursor-pointer font-bold px-12"
                   >
                     {isWinner ? 'Keep Playing' : 'Play Again'}
                   </Button>

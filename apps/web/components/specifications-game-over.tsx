@@ -58,8 +58,8 @@ export default function SpecificationsGameOver({
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
         <Button
           onClick={onPlayAgain}
-          className="cursor-pointer font-bold px-8"
           size="lg"
+          className="mt-8 cursor-pointer font-bold px-12"
         >
           {isCorrect ? 'Keep Playing' : 'Play Again'}
         </Button>

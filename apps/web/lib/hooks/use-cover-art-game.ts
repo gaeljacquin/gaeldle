@@ -22,6 +22,40 @@ function getRandomArtwork(artworks: unknown): string | null {
   return artwork.url || null;
 }
 
+function selectRandomAiImage(
+  target: Game | null,
+): { url: string; prompt: string } | null {
+  if (!target) return null;
+  const imageGen = target.imageGen;
+  if (Array.isArray(imageGen) && imageGen.length > 0) {
+    const randomIndex = Math.floor(Math.random() * imageGen.length);
+    const selectedObj = imageGen[randomIndex];
+    if (selectedObj && typeof selectedObj === 'object') {
+      const keys = Object.keys(selectedObj);
+      if (keys.length > 0) {
+        const styleKey = keys[0];
+        const data = selectedObj[styleKey] as
+          | { url?: string; prompt?: string; provider?: string }
+          | null
+          | undefined;
+        if (data && typeof data === 'object' && data.url && data.prompt) {
+          return {
+            url: data.url,
+            prompt: data.prompt,
+          };
+        }
+      }
+    }
+  }
+  if (target.aiImageUrl) {
+    return {
+      url: target.aiImageUrl,
+      prompt: target.aiPrompt ?? '',
+    };
+  }
+  return null;
+}
+
 export function useCoverArtGame(mode: CoverArtModeSlug) {
   const [targetGame, setTargetGame] = useState<Game | null>(null);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
@@ -31,6 +65,10 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   const [isCorrect, setIsCorrect] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedAiImage, setSelectedAiImage] = useState<{
+    url: string;
+    prompt: string;
+  } | null>(null);
 
   useEffect(() => {
     async function loadTarget() {
@@ -38,6 +76,9 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
         setIsLoading(true);
         const target = await getRandomGame([], mode);
         setTargetGame(target);
+        if (mode === 'image-gen') {
+          setSelectedAiImage(selectRandomAiImage(target));
+        }
       } catch (err) {
         setError(getFriendlyErrorMessage(err, 'Failed to load game'));
       } finally {
@@ -113,6 +154,9 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
       setSelectedGame(null);
       const target = await getRandomGame([], mode);
       setTargetGame(target);
+      if (mode === 'image-gen') {
+        setSelectedAiImage(selectRandomAiImage(target));
+      }
     } catch (err) {
       setError(getFriendlyErrorMessage(err, 'Failed to reset game'));
     } finally {
@@ -139,6 +183,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     error,
     currentPixelSize,
     selectedArtworkUrl,
+    selectedAiImage,
     handleSelectGame,
     clearSelection,
     handleSubmit,

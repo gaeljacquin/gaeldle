@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { and, notInArray, sql, type SQL } from 'drizzle-orm';
+import {
+  and,
+  // eq,
+  notInArray,
+  sql,
+  type SQL,
+} from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { games, gameObject, type GameModeSlug } from '@workspace/api-contract';
 
@@ -33,10 +39,16 @@ export async function GET(request: NextRequest) {
     } else if (mode === 'cover-art') {
       conditions.push(sql`image_url IS NOT NULL`);
     } else if (mode === 'image-gen') {
-      conditions.push(sql`ai_image_url IS NOT NULL`);
+      conditions.push(
+        sql`image_gen IS NOT NULL`,
+        sql`json_array_length(image_gen) > 0`,
+      );
     } else if (mode === 'timeline' || mode === 'timeline-2') {
       conditions.push(sql`first_release_date IS NOT NULL`);
     }
+
+    // Uncomment the line below to hardcode a specific game for testing (e.g. The Legend of Zelda: Tears of the Kingdom, IGDB ID 119388)
+    // conditions.push(eq(games.igdbId, 119388));
 
     const gamesList = await db
       .select(gameObject)

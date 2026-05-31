@@ -15,6 +15,7 @@ interface CoverDisplayProps {
   isLoading?: boolean;
   className?: string;
   sourceImageUrl?: string | null;
+  objectFit?: 'contain' | 'cover';
 }
 
 export default function CoverDisplay({
@@ -25,6 +26,7 @@ export default function CoverDisplay({
   isLoading = false,
   className,
   sourceImageUrl,
+  objectFit = 'contain',
 }: Readonly<CoverDisplayProps>) {
   const [pixelatedData, setPixelatedData] = useState<{
     url: string;
@@ -107,7 +109,9 @@ export default function CoverDisplay({
         <Image
           src={displayUrl}
           alt={isGameOver ? game.name : 'Game cover'}
-          className="object-contain"
+          className={cn(
+            objectFit === 'cover' ? 'object-cover' : 'object-contain',
+          )}
           fill
           unoptimized
           sizes="(max-width: 1024px) min(100vw, 480px), 50vw"

@@ -29,7 +29,10 @@ export async function GET(request: NextRequest) {
     } else if (mode === 'cover-art') {
       whereClause.push(sql`image_url IS NOT NULL`);
     } else if (mode === 'image-gen') {
-      whereClause.push(sql`ai_image_url IS NOT NULL`);
+      whereClause.push(
+        sql`image_gen IS NOT NULL`,
+        sql`json_array_length(image_gen) > 0`,
+      );
     } else if (mode === 'timeline' || mode === 'timeline-2') {
       whereClause.push(sql`first_release_date IS NOT NULL`);
     }

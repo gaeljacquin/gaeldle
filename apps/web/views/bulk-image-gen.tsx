@@ -310,25 +310,27 @@ export default function BulkImageGen() {
                     Image style
                   </Label>
                   <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <Button
-                        id="image-style-trigger"
-                        variant="outline"
-                        className="w-80 justify-between font-normal"
-                      >
-                        <span className="truncate">
-                          {
-                            IMAGE_STYLES.find((s) => s.value === imageStyle)
-                              ?.label
-                          }
-                        </span>
-                        <IconChevronDown
-                          size={16}
-                          className="ml-2 shrink-0 text-muted-foreground"
-                          aria-hidden="true"
-                        />
-                      </Button>
-                    </DropdownMenuTrigger>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          id="image-style-trigger"
+                          variant="outline"
+                          className="w-80 justify-between font-normal"
+                        >
+                          <span className="truncate">
+                            {
+                              IMAGE_STYLES.find((s) => s.value === imageStyle)
+                                ?.label
+                            }
+                          </span>
+                          <IconChevronDown
+                            size={16}
+                            className="ml-2 shrink-0 text-muted-foreground"
+                            aria-hidden="true"
+                          />
+                        </Button>
+                      }
+                    />
                     <DropdownMenuContent className="w-80 p-1">
                       <DropdownMenuRadioGroup
                         value={imageStyle}

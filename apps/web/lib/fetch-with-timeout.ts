@@ -2,7 +2,7 @@ export async function fetchWithTimeout(
   input: string | URL | Request,
   init?: RequestInit & { timeout?: number },
 ): Promise<Response> {
-  const { timeout = 10000, ...options } = init ?? {};
+  const { timeout = 60000, ...options } = init ?? {};
 
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);

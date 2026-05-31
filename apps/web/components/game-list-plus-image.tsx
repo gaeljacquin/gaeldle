@@ -36,6 +36,7 @@ export default function GameListPlusImage(
     error,
     currentPixelSize,
     selectedArtworkUrl,
+    selectedAiImage,
     handleSelectGame,
     clearSelection,
     handleSubmit,
@@ -83,7 +84,8 @@ export default function GameListPlusImage(
             isGameOver={isGameOver}
             isLoading={isLoading}
             className="size-full"
-            sourceImageUrl={targetGame?.aiImageUrl}
+            sourceImageUrl={selectedAiImage?.url ?? targetGame?.aiImageUrl}
+            objectFit="cover"
           />
         );
         break;
@@ -222,8 +224,8 @@ export default function GameListPlusImage(
                   )}
                   <Button
                     onClick={resetGame}
-                    className="mt-6 cursor-pointer font-bold"
                     size="lg"
+                    className="mt-8 cursor-pointer font-bold px-12"
                   >
                     {isCorrect ? 'Keep Playing' : 'Play Again'}
                   </Button>

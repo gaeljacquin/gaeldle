@@ -55,7 +55,6 @@ import {
 import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/tabs';
 import { Badge } from '@/components/badge';
 
@@ -197,6 +196,7 @@ export default function GameDetails({
   }, [game, imageStyle]);
 
   const savedPrompt = generatedImage?.prompt;
+  const provider = generatedImage?.provider ?? 'N/A';
 
   const savedPromptRows = useMemo(() => {
     if (!savedPrompt) return 4;
@@ -305,14 +305,16 @@ export default function GameDetails({
                 <DialogTrigger
                   nativeButton={false}
                   render={
-                    <Card className="overflow-hidden border-2 rounded-none shadow-xl cursor-pointer group hover:border-primary/50 transition-colors" />
+                    <Card className="overflow-hidden border-2 rounded-none shadow-xl cursor-pointer group hover:border-primary/50 transition-colors p-0" />
                   }
                 >
                   <div className="relative aspect-3/4 w-full">
                     {game.imageUrl ? (
                       <>
                         <Image
-                          src={game.imageUrl.replace('t_720p', 't_1080p')}
+                          src={game.imageUrl
+                            .replace('t_720p', 't_1080p')
+                            .replace('.jpg', '.png')}
                           alt={game.name}
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -334,16 +336,18 @@ export default function GameDetails({
                   </div>
                 </DialogTrigger>
                 {game.imageUrl && (
-                  <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
+                  <DialogContent className="fixed! inset-0! m-auto! translate-x-0! translate-y-0! max-w-md w-full aspect-3/4 p-0 overflow-hidden bg-transparent border-none ring-0">
                     <DialogHeader className="sr-only">
                       <DialogTitle>{game.name} Cover Art</DialogTitle>
                     </DialogHeader>
-                    <div className="relative w-full h-[85vh]">
+                    <div className="relative w-full h-full">
                       <Image
-                        src={game.imageUrl.replace('t_720p', 't_original')}
+                        src={game.imageUrl
+                          .replace('t_720p', 't_original')
+                          .replace('.jpg', '.png')}
                         alt={game.name}
                         fill
-                        className="object-contain"
+                        className="object-cover"
                       />
                     </div>
                   </DialogContent>
@@ -539,12 +543,14 @@ export default function GameDetails({
                           <DialogTrigger
                             nativeButton={false}
                             render={
-                              <Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors" />
+                              <Card className="overflow-hidden border-2 rounded-none bg-muted/20 group cursor-pointer hover:border-primary/50 transition-colors p-0" />
                             }
                           >
                             <div className="relative aspect-video w-full">
                               <Image
-                                src={art.url.replace('t_720p', 't_1080p')}
+                                src={art.url
+                                  .replace('t_720p', 't_1080p')
+                                  .replace('.jpg', '.png')}
                                 alt={`${game.name} artwork ${index + 1}`}
                                 fill
                                 className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -558,23 +564,90 @@ export default function GameDetails({
                               </div>
                             </div>
                           </DialogTrigger>
-                          <DialogContent className="max-w-6xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-6xl">
+                          <DialogContent className="fixed! inset-0! m-auto! translate-x-0! translate-y-0! max-w-4xl w-full aspect-video p-0 overflow-hidden bg-transparent border-none ring-0">
                             <DialogHeader className="sr-only">
                               <DialogTitle>
                                 {game.name} Artwork {index + 1}
                               </DialogTitle>
                             </DialogHeader>
-                            <div className="relative w-full h-[85vh]">
+                            <div className="relative w-full h-full">
                               <Image
-                                src={art.url.replace('t_720p', 't_original')}
+                                src={art.url
+                                  .replace('t_720p', 't_original')
+                                  .replace('.jpg', '.png')}
                                 alt={`${game.name} artwork ${index + 1}`}
                                 fill
-                                className="object-contain"
+                                className="object-cover"
                               />
                             </div>
                           </DialogContent>
                         </Dialog>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {Array.isArray(game.imageGen) && game.imageGen.length > 0 && (
+                  <div className="space-y-6">
+                    <h2 className="text-md font-black uppercase tracking-widest border-l-4 border-primary pl-4 flex items-center gap-2">
+                      <IconBrush aria-hidden="true" size={20} />
+                      Image Gen History ({game.imageGen.length})
+                    </h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {game.imageGen.map((entry, index) => {
+                        if (!entry || typeof entry !== 'object') return null;
+                        const keys = Object.keys(entry);
+                        if (keys.length === 0) return null;
+                        const styleKey = keys[0];
+                        const data = entry[styleKey];
+                        if (!data || typeof data !== 'object') return null;
+
+                        const styleLabel =
+                          IMAGE_STYLES.find((s) => s.value === styleKey)
+                            ?.label ?? styleKey;
+                        return (
+                          <Dialog key={index}>
+                            <DialogTrigger
+                              nativeButton={false}
+                              render={
+                                <div className="group relative aspect-square w-full cursor-pointer overflow-hidden border bg-muted/20 hover:border-primary/50 transition-colors" />
+                              }
+                            >
+                              <Image
+                                src={data.url}
+                                alt={`${game.name} - ${styleLabel}`}
+                                fill
+                                unoptimized
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                sizes="(max-width: 768px) 50vw, 200px"
+                              />
+                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 text-white text-[10px]">
+                                <p className="font-bold truncate">
+                                  {styleLabel}
+                                </p>
+                                <p className="opacity-70">{data.provider}</p>
+                              </div>
+                            </DialogTrigger>
+                            <DialogContent className="fixed! inset-0! m-auto! translate-x-0! translate-y-0! max-w-2xl w-full aspect-square p-0 overflow-hidden bg-transparent border-none ring-0">
+                              <DialogHeader className="sr-only">
+                                <DialogTitle>
+                                  {game.name} - {styleLabel}
+                                </DialogTitle>
+                              </DialogHeader>
+                              <div className="relative w-full h-full">
+                                <Image
+                                  src={data.url}
+                                  alt={`${game.name} - ${styleLabel}`}
+                                  fill
+                                  unoptimized
+                                  className="object-cover"
+                                  sizes="(max-width: 896px) 100vw, 896px"
+                                />
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -585,13 +658,12 @@ export default function GameDetails({
                   <div className="w-full md:w-64 shrink-0 flex flex-col gap-4">
                     {generatedImage ? (
                       <Dialog>
-                        <DialogTrigger
-                          className="relative aspect-square w-full overflow-hidden border-2 border-solid border-muted-foreground/30 bg-muted/5 group cursor-pointer hover:border-primary/50 transition-colors p-0 m-0 bg-transparent block"
-                        >
+                        <DialogTrigger className="relative aspect-square w-full overflow-hidden border-2 border-solid border-muted-foreground/30 group cursor-pointer hover:border-primary/50 transition-colors p-0 m-0 bg-transparent block">
                           <Image
                             src={generatedImage.url}
                             alt={`${game.name} AI Image - ${
-                              IMAGE_STYLES.find((s) => s.value === imageStyle)?.label ?? imageStyle
+                              IMAGE_STYLES.find((s) => s.value === imageStyle)
+                                ?.label ?? imageStyle
                             }`}
                             fill
                             unoptimized
@@ -605,23 +677,24 @@ export default function GameDetails({
                             />
                           </div>
                         </DialogTrigger>
-                        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
+                        <DialogContent className="fixed! inset-0! m-auto! translate-x-0! translate-y-0! max-w-2xl w-full aspect-square p-0 overflow-hidden bg-transparent border-none ring-0">
                           <DialogHeader className="sr-only">
                             <DialogTitle>
-                              {game.name} AI Image - {
-                                IMAGE_STYLES.find((s) => s.value === imageStyle)?.label ?? imageStyle
-                              }
+                              {game.name} AI Image -{' '}
+                              {IMAGE_STYLES.find((s) => s.value === imageStyle)
+                                ?.label ?? imageStyle}
                             </DialogTitle>
                           </DialogHeader>
-                          <div className="relative w-full h-[85vh]">
+                          <div className="relative w-full h-full">
                             <Image
                               src={generatedImage.url}
                               alt={`${game.name} AI Image - ${
-                                IMAGE_STYLES.find((s) => s.value === imageStyle)?.label ?? imageStyle
+                                IMAGE_STYLES.find((s) => s.value === imageStyle)
+                                  ?.label ?? imageStyle
                               }`}
                               fill
                               unoptimized
-                              className="object-contain"
+                              className="object-cover"
                               sizes="(max-width: 896px) 100vw, 896px"
                             />
                           </div>
@@ -654,6 +727,10 @@ export default function GameDetails({
                           </span>
                         </div>
                       )}
+                      <span className="text-sm">
+                        <span className="font-bold">Provider:</span>{' '}
+                        <span className="capitalize">{provider}</span>
+                      </span>
                     </div>
                   </div>
                   <div className="flex-1 space-y-4">
@@ -664,28 +741,39 @@ export default function GameDetails({
                       <div className="border border-border bg-card/50 overflow-y-scroll scrollbar-y max-h-60 rounded-none divide-y divide-border">
                         {IMAGE_STYLES.map((style) => {
                           const isSelected = style.value === imageStyle;
-                          const hasImage = Array.isArray(game?.imageGen) && game.imageGen.some(
-                            (item) => item && typeof item === 'object' && style.value in item
-                          );
+                          const hasImage =
+                            Array.isArray(game?.imageGen) &&
+                            game.imageGen.some(
+                              (item) =>
+                                item &&
+                                typeof item === 'object' &&
+                                style.value in item,
+                            );
                           return (
                             <button
                               key={style.value}
                               type="button"
-                              onClick={() => setImageStyle(style.value as ImageStyle)}
+                              onClick={() =>
+                                setImageStyle(style.value as ImageStyle)
+                              }
                               disabled={generateImageMutation.isPending}
                               className={cn(
-                                "w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between",
+                                'w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between',
                                 isSelected
-                                  ? "bg-primary text-primary-foreground font-semibold"
-                                  : "hover:bg-muted text-foreground"
+                                  ? 'bg-primary text-primary-foreground font-semibold'
+                                  : 'hover:bg-muted text-foreground',
                               )}
                             >
                               <span>{style.label}</span>
                               {hasImage && (
-                                <span className={cn(
-                                  "text-[10px] px-1.5 py-0.5 font-bold uppercase tracking-wider",
-                                  isSelected ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted-foreground/10 text-muted-foreground"
-                                )}>
+                                <span
+                                  className={cn(
+                                    'text-[10px] px-1.5 py-0.5 font-bold uppercase tracking-wider',
+                                    isSelected
+                                      ? 'bg-primary-foreground/20 text-primary-foreground'
+                                      : 'bg-muted-foreground/10 text-muted-foreground',
+                                  )}
+                                >
                                   generated
                                 </span>
                               )}
@@ -826,83 +914,6 @@ export default function GameDetails({
                     </Button>
                   </div>
                 </div>
-
-                {Array.isArray(game.imageGen) && game.imageGen.length > 0 && (
-                  <div className="mt-8 space-y-4">
-                    <div className="border-t pt-6">
-                      <h3 className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-4">
-                        Generation History ({game.imageGen.length} {game.imageGen.length === 1 ? 'image' : 'images'})
-                      </h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                        {game.imageGen.map((entry, index) => {
-                          if (!entry || typeof entry !== 'object') return null;
-                          const keys = Object.keys(entry);
-                          if (keys.length === 0) return null;
-                          const styleKey = keys[0];
-                          const data = entry[styleKey];
-                          if (!data || typeof data !== 'object') return null;
-
-                          const styleLabel =
-                            IMAGE_STYLES.find((s) => s.value === styleKey)
-                              ?.label ?? styleKey;
-                          return (
-                            <Dialog key={index}>
-                              <DialogTrigger
-                                nativeButton={false}
-                                render={
-                                  <div className="group relative aspect-square w-full cursor-pointer overflow-hidden border bg-muted/20 hover:border-primary/50 transition-colors" />
-                                }
-                              >
-                                <Image
-                                  src={data.url}
-                                  alt={`${game.name} - ${styleLabel}`}
-                                  fill
-                                  unoptimized
-                                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                  sizes="(max-width: 768px) 50vw, 200px"
-                                />
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 text-white text-[10px]">
-                                  <p className="font-bold truncate">
-                                    {styleLabel}
-                                  </p>
-                                  <p className="opacity-70">
-                                    {data.provider}
-                                  </p>
-                                </div>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none ring-0 sm:max-w-4xl">
-                                <DialogHeader className="sr-only">
-                                  <DialogTitle>
-                                    {game.name} - {styleLabel}
-                                  </DialogTitle>
-                                </DialogHeader>
-                                <div className="relative w-full h-[70vh]">
-                                  <Image
-                                    src={data.url}
-                                    alt={`${game.name} - ${styleLabel}`}
-                                    fill
-                                    unoptimized
-                                    className="object-contain"
-                                    sizes="(max-width: 896px) 100vw, 896px"
-                                  />
-                                </div>
-                                <div className="bg-card p-4 text-sm border-t">
-                                  <div className="flex justify-between font-bold text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                                    <span>Style: {styleLabel}</span>
-                                    <span>Provider: {data.provider}</span>
-                                  </div>
-                                  <p className="italic text-muted-foreground">
-                                    {data.prompt}
-                                  </p>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </TabsContent>
             </Tabs>
           </div>

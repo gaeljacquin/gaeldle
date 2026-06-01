@@ -25,7 +25,7 @@ const configuration = (): AppConfiguration => {
     'development'
   ).toLowerCase();
 
-  const portRaw = process.env.PORT ?? process.env.SERVER_PORT ?? '8080';
+  const portRaw = process.env.PORT ?? process.env.SERVER_PORT ?? '3000';
   const port = Number.parseInt(portRaw, 10) || 8080;
 
   const clientPortRaw = process.env.CLIENT_PORT ?? '3000';

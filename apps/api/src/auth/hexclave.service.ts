@@ -1,14 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-type StackSignInResult = {
+type HexclaveSignInResult = {
   accessToken: string;
   refreshToken: string | null;
   userId: string | null;
   expiresAtMillis: number | null;
 };
 
-const STACK_API_BASE_URL = 'https://api.stack-auth.com';
+const HEXCLAVE_API_BASE_URL =
+  process.env.HEXCLAVE_API_URL || 'https://api.hexclave.com';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
@@ -20,42 +21,43 @@ const getNumber = (value: unknown): number | null =>
   typeof value === 'number' ? value : null;
 
 @Injectable()
-export class StackAuthService {
-  private readonly stackProjectId: string;
-  private readonly stackPublishableClientKey: string;
-  private readonly stackSecretServerKey: string;
+export class HexclaveService {
+  private readonly hexclaveProjectId: string;
+  private readonly hexclavePublishableClientKey: string;
+  private readonly hexclaveSecretServerKey: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.stackProjectId =
-      this.configService.get<string>('stackProjectId') ?? '';
-    this.stackPublishableClientKey =
-      this.configService.get<string>('stackPublishableClientKey') ?? '';
-    this.stackSecretServerKey =
-      this.configService.get<string>('stackSecretServerKey') ?? '';
+    this.hexclaveProjectId =
+      this.configService.get<string>('hexclaveProjectId') ?? '';
+    this.hexclavePublishableClientKey =
+      this.configService.get<string>('hexclavePublishableClientKey') ?? '';
+    this.hexclaveSecretServerKey =
+      this.configService.get<string>('hexclaveSecretServerKey') ?? '';
   }
 
   async signInWithPassword(
     email: string,
     password: string,
-  ): Promise<StackSignInResult> {
+  ): Promise<HexclaveSignInResult> {
     if (
-      !this.stackProjectId ||
-      !this.stackPublishableClientKey ||
-      !this.stackSecretServerKey
+      !this.hexclaveProjectId ||
+      !this.hexclavePublishableClientKey ||
+      !this.hexclaveSecretServerKey
     ) {
-      throw new UnauthorizedException('Stack Auth is not configured');
+      throw new UnauthorizedException('Hexclave is not configured');
     }
 
     const response = await fetch(
-      `${STACK_API_BASE_URL}/api/v1/auth/password/sign-in`,
+      `${HEXCLAVE_API_BASE_URL}/api/v1/auth/password/sign-in`,
       {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          'x-stack-access-type': 'server',
-          'x-stack-project-id': this.stackProjectId,
-          'x-stack-publishable-client-key': this.stackPublishableClientKey,
-          'x-stack-secret-server-key': this.stackSecretServerKey,
+          'x-hexclave-access-type': 'server',
+          'x-hexclave-project-id': this.hexclaveProjectId,
+          'x-hexclave-publishable-client-key':
+            this.hexclavePublishableClientKey,
+          'x-hexclave-secret-server-key': this.hexclaveSecretServerKey,
         },
         body: JSON.stringify({
           email,
@@ -66,7 +68,7 @@ export class StackAuthService {
 
     const raw = (await response.json().catch(() => null)) as unknown;
     if (!response.ok || !isRecord(raw)) {
-      throw new UnauthorizedException('Invalid Stack Auth credentials');
+      throw new UnauthorizedException('Invalid Hexclave credentials');
     }
 
     const accessToken =
@@ -79,7 +81,7 @@ export class StackAuthService {
       getNumber(raw.accessTokenExpiresAtMillis);
 
     if (!accessToken) {
-      throw new UnauthorizedException('Invalid Stack Auth response');
+      throw new UnauthorizedException('Invalid Hexclave response');
     }
 
     return {

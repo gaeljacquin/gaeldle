@@ -1,4 +1,4 @@
-import { stackServerApp } from '@/stack/server';
+import { hexclaveServerApp } from '@/hexclave/server';
 import { Sidebar } from '@/components/sidebar';
 import { ReactNode } from 'react';
 
@@ -7,7 +7,7 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  await stackServerApp.getUser({ or: 'redirect' });
+  await hexclaveServerApp.getUser({ or: 'redirect' });
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">

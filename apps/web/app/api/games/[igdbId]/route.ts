@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { games, gameObject } from '@workspace/api-contract';
-import { stackServerApp } from '@/stack/server';
+import { hexclaveServerApp } from '@/hexclave/server';
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ igdbId: string }> },
 ) {
-  const user = await stackServerApp.getUser({ or: 'return-null' });
+  const user = await hexclaveServerApp.getUser({ or: 'return-null' });
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -5,20 +5,20 @@ import {
   HttpCode,
   Post,
 } from '@nestjs/common';
-import { StackAuthService } from '@/auth/stack-auth.service';
+import { HexclaveService } from '@/auth/hexclave.service';
 
-type StackSignInBody = {
+type HexclaveSignInBody = {
   email?: string;
   password?: string;
 };
 
 @Controller('api/auth')
-export class StackAuthController {
-  constructor(private readonly stackAuthService: StackAuthService) {}
+export class HexclaveAuthController {
+  constructor(private readonly stackAuthService: HexclaveService) {}
 
-  @Post('stack')
+  @Post('hexclave')
   @HttpCode(200)
-  async signInWithPassword(@Body() body: StackSignInBody) {
+  async signInWithPassword(@Body() body: HexclaveSignInBody) {
     const email = body?.email?.trim();
     const password = body?.password;
 
@@ -39,7 +39,7 @@ export class StackAuthController {
       data: {
         ...result,
         tokenType: 'Bearer',
-        headerName: 'x-stack-access-token',
+        headerName: 'x-hexclave-access-token',
       },
     };
   }

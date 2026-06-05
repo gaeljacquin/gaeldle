@@ -5,7 +5,7 @@ import { contract, type ImageStyle } from '@workspace/api-contract';
 import { GamesService } from '@/games/games.service';
 import { S3Service } from '@/lib/s3.service';
 import { AiService } from '@/lib/ai.service';
-import { StackAuthGuard } from '@/auth/stack-auth.guard';
+import { HexclaveGuard } from '@/auth/hexclave.guard';
 import {
   DEFAULT_IMAGE_GEN_STYLE,
   IMAGE_GEN_DIR,
@@ -25,7 +25,7 @@ export class GamesRouter {
   ) {}
 
   @Implement(contract.games.sync)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   sync() {
     return implement(contract.games.sync).handler(async ({ input }) => {
       const result = await this.gamesService.syncGameByIgdbId(input.igdb_id);
@@ -44,7 +44,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.update)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   update() {
     return implement(contract.games.update).handler(async ({ input }) => {
       const { id, updates } = input;
@@ -62,7 +62,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.deleteBulk)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   deleteBulk() {
     return implement(contract.games.deleteBulk).handler(async ({ input }) => {
       const deletedIds = await this.gamesService.deleteGames(input);
@@ -76,7 +76,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.delete)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   delete() {
     return implement(contract.games.delete).handler(async ({ input }) => {
       const deletedId = await this.gamesService.deleteGame(input.id);
@@ -125,7 +125,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.generateImage)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   generateImage() {
     return implement(contract.games.generateImage).handler(
       async ({
@@ -208,7 +208,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.bulkGenerateImages)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   bulkGenerateImages() {
     return implement(contract.games.bulkGenerateImages).handler(
       async ({ input }) => {
@@ -220,7 +220,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.getBulkJobStatus)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   getBulkJobStatus() {
     return implement(contract.games.getBulkJobStatus).handler(
       async ({ input }) => {
@@ -231,7 +231,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.validateReplaceGame)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   validateReplaceGame() {
     return implement(contract.games.validateReplaceGame).handler(
       async ({ input }) => {
@@ -244,7 +244,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.replaceGames)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   replaceGames() {
     return implement(contract.games.replaceGames).handler(async ({ input }) => {
       return this.gamesService.replaceGameByIgdbId(input);
@@ -252,7 +252,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.validateIgdbIdAdd)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   validateIgdbIdAdd() {
     return implement(contract.games.validateIgdbIdAdd).handler(({ input }) =>
       this.gamesService.validateGameForAdd(input.igdbId),

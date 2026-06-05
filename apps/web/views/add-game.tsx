@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { useUser } from '@stackframe/stack';
+import { useUser } from '@hexclave/next';
 import { addGame } from '@/lib/services/game.service';
 import { IgdbIdAddRow } from '@/components/igdb-id-add-row';
 import type { IgdbIdAddValidationState } from '@/lib/hooks/use-igdb-id-add-validation';

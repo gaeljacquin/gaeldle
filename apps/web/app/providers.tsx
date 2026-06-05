@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { StackProvider, StackTheme } from '@stackframe/stack';
+import { StackProvider, StackTheme } from '@hexclave/next';
 import { stackClientApp } from '@/stack/client';
 import { Toaster } from 'sonner';
 import type { ReactNode } from 'react';

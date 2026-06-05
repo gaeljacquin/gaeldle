@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { UserButton, useUser } from '@stackframe/stack';
+import { UserButton, useUser } from '@hexclave/next';
 import {
   IconDashboard,
   IconDeviceGamepad2,

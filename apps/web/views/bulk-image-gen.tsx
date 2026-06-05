@@ -2,7 +2,7 @@
 
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useUser } from '@stackframe/stack';
+import { useUser } from '@hexclave/next';
 import {
   DEFAULT_IMAGE_GEN_NUM,
   DEFAULT_IMAGE_GEN_STYLE,

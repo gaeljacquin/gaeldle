@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { StackServerApp } from '@stackframe/stack';
+import { StackServerApp } from '@hexclave/next';
 import { stackClientApp } from '@/stack/client';
 
 export const stackServerApp = new StackServerApp({

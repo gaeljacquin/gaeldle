@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useUser } from '@stackframe/stack';
+import { useUser } from '@hexclave/next';
 import { replaceGameByIdgbId } from '@/lib/services/game.service';
 import {
   useReplaceGameValidation,

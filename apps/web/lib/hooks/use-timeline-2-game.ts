@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRandomGame } from '@/lib/services/game.service';
 import type { Game } from '@workspace/api-contract';
-
-const MAX_ATTEMPTS = 7;
+import { TIMELINE_2_MAX_ATTEMPTS } from '@workspace/constants';
 
 export function useTimeline2Game() {
   const [timelineCards, setTimelineCards] = useState<Game[]>([]);
   const [dealtCard, setDealtCard] = useState<Game | null>(null);
-  const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
+  const [attemptsLeft, setAttemptsLeft] = useState(TIMELINE_2_MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -176,7 +175,7 @@ export function useTimeline2Game() {
   const resetGame = useCallback(() => {
     setTimelineCards([]);
     setDealtCard(null);
-    setAttemptsLeft(MAX_ATTEMPTS);
+    setAttemptsLeft(TIMELINE_2_MAX_ATTEMPTS);
     setIsGameOver(false);
     setScore(0);
     setLastPlacementCorrect(null);
@@ -190,7 +189,7 @@ export function useTimeline2Game() {
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft((prev) => {
       const newValue = prev + delta;
-      if (newValue < 1 || newValue > MAX_ATTEMPTS) return prev;
+      if (newValue < 1 || newValue > TIMELINE_2_MAX_ATTEMPTS) return prev;
       return newValue;
     });
   }, []);
@@ -199,7 +198,7 @@ export function useTimeline2Game() {
     timelineCards,
     dealtCard,
     attemptsLeft,
-    maxAttempts: MAX_ATTEMPTS,
+    maxAttempts: TIMELINE_2_MAX_ATTEMPTS,
     isGameOver,
     score,
     isLoading,

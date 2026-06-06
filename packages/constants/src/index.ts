@@ -82,3 +82,9 @@ export const DISCOVER_GAMES_MAX = 50;
 export const DISCOVER_GAMES_DEFAULT = 10;
 
 export const GAME_SEARCH_MIN_CHARS = 3;
+
+export const TIMELINE_MAX_ATTEMPTS = 3;
+
+export const TIMELINE_GAMES_COUNT = 10;
+
+export const TIMELINE_2_MAX_ATTEMPTS = 7;

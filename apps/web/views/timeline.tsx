@@ -1,6 +1,6 @@
 'use client';
 
-import { MAX_ATTEMPTS, useTimelineGame } from '@/lib/hooks/use-timeline-game';
+import { useTimelineGame } from '@/lib/hooks/use-timeline-game';
 import { TimelineCard } from '@/components/timeline-card';
 import { Button } from '@workspace/ui/button';
 import { Card, CardContent } from '@workspace/ui/card';
@@ -32,7 +32,11 @@ import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';
 import TimelineDevToggle from '@/components/timeline-dev-toggle';
 import { cn } from '@workspace/ui/lib/utils';
-import Stuck from '@/components/stuck';
+import { TimelineCardSkeleton } from '@/components/timeline-card-skeleton';
+import {
+  TIMELINE_GAMES_COUNT,
+  TIMELINE_MAX_ATTEMPTS,
+} from '@workspace/constants';
 
 const noOpStrategy: SortingStrategy = () => {
   return null;
@@ -158,10 +162,6 @@ export default function Timeline() {
     setActiveId(null);
   }
 
-  if (isLoading) {
-    return <Stuck stuckState="loading" />;
-  }
-
   if (error) {
     return (
       <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
@@ -217,39 +217,43 @@ export default function Timeline() {
                     }
                   >
                     <div className="flex gap-6 min-w-max px-2 mx-auto">
-                      {userOrder.map((game, index) => {
-                        let isCorrect: boolean | undefined = undefined;
-                        let showDate = false;
-                        let isLocked = false;
+                      {userOrder.length === 0 && isLoading
+                        ? Array.from({ length: TIMELINE_GAMES_COUNT }).map(
+                            (_, i) => <TimelineCardSkeleton key={i} />,
+                          )
+                        : userOrder.map((game, index) => {
+                            let isCorrect: boolean | undefined = undefined;
+                            let showDate = false;
+                            let isLocked = false;
 
-                        if (hasSubmitted) {
-                          const wasCorrect = correctGameIds.has(game.id);
-                          const isInCorrectPosition =
-                            correctPositionMap.get(index) === game.id;
+                            if (hasSubmitted) {
+                              const wasCorrect = correctGameIds.has(game.id);
+                              const isInCorrectPosition =
+                                correctPositionMap.get(index) === game.id;
 
-                          if (wasCorrect && isInCorrectPosition) {
-                            isCorrect = true;
-                            showDate = true;
-                            isLocked = true;
-                          } else if (wasCorrect && !isInCorrectPosition) {
-                            isCorrect = undefined;
-                            showDate = true;
-                          } else {
-                            isCorrect = false;
-                          }
-                        }
+                              if (wasCorrect && isInCorrectPosition) {
+                                isCorrect = true;
+                                showDate = true;
+                                isLocked = true;
+                              } else if (wasCorrect && !isInCorrectPosition) {
+                                isCorrect = undefined;
+                                showDate = true;
+                              } else {
+                                isCorrect = false;
+                              }
+                            }
 
-                        return (
-                          <SortableCard
-                            key={game.id}
-                            game={game}
-                            isCorrect={isCorrect}
-                            showDate={showDate}
-                            disabled={isLocked || isGameOver}
-                            isGameOver={isGameOver}
-                          />
-                        );
-                      })}
+                            return (
+                              <SortableCard
+                                key={game.id}
+                                game={game}
+                                isCorrect={isCorrect}
+                                showDate={showDate}
+                                disabled={isLocked || isGameOver}
+                                isGameOver={isGameOver}
+                              />
+                            );
+                          })}
                     </div>
                   </SortableContext>
 
@@ -297,7 +301,7 @@ export default function Timeline() {
                     Attempts
                   </p>
                   <Attempts
-                    maxAttempts={MAX_ATTEMPTS}
+                    maxAttempts={TIMELINE_MAX_ATTEMPTS}
                     attemptsLeft={attemptsLeft}
                     variant="primary"
                   />
@@ -381,7 +385,7 @@ export default function Timeline() {
           <TimelineDevToggle
             getCorrectOrder={getCorrectOrder}
             attemptsLeft={attemptsLeft}
-            maxAttempts={MAX_ATTEMPTS}
+            maxAttempts={TIMELINE_MAX_ATTEMPTS}
             onAdjustAttempts={adjustAttempts}
           />
         </div>

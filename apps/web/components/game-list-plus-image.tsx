@@ -13,7 +13,6 @@ import { getGameModeBySlug } from '@/lib/game-mode';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
 import type { CoverArtModeSlug } from '@workspace/api-contract';
-import Stuck from '@/components/stuck';
 
 interface GameListPlusImageProps {
   gameModeSlug: CoverArtModeSlug;
@@ -99,6 +98,7 @@ export default function GameListPlusImage(
             isLoading={isLoading}
             className="size-full"
             sourceImageUrl={targetGame?.imageUrl}
+            objectFit="cover"
           />
         );
         break;
@@ -106,10 +106,6 @@ export default function GameListPlusImage(
 
     return imageDisplayed;
   };
-
-  if (isLoading) {
-    return <Stuck stuckState="loading" />;
-  }
 
   if (error) {
     return (
@@ -192,7 +188,6 @@ export default function GameListPlusImage(
                   <SelectedGameDisplay
                     selectedGame={selectedGame}
                     onClearSelection={clearSelection}
-                    showSkeleton={!selectedGame}
                     className="w-full bg-muted/10 border-dashed"
                     mode={props.gameModeSlug}
                   />

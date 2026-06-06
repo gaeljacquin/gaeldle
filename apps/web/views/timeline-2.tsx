@@ -10,7 +10,8 @@ import Attempts from '@/components/attempts';
 import { motion, useMotionValue } from 'motion/react';
 import { cn } from '@workspace/ui/lib/utils';
 import Timeline2DevToggle from '@/components/timeline-2-dev-toggle';
-import Stuck from '@/components/stuck';
+import { TimelineCardSkeleton } from '@/components/timeline-card-skeleton';
+import { Timeline2CardSkeleton } from '@/components/timeline-2-card-skeleton';
 
 export default function Timeline2() {
   const gameMode = getGameModeBySlug('timeline-2');
@@ -25,7 +26,6 @@ export default function Timeline2() {
     maxAttempts,
     isGameOver,
     score,
-    isLoading,
     lastPlacementCorrect,
     isAnimating,
     correctlyPlacedCards,
@@ -104,10 +104,6 @@ export default function Timeline2() {
     return 'none';
   };
 
-  if (isLoading) {
-    return <Stuck stuckState="loading" />;
-  }
-
   return (
     <div className="min-h-full bg-background text-foreground">
       <div className="container mx-auto px-4 py-10">
@@ -149,7 +145,7 @@ export default function Timeline2() {
                 <div className="flex justify-center">
                   <div className="border-2 border-dashed border-border p-4 flex justify-center items-center w-36 h-48 bg-card/50">
                     {isDealingCard || isGameOver || !dealtCard ? (
-                      <div className="w-32 h-44 bg-muted animate-pulse border" />
+                      <Timeline2CardSkeleton />
                     ) : (
                       <div className="relative">
                         {isDragging && (
@@ -211,44 +207,45 @@ export default function Timeline2() {
                   className="border-2 border-dashed border-border p-6 overflow-x-auto scrollbar-x flex items-center bg-card/50 min-h-55"
                 >
                   <div className="flex gap-4 items-center px-4 mx-auto">
-                    {timelineCards.map((game, index) => {
-                      const correctlyPlacedCardColor = correctlyPlacedCards.has(
-                        game.id,
-                      )
-                        ? 'green'
-                        : 'red';
-                      const bannerColor =
-                        game.id === firstCardId
-                          ? 'slate'
-                          : correctlyPlacedCardColor;
-                      return (
-                        <motion.div
-                          key={game.id}
-                          className="flex items-center"
-                          layout
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <div
-                            className={cn(
-                              'transition-all duration-200',
-                              isDragging && draggedOverIndex === index
-                                ? 'w-32 mx-2 border-2 border-dashed border-primary h-44 bg-primary/10'
-                                : 'w-0',
-                            )}
-                          />
-
-                          <div data-timeline-card>
-                            <Timeline2Card
-                              game={game}
-                              showDate={true}
-                              bannerColor={bannerColor}
+                    {timelineCards.length === 0 ? (
+                      <TimelineCardSkeleton />
+                    ) : (
+                      timelineCards.map((game, index) => {
+                        const correctlyPlacedCardColor =
+                          correctlyPlacedCards.has(game.id) ? 'green' : 'red';
+                        const bannerColor =
+                          game.id === firstCardId
+                            ? 'slate'
+                            : correctlyPlacedCardColor;
+                        return (
+                          <motion.div
+                            key={game.id}
+                            className="flex items-center"
+                            layout
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <div
+                              className={cn(
+                                'transition-all duration-200',
+                                isDragging && draggedOverIndex === index
+                                  ? 'w-32 mx-2 border-2 border-dashed border-primary h-44 bg-primary/10'
+                                  : 'w-0',
+                              )}
                             />
-                          </div>
-                        </motion.div>
-                      );
-                    })}
+
+                            <div data-timeline-card>
+                              <Timeline2Card
+                                game={game}
+                                showDate={true}
+                                bannerColor={bannerColor}
+                              />
+                            </div>
+                          </motion.div>
+                        );
+                      })
+                    )}
 
                     <div
                       className={cn(

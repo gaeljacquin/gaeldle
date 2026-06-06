@@ -15,7 +15,6 @@ import { getGameModeBySlug } from '@/lib/game-mode';
 import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';
-import Stuck from '@/components/stuck';
 
 export default function Specifications() {
   const gameMode = getGameModeBySlug('specifications');
@@ -29,7 +28,6 @@ export default function Specifications() {
     attemptsLeft,
     isGameOver,
     isCorrect,
-    isLoading,
     error,
     revealedClue,
     clearSelection,
@@ -46,10 +44,6 @@ export default function Specifications() {
   };
 
   const selectedGameId = selectedGame?.id ?? null;
-
-  if (isLoading) {
-    return <Stuck stuckState="loading" />;
-  }
 
   if (error) {
     return (
@@ -102,7 +96,6 @@ export default function Specifications() {
               <SelectedGameDisplay
                 selectedGame={selectedGame}
                 onClearSelection={clearSelection}
-                showSkeleton={!selectedGame}
                 className="w-full bg-muted/10 border-dashed"
                 mode="specifications"
               />

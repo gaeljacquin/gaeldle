@@ -479,7 +479,7 @@ export default function SpecificationsGrid({
   return (
     <div
       className={cn(
-        'overflow-x-scroll w-full border border-border/50 bg-card/5',
+        'overflow-x-scroll scrollbar-x w-full border border-border/50 bg-card/5',
         className,
       )}
     >

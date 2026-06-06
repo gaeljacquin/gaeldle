@@ -7,7 +7,7 @@ import { hexclaveClientApp } from '@/hexclave/client';
 import { Toaster } from 'sonner';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { TooltipProvider } from "@workspace/ui/tooltip";
+import { TooltipProvider } from '@workspace/ui/tooltip';
 
 type ProvidersProps = {
   children: ReactNode;

@@ -26,6 +26,7 @@ export default function HomeView() {
               {gameModes.map((gameMode) => (
                 <GameModeCard
                   key={gameMode.id}
+                  id={gameMode.id}
                   href={gameMode.href}
                   title={gameMode.title}
                   description={gameMode.description}

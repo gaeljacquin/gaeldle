@@ -31,13 +31,17 @@
   "devDependencies": {
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
-    "@types/node": "^25.9.1",
+    "@types/node": "^25.9.2",
     "husky": "^9.1.7",
     "prettier": "^3.8.3",
     "turbo": "^2.9.16"
   },
   "dependencies": {
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "motion": "^12.40.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "zod": "^4.4.3"
   }
 }

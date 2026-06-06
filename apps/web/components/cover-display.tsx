@@ -95,7 +95,7 @@ export default function CoverDisplay({
       {shouldShowImage && displayUrl ? (
         <Image
           src={displayUrl}
-          alt={isGameOver ? game?.name : 'Game cover'}
+          alt={game && isGameOver ? game?.name : 'Game cover'}
           className={cn(
             objectFit === 'cover' ? 'object-cover' : 'object-contain',
           )}

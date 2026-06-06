@@ -8,8 +8,8 @@ import {
   useReplaceGameValidation,
   type ReplaceGameValidationState,
 } from '@/lib/hooks/use-replace-game-validation';
-import { IgdbIdPairRow } from '@/components/igdb-id-pair-row';
-import type { IgdbIdPairRowData } from '@/components/igdb-id-pair-row';
+import { IgdbIdRowPair } from '@/components/igdb-id-row-pair';
+import type { IgdbIdRowPairData } from '@/components/igdb-id-row-pair';
 import {
   ReplaceGameResultsTable,
   type ReplaceGameResult,
@@ -32,7 +32,7 @@ import { toast } from 'sonner';
 import { REPLACE_GAME_MAX_ROWS } from '@workspace/constants';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 
-function createEmptyRow(): IgdbIdPairRowData {
+function createEmptyRow(): IgdbIdRowPairData {
   return { id: crypto.randomUUID(), current: '', replacement: '' };
 }
 
@@ -74,7 +74,7 @@ function addCrossFieldDupes(
 
 // Each row is wrapped in a component so each gets its own hook invocation
 interface RowWithValidationProps {
-  row: IgdbIdPairRowData;
+  row: IgdbIdRowPairData;
   onCurrentChange: (id: string, value: string) => void;
   onReplacementChange: (id: string, value: string) => void;
   onRemove: (id: string) => void;
@@ -102,7 +102,7 @@ function RowWithValidation({
   }, [row.id, validationState, onValidationChange]);
 
   return (
-    <IgdbIdPairRow
+    <IgdbIdRowPair
       row={row}
       validationState={validationState}
       onCurrentChange={onCurrentChange}
@@ -117,7 +117,7 @@ function RowWithValidation({
 export default function ReplaceGameByIgdbId() {
   useUser({ or: 'redirect' });
 
-  const [rows, setRows] = useState<IgdbIdPairRowData[]>([createEmptyRow()]);
+  const [rows, setRows] = useState<IgdbIdRowPairData[]>([createEmptyRow()]);
   const [results, setResults] = useState<ReplaceGameResult[] | null>(null);
   const [validationMap, setValidationMap] = useState<
     Record<string, ReplaceGameValidationState>

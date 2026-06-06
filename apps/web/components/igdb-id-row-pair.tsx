@@ -16,14 +16,14 @@ import { cn } from '@workspace/ui/lib/utils';
 import type { ReplaceGameValidationState } from '@/lib/hooks/use-replace-game-validation';
 import { toast } from 'sonner';
 
-export interface IgdbIdPairRowData {
+export interface IgdbIdRowPairData {
   id: string;
   current: string;
   replacement: string;
 }
 
-interface IgdbIdPairRowProps {
-  row: IgdbIdPairRowData;
+interface IgdbIdRowPairProps {
+  row: IgdbIdRowPairData;
   validationState: ReplaceGameValidationState;
   onCurrentChange: (id: string, value: string) => void;
   onReplacementChange: (id: string, value: string) => void;
@@ -126,7 +126,7 @@ function ReplacementBadge({
   return null;
 }
 
-export function IgdbIdPairRow({
+export function IgdbIdRowPair({
   row,
   validationState,
   onCurrentChange,
@@ -134,7 +134,7 @@ export function IgdbIdPairRow({
   onRemove,
   canRemove,
   isDuplicate = false,
-}: Readonly<IgdbIdPairRowProps>) {
+}: Readonly<IgdbIdRowPairProps>) {
   const currentHasError =
     validationState.isReady &&
     !validationState.isLoading &&

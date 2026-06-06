@@ -140,10 +140,10 @@ export default function HealthView() {
               )}
               <Button
                 variant="outline"
-                size="sm"
+                size="icon-lg"
                 onClick={() => refetch()}
                 disabled={isFetching}
-                className="gap-1.5 cursor-pointer"
+                className="gap-1.5 cursor-pointer p-4"
                 aria-label="Refresh health status"
               >
                 <IconRefresh

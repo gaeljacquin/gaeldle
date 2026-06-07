@@ -1,6 +1,4 @@
-const NESTJS_BASE_URL = process.env.serverUrl || 'http://localhost:8080';
-const NEXTJS_BASE_URL =
-  process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const baseApiUrl = process.env.serverUrl || 'http://localhost:8080';
 
 export type HealthStatus = 'up' | 'down';
 
@@ -16,9 +14,9 @@ export interface HealthCheckResult {
   details: Record<string, HealthIndicatorDetail>;
 }
 
-async function pingNestJs(): Promise<HealthIndicatorDetail> {
+async function pingApi(): Promise<HealthIndicatorDetail> {
   try {
-    const response = await fetch(`${NESTJS_BASE_URL}/`, { cache: 'no-store' });
+    const response = await fetch(`${baseApiUrl}/`, { cache: 'no-store' });
     return response.ok
       ? { status: 'up' }
       : { status: 'down', message: `HTTP ${response.status}` };
@@ -27,9 +25,11 @@ async function pingNestJs(): Promise<HealthIndicatorDetail> {
   }
 }
 
-async function pingNextJs(): Promise<HealthIndicatorDetail> {
+async function pingClient(
+  baseClientUrl: string,
+): Promise<HealthIndicatorDetail> {
   try {
-    const response = await fetch(`${NEXTJS_BASE_URL}/api/games?pageSize=1`, {
+    const response = await fetch(`${baseClientUrl}/api/games?pageSize=1`, {
       cache: 'no-store',
     });
     return response.ok
@@ -40,13 +40,15 @@ async function pingNextJs(): Promise<HealthIndicatorDetail> {
   }
 }
 
-export async function fetchHealthStatus(): Promise<HealthCheckResult> {
-  const [healthResult, nestJsPing, nextJsPing] = await Promise.allSettled([
-    fetch(`${NESTJS_BASE_URL}/health`, { cache: 'no-store' }).then(
+export async function fetchHealthStatus(
+  baseClientUrl: string,
+): Promise<HealthCheckResult> {
+  const [healthResult, apiPing, clientPing] = await Promise.allSettled([
+    fetch(`${baseApiUrl}/health`, { cache: 'no-store' }).then(
       (r) => r.json() as Promise<HealthCheckResult>,
     ),
-    pingNestJs(),
-    pingNextJs(),
+    pingApi(),
+    pingClient(baseClientUrl),
   ]);
 
   const health: HealthCheckResult =
@@ -69,30 +71,30 @@ export async function fetchHealthStatus(): Promise<HealthCheckResult> {
           },
         };
 
-  const nestJsDetail: HealthIndicatorDetail =
-    nestJsPing.status === 'fulfilled'
-      ? nestJsPing.value
+  const apiDetail: HealthIndicatorDetail =
+    apiPing.status === 'fulfilled'
+      ? apiPing.value
       : { status: 'down', message: 'writes api is unreachable' };
 
-  const nextJsDetail: HealthIndicatorDetail =
-    nextJsPing.status === 'fulfilled'
-      ? nextJsPing.value
+  const clientDetail: HealthIndicatorDetail =
+    clientPing.status === 'fulfilled'
+      ? clientPing.value
       : { status: 'down', message: 'reads api is unreachable' };
 
   const anyDown =
     health.status === 'error' ||
-    nestJsDetail.status === 'down' ||
-    nextJsDetail.status === 'down';
+    apiDetail.status === 'down' ||
+    clientDetail.status === 'down';
   const overallStatus = anyDown ? 'error' : 'ok';
 
   const infoExtras = {
-    ...(nestJsDetail.status === 'up' ? { 'writes api': nestJsDetail } : {}),
-    ...(nextJsDetail.status === 'up' ? { 'reads api': nextJsDetail } : {}),
+    ...(apiDetail.status === 'up' ? { 'writes api': apiDetail } : {}),
+    ...(clientDetail.status === 'up' ? { 'reads api': clientDetail } : {}),
   };
 
   const errorExtras = {
-    ...(nestJsDetail.status === 'down' ? { 'writes api': nestJsDetail } : {}),
-    ...(nextJsDetail.status === 'down' ? { 'reads api': nextJsDetail } : {}),
+    ...(apiDetail.status === 'down' ? { 'writes api': apiDetail } : {}),
+    ...(clientDetail.status === 'down' ? { 'reads api': clientDetail } : {}),
   };
 
   return {
@@ -100,8 +102,8 @@ export async function fetchHealthStatus(): Promise<HealthCheckResult> {
     info: { ...infoExtras, ...health.info },
     error: { ...errorExtras, ...health.error },
     details: {
-      'writes api': nestJsDetail,
-      'reads api': nextJsDetail,
+      'writes api': apiDetail,
+      'reads api': clientDetail,
       ...health.details,
     },
   };

@@ -1,6 +1,5 @@
 'use client';
 
-import { ViewTransition } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchHealthStatus } from '@/lib/services/health.service';
 import type {
@@ -95,10 +94,19 @@ function ServiceRow({
   );
 }
 
-export default function HealthView() {
+interface HealthViewProps {
+  initialData: HealthCheckResult;
+  baseClientUrl: string;
+}
+
+export function HealthView({
+  initialData,
+  baseClientUrl,
+}: Readonly<HealthViewProps>) {
   const { data, isLoading, isFetching, dataUpdatedAt, refetch } = useQuery({
     queryKey: ['health'],
-    queryFn: fetchHealthStatus,
+    queryFn: () => fetchHealthStatus(baseClientUrl),
+    initialData,
     refetchInterval: 30_000,
   });
 
@@ -113,117 +121,112 @@ export default function HealthView() {
   const serviceEntries = data ? Object.entries(data.details) : [];
 
   return (
-    <ViewTransition>
-      <div className="flex flex-col min-h-full bg-background">
-        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <IconHeartbeat
-                    size={20}
-                    className="text-primary"
-                    aria-hidden="true"
-                  />
-                  <h1 className="text-2xl font-bold tracking-tight">
-                    System Health
-                  </h1>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Live status of APIs and database.
-                </p>
+    <div className="flex flex-col min-h-full bg-background">
+      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <IconHeartbeat
+                  size={20}
+                  className="text-primary"
+                  aria-hidden="true"
+                />
+                <h1 className="text-2xl font-bold tracking-tight">
+                  System Health
+                </h1>
               </div>
+              <p className="text-sm text-muted-foreground">
+                Live status of APIs and database.
+              </p>
+            </div>
 
-              <div className="flex items-center gap-3">
-                {lastChecked && (
-                  <p className="text-xs text-muted-foreground font-mono">
-                    Last checked: {lastChecked}
-                  </p>
-                )}
-                <Button
-                  variant="outline"
-                  size="icon-lg"
-                  onClick={() => refetch()}
-                  disabled={isFetching}
-                  className="gap-1.5 cursor-pointer p-4"
-                  aria-label="Refresh health status"
-                >
-                  <IconRefresh
-                    size={14}
-                    className={cn(isFetching && 'animate-spin')}
-                    aria-hidden="true"
-                  />
-                  Refresh
-                </Button>
-              </div>
+            <div className="flex items-center gap-3">
+              {lastChecked && (
+                <p className="text-xs text-muted-foreground font-mono">
+                  Last checked: {lastChecked}
+                </p>
+              )}
+              <Button
+                variant="outline"
+                size="icon-lg"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="gap-1.5 cursor-pointer w-24 h-12"
+                aria-label="Refresh health status"
+              >
+                <IconRefresh
+                  size={14}
+                  className={cn(isFetching && 'animate-spin')}
+                  aria-hidden="true"
+                />
+                Refresh
+              </Button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="container mx-auto px-4 py-8 flex-1 max-w-2xl">
-          {isLoading && !data ? (
-            <div className="flex flex-col items-center justify-center py-24 space-y-4 text-muted-foreground">
-              <div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
-              <p className="text-sm font-medium">Checking service health...</p>
+      <div className="container mx-auto px-4 py-8 flex-1 max-w-2xl">
+        {isLoading && !data ? (
+          <div className="flex flex-col items-center justify-center py-24 space-y-4 text-muted-foreground">
+            <div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
+            <p className="text-sm font-medium">Checking service health...</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Overall Status
+              </h2>
+              {data && <OverallStatusBadge status={data.status} />}
             </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                  Overall Status
-                </h2>
-                {data && <OverallStatusBadge status={data.status} />}
-              </div>
 
-              <div className="border border-border bg-card">
-                <div className="px-4 py-3 border-b border-border bg-muted/30">
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Services
-                  </h3>
-                </div>
-                <div className="px-4">
-                  {serviceEntries.length > 0 ? (
-                    serviceEntries.map(([name, detail]) => (
-                      <ServiceRow key={name} name={name} detail={detail} />
-                    ))
-                  ) : (
-                    <div className="py-8 text-center text-sm text-muted-foreground">
-                      No service data available.
-                    </div>
-                  )}
-                </div>
+            <div className="border border-border bg-card">
+              <div className="px-4 py-3 border-b border-border bg-muted/30">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Services
+                </h3>
               </div>
-
-              {data?.status === 'error' &&
-                Object.keys(data.error).length > 0 && (
-                  <div className="border border-destructive/30 bg-destructive/5 px-4 py-3">
-                    <p className="text-xs font-semibold text-destructive uppercase tracking-wider mb-2">
-                      Errors
-                    </p>
-                    <ul className="space-y-1" aria-live="polite">
-                      {Object.entries(data.error).map(([name, detail]) => (
-                        <li
-                          key={name}
-                          className="text-sm text-destructive font-mono"
-                        >
-                          <span className="font-semibold capitalize">
-                            {name}
-                          </span>
-                          {detail.message && (
-                            <span className="text-destructive/70">
-                              {' '}
-                              — {detail.message}
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
+              <div className="px-4">
+                {serviceEntries.length > 0 ? (
+                  serviceEntries.map(([name, detail]) => (
+                    <ServiceRow key={name} name={name} detail={detail} />
+                  ))
+                ) : (
+                  <div className="py-8 text-center text-sm text-muted-foreground">
+                    No service data available.
                   </div>
                 )}
+              </div>
             </div>
-          )}
-        </div>
+
+            {data?.status === 'error' && Object.keys(data.error).length > 0 && (
+              <div className="border border-destructive/30 bg-destructive/5 px-4 py-3">
+                <p className="text-xs font-semibold text-destructive uppercase tracking-wider mb-2">
+                  Errors
+                </p>
+                <ul className="space-y-1" aria-live="polite">
+                  {Object.entries(data.error).map(([name, detail]) => (
+                    <li
+                      key={name}
+                      className="text-sm text-destructive font-mono"
+                    >
+                      <span className="font-semibold capitalize">{name}</span>
+                      {detail.message && (
+                        <span className="text-destructive/70">
+                          {' '}
+                          — {detail.message}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-    </ViewTransition>
+    </div>
   );
 }

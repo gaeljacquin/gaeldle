@@ -1,3 +1,4 @@
+import { ViewTransition } from 'react';
 import { GameModeCard } from '@/components/game-mode-card';
 import { gameModes } from '@/lib/game-mode';
 import { appInfo } from '@/lib/app-info';
@@ -6,86 +7,89 @@ import ViewportDebugger from '@/components/viewport-debugger';
 
 export default function HomeView() {
   return (
-    <div className="bg-background text-foreground">
-      <div className="relative overflow-hidden">
-        {/* Glow effect */}
-        <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-180 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.8)_0%,rgba(255,255,255,0)_70%)] opacity-70" />
+    <ViewTransition>
+      <div className="bg-background text-foreground">
+        <div className="relative overflow-hidden">
+          {/* Glow effect */}
+          <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-180 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.8)_0%,rgba(255,255,255,0)_70%)] opacity-70" />
 
-        <div className="container mx-auto px-4 py-12 relative z-10">
-          <header className="mx-auto max-w-2xl text-center mb-12">
-            <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-              {appInfo.title}
-            </h1>
-            <p className="mt-3 text-lg text-muted-foreground">
-              {appInfo.description}
-            </p>
-          </header>
+          <div className="container mx-auto px-4 py-12 relative z-10">
+            <header className="mx-auto max-w-2xl text-center mb-12">
+              <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+                {appInfo.title}
+              </h1>
+              <p className="mt-3 text-lg text-muted-foreground">
+                {appInfo.description}
+              </p>
+            </header>
 
-          <section className="mb-14">
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {gameModes.map((gameMode) => (
-                <GameModeCard
-                  key={gameMode.id}
-                  href={gameMode.href}
-                  title={gameMode.title}
-                  description={gameMode.description}
-                  difficulty={gameMode.difficulty}
-                  icon={gameMode.icon}
-                  gradient={gameMode.gradient}
-                />
-              ))}
+            <section className="mb-14">
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {gameModes.map((gameMode) => (
+                  <GameModeCard
+                    key={gameMode.id}
+                    id={gameMode.id}
+                    href={gameMode.href}
+                    title={gameMode.title}
+                    description={gameMode.description}
+                    difficulty={gameMode.difficulty}
+                    icon={gameMode.icon}
+                    gradient={gameMode.gradient}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <div className="flex flex-col gap-4">
+              <p className="text-md text-center">
+                Inspired by&nbsp;
+                <Link
+                  href="https://gamedle.wtf"
+                  target="_blank"
+                  className="underline hover:text-sky-600"
+                >
+                  Gamedle
+                </Link>
+                &nbsp;and&nbsp;
+                <Link
+                  href="https://wikitrivia.tomjwatson.com/"
+                  target="_blank"
+                  className="underline hover:text-sky-600"
+                >
+                  Wikitrivia
+                </Link>
+                .
+              </p>
+              <p className="text-md text-center">
+                All game data sourced from&nbsp;
+                <Link
+                  href="https://www.igdb.com/"
+                  target="_blank"
+                  className="underline hover:text-sky-600"
+                >
+                  IGDB
+                </Link>
+                .
+              </p>
+              <p className="text-md text-center">
+                Be sure to check out&nbsp;
+                <Link
+                  href="https://tr.ee/uBF_3IDko-"
+                  target="_blank"
+                  className="underline hover:text-sky-600"
+                >
+                  my other games
+                </Link>
+                !
+              </p>
             </div>
-          </section>
+          </div>
 
-          <div className="flex flex-col gap-4">
-            <p className="text-md text-center">
-              Inspired by&nbsp;
-              <Link
-                href="https://gamedle.wtf"
-                target="_blank"
-                className="underline hover:text-sky-600"
-              >
-                Gamedle
-              </Link>
-              &nbsp;and&nbsp;
-              <Link
-                href="https://wikitrivia.tomjwatson.com/"
-                target="_blank"
-                className="underline hover:text-sky-600"
-              >
-                Wikitrivia
-              </Link>
-              .
-            </p>
-            <p className="text-md text-center">
-              All game data sourced from&nbsp;
-              <Link
-                href="https://www.igdb.com/"
-                target="_blank"
-                className="underline hover:text-sky-600"
-              >
-                IGDB
-              </Link>
-              .
-            </p>
-            <p className="text-md text-center">
-              Be sure to check out&nbsp;
-              <Link
-                href="https://tr.ee/uBF_3IDko-"
-                target="_blank"
-                className="underline hover:text-sky-600"
-              >
-                my other games
-              </Link>
-              !
-            </p>
+          <div className="flex flex-row justify-center">
+            <ViewportDebugger />
           </div>
         </div>
-
-        <div className="flex flex-row justify-center">
-          <ViewportDebugger />
-        </div>
       </div>
-    </div>
+    </ViewTransition>
   );
 }

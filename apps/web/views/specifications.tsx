@@ -1,5 +1,6 @@
 'use client';
 
+import { ViewTransition } from 'react';
 import { useState } from 'react';
 import {
   MAX_ATTEMPTS,
@@ -15,7 +16,6 @@ import { getGameModeBySlug } from '@/lib/game-mode';
 import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';
-import Stuck from '@/components/stuck';
 
 export default function Specifications() {
   const gameMode = getGameModeBySlug('specifications');
@@ -29,7 +29,6 @@ export default function Specifications() {
     attemptsLeft,
     isGameOver,
     isCorrect,
-    isLoading,
     error,
     revealedClue,
     clearSelection,
@@ -47,10 +46,6 @@ export default function Specifications() {
 
   const selectedGameId = selectedGame?.id ?? null;
 
-  if (isLoading) {
-    return <Stuck stuckState="loading" />;
-  }
-
   if (error) {
     return (
       <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
@@ -63,134 +58,137 @@ export default function Specifications() {
   const wrongGuesses = guesses.map((g) => g.gameId);
 
   return (
-    <div className="min-h-full bg-background text-foreground">
-      <div className="container mx-auto px-4 py-10">
-        <div className="relative mb-12">
-          <div className="text-center pt-8 md:pt-0">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">
-              {gameMode?.title}
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              {gameMode?.description}
-            </p>
+    <ViewTransition enter="slide-up">
+      <div className="min-h-full bg-background text-foreground">
+        <div className="container mx-auto px-4 py-10">
+          <div className="relative mb-12">
+            <div className="text-center pt-8 md:pt-0">
+              <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">
+                {gameMode?.title}
+              </h1>
+              <p className="mt-2 text-muted-foreground">
+                {gameMode?.description}
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="mx-auto max-w-screen-2xl space-y-8">
-          {isGameOver ? null : (
-            <div className="mx-auto flex max-w-2xl flex-col gap-4">
-              <div className="flex flex-col gap-3 sm:flex-row items-stretch">
-                <div className="flex-1">
-                  <GameSearch
-                    selectedGameId={selectedGameId}
-                    wrongGuesses={wrongGuesses}
-                    onSelectGame={handleSelectGame}
-                    disabled={isGameOver}
-                  />
+          <div className="mx-auto max-w-screen-2xl space-y-8">
+            {isGameOver ? null : (
+              <div className="mx-auto flex max-w-2xl flex-col gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row items-stretch">
+                  <div className="flex-1">
+                    <GameSearch
+                      selectedGameId={selectedGameId}
+                      wrongGuesses={wrongGuesses}
+                      onSelectGame={handleSelectGame}
+                      disabled={isGameOver}
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={selectedGameId === null || isGameOver}
+                    className="cursor-pointer h-10 font-bold px-8"
+                    size="lg"
+                  >
+                    Submit
+                  </Button>
                 </div>
 
-                <Button
-                  onClick={handleSubmit}
-                  disabled={selectedGameId === null || isGameOver}
-                  className="cursor-pointer h-10 font-bold px-8"
-                  size="lg"
-                >
-                  Submit
-                </Button>
+                <SelectedGameDisplay
+                  selectedGame={selectedGame}
+                  onClearSelection={clearSelection}
+                  className="w-full bg-muted/10 border-dashed"
+                  mode="specifications"
+                />
               </div>
-
-              <SelectedGameDisplay
-                selectedGame={selectedGame}
-                onClearSelection={clearSelection}
-                showSkeleton={!selectedGame}
-                className="w-full bg-muted/10 border-dashed"
-                mode="specifications"
-              />
-            </div>
-          )}
-
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Attempts
-              </p>
-              <Attempts
-                maxAttempts={MAX_ATTEMPTS}
-                attemptsLeft={attemptsLeft}
-                variant="primary"
-              />
-            </div>
-
-            {isGameOver ? null : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsHintModalOpen(true)}
-                disabled={attemptsLeft <= 1 || !!revealedClue}
-                className="font-bold h-8 cursor-pointer"
-              >
-                {revealedClue ? 'Hint revealed' : 'Reveal Hint (-1 attempt)'}
-              </Button>
             )}
-          </div>
 
-          <HintConfirmationModal
-            isOpen={isHintModalOpen}
-            onClose={() => setIsHintModalOpen(false)}
-            onReveal={revealClue}
-          />
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  Attempts
+                </p>
+                <Attempts
+                  maxAttempts={MAX_ATTEMPTS}
+                  attemptsLeft={attemptsLeft}
+                  variant="primary"
+                />
+              </div>
 
-          {!isGameOver && guesses.length > 0 ? (
-            <div className="flex flex-wrap items-center justify-center gap-6 text-[10px] uppercase tracking-widest font-bold">
-              <div className="flex items-center gap-2">
-                <div className="size-3 bg-green-600/50 border border-green-600"></div>
-                <span className="text-muted-foreground">Correct</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-3 bg-yellow-600/50 border border-yellow-600"></div>
-                <span className="text-muted-foreground">Partially correct</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-3 bg-destructive/50 border border-destructive"></div>
-                <span className="text-muted-foreground">Incorrect</span>
-              </div>
+              {isGameOver ? null : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsHintModalOpen(true)}
+                  disabled={attemptsLeft <= 1 || !!revealedClue}
+                  className="font-bold h-8 cursor-pointer"
+                >
+                  {revealedClue ? 'Hint revealed' : 'Reveal Hint (-1 attempt)'}
+                </Button>
+              )}
             </div>
-          ) : null}
 
-          {isGameOver ? (
-            <div className="mx-auto max-w-2xl">
-              <SpecificationsGameOver
-                isCorrect={isCorrect}
-                targetGame={targetGame}
-                attemptsUsed={MAX_ATTEMPTS - attemptsLeft}
-                onPlayAgain={handleResetGame}
-                onToggleTable={() => setShowAnswerSpecs(!showAnswerSpecs)}
-                showingAnswer={showAnswerSpecs}
-              />
-            </div>
-          ) : null}
-
-          <Card className="border shadow-none bg-muted/5 p-0 overflow-hidden">
-            <CardContent className="p-0">
-              <SpecificationsGrid
-                guesses={guesses}
-                revealedClue={revealedClue}
-                targetGame={targetGame}
-                showAnswerOnly={isGameOver ? showAnswerSpecs : false}
-              />
-            </CardContent>
-          </Card>
-
-          <div className="mx-auto max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
-            <DevModeToggle
-              targetGame={targetGame}
-              attemptsLeft={attemptsLeft}
-              maxAttempts={MAX_ATTEMPTS}
-              onAdjustAttempts={adjustAttempts}
+            <HintConfirmationModal
+              isOpen={isHintModalOpen}
+              onClose={() => setIsHintModalOpen(false)}
+              onReveal={revealClue}
             />
+
+            {!isGameOver && guesses.length > 0 ? (
+              <div className="flex flex-wrap items-center justify-center gap-6 text-[10px] uppercase tracking-widest font-bold">
+                <div className="flex items-center gap-2">
+                  <div className="size-3 bg-green-600/50 border border-green-600"></div>
+                  <span className="text-muted-foreground">Correct</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-3 bg-yellow-600/50 border border-yellow-600"></div>
+                  <span className="text-muted-foreground">
+                    Partially correct
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-3 bg-destructive/50 border border-destructive"></div>
+                  <span className="text-muted-foreground">Incorrect</span>
+                </div>
+              </div>
+            ) : null}
+
+            {isGameOver ? (
+              <div className="mx-auto max-w-2xl">
+                <SpecificationsGameOver
+                  isCorrect={isCorrect}
+                  targetGame={targetGame}
+                  attemptsUsed={MAX_ATTEMPTS - attemptsLeft}
+                  onPlayAgain={handleResetGame}
+                  onToggleTable={() => setShowAnswerSpecs(!showAnswerSpecs)}
+                  showingAnswer={showAnswerSpecs}
+                />
+              </div>
+            ) : null}
+
+            <Card className="border shadow-none bg-muted/5 p-0 overflow-hidden">
+              <CardContent className="p-0">
+                <SpecificationsGrid
+                  guesses={guesses}
+                  revealedClue={revealedClue}
+                  targetGame={targetGame}
+                  showAnswerOnly={isGameOver ? showAnswerSpecs : false}
+                />
+              </CardContent>
+            </Card>
+
+            <div className="mx-auto max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
+              <DevModeToggle
+                targetGame={targetGame}
+                attemptsLeft={attemptsLeft}
+                maxAttempts={MAX_ATTEMPTS}
+                onAdjustAttempts={adjustAttempts}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </ViewTransition>
   );
 }

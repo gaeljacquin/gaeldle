@@ -114,7 +114,7 @@ export const bulkImageGenJobs = pgTable('bulk_image_gen_job', {
     >(),
   params: json('params').notNull().$type<{
     numGames: number;
-    imageStyle: string;
+    artStyle: string;
     includeStoryline: boolean;
     includeGenres: boolean;
     includeThemes: boolean;
@@ -138,7 +138,7 @@ export const BulkJobFailureSchema = z.object({
 
 export const BulkJobParamsSchema = z.object({
   numGames: z.number(),
-  imageStyle: z.string(),
+  artStyle: z.string(),
   includeStoryline: z.boolean(),
   includeGenres: z.boolean(),
   includeThemes: z.boolean(),

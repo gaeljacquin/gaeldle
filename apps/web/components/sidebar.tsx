@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { UserButton, useUser } from '@stackframe/stack';
+import { UserButton, useUser } from '@hexclave/next';
 import {
   IconDashboard,
   IconDeviceGamepad2,
@@ -15,6 +15,7 @@ import {
   IconLayoutSidebarLeftCollapse,
   IconHome,
   IconTools,
+  IconHealthRecognition,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { appInfo } from '@/lib/app-info';
@@ -105,12 +106,12 @@ function SidebarGamesSection({
           'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer',
           isCollapsed ? 'justify-center px-0' : null,
         )}
-        title={isCollapsed ? 'Game Modes' : undefined}
+        title={isCollapsed ? 'Modes' : undefined}
       >
         <IconDeviceGamepad2 size={20} />
         {isCollapsed ? null : (
           <>
-            <span>Game Modes</span>
+            <span>Modes</span>
             <span className="ml-auto">
               {isExpanded ? (
                 <IconChevronDown size={16} />
@@ -290,15 +291,6 @@ export function Sidebar() {
 
         <Separator />
 
-        <SidebarGamesSection
-          isCollapsed={isCollapsed}
-          isExpanded={isGamesExpanded}
-          onToggle={toggleGames}
-          pathname={pathname}
-        />
-      </nav>
-
-      <div className="space-y-1 p-2">
         <SidebarLink
           href="/"
           icon={IconHome}
@@ -306,7 +298,22 @@ export function Sidebar() {
           isCollapsed={isCollapsed}
           isActive={pathname === '/'}
         />
-      </div>
+
+        <SidebarLink
+          href="/health"
+          icon={IconHealthRecognition}
+          label="Health"
+          isCollapsed={isCollapsed}
+          isActive={pathname === '/health'}
+        />
+
+        <SidebarGamesSection
+          isCollapsed={isCollapsed}
+          isExpanded={isGamesExpanded}
+          onToggle={toggleGames}
+          pathname={pathname}
+        />
+      </nav>
 
       <SidebarUserFooter isCollapsed={isCollapsed} user={user} />
     </aside>

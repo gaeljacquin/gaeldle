@@ -174,7 +174,7 @@ export default function GameSearch({
           <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
         </InputGroupAddon>
         <InputGroupInput
-          placeholder="Search for a game..."
+          placeholder="Search..."
           value={searchValue}
           onChange={handleInputChange}
           disabled={disabled}

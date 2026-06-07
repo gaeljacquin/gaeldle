@@ -10,8 +10,8 @@ import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import {
   IMAGE_PROMPT_SUFFIX,
-  IMAGE_STYLES,
-  DEFAULT_IMAGE_GEN_STYLE,
+  ART_STYLES,
+  DEFAULT_IMAGE_GEN_ART_STYLE,
   DEFAULT_IMAGE_GEN_NUM,
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
@@ -31,16 +31,16 @@ const numGames = Math.max(
   ),
 );
 
-// Resolve image style: match by value slug or label (case-insensitive), fall back to default
-const rawStyle = process.env.IMAGE_STYLE?.trim() ?? '';
+// Resolve art style: match by value slug or label (case-insensitive), fall back to default
+const rawStyle = process.env.ART_STYLE?.trim() ?? '';
 const resolvedStyle =
-  IMAGE_STYLES.find(
+  ART_STYLES.find(
     (s) =>
       s.value.toLowerCase() === rawStyle.toLowerCase() ||
       s.label.toLowerCase() === rawStyle.toLowerCase(),
-  ) ?? IMAGE_STYLES.find((s) => s.value === DEFAULT_IMAGE_GEN_STYLE)!;
+  ) ?? ART_STYLES.find((s) => s.value === DEFAULT_IMAGE_GEN_ART_STYLE)!;
 
-console.log(`Image style: ${resolvedStyle.label} (${resolvedStyle.value})`);
+console.log(`Art style: ${resolvedStyle.label} (${resolvedStyle.value})`);
 
 const options = {
   includeStoryline,
@@ -320,4 +320,4 @@ async function main() {
   }
 }
 
-main();
+void main();

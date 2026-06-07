@@ -94,10 +94,19 @@ function ServiceRow({
   );
 }
 
-export default function HealthView() {
+interface HealthViewProps {
+  initialData: HealthCheckResult;
+  baseClientUrl: string;
+}
+
+export function HealthView({
+  initialData,
+  baseClientUrl,
+}: Readonly<HealthViewProps>) {
   const { data, isLoading, isFetching, dataUpdatedAt, refetch } = useQuery({
     queryKey: ['health'],
-    queryFn: fetchHealthStatus,
+    queryFn: () => fetchHealthStatus(baseClientUrl),
+    initialData,
     refetchInterval: 30_000,
   });
 
@@ -140,10 +149,10 @@ export default function HealthView() {
               )}
               <Button
                 variant="outline"
-                size="sm"
+                size="icon-lg"
                 onClick={() => refetch()}
                 disabled={isFetching}
-                className="gap-1.5 cursor-pointer"
+                className="gap-1.5 cursor-pointer w-24 h-12"
                 aria-label="Refresh health status"
               >
                 <IconRefresh

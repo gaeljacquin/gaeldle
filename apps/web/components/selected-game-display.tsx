@@ -8,7 +8,6 @@ import { cn } from '@workspace/ui/lib/utils';
 interface SelectedGameDisplayProps {
   selectedGame: Game | null;
   onClearSelection?: () => void;
-  showSkeleton?: boolean;
   className?: string;
   mode: GameModeSlug;
 }
@@ -16,27 +15,9 @@ interface SelectedGameDisplayProps {
 export default function SelectedGameDisplay({
   selectedGame,
   onClearSelection,
-  showSkeleton = false,
   className,
   mode = 'cover-art',
 }: Readonly<SelectedGameDisplayProps>) {
-  if (showSkeleton || !selectedGame) {
-    return (
-      <div
-        className={cn(
-          'flex items-center gap-3 border bg-card/80 p-3',
-          className,
-        )}
-      >
-        <div className="h-14 w-10 bg-muted animate-pulse" />
-        <div className="flex-1 min-w-0 space-y-2">
-          <div className="h-4 bg-muted animate-pulse w-3/4" />
-          <div className="h-3 bg-muted animate-pulse w-1/2" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       className={cn(
@@ -44,7 +25,7 @@ export default function SelectedGameDisplay({
         className,
       )}
     >
-      {selectedGame.imageUrl && mode !== 'cover-art' ? (
+      {selectedGame?.imageUrl && mode !== 'cover-art' ? (
         <Image
           src={selectedGame.imageUrl}
           alt={selectedGame.name}
@@ -60,10 +41,10 @@ export default function SelectedGameDisplay({
       )}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold truncate text-foreground uppercase tracking-tight">
-          {selectedGame.name}
+          {selectedGame?.name ?? '?'}
         </p>
         <p className="text-xs text-muted-foreground uppercase tracking-widest">
-          Selected
+          {selectedGame?.name ? 'Selected' : 'No selection'}
         </p>
       </div>
       {onClearSelection ? (

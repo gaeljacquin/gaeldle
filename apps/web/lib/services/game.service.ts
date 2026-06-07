@@ -1,5 +1,5 @@
 import { orpcClient } from '@/lib/orpc';
-import type { Game, GameModeSlug, ImageStyle } from '@workspace/api-contract';
+import type { Game, GameModeSlug, ArtStyle } from '@workspace/api-contract';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 async function handleResponse<T>(res: Response): Promise<T> {
@@ -144,7 +144,7 @@ export async function generateImage(
     includeStoryline: boolean;
     includeGenres: boolean;
     includeThemes: boolean;
-    imageStyle: ImageStyle;
+    artStyle: ArtStyle;
   },
 ) {
   const result = await orpcClient.games.generateImage({ igdbId, ...options });
@@ -153,7 +153,7 @@ export async function generateImage(
 
 export async function bulkGenerateImages(params: {
   numGames: number;
-  imageStyle: ImageStyle;
+  artStyle: ArtStyle;
   includeStoryline: boolean;
   includeGenres: boolean;
   includeThemes: boolean;

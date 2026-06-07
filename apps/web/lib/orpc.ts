@@ -4,7 +4,7 @@ import { contract } from '@workspace/api-contract';
 import { createORPCReactQueryUtils } from '@orpc/react-query';
 import type { JsonifiedClient } from '@orpc/openapi-client';
 import type { ContractRouterClient } from '@orpc/contract';
-import { stackClientApp } from '@/stack/client';
+import { hexclaveClientApp } from '@/hexclave/client';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 export const orpcClient = createORPCClient<
@@ -21,7 +21,7 @@ export const orpcClient = createORPCClient<
           throw signal.reason || new Error('Aborted');
         }
 
-        const user = await stackClientApp.getUser({ or: 'return-null' });
+        const user = await hexclaveClientApp.getUser({ or: 'return-null' });
 
         if (user) {
           const authHeaders = await user.getAuthHeaders();

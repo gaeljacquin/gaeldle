@@ -1,13 +1,13 @@
 import { Controller, UseGuards, NotFoundException } from '@nestjs/common';
 import sharp from 'sharp';
 import { Implement, implement } from '@orpc/nest';
-import { contract, type ImageStyle } from '@workspace/api-contract';
+import { contract, type ArtStyle } from '@workspace/api-contract';
 import { GamesService } from '@/games/games.service';
 import { S3Service } from '@/lib/s3.service';
 import { AiService } from '@/lib/ai.service';
-import { StackAuthGuard } from '@/auth/stack-auth.guard';
+import { HexclaveGuard } from '@/auth/hexclave.guard';
 import {
-  DEFAULT_IMAGE_GEN_STYLE,
+  DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_GEN_DIR,
   IMAGE_PROMPT_SUFFIX,
   TEST_DIR,
@@ -25,7 +25,7 @@ export class GamesRouter {
   ) {}
 
   @Implement(contract.games.sync)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   sync() {
     return implement(contract.games.sync).handler(async ({ input }) => {
       const result = await this.gamesService.syncGameByIgdbId(input.igdb_id);
@@ -44,7 +44,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.update)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   update() {
     return implement(contract.games.update).handler(async ({ input }) => {
       const { id, updates } = input;
@@ -62,7 +62,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.deleteBulk)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   deleteBulk() {
     return implement(contract.games.deleteBulk).handler(async ({ input }) => {
       const deletedIds = await this.gamesService.deleteGames(input);
@@ -76,7 +76,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.delete)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   delete() {
     return implement(contract.games.delete).handler(async ({ input }) => {
       const deletedId = await this.gamesService.deleteGame(input.id);
@@ -125,7 +125,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.generateImage)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   generateImage() {
     return implement(contract.games.generateImage).handler(
       async ({
@@ -136,7 +136,7 @@ export class GamesRouter {
           includeStoryline?: boolean;
           includeGenres?: boolean;
           includeThemes?: boolean;
-          imageStyle?: ImageStyle;
+          artStyle?: ArtStyle;
         };
       }) => {
         const {
@@ -144,7 +144,7 @@ export class GamesRouter {
           includeStoryline,
           includeGenres,
           includeThemes,
-          imageStyle,
+          artStyle,
         } = input;
 
         const game = await this.gamesService.getGameByIgdbId(igdbId);
@@ -154,7 +154,7 @@ export class GamesRouter {
           includeStoryline: includeStoryline ?? false,
           includeGenres: includeGenres ?? false,
           includeThemes: includeThemes ?? false,
-          imageStyle: imageStyle ?? DEFAULT_IMAGE_GEN_STYLE,
+          artStyle: artStyle ?? DEFAULT_IMAGE_GEN_ART_STYLE,
         });
 
         const rawBuffer = await this.aiService.generateImage(prompt);
@@ -175,7 +175,7 @@ export class GamesRouter {
         const list = Array.isArray(game.imageGen)
           ? JSON.parse(JSON.stringify(game.imageGen))
           : [];
-        const styleKey = imageStyle ?? DEFAULT_IMAGE_GEN_STYLE;
+        const styleKey = artStyle ?? DEFAULT_IMAGE_GEN_ART_STYLE;
         const newItem = {
           [styleKey]: {
             url: publicUrl,
@@ -208,7 +208,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.bulkGenerateImages)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   bulkGenerateImages() {
     return implement(contract.games.bulkGenerateImages).handler(
       async ({ input }) => {
@@ -220,7 +220,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.getBulkJobStatus)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   getBulkJobStatus() {
     return implement(contract.games.getBulkJobStatus).handler(
       async ({ input }) => {
@@ -231,7 +231,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.validateReplaceGame)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   validateReplaceGame() {
     return implement(contract.games.validateReplaceGame).handler(
       async ({ input }) => {
@@ -244,7 +244,7 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.replaceGames)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   replaceGames() {
     return implement(contract.games.replaceGames).handler(async ({ input }) => {
       return this.gamesService.replaceGameByIgdbId(input);
@@ -252,27 +252,26 @@ export class GamesRouter {
   }
 
   @Implement(contract.games.validateIgdbIdAdd)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   validateIgdbIdAdd() {
     return implement(contract.games.validateIgdbIdAdd).handler(({ input }) =>
       this.gamesService.validateGameForAdd(input.igdbId),
     );
   }
 
-  private static readonly IMAGE_STYLE_DESCRIPTORS: Record<ImageStyle, string> =
-    {
-      'funko-pop-chibi': 'Funko Pop chibi style illustration',
-      simpsons: 'Simpsons style illustration',
-      'rubber-hose-animation': 'Rubber hose animation style illustration',
-      muppet: 'Muppet style illustration',
-      lego: 'Lego style illustration',
-      claymation: 'Claymation style illustration',
-      'vector-art': 'Vector art style illustration',
-      'digital-cel-shaded': 'Digital cel-shaded portrait illustration style',
-      'western-animation-concept-art':
-        'Western animation concept art style illustration',
-      'graphic-novel-illustration': 'Graphic novel illustration style',
-    };
+  private static readonly ART_STYLE_DESCRIPTORS: Record<ArtStyle, string> = {
+    'funko-pop-chibi': 'Funko Pop chibi style illustration',
+    simpsons: 'Simpsons style illustration',
+    'rubber-hose-animation': 'Rubber hose animation style illustration',
+    muppet: 'Muppet style illustration',
+    lego: 'Lego style illustration',
+    claymation: 'Claymation style illustration',
+    'vector-art': 'Vector art style illustration',
+    'digital-cel-shaded': 'Digital cel-shaded portrait illustration style',
+    'western-animation-concept-art':
+      'Western animation concept art style illustration',
+    'graphic-novel-illustration': 'Graphic novel illustration style',
+  };
 
   private buildImagePrompt(
     game: {
@@ -287,12 +286,12 @@ export class GamesRouter {
       includeStoryline: boolean;
       includeGenres: boolean;
       includeThemes: boolean;
-      imageStyle: ImageStyle;
+      artStyle: ArtStyle;
     },
   ): string {
     const parts: string[] = [];
 
-    const descriptor = GamesRouter.IMAGE_STYLE_DESCRIPTORS[options.imageStyle];
+    const descriptor = GamesRouter.ART_STYLE_DESCRIPTORS[options.artStyle];
     parts.push(
       `${descriptor} of iconic characters from "${game.name}" set within the game's distinct world`,
     );

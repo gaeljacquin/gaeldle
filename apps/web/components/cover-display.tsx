@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { pixelateImage } from '@/lib/utils/pixelate';
 import { cn } from '@workspace/ui/lib/utils';
 import type { Game } from '@workspace/api-contract';
-import Stuck from '@/components/stuck';
+import ImageDisplaySkeleton from '@/components/image-display-skeleton';
 
 interface CoverDisplayProps {
   game: Game | null;
@@ -68,10 +68,6 @@ export default function CoverDisplay({
     return () => clearTimeout(timer);
   }, [sourceImageUrl, pixelSize, usePixelation, isGameOver, isLoading]);
 
-  if (!game) {
-    return <Stuck stuckState="none" className={className} />;
-  }
-
   // Determine what to display
   const shouldShowPixelated = usePixelation && !isGameOver;
   // Only use pixelated URL if it matches the current source and parameters
@@ -86,29 +82,15 @@ export default function CoverDisplay({
     !shouldShowPixelated || (shouldShowPixelated && !!pixelatedUrl);
 
   if (!sourceImageUrl) {
-    return (
-      <div
-        className={cn(
-          'flex items-center justify-center bg-muted border',
-          className,
-        )}
-      >
-        <p className="text-sm text-muted-foreground">No cover available</p>
-      </div>
-    );
+    return <ImageDisplaySkeleton />;
   }
 
   return (
     <div className={cn('relative overflow-hidden bg-muted border', className)}>
-      {isLoading || !shouldShowImage ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        </div>
-      ) : null}
       {shouldShowImage && displayUrl ? (
         <Image
           src={displayUrl}
-          alt={isGameOver ? game.name : 'Game cover'}
+          alt={game && isGameOver ? game?.name : 'Game cover'}
           className={cn(
             objectFit === 'cover' ? 'object-cover' : 'object-contain',
           )}
@@ -120,7 +102,7 @@ export default function CoverDisplay({
       ) : null}
       {isGameOver ? (
         <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 text-center border-t">
-          <p className="font-semibold">{game.name}</p>
+          <p className="font-semibold">{game?.name}</p>
         </div>
       ) : null}
     </div>

@@ -4,9 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { getRandomGames } from '@/lib/services/game.service';
 import type { Game } from '@workspace/api-contract';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
-
-export const MAX_ATTEMPTS = 3;
-const GAMES_COUNT = 10;
+import {
+  TIMELINE_GAMES_COUNT,
+  TIMELINE_MAX_ATTEMPTS,
+} from '@workspace/constants';
 
 export function useTimelineGame() {
   const [selectedGames, setSelectedGames] = useState<Game[]>([]);
@@ -16,7 +17,7 @@ export function useTimelineGame() {
   const [correctPositionMap, setCorrectPositionMap] = useState<
     Map<number, number>
   >(new Map()); // position → correct game ID
-  const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
+  const [attemptsLeft, setAttemptsLeft] = useState(TIMELINE_MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isWinner, setIsWinner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +29,11 @@ export function useTimelineGame() {
     async function loadGames() {
       try {
         setIsLoading(true);
-        const selected = await getRandomGames(GAMES_COUNT, [], 'timeline');
+        const selected = await getRandomGames(
+          TIMELINE_GAMES_COUNT,
+          [],
+          'timeline',
+        );
 
         // Set all derived state in one update to avoid a visible re-shuffle
         setSelectedGames(selected);
@@ -110,12 +115,16 @@ export function useTimelineGame() {
       setHasSubmitted(false);
       setCorrectGameIds(new Set());
       setCorrectPositionMap(new Map());
-      setAttemptsLeft(MAX_ATTEMPTS);
+      setAttemptsLeft(TIMELINE_MAX_ATTEMPTS);
       setIsGameOver(false);
       setIsWinner(false);
 
       // Select new random games
-      const selected = await getRandomGames(GAMES_COUNT, [], 'timeline');
+      const selected = await getRandomGames(
+        TIMELINE_GAMES_COUNT,
+        [],
+        'timeline',
+      );
 
       setSelectedGames(selected);
       setUserOrder(selected);
@@ -139,7 +148,7 @@ export function useTimelineGame() {
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft((prev) => {
       const newValue = prev + delta;
-      if (newValue < 1 || newValue > MAX_ATTEMPTS) return prev;
+      if (newValue < 1 || newValue > TIMELINE_MAX_ATTEMPTS) return prev;
       return newValue;
     });
   }, []);

@@ -30,15 +30,15 @@ export class BulkImageGenController {
     private readonly bulkImageJobStore: BulkImageJobStore,
     private readonly configService: ConfigService,
   ) {
-    this.projectId = this.configService.get<string>('stackProjectId') ?? '';
+    this.projectId = this.configService.get<string>('hexclaveProjectId') ?? '';
     this.jwksUrl = new URL(
-      `https://api.stack-auth.com/api/v1/projects/${this.projectId}/.well-known/jwks.json`,
+      `https://api.hexclave.com/api/v1/projects/${this.projectId}/.well-known/jwks.json`,
     );
   }
 
   private async verifyToken(token: string): Promise<JWTPayload> {
     if (!this.projectId) {
-      throw new UnauthorizedException('Stack Auth is not configured');
+      throw new UnauthorizedException('Hexclave is not configured');
     }
     if (!this.jwks) {
       const { createRemoteJWKSet } = await getJose();
@@ -51,7 +51,7 @@ export class BulkImageGenController {
       });
       return payload;
     } catch {
-      throw new UnauthorizedException('Invalid Stack access token');
+      throw new UnauthorizedException('Invalid Hexclave access token');
     }
   }
 

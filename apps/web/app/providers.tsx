@@ -2,11 +2,12 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { StackProvider, StackTheme } from '@stackframe/stack';
-import { stackClientApp } from '@/stack/client';
+import { HexclaveProvider } from '@hexclave/next';
+import { hexclaveClientApp } from '@/hexclave/client';
 import { Toaster } from 'sonner';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
+import { TooltipProvider } from '@workspace/ui/tooltip';
 
 type ProvidersProps = {
   children: ReactNode;
@@ -27,14 +28,14 @@ export default function Providers({ children }: Readonly<ProvidersProps>) {
   );
 
   return (
-    <StackProvider app={stackClientApp}>
-      <StackTheme>
-        <QueryClientProvider client={queryClient}>
+    <HexclaveProvider app={hexclaveClientApp}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
           {children}
           <Toaster position="bottom-right" closeButton richColors />
           <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
-      </StackTheme>
-    </StackProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </HexclaveProvider>
   );
 }

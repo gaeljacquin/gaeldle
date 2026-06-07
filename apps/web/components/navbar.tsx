@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import { IconMenu2, IconX } from '@tabler/icons-react';
 import { Button } from '@workspace/ui/button';
 import { cn } from '@workspace/ui/lib/utils';
-import { useUser } from '@stackframe/stack';
+import { useUser } from '@hexclave/next';
 import { appInfo } from '@/lib/app-info';
 
 const navLinks = [

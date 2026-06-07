@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { type TablerIcon } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
+import { ViewTransition } from 'react';
 
 export interface MenuCardProps {
+  id?: string;
   href?: string;
   title: string;
   description: string;
@@ -13,6 +15,7 @@ export interface MenuCardProps {
 }
 
 export function MenuCard({
+  id,
   href,
   title,
   description,
@@ -56,7 +59,7 @@ export function MenuCard({
 
   return (
     <Link href={href} className="block w-full">
-      {cardContent}
+      <ViewTransition name={id}>{cardContent}</ViewTransition>
     </Link>
   );
 }

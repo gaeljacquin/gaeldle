@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent, ViewTransition } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useUser } from '@stackframe/stack';
+import { useUser } from '@hexclave/next';
 import {
   DEFAULT_IMAGE_GEN_NUM,
-  DEFAULT_IMAGE_GEN_STYLE,
+  DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
-  IMAGE_STYLES,
+  ART_STYLES,
 } from '@workspace/constants';
-import type { ImageStyle } from '@workspace/api-contract';
+import type { ArtStyle } from '@workspace/api-contract';
 import { bulkGenerateImages } from '@/lib/services/game.service';
 import { useBulkImageJob } from '@/lib/hooks/use-bulk-image-job';
 import { Button } from '@workspace/ui/button';
@@ -211,8 +211,8 @@ export default function BulkImageGen() {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
 
   const [numGames, setNumGames] = useState(DEFAULT_IMAGE_GEN_NUM);
-  const [imageStyle, setImageStyle] = useState<ImageStyle>(
-    DEFAULT_IMAGE_GEN_STYLE,
+  const [artStyle, setArtStyle] = useState<ArtStyle>(
+    DEFAULT_IMAGE_GEN_ART_STYLE,
   );
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
@@ -244,7 +244,7 @@ export default function BulkImageGen() {
     mutationFn: () =>
       bulkGenerateImages({
         numGames,
-        imageStyle,
+        artStyle: artStyle,
         includeStoryline,
         includeGenres,
         includeThemes,
@@ -267,159 +267,159 @@ export default function BulkImageGen() {
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-background">
-      {/* Sticky header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <DashboardPageHeader
-            title="Bulk Image Generation"
-            icon={IconRobotFace}
-          />
+    <ViewTransition>
+      <div className="flex flex-col min-h-full bg-background">
+        {/* Sticky header */}
+        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4">
+            <DashboardPageHeader
+              title="Bulk Image Generation"
+              icon={IconRobotFace}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Main content */}
-      <div className="container mx-auto px-4 py-8 flex-1">
-        <div className="max-w-lg space-y-6">
-          {/* Configuration form */}
-          <Card>
-            <CardContent>
-              <fieldset
-                disabled={startMutation.isPending || isJobActive}
-                className="space-y-5"
-              >
-                {/* Number of games */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="num-games" className="text-sm">
-                    Number of games ({IMAGE_GEN_MIN}–{IMAGE_GEN_MAX})
-                  </Label>
-                  <Input
-                    id="num-games"
-                    type="number"
-                    min={IMAGE_GEN_MIN}
-                    max={IMAGE_GEN_MAX}
-                    value={numGames}
-                    onChange={handleNumGamesChange}
-                    className="w-28"
-                  />
-                </div>
-
-                {/* Image style */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="image-style-trigger" className="text-sm">
-                    Image style
-                  </Label>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <Button
-                          id="image-style-trigger"
-                          variant="outline"
-                          className="w-80 justify-between font-normal"
-                        >
-                          <span className="truncate">
-                            {
-                              IMAGE_STYLES.find((s) => s.value === imageStyle)
-                                ?.label
-                            }
-                          </span>
-                          <IconChevronDown
-                            size={16}
-                            className="ml-2 shrink-0 text-muted-foreground"
-                            aria-hidden="true"
-                          />
-                        </Button>
-                      }
-                    />
-                    <DropdownMenuContent className="w-80 p-1">
-                      <DropdownMenuRadioGroup
-                        value={imageStyle}
-                        onValueChange={(val) =>
-                          setImageStyle(val as ImageStyle)
-                        }
-                      >
-                        {IMAGE_STYLES.map((style) => (
-                          <DropdownMenuRadioItem
-                            key={style.value}
-                            value={style.value}
-                            className="pl-3 data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
-                          >
-                            {style.label}
-                          </DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                {/* Checkboxes */}
-                <div className="space-y-3">
-                  <Label className="text-sm">Prompt extras</Label>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 cursor-pointer text-xs">
-                      <Checkbox
-                        checked={includeStoryline}
-                        onCheckedChange={(checked) =>
-                          setIncludeStoryline(checked === true)
-                        }
-                      />
-                      Include storyline
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer text-xs">
-                      <Checkbox
-                        checked={includeGenres}
-                        onCheckedChange={(checked) =>
-                          setIncludeGenres(checked === true)
-                        }
-                      />
-                      Include genres
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer text-xs">
-                      <Checkbox
-                        checked={includeThemes}
-                        onCheckedChange={(checked) =>
-                          setIncludeThemes(checked === true)
-                        }
-                      />
-                      Include themes
-                    </label>
-                  </div>
-                </div>
-
-                {/* Start button */}
-                <Button
-                  onClick={() => startMutation.mutate()}
+        {/* Main content */}
+        <div className="container mx-auto px-4 py-8 flex-1">
+          <div className="max-w-lg space-y-6">
+            {/* Configuration form */}
+            <Card>
+              <CardContent>
+                <fieldset
                   disabled={startMutation.isPending || isJobActive}
-                  className="cursor-pointer flex items-center gap-2"
+                  className="space-y-5"
                 >
-                  {startMutation.isPending ? (
-                    <IconLoader
-                      size={16}
-                      className="animate-spin"
-                      aria-hidden="true"
+                  {/* Number of games */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="num-games" className="text-sm">
+                      Number of games ({IMAGE_GEN_MIN}–{IMAGE_GEN_MAX})
+                    </Label>
+                    <Input
+                      id="num-games"
+                      type="number"
+                      min={IMAGE_GEN_MIN}
+                      max={IMAGE_GEN_MAX}
+                      value={numGames}
+                      onChange={handleNumGamesChange}
+                      className="w-28"
                     />
-                  ) : (
-                    <IconPlayerPlay size={16} aria-hidden="true" />
+                  </div>
+
+                  {/* Art style */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="art-style-trigger" className="text-sm">
+                      Art style
+                    </Label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            id="art-style-trigger"
+                            variant="outline"
+                            className="w-80 justify-between font-normal"
+                          >
+                            <span className="truncate">
+                              {
+                                ART_STYLES.find((s) => s.value === artStyle)
+                                  ?.label
+                              }
+                            </span>
+                            <IconChevronDown
+                              size={16}
+                              className="ml-2 shrink-0 text-muted-foreground"
+                              aria-hidden="true"
+                            />
+                          </Button>
+                        }
+                      />
+                      <DropdownMenuContent className="w-80 p-1 bg-muted">
+                        <DropdownMenuRadioGroup
+                          value={artStyle}
+                          onValueChange={(val) => setArtStyle(val as ArtStyle)}
+                        >
+                          {ART_STYLES.map((style) => (
+                            <DropdownMenuRadioItem
+                              key={style.value}
+                              value={style.value}
+                              className="pl-3 data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
+                            >
+                              {style.label}
+                            </DropdownMenuRadioItem>
+                          ))}
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  {/* Checkboxes */}
+                  <div className="space-y-3">
+                    <Label className="text-sm">Prompt extras</Label>
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs">
+                        <Checkbox
+                          checked={includeStoryline}
+                          onCheckedChange={(checked) =>
+                            setIncludeStoryline(checked === true)
+                          }
+                        />
+                        Include storyline
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer text-xs">
+                        <Checkbox
+                          checked={includeGenres}
+                          onCheckedChange={(checked) =>
+                            setIncludeGenres(checked === true)
+                          }
+                        />
+                        Include genres
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer text-xs">
+                        <Checkbox
+                          checked={includeThemes}
+                          onCheckedChange={(checked) =>
+                            setIncludeThemes(checked === true)
+                          }
+                        />
+                        Include themes
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Start button */}
+                  <Button
+                    onClick={() => startMutation.mutate()}
+                    disabled={startMutation.isPending || isJobActive}
+                    className="cursor-pointer flex items-center gap-2"
+                  >
+                    {startMutation.isPending ? (
+                      <IconLoader
+                        size={16}
+                        className="animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <IconPlayerPlay size={16} aria-hidden="true" />
+                    )}
+                    {isJobActive ? 'Job already running' : 'Start Generation'}
+                  </Button>
+
+                  {isJobActive && (
+                    <p className="text-xs text-muted-foreground">
+                      A job is currently active. Wait for it to finish before
+                      starting a new one.
+                    </p>
                   )}
-                  {isJobActive ? 'Job already running' : 'Start Generation'}
-                </Button>
+                </fieldset>
+              </CardContent>
+            </Card>
 
-                {isJobActive && (
-                  <p className="text-xs text-muted-foreground">
-                    A job is currently active. Wait for it to finish before
-                    starting a new one.
-                  </p>
-                )}
-              </fieldset>
-            </CardContent>
-          </Card>
-
-          {/* Active job panel */}
-          {activeJobId && (
-            <ActiveJobPanel jobId={activeJobId} accessToken={accessToken} />
-          )}
+            {/* Active job panel */}
+            {activeJobId && (
+              <ActiveJobPanel jobId={activeJobId} accessToken={accessToken} />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </ViewTransition>
   );
 }

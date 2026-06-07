@@ -4,28 +4,28 @@ import type { Request } from 'express';
 import type { JWTPayload } from 'jose';
 import { contract } from '@workspace/api-contract';
 import { DiscoverService } from '@/discover/discover.service';
-import { StackAuthGuard } from '@/auth/stack-auth.guard';
+import { HexclaveGuard } from '@/auth/hexclave.guard';
 
-type AuthenticatedRequest = Request & { stackAuth?: JWTPayload };
+type AuthenticatedRequest = Request & { hexclaveAuth?: JWTPayload };
 
 @Controller()
 export class DiscoverRouter {
   constructor(private readonly discoverService: DiscoverService) {}
 
   @Implement(contract.discover.scan)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   scan(@Req() req: AuthenticatedRequest) {
     return implement(contract.discover.scan).handler(({ input }) => {
-      const actorId = req.stackAuth?.sub ?? 'unknown';
+      const actorId = req.hexclaveAuth?.sub ?? 'unknown';
       return this.discoverService.scan(input.count, actorId);
     });
   }
 
   @Implement(contract.discover.apply)
-  @UseGuards(StackAuthGuard)
+  @UseGuards(HexclaveGuard)
   apply(@Req() req: AuthenticatedRequest) {
     return implement(contract.discover.apply).handler(({ input }) => {
-      const actorId = req.stackAuth?.sub ?? 'unknown';
+      const actorId = req.hexclaveAuth?.sub ?? 'unknown';
       return this.discoverService.apply(
         input.selectedIgdbIds,
         input.scanEventId,

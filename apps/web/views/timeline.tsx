@@ -1,6 +1,7 @@
 'use client';
 
-import { MAX_ATTEMPTS, useTimelineGame } from '@/lib/hooks/use-timeline-game';
+import { ViewTransition } from 'react';
+import { useTimelineGame } from '@/lib/hooks/use-timeline-game';
 import { TimelineCard } from '@/components/timeline-card';
 import { Button } from '@workspace/ui/button';
 import { Card, CardContent } from '@workspace/ui/card';
@@ -32,7 +33,11 @@ import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';
 import TimelineDevToggle from '@/components/timeline-dev-toggle';
 import { cn } from '@workspace/ui/lib/utils';
-import Stuck from '@/components/stuck';
+import { TimelineCardSkeleton } from '@/components/timeline-card-skeleton';
+import {
+  TIMELINE_GAMES_COUNT,
+  TIMELINE_MAX_ATTEMPTS,
+} from '@workspace/constants';
 
 const noOpStrategy: SortingStrategy = () => {
   return null;
@@ -158,10 +163,6 @@ export default function Timeline() {
     setActiveId(null);
   }
 
-  if (isLoading) {
-    return <Stuck stuckState="loading" />;
-  }
-
   if (error) {
     return (
       <div className="container mx-auto p-6 min-h-screen flex flex-col items-center justify-center gap-2 text-center">
@@ -186,206 +187,212 @@ export default function Timeline() {
   const buttonsDisabled = isOrderSameAsSaved() || hasMovedCorrectCard;
 
   return (
-    <div className="min-h-full bg-background text-foreground">
-      <div className="container mx-auto py-10">
-        <div className="relative mb-12">
-          <div className="text-center pt-8 md:pt-0">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">
-              {gameMode?.title}
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              {gameMode?.description}
-            </p>
+    <ViewTransition enter="slide-up">
+      <div className="min-h-full bg-background text-foreground">
+        <div className="container mx-auto py-10">
+          <div className="relative mb-12">
+            <div className="text-center pt-8 md:pt-0">
+              <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">
+                {gameMode?.title}
+              </h1>
+              <p className="mt-2 text-muted-foreground">
+                {gameMode?.description}
+              </p>
+            </div>
           </div>
-        </div>
 
-        <Card className="border shadow-none bg-muted/5">
-          <CardContent>
-            <div className="space-y-8">
-              <div className="rounded-none border-2 border-dashed border-border py-4 overflow-x-auto scrollbar-x bg-card/50">
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                  onDragCancel={handleDragCancel}
-                >
-                  <SortableContext
-                    items={userOrder.map((game) => game.id)}
-                    strategy={
-                      swapMode ? noOpStrategy : horizontalListSortingStrategy
-                    }
+          <Card className="border shadow-none bg-muted/5">
+            <CardContent>
+              <div className="space-y-8">
+                <div className="rounded-none border-2 border-dashed border-border py-4 overflow-x-auto scrollbar-x bg-card/50">
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                    onDragCancel={handleDragCancel}
                   >
-                    <div className="flex gap-6 min-w-max px-2 mx-auto">
-                      {userOrder.map((game, index) => {
-                        let isCorrect: boolean | undefined = undefined;
-                        let showDate = false;
-                        let isLocked = false;
+                    <SortableContext
+                      items={userOrder.map((game) => game.id)}
+                      strategy={
+                        swapMode ? noOpStrategy : horizontalListSortingStrategy
+                      }
+                    >
+                      <div className="flex gap-6 min-w-max px-2 mx-auto">
+                        {userOrder.length === 0 && isLoading
+                          ? Array.from({ length: TIMELINE_GAMES_COUNT }).map(
+                              (_, i) => <TimelineCardSkeleton key={i} />,
+                            )
+                          : userOrder.map((game, index) => {
+                              let isCorrect: boolean | undefined = undefined;
+                              let showDate = false;
+                              let isLocked = false;
 
-                        if (hasSubmitted) {
-                          const wasCorrect = correctGameIds.has(game.id);
-                          const isInCorrectPosition =
-                            correctPositionMap.get(index) === game.id;
+                              if (hasSubmitted) {
+                                const wasCorrect = correctGameIds.has(game.id);
+                                const isInCorrectPosition =
+                                  correctPositionMap.get(index) === game.id;
 
-                          if (wasCorrect && isInCorrectPosition) {
-                            isCorrect = true;
-                            showDate = true;
-                            isLocked = true;
-                          } else if (wasCorrect && !isInCorrectPosition) {
-                            isCorrect = undefined;
-                            showDate = true;
-                          } else {
-                            isCorrect = false;
-                          }
-                        }
+                                if (wasCorrect && isInCorrectPosition) {
+                                  isCorrect = true;
+                                  showDate = true;
+                                  isLocked = true;
+                                } else if (wasCorrect && !isInCorrectPosition) {
+                                  isCorrect = undefined;
+                                  showDate = true;
+                                } else {
+                                  isCorrect = false;
+                                }
+                              }
 
-                        return (
-                          <SortableCard
-                            key={game.id}
-                            game={game}
-                            isCorrect={isCorrect}
-                            showDate={showDate}
-                            disabled={isLocked || isGameOver}
-                            isGameOver={isGameOver}
-                          />
-                        );
-                      })}
-                    </div>
-                  </SortableContext>
+                              return (
+                                <SortableCard
+                                  key={game.id}
+                                  game={game}
+                                  isCorrect={isCorrect}
+                                  showDate={showDate}
+                                  disabled={isLocked || isGameOver}
+                                  isGameOver={isGameOver}
+                                />
+                              );
+                            })}
+                      </div>
+                    </SortableContext>
 
-                  <DragOverlay>
-                    {activeGame ? (
-                      <TimelineCard
-                        game={activeGame}
-                        className="opacity-100 ring-2 ring-primary"
-                      />
-                    ) : null}
-                  </DragOverlay>
-                </DndContext>
-              </div>
-
-              <div className="flex flex-col items-center gap-6">
-                <div className="flex items-center gap-2 border p-1 bg-muted/20">
-                  <button
-                    onClick={() => setSwapMode(false)}
-                    className={cn(
-                      'px-6 py-2 text-sm font-bold transition-colors cursor-pointer',
-                      swapMode
-                        ? 'text-muted-foreground hover:text-foreground'
-                        : 'bg-primary text-primary-foreground',
-                    )}
-                    disabled={isGameOver}
-                  >
-                    Shift
-                  </button>
-                  <button
-                    onClick={() => setSwapMode(true)}
-                    className={cn(
-                      'px-6 py-2 text-sm font-bold transition-colors cursor-pointer',
-                      swapMode
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground',
-                    )}
-                    disabled={isGameOver}
-                  >
-                    Swap
-                  </button>
+                    <DragOverlay>
+                      {activeGame ? (
+                        <TimelineCard
+                          game={activeGame}
+                          className="opacity-100 ring-2 ring-primary"
+                        />
+                      ) : null}
+                    </DragOverlay>
+                  </DndContext>
                 </div>
 
-                <div className="flex flex-col items-center gap-2">
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Attempts
-                  </p>
-                  <Attempts
-                    maxAttempts={MAX_ATTEMPTS}
-                    attemptsLeft={attemptsLeft}
-                    variant="primary"
-                  />
-                </div>
-              </div>
+                <div className="flex flex-col items-center gap-6">
+                  <div className="flex items-center gap-2 border p-1 bg-muted/20">
+                    <button
+                      onClick={() => setSwapMode(false)}
+                      className={cn(
+                        'px-6 py-2 text-sm font-bold transition-colors cursor-pointer',
+                        swapMode
+                          ? 'text-muted-foreground hover:text-foreground'
+                          : 'bg-primary text-primary-foreground',
+                      )}
+                      disabled={isGameOver}
+                    >
+                      Shift
+                    </button>
+                    <button
+                      onClick={() => setSwapMode(true)}
+                      className={cn(
+                        'px-6 py-2 text-sm font-bold transition-colors cursor-pointer',
+                        swapMode
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground',
+                      )}
+                      disabled={isGameOver}
+                    >
+                      Swap
+                    </button>
+                  </div>
 
-              {isGameOver ? null : (
-                <div className="flex flex-wrap items-center justify-center gap-4">
-                  <Button
-                    onClick={handleSubmit}
-                    size="lg"
-                    className="cursor-pointer font-bold px-8 py-4"
-                    disabled={buttonsDisabled}
-                  >
-                    Submit
-                  </Button>
-                  <Button
-                    onClick={handleResetToSaved}
-                    size="lg"
-                    variant="outline"
-                    className="cursor-pointer font-bold px-8 py-4"
-                    disabled={buttonsDisabled}
-                  >
-                    Reset
-                  </Button>
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                      Attempts
+                    </p>
+                    <Attempts
+                      maxAttempts={TIMELINE_MAX_ATTEMPTS}
+                      attemptsLeft={attemptsLeft}
+                      variant="primary"
+                    />
+                  </div>
                 </div>
-              )}
 
-              {isGameOver ? (
-                <div className="mt-8 border border-border bg-card/60 p-8 text-center animate-in fade-in zoom-in duration-300">
-                  {isWinner ? (
-                    <div className="space-y-2">
-                      <p className="text-2xl font-bold text-green-600">
-                        Congratulations!
-                      </p>
-                      <p className="text-muted-foreground">
-                        You arranged all games in the correct chronological
-                        order!
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
+                {isGameOver ? null : (
+                  <div className="flex flex-wrap items-center justify-center gap-4">
+                    <Button
+                      onClick={handleSubmit}
+                      size="lg"
+                      className="cursor-pointer font-bold px-8 py-4"
+                      disabled={buttonsDisabled}
+                    >
+                      Submit
+                    </Button>
+                    <Button
+                      onClick={handleResetToSaved}
+                      size="lg"
+                      variant="outline"
+                      className="cursor-pointer font-bold px-8 py-4"
+                      disabled={buttonsDisabled}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                )}
+
+                {isGameOver ? (
+                  <div className="mt-8 border border-border bg-card/60 p-8 text-center animate-in fade-in zoom-in duration-300">
+                    {isWinner ? (
                       <div className="space-y-2">
-                        <p className="text-2xl font-bold text-destructive">
-                          Game Over!
+                        <p className="text-2xl font-bold text-green-600">
+                          Congratulations!
                         </p>
                         <p className="text-muted-foreground">
-                          Here&apos;s the correct order:
+                          You arranged all games in the correct chronological
+                          order!
                         </p>
                       </div>
+                    ) : (
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <p className="text-2xl font-bold text-destructive">
+                            Game Over!
+                          </p>
+                          <p className="text-muted-foreground">
+                            Here&apos;s the correct order:
+                          </p>
+                        </div>
 
-                      <div className="rounded-none border-2 border-dashed border-border p-6 overflow-x-auto bg-card/50">
-                        <div className="flex gap-6 min-w-max justify-center">
-                          {getCorrectOrder().map((game) => (
-                            <TimelineCard
-                              key={game.id}
-                              game={game}
-                              isCorrect={true}
-                              showDate={true}
-                            />
-                          ))}
+                        <div className="rounded-none border-2 border-dashed border-border p-6 overflow-x-auto bg-card/50">
+                          <div className="flex gap-6 min-w-max justify-center">
+                            {getCorrectOrder().map((game) => (
+                              <TimelineCard
+                                key={game.id}
+                                game={game}
+                                isCorrect={true}
+                                showDate={true}
+                              />
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  <Button
-                    onClick={resetGame}
-                    size="lg"
-                    className="mt-8 cursor-pointer font-bold px-12"
-                  >
-                    {isWinner ? 'Keep Playing' : 'Play Again'}
-                  </Button>
-                </div>
-              ) : null}
-            </div>
-          </CardContent>
-        </Card>
+                    <Button
+                      onClick={resetGame}
+                      size="lg"
+                      className="mt-8 cursor-pointer font-bold px-12"
+                    >
+                      {isWinner ? 'Keep Playing' : 'Play Again'}
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            </CardContent>
+          </Card>
 
-        <div className="mx-auto mt-8 max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
-          <TimelineDevToggle
-            getCorrectOrder={getCorrectOrder}
-            attemptsLeft={attemptsLeft}
-            maxAttempts={MAX_ATTEMPTS}
-            onAdjustAttempts={adjustAttempts}
-          />
+          <div className="mx-auto mt-8 max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
+            <TimelineDevToggle
+              getCorrectOrder={getCorrectOrder}
+              attemptsLeft={attemptsLeft}
+              maxAttempts={TIMELINE_MAX_ATTEMPTS}
+              onAdjustAttempts={adjustAttempts}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </ViewTransition>
   );
 }

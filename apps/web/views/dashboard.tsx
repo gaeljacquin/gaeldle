@@ -49,6 +49,7 @@ import { Checkbox } from '@workspace/ui/checkbox';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { DashboardPageHeader } from '@/components/dashboard-header';
+import { Timeline2CardSkeleton } from '@/components/timeline-2-card-skeleton';
 
 type SortOption =
   | 'name-asc'
@@ -214,31 +215,52 @@ export default function Dashboard() {
   };
 
   const dataLengthZero = () => {
-    return data?.data.length === 0 ? (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="rounded-full bg-muted p-6 mb-4">
-          <IconSearch size={48} className="text-muted-foreground/40" />
+    if (!data || isLoading) {
+      return (
+        <div
+          className={cn(
+            'grid gap-6',
+            view === 'grid'
+              ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 justify-items-start'
+              : 'grid-cols-1',
+          )}
+        >
+          {Array.from({ length: Number.parseInt(pageSize, 10) }).map((_, i) => (
+            <Timeline2CardSkeleton key={i} className="sm:w-36 sm:h-56" />
+          ))}
         </div>
-        <h3 className="text-lg font-semibold">No games found</h3>
-        <p className="text-muted-foreground max-w-xs mx-auto">
-          {search || searchIgdbId
-            ? `We couldn't find any games matching your search criteria.`
-            : 'The library is currently empty.'}
-        </p>
-        {(search || searchIgdbId) && (
-          <Button
-            variant="link"
-            onClick={() => {
-              clearSearch();
-              clearSearchIgdbId();
-            }}
-            className="mt-2"
-          >
-            Clear search
-          </Button>
-        )}
-      </div>
-    ) : (
+      );
+    }
+
+    if (data.data.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="rounded-full bg-muted p-6 mb-4">
+            <IconSearch size={48} className="text-muted-foreground/40" />
+          </div>
+          <h3 className="text-lg font-semibold">No games found</h3>
+          <p className="text-muted-foreground max-w-xs mx-auto">
+            {search || searchIgdbId
+              ? `We couldn't find any games matching your search criteria.`
+              : 'The library is currently empty.'}
+          </p>
+          {(search || searchIgdbId) && (
+            <Button
+              variant="link"
+              onClick={() => {
+                clearSearch();
+                clearSearchIgdbId();
+              }}
+              className="mt-2"
+            >
+              Clear search
+            </Button>
+          )}
+        </div>
+      );
+    }
+
+    return (
       <div className="space-y-8">
         <div
           className={cn(
@@ -288,12 +310,14 @@ export default function Dashboard() {
                       : 'shrink-0',
                   )}
                 >
-                  <Timeline2Card
-                    game={game}
-                    showTopBanner={false}
-                    bannerColor={selectedIds.has(game.id) ? 'red' : 'none'}
-                    className={cn(view === 'grid' && 'sm:w-36 sm:h-52')}
-                  />
+                  <ViewTransition name={`game-details-${game.igdbId}`}>
+                    <Timeline2Card
+                      game={game}
+                      showTopBanner={false}
+                      bannerColor={selectedIds.has(game.id) ? 'red' : 'none'}
+                      className={cn(view === 'grid' && 'sm:w-36 sm:h-52')}
+                    />
+                  </ViewTransition>
                 </Link>
               </div>
 
@@ -384,7 +408,7 @@ export default function Dashboard() {
                   <div className="relative w-full sm:w-64 group">
                     <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
                     <Input
-                      placeholder="Search by IGDB ID..."
+                      placeholder="Search games by IGDB ID..."
                       className="pl-9 pr-9"
                       value={searchIgdbId}
                       onChange={handleSearchIgdbIdChange}
@@ -421,7 +445,7 @@ export default function Dashboard() {
                       }
                     />
                     <DropdownMenuContent
-                      className="w-(--anchor-width) min-w-0 p-1"
+                      className="w-(--anchor-width) min-w-0 p-1 bg-muted"
                       align="end"
                     >
                       <DropdownMenuRadioGroup
@@ -461,7 +485,7 @@ export default function Dashboard() {
                       }
                     />
                     <DropdownMenuContent
-                      className="w-(--anchor-width) min-w-0 p-1"
+                      className="w-(--anchor-width) min-w-0 p-1 bg-muted"
                       align="end"
                     >
                       <DropdownMenuRadioGroup
@@ -682,14 +706,7 @@ export default function Dashboard() {
         </div>
 
         <div className="container mx-auto px-4 py-8 flex-1">
-          {isLoading && !data ? (
-            <div className="flex flex-col items-center justify-center py-24 space-y-4 text-muted-foreground">
-              <div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
-              <p className="text-sm font-medium">Loading your library...</p>
-            </div>
-          ) : (
-            dataLengthZero()
-          )}
+          {dataLengthZero()}
         </div>
       </div>
     </ViewTransition>

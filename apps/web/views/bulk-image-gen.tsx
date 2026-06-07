@@ -332,7 +332,7 @@ export default function BulkImageGen() {
                           </Button>
                         }
                       />
-                      <DropdownMenuContent className="w-80 p-1">
+                      <DropdownMenuContent className="w-80 p-1 bg-muted">
                         <DropdownMenuRadioGroup
                           value={imageStyle}
                           onValueChange={(val) =>

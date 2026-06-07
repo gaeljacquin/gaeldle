@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, ChangeEvent } from 'react';
+import { ChangeEvent, useMemo, useState, ViewTransition } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getPaginatedGames,
@@ -353,343 +353,345 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-background">
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-30">
-        <div className="container mx-auto px-4 py-4 space-y-4">
-          <DashboardPageHeader title="Dashboard" icon={IconDashboard} />
+    <ViewTransition>
+      <div className="flex flex-col min-h-full bg-background">
+        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-30">
+          <div className="container mx-auto px-4 py-4 space-y-4">
+            <DashboardPageHeader title="Dashboard" icon={IconDashboard} />
 
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
-              <div className="flex flex-col sm:flex-row flex-1 gap-4">
-                <div className="relative flex-1 group">
-                  <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
-                  <Input
-                    placeholder="Search games by title..."
-                    className="px-9"
-                    value={search}
-                    onChange={handleSearchChange}
-                  />
-                  {search ? (
-                    <button
-                      onClick={clearSearch}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 cursor-pointer"
-                      title="Clear search"
-                    >
-                      <IconX size={14} />
-                    </button>
-                  ) : null}
-                </div>
-
-                <div className="relative w-full sm:w-64 group">
-                  <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
-                  <Input
-                    placeholder="Search by IGDB ID..."
-                    className="pl-9 pr-9"
-                    value={searchIgdbId}
-                    onChange={handleSearchIgdbIdChange}
-                  />
-                  {searchIgdbId ? (
-                    <button
-                      onClick={clearSearchIgdbId}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 cursor-pointer"
-                      title="Clear search"
-                    >
-                      <IconX size={14} />
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 justify-between sm:justify-end">
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        variant="outline"
-                        size="default"
-                        className="flex-1 sm:w-40 sm:flex-none justify-between px-4 font-normal cursor-pointer"
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
+                <div className="flex flex-col sm:flex-row flex-1 gap-4">
+                  <div className="relative flex-1 group">
+                    <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
+                    <Input
+                      placeholder="Search games by title..."
+                      className="px-9"
+                      value={search}
+                      onChange={handleSearchChange}
+                    />
+                    {search ? (
+                      <button
+                        onClick={clearSearch}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 cursor-pointer"
+                        title="Clear search"
                       >
-                        <span className="truncate">
-                          {
-                            SORT_OPTIONS.find((opt) => opt.value === sort)
-                              ?.label
-                          }
-                        </span>
-                        <IconSelector className="text-muted-foreground size-4 shrink-0" />
-                      </Button>
-                    }
-                  />
-                  <DropdownMenuContent
-                    className="w-(--anchor-width) min-w-0 p-1"
-                    align="end"
-                  >
-                    <DropdownMenuRadioGroup
-                      value={sort}
-                      onValueChange={(val) => {
-                        if (val !== sort) {
-                          setSort(val as SortOption);
-                          setPage(1);
-                        }
-                      }}
+                        <IconX size={14} />
+                      </button>
+                    ) : null}
+                  </div>
+
+                  <div className="relative w-full sm:w-64 group">
+                    <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
+                    <Input
+                      placeholder="Search by IGDB ID..."
+                      className="pl-9 pr-9"
+                      value={searchIgdbId}
+                      onChange={handleSearchIgdbIdChange}
+                    />
+                    {searchIgdbId ? (
+                      <button
+                        onClick={clearSearchIgdbId}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 cursor-pointer"
+                        title="Clear search"
+                      >
+                        <IconX size={14} />
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 justify-between sm:justify-end">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          variant="outline"
+                          size="default"
+                          className="flex-1 sm:w-40 sm:flex-none justify-between px-4 font-normal cursor-pointer"
+                        >
+                          <span className="truncate">
+                            {
+                              SORT_OPTIONS.find((opt) => opt.value === sort)
+                                ?.label
+                            }
+                          </span>
+                          <IconSelector className="text-muted-foreground size-4 shrink-0" />
+                        </Button>
+                      }
+                    />
+                    <DropdownMenuContent
+                      className="w-(--anchor-width) min-w-0 p-1"
+                      align="end"
                     >
-                      {SORT_OPTIONS.map((opt) => (
+                      <DropdownMenuRadioGroup
+                        value={sort}
+                        onValueChange={(val) => {
+                          if (val !== sort) {
+                            setSort(val as SortOption);
+                            setPage(1);
+                          }
+                        }}
+                      >
+                        {SORT_OPTIONS.map((opt) => (
+                          <DropdownMenuRadioItem
+                            key={opt.value}
+                            value={opt.value}
+                            className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
+                            closeOnClick={true}
+                          >
+                            {opt.label}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          variant="outline"
+                          size="default"
+                          className="flex-1 sm:w-20 sm:flex-none justify-between px-4 font-normal cursor-pointer"
+                        >
+                          <span>{pageSize}</span>
+                          <IconSelector className="text-muted-foreground size-4 shrink-0" />
+                        </Button>
+                      }
+                    />
+                    <DropdownMenuContent
+                      className="w-(--anchor-width) min-w-0 p-1"
+                      align="end"
+                    >
+                      <DropdownMenuRadioGroup
+                        value={pageSize}
+                        onValueChange={(val) => {
+                          if (val !== pageSize) {
+                            handlePageSizeChange(val);
+                          }
+                        }}
+                      >
                         <DropdownMenuRadioItem
-                          key={opt.value}
-                          value={opt.value}
+                          value="10"
                           className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
                           closeOnClick={true}
                         >
-                          {opt.label}
+                          10
                         </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        variant="outline"
-                        size="default"
-                        className="flex-1 sm:w-20 sm:flex-none justify-between px-4 font-normal cursor-pointer"
-                      >
-                        <span>{pageSize}</span>
-                        <IconSelector className="text-muted-foreground size-4 shrink-0" />
-                      </Button>
-                    }
-                  />
-                  <DropdownMenuContent
-                    className="w-(--anchor-width) min-w-0 p-1"
-                    align="end"
-                  >
-                    <DropdownMenuRadioGroup
-                      value={pageSize}
-                      onValueChange={(val) => {
-                        if (val !== pageSize) {
-                          handlePageSizeChange(val);
-                        }
-                      }}
-                    >
-                      <DropdownMenuRadioItem
-                        value="10"
-                        className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
-                        closeOnClick={true}
-                      >
-                        10
-                      </DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem
-                        value="25"
-                        className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
-                        closeOnClick={true}
-                      >
-                        25
-                      </DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem
-                        value="50"
-                        className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
-                        closeOnClick={true}
-                      >
-                        50
-                      </DropdownMenuRadioItem>
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="flex flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-                <div className="flex bg-muted p-1 border border-border">
-                  <Button
-                    variant={view === 'grid' ? 'default' : 'ghost'}
-                    size="icon"
-                    onClick={() => setView('grid')}
-                    title="Grid view"
-                    className="cursor-pointer"
-                  >
-                    <IconLayoutGrid size={20} />
-                  </Button>
-                  <Button
-                    variant={view === 'list' ? 'default' : 'ghost'}
-                    size="icon"
-                    onClick={() => setView('list')}
-                    title="List view"
-                    className="cursor-pointer"
-                  >
-                    <IconList size={20} />
-                  </Button>
+                        <DropdownMenuRadioItem
+                          value="25"
+                          className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
+                          closeOnClick={true}
+                        >
+                          25
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem
+                          value="50"
+                          className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
+                          closeOnClick={true}
+                        >
+                          50
+                        </DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
+              </div>
 
-                <div className="flex flex-row-reverse md:flex-row items-center gap-4">
-                  <Button
-                    variant={isMultiSelect ? 'default' : 'outline'}
-                    size="icon-lg"
-                    onClick={() => {
-                      setIsMultiSelect(!isMultiSelect);
-                      if (isMultiSelect) clearSelection();
-                    }}
-                    title="Multi-select"
-                    className={cn(
-                      'cursor-pointer size-10',
-                      isMultiSelect && 'bg-primary text-primary-foreground',
-                    )}
-                  >
-                    <IconChecklist size={22} />
-                  </Button>
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+                  <div className="flex bg-muted p-1 border border-border">
+                    <Button
+                      variant={view === 'grid' ? 'default' : 'ghost'}
+                      size="icon"
+                      onClick={() => setView('grid')}
+                      title="Grid view"
+                      className="cursor-pointer"
+                    >
+                      <IconLayoutGrid size={20} />
+                    </Button>
+                    <Button
+                      variant={view === 'list' ? 'default' : 'ghost'}
+                      size="icon"
+                      onClick={() => setView('list')}
+                      title="List view"
+                      className="cursor-pointer"
+                    >
+                      <IconList size={20} />
+                    </Button>
+                  </div>
 
-                  {isMultiSelect && (
-                    <div className="flex items-center gap-4 animate-in fade-in md:slide-in-from-left-4 slide-in-from-right-4 duration-300">
-                      <AlertDialog
-                        open={isDeleteDialogOpen}
-                        onOpenChange={setIsDeleteDialogOpen}
-                      >
+                  <div className="flex flex-row-reverse md:flex-row items-center gap-4">
+                    <Button
+                      variant={isMultiSelect ? 'default' : 'outline'}
+                      size="icon-lg"
+                      onClick={() => {
+                        setIsMultiSelect(!isMultiSelect);
+                        if (isMultiSelect) clearSelection();
+                      }}
+                      title="Multi-select"
+                      className={cn(
+                        'cursor-pointer size-10',
+                        isMultiSelect && 'bg-primary text-primary-foreground',
+                      )}
+                    >
+                      <IconChecklist size={22} />
+                    </Button>
+
+                    {isMultiSelect && (
+                      <div className="flex items-center gap-4 animate-in fade-in md:slide-in-from-left-4 slide-in-from-right-4 duration-300">
+                        <AlertDialog
+                          open={isDeleteDialogOpen}
+                          onOpenChange={setIsDeleteDialogOpen}
+                        >
+                          <Button
+                            variant="default"
+                            size="sm"
+                            disabled={
+                              selectedIds.size === 0 || deleteMutation.isPending
+                            }
+                            onClick={() => setIsDeleteDialogOpen(true)}
+                            className={cn(
+                              'h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                              selectedIds.size === 0 || deleteMutation.isPending
+                                ? 'cursor-not-allowed'
+                                : 'cursor-pointer',
+                            )}
+                          >
+                            <IconTrash size={16} className="mr-2" />
+                            Delete ({selectedIds.size})
+                          </Button>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Are you absolutely sure?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will
+                                permanently delete {selectedIds.size}{' '}
+                                {selectedIds.size === 1 ? 'game' : 'games'} from
+                                your library.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="cursor-pointer">
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                variant="destructive"
+                                onClick={handleBulkDelete}
+                                className="cursor-pointer"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                         <Button
-                          variant="default"
+                          variant="outline"
                           size="sm"
-                          disabled={
-                            selectedIds.size === 0 || deleteMutation.isPending
-                          }
-                          onClick={() => setIsDeleteDialogOpen(true)}
+                          onClick={clearSelection}
+                          disabled={selectedIds.size === 0}
                           className={cn(
-                            'h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                            'h-10',
                             selectedIds.size === 0 || deleteMutation.isPending
                               ? 'cursor-not-allowed'
                               : 'cursor-pointer',
                           )}
                         >
-                          <IconTrash size={16} className="mr-2" />
-                          Delete ({selectedIds.size})
+                          Clear
                         </Button>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Are you absolutely sure?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will
-                              permanently delete {selectedIds.size}{' '}
-                              {selectedIds.size === 1 ? 'game' : 'games'} from
-                              your library.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="cursor-pointer">
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              variant="destructive"
-                              onClick={handleBulkDelete}
-                              className="cursor-pointer"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                    <div className="text-sm text-muted-foreground whitespace-nowrap order-2 sm:order-1">
+                      Showing{' '}
+                      <span className="font-medium text-foreground">
+                        {(page - 1) * Number.parseInt(pageSize, 10) + 1}
+                      </span>{' '}
+                      to{' '}
+                      <span className="font-medium text-foreground">
+                        {Math.min(
+                          page * Number.parseInt(pageSize, 10),
+                          data?.meta?.total || 0,
+                        )}
+                      </span>{' '}
+                      of{' '}
+                      <span className="font-medium text-foreground">
+                        {data?.meta?.total || 0}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1 order-1 sm:order-2">
                       <Button
                         variant="outline"
-                        size="sm"
-                        onClick={clearSelection}
-                        disabled={selectedIds.size === 0}
-                        className={cn(
-                          'h-10',
-                          selectedIds.size === 0 || deleteMutation.isPending
-                            ? 'cursor-not-allowed'
-                            : 'cursor-pointer',
-                        )}
+                        size="icon-xs"
+                        disabled={page === 1}
+                        onClick={() => setPage((p) => p - 1)}
+                        className="size-8 cursor-pointer"
                       >
-                        Clear
+                        <IconChevronLeft size={16} />
+                      </Button>
+
+                      <div className="flex items-center gap-1 mx-1">
+                        {paginationRange.map((p, i) =>
+                          p === '...' ? (
+                            <span
+                              key={`dots-${i + 1}`}
+                              className="w-8 flex justify-center text-muted-foreground select-none"
+                            >
+                              ...
+                            </span>
+                          ) : (
+                            <Button
+                              key={p}
+                              variant={page === p ? 'default' : 'ghost'}
+                              size="icon-xs"
+                              className={cn(
+                                'size-8 cursor-pointer',
+                                page === p && 'pointer-events-none',
+                              )}
+                              onClick={() => setPage(p as number)}
+                            >
+                              {p}
+                            </Button>
+                          ),
+                        )}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="icon-xs"
+                        disabled={page === totalPages}
+                        onClick={() => setPage((p) => p + 1)}
+                        className="size-8 cursor-pointer"
+                      >
+                        <IconChevronRight size={16} />
                       </Button>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
-
-              {totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                  <div className="text-sm text-muted-foreground whitespace-nowrap order-2 sm:order-1">
-                    Showing{' '}
-                    <span className="font-medium text-foreground">
-                      {(page - 1) * Number.parseInt(pageSize, 10) + 1}
-                    </span>{' '}
-                    to{' '}
-                    <span className="font-medium text-foreground">
-                      {Math.min(
-                        page * Number.parseInt(pageSize, 10),
-                        data?.meta?.total || 0,
-                      )}
-                    </span>{' '}
-                    of{' '}
-                    <span className="font-medium text-foreground">
-                      {data?.meta?.total || 0}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1 order-1 sm:order-2">
-                    <Button
-                      variant="outline"
-                      size="icon-xs"
-                      disabled={page === 1}
-                      onClick={() => setPage((p) => p - 1)}
-                      className="size-8 cursor-pointer"
-                    >
-                      <IconChevronLeft size={16} />
-                    </Button>
-
-                    <div className="flex items-center gap-1 mx-1">
-                      {paginationRange.map((p, i) =>
-                        p === '...' ? (
-                          <span
-                            key={`dots-${i + 1}`}
-                            className="w-8 flex justify-center text-muted-foreground select-none"
-                          >
-                            ...
-                          </span>
-                        ) : (
-                          <Button
-                            key={p}
-                            variant={page === p ? 'default' : 'ghost'}
-                            size="icon-xs"
-                            className={cn(
-                              'size-8 cursor-pointer',
-                              page === p && 'pointer-events-none',
-                            )}
-                            onClick={() => setPage(p as number)}
-                          >
-                            {p}
-                          </Button>
-                        ),
-                      )}
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      size="icon-xs"
-                      disabled={page === totalPages}
-                      onClick={() => setPage((p) => p + 1)}
-                      className="size-8 cursor-pointer"
-                    >
-                      <IconChevronRight size={16} />
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-8 flex-1">
-        {isLoading && !data ? (
-          <div className="flex flex-col items-center justify-center py-24 space-y-4 text-muted-foreground">
-            <div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
-            <p className="text-sm font-medium">Loading your library...</p>
-          </div>
-        ) : (
-          dataLengthZero()
-        )}
+        <div className="container mx-auto px-4 py-8 flex-1">
+          {isLoading && !data ? (
+            <div className="flex flex-col items-center justify-center py-24 space-y-4 text-muted-foreground">
+              <div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
+              <p className="text-sm font-medium">Loading your library...</p>
+            </div>
+          ) : (
+            dataLengthZero()
+          )}
+        </div>
       </div>
-    </div>
+    </ViewTransition>
   );
 }

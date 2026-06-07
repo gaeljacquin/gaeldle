@@ -1,6 +1,12 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  ViewTransition,
+} from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useUser } from '@hexclave/next';
 import { replaceGameByIdgbId } from '@/lib/services/game.service';
@@ -243,106 +249,111 @@ export default function ReplaceGameByIgdbId() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-full bg-background">
-      {/* Sticky header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <DashboardPageHeader title="Replace Game" icon={IconArrowsExchange} />
+    <ViewTransition>
+      <div className="flex flex-col min-h-full bg-background">
+        {/* Sticky header */}
+        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4">
+            <DashboardPageHeader
+              title="Replace Game"
+              icon={IconArrowsExchange}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Main content */}
-      <div className="container mx-auto px-4 py-8 flex-1">
-        <div className="max-w-2xl space-y-6">
-          {/* Input form */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Up to {REPLACE_GAME_MAX_ROWS} games.</CardTitle>
-                  <CardDescription />
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={handleAddRow}
-                  disabled={
-                    rows.length >= REPLACE_GAME_MAX_ROWS ||
-                    applyMutation.isPending
-                  }
-                  className="w-24 flex items-center gap-1.5 shrink-0 cursor-pointer"
-                >
-                  <IconPlus size={14} aria-hidden="true" />
-                  Add row
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {rows.map((row) => (
-                <RowWithValidation
-                  key={row.id}
-                  row={row}
-                  onCurrentChange={handleCurrentChange}
-                  onReplacementChange={handleReplacementChange}
-                  onRemove={handleRemove}
-                  canRemove={rows.length > 1}
-                  onValidationChange={handleValidationChange}
-                  isDuplicate={duplicateRowIds.has(row.id)}
-                />
-              ))}
-
-              {hasDuplicates ? (
-                <p className="text-xs text-destructive pt-1">
-                  Duplicate IGDB IDs detected. Fix or remove the highlighted
-                  rows before applying.
-                </p>
-              ) : null}
-
-              <div className="pt-2 flex items-center gap-3">
-                <Button
-                  type="button"
-                  onClick={() => applyMutation.mutate()}
-                  disabled={!allPairsValid || applyMutation.isPending}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  {applyMutation.isPending ? (
-                    <IconLoader
-                      size={16}
-                      className="animate-spin"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <IconPlayerPlay size={16} aria-hidden="true" />
-                  )}
-                  Apply
-                </Button>
-                <span className="text-xs text-muted-foreground">
-                  {rows.length} / {REPLACE_GAME_MAX_ROWS} pairs
-                  {!allPairsValid && rows.length > 0 && (
-                    <> &mdash; all pairs must pass validation</>
-                  )}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Results table */}
-          {results !== null && (
+        {/* Main content */}
+        <div className="container mx-auto px-4 py-8 flex-1">
+          <div className="max-w-2xl space-y-6">
+            {/* Input form */}
             <Card>
               <CardHeader>
-                <CardTitle>Results</CardTitle>
-                <CardDescription>
-                  Post-update state from the database.
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Up to {REPLACE_GAME_MAX_ROWS} games.</CardTitle>
+                    <CardDescription />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={handleAddRow}
+                    disabled={
+                      rows.length >= REPLACE_GAME_MAX_ROWS ||
+                      applyMutation.isPending
+                    }
+                    className="w-24 flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  >
+                    <IconPlus size={14} aria-hidden="true" />
+                    Add row
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent className="p-0">
-                <ReplaceGameResultsTable results={results} />
+              <CardContent className="space-y-3">
+                {rows.map((row) => (
+                  <RowWithValidation
+                    key={row.id}
+                    row={row}
+                    onCurrentChange={handleCurrentChange}
+                    onReplacementChange={handleReplacementChange}
+                    onRemove={handleRemove}
+                    canRemove={rows.length > 1}
+                    onValidationChange={handleValidationChange}
+                    isDuplicate={duplicateRowIds.has(row.id)}
+                  />
+                ))}
+
+                {hasDuplicates ? (
+                  <p className="text-xs text-destructive pt-1">
+                    Duplicate IGDB IDs detected. Fix or remove the highlighted
+                    rows before applying.
+                  </p>
+                ) : null}
+
+                <div className="pt-2 flex items-center gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => applyMutation.mutate()}
+                    disabled={!allPairsValid || applyMutation.isPending}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    {applyMutation.isPending ? (
+                      <IconLoader
+                        size={16}
+                        className="animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <IconPlayerPlay size={16} aria-hidden="true" />
+                    )}
+                    Apply
+                  </Button>
+                  <span className="text-xs text-muted-foreground">
+                    {rows.length} / {REPLACE_GAME_MAX_ROWS} pairs
+                    {!allPairsValid && rows.length > 0 && (
+                      <> &mdash; all pairs must pass validation</>
+                    )}
+                  </span>
+                </div>
               </CardContent>
             </Card>
-          )}
+
+            {/* Results table */}
+            {results !== null && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Results</CardTitle>
+                  <CardDescription>
+                    Post-update state from the database.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <ReplaceGameResultsTable results={results} />
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </ViewTransition>
   );
 }

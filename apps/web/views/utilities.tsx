@@ -1,3 +1,4 @@
+import { ViewTransition } from 'react';
 import {
   IconCirclePlus,
   IconRobotFace,
@@ -41,27 +42,29 @@ const utilityItems = [
 
 export default function UtilitiesView() {
   return (
-    <div className="flex flex-col min-h-full bg-background">
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <DashboardPageHeader title="Utilities" icon={IconTools} />
+    <ViewTransition>
+      <div className="flex flex-col min-h-full bg-background">
+        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4">
+            <DashboardPageHeader title="Utilities" icon={IconTools} />
+          </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {utilityItems.map((item) => (
-            <MenuCard
-              key={item.href}
-              href={item.href}
-              title={item.title}
-              description={item.description}
-              icon={item.icon}
-              gradient={item.gradient}
-            />
-          ))}
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {utilityItems.map((item) => (
+              <MenuCard
+                key={item.href}
+                href={item.href}
+                title={item.title}
+                description={item.description}
+                icon={item.icon}
+                gradient={item.gradient}
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </ViewTransition>
   );
 }

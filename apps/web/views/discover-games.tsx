@@ -1,5 +1,6 @@
 'use client';
 
+import { ViewTransition } from 'react';
 import { useUser } from '@hexclave/next';
 import {
   IconZoomScan,
@@ -208,112 +209,120 @@ export function DiscoverGames() {
   ).length;
 
   return (
-    <div className="flex flex-col min-h-full bg-background">
-      {/* Sticky header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <DashboardPageHeader title="Discover Games" icon={IconZoomScan} />
+    <ViewTransition>
+      <div className="flex flex-col min-h-full bg-background">
+        {/* Sticky header */}
+        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4">
+            <DashboardPageHeader title="Discover Games" icon={IconZoomScan} />
+          </div>
         </div>
-      </div>
 
-      {/* Main content */}
-      <div className="container mx-auto px-4 py-8 flex-1">
-        <div className="max-w-2xl space-y-6">
-          {hasResults ? (
-            <>
-              {/* Summary + controls card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Results</CardTitle>
-                  <CardDescription className="mt-1">
-                    {candidates.length} candidate
-                    {candidates.length === 1 ? '' : 's'} returned &mdash;{' '}
-                    {candidates.filter((c) => c.isAlreadyAdded).length} already
-                    in library
-                    {appliedIds.size > 0
-                      ? `, ${appliedIds.size} just added`
-                      : null}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ResultsControls
-                    selectedCount={selectedIds.size}
-                    totalCount={candidates.length}
-                    newCount={newCount}
-                    canApply={canApply}
-                    isApplying={isApplying}
-                    isScanning={isScanning}
-                    onSelectAllNew={() =>
-                      selectAllNew(candidates as DiscoverCandidate[])
-                    }
-                    onDeselectAll={deselectAll}
-                    onApply={handleApply}
-                    onScanAgain={handleScan}
-                  />
-
-                  {/* Card grid */}
-                  <div
-                    className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
-                    aria-live="polite"
-                  >
-                    {candidates.map((candidate) => (
-                      <DiscoveredGameCard
-                        key={candidate.igdbId}
-                        igdbId={candidate.igdbId}
-                        name={candidate.name}
-                        firstReleaseDate={candidate.firstReleaseDate}
-                        coverUrl={candidate.coverUrl}
-                        isSelected={selectedIds.has(candidate.igdbId)}
-                        isAlreadyAdded={candidate.isAlreadyAdded}
-                        isApplied={appliedIds.has(candidate.igdbId)}
-                        isDisabled={isApplying}
-                        onToggle={toggleSelect}
-                      />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Post-apply results summary */}
-              {applyResults ? (
-                <Card aria-live="polite" aria-label="Apply results">
+        {/* Main content */}
+        <div className="container mx-auto px-4 py-8 flex-1">
+          <div className="max-w-2xl space-y-6">
+            {hasResults ? (
+              <>
+                {/* Summary + controls card */}
+                <Card>
                   <CardHeader>
                     <CardTitle>Results</CardTitle>
                     <CardDescription className="mt-1">
-                      {applyResults.filter((r) => r.status !== 'error').length}{' '}
-                      games added,{' '}
-                      {applyResults.filter((r) => r.status === 'error').length}{' '}
-                      error(s)
+                      {candidates.length} candidate
+                      {candidates.length === 1 ? '' : 's'} returned &mdash;{' '}
+                      {candidates.filter((c) => c.isAlreadyAdded).length}{' '}
+                      already in library
+                      {appliedIds.size > 0
+                        ? `, ${appliedIds.size} just added`
+                        : null}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-1">
-                    {applyResults.map((result) => (
-                      <ApplyResultsRow key={result.igdbId} result={result} />
-                    ))}
+                  <CardContent className="space-y-4">
+                    <ResultsControls
+                      selectedCount={selectedIds.size}
+                      totalCount={candidates.length}
+                      newCount={newCount}
+                      canApply={canApply}
+                      isApplying={isApplying}
+                      isScanning={isScanning}
+                      onSelectAllNew={() =>
+                        selectAllNew(candidates as DiscoverCandidate[])
+                      }
+                      onDeselectAll={deselectAll}
+                      onApply={handleApply}
+                      onScanAgain={handleScan}
+                    />
+
+                    {/* Card grid */}
+                    <div
+                      className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
+                      aria-live="polite"
+                    >
+                      {candidates.map((candidate) => (
+                        <DiscoveredGameCard
+                          key={candidate.igdbId}
+                          igdbId={candidate.igdbId}
+                          name={candidate.name}
+                          firstReleaseDate={candidate.firstReleaseDate}
+                          coverUrl={candidate.coverUrl}
+                          isSelected={selectedIds.has(candidate.igdbId)}
+                          isAlreadyAdded={candidate.isAlreadyAdded}
+                          isApplied={appliedIds.has(candidate.igdbId)}
+                          isDisabled={isApplying}
+                          onToggle={toggleSelect}
+                        />
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
-              ) : null}
-            </>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  Fetch up to {DISCOVER_GAMES_MAX} games from IGDB.
-                </CardTitle>
-                <CardDescription />
-              </CardHeader>
-              <CardContent>
-                <IdlePhase
-                  countInput={countInput}
-                  setCountInput={setCountInput}
-                  onScan={handleScan}
-                  isScanning={isScanning}
-                />
-              </CardContent>
-            </Card>
-          )}
+
+                {/* Post-apply results summary */}
+                {applyResults ? (
+                  <Card aria-live="polite" aria-label="Apply results">
+                    <CardHeader>
+                      <CardTitle>Results</CardTitle>
+                      <CardDescription className="mt-1">
+                        {
+                          applyResults.filter((r) => r.status !== 'error')
+                            .length
+                        }{' '}
+                        games added,{' '}
+                        {
+                          applyResults.filter((r) => r.status === 'error')
+                            .length
+                        }{' '}
+                        error(s)
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-1">
+                      {applyResults.map((result) => (
+                        <ApplyResultsRow key={result.igdbId} result={result} />
+                      ))}
+                    </CardContent>
+                  </Card>
+                ) : null}
+              </>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Fetch up to {DISCOVER_GAMES_MAX} games from IGDB.
+                  </CardTitle>
+                  <CardDescription />
+                </CardHeader>
+                <CardContent>
+                  <IdlePhase
+                    countInput={countInput}
+                    setCountInput={setCountInput}
+                    onScan={handleScan}
+                    isScanning={isScanning}
+                  />
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </ViewTransition>
   );
 }

@@ -30,8 +30,6 @@ import {
 } from '@workspace/ui/alert-dialog';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import {
-  IconLayoutGrid,
-  IconList,
   IconChevronLeft,
   IconChevronRight,
   IconSearch,
@@ -44,47 +42,43 @@ import {
   IconDeviceGamepad,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
-import { Game } from '@workspace/api-contract';
+import { Game, NumericString } from '@workspace/api-contract';
 import { Checkbox } from '@workspace/ui/checkbox';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 import { Timeline2CardSkeleton } from '@/components/timeline-2-card-skeleton';
-
-type SortOption =
-  | 'name-asc'
-  | 'name-desc'
-  | 'firstReleaseDate-asc'
-  | 'firstReleaseDate-desc'
-  | 'igdbId-asc'
-  | 'igdbId-desc';
-
-const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: 'name-asc', label: 'Title A→Z' },
-  { value: 'name-desc', label: 'Title Z→A' },
-  { value: 'firstReleaseDate-asc', label: 'Release Date ↑' },
-  { value: 'firstReleaseDate-desc', label: 'Release Date ↓' },
-  { value: 'igdbId-asc', label: 'IGDB ID ↑' },
-  { value: 'igdbId-desc', label: 'IGDB ID ↓' },
-];
+import {
+  type SortOption,
+  sortOptions,
+  useDashboardStore,
+  pageSizes,
+  viewOptions,
+} from '@/lib/stores/dashboard-store';
 
 export default function Dashboard() {
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState('10');
   const [search, setSearch] = useState('');
   const [searchIgdbId, setSearchIgdbId] = useState('');
-  const [sort, setSort] = useState<SortOption>('name-asc');
-  const [view, setView] = useState<'grid' | 'list'>('grid');
   const [isMultiSelect, setIsMultiSelect] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const {
+    sortOption,
+    setSortOption,
+    pageSize,
+    setPageSize,
+    page,
+    setPage,
+    view,
+    setView,
+  } = useDashboardStore();
 
   const queryClient = useQueryClient();
 
   const debouncedSearch = useDebounce(search, 500);
   const debouncedSearchIgdbId = useDebounce(searchIgdbId, 500);
 
-  const [sortBy, sortDir] = sort.split('-') as [
+  const [sortBy, sortDir] = sortOption.split('-') as [
     'name' | 'firstReleaseDate' | 'igdbId',
     'asc' | 'desc',
   ];
@@ -207,7 +201,7 @@ export default function Dashboard() {
     setPage(1);
   };
 
-  const handlePageSizeChange = (val: string | null) => {
+  const handlePageSizeChange = (val: NumericString | null) => {
     if (val) {
       setPageSize(val);
       setPage(1);
@@ -436,8 +430,9 @@ export default function Dashboard() {
                         >
                           <span className="truncate">
                             {
-                              SORT_OPTIONS.find((opt) => opt.value === sort)
-                                ?.label
+                              sortOptions.find(
+                                (opt) => opt.value === sortOption,
+                              )?.label
                             }
                           </span>
                           <IconSelector className="text-muted-foreground size-4 shrink-0" />
@@ -449,22 +444,21 @@ export default function Dashboard() {
                       align="end"
                     >
                       <DropdownMenuRadioGroup
-                        value={sort}
+                        value={sortOption}
                         onValueChange={(val) => {
-                          if (val !== sort) {
-                            setSort(val as SortOption);
-                            setPage(1);
+                          if (val !== sortOption) {
+                            setSortOption(val as SortOption);
                           }
                         }}
                       >
-                        {SORT_OPTIONS.map((opt) => (
+                        {sortOptions.map((sortOption) => (
                           <DropdownMenuRadioItem
-                            key={opt.value}
-                            value={opt.value}
+                            key={sortOption.value}
+                            value={sortOption.value}
                             className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
                             closeOnClick={true}
                           >
-                            {opt.label}
+                            {sortOption.label}
                           </DropdownMenuRadioItem>
                         ))}
                       </DropdownMenuRadioGroup>
@@ -496,27 +490,18 @@ export default function Dashboard() {
                           }
                         }}
                       >
-                        <DropdownMenuRadioItem
-                          value="10"
-                          className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
-                          closeOnClick={true}
-                        >
-                          10
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem
-                          value="25"
-                          className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
-                          closeOnClick={true}
-                        >
-                          25
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem
-                          value="50"
-                          className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
-                          closeOnClick={true}
-                        >
-                          50
-                        </DropdownMenuRadioItem>
+                        {pageSizes.map((pageSize, index) => {
+                          return (
+                            <DropdownMenuRadioItem
+                              key={index + '-' + pageSize}
+                              value={pageSize}
+                              className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
+                              closeOnClick={true}
+                            >
+                              {pageSize}
+                            </DropdownMenuRadioItem>
+                          );
+                        })}
                       </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -526,24 +511,20 @@ export default function Dashboard() {
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div className="flex flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-start">
                   <div className="flex bg-muted p-1 border border-border">
-                    <Button
-                      variant={view === 'grid' ? 'default' : 'ghost'}
-                      size="icon"
-                      onClick={() => setView('grid')}
-                      title="Grid view"
-                      className="cursor-pointer"
-                    >
-                      <IconLayoutGrid size={20} />
-                    </Button>
-                    <Button
-                      variant={view === 'list' ? 'default' : 'ghost'}
-                      size="icon"
-                      onClick={() => setView('list')}
-                      title="List view"
-                      className="cursor-pointer"
-                    >
-                      <IconList size={20} />
-                    </Button>
+                    {viewOptions.map((viewOption) => (
+                      <Button
+                        key={viewOption.value}
+                        variant={
+                          view === viewOption.value ? 'default' : 'ghost'
+                        }
+                        size="icon"
+                        onClick={() => setView(viewOption.value)}
+                        title={viewOption.label}
+                        className="cursor-pointer"
+                      >
+                        <viewOption.icon size={20} />
+                      </Button>
+                    ))}
                   </div>
 
                   <div className="flex flex-row-reverse md:flex-row items-center gap-4">

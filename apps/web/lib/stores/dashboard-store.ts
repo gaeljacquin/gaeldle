@@ -1,0 +1,64 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { type Icon, IconLayoutGrid, IconList } from '@tabler/icons-react';
+import { type NumericString } from '@workspace/api-contract';
+
+type SelectOption<T> = { value: T; label: string };
+
+export type SortOption =
+  | 'name-asc'
+  | 'name-desc'
+  | 'firstReleaseDate-asc'
+  | 'firstReleaseDate-desc'
+  | 'igdbId-asc'
+  | 'igdbId-desc';
+
+export type ViewOption = 'grid' | 'list';
+
+interface DashboardStore {
+  sortOption: SortOption;
+  setSortOption: (sortOption: SortOption) => void;
+  pageSize: NumericString;
+  setPageSize: (pageSize: NumericString) => void;
+  page: number;
+  setPage: (updater: number | ((prev: number) => number)) => void;
+  view: ViewOption;
+  setView: (view: ViewOption) => void;
+}
+
+export const sortOptions: SelectOption<SortOption>[] = [
+  { value: 'name-asc', label: 'Title A → Z' },
+  { value: 'name-desc', label: 'Title Z → A' },
+  { value: 'firstReleaseDate-asc', label: 'Release Date ↑' },
+  { value: 'firstReleaseDate-desc', label: 'Release Date ↓' },
+  { value: 'igdbId-asc', label: 'IGDB ID ↑' },
+  { value: 'igdbId-desc', label: 'IGDB ID ↓' },
+];
+
+export const pageSizes: NumericString[] = ['10', '25', '50'];
+
+export const viewOptions: (SelectOption<ViewOption> & { icon: Icon })[] = [
+  { value: 'grid', label: 'Grid view', icon: IconLayoutGrid },
+  { value: 'list', label: 'List view', icon: IconList },
+];
+
+export const useDashboardStore = create<DashboardStore>()(
+  persist(
+    (set) => ({
+      sortOption: 'name-asc',
+      setSortOption: (newSortOption) => set({ sortOption: newSortOption }),
+      pageSize: '10',
+      setPageSize: (newPageSize) => set({ pageSize: newPageSize }),
+      page: 1,
+      setPage: (updater) =>
+        set((state) => ({
+          page: typeof updater === 'function' ? updater(state.page) : updater,
+        })),
+      view: 'grid',
+      setView: (newView) => set({ view: newView }),
+    }),
+    {
+      name: 'dashboard-settings',
+    },
+  ),
+);

@@ -132,9 +132,7 @@ export function HealthView({
                   className="text-primary"
                   aria-hidden="true"
                 />
-                <h1 className="text-2xl font-bold tracking-tight">
-                  System Health
-                </h1>
+                <h1 className="text-2xl font-bold tracking-tight">Health</h1>
               </div>
               <p className="text-sm text-muted-foreground">
                 Live status of APIs and database.

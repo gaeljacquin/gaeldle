@@ -14,6 +14,7 @@ const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'Privacy', href: '/privacy' },
   { label: 'Terms', href: '/terms' },
+  { label: 'Health', href: '/health' },
 ];
 
 export function Navbar() {

@@ -10,3 +10,4 @@ export const contract = oc.prefix('/api').router({
 export * from './games';
 export * from './schema';
 export * from './discover';
+export * from './types';

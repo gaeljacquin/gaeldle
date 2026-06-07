@@ -87,11 +87,6 @@ export default function CoverDisplay({
 
   return (
     <div className={cn('relative overflow-hidden bg-muted border', className)}>
-      {isLoading || !shouldShowImage ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        </div>
-      ) : null}
       {shouldShowImage && displayUrl ? (
         <Image
           src={displayUrl}

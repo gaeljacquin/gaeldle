@@ -9,7 +9,7 @@ import {
   type Game,
 } from './schema';
 import {
-  DEFAULT_IMAGE_GEN_STYLE,
+  DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
 } from '@workspace/constants';
@@ -23,7 +23,7 @@ export const GameModeSlugSchema = z.enum([
   'specifications',
 ]);
 
-export const ImageStyleSchema = z.enum([
+export const ArtStyleSchema = z.enum([
   'funko-pop-chibi',
   'simpsons',
   'rubber-hose-animation',
@@ -35,7 +35,7 @@ export const ImageStyleSchema = z.enum([
   'western-animation-concept-art',
   'graphic-novel-illustration',
 ]);
-export type ImageStyle = z.infer<typeof ImageStyleSchema>;
+export type ArtStyle = z.infer<typeof ArtStyleSchema>;
 
 export const SyncOperationSchema = z.enum([
   'created',
@@ -123,8 +123,8 @@ export const GamesContract = {
         includeStoryline: z.boolean().optional().default(false),
         includeGenres: z.boolean().optional().default(false),
         includeThemes: z.boolean().optional().default(false),
-        imageStyle: ImageStyleSchema.optional().default(
-          DEFAULT_IMAGE_GEN_STYLE,
+        artStyle: ArtStyleSchema.optional().default(
+          DEFAULT_IMAGE_GEN_ART_STYLE,
         ),
       }),
     )
@@ -140,7 +140,7 @@ export const GamesContract = {
     .input(
       z.object({
         numGames: z.number().int().min(IMAGE_GEN_MIN).max(IMAGE_GEN_MAX),
-        imageStyle: ImageStyleSchema,
+        artStyle: ArtStyleSchema,
         includeStoryline: z.boolean().default(false),
         includeGenres: z.boolean().default(false),
         includeThemes: z.boolean().default(false),

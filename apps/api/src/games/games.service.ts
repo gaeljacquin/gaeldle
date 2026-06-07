@@ -15,7 +15,7 @@ import {
   gameObject,
   type SyncOperation,
   GameUpdate,
-  type ImageStyle,
+  type ArtStyle,
 } from '@workspace/api-contract';
 import { IgdbService, type IgdbGame } from '@/games/igdb.service';
 import { AiService } from '@/lib/ai.service';
@@ -23,7 +23,7 @@ import { S3Service } from '@/lib/s3.service';
 import { BulkImageJobStore } from '@/games/bulk-image-job.store';
 import type { AppConfiguration } from '@/config/configuration';
 import {
-  IMAGE_STYLES,
+  ART_STYLES,
   IMAGE_PROMPT_SUFFIX,
   IMAGE_GEN_DIR,
 } from '@workspace/constants';
@@ -484,7 +484,7 @@ export class GamesService {
 
   async bulkGenerateImages(params: {
     numGames: number;
-    imageStyle: ImageStyle;
+    artStyle: ArtStyle;
     includeStoryline: boolean;
     includeGenres: boolean;
     includeThemes: boolean;
@@ -544,7 +544,7 @@ export class GamesService {
     pendingGames: Game[],
     params: {
       numGames: number;
-      imageStyle: ImageStyle;
+      artStyle: ArtStyle;
       includeStoryline: boolean;
       includeGenres: boolean;
       includeThemes: boolean;
@@ -563,8 +563,8 @@ export class GamesService {
       .set({ status: 'running', startedAt: new Date() })
       .where(eq(bulkImageGenJobs.jobId, jobId));
 
-    const styleEntry = IMAGE_STYLES.find((s) => s.value === params.imageStyle);
-    const styleDescriptor = styleEntry?.descriptor ?? params.imageStyle;
+    const styleEntry = ART_STYLES.find((s) => s.value === params.artStyle);
+    const styleDescriptor = styleEntry?.descriptor ?? params.artStyle;
 
     const r2PublicUrlRaw =
       this.configService.get('r2PublicUrl', { infer: true }) ?? '';
@@ -593,7 +593,7 @@ export class GamesService {
         const list = Array.isArray(game.imageGen)
           ? JSON.parse(JSON.stringify(game.imageGen))
           : [];
-        const styleKey = params.imageStyle;
+        const styleKey = params.artStyle;
         const newItem = {
           [styleKey]: {
             url: publicUrl,

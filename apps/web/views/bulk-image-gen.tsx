@@ -5,12 +5,12 @@ import { useMutation } from '@tanstack/react-query';
 import { useUser } from '@hexclave/next';
 import {
   DEFAULT_IMAGE_GEN_NUM,
-  DEFAULT_IMAGE_GEN_STYLE,
+  DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
-  IMAGE_STYLES,
+  ART_STYLES,
 } from '@workspace/constants';
-import type { ImageStyle } from '@workspace/api-contract';
+import type { ArtStyle } from '@workspace/api-contract';
 import { bulkGenerateImages } from '@/lib/services/game.service';
 import { useBulkImageJob } from '@/lib/hooks/use-bulk-image-job';
 import { Button } from '@workspace/ui/button';
@@ -211,8 +211,8 @@ export default function BulkImageGen() {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
 
   const [numGames, setNumGames] = useState(DEFAULT_IMAGE_GEN_NUM);
-  const [imageStyle, setImageStyle] = useState<ImageStyle>(
-    DEFAULT_IMAGE_GEN_STYLE,
+  const [artStyle, setArtStyle] = useState<ArtStyle>(
+    DEFAULT_IMAGE_GEN_ART_STYLE,
   );
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
@@ -244,7 +244,7 @@ export default function BulkImageGen() {
     mutationFn: () =>
       bulkGenerateImages({
         numGames,
-        imageStyle,
+        artStyle: artStyle,
         includeStoryline,
         includeGenres,
         includeThemes,
@@ -305,22 +305,22 @@ export default function BulkImageGen() {
                     />
                   </div>
 
-                  {/* Image style */}
+                  {/* Art style */}
                   <div className="space-y-1.5">
-                    <Label htmlFor="image-style-trigger" className="text-sm">
-                      Image style
+                    <Label htmlFor="art-style-trigger" className="text-sm">
+                      Art style
                     </Label>
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         render={
                           <Button
-                            id="image-style-trigger"
+                            id="art-style-trigger"
                             variant="outline"
                             className="w-80 justify-between font-normal"
                           >
                             <span className="truncate">
                               {
-                                IMAGE_STYLES.find((s) => s.value === imageStyle)
+                                ART_STYLES.find((s) => s.value === artStyle)
                                   ?.label
                               }
                             </span>
@@ -334,12 +334,10 @@ export default function BulkImageGen() {
                       />
                       <DropdownMenuContent className="w-80 p-1 bg-muted">
                         <DropdownMenuRadioGroup
-                          value={imageStyle}
-                          onValueChange={(val) =>
-                            setImageStyle(val as ImageStyle)
-                          }
+                          value={artStyle}
+                          onValueChange={(val) => setArtStyle(val as ArtStyle)}
                         >
-                          {IMAGE_STYLES.map((style) => (
+                          {ART_STYLES.map((style) => (
                             <DropdownMenuRadioItem
                               key={style.value}
                               value={style.value}

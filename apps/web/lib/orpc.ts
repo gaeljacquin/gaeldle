@@ -32,7 +32,7 @@ export const orpcClient = createORPCClient<
           // Also set the token explicitly just in case some middleware prefers it
           const accessToken = await user.getAccessToken();
           if (accessToken) {
-            headers.set('x-hexclave-access-token', accessToken);
+            headers.set('x-stack-access-token', accessToken);
           }
         }
 

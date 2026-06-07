@@ -3,9 +3,9 @@ export type AppConfiguration = {
   port: number;
   clientPort: number;
   corsAllowedOrigins: string[];
-  stackProjectId: string;
-  stackPublishableClientKey: string;
-  stackSecretServerKey: string;
+  hexclaveProjectId: string;
+  hexclavePublishableClientKey: string;
+  hexclaveSecretServerKey: string;
   databaseUrl: string;
   twitchClientId: string;
   twitchClientSecret: string;
@@ -44,10 +44,10 @@ const configuration = (): AppConfiguration => {
     port,
     clientPort,
     corsAllowedOrigins,
-    stackProjectId: process.env.HEXCLAVE_PROJECT_ID ?? '',
-    stackPublishableClientKey:
+    hexclaveProjectId: process.env.HEXCLAVE_PROJECT_ID ?? '',
+    hexclavePublishableClientKey:
       process.env.HEXCLAVE_PUBLISHABLE_CLIENT_KEY ?? '',
-    stackSecretServerKey: process.env.HEXCLAVE_SECRET_SERVER_KEY ?? '',
+    hexclaveSecretServerKey: process.env.HEXCLAVE_SECRET_SERVER_KEY ?? '',
     databaseUrl: process.env.DATABASE_URL ?? '',
     twitchClientId: process.env.TWITCH_CLIENT_ID ?? '',
     twitchClientSecret: process.env.TWITCH_CLIENT_SECRET ?? '',

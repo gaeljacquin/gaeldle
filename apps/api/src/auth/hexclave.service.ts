@@ -53,11 +53,10 @@ export class HexclaveService {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          'x-hexclave-access-type': 'server',
-          'x-hexclave-project-id': this.hexclaveProjectId,
-          'x-hexclave-publishable-client-key':
-            this.hexclavePublishableClientKey,
-          'x-hexclave-secret-server-key': this.hexclaveSecretServerKey,
+          'x-stack-access-type': 'server',
+          'x-stack-project-id': this.hexclaveProjectId,
+          'x-stack-publishable-client-key': this.hexclavePublishableClientKey,
+          'x-stack-secret-server-key': this.hexclaveSecretServerKey,
         },
         body: JSON.stringify({
           email,

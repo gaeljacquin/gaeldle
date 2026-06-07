@@ -39,7 +39,7 @@ export class HexclaveAuthController {
       data: {
         ...result,
         tokenType: 'Bearer',
-        headerName: 'x-hexclave-access-token',
+        headerName: 'x-stack-access-token',
       },
     };
   }

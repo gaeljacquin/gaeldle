@@ -63,7 +63,7 @@ export class HexclaveGuard implements CanActivate {
       return authHeader.slice(7).trim();
     }
 
-    const hexclaveTokenHeader = request.headers['x-hexclave-access-token'];
+    const hexclaveTokenHeader = request.headers['x-stack-access-token'];
     if (typeof hexclaveTokenHeader === 'string') {
       return hexclaveTokenHeader;
     }

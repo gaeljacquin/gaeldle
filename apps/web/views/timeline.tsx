@@ -383,12 +383,13 @@ export default function Timeline() {
             </CardContent>
           </Card>
 
-          <div className="mx-auto mt-8 max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
+          <div className="mx-auto mt-8 text-center opacity-70 hover:opacity-100 transition-opacity">
             <TimelineDevToggle
               getCorrectOrder={getCorrectOrder}
               attemptsLeft={attemptsLeft}
               maxAttempts={TIMELINE_MAX_ATTEMPTS}
               onAdjustAttempts={adjustAttempts}
+              className="border-2 border-dashed w-full p-6"
             />
           </div>
         </div>

@@ -230,12 +230,13 @@ export default function GameListPlusImage(
           </div>
         </div>
 
-        <div className="flex items-center justify-center border-2 border-dashed p-4 text-center opacity-70 hover:opacity-100 transition-opacity mt-8">
+        <div className="flex items-center justify-center text-center opacity-70 hover:opacity-100 transition-opacity mt-8">
           <DevModeToggle
             targetGame={targetGame}
             attemptsLeft={attemptsLeft}
             maxAttempts={MAX_ATTEMPTS}
             onAdjustAttempts={adjustAttempts}
+            className="border-2 border-dashed w-full p-4"
           />
         </div>
       </div>

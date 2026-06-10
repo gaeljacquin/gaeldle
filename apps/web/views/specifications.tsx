@@ -178,12 +178,13 @@ export default function Specifications() {
               </CardContent>
             </Card>
 
-            <div className="mx-auto max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
+            <div className="mx-auto text-center opacity-70 hover:opacity-100 transition-opacity">
               <DevModeToggle
                 targetGame={targetGame}
                 attemptsLeft={attemptsLeft}
                 maxAttempts={MAX_ATTEMPTS}
                 onAdjustAttempts={adjustAttempts}
+                className="border-2 border-dashed w-full p-6"
               />
             </div>
           </div>

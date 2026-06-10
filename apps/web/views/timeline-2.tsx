@@ -265,12 +265,13 @@ export default function Timeline2() {
             </CardContent>
           </Card>
 
-          <div className="mx-auto mt-8 max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
+          <div className="mx-auto mt-8 text-center opacity-70 hover:opacity-100 transition-opacity">
             <Timeline2DevToggle
               dealtCard={dealtCard}
               attemptsLeft={attemptsLeft}
               maxAttempts={maxAttempts}
               onAdjustAttempts={adjustAttempts}
+              className="border-2 border-dashed w-full p-6"
             />
           </div>
         </div>

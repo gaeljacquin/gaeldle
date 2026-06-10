@@ -16,6 +16,10 @@ export type AppConfiguration = {
   r2PublicUrl: string;
   cfAccountId: string;
   cfApiToken: string;
+  awsAccessKeyId: string;
+  awsSecretAccessKey: string;
+  awsRegion: string;
+  sampleSqsUrl: string;
 };
 
 const configuration = (): AppConfiguration => {
@@ -58,6 +62,10 @@ const configuration = (): AppConfiguration => {
     r2PublicUrl: process.env.R2_PUBLIC_URL ?? '',
     cfAccountId: process.env.CF_ACCOUNT_ID ?? '',
     cfApiToken: process.env.CF_API_TOKEN ?? '',
+    awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID ?? '',
+    awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? '',
+    awsRegion: process.env.AWS_REGION ?? '',
+    sampleSqsUrl: process.env.SAMPLE_SQS_URL ?? '',
   };
 };
 export default configuration;

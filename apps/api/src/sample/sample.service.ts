@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { S3Service } from '@/lib/s3.service';
 import { SAMPLE_DIR } from '@workspace/constants';
+import configuration from '@/config/configuration';
+import { SqsService } from '@/lib/sqs.service';
 
 @Injectable()
 export class SampleService {
-  constructor(private readonly s3Service: S3Service) {}
+  constructor(
+    private readonly s3Service: S3Service,
+    private readonly sqsService: SqsService,
+  ) {}
 
   async uploadImage({
     input,
@@ -39,17 +44,15 @@ export class SampleService {
 
   async sendMessage({ input }: { input: { message: string } }) {
     try {
-      const { message } = input;
-
-      const delay = (ms: number): Promise<void> => {
-        return new Promise((resolve) => setTimeout(resolve, ms));
-      };
-
-      await delay(2000);
+      const result = await this.sqsService.sendMessage(
+        configuration().sampleSqsUrl,
+        { message: input.message },
+      );
 
       return {
         success: true,
-        message: message + ' Acknowledged!',
+        messageId: result.MessageId ?? '',
+        message: input.message + ' Acknowledged!',
       };
     } catch (error) {
       console.error('Sending sample message failed:', error);

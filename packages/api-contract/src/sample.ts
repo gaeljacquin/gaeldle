@@ -27,6 +27,7 @@ export const SampleContract = {
     .output(
       z.object({
         success: z.boolean(),
+        messageId: z.string().optional(),
         message: z.string(),
       }),
     ),

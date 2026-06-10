@@ -52,15 +52,18 @@ export default function Settings() {
   const sendSampleMessageMutation = useMutation({
     mutationFn: async () => {
       const message = 'Shouting into the void!';
-
       return sendSampleMessage(message);
     },
     onSuccess: (data) => {
+      console.log(data);
+      const msg = data.message + (data.messageId ? ' - ' + data.messageId : '');
+      console.log('message:', msg);
       toast.success(data.message);
+      toast.info(data.messageId ?? 'No message id.');
     },
     onError: (error) => {
       console.error('Sending failed:', error);
-      toast.error('Failed to send sample message');
+      toast.error('Failed to send sample message.');
     },
   });
 

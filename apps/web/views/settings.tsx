@@ -11,82 +11,58 @@ import {
 import { Button } from '@workspace/ui/button';
 import Image from 'next/image';
 import { useMutation } from '@tanstack/react-query';
-import { testUpload } from '@/lib/services/game.service';
+import {
+  uploadImage as uploadSampleImage,
+  sendMessage as sendSampleMessage,
+} from '@/lib/services/sample.service';
 import { toast } from 'sonner';
-import { useState } from 'react';
 import {
   IconUpload,
   IconLoader2,
   IconSettings,
-  // IconServer2,
+  IconMail,
 } from '@tabler/icons-react';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 
 export default function Settings() {
-  const [isUploading, setIsUploading] = useState(false);
-  // const [isPinging, setIsPinging] = useState(false);
+  const uploadSampleImageMutation = useMutation({
+    mutationFn: async () => {
+      // Fetch and convert the placeholder image to base64
+      const response = await fetch('/placeholder.jpg');
+      const blob = await response.blob();
 
-  const uploadMutation = useMutation({
-    mutationFn: ({ image, extension }: { image: string; extension: string }) =>
-      testUpload(image, extension),
+      const base64data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+      });
+
+      return uploadSampleImage(base64data, 'jpg');
+    },
     onSuccess: () => {
       toast.success('Test image uploaded to R2 bucket successfully!');
-      setIsUploading(false);
     },
     onError: (error) => {
       console.error('Upload failed:', error);
       toast.error('Failed to upload test image to R2 bucket');
-      setIsUploading(false);
     },
   });
 
-  const handleTestUpload = async () => {
-    try {
-      setIsUploading(true);
+  const sendSampleMessageMutation = useMutation({
+    mutationFn: async () => {
+      const message = 'Shouting into the void!';
 
-      // Fetch the local placeholder image
-      const response = await fetch('/placeholder.jpg');
-      const blob = await response.blob();
-
-      // Convert to base64
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = async () => {
-        const base64data = reader.result as string;
-
-        await uploadMutation.mutateAsync({
-          image: base64data,
-          extension: 'jpg',
-        });
-      };
-    } catch (error) {
-      console.error('Preparation failed:', error);
-      toast.error('Failed to prepare image for upload');
-      setIsUploading(false);
-    }
-  };
-
-  // const handlePingNewAPI = async () => {
-  //   try {
-  //     setIsPinging(true);
-
-  //     const response = await fetch(`${process.env.newApiUrl}`);
-
-  //     if (!response.ok) {
-  //       throw new Error(`API responded with status: ${response.status}`)
-  //     }
-
-  //     const data = await response.json()
-  //     console.log('API response:', data)
-  //     toast.success(data.message)
-  //   } catch (error) {
-  //     console.error('Failed to reach new API:', error);
-  //     toast.error(error instanceof Error ? error.message : 'Failed to call API');
-  //   } finally {
-  //     setIsPinging(false);
-  //   }
-
-  // };
+      return sendSampleMessage(message);
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onError: (error) => {
+      console.error('Sending failed:', error);
+      toast.error('Failed to send sample message');
+    },
+  });
 
   return (
     <ViewTransition>
@@ -103,7 +79,7 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle>Cloudflare R2 Test</CardTitle>
                 <CardDescription>
-                  Test image upload to your Cloudflare R2 bucket.
+                  Test uploading an image to your Cloudflare R2 bucket.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -123,50 +99,54 @@ export default function Settings() {
                       public/placeholder.jpg
                     </p>
                     <Button
-                      onClick={handleTestUpload}
-                      disabled={isUploading}
+                      onClick={() => uploadSampleImageMutation.mutate()}
+                      disabled={uploadSampleImageMutation.isPending}
                       className="font-bold cursor-pointer"
                     >
-                      {isUploading ? (
+                      {uploadSampleImageMutation.isPending ? (
                         <IconLoader2 className="mr-2 size-4 animate-spin" />
                       ) : (
                         <IconUpload className="mr-2 size-4" />
                       )}
-                      {isUploading ? 'Uploading...' : 'Upload to R2'}
+                      {uploadSampleImageMutation.isPending
+                        ? 'Uploading...'
+                        : 'Upload to R2'}
                     </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-          {/* <div className="max-w-2xl space-y-6">
+          <div className="max-w-2xl space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Ping new API</CardTitle>
+                <CardTitle>AWS SQS Test</CardTitle>
                 <CardDescription>
-                  Test connection to new API.
+                  Test sending a message to AWS SQS.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex flex-col items-center gap-4">
                   <div className="text-center space-y-2">
                     <Button
-                      onClick={handlePingNewAPI}
-                      disabled={isPinging}
+                      onClick={() => sendSampleMessageMutation.mutate()}
+                      disabled={sendSampleMessageMutation.isPending}
                       className="font-bold cursor-pointer"
                     >
-                      {isPinging ? (
+                      {sendSampleMessageMutation.isPending ? (
                         <IconLoader2 className="mr-2 size-4 animate-spin" />
                       ) : (
-                        <IconServer2 className="mr-2 size-4" />
+                        <IconMail className="mr-2 size-4" />
                       )}
-                      {isPinging ? 'Pinging new API...' : 'Ping new API'}
+                      {sendSampleMessageMutation.isPending
+                        ? 'Sending message...'
+                        : 'Send message'}
                     </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </div> */}
+          </div>
         </div>
       </div>
     </ViewTransition>

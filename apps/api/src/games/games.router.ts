@@ -10,7 +10,6 @@ import {
   DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_GEN_DIR,
   IMAGE_PROMPT_SUFFIX,
-  TEST_DIR,
 } from '@workspace/constants';
 import { ConfigService } from '@nestjs/config';
 import type { AppConfiguration } from '@/config/configuration';
@@ -90,38 +89,6 @@ export class GamesRouter {
         data: { id: deletedId },
       };
     });
-  }
-
-  @Implement(contract.games.testUpload)
-  testUpload() {
-    return implement(contract.games.testUpload).handler(
-      async ({ input }: { input: { image: string; extension: string } }) => {
-        try {
-          const { image, extension } = input;
-
-          // Remove base64 prefix if present
-          const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
-          const buffer = Buffer.from(base64Data, 'base64');
-
-          const timestamp = Date.now();
-          const fileName = `${TEST_DIR}/placeholder_${timestamp}.${extension}`;
-
-          await this.s3Service.uploadImage(
-            fileName,
-            buffer,
-            `image/${extension === 'jpg' ? 'jpeg' : extension}`,
-          );
-
-          return {
-            success: true,
-            url: fileName,
-          };
-        } catch (error) {
-          console.error('Test upload failed:', error);
-          throw error;
-        }
-      },
-    );
   }
 
   @Implement(contract.games.generateImage)

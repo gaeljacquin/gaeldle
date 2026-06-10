@@ -247,6 +247,20 @@ export const GamesContract = {
         canAdd: z.boolean(),
       }),
     ),
+
+  testSendMessage: oc
+    .route({ method: 'POST', path: '/test/send-message' })
+    .input(
+      z.object({
+        message: z.string(),
+      }),
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        url: z.string(),
+      }),
+    ),
 } as const;
 
 export interface GameApiResponse {

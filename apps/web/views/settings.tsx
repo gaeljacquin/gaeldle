@@ -14,11 +14,12 @@ import { useMutation } from '@tanstack/react-query';
 import { testUpload } from '@/lib/services/game.service';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { IconUpload, IconLoader2, IconSettings } from '@tabler/icons-react';
+import { IconUpload, IconLoader2, IconSettings, IconServer2 } from '@tabler/icons-react';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 
 export default function Settings() {
   const [isUploading, setIsUploading] = useState(false);
+  const [isPinging, setIsPinging] = useState(false);
 
   const uploadMutation = useMutation({
     mutationFn: ({ image, extension }: { image: string; extension: string }) =>
@@ -60,6 +61,28 @@ export default function Settings() {
     }
   };
 
+  const handlePingNewAPI = async () => {
+    try {
+      setIsPinging(true);
+
+      const response = await fetch(`${process.env.newApiUrl}`);
+
+      if (!response.ok) {
+        throw new Error(`API responded with status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log('API response:', data)
+      toast.success(data.message)
+    } catch (error) {
+      console.error('Failed to reach new API:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to call API');
+    } finally {
+      setIsPinging(false);
+    }
+
+  };
+
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
@@ -69,7 +92,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-8 flex-1">
+        <div className="container mx-auto px-4 py-8 flex-1 space-y-8">
           <div className="max-w-2xl space-y-6">
             <Card>
               <CardHeader>
@@ -105,6 +128,34 @@ export default function Settings() {
                         <IconUpload className="mr-2 size-4" />
                       )}
                       {isUploading ? 'Uploading...' : 'Upload to R2'}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="max-w-2xl space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Ping new API</CardTitle>
+                <CardDescription>
+                  Test connection to new API.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="text-center space-y-2">
+                    <Button
+                      onClick={handlePingNewAPI}
+                      disabled={isPinging}
+                      className="font-bold cursor-pointer"
+                    >
+                      {isPinging ? (
+                        <IconLoader2 className="mr-2 size-4 animate-spin" />
+                      ) : (
+                        <IconServer2 className="mr-2 size-4" />
+                      )}
+                      {isPinging ? 'Pinging new API...' : 'Ping new API'}
                     </Button>
                   </div>
                 </div>

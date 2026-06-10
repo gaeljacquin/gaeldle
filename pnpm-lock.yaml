@@ -194,6 +194,8 @@ importers:
         specifier: ^8.60.1
         version: 8.60.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
 
+  apps/newapi: {}
+
   apps/web:
     dependencies:
       '@base-ui/react':

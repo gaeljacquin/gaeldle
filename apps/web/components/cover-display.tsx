@@ -12,7 +12,6 @@ interface CoverDisplayProps {
   pixelSize?: number;
   usePixelation?: boolean;
   isGameOver?: boolean;
-  isLoading?: boolean;
   className?: string;
   sourceImageUrl?: string | null;
   objectFit?: 'contain' | 'cover';
@@ -23,7 +22,6 @@ export default function CoverDisplay({
   pixelSize = 0,
   usePixelation = false,
   isGameOver = false,
-  isLoading = false,
   className,
   sourceImageUrl,
   objectFit = 'contain',
@@ -36,7 +34,7 @@ export default function CoverDisplay({
 
   useEffect(() => {
     // Early return for invalid states
-    if (!sourceImageUrl || !usePixelation || isGameOver || isLoading) {
+    if (!sourceImageUrl || !usePixelation || isGameOver) {
       return;
     }
 
@@ -66,7 +64,7 @@ export default function CoverDisplay({
     }, 0);
 
     return () => clearTimeout(timer);
-  }, [sourceImageUrl, pixelSize, usePixelation, isGameOver, isLoading]);
+  }, [sourceImageUrl, pixelSize, usePixelation, isGameOver]);
 
   // Determine what to display
   const shouldShowPixelated = usePixelation && !isGameOver;

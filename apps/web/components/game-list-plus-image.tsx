@@ -31,7 +31,6 @@ export default function GameListPlusImage(
     attemptsLeft,
     isGameOver,
     isCorrect,
-    isLoading,
     error,
     currentPixelSize,
     selectedArtworkUrl,
@@ -69,7 +68,6 @@ export default function GameListPlusImage(
             imageUrl={selectedArtworkUrl}
             pixelSize={currentPixelSize}
             isGameOver={isGameOver}
-            isLoading={isLoading}
             className="size-full"
           />
         );
@@ -81,7 +79,6 @@ export default function GameListPlusImage(
             pixelSize={0}
             usePixelation={false}
             isGameOver={isGameOver}
-            isLoading={isLoading}
             className="size-full"
             sourceImageUrl={selectedAiImage?.url ?? targetGame?.aiImageUrl}
             objectFit="cover"
@@ -95,7 +92,6 @@ export default function GameListPlusImage(
             pixelSize={currentPixelSize}
             usePixelation={true}
             isGameOver={isGameOver}
-            isLoading={isLoading}
             className="size-full"
             sourceImageUrl={targetGame?.imageUrl}
             objectFit="cover"

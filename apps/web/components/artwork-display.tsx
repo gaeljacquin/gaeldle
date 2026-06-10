@@ -9,7 +9,6 @@ interface ArtworkDisplayProps {
   imageUrl: string | null;
   pixelSize: number;
   isGameOver: boolean;
-  isLoading?: boolean;
   className?: string;
 }
 
@@ -17,7 +16,6 @@ export default function ArtworkDisplay({
   imageUrl,
   pixelSize,
   isGameOver,
-  isLoading = false,
   className,
 }: Readonly<ArtworkDisplayProps>) {
   const [pixelatedData, setPixelatedData] = useState<{
@@ -29,7 +27,7 @@ export default function ArtworkDisplay({
   // Apply pixelation when image URL or pixel size changes
   useEffect(() => {
     // Early return for invalid states
-    if (!imageUrl || isGameOver || isLoading) {
+    if (!imageUrl || isGameOver) {
       return;
     }
 
@@ -51,7 +49,7 @@ export default function ArtworkDisplay({
     }, 0);
 
     return () => clearTimeout(timer);
-  }, [imageUrl, pixelSize, isGameOver, isLoading]);
+  }, [imageUrl, pixelSize, isGameOver]);
 
   // Determine what to display
   const shouldShowPixelated = !isGameOver;

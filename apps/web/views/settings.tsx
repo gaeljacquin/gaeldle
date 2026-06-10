@@ -14,12 +14,17 @@ import { useMutation } from '@tanstack/react-query';
 import { testUpload } from '@/lib/services/game.service';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { IconUpload, IconLoader2, IconSettings, IconServer2 } from '@tabler/icons-react';
+import {
+  IconUpload,
+  IconLoader2,
+  IconSettings,
+  // IconServer2,
+} from '@tabler/icons-react';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 
 export default function Settings() {
   const [isUploading, setIsUploading] = useState(false);
-  const [isPinging, setIsPinging] = useState(false);
+  // const [isPinging, setIsPinging] = useState(false);
 
   const uploadMutation = useMutation({
     mutationFn: ({ image, extension }: { image: string; extension: string }) =>
@@ -61,27 +66,27 @@ export default function Settings() {
     }
   };
 
-  const handlePingNewAPI = async () => {
-    try {
-      setIsPinging(true);
+  // const handlePingNewAPI = async () => {
+  //   try {
+  //     setIsPinging(true);
 
-      const response = await fetch(`${process.env.newApiUrl}`);
+  //     const response = await fetch(`${process.env.newApiUrl}`);
 
-      if (!response.ok) {
-        throw new Error(`API responded with status: ${response.status}`)
-      }
+  //     if (!response.ok) {
+  //       throw new Error(`API responded with status: ${response.status}`)
+  //     }
 
-      const data = await response.json()
-      console.log('API response:', data)
-      toast.success(data.message)
-    } catch (error) {
-      console.error('Failed to reach new API:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to call API');
-    } finally {
-      setIsPinging(false);
-    }
+  //     const data = await response.json()
+  //     console.log('API response:', data)
+  //     toast.success(data.message)
+  //   } catch (error) {
+  //     console.error('Failed to reach new API:', error);
+  //     toast.error(error instanceof Error ? error.message : 'Failed to call API');
+  //   } finally {
+  //     setIsPinging(false);
+  //   }
 
-  };
+  // };
 
   return (
     <ViewTransition>
@@ -134,7 +139,7 @@ export default function Settings() {
               </CardContent>
             </Card>
           </div>
-          <div className="max-w-2xl space-y-6">
+          {/* <div className="max-w-2xl space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Ping new API</CardTitle>
@@ -161,7 +166,7 @@ export default function Settings() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
         </div>
       </div>
     </ViewTransition>

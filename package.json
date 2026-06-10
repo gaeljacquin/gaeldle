@@ -4,8 +4,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev",
+    "build": "turbo run build --filter=!@workspace/newapi",
+    "dev": "turbo run dev --filter=!@workspace/newapi",
     "lint": "turbo lint --filter '!@workspace/ui'",
     "lint:fix": "turbo lint --filter '!@workspace/ui' -- --fix",
     "lint:web": "turbo lint --filter @workspace/web",

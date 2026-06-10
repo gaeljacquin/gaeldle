@@ -3,7 +3,7 @@ import { AuthModule } from '@/auth/auth.module';
 import { DatabaseModule } from '@/db/database.module';
 import { GamesRouter } from '@/games/games.router';
 import { GamesService } from '@/games/games.service';
-import { IgdbService } from '@/games/igdb.service';
+import { IgdbService } from '@/lib/igdb.service';
 import { S3Service } from '@/lib/s3.service';
 import { AiService } from '@/lib/ai.service';
 import { BulkImageJobStore } from '@/games/bulk-image-job.store';

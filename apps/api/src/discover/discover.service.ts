@@ -7,7 +7,7 @@ import {
   DiscoverCandidate,
   DiscoverApplyResult,
 } from '@workspace/api-contract';
-import { IgdbService } from '@/games/igdb.service';
+import { IgdbService } from '@/lib/igdb.service';
 import { GamesService } from '@/games/games.service';
 
 @Injectable()

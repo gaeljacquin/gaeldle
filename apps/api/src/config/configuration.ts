@@ -19,7 +19,7 @@ export type AppConfiguration = {
   awsAccessKeyId: string;
   awsSecretAccessKey: string;
   awsRegion: string;
-  sampleSqsUrl: string;
+  sampleSqsQueueUrl: string;
 };
 
 const configuration = (): AppConfiguration => {
@@ -65,7 +65,8 @@ const configuration = (): AppConfiguration => {
     awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID ?? '',
     awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? '',
     awsRegion: process.env.AWS_REGION ?? '',
-    sampleSqsUrl: process.env.SAMPLE_SQS_URL ?? '',
+    sampleSqsQueueUrl:
+      process.env.SAMPLE_SQS_QUEUE_URL ?? 'gaeldle-sample-queue',
   };
 };
 export default configuration;

@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
+import {
+  PurgeQueueCommand,
+  SQSClient,
+  SendMessageCommand,
+} from '@aws-sdk/client-sqs';
 import configuration from '@/config/configuration';
 
 @Injectable()
@@ -12,6 +16,14 @@ export class SqsService {
     const command = new SendMessageCommand({
       QueueUrl: queueUrl,
       MessageBody: JSON.stringify(body),
+    });
+
+    return this.client.send(command);
+  }
+
+  async purgeQueue(queueUrl: string) {
+    const command = new PurgeQueueCommand({
+      QueueUrl: queueUrl,
     });
 
     return this.client.send(command);

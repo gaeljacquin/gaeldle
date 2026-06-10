@@ -31,4 +31,11 @@ export const SampleContract = {
         message: z.string(),
       }),
     ),
+
+  purgeQueue: oc.route({ method: 'POST', path: '/sample/purge-queue' }).output(
+    z.object({
+      success: z.boolean(),
+      message: z.string(),
+    }),
+  ),
 } as const;

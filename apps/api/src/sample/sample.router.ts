@@ -35,4 +35,18 @@ export class SampleRouter {
       return sendMessageRes;
     });
   }
+
+  @Implement(contract.sample.purgeQueue)
+  @UseGuards(HexclaveGuard)
+  purgeQueue() {
+    return implement(contract.sample.purgeQueue).handler(async () => {
+      const purgeQueueRes = await this.sampleService.purgeQueue();
+
+      if (!purgeQueueRes.success) {
+        throw new Error('Unable to clear sample queue...');
+      }
+
+      return purgeQueueRes;
+    });
+  }
 }

@@ -14,6 +14,7 @@ import { useMutation } from '@tanstack/react-query';
 import {
   uploadImage as uploadSampleImage,
   sendMessage as sendSampleMessage,
+  purgeQueue as purgeSampleQueue,
 } from '@/lib/services/sample.service';
 import { toast } from 'sonner';
 import {
@@ -21,6 +22,7 @@ import {
   IconLoader2,
   IconSettings,
   IconMail,
+  IconQueuePopOut,
 } from '@tabler/icons-react';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 
@@ -64,6 +66,19 @@ export default function Settings() {
     onError: (error) => {
       console.error('Sending failed:', error);
       toast.error('Failed to send sample message.');
+    },
+  });
+
+  const purgeSampleQueueMutation = useMutation({
+    mutationFn: async () => {
+      return purgeSampleQueue();
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onError: (error) => {
+      console.error('Clearing queue failed:', error);
+      toast.error('Failed to clear sample queue.');
     },
   });
 
@@ -125,11 +140,11 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle>AWS SQS Test</CardTitle>
                 <CardDescription>
-                  Test sending a message to AWS SQS.
+                  Test sending a message to an SQS queue and clearing it.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-row items-center justify-center gap-4">
                   <div className="text-center space-y-2">
                     <Button
                       onClick={() => sendSampleMessageMutation.mutate()}
@@ -144,6 +159,22 @@ export default function Settings() {
                       {sendSampleMessageMutation.isPending
                         ? 'Sending message...'
                         : 'Send message'}
+                    </Button>
+                  </div>
+                  <div className="text-center space-y-2">
+                    <Button
+                      onClick={() => purgeSampleQueueMutation.mutate()}
+                      disabled={purgeSampleQueueMutation.isPending}
+                      className="font-bold cursor-pointer bg-fuchsia-600"
+                    >
+                      {purgeSampleQueueMutation.isPending ? (
+                        <IconLoader2 className="mr-2 size-4 animate-spin" />
+                      ) : (
+                        <IconQueuePopOut className="mr-2 size-4" />
+                      )}
+                      {purgeSampleQueueMutation.isPending
+                        ? 'Clearing queue...'
+                        : 'Clear queue'}
                     </Button>
                   </div>
                 </div>

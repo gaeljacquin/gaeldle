@@ -45,7 +45,7 @@ export class SampleService {
   async sendMessage({ input }: { input: { message: string } }) {
     try {
       const result = await this.sqsService.sendMessage(
-        configuration().sampleSqsUrl,
+        configuration().sampleSqsQueueUrl,
         { message: input.message },
       );
 
@@ -56,6 +56,20 @@ export class SampleService {
       };
     } catch (error) {
       console.error('Sending sample message failed:', error);
+      throw error;
+    }
+  }
+
+  async purgeQueue() {
+    try {
+      await this.sqsService.purgeQueue(configuration().sampleSqsQueueUrl);
+
+      return {
+        success: true,
+        message: 'Cleared sample queue.',
+      };
+    } catch (error) {
+      console.error('Clearing sample queue failed:', error);
       throw error;
     }
   }

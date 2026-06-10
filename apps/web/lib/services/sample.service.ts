@@ -14,3 +14,8 @@ export async function sendMessage(message: string) {
   });
   return result;
 }
+
+export async function purgeQueue() {
+  const result = await orpcClient.sample.purgeQueue();
+  return result;
+}

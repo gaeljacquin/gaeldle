@@ -13,7 +13,6 @@ export default function GuessHistoryInline({
   guesses,
   className,
 }: GuessHistoryInlineProps) {
-  // Reverse to show newest first
   const reversedGuesses = [...guesses].reverse();
 
   return (

@@ -12,7 +12,7 @@ import {
   DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
-} from '@workspace/constants';
+} from '@workspace/shared';
 import {
   IconPhoto,
   IconCalendar,
@@ -162,9 +162,11 @@ export const artStyles: {
   },
 ];
 
-export const ArtStyleSchema = z.enum(artStyles.map((artStyle) => {
-  return artStyle.value
-}));
+export const ArtStyleSchema = z.enum(
+  artStyles.map((artStyle) => {
+    return artStyle.value;
+  }),
+);
 
 export type ArtStyle = z.infer<typeof ArtStyleSchema>;
 
@@ -173,6 +175,7 @@ export const SyncOperationSchema = z.enum([
   'updated',
   // 'no_change',
 ]);
+
 export type SyncOperation = z.infer<typeof SyncOperationSchema>;
 
 export const GamesContract = {
@@ -415,7 +418,6 @@ export interface GameState {
   currentPixelSize: number;
 }
 
-// Specifications game types
 export type MatchType = 'exact' | 'partial' | 'none';
 
 export interface CellMatch {

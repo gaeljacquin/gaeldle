@@ -96,7 +96,10 @@ export function useBulkImageJob({
 
   // Derive polled state without an effect — avoids synchronous setState inside useEffect
   const polledState = useMemo<BulkJobState | null>(() => {
-    if (!polledJob || sseConnected) return null;
+    if (!polledJob || sseConnected) {
+      return null;
+    }
+
     return {
       status: polledJob.status as BulkJobStatus,
       total: polledJob.total,
@@ -120,10 +123,11 @@ export function useBulkImageJob({
 
   // SSE connection
   useEffect(() => {
-    if (!jobId || !enabled || !accessToken || isTerminalRef.current) return;
+    if (!jobId || !enabled || !accessToken || isTerminalRef.current) {
+      return;
+    }
 
-    const apiBase = process.env.serverUrl || 'http://localhost:8080';
-    const url = `${apiBase}/api/games/bulk-generate-images/${jobId}/stream?token=${encodeURIComponent(accessToken)}`;
+    const url = `${process.env.apiUrl}/api/games/bulk-generate-images/${jobId}/stream?token=${encodeURIComponent(accessToken)}`;
 
     const es = new EventSource(url);
     eventSourceRef.current = es;

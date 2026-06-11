@@ -23,7 +23,7 @@ import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { BulkImageJobStore } from '@/games/bulk-image-job.store';
 import type { AppConfiguration } from '@/config/configuration';
-import { IMAGE_PROMPT_SUFFIX, IMAGE_GEN_DIR } from '@workspace/constants';
+import { IMAGE_PROMPT_SUFFIX, IMAGE_GEN_DIR } from '@workspace/shared';
 
 type Result = {
   current: number;

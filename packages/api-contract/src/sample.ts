@@ -32,7 +32,7 @@ export const SampleContract = {
       }),
     ),
 
-  purgeQueue: oc.route({ method: 'POST', path: '/sample/purge-queue' }).output(
+  clearQueue: oc.route({ method: 'POST', path: '/sample/clear-queue' }).output(
     z.object({
       success: z.boolean(),
       message: z.string(),

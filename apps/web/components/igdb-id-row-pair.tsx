@@ -39,7 +39,9 @@ function CurrentBadge({
   state: ReplaceGameValidationState;
   igdbId: string;
 }) {
-  if (!state.isReady && !state.isLoading) return null;
+  if (!state.isReady && !state.isLoading) {
+    return null;
+  }
 
   if (state.currentExistsInDb === false) {
     return (
@@ -74,10 +76,13 @@ function CurrentBadge({
 }
 
 function ReplacementBadge({ state }: { state: ReplaceGameValidationState }) {
-  if (!state.isReady) return null;
+  if (!state.isReady) {
+    return null;
+  }
 
-  // Current not in DB — skip IGDB lookup, show nothing under replacement
-  if (state.currentExistsInDb === false) return null;
+  if (state.currentExistsInDb === false) {
+    return null;
+  }
 
   if (state.sameIds) {
     return (
@@ -140,13 +145,11 @@ export function IgdbIdRowPair({
     validationState.isReady &&
     !validationState.isLoading &&
     validationState.currentExistsInDb === false;
-
   const replacementHasError =
     validationState.isReady &&
     !validationState.isLoading &&
     validationState.currentExistsInDb === true &&
     !validationState.canApply;
-
   const canSync = row.replacement.trim() !== '' && !validationState.isLoading;
 
   const handleStop = () => {

@@ -10,7 +10,7 @@ import {
   DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_GEN_DIR,
   IMAGE_PROMPT_SUFFIX,
-} from '@workspace/constants';
+} from '@workspace/shared';
 import { ConfigService } from '@nestjs/config';
 import type { AppConfiguration } from '@/config/configuration';
 

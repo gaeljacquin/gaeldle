@@ -35,3 +35,5 @@ export const TIMELINE_MAX_ATTEMPTS = 3;
 export const TIMELINE_GAMES_COUNT = 10;
 
 export const TIMELINE_2_MAX_ATTEMPTS = 7;
+
+export const SPECIFICATIONS_MAX_ATTEMPTS = 10;

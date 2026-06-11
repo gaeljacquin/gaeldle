@@ -10,7 +10,7 @@ import {
   IconCircleCheck,
   IconCircleX,
 } from '@tabler/icons-react';
-import { DISCOVER_GAMES_MAX } from '@workspace/constants';
+import { DISCOVER_GAMES_MAX } from '@workspace/shared';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 import { Button } from '@workspace/ui/button';
 import {

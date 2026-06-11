@@ -28,7 +28,7 @@
     "@tanstack/react-query": "^5.101.0",
     "@tanstack/react-virtual": "^3.14.2",
     "@workspace/api-contract": "workspace:*",
-    "@workspace/constants": "workspace:*",
+    "@workspace/shared": "workspace:*",
     "@workspace/ui": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

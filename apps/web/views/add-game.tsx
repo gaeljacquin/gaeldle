@@ -23,7 +23,7 @@ import {
   IconExternalLink,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
-import { ADD_GAME_MAX_ROWS } from '@workspace/constants';
+import { ADD_GAME_MAX_ROWS } from '@workspace/shared';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 
 interface AddGameRowData {

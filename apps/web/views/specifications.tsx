@@ -2,10 +2,7 @@
 
 import { ViewTransition } from 'react';
 import { useState } from 'react';
-import {
-  MAX_ATTEMPTS,
-  useSpecificationsGame,
-} from '@/lib/hooks/use-specifications-game';
+import { useSpecificationsGame } from '@/lib/hooks/use-specifications-game';
 import SpecificationsGrid from '@/components/specifications-grid';
 import GameSearch from '@/components/game-search';
 import DevModeToggle from '@/components/dev-mode-toggle';
@@ -16,6 +13,7 @@ import { getGameModeBySlug } from '@workspace/api-contract';
 import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';
+import { SPECIFICATIONS_MAX_ATTEMPTS } from '@workspace/shared';
 
 export default function Specifications() {
   const gameMode = getGameModeBySlug('specifications');
@@ -110,7 +108,7 @@ export default function Specifications() {
                   Attempts
                 </p>
                 <Attempts
-                  maxAttempts={MAX_ATTEMPTS}
+                  maxAttempts={SPECIFICATIONS_MAX_ATTEMPTS}
                   attemptsLeft={attemptsLeft}
                   variant="primary"
                 />
@@ -159,7 +157,7 @@ export default function Specifications() {
                 <SpecificationsGameOver
                   isCorrect={isCorrect}
                   targetGame={targetGame}
-                  attemptsUsed={MAX_ATTEMPTS - attemptsLeft}
+                  attemptsUsed={SPECIFICATIONS_MAX_ATTEMPTS - attemptsLeft}
                   onPlayAgain={handleResetGame}
                   onToggleTable={() => setShowAnswerSpecs(!showAnswerSpecs)}
                   showingAnswer={showAnswerSpecs}
@@ -182,7 +180,7 @@ export default function Specifications() {
               <DevModeToggle
                 targetGame={targetGame}
                 attemptsLeft={attemptsLeft}
-                maxAttempts={MAX_ATTEMPTS}
+                maxAttempts={SPECIFICATIONS_MAX_ATTEMPTS}
                 onAdjustAttempts={adjustAttempts}
                 className="border-2 border-dashed w-full p-6"
               />

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { S3Service } from '@/lib/s3.service';
-import { SAMPLE_DIR } from '@workspace/constants';
+import { SAMPLE_DIR } from '@workspace/shared';
 import configuration from '@/config/configuration';
 import { SqsService } from '@/lib/sqs.service';
 
@@ -60,9 +60,9 @@ export class SampleService {
     }
   }
 
-  async purgeQueue() {
+  async clearQueue() {
     try {
-      await this.sqsService.purgeQueue(configuration().sampleSqsQueueUrl);
+      await this.sqsService.clearQueue(configuration().sampleSqsQueueUrl);
 
       return {
         success: true,

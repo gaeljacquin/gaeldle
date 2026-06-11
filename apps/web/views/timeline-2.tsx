@@ -53,7 +53,9 @@ export default function Timeline2() {
 
     const cards = timelineRef.current.querySelectorAll('[data-timeline-card]');
 
-    if (cards.length === 0) return null;
+    if (cards.length === 0) {
+      return null;
+    }
 
     for (let i = 0; i < cards.length; i++) {
       const cardRect = cards[i].getBoundingClientRect();

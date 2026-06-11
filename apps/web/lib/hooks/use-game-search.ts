@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { searchGames } from '@/lib/services/game.service';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import type { Game, GameModeSlug } from '@workspace/api-contract';
-import { GAME_SEARCH_MIN_CHARS } from '@workspace/constants';
+import { GAME_SEARCH_MIN_CHARS } from '@workspace/shared';
 
 interface GameSearchOptions {
   mode?: GameModeSlug;

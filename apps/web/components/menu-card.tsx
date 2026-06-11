@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { type TablerIcon } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
-import { ViewTransition } from 'react';
+import { ReactNode, ViewTransition } from 'react';
 
 export interface MenuCardProps {
   id?: string;
@@ -11,7 +11,7 @@ export interface MenuCardProps {
   icon: TablerIcon;
   gradient: string;
   disabled?: boolean;
-  badge?: React.ReactNode;
+  badge?: ReactNode;
 }
 
 export function MenuCard({

@@ -45,7 +45,9 @@ function StatusCell({ status }: { status: ReplaceGameResult['status'] }) {
 export function ReplaceGameResultsTable({
   results,
 }: ReplaceGameResultsTableProps) {
-  if (results.length === 0) return null;
+  if (results.length === 0) {
+    return null;
+  }
 
   return (
     <div className="overflow-x-auto border">

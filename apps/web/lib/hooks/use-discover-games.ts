@@ -4,10 +4,7 @@ import { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { discoverScan, discoverApply } from '@/lib/services/discover.service';
-import {
-  DISCOVER_GAMES_DEFAULT,
-  DISCOVER_GAMES_MAX,
-} from '@workspace/constants';
+import { DISCOVER_GAMES_DEFAULT, DISCOVER_GAMES_MAX } from '@workspace/shared';
 import type {
   DiscoverCandidate,
   DiscoverApplyResult,

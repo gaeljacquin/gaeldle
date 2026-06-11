@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
 import { IconPlus, IconMinus } from '@tabler/icons-react';
 import type { Game } from '@workspace/api-contract';
+import { timelineFormatDate } from '@workspace/shared';
 
 interface TimelineDevToggleProps {
   getCorrectOrder: () => Game[];
@@ -11,19 +12,6 @@ interface TimelineDevToggleProps {
   maxAttempts: number;
   onAdjustAttempts?: (delta: number) => void;
   className?: string;
-}
-
-function formatReleaseDate(timestamp: number | null): string {
-  if (!timestamp) {
-    return 'Unknown';
-  }
-
-  const date = new Date(timestamp * 1000);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
 }
 
 export default function TimelineDevToggle({
@@ -52,6 +40,7 @@ export default function TimelineDevToggle({
       >
         {showDevInfo ? 'Hide' : 'Show'} Correct Order
       </button>
+
       {showDevInfo && (
         <div className="text-xs font-mono p-3 bg-muted border border-border/50 space-y-1 max-w-md text-left uppercase">
           {correctOrder.map((game, index) => (
@@ -59,7 +48,7 @@ export default function TimelineDevToggle({
               <span className="font-bold">{index + 1}.</span>
               <span className="flex-1 truncate">{game.name}</span>
               <span className="text-muted-foreground whitespace-nowrap">
-                {formatReleaseDate(game.firstReleaseDate)}
+                {timelineFormatDate(game.firstReleaseDate)}
               </span>
             </div>
           ))}

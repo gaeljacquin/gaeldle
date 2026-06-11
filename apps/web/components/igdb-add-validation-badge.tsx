@@ -8,7 +8,9 @@ interface IgdbAddValidationBadgeProps {
 }
 
 export function IgdbAddValidationBadge({ state }: IgdbAddValidationBadgeProps) {
-  if (!state.isReady) return null;
+  if (!state.isReady) {
+    return null;
+  }
 
   if (state.alreadyInDb) {
     return (

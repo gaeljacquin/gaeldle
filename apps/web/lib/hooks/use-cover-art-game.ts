@@ -19,25 +19,33 @@ function getRandomArtwork(artworks: unknown): string | null {
 
   const randomIndex = Math.floor(Math.random() * artworks.length);
   const artwork = artworks[randomIndex] as ArtworkImage;
+
   return artwork.url || null;
 }
 
 function selectRandomAiImage(
   target: Game | null,
 ): { url: string; prompt: string } | null {
-  if (!target) return null;
+  if (!target) {
+    return null;
+  }
+
   const imageGen = target.imageGen;
+
   if (Array.isArray(imageGen) && imageGen.length > 0) {
     const randomIndex = Math.floor(Math.random() * imageGen.length);
     const selectedObj = imageGen[randomIndex];
+
     if (selectedObj && typeof selectedObj === 'object') {
       const keys = Object.keys(selectedObj);
+
       if (keys.length > 0) {
         const styleKey = keys[0];
         const data = selectedObj[styleKey] as
           | { url?: string; prompt?: string; provider?: string }
           | null
           | undefined;
+
         if (data && typeof data === 'object' && data.url && data.prompt) {
           return {
             url: data.url,
@@ -47,12 +55,14 @@ function selectRandomAiImage(
       }
     }
   }
+
   if (target.aiImageUrl) {
     return {
       url: target.aiImageUrl,
       prompt: target.aiPrompt ?? '',
     };
   }
+
   return null;
 }
 
@@ -98,6 +108,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     if (mode === 'artwork' && targetGame) {
       return getRandomArtwork(targetGame.artworks);
     }
+
     return null;
   }, [mode, targetGame]);
 

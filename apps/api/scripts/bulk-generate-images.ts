@@ -14,7 +14,7 @@ import {
   DEFAULT_IMAGE_GEN_NUM,
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
-} from '@workspace/constants';
+} from '@workspace/shared';
 import { artStyles } from '@workspace/api-contract';
 
 // Parse prompt options from environment variables
@@ -22,7 +22,6 @@ const includeStoryline = process.env.INCLUDE_STORYLINE === 'true';
 const includeGenres = process.env.INCLUDE_GENRES === 'true';
 const includeThemes = process.env.INCLUDE_THEMES === 'true';
 
-// Parse NUM_GAMES (default to 5 if not specified)
 const numGames = Math.max(
   IMAGE_GEN_MIN,
   Math.min(
@@ -31,7 +30,6 @@ const numGames = Math.max(
   ),
 );
 
-// Resolve art style: match by value slug or label (case-insensitive), fall back to default
 const rawStyle = process.env.ART_STYLE?.trim() ?? '';
 const resolvedStyle =
   artStyles.find(
@@ -58,7 +56,6 @@ const pool = new Pool({
 
 const db = drizzle(pool, { schema });
 
-// Initialize S3 client for R2
 const s3 = new S3Client({
   region: 'auto',
   endpoint: process.env.R2_ENDPOINT,
@@ -141,24 +138,28 @@ async function generateImage(prompt: string): Promise<Buffer> {
 
   if (!response.ok) {
     const errorText = await response.text();
+
     console.error(
       `[AiService] Cloudflare AI error: ${response.status}`,
       errorText,
     );
+
     throw new Error(`Cloudflare AI failed: ${response.status} ${errorText}`);
   }
 
   const contentType = response.headers.get('content-type') ?? '';
+
   if (!contentType.includes('image')) {
     const body = await response.text();
+
     console.error(`[AiService] Unexpected content-type: ${contentType}`, body);
+
     throw new Error(`Unexpected response type: ${contentType} — ${body}`);
   }
 
   return Buffer.from(await response.arrayBuffer());
 }
 
-// Helper: Upload image to R2
 async function uploadImageToR2(
   key: string,
   body: Buffer,
@@ -174,10 +175,8 @@ async function uploadImageToR2(
   await s3.send(command);
 }
 
-// Main processing
 async function main() {
   try {
-    // Step 1: Query up to numGames games where ai_image_url IS NULL
     const pending = await db
       .select()
       .from(schema.games)
@@ -188,7 +187,9 @@ async function main() {
 
     if (pending.length === 0) {
       console.log('No games to process. Exiting.');
+
       await pool.end();
+
       process.exit(0);
     }
 
@@ -196,36 +197,35 @@ async function main() {
     let failureCount = 0;
     const failures: { gameId: number; gameName: string; error: string }[] = [];
 
-    // Step 2: Process each game
     for (const game of pending) {
       try {
         console.log(`\nProcessing game: ${game.name} (ID: ${game.igdbId})`);
 
-        // Build the prompt
         const prompt = buildImagePrompt(
           game,
           options,
           resolvedStyle.descriptor,
         );
-        console.log(`Generated prompt (${prompt.length} chars)`);
 
-        // Generate the image
+        console.log(`Generated prompt (${prompt.length} chars)`);
         console.log('Generating image via Cloudflare AI...');
+
         const rawBuffer = await generateImage(prompt);
+
         console.log(`Image buffer size: ${rawBuffer.length} bytes`);
 
-        // Optimize with sharp
         const imageBuffer = await sharp(rawBuffer)
           .jpeg({ quality: 85 })
           .toBuffer();
+
         console.log(`Optimized image size: ${imageBuffer.length} bytes`);
 
-        // Upload to R2
         const key = `res/${game.igdbId}_${Date.now()}.jpg`;
+
         console.log(`Uploading to R2 with key: ${key}`);
+
         await uploadImageToR2(key, imageBuffer, 'image/jpeg');
 
-        // Build public URL
         const r2PublicUrlRaw = process.env.R2_PUBLIC_URL ?? '';
         const r2PublicUrl = r2PublicUrlRaw.startsWith('http')
           ? r2PublicUrlRaw
@@ -247,14 +247,15 @@ async function main() {
         const existingIndex = list.findIndex(
           (item: any) => item && typeof item === 'object' && styleKey in item,
         );
+
         if (existingIndex >= 0) {
           list[existingIndex] = newItem;
         } else {
           list.push(newItem);
         }
+
         const updatedImageGen = list;
 
-        // Update database
         await db
           .update(schema.games)
           .set({
@@ -266,16 +267,19 @@ async function main() {
           .where(eq(schema.games.id, game.id));
 
         console.log(`Successfully updated game ${game.name}`);
+
         successCount++;
       } catch (error) {
         failureCount++;
         const errorMessage =
           error instanceof Error ? error.message : String(error);
+
         failures.push({
           gameId: game.igdbId,
           gameName: game.name,
           error: errorMessage,
         });
+
         console.error(
           `Failed to process game ${game.name} (${game.igdbId}):`,
           errorMessage,
@@ -312,10 +316,13 @@ async function main() {
     );
 
     await pool.end();
+
     process.exit(failureCount > 0 ? 1 : 0);
   } catch (error) {
     console.error('Fatal error:', error);
+
     await pool.end();
+
     process.exit(1);
   }
 }

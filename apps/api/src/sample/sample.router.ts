@@ -26,27 +26,27 @@ export class SampleRouter {
   @UseGuards(HexclaveGuard)
   sendMessage() {
     return implement(contract.sample.sendMessage).handler(async (input) => {
-      const sendMessageRes = await this.sampleService.sendMessage(input);
+      const res = await this.sampleService.sendMessage(input);
 
-      if (!sendMessageRes.success) {
+      if (!res.success) {
         throw new Error('Unable to send sample message...');
       }
 
-      return sendMessageRes;
+      return res;
     });
   }
 
-  @Implement(contract.sample.purgeQueue)
+  @Implement(contract.sample.clearQueue)
   @UseGuards(HexclaveGuard)
-  purgeQueue() {
-    return implement(contract.sample.purgeQueue).handler(async () => {
-      const purgeQueueRes = await this.sampleService.purgeQueue();
+  clearQueue() {
+    return implement(contract.sample.clearQueue).handler(async () => {
+      const res = await this.sampleService.clearQueue();
 
-      if (!purgeQueueRes.success) {
+      if (!res.success) {
         throw new Error('Unable to clear sample queue...');
       }
 
-      return purgeQueueRes;
+      return res;
     });
   }
 }

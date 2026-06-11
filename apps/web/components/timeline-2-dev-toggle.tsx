@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
 import { IconPlus, IconMinus } from '@tabler/icons-react';
 import type { Game } from '@workspace/api-contract';
+import { timelineFormatDate } from '@workspace/shared';
 
 interface Timeline2DevToggleProps {
   dealtCard: Game | null;
@@ -11,15 +12,6 @@ interface Timeline2DevToggleProps {
   maxAttempts: number;
   onAdjustAttempts?: (delta: number) => void;
   className?: string;
-}
-
-function formatReleaseDate(timestamp: number | null): string {
-  if (!timestamp) return 'Unknown';
-  const date = new Date(timestamp * 1000);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 }
 
 export default function Timeline2DevToggle({
@@ -51,7 +43,7 @@ export default function Timeline2DevToggle({
           <div className="flex flex-col gap-1">
             <span className="font-bold">{dealtCard.name}</span>
             <span className="text-muted-foreground">
-              {formatReleaseDate(dealtCard.firstReleaseDate)}
+              {timelineFormatDate(dealtCard.firstReleaseDate)}
             </span>
           </div>
         </div>

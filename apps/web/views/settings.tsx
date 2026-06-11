@@ -14,7 +14,7 @@ import { useMutation } from '@tanstack/react-query';
 import {
   uploadImage as uploadSampleImage,
   sendMessage as sendSampleMessage,
-  purgeQueue as purgeSampleQueue,
+  clearQueue as clearSampleQueue,
 } from '@/lib/services/sample.service';
 import { toast } from 'sonner';
 import {
@@ -70,9 +70,9 @@ export default function Settings() {
     },
   });
 
-  const purgeSampleQueueMutation = useMutation({
+  const clearSampleQueueMutation = useMutation({
     mutationFn: async () => {
-      return purgeSampleQueue();
+      return clearSampleQueue();
     },
     onSuccess: (data) => {
       toast.success(data.message);
@@ -164,16 +164,16 @@ export default function Settings() {
                   </div>
                   <div className="text-center space-y-2">
                     <Button
-                      onClick={() => purgeSampleQueueMutation.mutate()}
-                      disabled={purgeSampleQueueMutation.isPending}
+                      onClick={() => clearSampleQueueMutation.mutate()}
+                      disabled={clearSampleQueueMutation.isPending}
                       className="font-bold cursor-pointer bg-fuchsia-600"
                     >
-                      {purgeSampleQueueMutation.isPending ? (
+                      {clearSampleQueueMutation.isPending ? (
                         <IconLoader2 className="mr-2 size-4 animate-spin" />
                       ) : (
                         <IconQueuePopOut className="mr-2 size-4" />
                       )}
-                      {purgeSampleQueueMutation.isPending
+                      {clearSampleQueueMutation.isPending
                         ? 'Clearing queue...'
                         : 'Clear queue'}
                     </Button>

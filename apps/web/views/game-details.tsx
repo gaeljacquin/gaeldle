@@ -4,7 +4,7 @@ import { use, useState, useMemo, Suspense, ViewTransition } from 'react';
 import {
   DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_PROMPT_SUFFIX,
-} from '@workspace/constants';
+} from '@workspace/shared';
 import {
   useQuery,
   useSuspenseQuery,
@@ -424,14 +424,26 @@ function ArtworksTabContent({ igdbId }: { igdbId: string }) {
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {game.imageGen.map((entry, index) => {
-              if (!entry || typeof entry !== 'object') return null;
+              if (!entry || typeof entry !== 'object') {
+                return null;
+              }
+
               const keys = Object.keys(entry);
-              if (keys.length === 0) return null;
+
+              if (keys.length === 0) {
+                return null;
+              }
+
               const styleKey = keys[0];
               const data = entry[styleKey];
-              if (!data || typeof data !== 'object') return null;
+
+              if (!data || typeof data !== 'object') {
+                return null;
+              }
+
               const styleLabel =
                 artStyles.find((s) => s.value === styleKey)?.label ?? styleKey;
+
               return (
                 <Dialog key={index}>
                   <DialogTrigger
@@ -531,10 +543,14 @@ function ImageGenTabContent({
   });
 
   const generatedImage = useMemo(() => {
-    if (!game || !Array.isArray(game.imageGen)) return null;
+    if (!game || !Array.isArray(game.imageGen)) {
+      return null;
+    }
+
     const entry = game.imageGen.find(
       (item) => item && typeof item === 'object' && artStyle in item,
     );
+
     return entry
       ? (entry[artStyle] as { url: string; prompt: string; provider: string })
       : null;

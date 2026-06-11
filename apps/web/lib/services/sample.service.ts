@@ -5,6 +5,7 @@ export async function uploadImage(image: string, extension: string = 'jpg') {
     image,
     extension,
   });
+
   return result;
 }
 
@@ -12,10 +13,12 @@ export async function sendMessage(message: string) {
   const result = await orpcClient.sample.sendMessage({
     message,
   });
+
   return result;
 }
 
-export async function purgeQueue() {
-  const result = await orpcClient.sample.purgeQueue();
+export async function clearQueue() {
+  const result = await orpcClient.sample.clearQueue();
+
   return result;
 }

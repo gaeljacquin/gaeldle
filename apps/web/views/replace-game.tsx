@@ -35,7 +35,7 @@ import {
   IconLoader,
 } from '@tabler/icons-react';
 import { toast } from 'sonner';
-import { REPLACE_GAME_MAX_ROWS } from '@workspace/constants';
+import { REPLACE_GAME_MAX_ROWS } from '@workspace/shared';
 import { DashboardPageHeader } from '@/components/dashboard-header';
 
 function createEmptyRow(): IgdbIdRowPairData {

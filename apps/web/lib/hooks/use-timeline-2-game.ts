@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRandomGame } from '@/lib/services/game.service';
 import type { Game } from '@workspace/api-contract';
-import { TIMELINE_2_MAX_ATTEMPTS } from '@workspace/constants';
+import { TIMELINE_2_MAX_ATTEMPTS } from '@workspace/shared';
 
 export function useTimeline2Game() {
   const [timelineCards, setTimelineCards] = useState<Game[]>([]);

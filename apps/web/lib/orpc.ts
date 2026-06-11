@@ -11,7 +11,7 @@ export const orpcClient = createORPCClient<
   JsonifiedClient<ContractRouterClient<typeof contract>>
 >(
   new OpenAPILink(contract, {
-    url: `${process.env.serverUrl || 'http://localhost:8080'}`,
+    url: process.env.apiUrl!,
     fetch: async (request: Request, init: { redirect?: RequestRedirect }) => {
       const headers = new Headers(request.headers);
       const signal = request.signal;

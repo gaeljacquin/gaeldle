@@ -33,7 +33,6 @@ export default function CoverDisplay({
   } | null>(null);
 
   useEffect(() => {
-    // Early return for invalid states
     if (!sourceImageUrl || !usePixelation || isGameOver) {
       return;
     }
@@ -66,16 +65,12 @@ export default function CoverDisplay({
     return () => clearTimeout(timer);
   }, [sourceImageUrl, pixelSize, usePixelation, isGameOver]);
 
-  // Determine what to display
   const shouldShowPixelated = usePixelation && !isGameOver;
-  // Only use pixelated URL if it matches the current source and parameters
   const isDataValid =
     pixelatedData?.sourceUrl === sourceImageUrl &&
     pixelatedData?.pixelSize === pixelSize;
   const pixelatedUrl = isDataValid ? pixelatedData.url : null;
   const displayUrl = shouldShowPixelated ? pixelatedUrl : sourceImageUrl;
-
-  // Don't show original image if we're waiting for pixelation
   const shouldShowImage =
     !shouldShowPixelated || (shouldShowPixelated && !!pixelatedUrl);
 
@@ -98,6 +93,7 @@ export default function CoverDisplay({
           priority
         />
       ) : null}
+
       {isGameOver ? (
         <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 text-center border-t">
           <p className="font-semibold">{game?.name}</p>

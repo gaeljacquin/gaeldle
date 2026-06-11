@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { and, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { games, gameObject, type GameModeSlug } from '@workspace/api-contract';
-import { GAME_SEARCH_MIN_CHARS } from '@workspace/constants';
+import { GAME_SEARCH_MIN_CHARS } from '@workspace/shared';
 
 export async function GET(request: NextRequest) {
   try {

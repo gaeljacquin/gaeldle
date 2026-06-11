@@ -35,7 +35,7 @@
     "@orpc/openapi": "^1.14.5",
     "@orpc/server": "^1.14.5",
     "@workspace/api-contract": "workspace:*",
-    "@workspace/constants": "workspace:*",
+    "@workspace/shared": "workspace:*",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.8.3",
@@ -99,7 +99,7 @@
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
       "^@workspace/api-contract$": "<rootDir>/../../../packages/api-contract/src/index.ts",
-      "^@workspace/constants$": "<rootDir>/../../../packages/constants/src/index.ts"
+      "^@workspace/shared$": "<rootDir>/../../../packages/shared/src/index.ts"
     },
     "extensionsToTreatAsEsm": [
       ".ts"

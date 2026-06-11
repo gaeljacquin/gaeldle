@@ -64,6 +64,7 @@ export class HexclaveGuard implements CanActivate {
     }
 
     const hexclaveTokenHeader = request.headers['x-stack-access-token'];
+
     if (typeof hexclaveTokenHeader === 'string') {
       return hexclaveTokenHeader;
     }

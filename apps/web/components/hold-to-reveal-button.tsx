@@ -24,7 +24,9 @@ export default function HoldToRevealButton({
   const animationFrameRef = useRef<number | null>(null);
 
   const startHolding = () => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
 
     setIsHolding(true);
     startTimeRef.current = 0;
@@ -33,6 +35,7 @@ export default function HoldToRevealButton({
       if (startTimeRef.current === 0) {
         startTimeRef.current = timestamp;
       }
+
       const elapsed = timestamp - startTimeRef.current;
       const newProgress = Math.min((elapsed / HOLD_DURATION) * 100, 100);
       setProgress(newProgress);

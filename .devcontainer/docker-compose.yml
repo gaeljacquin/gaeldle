@@ -26,9 +26,8 @@ services:
       - /workspaces/gaeldle/apps/api/node_modules
       - /workspaces/gaeldle/apps/web/node_modules
       - /workspaces/gaeldle/packages/api-contract/node_modules
-      - /workspaces/gaeldle/packages/constants/node_modules
+      - /workspaces/gaeldle/packages/shared/node_modules
       - /workspaces/gaeldle/packages/ui/node_modules
-      - /workspaces/gaeldle/.kilocode/node_modules
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/gaeldle
       - COREPACK_ENABLE_STRICT=0

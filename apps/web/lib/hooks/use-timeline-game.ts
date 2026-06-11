@@ -4,10 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getRandomGames } from '@/lib/services/game.service';
 import type { Game } from '@workspace/api-contract';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
-import {
-  TIMELINE_GAMES_COUNT,
-  TIMELINE_MAX_ATTEMPTS,
-} from '@workspace/constants';
+import { TIMELINE_GAMES_COUNT, TIMELINE_MAX_ATTEMPTS } from '@workspace/shared';
 
 export function useTimelineGame() {
   const [selectedGames, setSelectedGames] = useState<Game[]>([]);

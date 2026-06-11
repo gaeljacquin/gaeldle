@@ -8,7 +8,7 @@ import {
   DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
-} from '@workspace/constants';
+} from '@workspace/shared';
 import { artStyles, type ArtStyle } from '@workspace/api-contract';
 import { bulkGenerateImages } from '@/lib/services/game.service';
 import { useBulkImageJob } from '@/lib/hooks/use-bulk-image-job';

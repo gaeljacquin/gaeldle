@@ -24,20 +24,19 @@ export default function ArtworkDisplay({
     pixelSize: number;
   } | null>(null);
 
-  // Apply pixelation when image URL or pixel size changes
   useEffect(() => {
-    // Early return for invalid states
     if (!imageUrl || isGameOver) {
       return;
     }
 
     const timer = setTimeout(() => {
       async function applyPixelation() {
-        if (!imageUrl) return;
+        if (!imageUrl) {
+          return;
+        }
 
         try {
           const pixelated = await pixelateImage(imageUrl, pixelSize);
-          // Store both the pixelated URL and the source/params it came from
           setPixelatedData({ url: pixelated, sourceUrl: imageUrl, pixelSize });
         } catch (error) {
           console.error('Failed to pixelate artwork:', error);
@@ -51,16 +50,12 @@ export default function ArtworkDisplay({
     return () => clearTimeout(timer);
   }, [imageUrl, pixelSize, isGameOver]);
 
-  // Determine what to display
   const shouldShowPixelated = !isGameOver;
-  // Only use pixelated URL if it matches the current source and parameters
   const isDataValid =
     pixelatedData?.sourceUrl === imageUrl &&
     pixelatedData?.pixelSize === pixelSize;
   const pixelatedImageUrl = isDataValid ? pixelatedData.url : null;
   const displayUrl = shouldShowPixelated ? pixelatedImageUrl : imageUrl;
-
-  // Don't show original image if we're waiting for pixelation
   const shouldShowImage =
     !shouldShowPixelated || (shouldShowPixelated && !!pixelatedImageUrl);
 

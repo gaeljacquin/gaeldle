@@ -33,10 +33,7 @@ import { motion } from 'motion/react';
 import TimelineDevToggle from '@/components/timeline-dev-toggle';
 import { cn } from '@workspace/ui/lib/utils';
 import { TimelineCardSkeleton } from '@/components/timeline-card-skeleton';
-import {
-  TIMELINE_GAMES_COUNT,
-  TIMELINE_MAX_ATTEMPTS,
-} from '@workspace/constants';
+import { TIMELINE_GAMES_COUNT, TIMELINE_MAX_ATTEMPTS } from '@workspace/shared';
 
 const noOpStrategy: SortingStrategy = () => {
   return null;

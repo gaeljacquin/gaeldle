@@ -21,7 +21,7 @@ export class SqsService {
     return this.client.send(command);
   }
 
-  async purgeQueue(queueUrl: string) {
+  async clearQueue(queueUrl: string) {
     const command = new PurgeQueueCommand({
       QueueUrl: queueUrl,
     });

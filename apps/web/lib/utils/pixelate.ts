@@ -74,5 +74,6 @@ export function getPixelSizeForAttempt(
 
   // Calculate pixel size based on remaining attempts
   const progress = attempt / (maxAttempts - 1);
+
   return Math.round(maxPixelSize - progress * range);
 }

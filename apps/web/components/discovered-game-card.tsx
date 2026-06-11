@@ -16,7 +16,10 @@ interface DiscoveredGameCardProps {
 }
 
 function releaseDate(timestamp: number | null): string | null {
-  if (timestamp === null) return null;
+  if (timestamp === null) {
+    return null;
+  }
+
   return new Date(timestamp * 1000).toISOString().slice(0, 10);
 }
 
@@ -48,7 +51,7 @@ export function DiscoveredGameCard({
   isApplied,
   isDisabled,
   onToggle,
-}: Readonly<DiscoveredGameCardProps>) {
+}: DiscoveredGameCardProps) {
   const date = releaseDate(firstReleaseDate);
   const isCheckboxDisabled = isAlreadyAdded || isApplied || isDisabled;
 

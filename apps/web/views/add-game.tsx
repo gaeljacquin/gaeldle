@@ -35,14 +35,6 @@ function createEmptyRow(): AddGameRowData {
   return { id: crypto.randomUUID(), igdbId: '' };
 }
 
-function parsePositiveInt(value: string): number | null {
-  const trimmed = value.trim();
-  if (trimmed === '') return null;
-  const n = Number.parseInt(trimmed, 10);
-  if (Number.isNaN(n) || n <= 0 || String(n) !== trimmed) return null;
-  return n;
-}
-
 export interface AddGameResult {
   igdbId: number;
   gameName: string | null;
@@ -51,7 +43,7 @@ export interface AddGameResult {
   error: string | null;
 }
 
-function OperationCell({ result }: Readonly<{ result: AddGameResult }>) {
+function OperationCell({ result }: { result: AddGameResult }) {
   if (result.error) {
     return (
       <div className="flex items-center gap-1.5 text-destructive">
@@ -83,7 +75,7 @@ interface ResultsTableProps {
   onAddMore: () => void;
 }
 
-function ResultsTable({ results, onAddMore }: Readonly<ResultsTableProps>) {
+function ResultsTable({ results, onAddMore }: ResultsTableProps) {
   return (
     <Card>
       <CardHeader>
@@ -190,7 +182,7 @@ function RowWithValidation({
   onRemove,
   onValidationChange,
   isDuplicate,
-}: Readonly<RowWithValidationProps>) {
+}: RowWithValidationProps) {
   return (
     <IgdbIdAddRow
       rowId={row.id}
@@ -218,6 +210,7 @@ export function AddGame() {
     (id: string, state: IgdbIdAddValidationState) => {
       setValidationMap((prev) => {
         const current = prev[id];
+
         if (
           current?.canAdd === state.canAdd &&
           current?.isLoading === state.isLoading &&
@@ -227,6 +220,7 @@ export function AddGame() {
         ) {
           return prev;
         }
+
         return { ...prev, [id]: state };
       });
     },
@@ -241,12 +235,16 @@ export function AddGame() {
 
   const handleRemove = useCallback((id: string) => {
     setRows((prev) => {
-      if (prev.length <= 1) return prev;
+      if (prev.length <= 1) {
+        return prev;
+      }
+
       return prev.filter((row) => row.id !== id);
     });
     setValidationMap((prev) => {
       const next = { ...prev };
       delete next[id];
+
       return next;
     });
   }, []);
@@ -266,18 +264,34 @@ export function AddGame() {
 
   const duplicateRowIds = useMemo(() => {
     const idToRowIds = new Map<number, string[]>();
+
     for (const row of rows) {
-      const n = parsePositiveInt(row.igdbId);
-      if (n === null) continue;
+      const n = Number.parseInt(row.igdbId, 10);
+
+      if (n === null) {
+        continue;
+      }
+
       const state = validationMap[row.id];
-      if (!state?.isReady || state.existsOnIgdb !== true) continue;
-      if (!idToRowIds.has(n)) idToRowIds.set(n, []);
+
+      if (!state?.isReady || state.existsOnIgdb !== true) {
+        continue;
+      }
+
+      if (!idToRowIds.has(n)) {
+        idToRowIds.set(n, []);
+      }
+
       idToRowIds.get(n)!.push(row.id);
     }
     const dupes = new Set<string>();
+
     for (const rowIds of idToRowIds.values()) {
-      if (rowIds.length > 1) rowIds.forEach((id) => dupes.add(id));
+      if (rowIds.length > 1) {
+        rowIds.forEach((id) => dupes.add(id));
+      }
     }
+
     return dupes;
   }, [rows, validationMap]);
 
@@ -298,6 +312,7 @@ export function AddGame() {
 
   const handleApply = useCallback(async () => {
     setIsMutating(true);
+
     try {
       const settled = await Promise.allSettled(
         rows.map((row) => addGame(Number.parseInt(row.igdbId, 10))),
@@ -309,6 +324,7 @@ export function AddGame() {
 
         if (outcome.status === 'fulfilled') {
           const syncResult = outcome.value;
+
           return {
             igdbId,
             gameName: syncResult.data.name,
@@ -319,6 +335,7 @@ export function AddGame() {
         }
 
         const err = outcome.reason;
+
         return {
           igdbId,
           gameName: validationMap[row.id]?.gameName ?? null,

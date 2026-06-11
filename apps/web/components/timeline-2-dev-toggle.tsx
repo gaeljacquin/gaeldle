@@ -28,7 +28,7 @@ export default function Timeline2DevToggle({
   maxAttempts,
   onAdjustAttempts,
   className,
-}: Readonly<Timeline2DevToggleProps>) {
+}: Timeline2DevToggleProps) {
   const [showDevInfo, setShowDevInfo] = useState(false);
 
   if (process.env.NODE_ENV !== 'development') {

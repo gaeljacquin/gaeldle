@@ -19,11 +19,7 @@ export const metadata: Metadata = {
   description: appInfo.description,
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={figtree.variable}>
       <body className={`${jetbrainsMono.variable} font-sans antialiased`}>

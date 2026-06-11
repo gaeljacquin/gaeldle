@@ -11,7 +11,7 @@ interface ImageDisplaySkeletonProps {
 
 export default function ImageDisplaySkeleton({
   className,
-}: Readonly<ImageDisplaySkeletonProps>) {
+}: ImageDisplaySkeletonProps) {
   return (
     <div
       className={cn(

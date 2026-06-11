@@ -25,7 +25,7 @@ export default function CoverDisplay({
   className,
   sourceImageUrl,
   objectFit = 'contain',
-}: Readonly<CoverDisplayProps>) {
+}: CoverDisplayProps) {
   const [pixelatedData, setPixelatedData] = useState<{
     url: string;
     sourceUrl: string;

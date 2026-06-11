@@ -146,14 +146,19 @@ export default function Dashboard() {
     : 0;
 
   const paginationRange = useMemo(() => {
-    if (!totalPages) return [];
+    if (!totalPages) {
+      return [];
+    }
 
     const range: (number | string)[] = [];
     const siblingCount = 1;
     const totalPageNumbers = siblingCount + 5;
 
     if (totalPageNumbers >= totalPages) {
-      for (let i = 1; i <= totalPages; i++) range.push(i);
+      for (let i = 1; i <= totalPages; i++) {
+        range.push(i);
+      }
+
       return range;
     }
 
@@ -165,16 +170,23 @@ export default function Dashboard() {
 
     if (!shouldShowLeftDots && shouldShowRightDots) {
       const leftItemCount = 3 + 2 * siblingCount;
+
       for (let i = 1; i <= leftItemCount; i++) range.push(i);
       range.push('...', totalPages);
     } else if (shouldShowLeftDots && !shouldShowRightDots) {
       const rightItemCount = 3 + 2 * siblingCount;
       range.push(1, '...');
-      for (let i = totalPages - rightItemCount + 1; i <= totalPages; i++)
+
+      for (let i = totalPages - rightItemCount + 1; i <= totalPages; i++) {
         range.push(i);
+      }
     } else {
       range.push(1, '...');
-      for (let i = leftSiblingIndex; i <= rightSiblingIndex; i++) range.push(i);
+
+      for (let i = leftSiblingIndex; i <= rightSiblingIndex; i++) {
+        range.push(i);
+      }
+
       range.push('...', totalPages);
     }
 

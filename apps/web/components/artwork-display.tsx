@@ -17,7 +17,7 @@ export default function ArtworkDisplay({
   pixelSize,
   isGameOver,
   className,
-}: Readonly<ArtworkDisplayProps>) {
+}: ArtworkDisplayProps) {
   const [pixelatedData, setPixelatedData] = useState<{
     url: string;
     sourceUrl: string;

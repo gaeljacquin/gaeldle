@@ -6,7 +6,7 @@ interface DashboardPageHeaderProps {
   icon: Icon;
 }
 
-export function DashboardPageHeader(props: Readonly<DashboardPageHeaderProps>) {
+export function DashboardPageHeader(props: DashboardPageHeaderProps) {
   return (
     <div className="flex flex-row gap-1 justify-between">
       <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">

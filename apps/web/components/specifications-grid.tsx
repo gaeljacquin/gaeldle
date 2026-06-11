@@ -68,7 +68,7 @@ function getCellColor(
   }
 }
 
-function CellValueDisplay({ value }: Readonly<{ value: CellValue }>) {
+function CellValueDisplay({ value }: { value: CellValue }) {
   if (!value) return <span className="opacity-80">No data</span>;
   if (Array.isArray(value)) {
     if (value.length === 0) return <span className="opacity-80">No data</span>;
@@ -220,7 +220,10 @@ function getYearArrow(
 function ImageCell({
   imageUrl,
   name,
-}: Readonly<{ imageUrl: string | null; name: string }>) {
+}: {
+  imageUrl: string | null;
+  name: string;
+}) {
   return (
     <td className="border border-border/50 p-0 w-32">
       <div className="relative w-32 h-44 bg-muted/20">
@@ -257,7 +260,10 @@ function ImageCell({
 function ReleaseDateCell({
   match,
   targetYear,
-}: Readonly<{ match: CellMatch; targetYear: string | null }>) {
+}: {
+  match: CellMatch;
+  targetYear: string | null;
+}) {
   const arrow = getYearArrow(
     typeof match.value === 'string' ? match.value : null,
     targetYear,
@@ -278,7 +284,7 @@ function ReleaseDateCell({
   );
 }
 
-function MatchCell({ match }: Readonly<{ match: CellMatch }>) {
+function MatchCell({ match }: { match: CellMatch }) {
   return (
     <td
       className={cn(
@@ -291,7 +297,7 @@ function MatchCell({ match }: Readonly<{ match: CellMatch }>) {
   );
 }
 
-function AnswerCell({ value }: Readonly<{ value: string | string[] | null }>) {
+function AnswerCell({ value }: { value: string | string[] | null }) {
   return (
     <td className="border border-border/50 px-3 py-2 text-xs text-foreground bg-muted/70 text-center wrap-break-word">
       <CellValueDisplay value={value} />
@@ -336,10 +342,10 @@ function getBestMatches(
 function SummaryRow({
   bestMatches,
   targetYear,
-}: Readonly<{
+}: {
   bestMatches: Record<MatchKey, CellMatch>;
   targetYear: string | null;
-}>) {
+}) {
   return (
     <tr>
       <th className="border border-border/50 bg-secondary px-3 py-2 text-sm font-semibold text-white text-center w-32">
@@ -381,10 +387,10 @@ function HeaderRow() {
 function AnswerRow({
   answerSpecs,
   targetGame,
-}: Readonly<{
+}: {
   answerSpecs: NonNullable<ReturnType<typeof getAnswerSpecs>>;
   targetGame: Game;
-}>) {
+}) {
   return (
     <tr>
       <ImageCell
@@ -424,12 +430,12 @@ function GuessRows({
   revealedClue,
   hintInsertIndex,
   targetYear,
-}: Readonly<{
+}: {
   guesses: SpecificationGuess[];
   revealedClue?: RevealedClue | null;
   hintInsertIndex: number;
   targetYear: string | null;
-}>) {
+}) {
   return (
     <>
       {guesses.map((guess, index) => (
@@ -466,7 +472,7 @@ export default function SpecificationsGrid({
   targetGame,
   showAnswerOnly = false,
   className,
-}: Readonly<SpecificationsGridProps>) {
+}: SpecificationsGridProps) {
   const reversedGuesses = [...guesses].reverse();
   const hintInsertIndex = revealedClue
     ? guesses.length - revealedClue.revealedAtGuessCount

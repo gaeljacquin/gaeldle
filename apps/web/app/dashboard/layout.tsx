@@ -4,9 +4,9 @@ import { ReactNode } from 'react';
 
 export default async function DashboardLayout({
   children,
-}: Readonly<{
+}: {
   children: ReactNode;
-}>) {
+}) {
   await hexclaveServerApp.getUser({ or: 'redirect' });
 
   return (

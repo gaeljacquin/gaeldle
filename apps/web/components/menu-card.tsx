@@ -23,7 +23,7 @@ export function MenuCard({
   gradient,
   disabled = false,
   badge,
-}: Readonly<MenuCardProps>) {
+}: MenuCardProps) {
   const cardContent = (
     <div
       className={cn(

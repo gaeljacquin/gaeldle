@@ -10,12 +10,12 @@ import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import {
   IMAGE_PROMPT_SUFFIX,
-  ART_STYLES,
   DEFAULT_IMAGE_GEN_ART_STYLE,
   DEFAULT_IMAGE_GEN_NUM,
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
 } from '@workspace/constants';
+import { artStyles } from '@workspace/api-contract';
 
 // Parse prompt options from environment variables
 const includeStoryline = process.env.INCLUDE_STORYLINE === 'true';
@@ -34,11 +34,11 @@ const numGames = Math.max(
 // Resolve art style: match by value slug or label (case-insensitive), fall back to default
 const rawStyle = process.env.ART_STYLE?.trim() ?? '';
 const resolvedStyle =
-  ART_STYLES.find(
+  artStyles.find(
     (s) =>
       s.value.toLowerCase() === rawStyle.toLowerCase() ||
       s.label.toLowerCase() === rawStyle.toLowerCase(),
-  ) ?? ART_STYLES.find((s) => s.value === DEFAULT_IMAGE_GEN_ART_STYLE)!;
+  ) ?? artStyles.find((s) => s.value === DEFAULT_IMAGE_GEN_ART_STYLE)!;
 
 console.log(`Art style: ${resolvedStyle.label} (${resolvedStyle.value})`);
 

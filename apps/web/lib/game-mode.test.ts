@@ -1,5 +1,5 @@
+import { gameModes, getGameModeBySlug } from '@workspace/api-contract';
 import { describe, it, expect } from 'vitest';
-import { getGameModeBySlug, gameModes } from './game-mode';
 
 describe('game-mode utilities', () => {
   describe('gameModes array', () => {

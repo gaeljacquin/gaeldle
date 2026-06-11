@@ -7,22 +7,26 @@ async function handleResponse<T>(res: Response): Promise<T> {
     const errorData = await res.json().catch(() => ({}));
     throw new Error(errorData.error || `Server error: ${res.status}`);
   }
+
   return res.json();
 }
 
 export async function getGameByIgdbId(igdbId: number): Promise<Game> {
   const res = await fetchWithTimeout(`/api/games/${igdbId}`);
   const result = await handleResponse<{ data: Game }>(res);
+
   return result.data;
 }
 
 export async function deleteGame(id: number): Promise<boolean> {
   const result = await orpcClient.games.delete({ id });
+
   return result.success;
 }
 
 export async function deleteBulkGames(ids: number[]): Promise<boolean> {
   const result = await orpcClient.games.deleteBulk(ids);
+
   return result.success;
 }
 
@@ -59,6 +63,7 @@ export async function getPaginatedGames(
   }
 
   const res = await fetchWithTimeout(`/api/games?${params.toString()}`);
+
   return handleResponse<PaginatedResponse<Game>>(res);
 }
 
@@ -81,6 +86,7 @@ export async function getRandomGame(
     `/api/games/random${query ? '?' + query : ''}`,
   );
   const result = await handleResponse<{ data: Game }>(res);
+
   return result.data;
 }
 
@@ -102,6 +108,7 @@ export async function getRandomGames(
   const query = params.toString();
   const res = await fetchWithTimeout(`/api/games/random?${query}`);
   const result = await handleResponse<{ data: Game[] }>(res);
+
   return result.data;
 }
 
@@ -122,6 +129,7 @@ export async function searchGames(
 
   const res = await fetchWithTimeout(`/api/games/search?${params.toString()}`);
   const result = await handleResponse<{ data: Game[] }>(res);
+
   return result.data;
 }
 
@@ -135,6 +143,7 @@ export async function testUpload(image: string, extension: string = 'jpg') {
     image,
     extension,
   });
+
   return result;
 }
 
@@ -148,6 +157,7 @@ export async function generateImage(
   },
 ) {
   const result = await orpcClient.games.generateImage({ igdbId, ...options });
+
   return result;
 }
 
@@ -159,11 +169,13 @@ export async function bulkGenerateImages(params: {
   includeThemes: boolean;
 }) {
   const result = await orpcClient.games.bulkGenerateImages(params);
+
   return result;
 }
 
 export async function getBulkJobStatus(jobId: string) {
   const result = await orpcClient.games.getBulkJobStatus({ jobId });
+
   return result;
 }
 
@@ -179,6 +191,7 @@ export async function validateReplaceGame(
     },
     { signal },
   );
+
   return result;
 }
 
@@ -186,6 +199,7 @@ export async function replaceGameByIdgbId(
   pairs: Array<{ current: number; replacement: number }>,
 ) {
   const result = await orpcClient.games.replaceGames(pairs);
+
   return result;
 }
 
@@ -194,10 +208,12 @@ export async function validateIgdbIdAdd(igdbId: number, signal?: AbortSignal) {
     { igdbId },
     { signal },
   );
+
   return result;
 }
 
 export async function addGame(igdbId: number) {
   const result = await orpcClient.games.sync({ igdb_id: igdbId });
+
   return result;
 }

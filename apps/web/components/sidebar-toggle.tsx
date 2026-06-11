@@ -12,7 +12,7 @@ interface SidebarToggleProps {
 export default function SidebarToggle({
   isCollapsed,
   toggleSidebar,
-}: Readonly<SidebarToggleProps>) {
+}: SidebarToggleProps) {
   return (
     <button
       onClick={toggleSidebar}

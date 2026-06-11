@@ -5,7 +5,7 @@ import { useTimeline2Game } from '@/lib/hooks/use-timeline-2-game';
 import { Timeline2Card } from '@/components/timeline-2-card';
 import { Button } from '@workspace/ui/button';
 import { Card, CardContent } from '@workspace/ui/card';
-import { getGameModeBySlug } from '@/lib/game-mode';
+import { getGameModeBySlug } from '@workspace/api-contract';
 import { useState, useRef } from 'react';
 import Attempts from '@/components/attempts';
 import { motion, useMotionValue } from 'motion/react';
@@ -41,7 +41,9 @@ export default function Timeline2() {
   const y = useMotionValue(0);
 
   const findDropZone = (clientX: number, clientY: number): number | null => {
-    if (!timelineRef.current) return null;
+    if (!timelineRef.current) {
+      return null;
+    }
 
     const timelineRect = timelineRef.current.getBoundingClientRect();
 
@@ -102,6 +104,7 @@ export default function Timeline2() {
     if (isAnimating) {
       return lastPlacementCorrect === true ? 'green' : 'red';
     }
+
     return 'none';
   };
 

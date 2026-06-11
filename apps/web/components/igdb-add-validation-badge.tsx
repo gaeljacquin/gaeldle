@@ -7,9 +7,7 @@ interface IgdbAddValidationBadgeProps {
   state: IgdbIdAddValidationState;
 }
 
-export function IgdbAddValidationBadge({
-  state,
-}: Readonly<IgdbAddValidationBadgeProps>) {
+export function IgdbAddValidationBadge({ state }: IgdbAddValidationBadgeProps) {
   if (!state.isReady) return null;
 
   if (state.alreadyInDb) {

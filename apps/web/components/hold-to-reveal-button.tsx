@@ -16,7 +16,7 @@ export default function HoldToRevealButton({
   onReveal,
   disabled,
   className,
-}: Readonly<HoldToRevealButtonProps>) {
+}: HoldToRevealButtonProps) {
   const [isHolding, setIsHolding] = useState(false);
   const [progress, setProgress] = useState(0);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);

@@ -9,18 +9,18 @@ import SelectedGameDisplay from '@/components/selected-game-display';
 import GuessHistoryInline from '@/components/guess-history-inline';
 import { Button } from '@workspace/ui/button';
 import { Card } from '@workspace/ui/card';
-import { getGameModeBySlug } from '@/lib/game-mode';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
-import type { CoverArtModeSlug } from '@workspace/api-contract';
+import {
+  getGameModeBySlug,
+  type CoverArtModeSlug,
+} from '@workspace/api-contract';
 
 interface GameListPlusImageProps {
   gameModeSlug: CoverArtModeSlug;
 }
 
-export default function GameListPlusImage(
-  props: Readonly<GameListPlusImageProps>,
-) {
+export default function GameListPlusImage(props: GameListPlusImageProps) {
   const gameMode = getGameModeBySlug(props.gameModeSlug);
   const [searchKey, setSearchKey] = useState(0);
 

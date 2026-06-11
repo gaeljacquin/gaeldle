@@ -5,7 +5,6 @@ import { useTimelineGame } from '@/lib/hooks/use-timeline-game';
 import { TimelineCard } from '@/components/timeline-card';
 import { Button } from '@workspace/ui/button';
 import { Card, CardContent } from '@workspace/ui/card';
-import { getGameModeBySlug } from '@/lib/game-mode';
 import {
   DndContext,
   closestCenter,
@@ -27,7 +26,7 @@ import {
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
-import type { Game } from '@workspace/api-contract';
+import { type Game, getGameModeBySlug } from '@workspace/api-contract';
 import Attempts from '@/components/attempts';
 import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';
@@ -49,13 +48,13 @@ function SortableCard({
   showDate,
   disabled,
   isGameOver,
-}: Readonly<{
+}: {
   game: Game;
   isCorrect?: boolean;
   showDate?: boolean;
   disabled?: boolean;
   isGameOver?: boolean;
-}>) {
+}) {
   const {
     attributes,
     listeners,

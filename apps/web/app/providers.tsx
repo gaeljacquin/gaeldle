@@ -13,7 +13,7 @@ type ProvidersProps = {
   children: ReactNode;
 };
 
-export default function Providers({ children }: Readonly<ProvidersProps>) {
+export default function Providers({ children }: ProvidersProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({

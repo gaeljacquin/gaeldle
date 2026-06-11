@@ -1,7 +1,7 @@
 import { Controller, UseGuards, NotFoundException } from '@nestjs/common';
 import sharp from 'sharp';
 import { Implement, implement } from '@orpc/nest';
-import { contract, type ArtStyle } from '@workspace/api-contract';
+import { artStyles, contract, type ArtStyle } from '@workspace/api-contract';
 import { GamesService } from '@/games/games.service';
 import { S3Service } from '@/lib/s3.service';
 import { AiService } from '@/lib/ai.service';
@@ -226,19 +226,13 @@ export class GamesRouter {
     );
   }
 
-  private static readonly ART_STYLE_DESCRIPTORS: Record<ArtStyle, string> = {
-    'funko-pop-chibi': 'Funko Pop chibi style illustration',
-    simpsons: 'Simpsons style illustration',
-    'rubber-hose-animation': 'Rubber hose animation style illustration',
-    muppet: 'Muppet style illustration',
-    lego: 'Lego style illustration',
-    claymation: 'Claymation style illustration',
-    'vector-art': 'Vector art style illustration',
-    'digital-cel-shaded': 'Digital cel-shaded portrait illustration style',
-    'western-animation-concept-art':
-      'Western animation concept art style illustration',
-    'graphic-novel-illustration': 'Graphic novel illustration style',
-  };
+  private static readonly ART_STYLE_DESCRIPTORS: Record<ArtStyle, string> =
+    artStyles.reduce((acc, artStyle) => {
+      const { value, descriptor } = artStyle;
+      acc[value] = descriptor;
+
+      return acc;
+    });
 
   private buildImagePrompt(
     game: {

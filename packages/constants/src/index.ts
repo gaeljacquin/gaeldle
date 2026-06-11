@@ -9,59 +9,6 @@ export const IMAGE_GEN_MIN = 1;
 
 export const IMAGE_GEN_MAX = 50;
 
-export const ART_STYLES: {
-  value: string;
-  label: string;
-  descriptor: string;
-}[] = [
-  {
-    value: 'funko-pop-chibi',
-    label: 'Funko Pop Chibi Style',
-    descriptor: 'Funko Pop chibi style illustration',
-  },
-  {
-    value: 'simpsons',
-    label: 'Simpsons Style',
-    descriptor: 'Simpsons style illustration',
-  },
-  {
-    value: 'rubber-hose-animation',
-    label: 'Rubber Hose Animation Style',
-    descriptor: 'Rubber hose animation style illustration',
-  },
-  {
-    value: 'muppet',
-    label: 'Muppet Style',
-    descriptor: 'Muppet style illustration',
-  },
-  { value: 'lego', label: 'Lego Style', descriptor: 'Lego style illustration' },
-  {
-    value: 'claymation',
-    label: 'Claymation Style',
-    descriptor: 'Claymation style illustration',
-  },
-  {
-    value: 'vector-art',
-    label: 'Vector Art Style',
-    descriptor: 'Vector art style illustration',
-  },
-  {
-    value: 'digital-cel-shaded',
-    label: 'Digital Cel-shaded Portrait Illustration Style',
-    descriptor: 'Digital cel-shaded portrait illustration style',
-  },
-  {
-    value: 'western-animation-concept-art',
-    label: 'Western Animation Concept Art Style',
-    descriptor: 'Western animation concept art style illustration',
-  },
-  {
-    value: 'graphic-novel-illustration',
-    label: 'Graphic Novel Illustration Style',
-    descriptor: 'Graphic novel illustration style',
-  },
-];
-
 export const FILE_SIZE_LIMIT = '10mb';
 
 export const SAMPLE_DIR = 'sample-dir';

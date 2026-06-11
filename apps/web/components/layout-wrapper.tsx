@@ -5,7 +5,7 @@ import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { ReactNode } from 'react';
 
-export function LayoutWrapper({ children }: Readonly<{ children: ReactNode }>) {
+export function LayoutWrapper({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const shouldHideNav =
     pathname?.startsWith('/dashboard') || pathname?.startsWith('/handler');

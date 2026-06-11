@@ -13,6 +13,7 @@
   "dependencies": {
     "@orpc/contract": "^1.14.5",
     "@orpc/server": "^1.14.5",
+    "@tabler/icons-react": "^3.44.0",
     "@workspace/constants": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.8.3",

@@ -10,7 +10,7 @@ export default function Attempts({
   attemptsLeft,
   className,
   variant = 'primary',
-}: Readonly<AttemptsProps>) {
+}: AttemptsProps) {
   const attemptsUsed = maxAttempts - attemptsLeft;
   const emptyClass =
     variant === 'neutral'

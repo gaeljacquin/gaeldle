@@ -27,9 +27,7 @@ import type {
   DiscoverApplyResult,
 } from '@workspace/api-contract';
 
-function ApplyResultsRow({
-  result,
-}: Readonly<{ result: DiscoverApplyResult }>) {
+function ApplyResultsRow({ result }: { result: DiscoverApplyResult }) {
   if (result.status === 'error') {
     return (
       <div className="flex items-center gap-1.5 text-destructive">
@@ -68,7 +66,7 @@ function IdlePhase({
   setCountInput,
   onScan,
   isScanning,
-}: Readonly<IdlePhaseProps>) {
+}: IdlePhaseProps) {
   return (
     <div className="flex flex-col items-start gap-4">
       <div className="flex items-center gap-3">
@@ -128,7 +126,7 @@ function ResultsControls({
   onDeselectAll,
   onApply,
   onScanAgain,
-}: Readonly<ResultsControlsProps>) {
+}: ResultsControlsProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Button

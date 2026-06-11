@@ -14,11 +14,15 @@ interface TimelineDevToggleProps {
 }
 
 function formatReleaseDate(timestamp: number | null): string {
-  if (!timestamp) return 'Unknown';
+  if (!timestamp) {
+    return 'Unknown';
+  }
+
   const date = new Date(timestamp * 1000);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
+
   return `${year}-${month}-${day}`;
 }
 
@@ -28,7 +32,7 @@ export default function TimelineDevToggle({
   maxAttempts,
   onAdjustAttempts,
   className,
-}: Readonly<TimelineDevToggleProps>) {
+}: TimelineDevToggleProps) {
   const [showDevInfo, setShowDevInfo] = useState(false);
 
   if (process.env.NODE_ENV !== 'development') {

@@ -4,7 +4,6 @@ import { use, useState, useMemo, Suspense, ViewTransition } from 'react';
 import {
   DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_PROMPT_SUFFIX,
-  ART_STYLES,
 } from '@workspace/constants';
 import {
   useQuery,
@@ -56,6 +55,7 @@ import {
   Game,
   type ArtworkImage,
   type ArtStyle,
+  artStyles,
 } from '@workspace/api-contract';
 import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
@@ -78,7 +78,7 @@ function buildPromptPreview(
 ): string {
   const parts: string[] = [];
   const style =
-    ART_STYLES.find((s) => s.value === options.artStyle) ?? ART_STYLES[0];
+    artStyles.find((s) => s.value === options.artStyle) ?? artStyles[0];
   parts.push(
     `${style.descriptor} of iconic characters from "${game.name}" set within the game's distinct world`,
   );
@@ -431,7 +431,7 @@ function ArtworksTabContent({ igdbId }: { igdbId: string }) {
               const data = entry[styleKey];
               if (!data || typeof data !== 'object') return null;
               const styleLabel =
-                ART_STYLES.find((s) => s.value === styleKey)?.label ?? styleKey;
+                artStyles.find((s) => s.value === styleKey)?.label ?? styleKey;
               return (
                 <Dialog key={index}>
                   <DialogTrigger
@@ -576,7 +576,7 @@ function ImageGenTabContent({
             <DialogTrigger className="relative aspect-square w-full overflow-hidden border-2 border-solid border-muted-foreground/30 group cursor-pointer hover:border-primary/50 transition-colors p-0 m-0 bg-transparent block">
               <Image
                 src={generatedImage.url}
-                alt={`${game.name} AI Image - ${ART_STYLES.find((s) => s.value === artStyle)?.label ?? artStyle}`}
+                alt={`${game.name} AI Image - ${artStyles.find((s) => s.value === artStyle)?.label ?? artStyle}`}
                 fill
                 unoptimized
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -593,7 +593,7 @@ function ImageGenTabContent({
               <DialogHeader className="sr-only">
                 <DialogTitle>
                   {game.name} AI Image -{' '}
-                  {ART_STYLES.find((s) => s.value === artStyle)?.label ??
+                  {artStyles.find((s) => s.value === artStyle)?.label ??
                     artStyle}
                 </DialogTitle>
               </DialogHeader>
@@ -649,7 +649,7 @@ function ImageGenTabContent({
             Art Style
           </h3>
           <div className="border border-border bg-card/50 overflow-y-scroll scrollbar-y max-h-60 rounded-none divide-y divide-border">
-            {ART_STYLES.map((style) => {
+            {artStyles.map((style) => {
               const isSelected = style.value === artStyle;
               const hasImage =
                 Array.isArray(game?.imageGen) &&
@@ -848,12 +848,15 @@ function HeaderTitle({ igdbId }: { igdbId: string }) {
     queryKey: ['game', igdbId],
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
   });
+
   return <>{game.name}</>;
 }
 
 export default function GameDetails({
   params,
-}: Readonly<{ params: Promise<{ igdbId: string }> }>) {
+}: {
+  params: Promise<{ igdbId: string }>;
+}) {
   const { igdbId } = use(params);
   const router = useRouter();
   const queryClient = useQueryClient();

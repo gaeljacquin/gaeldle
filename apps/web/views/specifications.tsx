@@ -12,7 +12,7 @@ import DevModeToggle from '@/components/dev-mode-toggle';
 import SpecificationsGameOver from '@/components/specifications-game-over';
 import { Button } from '@workspace/ui/button';
 import { Card, CardContent } from '@workspace/ui/card';
-import { getGameModeBySlug } from '@/lib/game-mode';
+import { getGameModeBySlug } from '@workspace/api-contract';
 import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';

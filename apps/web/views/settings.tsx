@@ -54,6 +54,7 @@ export default function Settings() {
   const sendSampleMessageMutation = useMutation({
     mutationFn: async () => {
       const message = 'Shouting into the void!';
+
       return sendSampleMessage(message);
     },
     onSuccess: (data) => {

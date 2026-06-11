@@ -16,17 +16,14 @@ import {
   type SyncOperation,
   GameUpdate,
   type ArtStyle,
+  artStyles,
 } from '@workspace/api-contract';
 import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { BulkImageJobStore } from '@/games/bulk-image-job.store';
 import type { AppConfiguration } from '@/config/configuration';
-import {
-  ART_STYLES,
-  IMAGE_PROMPT_SUFFIX,
-  IMAGE_GEN_DIR,
-} from '@workspace/constants';
+import { IMAGE_PROMPT_SUFFIX, IMAGE_GEN_DIR } from '@workspace/constants';
 
 type Result = {
   current: number;
@@ -563,7 +560,7 @@ export class GamesService {
       .set({ status: 'running', startedAt: new Date() })
       .where(eq(bulkImageGenJobs.jobId, jobId));
 
-    const styleEntry = ART_STYLES.find((s) => s.value === params.artStyle);
+    const styleEntry = artStyles.find((s) => s.value === params.artStyle);
     const styleDescriptor = styleEntry?.descriptor ?? params.artStyle;
 
     const r2PublicUrlRaw =

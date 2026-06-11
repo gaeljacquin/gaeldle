@@ -19,8 +19,8 @@ import {
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { appInfo } from '@/lib/app-info';
-import { gameModes } from '@/lib/game-mode';
 import { Separator } from '@workspace/ui/separator';
+import { gameModes } from '@workspace/api-contract';
 
 interface SidebarLinkProps {
   href: string;
@@ -36,7 +36,7 @@ function SidebarLink({
   label,
   isCollapsed,
   isActive,
-}: Readonly<SidebarLinkProps>) {
+}: SidebarLinkProps) {
   return (
     <Link
       href={href}
@@ -72,7 +72,7 @@ function SidebarGameLink({
   mode,
   isCollapsed,
   pathname,
-}: Readonly<SidebarGameLinkProps>) {
+}: SidebarGameLinkProps) {
   const isActive = pathname === mode.href;
   return (
     <Link
@@ -97,7 +97,7 @@ function SidebarGamesSection({
   isExpanded,
   onToggle,
   pathname,
-}: Readonly<SidebarGamesSectionProps>) {
+}: SidebarGamesSectionProps) {
   return (
     <div>
       <button
@@ -143,10 +143,7 @@ interface SidebarHeaderProps {
   onToggle: () => void;
 }
 
-function SidebarHeader({
-  isCollapsed,
-  onToggle,
-}: Readonly<SidebarHeaderProps>) {
+function SidebarHeader({ isCollapsed, onToggle }: SidebarHeaderProps) {
   return (
     <button
       onClick={onToggle}
@@ -207,10 +204,7 @@ interface SidebarUserFooterProps {
   user: { displayName?: string | null };
 }
 
-function SidebarUserFooter({
-  isCollapsed,
-  user,
-}: Readonly<SidebarUserFooterProps>) {
+function SidebarUserFooter({ isCollapsed, user }: SidebarUserFooterProps) {
   return (
     <div
       className={cn(

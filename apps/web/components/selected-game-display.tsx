@@ -17,7 +17,7 @@ export default function SelectedGameDisplay({
   onClearSelection,
   className,
   mode = 'cover-art',
-}: Readonly<SelectedGameDisplayProps>) {
+}: SelectedGameDisplayProps) {
   return (
     <div
       className={cn(

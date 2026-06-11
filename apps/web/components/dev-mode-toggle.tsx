@@ -19,7 +19,7 @@ export default function DevModeToggle({
   maxAttempts,
   onAdjustAttempts,
   className,
-}: Readonly<DevModeToggleProps>) {
+}: DevModeToggleProps) {
   const [showDevInfo, setShowDevInfo] = useState(false);
 
   if (!targetGame || process.env.NODE_ENV !== 'development') {

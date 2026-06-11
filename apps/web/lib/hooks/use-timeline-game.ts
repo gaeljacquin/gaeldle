@@ -61,6 +61,7 @@ export function useTimelineGame() {
     const correctOrder = [...selectedGames].sort((a, b) => {
       const dateA = a.firstReleaseDate || 0;
       const dateB = b.firstReleaseDate || 0;
+
       return dateA - dateB;
     });
 
@@ -148,7 +149,11 @@ export function useTimelineGame() {
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft((prev) => {
       const newValue = prev + delta;
-      if (newValue < 1 || newValue > TIMELINE_MAX_ATTEMPTS) return prev;
+
+      if (newValue < 1 || newValue > TIMELINE_MAX_ATTEMPTS) {
+        return prev;
+      }
+
       return newValue;
     });
   }, []);

@@ -35,7 +35,10 @@ interface IgdbIdRowPairProps {
 function CurrentBadge({
   state,
   igdbId,
-}: Readonly<{ state: ReplaceGameValidationState; igdbId: string }>) {
+}: {
+  state: ReplaceGameValidationState;
+  igdbId: string;
+}) {
   if (!state.isReady && !state.isLoading) return null;
 
   if (state.currentExistsInDb === false) {
@@ -70,9 +73,7 @@ function CurrentBadge({
   return null;
 }
 
-function ReplacementBadge({
-  state,
-}: Readonly<{ state: ReplaceGameValidationState }>) {
+function ReplacementBadge({ state }: { state: ReplaceGameValidationState }) {
   if (!state.isReady) return null;
 
   // Current not in DB — skip IGDB lookup, show nothing under replacement
@@ -134,7 +135,7 @@ export function IgdbIdRowPair({
   onRemove,
   canRemove,
   isDuplicate = false,
-}: Readonly<IgdbIdRowPairProps>) {
+}: IgdbIdRowPairProps) {
   const currentHasError =
     validationState.isReady &&
     !validationState.isLoading &&

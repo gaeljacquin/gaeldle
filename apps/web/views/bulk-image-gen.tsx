@@ -8,9 +8,8 @@ import {
   DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
-  ART_STYLES,
 } from '@workspace/constants';
-import type { ArtStyle } from '@workspace/api-contract';
+import { artStyles, type ArtStyle } from '@workspace/api-contract';
 import { bulkGenerateImages } from '@/lib/services/game.service';
 import { useBulkImageJob } from '@/lib/hooks/use-bulk-image-job';
 import { Button } from '@workspace/ui/button';
@@ -48,7 +47,7 @@ import { DashboardPageHeader } from '@/components/dashboard-header';
 
 type JobStatus = 'pending' | 'running' | 'completed' | 'failed';
 
-function StatusBadge({ status }: Readonly<{ status: JobStatus | 'idle' }>) {
+function StatusBadge({ status }: { status: JobStatus | 'idle' }) {
   const variantMap: Record<
     JobStatus | 'idle',
     'default' | 'secondary' | 'destructive' | 'outline'
@@ -76,7 +75,7 @@ interface ActiveJobPanelProps {
   accessToken: string | null;
 }
 
-function ActiveJobPanel({ jobId, accessToken }: Readonly<ActiveJobPanelProps>) {
+function ActiveJobPanel({ jobId, accessToken }: ActiveJobPanelProps) {
   const jobState = useBulkImageJob({ jobId, enabled: true, accessToken });
 
   const progressPct =
@@ -320,7 +319,7 @@ export default function BulkImageGen() {
                           >
                             <span className="truncate">
                               {
-                                ART_STYLES.find((s) => s.value === artStyle)
+                                artStyles.find((s) => s.value === artStyle)
                                   ?.label
                               }
                             </span>
@@ -337,7 +336,7 @@ export default function BulkImageGen() {
                           value={artStyle}
                           onValueChange={(val) => setArtStyle(val as ArtStyle)}
                         >
-                          {ART_STYLES.map((style) => (
+                          {artStyles.map((style) => (
                             <DropdownMenuRadioItem
                               key={style.value}
                               value={style.value}

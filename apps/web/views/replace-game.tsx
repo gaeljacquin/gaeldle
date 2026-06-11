@@ -42,14 +42,6 @@ function createEmptyRow(): IgdbIdRowPairData {
   return { id: crypto.randomUUID(), current: '', replacement: '' };
 }
 
-function parsePositiveInt(value: string): number | null {
-  const trimmed = value.trim();
-  if (trimmed === '') return null;
-  const n = Number.parseInt(trimmed, 10);
-  if (Number.isNaN(n) || n <= 0 || String(n) !== trimmed) return null;
-  return n;
-}
-
 function pushToMap(map: Map<number, string[]>, key: number, rowId: string) {
   const existing = map.get(key);
   if (existing) {
@@ -97,7 +89,7 @@ function RowWithValidation({
   canRemove,
   onValidationChange,
   isDuplicate,
-}: Readonly<RowWithValidationProps>) {
+}: RowWithValidationProps) {
   const validationState = useReplaceGameValidation(
     row.current,
     row.replacement,
@@ -133,6 +125,7 @@ export default function ReplaceGameByIgdbId() {
     (id: string, state: ReplaceGameValidationState) => {
       setValidationMap((prev) => {
         const current = prev[id];
+
         if (
           current?.canApply === state.canApply &&
           current?.isLoading === state.isLoading &&
@@ -140,6 +133,7 @@ export default function ReplaceGameByIgdbId() {
         ) {
           return prev;
         }
+
         return { ...prev, [id]: state };
       });
     },
@@ -152,14 +146,19 @@ export default function ReplaceGameByIgdbId() {
 
     for (const row of rows) {
       const state = validationMap[row.id];
-      if (!state?.isReady) continue;
 
-      const currentInt = parsePositiveInt(row.current);
+      if (!state?.isReady) {
+        continue;
+      }
+
+      const currentInt = Number.parseInt(row.current, 10);
+
       if (currentInt !== null && state.currentExistsInDb === true) {
         pushToMap(currentIdToRows, currentInt, row.id);
       }
 
-      const replacementInt = parsePositiveInt(row.replacement);
+      const replacementInt = Number.parseInt(row.replacement, 10);
+
       if (replacementInt !== null && state.replacementExistsOnIgdb === true) {
         pushToMap(replacementIdToRows, replacementInt, row.id);
       }

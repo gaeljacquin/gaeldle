@@ -1,6 +1,6 @@
 import { ViewTransition } from 'react';
 import { GameModeCard } from '@/components/game-mode-card';
-import { gameModes } from '@/lib/game-mode';
+import { gameModes } from '@workspace/api-contract';
 import { appInfo } from '@/lib/app-info';
 import Link from 'next/link';
 import ViewportDebugger from '@/components/viewport-debugger';

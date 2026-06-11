@@ -13,28 +13,159 @@ import {
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
 } from '@workspace/constants';
+import {
+  IconPhoto,
+  IconCalendar,
+  IconCalendarDue,
+  IconNotes,
+  IconWallpaper,
+  IconRobot,
+  type TablerIcon,
+} from '@tabler/icons-react';
 
-export const GameModeSlugSchema = z.enum([
-  'cover-art',
-  'image-gen',
-  'artwork',
+export const coverArtModeSlugs = ['cover-art', 'image-gen', 'artwork'];
+
+export const gameModeSlugs = [
+  ...coverArtModeSlugs,
   'timeline',
   'timeline-2',
   'specifications',
-]);
+];
 
-export const ArtStyleSchema = z.enum([
-  'funko-pop-chibi',
-  'simpsons',
-  'rubber-hose-animation',
-  'muppet',
-  'lego',
-  'claymation',
-  'vector-art',
-  'digital-cel-shaded',
-  'western-animation-concept-art',
-  'graphic-novel-illustration',
-]);
+export type GameModeSlug = (typeof gameModeSlugs)[number];
+
+export type CoverArtModeSlug = (typeof coverArtModeSlugs)[number];
+
+export interface GameMode {
+  id: GameModeSlug;
+  title: string;
+  description: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  icon: TablerIcon;
+  gradient: string;
+  href: string;
+}
+
+export const gameModes: GameMode[] = [
+  {
+    id: 'cover-art',
+    title: 'Cover Art',
+    description: 'Identify the game from their cover art.',
+    difficulty: 'Easy',
+    icon: IconPhoto,
+    gradient: '--gradient-easy',
+    href: '/cover-art',
+  },
+  {
+    id: 'artwork',
+    title: 'Artwork',
+    description: 'Guess the game from their artwork.',
+    difficulty: 'Medium',
+    icon: IconWallpaper,
+    gradient: '--gradient-medium-1',
+    href: '/artwork',
+  },
+  {
+    id: 'image-gen',
+    title: 'Image Gen',
+    description: 'Guess the game from a text-to-image rendition.',
+    difficulty: 'Medium',
+    icon: IconRobot,
+    gradient: '--gradient-medium-2',
+    href: '/image-gen',
+  },
+  {
+    id: 'timeline',
+    title: 'Timeline',
+    description: 'Arrange games in chronological order.',
+    difficulty: 'Medium',
+    icon: IconCalendar,
+    gradient: '--gradient-medium-3',
+    href: '/timeline',
+  },
+  {
+    id: 'timeline-2',
+    title: 'Timeline 2',
+    description: 'Place each game in chronological order.',
+    difficulty: 'Hard',
+    icon: IconCalendarDue,
+    gradient: '--gradient-hard-1',
+    href: '/timeline-2',
+  },
+  {
+    id: 'specifications',
+    title: 'Specifications',
+    description: 'Deduce the game from their specifications.',
+    difficulty: 'Hard',
+    icon: IconNotes,
+    gradient: '--gradient-hard-2',
+    href: '/specifications',
+  },
+];
+
+export const GameModeSlugSchema = z.enum(
+  gameModes.map((gameMode) => {
+    return gameMode.id;
+  }),
+);
+
+export const artStyles: {
+  value: string;
+  label: string;
+  descriptor: string;
+}[] = [
+  {
+    value: 'funko-pop-chibi',
+    label: 'Funko Pop Chibi Style',
+    descriptor: 'Funko Pop chibi style illustration',
+  },
+  {
+    value: 'simpsons',
+    label: 'Simpsons Style',
+    descriptor: 'Simpsons style illustration',
+  },
+  {
+    value: 'rubber-hose-animation',
+    label: 'Rubber Hose Animation Style',
+    descriptor: 'Rubber hose animation style illustration',
+  },
+  {
+    value: 'muppet',
+    label: 'Muppet Style',
+    descriptor: 'Muppet style illustration',
+  },
+  { value: 'lego', label: 'Lego Style', descriptor: 'Lego style illustration' },
+  {
+    value: 'claymation',
+    label: 'Claymation Style',
+    descriptor: 'Claymation style illustration',
+  },
+  {
+    value: 'vector-art',
+    label: 'Vector Art Style',
+    descriptor: 'Vector art style illustration',
+  },
+  {
+    value: 'digital-cel-shaded',
+    label: 'Digital Cel-shaded Portrait Illustration Style',
+    descriptor: 'Digital cel-shaded portrait illustration style',
+  },
+  {
+    value: 'western-animation-concept-art',
+    label: 'Western Animation Concept Art Style',
+    descriptor: 'Western animation concept art style illustration',
+  },
+  {
+    value: 'graphic-novel-illustration',
+    label: 'Graphic Novel Illustration Style',
+    descriptor: 'Graphic novel illustration style',
+  },
+];
+
+export const ArtStyleSchema = z.enum(artStyles.map((artStyle) => {
+  return artStyle.value
+}));
+
 export type ArtStyle = z.infer<typeof ArtStyleSchema>;
 
 export const SyncOperationSchema = z.enum([
@@ -269,14 +400,6 @@ export interface GameApiResponse {
   error?: string;
 }
 
-export type CoverArtModeSlug = 'cover-art' | 'image-gen' | 'artwork';
-
-export type GameModeSlug =
-  | CoverArtModeSlug
-  | 'timeline'
-  | 'timeline-2'
-  | 'specifications';
-
 export interface ArtworkImage {
   url: string;
   image_id: string;
@@ -322,3 +445,16 @@ export interface RevealedClue {
   value: string | string[];
   revealedAtGuessCount: number;
 }
+
+/**
+ * Get game mode by slug (pathname without leading slash)
+ * @param slug - The game mode slug (e.g., "cover-art", "image-gen")
+ * @returns GameMode or undefined if not found
+ */
+export function getGameModeBySlug(slug: string): GameMode | undefined {
+  return gameModes.find((mode) => mode.id === slug);
+}
+
+export const isGameModeSlug = (value: unknown): value is GameModeSlug =>
+  typeof value === 'string' &&
+  (gameModeSlugs as readonly string[]).includes(value);

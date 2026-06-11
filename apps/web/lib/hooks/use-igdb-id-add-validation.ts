@@ -24,20 +24,12 @@ const DEFAULT_STATE: Omit<IgdbIdAddValidationState, 'refetch' | 'stop'> = {
   canAdd: false,
 };
 
-function parsePositiveInt(value: string): number | null {
-  const trimmed = value.trim();
-  if (trimmed === '') return null;
-  const n = Number.parseInt(trimmed, 10);
-  if (Number.isNaN(n) || n <= 0 || String(n) !== trimmed) return null;
-  return n;
-}
-
 export function useIgdbIdAddValidation(
   igdbId: string,
 ): IgdbIdAddValidationState {
   const queryClient = useQueryClient();
   const [forcedInt, setForcedInt] = useState<number | null>(null);
-  const liveInt = parsePositiveInt(igdbId);
+  const liveInt = Number.parseInt(igdbId, 10);
 
   const queryKey = useMemo(() => ['igdb-add-validate', forcedInt], [forcedInt]);
 

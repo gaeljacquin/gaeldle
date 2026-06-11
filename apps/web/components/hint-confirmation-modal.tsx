@@ -21,7 +21,7 @@ export default function HintConfirmationModal({
   isOpen,
   onClose,
   onReveal,
-}: Readonly<HintConfirmationModalProps>) {
+}: HintConfirmationModalProps) {
   const handleReveal = () => {
     onReveal();
     onClose();

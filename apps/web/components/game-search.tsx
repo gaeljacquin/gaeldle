@@ -55,7 +55,7 @@ export default function GameSearch({
   disabled = false,
   className,
   mode,
-}: Readonly<GameSearchProps>) {
+}: GameSearchProps) {
   const [searchValue, setSearchValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);

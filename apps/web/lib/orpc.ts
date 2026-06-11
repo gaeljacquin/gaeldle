@@ -24,16 +24,10 @@ export const orpcClient = createORPCClient<
         const user = await hexclaveClientApp.getUser({ or: 'return-null' });
 
         if (user) {
-          const authHeaders = await user.getAuthHeaders();
+          const authorizationHeader = await user.getAuthorizationHeader();
 
-          Object.entries(authHeaders).forEach(([key, value]) => {
-            headers.set(key, value);
-          });
-
-          // Also set the token explicitly just in case some middleware prefers it
-          const accessToken = await user.getAccessToken();
-          if (accessToken) {
-            headers.set('x-stack-access-token', accessToken);
+          if (authorizationHeader) {
+            headers.set('Authorization', authorizationHeader);
           }
         }
 
@@ -44,6 +38,7 @@ export const orpcClient = createORPCClient<
           mode: 'cors',
           timeout: 60000,
         });
+
         return response;
       } catch (e) {
         if (

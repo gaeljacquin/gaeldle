@@ -1,19 +1,8 @@
 'use client';
 
 import { IconCircleCheck, IconCircleX, IconMinus } from '@tabler/icons-react';
+import { ReplaceGameResult } from '@workspace/api-contract';
 import { cn } from '@workspace/ui/lib/utils';
-
-export interface ReplaceGameResult {
-  current: number;
-  replacement: number;
-  status: 'updated' | 'skipped' | 'error';
-  message: string;
-  gameName: string | null;
-}
-
-interface ReplaceGameResultsTableProps {
-  results: ReplaceGameResult[];
-}
 
 function StatusCell({ status }: { status: ReplaceGameResult['status'] }) {
   if (status === 'updated') {
@@ -44,7 +33,9 @@ function StatusCell({ status }: { status: ReplaceGameResult['status'] }) {
 
 export function ReplaceGameResultsTable({
   results,
-}: ReplaceGameResultsTableProps) {
+}: {
+  results: ReplaceGameResult[];
+}) {
   if (results.length === 0) {
     return null;
   }

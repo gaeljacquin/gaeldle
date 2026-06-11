@@ -15,7 +15,7 @@ import {
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
 } from '@workspace/shared';
-import { artStyles } from '@workspace/api-contract';
+import { artStyles, Game } from '@workspace/api-contract';
 
 // Parse prompt options from environment variables
 const includeStoryline = process.env.INCLUDE_STORYLINE === 'true';
@@ -31,14 +31,14 @@ const numGames = Math.max(
 );
 
 const rawStyle = process.env.ART_STYLE?.trim() ?? '';
-const resolvedStyle =
+const resolvedArtStyle =
   artStyles.find(
     (s) =>
       s.value.toLowerCase() === rawStyle.toLowerCase() ||
       s.label.toLowerCase() === rawStyle.toLowerCase(),
   ) ?? artStyles.find((s) => s.value === DEFAULT_IMAGE_GEN_ART_STYLE)!;
 
-console.log(`Art style: ${resolvedStyle.label} (${resolvedStyle.value})`);
+console.log(`Art style: ${resolvedArtStyle.label} (${resolvedArtStyle.value})`);
 
 const options = {
   includeStoryline,
@@ -68,14 +68,10 @@ const s3 = new S3Client({
 
 // Helper: Build image prompt (same logic as games.router.ts)
 function buildImagePrompt(
-  game: {
-    name: string;
-    summary?: string | null;
-    storyline?: string | null;
-    keywords?: unknown;
-    genres?: unknown;
-    themes?: unknown;
-  },
+  game: Pick<
+    Game,
+    'name' | 'summary' | 'storyline' | 'keywords' | 'genres' | 'themes'
+  >,
   opts: typeof options,
   styleDescriptor: string,
 ): string {
@@ -204,7 +200,7 @@ async function main() {
         const prompt = buildImagePrompt(
           game,
           options,
-          resolvedStyle.descriptor,
+          resolvedArtStyle.descriptor,
         );
 
         console.log(`Generated prompt (${prompt.length} chars)`);
@@ -236,7 +232,7 @@ async function main() {
         const list = Array.isArray(game.imageGen)
           ? JSON.parse(JSON.stringify(game.imageGen))
           : [];
-        const styleKey = resolvedStyle.value;
+        const styleKey = resolvedArtStyle.value;
         const newItem = {
           [styleKey]: {
             url: publicUrl,

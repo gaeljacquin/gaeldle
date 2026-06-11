@@ -4,7 +4,7 @@ import { DatabaseService } from '@/db/database.service';
 import { sql } from 'drizzle-orm';
 
 @Injectable()
-export class DatabaseHealthIndicator {
+export class HealthService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly healthIndicatorService: HealthIndicatorService,
@@ -15,9 +15,11 @@ export class DatabaseHealthIndicator {
 
     try {
       await this.databaseService.db.execute(sql`SELECT 1`);
+
       return indicator.up();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
+
       return indicator.down(message);
     }
   }

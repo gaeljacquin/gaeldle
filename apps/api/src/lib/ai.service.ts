@@ -32,6 +32,7 @@ export class AiService {
 
     if (!response.ok) {
       const errorText = await response.text();
+
       console.error(
         `[AiService] Cloudflare AI error: ${response.status}`,
         errorText,
@@ -42,6 +43,7 @@ export class AiService {
     const contentType = response.headers.get('content-type') ?? '';
     if (!contentType.includes('image')) {
       const body = await response.text();
+
       console.error(
         `[AiService] Unexpected content-type: ${contentType}`,
         body,

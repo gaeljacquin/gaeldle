@@ -13,7 +13,7 @@ import { DatabaseService } from '@/db/database.service';
 import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
-import { BulkImageJobStore } from '@/games/bulk-image-job.store';
+import { BulkImageJobStore } from '@/image-gen/bulk-image-job.store';
 
 type AsyncMock = jest.Mock<(...args: unknown[]) => Promise<unknown>>;
 

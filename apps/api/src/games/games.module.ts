@@ -6,8 +6,8 @@ import { GamesService } from '@/games/games.service';
 import { IgdbService } from '@/lib/igdb.service';
 import { S3Service } from '@/lib/s3.service';
 import { AiService } from '@/lib/ai.service';
-import { BulkImageJobStore } from '@/games/bulk-image-job.store';
-import { BulkImageGenController } from '@/games/bulk-image-gen.controller';
+import { BulkImageJobStore } from '@/image-gen/bulk-image-job.store';
+import { BulkImageGenController } from '@/image-gen/bulk-image-gen.controller';
 
 @Module({
   imports: [DatabaseModule, AuthModule],

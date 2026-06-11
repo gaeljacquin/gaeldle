@@ -13,7 +13,7 @@ import { GamesService } from '@/games/games.service';
 import {
   BulkImageJobStore,
   type BulkJobEvent,
-} from '@/games/bulk-image-job.store';
+} from '@/image-gen/bulk-image-job.store';
 
 type JoseModule = typeof import('jose');
 let josePromise: Promise<JoseModule> | null = null;

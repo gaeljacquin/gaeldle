@@ -52,10 +52,7 @@ const MATCH_COLUMNS = COLUMN_HEADERS.filter(({ key }) => key !== 'name').map(
   }),
 );
 
-function getCellColor(
-  matchType: MatchType,
-  hasData: boolean,
-): string {
+function getCellColor(matchType: MatchType, hasData: boolean): string {
   if (!hasData) {
     return 'bg-muted/70 text-foreground';
   }

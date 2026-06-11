@@ -1,39 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { fetchWithTimeout } from '@/lib/utils';
-
-type IgdbGame = {
-  id: number;
-  name: string;
-  summary?: string;
-  storyline?: string;
-  url?: string;
-  total_rating?: number;
-  total_rating_count?: number;
-  first_release_date?: number;
-  cover?: { image_id?: string; url?: string };
-  artworks?: Array<{ image_id?: string; url?: string }>;
-  keywords?: Array<{ name?: string }>;
-  franchises?: Array<{ name?: string }>;
-  game_engines?: Array<{ name?: string }>;
-  game_modes?: Array<{ name?: string }>;
-  genres?: Array<{ name?: string }>;
-  involved_companies?: Array<{
-    company?: { name?: string };
-    publisher?: boolean;
-    developer?: boolean;
-  }>;
-  platforms?: Array<{ name?: string }>;
-  player_perspectives?: Array<{ name?: string }>;
-  release_dates?: Array<{
-    human?: string;
-    date?: number;
-    platform?: { name?: string };
-  }>;
-  themes?: Array<{ id?: number; name?: string }>;
-  category?: number;
-  status?: number;
-};
+import type { IgdbGame, IgdbGameField } from '@workspace/api-contract';
 
 type TwitchTokenResponse = {
   access_token: string;
@@ -56,7 +24,9 @@ export class IgdbService {
   }
 
   async getGamesByIds(igdbIds: number[]): Promise<IgdbGame[]> {
-    if (igdbIds.length === 0) return [];
+    if (igdbIds.length === 0) {
+      return [];
+    }
 
     if (!this.twitchClientId || !this.twitchClientSecret) {
       throw new Error(
@@ -65,7 +35,7 @@ export class IgdbService {
     }
 
     const accessToken = await this.getAccessToken();
-    const fields = [
+    const igdbGameFields: IgdbGameField[] = [
       'id',
       'name',
       'summary',
@@ -93,7 +63,6 @@ export class IgdbService {
       'release_dates.platform.name',
       'themes.name',
     ];
-
     const idsStr = igdbIds.join(',');
     const response = await fetchWithTimeout('https://api.igdb.com/v4/games', {
       method: 'POST',
@@ -102,7 +71,7 @@ export class IgdbService {
         Authorization: `Bearer ${accessToken}`,
         Accept: 'application/json',
       },
-      body: `fields ${fields.join(',')}; where id = (${idsStr}); limit ${igdbIds.length};`,
+      body: `fields ${igdbGameFields.join(',')}; where id = (${idsStr}); limit ${igdbIds.length};`,
       timeout: 20000,
     });
 
@@ -168,6 +137,7 @@ export class IgdbService {
     }
 
     const games = (await response.json()) as IgdbGame[];
+
     return games[0] ?? null;
   }
 
@@ -179,7 +149,6 @@ export class IgdbService {
     }
 
     const accessToken = await this.getAccessToken();
-
     const now = Math.floor(Date.now() / 1000);
     const fetchLimit = Math.min(count * 3, 500);
     const offset = Math.floor(Math.random() * 200);
@@ -201,10 +170,11 @@ export class IgdbService {
       throw new Error(`IGDB request failed (${response.status}): ${details}`);
     }
 
-    const all = (await response.json()) as IgdbGame[];
+    const res = (await response.json()) as IgdbGame[];
+
     // Filter to main games only (category 0) and exclude erotic theme (42) post-fetch,
     // since IGDB's default pool does not support filtering on these fields server-side.
-    return all
+    return res
       .filter((g) => g.category === 0 || g.category === undefined)
       .filter((g) => !g.themes?.some((t) => t.id === 42))
       .slice(0, count);
@@ -212,6 +182,7 @@ export class IgdbService {
 
   private async getAccessToken(): Promise<string> {
     const now = Date.now();
+
     if (this.accessToken && now < this.accessTokenExpiresAt) {
       return this.accessToken;
     }
@@ -232,6 +203,7 @@ export class IgdbService {
 
     if (!tokenResponse.ok) {
       const details = await tokenResponse.text();
+
       throw new Error(
         `Failed to fetch Twitch access token (${tokenResponse.status}): ${details}`,
       );
@@ -241,6 +213,7 @@ export class IgdbService {
     this.accessToken = payload.access_token;
     this.accessTokenExpiresAt =
       now + Math.max(payload.expires_in - 60, 30) * 1000;
+
     return this.accessToken;
   }
 }

@@ -17,6 +17,7 @@ export class DiscoverRouter {
   scan(@Req() req: AuthenticatedRequest) {
     return implement(contract.discover.scan).handler(({ input }) => {
       const actorId = req.hexclaveAuth?.sub ?? 'unknown';
+
       return this.discoverService.scan(input.count, actorId);
     });
   }
@@ -26,6 +27,7 @@ export class DiscoverRouter {
   apply(@Req() req: AuthenticatedRequest) {
     return implement(contract.discover.apply).handler(({ input }) => {
       const actorId = req.hexclaveAuth?.sub ?? 'unknown';
+
       return this.discoverService.apply(
         input.selectedIgdbIds,
         input.scanEventId,

@@ -6,10 +6,8 @@ import { FILE_SIZE_LIMIT } from '@workspace/shared';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
   app.useBodyParser('json', { limit: FILE_SIZE_LIMIT });
   app.useBodyParser('urlencoded', { extended: true, limit: FILE_SIZE_LIMIT });
-
   const configService = app.get(ConfigService);
 
   app.enableCors({
@@ -30,7 +28,8 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const port = configService.get<number>('port') ?? 8080;
+  const port = configService.get<number>('port') ?? 3000;
+
   await app.listen(port);
 }
 

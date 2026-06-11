@@ -22,6 +22,7 @@ import {
   IconRobot,
   type TablerIcon,
 } from '@tabler/icons-react';
+import { DotPaths } from './other';
 
 export const coverArtModeSlugs = ['cover-art', 'image-gen', 'artwork'];
 
@@ -447,6 +448,51 @@ export interface RevealedClue {
   value: string | string[];
   revealedAtGuessCount: number;
 }
+
+export type ResultStatus = 'updated' | 'skipped' | 'error';
+
+export type ReplaceGameResult = {
+  current: number;
+  replacement: number;
+  status: ResultStatus;
+  message: string;
+  gameName: string | null;
+};
+
+export type IgdbGame = {
+  id: number;
+  name: string;
+  summary?: string;
+  storyline?: string;
+  url?: string;
+  total_rating?: number;
+  total_rating_count?: number;
+  first_release_date?: number;
+  cover?: { image_id?: string; url?: string };
+  artworks?: Array<{ image_id?: string; url?: string }>;
+  keywords?: Array<{ name?: string }>;
+  franchises?: Array<{ name?: string }>;
+  game_engines?: Array<{ name?: string }>;
+  game_modes?: Array<{ name?: string }>;
+  genres?: Array<{ name?: string }>;
+  involved_companies?: Array<{
+    company?: { name?: string };
+    publisher?: boolean;
+    developer?: boolean;
+  }>;
+  platforms?: Array<{ name?: string }>;
+  player_perspectives?: Array<{ name?: string }>;
+  release_dates?: Array<{
+    human?: string;
+    date?: number;
+    platform?: { name?: string };
+  }>;
+  themes?: Array<{ id?: number; name?: string }>;
+  category?: number;
+  status?: number;
+};
+
+export type IgdbGameField = DotPaths<IgdbGame>;
 
 /**
  * Get game mode by slug (pathname without leading slash)

@@ -9,10 +9,10 @@ import type { JWTPayload } from 'jose';
 import type { Request } from 'express';
 
 type JoseModule = typeof import('jose');
+type AuthenticatedRequest = Request & { hexclave?: JWTPayload };
+
 let josePromise: Promise<JoseModule> | null = null;
 const getJose = () => (josePromise ??= import('jose'));
-
-type AuthenticatedRequest = Request & { hexclave?: JWTPayload };
 
 @Injectable()
 export class HexclaveGuard implements CanActivate {
@@ -36,6 +36,7 @@ export class HexclaveGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = this.extractToken(request);
+
     if (!token) {
       throw new UnauthorizedException('Missing Hexclave access token');
     }
@@ -51,6 +52,7 @@ export class HexclaveGuard implements CanActivate {
         audience: this.projectId,
       });
       request.hexclave = payload;
+
       return true;
     } catch {
       throw new UnauthorizedException('Invalid Hexclave access token');
@@ -59,6 +61,7 @@ export class HexclaveGuard implements CanActivate {
 
   private extractToken(request: Request): string | null {
     const authHeader = request.headers.authorization;
+
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       return authHeader.slice(7).trim();
     }

@@ -11,21 +11,21 @@ export class SampleRouter {
   @Implement(contract.sample.uploadImage)
   @UseGuards(HexclaveGuard)
   uploadImage() {
-    return implement(contract.sample.uploadImage).handler(async (input) => {
-      const uploadImageRes = await this.sampleService.uploadImage(input);
+    return implement(contract.sample.uploadImage).handler(async ({ input }) => {
+      const res = await this.sampleService.uploadImage(input);
 
-      if (!uploadImageRes.success) {
+      if (!res.success) {
         throw new Error('Unable to upload sample image...');
       }
 
-      return uploadImageRes;
+      return res;
     });
   }
 
   @Implement(contract.sample.sendMessage)
   @UseGuards(HexclaveGuard)
   sendMessage() {
-    return implement(contract.sample.sendMessage).handler(async (input) => {
+    return implement(contract.sample.sendMessage).handler(async ({ input }) => {
       const res = await this.sampleService.sendMessage(input);
 
       if (!res.success) {

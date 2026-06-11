@@ -3,14 +3,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@workspace/ui/button';
 import { cn } from '@workspace/ui/lib/utils';
+import { HOLD_DURATION } from '@workspace/shared';
 
 interface HoldToRevealButtonProps {
   onReveal: () => void;
   disabled?: boolean;
   className?: string;
 }
-
-const HOLD_DURATION = 3000;
 
 export default function HoldToRevealButton({
   onReveal,
@@ -71,6 +70,7 @@ export default function HoldToRevealButton({
       if (holdTimerRef.current) {
         clearTimeout(holdTimerRef.current);
       }
+
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }

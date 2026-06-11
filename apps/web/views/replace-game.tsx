@@ -16,10 +16,7 @@ import {
 } from '@/lib/hooks/use-replace-game-validation';
 import { IgdbIdRowPair } from '@/components/igdb-id-row-pair';
 import type { IgdbIdRowPairData } from '@/components/igdb-id-row-pair';
-import {
-  ReplaceGameResultsTable,
-  type ReplaceGameResult,
-} from '@/components/replace-game-results-table';
+import { ReplaceGameResultsTable } from '@/components/replace-game-results-table';
 import { Button } from '@workspace/ui/button';
 import {
   Card,
@@ -37,6 +34,7 @@ import {
 import { toast } from 'sonner';
 import { REPLACE_GAME_MAX_ROWS } from '@workspace/shared';
 import { DashboardPageHeader } from '@/components/dashboard-header';
+import { ReplaceGameResult } from '@workspace/api-contract';
 
 function createEmptyRow(): IgdbIdRowPairData {
   return { id: crypto.randomUUID(), current: '', replacement: '' };

@@ -4,6 +4,15 @@ import { SAMPLE_DIR } from '@workspace/shared';
 import configuration from '@/config/configuration';
 import { SqsService } from '@/lib/sqs.service';
 
+interface uploadImageProps {
+  image: string;
+  extension: string;
+}
+
+interface sendMessageProps {
+  message: string;
+}
+
 @Injectable()
 export class SampleService {
   constructor(
@@ -11,11 +20,7 @@ export class SampleService {
     private readonly sqsService: SqsService,
   ) {}
 
-  async uploadImage({
-    input,
-  }: {
-    input: { image: string; extension: string };
-  }) {
+  async uploadImage(input: uploadImageProps) {
     try {
       const { image, extension } = input;
 
@@ -42,7 +47,7 @@ export class SampleService {
     }
   }
 
-  async sendMessage({ input }: { input: { message: string } }) {
+  async sendMessage(input: sendMessageProps) {
     try {
       const result = await this.sqsService.sendMessage(
         configuration().sampleSqsQueueUrl,

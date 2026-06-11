@@ -1,0 +1,1 @@
+CREATE MATERIALIZED VIEW "public"."active_art_styles" AS (select "id", "value", "label", "description", "is_default", "is_active" from "art_style" where "art_style"."is_active" = 1);

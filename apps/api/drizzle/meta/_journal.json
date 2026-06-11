@@ -99,6 +99,27 @@
       "when": 1778292319662,
       "tag": "0013_modern_giant_man",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1781220112105,
+      "tag": "0014_nosy_silvermane",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1781220705450,
+      "tag": "0015_vengeful_sentry",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1781221176835,
+      "tag": "0016_wooden_chat",
+      "breakpoints": true
     }
   ]
 }

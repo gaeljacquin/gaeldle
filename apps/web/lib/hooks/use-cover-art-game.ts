@@ -9,8 +9,7 @@ import type {
   ArtworkImage,
 } from '@workspace/api-contract';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
-
-export const MAX_ATTEMPTS = 5;
+import { COVER_ART_MAX_ATTEMPTS } from '@workspace/shared';
 
 function getRandomArtwork(artworks: unknown): string | null {
   if (!artworks || !Array.isArray(artworks) || artworks.length === 0) {
@@ -70,7 +69,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   const [targetGame, setTargetGame] = useState<Game | null>(null);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [wrongGuesses, setWrongGuesses] = useState<(Game | null)[]>([]);
-  const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
+  const [attemptsLeft, setAttemptsLeft] = useState(COVER_ART_MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -85,7 +84,9 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
       try {
         setIsLoading(true);
         const target = await getRandomGame([], mode);
+
         setTargetGame(target);
+
         if (mode === 'image-gen') {
           setSelectedAiImage(selectRandomAiImage(target));
         }
@@ -100,8 +101,8 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   }, [mode]);
 
   const currentPixelSize = getPixelSizeForAttempt(
-    MAX_ATTEMPTS - attemptsLeft,
-    MAX_ATTEMPTS,
+    COVER_ART_MAX_ATTEMPTS - attemptsLeft,
+    COVER_ART_MAX_ATTEMPTS,
   );
 
   const selectedArtworkUrl = useMemo(() => {
@@ -115,6 +116,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   const handleSelectGame = useCallback((game: Game | number | null) => {
     if (game === null) {
       setSelectedGame(null);
+
       return;
     }
 
@@ -130,7 +132,9 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (!targetGame || !selectedGame || isGameOver) return;
+    if (!targetGame || !selectedGame || isGameOver) {
+      return;
+    }
 
     if (selectedGame.id === targetGame.id) {
       setIsCorrect(true);
@@ -138,6 +142,7 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     } else {
       setWrongGuesses((prev) => [...prev, selectedGame]);
       setAttemptsLeft((prev) => prev - 1);
+
       if (attemptsLeft - 1 <= 0) {
         setIsGameOver(true);
       }
@@ -146,10 +151,13 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   }, [targetGame, selectedGame, isGameOver, attemptsLeft]);
 
   const handleSkip = useCallback(() => {
-    if (!targetGame || isGameOver) return;
+    if (!targetGame || isGameOver) {
+      return;
+    }
 
     setWrongGuesses((prev) => [...prev, null]);
     setAttemptsLeft((prev) => prev - 1);
+
     if (attemptsLeft - 1 <= 0) {
       setIsGameOver(true);
     }
@@ -159,12 +167,13 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
     try {
       setIsLoading(true);
       setWrongGuesses([]);
-      setAttemptsLeft(MAX_ATTEMPTS);
+      setAttemptsLeft(COVER_ART_MAX_ATTEMPTS);
       setIsGameOver(false);
       setIsCorrect(false);
       setSelectedGame(null);
       const target = await getRandomGame([], mode);
       setTargetGame(target);
+
       if (mode === 'image-gen') {
         setSelectedAiImage(selectRandomAiImage(target));
       }
@@ -178,7 +187,11 @@ export function useCoverArtGame(mode: CoverArtModeSlug) {
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft((prev) => {
       const newValue = prev + delta;
-      if (newValue < 1 || newValue > MAX_ATTEMPTS) return prev;
+
+      if (newValue < 1 || newValue > COVER_ART_MAX_ATTEMPTS) {
+        return prev;
+      }
+
       return newValue;
     });
   }, []);

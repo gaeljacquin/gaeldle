@@ -16,6 +16,7 @@ import {
 } from '@/image-gen/bulk-image-job.store';
 
 type JoseModule = typeof import('jose');
+
 let josePromise: Promise<JoseModule> | null = null;
 const getJose = () => (josePromise ??= import('jose'));
 
@@ -40,15 +41,19 @@ export class BulkImageGenController {
     if (!this.projectId) {
       throw new UnauthorizedException('Hexclave is not configured');
     }
+
     if (!this.jwks) {
       const { createRemoteJWKSet } = await getJose();
       this.jwks = createRemoteJWKSet(this.jwksUrl);
     }
+
     const { jwtVerify } = await getJose();
+
     try {
       const { payload } = await jwtVerify(token, this.jwks, {
         audience: this.projectId,
       });
+
       return payload;
     } catch {
       throw new UnauthorizedException('Invalid Hexclave access token');
@@ -99,6 +104,7 @@ export class BulkImageGenController {
     const events$ = new Observable<BulkJobEvent>((subscriber) => {
       const listener = (event: BulkJobEvent) => subscriber.next(event);
       emitter.on('event', listener);
+
       return () => emitter.off('event', listener);
     });
 

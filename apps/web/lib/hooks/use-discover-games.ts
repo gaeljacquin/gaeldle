@@ -19,11 +19,15 @@ export function useDiscoverGames() {
   const [applyResults, setApplyResults] = useState<
     DiscoverApplyResult[] | null
   >(null);
+  const discoverApplyToastId = 'discover-apply';
+  const discoverScanToastId = 'discover-scan';
 
   const scanMutation = useMutation({
     mutationFn: (count: number) => discoverScan(count),
     onMutate: () => {
-      toast.loading('Scanning IGDB for candidates…', { id: 'discover-scan' });
+      toast.loading('Scanning IGDB for candidates…', {
+        id: discoverScanToastId,
+      });
     },
     onSuccess: (data) => {
       setCandidates(data.candidates as DiscoverCandidate[]);
@@ -33,12 +37,12 @@ export function useDiscoverGames() {
       setApplyResults(null);
       toast.success(
         `Found ${data.totalReturned} candidates (${data.alreadyAddedCount} already in library)`,
-        { id: 'discover-scan' },
+        { id: discoverScanToastId },
       );
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : 'Scan failed', {
-        id: 'discover-scan',
+        id: discoverScanToastId,
       });
     },
   });
@@ -52,33 +56,38 @@ export function useDiscoverGames() {
       selectedIgdbIds: number[];
     }) => discoverApply(evtId, selectedIgdbIds),
     onMutate: () => {
-      toast.loading('Adding selected games…', { id: 'discover-apply' });
+      toast.loading('Adding selected games…', { id: discoverApplyToastId });
     },
     onSuccess: (data) => {
       const added = data.results.filter((r) => r.status !== 'error').length;
       const errors = data.results.filter((r) => r.status === 'error').length;
+
       setApplyResults(data.results as DiscoverApplyResult[]);
+
       const newApplied = new Set(appliedIds);
+
       for (const r of data.results) {
         if (r.status !== 'error') {
           newApplied.add(r.igdbId);
         }
       }
+
       setAppliedIds(newApplied);
       setSelectedIds(new Set());
+
       if (errors > 0) {
         toast.warning(`${added} game(s) added, ${errors} error(s)`, {
-          id: 'discover-apply',
+          id: discoverApplyToastId,
         });
       } else {
         toast.success(`${added} game(s) added successfully`, {
-          id: 'discover-apply',
+          id: discoverApplyToastId,
         });
       }
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : 'Apply failed', {
-        id: 'discover-apply',
+        id: discoverApplyToastId,
       });
     },
   });
@@ -86,6 +95,7 @@ export function useDiscoverGames() {
   const toggleSelect = useCallback((igdbId: number) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
+
       if (next.has(igdbId)) {
         next.delete(igdbId);
       } else {
@@ -100,6 +110,7 @@ export function useDiscoverGames() {
       const newIds = currentCandidates
         .filter((c) => !c.isAlreadyAdded && !appliedIds.has(c.igdbId))
         .map((c) => c.igdbId);
+
       setSelectedIds(new Set(newIds));
     },
     [appliedIds],
@@ -111,11 +122,15 @@ export function useDiscoverGames() {
 
   const handleScan = useCallback(() => {
     const clamped = Math.min(Math.max(1, countInput), DISCOVER_GAMES_MAX);
+
     scanMutation.mutate(clamped);
   }, [countInput, scanMutation]);
 
   const handleApply = useCallback(() => {
-    if (!scanEventId || selectedIds.size === 0) return;
+    if (!scanEventId || selectedIds.size === 0) {
+      return;
+    }
+
     applyMutation.mutate({
       scanEventId,
       selectedIgdbIds: Array.from(selectedIds),
@@ -126,24 +141,19 @@ export function useDiscoverGames() {
     selectedIds.size > 0 && scanEventId !== null && !applyMutation.isPending;
 
   return {
-    // scan
     scanMutation,
     candidates,
     scanEventId,
     handleScan,
-    // selection
     selectedIds,
     appliedIds,
     toggleSelect,
     selectAllNew,
     deselectAll,
-    // apply
     applyMutation,
     applyResults,
     handleApply,
-    // derived
     canApply,
-    // count input
     countInput,
     setCountInput,
   };

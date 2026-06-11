@@ -46,7 +46,7 @@ import { Game, NumericString } from '@workspace/api-contract';
 import { Checkbox } from '@workspace/ui/checkbox';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { DashboardPageHeader } from '@/components/dashboard-header';
+import { DashboardHeader } from '@/components/dashboard-header';
 import { Timeline2CardSkeleton } from '@/components/timeline-2-card-skeleton';
 import {
   type SortOption,
@@ -54,6 +54,8 @@ import {
   useDashboardStore,
   pageSizes,
   viewOptions,
+  SortDir,
+  SortField,
 } from '@/lib/stores/dashboard-store';
 
 export default function Dashboard() {
@@ -74,19 +76,16 @@ export default function Dashboard() {
   } = useDashboardStore();
 
   const queryClient = useQueryClient();
-
   const debouncedSearch = useDebounce(search, 500);
   const debouncedSearchIgdbId = useDebounce(searchIgdbId, 500);
 
-  const [sortBy, sortDir] = sortOption.split('-') as [
-    'name' | 'firstReleaseDate' | 'igdbId',
-    'asc' | 'desc',
-  ];
+  const [sortBy, sortDir] = sortOption.split('-') as [SortField, SortDir];
 
   const deleteMutation = useMutation({
     mutationFn: (ids: number[]) => deleteBulkGames(ids),
     onSuccess: () => {
       const successMessage = `${selectedIds.size} ${selectedIds.size === 1 ? 'game' : 'games'} deleted successfully`;
+
       queryClient.invalidateQueries({ queryKey: ['games'] });
       toast.success(successMessage);
       setSelectedIds(new Set());
@@ -99,16 +98,21 @@ export default function Dashboard() {
 
   const toggleSelect = (id: number) => {
     const newSelected = new Set(selectedIds);
+
     if (newSelected.has(id)) {
       newSelected.delete(id);
     } else {
       newSelected.add(id);
     }
+
     setSelectedIds(newSelected);
   };
 
   const handleBulkDelete = () => {
-    if (selectedIds.size === 0) return;
+    if (selectedIds.size === 0) {
+      return;
+    }
+
     deleteMutation.mutate(Array.from(selectedIds));
     setIsDeleteDialogOpen(false);
   };
@@ -164,14 +168,16 @@ export default function Dashboard() {
 
     const leftSiblingIndex = Math.max(page - siblingCount, 1);
     const rightSiblingIndex = Math.min(page + siblingCount, totalPages);
-
     const shouldShowLeftDots = leftSiblingIndex > 2;
     const shouldShowRightDots = rightSiblingIndex < totalPages - 2;
 
     if (!shouldShowLeftDots && shouldShowRightDots) {
       const leftItemCount = 3 + 2 * siblingCount;
 
-      for (let i = 1; i <= leftItemCount; i++) range.push(i);
+      for (let i = 1; i <= leftItemCount; i++) {
+        range.push(i);
+      }
+
       range.push('...', totalPages);
     } else if (shouldShowLeftDots && !shouldShowRightDots) {
       const rightItemCount = 3 + 2 * siblingCount;
@@ -385,10 +391,10 @@ export default function Dashboard() {
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
-        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-30">
-          <div className="container mx-auto px-4 py-4 space-y-4">
-            <DashboardPageHeader title="Dashboard" icon={IconDashboard} />
-
+        <DashboardHeader
+          title="Dashboard"
+          icon={IconDashboard}
+          extraElements={
             <div className="flex flex-col gap-4">
               <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
                 <div className="flex flex-col sm:flex-row flex-1 gap-4">
@@ -695,8 +701,8 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         <div className="container mx-auto px-4 py-8 flex-1">
           {dataLengthZero()}

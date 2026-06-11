@@ -7,7 +7,7 @@ import {
   IconTools,
 } from '@tabler/icons-react';
 import { MenuCard } from '@/components/menu-card';
-import { DashboardPageHeader } from '@/components/dashboard-header';
+import { DashboardHeader } from '@/components/dashboard-header';
 
 const utilityItems = [
   {
@@ -44,11 +44,7 @@ export default function UtilitiesView() {
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
-        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4">
-            <DashboardPageHeader title="Utilities" icon={IconTools} />
-          </div>
-        </div>
+        <DashboardHeader title="Utilities" icon={IconTools} />
 
         <div className="container mx-auto px-4 py-8">
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

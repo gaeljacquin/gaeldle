@@ -25,6 +25,7 @@ export const orpcClient = createORPCClient<
 
         if (user) {
           const authHeaders = await user.getAuthHeaders();
+
           Object.entries(authHeaders).forEach(([key, value]) => {
             headers.set(key, value);
           });

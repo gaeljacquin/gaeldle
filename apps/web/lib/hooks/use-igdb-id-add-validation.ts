@@ -15,7 +15,7 @@ export interface IgdbIdAddValidationState {
   stop: () => void;
 }
 
-const DEFAULT_STATE: Omit<IgdbIdAddValidationState, 'refetch' | 'stop'> = {
+const defaultState: Omit<IgdbIdAddValidationState, 'refetch' | 'stop'> = {
   isLoading: false,
   isReady: false,
   existsOnIgdb: null,
@@ -30,7 +30,6 @@ export function useIgdbIdAddValidation(
   const queryClient = useQueryClient();
   const [forcedInt, setForcedInt] = useState<number | null>(null);
   const liveInt = Number.parseInt(igdbId, 10);
-
   const queryKey = useMemo(() => ['igdb-add-validate', forcedInt], [forcedInt]);
 
   const { data, isFetching, refetch } = useQuery({
@@ -48,6 +47,7 @@ export function useIgdbIdAddValidation(
   const handleRefetch = useCallback(() => {
     if (liveInt !== null) {
       setForcedInt(liveInt);
+
       if (liveInt === forcedInt) {
         void refetch();
       }
@@ -56,7 +56,7 @@ export function useIgdbIdAddValidation(
 
   if (isFetching) {
     return {
-      ...DEFAULT_STATE,
+      ...defaultState,
       isLoading: true,
       refetch: handleRefetch,
       stop: handleStop,
@@ -64,7 +64,7 @@ export function useIgdbIdAddValidation(
   }
 
   if (!data || forcedInt === null) {
-    return { ...DEFAULT_STATE, refetch: handleRefetch, stop: handleStop };
+    return { ...defaultState, refetch: handleRefetch, stop: handleStop };
   }
 
   return {

@@ -43,7 +43,7 @@ import {
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { toast } from 'sonner';
-import { DashboardPageHeader } from '@/components/dashboard-header';
+import { DashboardHeader } from '@/components/dashboard-header';
 
 type JobStatus = 'pending' | 'running' | 'completed' | 'failed';
 
@@ -268,17 +268,8 @@ export default function BulkImageGen() {
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
-        {/* Sticky header */}
-        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4">
-            <DashboardPageHeader
-              title="Bulk Image Generation"
-              icon={IconRobotFace}
-            />
-          </div>
-        </div>
+        <DashboardHeader title="Bulk Image Generation" icon={IconRobotFace} />
 
-        {/* Main content */}
         <div className="container mx-auto px-4 py-8 flex-1">
           <div className="max-w-lg space-y-6">
             {/* Configuration form */}

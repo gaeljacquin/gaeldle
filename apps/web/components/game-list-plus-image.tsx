@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MAX_ATTEMPTS, useCoverArtGame } from '@/lib/hooks/use-cover-art-game';
+import { useCoverArtGame } from '@/lib/hooks/use-cover-art-game';
 import ArtworkDisplay from '@/components/artwork-display';
 import CoverDisplay from '@/components/cover-display';
 import GameSearch from '@/components/game-search';
@@ -15,6 +15,7 @@ import {
   getGameModeBySlug,
   type CoverArtModeSlug,
 } from '@workspace/api-contract';
+import { COVER_ART_MAX_ATTEMPTS } from '@workspace/shared';
 
 interface GameListPlusImageProps {
   gameModeSlug: CoverArtModeSlug;
@@ -143,7 +144,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                     Attempts
                   </p>
                   <Attempts
-                    maxAttempts={MAX_ATTEMPTS}
+                    maxAttempts={COVER_ART_MAX_ATTEMPTS}
                     attemptsLeft={attemptsLeft}
                     variant="primary"
                   />
@@ -230,7 +231,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
           <DevModeToggle
             targetGame={targetGame}
             attemptsLeft={attemptsLeft}
-            maxAttempts={MAX_ATTEMPTS}
+            maxAttempts={COVER_ART_MAX_ATTEMPTS}
             onAdjustAttempts={adjustAttempts}
             className="border-2 border-dashed w-full p-4"
           />

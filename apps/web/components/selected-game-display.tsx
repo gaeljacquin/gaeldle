@@ -39,6 +39,7 @@ export default function SelectedGameDisplay({
           <span className="text-xs text-muted-foreground font-mono">?</span>
         </div>
       )}
+
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold truncate text-foreground uppercase tracking-tight">
           {selectedGame?.name ?? '?'}
@@ -47,6 +48,7 @@ export default function SelectedGameDisplay({
           {selectedGame?.name ? 'Selected' : 'No selection'}
         </p>
       </div>
+
       {onClearSelection ? (
         <button
           onClick={onClearSelection}

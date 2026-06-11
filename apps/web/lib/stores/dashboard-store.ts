@@ -5,13 +5,9 @@ import { type NumericString } from '@workspace/api-contract';
 
 type SelectOption<T> = { value: T; label: string };
 
-export type SortOption =
-  | 'name-asc'
-  | 'name-desc'
-  | 'firstReleaseDate-asc'
-  | 'firstReleaseDate-desc'
-  | 'igdbId-asc'
-  | 'igdbId-desc';
+export type SortField = 'name' | 'firstReleaseDate' | 'igdbId';
+export type SortDir = 'asc' | 'desc';
+export type SortOption = `${SortField}-${SortDir}`;
 
 export type ViewOption = 'grid' | 'list';
 

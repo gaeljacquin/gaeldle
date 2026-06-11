@@ -12,15 +12,16 @@ import { games, gameObject, type GameModeSlug } from '@workspace/api-contract';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
-
     const excludeIdsParam = searchParams.get('excludeIds');
     const excludeIds = excludeIdsParam
       ? excludeIdsParam.split(',').map(Number).filter(Boolean)
       : [];
+
     const count = Math.max(
       1,
       Math.min(50, Number(searchParams.get('count') ?? 1)),
     );
+
     const mode = (searchParams.get('mode') ?? undefined) as
       | GameModeSlug
       | undefined;
@@ -71,6 +72,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, data: gamesList });
   } catch (error) {
     console.error('Error fetching random game:', error);
+
     return NextResponse.json(
       { success: false, error: 'Connection failed. Please try again later.' },
       { status: 500 },

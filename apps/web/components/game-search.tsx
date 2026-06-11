@@ -75,7 +75,10 @@ export default function GameSearch({
   });
 
   const handleSelect = (game: Game) => {
-    if (wrongGuesses.includes(game.id) || disabled) return;
+    if (wrongGuesses.includes(game.id) || disabled) {
+      return;
+    }
+
     onSelectGame(game);
     setSearchValue('');
     setIsOpen(false);
@@ -83,6 +86,7 @@ export default function GameSearch({
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+
     setSearchValue(value);
     setIsOpen(value.length > 0);
   };

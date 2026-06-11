@@ -54,7 +54,7 @@ export function DiscoveredGameCard({
   isDisabled,
   onToggle,
 }: DiscoveredGameCardProps) {
-  const date = releaseDate(firstReleaseDate);
+  const processedFirstReleaseDate = releaseDate(firstReleaseDate);
   const isCheckboxDisabled = isAlreadyAdded || isApplied || isDisabled;
 
   return (
@@ -84,7 +84,6 @@ export function DiscoveredGameCard({
         {statusBadge(isApplied, isAlreadyAdded)}
       </div>
 
-      {/* Bottom bar: checkbox, truncated title, year */}
       <div className="flex items-start gap-2 px-2 py-2" title={name}>
         <div className="mt-0.5 shrink-0">
           <Checkbox
@@ -111,8 +110,10 @@ export function DiscoveredGameCard({
             {name}
           </p>
 
-          {date ? (
-            <p className="text-[10px] text-muted-foreground">{date}</p>
+          {processedFirstReleaseDate ? (
+            <p className="text-[10px] text-muted-foreground">
+              {processedFirstReleaseDate}
+            </p>
           ) : null}
         </div>
       </div>

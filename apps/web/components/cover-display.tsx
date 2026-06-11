@@ -39,7 +39,9 @@ export default function CoverDisplay({
 
     const timer = setTimeout(() => {
       async function applyPixelation() {
-        if (!sourceImageUrl) return;
+        if (!sourceImageUrl) {
+          return;
+        }
 
         try {
           const pixelated = await pixelateImage(sourceImageUrl, pixelSize);
@@ -69,6 +71,7 @@ export default function CoverDisplay({
   const isDataValid =
     pixelatedData?.sourceUrl === sourceImageUrl &&
     pixelatedData?.pixelSize === pixelSize;
+
   const pixelatedUrl = isDataValid ? pixelatedData.url : null;
   const displayUrl = shouldShowPixelated ? pixelatedUrl : sourceImageUrl;
   const shouldShowImage =

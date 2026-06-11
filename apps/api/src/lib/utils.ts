@@ -11,6 +11,7 @@ export async function fetchWithTimeout(
       ...options,
       signal: controller.signal,
     });
+
     return response;
   } finally {
     clearTimeout(id);

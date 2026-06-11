@@ -18,6 +18,7 @@ export function pixelateImage(
 
       if (!ctx) {
         reject(new Error('Failed to get canvas context'));
+
         return;
       }
 

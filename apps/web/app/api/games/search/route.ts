@@ -8,7 +8,6 @@ import { GAME_SEARCH_MIN_CHARS } from '@workspace/shared';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
-
     const q = searchParams.get('q') ?? '';
     const limit = Math.max(1, Number(searchParams.get('limit') ?? 20));
     const mode = (searchParams.get('mode') ?? undefined) as
@@ -47,6 +46,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, data: gamesList });
   } catch (error) {
     console.error('Error searching games:', error);
+
     return NextResponse.json(
       { success: false, error: 'Connection failed. Please try again later.' },
       { status: 500 },

@@ -29,7 +29,7 @@ export interface BulkJobState {
   isConnected: boolean;
 }
 
-const IDLE_STATE: BulkJobState = {
+const idleState: BulkJobState = {
   status: 'idle',
   total: 0,
   processed: 0,
@@ -75,12 +75,11 @@ export function useBulkImageJob({
   enabled = true,
   accessToken,
 }: UseBulkImageJobOptions): BulkJobState {
-  const [state, setState] = useState<BulkJobState>(IDLE_STATE);
+  const [state, setState] = useState<BulkJobState>(idleState);
   const [sseConnected, setSseConnected] = useState(false);
   const [sseFailed, setSseFailed] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
   const isTerminalRef = useRef(false);
-
   const isTerminal = state.status === 'completed' || state.status === 'failed';
 
   // Polling fallback: used when SSE fails or job is already terminal
@@ -118,6 +117,7 @@ export function useBulkImageJob({
       eventSourceRef.current.close();
       eventSourceRef.current = null;
     }
+
     setSseConnected(false);
   }, []);
 
@@ -128,8 +128,8 @@ export function useBulkImageJob({
     }
 
     const url = `${process.env.apiUrl}/api/games/bulk-generate-images/${jobId}/stream?token=${encodeURIComponent(accessToken)}`;
-
     const es = new EventSource(url);
+
     eventSourceRef.current = es;
 
     es.onopen = () => {
@@ -159,6 +159,7 @@ export function useBulkImageJob({
         }));
       } else if (event.type === 'completed') {
         isTerminalRef.current = true;
+
         setState((prev) => ({
           ...prev,
           status:
@@ -171,24 +172,31 @@ export function useBulkImageJob({
           latestGame: null,
           isConnected: false,
         }));
+
         closeSSE();
       } else if (event.type === 'error') {
         isTerminalRef.current = true;
+
         setState((prev) => ({ ...prev, status: 'failed', isConnected: false }));
+
         closeSSE();
       }
     };
 
     es.onerror = () => {
       closeSSE();
+
       setSseFailed(true);
     };
 
     return closeSSE;
   }, [jobId, enabled, accessToken, closeSSE]);
 
-  if (!jobId || !enabled) return IDLE_STATE;
+  if (!jobId || !enabled) {
+    return idleState;
+  }
 
   const activeState = polledState ?? state;
+
   return { ...activeState, isConnected: sseConnected };
 }

@@ -443,6 +443,8 @@ export interface SpecificationGuess {
   };
 }
 
+export type MatchKey = keyof SpecificationGuess['matches'];
+
 export interface RevealedClue {
   field: keyof SpecificationGuess['matches'];
   value: string | string[];

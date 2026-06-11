@@ -24,7 +24,6 @@ export function useGameSearch(
 ): GameSearchResult {
   const { mode, limit } = options;
   const debouncedQuery = useDebounce(query, 300);
-
   const isIdle = debouncedQuery.length < GAME_SEARCH_MIN_CHARS;
 
   const { data, isFetching } = useQuery({

@@ -76,11 +76,7 @@ function CurrentBadge({
 }
 
 function ReplacementBadge({ state }: { state: ReplaceGameValidationState }) {
-  if (!state.isReady) {
-    return null;
-  }
-
-  if (state.currentExistsInDb === false) {
+  if (!state.isReady || state.currentExistsInDb === false) {
     return null;
   }
 

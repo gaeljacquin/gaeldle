@@ -11,7 +11,7 @@ import {
   IconCircleX,
 } from '@tabler/icons-react';
 import { DISCOVER_GAMES_MAX } from '@workspace/shared';
-import { DashboardPageHeader } from '@/components/dashboard-header';
+import { DashboardHeader } from '@/components/dashboard-header';
 import { Button } from '@workspace/ui/button';
 import {
   Card,
@@ -209,14 +209,8 @@ export function DiscoverGames() {
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
-        {/* Sticky header */}
-        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4">
-            <DashboardPageHeader title="Discover Games" icon={IconZoomScan} />
-          </div>
-        </div>
+        <DashboardHeader title="Discover Games" icon={IconZoomScan} />
 
-        {/* Main content */}
         <div className="container mx-auto px-4 py-8 flex-1">
           <div className="max-w-2xl space-y-6">
             {hasResults ? (

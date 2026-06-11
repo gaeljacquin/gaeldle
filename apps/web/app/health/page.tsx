@@ -7,7 +7,6 @@ export default async function HealthPage() {
   const host = headersList.get('host') ?? 'localhost:3000';
   const proto = headersList.get('x-forwarded-proto') ?? 'http';
   const baseClientUrl = `${proto}://${host}`;
-
   const initialData = await fetchHealthStatus(baseClientUrl);
 
   return <HealthView initialData={initialData} baseClientUrl={baseClientUrl} />;

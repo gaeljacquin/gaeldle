@@ -37,6 +37,7 @@ export default function ArtworkDisplay({
 
         try {
           const pixelated = await pixelateImage(imageUrl, pixelSize);
+
           setPixelatedData({ url: pixelated, sourceUrl: imageUrl, pixelSize });
         } catch (error) {
           console.error('Failed to pixelate artwork:', error);
@@ -54,8 +55,10 @@ export default function ArtworkDisplay({
   const isDataValid =
     pixelatedData?.sourceUrl === imageUrl &&
     pixelatedData?.pixelSize === pixelSize;
+
   const pixelatedImageUrl = isDataValid ? pixelatedData.url : null;
   const displayUrl = shouldShowPixelated ? pixelatedImageUrl : imageUrl;
+
   const shouldShowImage =
     !shouldShowPixelated || (shouldShowPixelated && !!pixelatedImageUrl);
 

@@ -5,6 +5,7 @@ import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
+
     throw new Error(errorData.error || `Server error: ${res.status}`);
   }
 
@@ -135,6 +136,7 @@ export async function searchGames(
 
 export async function syncGame(igdbId: number) {
   const result = await orpcClient.games.sync({ igdb_id: igdbId });
+
   return result;
 }
 

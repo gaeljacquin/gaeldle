@@ -123,7 +123,9 @@ export function useSpecificationsGame() {
     async function loadTarget() {
       try {
         setIsLoading(true);
+
         const randomGame = await getRandomGame([], 'specifications');
+
         setTargetGame(randomGame);
       } catch (err) {
         console.error('Error loading target game:', err);
@@ -172,6 +174,7 @@ export function useSpecificationsGame() {
         aiImageUrl: selectedGame.aiImageUrl,
         matches,
       };
+
       setGuesses((prev) => [...prev, newGuess]);
       setIsCorrect(true);
       setIsGameOver(true);
@@ -230,7 +233,6 @@ export function useSpecificationsGame() {
 
     const randomField =
       availableFields[Math.floor(Math.random() * availableFields.length)];
-
     let value: string | string[];
 
     switch (randomField) {
@@ -286,6 +288,7 @@ export function useSpecificationsGame() {
       setRevealedClue(null);
 
       const randomGame = await getRandomGame([], 'specifications');
+
       setTargetGame(randomGame);
     } catch (err) {
       setError(getFriendlyErrorMessage(err, 'Failed to reset game'));
@@ -307,7 +310,6 @@ export function useSpecificationsGame() {
   }, []);
 
   return {
-    // Game state
     targetGame,
     selectedGame,
     guesses,
@@ -317,8 +319,6 @@ export function useSpecificationsGame() {
     isLoading,
     error,
     revealedClue,
-
-    // Actions
     handleSelectGame,
     clearSelection,
     handleSubmit,

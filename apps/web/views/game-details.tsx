@@ -17,7 +17,7 @@ import {
   syncGame,
   generateImage,
 } from '@/lib/services/game.service';
-import { DashboardPageHeader } from '@/components/dashboard-header';
+import { DashboardHeader } from '@/components/dashboard-header';
 import Image from 'next/image';
 import { Button } from '@workspace/ui/button';
 import { Card } from '@workspace/ui/card';
@@ -909,7 +909,7 @@ export default function GameDetails({
       <div className="flex flex-col min-h-full bg-background">
         <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4">
-            <DashboardPageHeader title="Game Not Found" icon={IconDashboard} />
+            <DashboardHeader title="Game Not Found" icon={IconDashboard} />
           </div>
         </div>
         <div className="container mx-auto px-4 py-10 flex-1">
@@ -936,19 +936,14 @@ export default function GameDetails({
 
   return (
     <div className="flex flex-col min-h-full bg-background">
-      {/* Header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <DashboardPageHeader
-            title={
-              <Suspense fallback="Loading...">
-                <HeaderTitle igdbId={igdbId} />
-              </Suspense>
-            }
-            icon={IconDashboard}
-          />
-        </div>
-      </div>
+      <DashboardHeader
+        title={
+          <Suspense fallback="Loading...">
+            <HeaderTitle igdbId={igdbId} />
+          </Suspense>
+        }
+        icon={IconDashboard}
+      />
 
       <div className="container mx-auto px-4 py-8 flex-1">
         <div className="flex flex-col lg:flex-row gap-10">

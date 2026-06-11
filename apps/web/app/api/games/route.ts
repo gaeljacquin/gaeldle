@@ -7,17 +7,17 @@ import { games, gameObject } from '@workspace/api-contract';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
-
     const page = Math.max(1, Number(searchParams.get('page') ?? 1));
     const pageSize = Math.max(1, Number(searchParams.get('pageSize') ?? 10));
     const q = searchParams.get('q') ?? undefined;
     const igdbId = searchParams.get('igdbId') ?? undefined;
+
     const sortBy = (searchParams.get('sortBy') ?? 'name') as
       | 'name'
       | 'firstReleaseDate'
       | 'igdbId';
-    const sortDir = (searchParams.get('sortDir') ?? 'asc') as 'asc' | 'desc';
 
+    const sortDir = (searchParams.get('sortDir') ?? 'asc') as 'asc' | 'desc';
     const offset = (page - 1) * pageSize;
 
     const where = and(
@@ -29,12 +29,15 @@ export async function GET(request: NextRequest) {
       if (q) {
         return sql`similarity(name, ${q}) DESC`;
       }
+
       if (sortBy === 'firstReleaseDate') {
         return sortDir === 'asc'
           ? sql`first_release_date ASC NULLS LAST`
           : sql`first_release_date DESC NULLS LAST`;
       }
+
       const col = sortBy === 'igdbId' ? games.igdbId : games.name;
+
       return sortDir === 'asc' ? asc(col) : desc(col);
     })();
 
@@ -61,6 +64,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching games:', error);
+
     return NextResponse.json(
       {
         success: false,

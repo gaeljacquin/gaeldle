@@ -17,6 +17,7 @@ async function pingApi(): Promise<HealthIndicatorDetail> {
     const response = await fetch(`${process.env.apiUrl}/`, {
       cache: 'no-store',
     });
+
     return response.ok
       ? { status: 'up' }
       : { status: 'down', message: `HTTP ${response.status}` };
@@ -32,6 +33,7 @@ async function pingClient(
     const response = await fetch(`${baseClientUrl}/api/games?pageSize=1`, {
       cache: 'no-store',
     });
+
     return response.ok
       ? { status: 'up' }
       : { status: 'down', message: `HTTP ${response.status}` };

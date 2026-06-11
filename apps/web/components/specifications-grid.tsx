@@ -8,6 +8,7 @@ import type {
   Game,
   CellMatch,
   MatchType,
+  MatchKey,
 } from '@workspace/api-contract';
 import Image from 'next/image';
 import {
@@ -31,7 +32,7 @@ interface SpecificationsGridProps {
 
 type CellValue = string | string[] | null;
 
-const COLUMN_HEADERS = [
+const columnHeaders = [
   { key: 'name', label: 'Name' },
   { key: 'platforms', label: 'Platforms' },
   { key: 'genres', label: 'Genres' },
@@ -43,14 +44,12 @@ const COLUMN_HEADERS = [
   { key: 'perspective', label: 'Perspective' },
 ] as const;
 
-type MatchKey = keyof SpecificationGuess['matches'];
-
-const MATCH_COLUMNS = COLUMN_HEADERS.filter(({ key }) => key !== 'name').map(
-  ({ key }) => ({
+const matchColumns = columnHeaders
+  .filter(({ key }) => key !== 'name')
+  .map(({ key }) => ({
     key: key as MatchKey,
     ...(key === 'releaseDate' && { isReleaseDate: true }),
-  }),
-);
+  }));
 
 function getCellColor(matchType: MatchType, hasData: boolean): string {
   if (!hasData) {
@@ -137,7 +136,7 @@ function renderHintRow(revealedClue: RevealedClue) {
           <IconArrowRight className="size-4" />
         </div>
       </td>
-      {COLUMN_HEADERS.slice(1).map((header) => (
+      {columnHeaders.slice(1).map((header) => (
         <td
           key={header.key}
           className={cn(
@@ -322,7 +321,7 @@ function SummaryRow({
       <th className="border border-border/50 bg-secondary px-3 py-2 text-sm font-semibold text-white text-center w-32">
         Summary
       </th>
-      {MATCH_COLUMNS.map((column) =>
+      {matchColumns.map((column) =>
         column.isReleaseDate ? (
           <ReleaseDateCell
             key={column.key}
@@ -340,7 +339,7 @@ function SummaryRow({
 function HeaderRow() {
   return (
     <tr className="bg-slate-700">
-      {COLUMN_HEADERS.map((header) => (
+      {columnHeaders.map((header) => (
         <th
           key={header.key}
           className={cn(
@@ -416,7 +415,7 @@ function GuessRows({
             : null}
           <tr>
             <ImageCell imageUrl={guess.imageUrl} name={guess.gameName} />
-            {MATCH_COLUMNS.map((column) =>
+            {matchColumns.map((column) =>
               column.isReleaseDate ? (
                 <ReleaseDateCell
                   key={column.key}

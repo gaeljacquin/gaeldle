@@ -37,6 +37,7 @@ export default function HoldToRevealButton({
 
       const elapsed = timestamp - startTimeRef.current;
       const newProgress = Math.min((elapsed / HOLD_DURATION) * 100, 100);
+
       setProgress(newProgress);
 
       if (newProgress < 100) {

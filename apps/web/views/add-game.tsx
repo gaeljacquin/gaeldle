@@ -24,7 +24,7 @@ import {
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { ADD_GAME_MAX_ROWS } from '@workspace/shared';
-import { DashboardPageHeader } from '@/components/dashboard-header';
+import { DashboardHeader } from '@/components/dashboard-header';
 
 interface AddGameRowData {
   id: string;
@@ -354,14 +354,8 @@ export function AddGame() {
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
-        {/* Sticky header */}
-        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4">
-            <DashboardPageHeader title="Add Game" icon={IconCirclePlus} />
-          </div>
-        </div>
+        <DashboardHeader title="Add Game" icon={IconCirclePlus} />
 
-        {/* Main content */}
         <div className="container mx-auto px-4 py-8 flex-1">
           <div className="max-w-2xl space-y-6">
             {results === null ? (

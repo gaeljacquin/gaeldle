@@ -8,7 +8,7 @@ export interface MenuCardProps {
   href?: string;
   title: string;
   description: string;
-  icon: TablerIcon;
+  icon?: TablerIcon;
   gradient: string;
   disabled?: boolean;
   badge?: ReactNode;
@@ -40,9 +40,11 @@ export function MenuCard({
 
       {badge}
 
-      <div className="absolute right-4 top-4 rounded-lg bg-card/20 p-2 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
-        <Icon size={20} className="text-primary-foreground" />
-      </div>
+      {Icon && (
+        <div className="absolute right-4 top-4 rounded-lg bg-card/20 p-2 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
+          <Icon size={20} className="text-primary-foreground" />
+        </div>
+      )}
 
       <div className="relative z-10">
         <h2 className="text-xl font-bold text-primary-foreground">{title}</h2>

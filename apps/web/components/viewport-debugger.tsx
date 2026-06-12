@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Separator } from '@workspace/ui/separator';
 
 export default function ViewportDebugger() {
   const [dimensions, setDimensions] = useState({
@@ -60,17 +59,13 @@ export default function ViewportDebugger() {
   return (
     <div className="flex items-center gap-2 border border-sky-500/30 bg-sky-500/10 px-3 py-1 shadow-sm">
       <div className="flex flex-col">
-        <div className="flex items-center gap-2 text-sm font-bold text-sky-600 dark:text-sky-400">
+        <div className="flex items-center gap-2 text-xs font-bold text-sky-600 dark:text-sky-400">
           <span className="uppercase">{breakpoint}</span>
           <span className="opacity-40 font-sans text-xs">|</span>
           <span>
             {dimensions.width} x {dimensions.height}
           </span>
         </div>
-        <Separator className="opacity-30 text-sky-600 dark:text-sky-400" />
-        <span className="text-center text-xs uppercase tracking-widest text-sky-600/70 dark:text-sky-400/70">
-          1rem = {dimensions.rem}px
-        </span>
       </div>
     </div>
   );

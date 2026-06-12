@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation';
 import { UserButton, useUser } from '@hexclave/next';
 import {
   IconDashboard,
-  IconDeviceGamepad2,
   IconChevronDown,
   IconChevronRight,
   IconSettings,
@@ -16,6 +15,7 @@ import {
   IconHome,
   IconTools,
   IconHealthRecognition,
+  IconPlayerPlay,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { appInfo } from '@/lib/app-info';
@@ -86,7 +86,6 @@ function SidebarGameLink({
       )}
       title={isCollapsed ? mode.title : undefined}
     >
-      <mode.icon size={isCollapsed ? 20 : 18} />
       {isCollapsed ? null : <span>{mode.title}</span>}
     </Link>
   );
@@ -108,7 +107,7 @@ function SidebarGamesSection({
         )}
         title={isCollapsed ? 'Modes' : undefined}
       >
-        <IconDeviceGamepad2 size={20} />
+        <IconPlayerPlay size={20} />
         {isCollapsed ? null : (
           <>
             <span>Modes</span>

@@ -10,15 +10,6 @@ import {
   artStyleSelectSchema,
 } from './schema';
 import { IMAGE_GEN_MIN, IMAGE_GEN_MAX } from '@workspace/shared';
-import {
-  IconPhoto,
-  IconCalendar,
-  IconCalendarDue,
-  IconNotes,
-  IconWallpaper,
-  IconRobot,
-  type TablerIcon,
-} from '@tabler/icons-react';
 import { DotPaths } from './other';
 
 export const coverArtModeSlugs = ['cover-art', 'image-gen', 'artwork'];
@@ -39,7 +30,6 @@ export interface GameMode {
   title: string;
   description: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
-  icon: TablerIcon;
   gradient: string;
   href: string;
 }
@@ -50,7 +40,6 @@ export const gameModes: GameMode[] = [
     title: 'Cover Art',
     description: 'Identify the game from their cover art.',
     difficulty: 'Easy',
-    icon: IconPhoto,
     gradient: '--gradient-easy',
     href: '/cover-art',
   },
@@ -59,7 +48,6 @@ export const gameModes: GameMode[] = [
     title: 'Artwork',
     description: 'Guess the game from their artwork.',
     difficulty: 'Medium',
-    icon: IconWallpaper,
     gradient: '--gradient-medium-1',
     href: '/artwork',
   },
@@ -68,7 +56,6 @@ export const gameModes: GameMode[] = [
     title: 'Image Gen',
     description: 'Guess the game from a text-to-image rendition.',
     difficulty: 'Medium',
-    icon: IconRobot,
     gradient: '--gradient-medium-2',
     href: '/image-gen',
   },
@@ -77,7 +64,6 @@ export const gameModes: GameMode[] = [
     title: 'Timeline',
     description: 'Arrange games in chronological order.',
     difficulty: 'Medium',
-    icon: IconCalendar,
     gradient: '--gradient-medium-3',
     href: '/timeline',
   },
@@ -86,7 +72,6 @@ export const gameModes: GameMode[] = [
     title: 'Timeline 2',
     description: 'Place each game in chronological order.',
     difficulty: 'Hard',
-    icon: IconCalendarDue,
     gradient: '--gradient-hard-1',
     href: '/timeline-2',
   },
@@ -95,7 +80,6 @@ export const gameModes: GameMode[] = [
     title: 'Specifications',
     description: 'Deduce the game from their specifications.',
     difficulty: 'Hard',
-    icon: IconNotes,
     gradient: '--gradient-hard-2',
     href: '/specifications',
   },

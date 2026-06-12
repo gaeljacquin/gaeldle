@@ -33,7 +33,6 @@ export default function HomeView() {
                     title={gameMode.title}
                     description={gameMode.description}
                     difficulty={gameMode.difficulty}
-                    icon={gameMode.icon}
                     gradient={gameMode.gradient}
                   />
                 ))}

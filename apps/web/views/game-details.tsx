@@ -47,9 +47,9 @@ import {
   IconExternalLink,
   IconRefresh,
   IconBrush,
-  IconDashboard,
   IconCalendar,
   IconDeviceGamepad,
+  IconDeviceGamepad2,
 } from '@tabler/icons-react';
 import {
   Game,
@@ -61,8 +61,17 @@ import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/tabs';
 import { Badge } from '@/components/badge';
-import { artStylesQueryOptions } from '@/lib/services/art-style.service';
+import {
+  artStyleDefaultValue,
+  artStylesQueryOptions,
+} from '@/lib/services/art-style.service';
 import type { ArtStyle } from '@workspace/api-contract';
+import {
+  SidebarContentSkeleton,
+  InfoTabSkeleton,
+  ArtworksTabSkeleton,
+  ImageGenTabSkeleton,
+} from '@/components/game-details-tab-skeleton';
 
 function buildPromptPreview(
   game: Game,
@@ -77,6 +86,7 @@ function buildPromptPreview(
   const parts: string[] = [];
   const style =
     artStyles.find((s) => s.value === options.artStyleValue) ?? artStyles[0];
+
   parts.push(
     `${style.description} of iconic characters from "${game.name}" set within the game's distinct world`,
   );
@@ -116,94 +126,6 @@ interface Company {
   name: string;
   developer: boolean;
   publisher: boolean;
-}
-
-function Skeleton({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn('animate-pulse rounded bg-muted-foreground/10', className)}
-    />
-  );
-}
-
-function SidebarContentSkeleton() {
-  return (
-    <>
-      <div className="flex flex-wrap gap-2 justify-center">
-        <Skeleton className="h-6 w-24" />
-        <Skeleton className="h-6 w-20" />
-      </div>
-      <div className="space-y-3">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-    </>
-  );
-}
-
-function InfoTabSkeleton() {
-  return (
-    <div className="space-y-10">
-      <div className="space-y-4">
-        <Skeleton className="h-5 w-32" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-        <Skeleton className="h-4 w-4/6" />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-4">
-        <div className="space-y-3">
-          <Skeleton className="h-4 w-20" />
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-6 w-16" />
-            ))}
-          </div>
-        </div>
-        <div className="space-y-3">
-          <Skeleton className="h-4 w-16" />
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-6 w-20" />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ArtworksTabSkeleton() {
-  return (
-    <div className="space-y-6">
-      <Skeleton className="h-5 w-40" />
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <Skeleton key={i} className="aspect-video w-full" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ImageGenTabSkeleton() {
-  return (
-    <div className="flex flex-col md:flex-row gap-8">
-      <div className="w-full md:w-64 shrink-0 flex flex-col gap-4">
-        <Skeleton className="aspect-square w-full" />
-        <Skeleton className="h-24 w-full" />
-      </div>
-      <div className="flex-1 space-y-4">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-60 w-full" />
-        <Skeleton className="h-4 w-28" />
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-8 w-full" />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function SidebarContent({
@@ -928,7 +850,8 @@ export default function GameDetails({
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
   const [includeThemes, setIncludeThemes] = useState(false);
-  const [artStyleValue, setArtStyleValue] = useState<ArtStyleValue | ''>('');
+  const [artStyleValue, setArtStyleValue] =
+    useState<ArtStyleValue>(artStyleDefaultValue);
 
   // Still needed for the delete dialog — reads from cache after SidebarContent populates it
   const { data: game } = useQuery({
@@ -953,11 +876,7 @@ export default function GameDetails({
     // error / not found state
     return (
       <div className="flex flex-col min-h-full bg-background">
-        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4">
-            <DashboardHeader title="Game Not Found" icon={IconDashboard} />
-          </div>
-        </div>
+        <DashboardHeader title="Game Not Found" icon={IconDeviceGamepad2} />
         <div className="container mx-auto px-4 py-10 flex-1">
           <div className="text-center py-20 border border-dashed rounded-none bg-muted/5">
             <h2 className="text-xl font-bold uppercase tracking-tight">
@@ -988,7 +907,7 @@ export default function GameDetails({
             <HeaderTitle igdbId={igdbId} />
           </Suspense>
         }
-        icon={IconDashboard}
+        icon={IconDeviceGamepad2}
       />
 
       <div className="container mx-auto px-4 py-8 flex-1">
@@ -1045,22 +964,13 @@ export default function GameDetails({
                 variant="line"
                 className="mb-8 gap-0 border-b border-border w-full justify-start"
               >
-                <TabsTrigger
-                  value="info"
-                  className="text-xs font-black uppercase tracking-widest px-8 py-3 cursor-pointer hover:text-primary data-active:text-primary data-active:after:bg-primary! data-active:after:opacity-100!"
-                >
+                <TabsTrigger value="info" className="game-details-tab">
                   Info
                 </TabsTrigger>
-                <TabsTrigger
-                  value="artworks"
-                  className="text-xs font-black uppercase tracking-widest px-8 py-3 cursor-pointer hover:text-primary data-active:text-primary data-active:after:bg-primary! data-active:after:opacity-100!"
-                >
+                <TabsTrigger value="artworks" className="game-details-tab">
                   Artworks
                 </TabsTrigger>
-                <TabsTrigger
-                  value="image-gen"
-                  className="text-xs font-black uppercase tracking-widest px-8 py-3 cursor-pointer hover:text-primary data-active:text-primary data-active:after:bg-primary! data-active:after:opacity-100!"
-                >
+                <TabsTrigger value="image-gen" className="game-details-tab">
                   Image Gen
                 </TabsTrigger>
               </TabsList>

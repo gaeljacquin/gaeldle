@@ -162,7 +162,6 @@ export const artStyleValues = pgMaterializedView('active_art_styles').as(
 export const artStyleValueSelectSchema = createSelectSchema(artStyleValues);
 
 export type ArtStyle = typeof artStyles.$inferSelect;
-// export type ArtStyleValue = z.infer<typeof artStyles.value>;
 export type ArtStyleValue = z.infer<typeof artStyleSelectSchema>['value'];
 
 export const bulkImageGenJobs = pgTable('bulk_image_gen_job', {

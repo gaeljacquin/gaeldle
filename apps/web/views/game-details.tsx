@@ -61,10 +61,12 @@ import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/tabs';
 import { Badge } from '@/components/badge';
-import { artStyleDefaultValue, artStyles } from '@/lib/services/other.service';
+import { artStylesQueryOptions } from '@/lib/services/art-style.service';
+import type { ArtStyle } from '@workspace/api-contract';
 
 function buildPromptPreview(
   game: Game,
+  artStyles: ArtStyle[],
   options: {
     includeStoryline: boolean;
     includeGenres: boolean;
@@ -370,6 +372,8 @@ function ArtworksTabContent({ igdbId }: { igdbId: string }) {
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
   });
 
+  const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
+
   const artworks = game.artworks as ArtworkImage[] | null;
 
   return (
@@ -533,6 +537,8 @@ function ImageGenTabContent({
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
   });
 
+  const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
+
   const generateImageMutation = useMutation({
     mutationFn: () =>
       generateImage(Number.parseInt(igdbId, 10), {
@@ -594,13 +600,20 @@ function ImageGenTabContent({
       return '';
     }
 
-    return buildPromptPreview(game, {
+    return buildPromptPreview(game, artStyles, {
       includeStoryline,
       includeGenres,
       includeThemes,
       artStyleValue,
     });
-  }, [game, includeStoryline, includeGenres, includeThemes, artStyleValue]);
+  }, [
+    game,
+    artStyles,
+    includeStoryline,
+    includeGenres,
+    includeThemes,
+    artStyleValue,
+  ]);
 
   const previewPromptRows = useMemo(() => {
     if (!previewPrompt) {
@@ -915,8 +928,7 @@ export default function GameDetails({
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
   const [includeThemes, setIncludeThemes] = useState(false);
-  const [artStyleValue, setArtStyleValue] =
-    useState<ArtStyleValue>(artStyleDefaultValue);
+  const [artStyleValue, setArtStyleValue] = useState<ArtStyleValue | ''>('');
 
   // Still needed for the delete dialog — reads from cache after SidebarContent populates it
   const { data: game } = useQuery({
@@ -1067,17 +1079,19 @@ export default function GameDetails({
 
               <TabsContent value="image-gen" className="space-y-6 outline-none">
                 <Suspense fallback={<ImageGenTabSkeleton />}>
-                  <ImageGenTabContent
-                    igdbId={igdbId}
-                    artStyleValue={artStyleValue}
-                    setArtStyleValue={setArtStyleValue}
-                    includeStoryline={includeStoryline}
-                    setIncludeStoryline={setIncludeStoryline}
-                    includeGenres={includeGenres}
-                    setIncludeGenres={setIncludeGenres}
-                    includeThemes={includeThemes}
-                    setIncludeThemes={setIncludeThemes}
-                  />
+                  {artStyleValue !== '' && (
+                    <ImageGenTabContent
+                      igdbId={igdbId}
+                      artStyleValue={artStyleValue}
+                      setArtStyleValue={setArtStyleValue}
+                      includeStoryline={includeStoryline}
+                      setIncludeStoryline={setIncludeStoryline}
+                      includeGenres={includeGenres}
+                      setIncludeGenres={setIncludeGenres}
+                      includeThemes={includeThemes}
+                      setIncludeThemes={setIncludeThemes}
+                    />
+                  )}
                 </Suspense>
               </TabsContent>
             </Tabs>

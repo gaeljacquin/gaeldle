@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, ChangeEvent, ViewTransition } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
 import { useUser } from '@hexclave/next';
 import {
   DEFAULT_IMAGE_GEN_NUM,
@@ -9,7 +9,10 @@ import {
   IMAGE_GEN_MAX,
 } from '@workspace/shared';
 import type { ArtStyle } from '@workspace/api-contract';
-import { artStyleDefault, artStyles } from '@/lib/services/other.service';
+import {
+  artStyleDefault,
+  artStylesQueryOptions,
+} from '@/lib/services/art-style.service';
 import { bulkGenerateImages } from '@/lib/services/game.service';
 import { useBulkImageJob } from '@/lib/hooks/use-bulk-image-job';
 import { Button } from '@workspace/ui/button';
@@ -208,12 +211,13 @@ export default function BulkImageGen() {
 
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
-
   const [numGames, setNumGames] = useState(DEFAULT_IMAGE_GEN_NUM);
   const [artStyle, setArtStyle] = useState<ArtStyle>(artStyleDefault);
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
   const [includeThemes, setIncludeThemes] = useState(false);
+
+  const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
 
   // Fetch access token for SSE
   useEffect(() => {

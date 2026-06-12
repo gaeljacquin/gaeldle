@@ -1,7 +1,7 @@
 import { orpcClient } from '@/lib/orpc';
 import type { Game, GameModeSlug } from '@workspace/api-contract';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
-import { artStyleValuesEnum } from './other.service';
+import { artStyleValuesEnum } from './art-style.service';
 import { z } from 'zod';
 
 async function handleResponse<T>(res: Response): Promise<T> {

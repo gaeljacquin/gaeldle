@@ -5,11 +5,11 @@ import { useMutation } from '@tanstack/react-query';
 import { useUser } from '@hexclave/next';
 import {
   DEFAULT_IMAGE_GEN_NUM,
-  DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
 } from '@workspace/shared';
-import { artStyles, type ArtStyle } from '@workspace/api-contract';
+import type { ArtStyle } from '@workspace/api-contract';
+import { artStyleDefault, artStyles } from '@/lib/services/other.service';
 import { bulkGenerateImages } from '@/lib/services/game.service';
 import { useBulkImageJob } from '@/lib/hooks/use-bulk-image-job';
 import { Button } from '@workspace/ui/button';
@@ -210,9 +210,7 @@ export default function BulkImageGen() {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
 
   const [numGames, setNumGames] = useState(DEFAULT_IMAGE_GEN_NUM);
-  const [artStyle, setArtStyle] = useState<ArtStyle>(
-    DEFAULT_IMAGE_GEN_ART_STYLE,
-  );
+  const [artStyle, setArtStyle] = useState<ArtStyle>(artStyleDefault);
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
   const [includeThemes, setIncludeThemes] = useState(false);
@@ -243,7 +241,7 @@ export default function BulkImageGen() {
     mutationFn: () =>
       bulkGenerateImages({
         numGames,
-        artStyle: artStyle,
+        artStyle: artStyle?.value, // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
         includeStoryline,
         includeGenres,
         includeThemes,
@@ -310,8 +308,9 @@ export default function BulkImageGen() {
                           >
                             <span className="truncate">
                               {
-                                artStyles.find((s) => s.value === artStyle)
-                                  ?.label
+                                artStyles.find(
+                                  (s) => s.value === artStyle?.value,
+                                )?.label
                               }
                             </span>
                             <IconChevronDown

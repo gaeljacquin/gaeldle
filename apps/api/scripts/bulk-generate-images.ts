@@ -15,7 +15,7 @@ import {
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
 } from '@workspace/shared';
-import { artStyles, Game } from '@workspace/api-contract';
+import { artStyles as artStylesView, Game } from '@workspace/api-contract';
 
 // Parse prompt options from environment variables
 const includeStoryline = process.env.INCLUDE_STORYLINE === 'true';
@@ -29,16 +29,6 @@ const numGames = Math.max(
     Number.parseInt(process.env.NUM_GAMES ?? String(DEFAULT_IMAGE_GEN_NUM), 10),
   ),
 );
-
-const rawStyle = process.env.ART_STYLE?.trim() ?? '';
-const resolvedArtStyle =
-  artStyles.find(
-    (s) =>
-      s.value.toLowerCase() === rawStyle.toLowerCase() ||
-      s.label.toLowerCase() === rawStyle.toLowerCase(),
-  ) ?? artStyles.find((s) => s.value === DEFAULT_IMAGE_GEN_ART_STYLE)!;
-
-console.log(`Art style: ${resolvedArtStyle.label} (${resolvedArtStyle.value})`);
 
 const options = {
   includeStoryline,
@@ -55,6 +45,23 @@ const pool = new Pool({
 });
 
 const db = drizzle(pool, { schema });
+
+const artStyles = await db
+  .select({
+    value: artStylesView.value,
+    label: artStylesView.label,
+    description: artStylesView.description,
+  })
+  .from(artStylesView);
+const rawStyle = process.env.ART_STYLE?.trim() ?? '';
+const resolvedArtStyle =
+  artStyles.find(
+    (s) =>
+      s.value.toLowerCase() === rawStyle.toLowerCase() ||
+      s.label.toLowerCase() === rawStyle.toLowerCase(),
+  ) ?? artStyles.find((s) => s.value === DEFAULT_IMAGE_GEN_ART_STYLE)!;
+
+console.log(`Art style: ${resolvedArtStyle.label} (${resolvedArtStyle.value})`);
 
 const s3 = new S3Client({
   region: 'auto',
@@ -200,7 +207,7 @@ async function main() {
         const prompt = buildImagePrompt(
           game,
           options,
-          resolvedArtStyle.descriptor,
+          resolvedArtStyle.description,
         );
 
         console.log(`Generated prompt (${prompt.length} chars)`);

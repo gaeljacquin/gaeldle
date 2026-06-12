@@ -7,12 +7,9 @@ import {
   BulkJobParamsSchema,
   BulkJobStatusEnum,
   type Game,
+  artStyleSelectSchema,
 } from './schema';
-import {
-  DEFAULT_IMAGE_GEN_ART_STYLE,
-  IMAGE_GEN_MIN,
-  IMAGE_GEN_MAX,
-} from '@workspace/shared';
+import { IMAGE_GEN_MIN, IMAGE_GEN_MAX } from '@workspace/shared';
 import {
   IconPhoto,
   IconCalendar,
@@ -110,67 +107,6 @@ export const GameModeSlugSchema = z.enum(
   }),
 );
 
-export const artStyles: {
-  value: string;
-  label: string;
-  descriptor: string;
-}[] = [
-  {
-    value: 'funko-pop-chibi',
-    label: 'Funko Pop Chibi Style',
-    descriptor: 'Funko Pop chibi style illustration',
-  },
-  {
-    value: 'simpsons',
-    label: 'Simpsons Style',
-    descriptor: 'Simpsons style illustration',
-  },
-  {
-    value: 'rubber-hose-animation',
-    label: 'Rubber Hose Animation Style',
-    descriptor: 'Rubber hose animation style illustration',
-  },
-  {
-    value: 'muppet',
-    label: 'Muppet Style',
-    descriptor: 'Muppet style illustration',
-  },
-  { value: 'lego', label: 'Lego Style', descriptor: 'Lego style illustration' },
-  {
-    value: 'claymation',
-    label: 'Claymation Style',
-    descriptor: 'Claymation style illustration',
-  },
-  {
-    value: 'vector-art',
-    label: 'Vector Art Style',
-    descriptor: 'Vector art style illustration',
-  },
-  {
-    value: 'digital-cel-shaded',
-    label: 'Digital Cel-shaded Portrait Illustration Style',
-    descriptor: 'Digital cel-shaded portrait illustration style',
-  },
-  {
-    value: 'western-animation-concept-art',
-    label: 'Western Animation Concept Art Style',
-    descriptor: 'Western animation concept art style illustration',
-  },
-  {
-    value: 'graphic-novel-illustration',
-    label: 'Graphic Novel Illustration Style',
-    descriptor: 'Graphic novel illustration style',
-  },
-];
-
-export const ArtStyleSchema = z.enum(
-  artStyles.map((artStyle) => {
-    return artStyle.value;
-  }),
-);
-
-export type ArtStyle = z.infer<typeof ArtStyleSchema>;
-
 export const SyncOperationSchema = z.enum([
   'created',
   'updated',
@@ -258,9 +194,7 @@ export const GamesContract = {
         includeStoryline: z.boolean().optional().default(false),
         includeGenres: z.boolean().optional().default(false),
         includeThemes: z.boolean().optional().default(false),
-        artStyle: ArtStyleSchema.optional().default(
-          DEFAULT_IMAGE_GEN_ART_STYLE,
-        ),
+        artStyle: artStyleSelectSchema.shape.value.optional(), // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
       }),
     )
     .output(
@@ -275,7 +209,7 @@ export const GamesContract = {
     .input(
       z.object({
         numGames: z.number().int().min(IMAGE_GEN_MIN).max(IMAGE_GEN_MAX),
-        artStyle: ArtStyleSchema,
+        artStyle: artStyleSelectSchema.shape.value, // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
         includeStoryline: z.boolean().default(false),
         includeGenres: z.boolean().default(false),
         includeThemes: z.boolean().default(false),

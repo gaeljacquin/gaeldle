@@ -1,6 +1,8 @@
 import { orpcClient } from '@/lib/orpc';
-import type { Game, GameModeSlug, ArtStyle } from '@workspace/api-contract';
+import type { Game, GameModeSlug } from '@workspace/api-contract';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
+import { artStyleValuesEnum } from './other.service';
+import { z } from 'zod';
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -152,10 +154,10 @@ export async function testUpload(image: string, extension: string = 'jpg') {
 export async function generateImage(
   igdbId: number,
   options: {
-    includeStoryline: boolean;
-    includeGenres: boolean;
-    includeThemes: boolean;
-    artStyle: ArtStyle;
+    includeStoryline?: boolean;
+    includeGenres?: boolean;
+    includeThemes?: boolean;
+    artStyleValue: z.infer<typeof artStyleValuesEnum>;
   },
 ) {
   const result = await orpcClient.games.generateImage({ igdbId, ...options });
@@ -165,7 +167,7 @@ export async function generateImage(
 
 export async function bulkGenerateImages(params: {
   numGames: number;
-  artStyle: ArtStyle;
+  artStyle: z.infer<typeof artStyleValuesEnum>; // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
   includeStoryline: boolean;
   includeGenres: boolean;
   includeThemes: boolean;

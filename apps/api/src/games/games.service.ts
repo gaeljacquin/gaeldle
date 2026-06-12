@@ -15,20 +15,16 @@ import {
   gameObject,
   type SyncOperation,
   GameUpdate,
-  type ArtStyle,
-  artStyles,
   ReplaceGameResult,
+  artStyles as artStylesView,
+  type ArtStyleValue,
 } from '@workspace/api-contract';
 import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { BulkImageJobStore } from '@/image-gen/bulk-image-job.store';
 import type { AppConfiguration } from '@/config/configuration';
-import {
-  DEFAULT_IMAGE_GEN_ART_STYLE,
-  IMAGE_GEN_DIR,
-  IMAGE_PROMPT_SUFFIX,
-} from '@workspace/shared';
+import { IMAGE_GEN_DIR, IMAGE_PROMPT_SUFFIX } from '@workspace/shared';
 
 type GameInsert = InferInsertModel<typeof games>;
 
@@ -37,7 +33,7 @@ interface GenerateImageInput {
   includeStoryline?: boolean;
   includeGenres?: boolean;
   includeThemes?: boolean;
-  artStyle?: ArtStyle;
+  artStyle?: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
 }
 
 @Injectable()
@@ -438,14 +434,16 @@ export class GamesService {
       };
 
     const igdbResult = await this.fetchIgdbGameMap(validPairs);
-    if (Array.isArray(igdbResult))
+    if (Array.isArray(igdbResult)) {
       return { success: false, results: [...results, ...igdbResult] };
+    }
 
     const { igdbGameMap } = igdbResult;
     let anyUpdated = false;
 
     for (const pair of validPairs) {
       const gameData = igdbGameMap.get(pair.replacement);
+
       if (!gameData) {
         results.push(
           this.makeResult(
@@ -469,13 +467,16 @@ export class GamesService {
       }
     }
 
-    if (anyUpdated) await this.refreshAllGamesView();
+    if (anyUpdated) {
+      await this.refreshAllGamesView();
+    }
+
     return { success: true, results };
   }
 
   async bulkGenerateImages(params: {
     numGames: number;
-    artStyle: ArtStyle;
+    artStyle: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
     includeStoryline: boolean;
     includeGenres: boolean;
     includeThemes: boolean;
@@ -534,7 +535,7 @@ export class GamesService {
     pendingGames: Game[],
     params: {
       numGames: number;
-      artStyle: ArtStyle;
+      artStyle: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
       includeStoryline: boolean;
       includeGenres: boolean;
       includeThemes: boolean;
@@ -543,6 +544,7 @@ export class GamesService {
     const total = pendingGames.length;
     const failures: Array<{ igdbId: number; gameName: string; error: string }> =
       [];
+    const { artStyle: artStyleValue } = params; // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
     let processed = 0;
     let succeeded = 0;
     let failed = 0;
@@ -552,10 +554,19 @@ export class GamesService {
       .set({ status: 'running', startedAt: new Date() })
       .where(eq(bulkImageGenJobs.jobId, jobId));
 
-    const artStyle = artStyles.find(
-      (artStyle) => artStyle.value === params.artStyle,
-    );
-    const artStyleDescriptor = artStyle?.descriptor ?? params.artStyle;
+    const artStyle = await this.databaseService.db
+      .select({
+        value: artStylesView.value,
+        description: artStylesView.description,
+      })
+      .from(artStylesView)
+      .where(eq(artStylesView.value, artStyleValue))
+      .then((rows) => rows[0]);
+
+    if (!artStyle?.description) {
+      throw new Error('No art style description found.');
+    }
+
     const r2PublicUrlRaw =
       this.configService.get('r2PublicUrl', { infer: true }) ?? '';
     const r2PublicUrl = r2PublicUrlRaw.startsWith('http')
@@ -564,7 +575,11 @@ export class GamesService {
 
     for (const game of pendingGames) {
       try {
-        const prompt = this.buildImagePrompt(game, params, artStyleDescriptor);
+        const prompt = this.buildImagePrompt(
+          game,
+          params,
+          artStyle?.description,
+        );
         const rawBuffer = await this.aiService.generateImage(prompt);
         const imageBuffer = await sharp(rawBuffer)
           .jpeg({ quality: 85 })
@@ -579,16 +594,16 @@ export class GamesService {
         const list = Array.isArray(game.imageGen)
           ? JSON.parse(JSON.stringify(game.imageGen))
           : [];
-        const styleKey = params.artStyle;
+        const asvKey = artStyleValue;
         const newItem = {
-          [styleKey]: {
+          [asvKey]: {
             url: publicUrl,
             prompt: prompt,
             provider: 'cloudflare',
           },
         };
         const existingIndex = list.findIndex(
-          (item: any) => item && typeof item === 'object' && styleKey in item,
+          (item: any) => item && typeof item === 'object' && asvKey in item,
         );
 
         if (existingIndex >= 0) {
@@ -743,19 +758,26 @@ export class GamesService {
   async generateImage(
     input: GenerateImageInput,
   ): Promise<{ success: boolean; url: string; data: Game } | null> {
-    const { igdbId, includeStoryline, includeGenres, includeThemes, artStyle } =
-      input;
+    const {
+      igdbId,
+      includeStoryline,
+      includeGenres,
+      includeThemes,
+      artStyle: artStyleValue, // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
+    } = input;
     const game = await this.getGameByIgdbId(igdbId);
+    const artStyles = await this.databaseService.db
+      .select()
+      .from(artStylesView);
 
-    if (!game) {
+    if (!game || !artStyleValue) {
       return null;
     }
 
-    const resolvedArtStyle = artStyle ?? DEFAULT_IMAGE_GEN_ART_STYLE;
-    const artStyleDescriptor = artStyles.find(
+    const artStyleDescription = artStyles.find(
       (artStyle) =>
-        artStyle.value.toLowerCase() === resolvedArtStyle.toLowerCase(),
-    )?.descriptor;
+        artStyle.value.toLowerCase() === artStyleValue.toLowerCase(),
+    )?.description;
     const prompt = this.buildImagePrompt(
       game,
       {
@@ -763,7 +785,7 @@ export class GamesService {
         includeGenres: includeGenres ?? false,
         includeThemes: includeThemes ?? false,
       },
-      artStyleDescriptor!,
+      artStyleDescription!,
     );
     const rawBuffer = await this.aiService.generateImage(prompt);
     const imageBuffer = await sharp(rawBuffer).jpeg({ quality: 85 }).toBuffer();
@@ -781,16 +803,15 @@ export class GamesService {
     const list = Array.isArray(game.imageGen)
       ? JSON.parse(JSON.stringify(game.imageGen))
       : [];
-    const styleKey = resolvedArtStyle;
     const newItem = {
-      [styleKey]: {
+      [artStyleValue]: {
         url: publicUrl,
         prompt: prompt,
         provider: 'cloudflare',
       },
     };
     const existingIndex = list.findIndex(
-      (item: any) => item && typeof item === 'object' && styleKey in item,
+      (item: any) => item && typeof item === 'object' && artStyleValue in item,
     );
 
     if (existingIndex >= 0) {
@@ -822,12 +843,12 @@ export class GamesService {
       includeGenres: boolean;
       includeThemes: boolean;
     },
-    artStyleDescriptor: string,
+    artStyleDescription: string,
   ): string {
     const parts: string[] = [];
 
     parts.push(
-      `${artStyleDescriptor} of iconic characters from "${game.name}" set within the game's distinct world`,
+      `${artStyleDescription} of iconic characters from "${game.name}" set within the game's distinct world`,
     );
 
     if (game.summary) {

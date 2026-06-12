@@ -2,8 +2,8 @@
 
 import { use, useState, useMemo, Suspense, ViewTransition } from 'react';
 import {
-  DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_PROMPT_SUFFIX,
+  MIN_PREVIEW_PROMPT_ROWS,
 } from '@workspace/shared';
 import {
   useQuery,
@@ -54,18 +54,14 @@ import {
 import {
   Game,
   type ArtworkImage,
-  type ArtStyle,
-  artStyles,
+  type ArtStyleValue,
 } from '@workspace/api-contract';
 import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/tabs';
 import { Badge } from '@/components/badge';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+import { artStyleDefaultValue, artStyles } from '@/lib/services/other.service';
 
 function buildPromptPreview(
   game: Game,
@@ -73,26 +69,44 @@ function buildPromptPreview(
     includeStoryline: boolean;
     includeGenres: boolean;
     includeThemes: boolean;
-    artStyle: string;
+    artStyleValue: string;
   },
 ): string {
   const parts: string[] = [];
   const style =
-    artStyles.find((s) => s.value === options.artStyle) ?? artStyles[0];
+    artStyles.find((s) => s.value === options.artStyleValue) ?? artStyles[0];
   parts.push(
-    `${style.descriptor} of iconic characters from "${game.name}" set within the game's distinct world`,
+    `${style.description} of iconic characters from "${game.name}" set within the game's distinct world`,
   );
-  if (game.summary) parts.push(game.summary);
-  if (options.includeStoryline && game.storyline) parts.push(game.storyline);
+
+  if (game.summary) {
+    parts.push(game.summary);
+  }
+
+  if (options.includeStoryline && game.storyline) {
+    parts.push(game.storyline);
+  }
+
   const genres = game.genres as string[] | null;
-  if (options.includeGenres && genres?.length)
+
+  if (options.includeGenres && genres?.length) {
     parts.push(`Genres: ${genres.join(', ')}`);
+  }
+
   const themes = game.themes as string[] | null;
-  if (options.includeThemes && themes?.length)
+
+  if (options.includeThemes && themes?.length) {
     parts.push(`Themes: ${themes.join(', ')}`);
+  }
+
   const keywords = game.keywords as string[] | null;
-  if (keywords?.length) parts.push(`Keywords: ${keywords.join(', ')}`);
+
+  if (keywords?.length) {
+    parts.push(`Keywords: ${keywords.join(', ')}`);
+  }
+
   parts.push(IMAGE_PROMPT_SUFFIX);
+
   return parts.join('. ');
 }
 
@@ -494,8 +508,8 @@ function ArtworksTabContent({ igdbId }: { igdbId: string }) {
 
 function ImageGenTabContent({
   igdbId,
-  artStyle,
-  setArtStyle,
+  artStyleValue,
+  setArtStyleValue,
   includeStoryline,
   setIncludeStoryline,
   includeGenres,
@@ -504,8 +518,8 @@ function ImageGenTabContent({
   setIncludeThemes,
 }: {
   igdbId: string;
-  artStyle: ArtStyle;
-  setArtStyle: (s: ArtStyle) => void;
+  artStyleValue: ArtStyleValue;
+  setArtStyleValue: (s: ArtStyleValue) => void;
   includeStoryline: boolean;
   setIncludeStoryline: (v: boolean) => void;
   includeGenres: boolean;
@@ -525,7 +539,7 @@ function ImageGenTabContent({
         includeStoryline,
         includeGenres,
         includeThemes,
-        artStyle: artStyle,
+        artStyleValue,
       }),
     onMutate: () => {
       toast.loading('Generating AI image...', { id: 'generate-image' });
@@ -548,35 +562,55 @@ function ImageGenTabContent({
     }
 
     const entry = game.imageGen.find(
-      (item) => item && typeof item === 'object' && artStyle in item,
+      (item) => item && typeof item === 'object' && artStyleValue in item,
     );
 
     return entry
-      ? (entry[artStyle] as { url: string; prompt: string; provider: string })
+      ? (entry[artStyleValue] as {
+          url: string;
+          prompt: string;
+          provider: string;
+        })
       : null;
-  }, [game, artStyle]);
+  }, [game, artStyleValue]);
 
   const savedPrompt = generatedImage?.prompt;
   const provider = generatedImage?.provider ?? 'N/A';
+  const artStyleLabel = artStyles.find((s) => s.value === artStyleValue)?.label;
 
   const savedPromptRows = useMemo(() => {
-    if (!savedPrompt) return 4;
-    return Math.min(15, Math.max(4, Math.ceil(savedPrompt.length / 28)));
+    if (!savedPrompt) {
+      return MIN_PREVIEW_PROMPT_ROWS;
+    }
+
+    return Math.min(
+      15,
+      Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(savedPrompt.length / 28)),
+    );
   }, [savedPrompt]);
 
   const previewPrompt = useMemo(() => {
-    if (!game) return '';
+    if (!game) {
+      return '';
+    }
+
     return buildPromptPreview(game, {
       includeStoryline,
       includeGenres,
       includeThemes,
-      artStyle: artStyle,
+      artStyleValue,
     });
-  }, [game, includeStoryline, includeGenres, includeThemes, artStyle]);
+  }, [game, includeStoryline, includeGenres, includeThemes, artStyleValue]);
 
   const previewPromptRows = useMemo(() => {
-    if (!previewPrompt) return 4;
-    return Math.min(15, Math.max(4, Math.ceil(previewPrompt.length / 50)));
+    if (!previewPrompt) {
+      return MIN_PREVIEW_PROMPT_ROWS;
+    }
+
+    return Math.min(
+      15,
+      Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(previewPrompt.length / 50)),
+    );
   }, [previewPrompt]);
 
   const imageGenButtonText = generateImageMutation.isPending
@@ -584,6 +618,7 @@ function ImageGenTabContent({
     : generatedImage
       ? 'Regenerate AI Image'
       : 'Generate AI Image';
+
   return (
     <div className="flex flex-col md:flex-row gap-8">
       <div className="w-full md:w-64 shrink-0 flex flex-col gap-4">
@@ -592,7 +627,7 @@ function ImageGenTabContent({
             <DialogTrigger className="relative aspect-square w-full overflow-hidden border-2 border-solid border-muted-foreground/30 group cursor-pointer hover:border-primary/50 transition-colors p-0 m-0 bg-transparent block">
               <Image
                 src={generatedImage.url}
-                alt={`${game.name} AI Image - ${artStyles.find((s) => s.value === artStyle)?.label ?? artStyle}`}
+                alt={`${game.name} AI Image - ${artStyleLabel}`}
                 fill
                 unoptimized
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -609,8 +644,8 @@ function ImageGenTabContent({
               <DialogHeader className="sr-only">
                 <DialogTitle>
                   {game.name} AI Image -{' '}
-                  {artStyles.find((s) => s.value === artStyle)?.label ??
-                    artStyle}
+                  {artStyles.find((s) => s.value === artStyleValue)?.label ??
+                    artStyleValue}
                 </DialogTitle>
               </DialogHeader>
               <div className="relative w-full h-full">
@@ -666,7 +701,7 @@ function ImageGenTabContent({
           </h3>
           <div className="border border-border bg-card/50 overflow-y-scroll scrollbar-y max-h-60 rounded-none divide-y divide-border">
             {artStyles.map((style) => {
-              const isSelected = style.value === artStyle;
+              const isSelected = style.value === artStyleValue;
               const hasImage =
                 Array.isArray(game?.imageGen) &&
                 game.imageGen.some(
@@ -677,7 +712,7 @@ function ImageGenTabContent({
                 <button
                   key={style.value}
                   type="button"
-                  onClick={() => setArtStyle(style.value as ArtStyle)}
+                  onClick={() => setArtStyleValue(style.value as ArtStyleValue)}
                   disabled={generateImageMutation.isPending}
                   className={cn(
                     'w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between',
@@ -880,9 +915,8 @@ export default function GameDetails({
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
   const [includeThemes, setIncludeThemes] = useState(false);
-  const [artStyle, setArtStyle] = useState<ArtStyle>(
-    DEFAULT_IMAGE_GEN_ART_STYLE,
-  );
+  const [artStyleValue, setArtStyleValue] =
+    useState<ArtStyleValue>(artStyleDefaultValue);
 
   // Still needed for the delete dialog — reads from cache after SidebarContent populates it
   const { data: game } = useQuery({
@@ -1035,8 +1069,8 @@ export default function GameDetails({
                 <Suspense fallback={<ImageGenTabSkeleton />}>
                   <ImageGenTabContent
                     igdbId={igdbId}
-                    artStyle={artStyle}
-                    setArtStyle={setArtStyle}
+                    artStyleValue={artStyleValue}
+                    setArtStyleValue={setArtStyleValue}
                     includeStoryline={includeStoryline}
                     setIncludeStoryline={setIncludeStoryline}
                     includeGenres={includeGenres}

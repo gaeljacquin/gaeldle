@@ -1,7 +1,4 @@
-import {
-  sql,
-  eq,
-} from 'drizzle-orm';
+import { sql, eq } from 'drizzle-orm';
 import {
   pgTable,
   serial,
@@ -104,6 +101,70 @@ export const GameUpdateInputSchema = GameInsertSchema.omit({
 export type GameUpdate = z.infer<typeof GameUpdateInputSchema>;
 export type Game = typeof allGames.$inferSelect;
 
+const artStylesTable = pgTable(
+  'art_style',
+  {
+    id: serial('id').primaryKey(),
+    value: text('value').notNull().unique(),
+    label: text('label').notNull(),
+    description: text('description').notNull(),
+    isDefault: integer('is_default').notNull().default(0),
+    isActive: integer('is_active').notNull().default(1),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).defaultNow(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).defaultNow(),
+  },
+  (table) => [
+    check('art_style_default_check', sql`${table.isDefault} IN (0, 1)`),
+    check('art_style_active_check', sql`${table.isActive} IN (0, 1)`),
+    // At most one record where default = 1
+    uniqueIndex('art_style_single_default_idx')
+      .on(table.isDefault)
+      .where(sql`${table.isDefault} = 1`),
+    index('art_style_value_idx').on(table.value),
+  ],
+);
+
+export const artStyleObject = {
+  id: artStylesTable.id,
+  value: artStylesTable.value,
+  label: artStylesTable.label,
+  description: artStylesTable.description,
+  isDefault: artStylesTable.isDefault,
+  isActive: artStylesTable.isActive,
+};
+
+export const artStyles = pgMaterializedView('active_art_styles').as((qb) => {
+  return qb
+    .select(artStyleObject)
+    .from(artStylesTable)
+    .where(eq(artStylesTable.isActive, 1));
+});
+
+export const artStyleSelectSchema = createSelectSchema(artStyles);
+
+export const artStyleValues = pgMaterializedView('active_art_styles').as(
+  (qb) => {
+    return qb
+      .select({
+        value: artStyleObject.value,
+      })
+      .from(artStylesTable)
+      .where(eq(artStylesTable.isActive, 1));
+  },
+);
+
+export const artStyleValueSelectSchema = createSelectSchema(artStyleValues);
+
+export type ArtStyle = typeof artStyles.$inferSelect;
+// export type ArtStyleValue = z.infer<typeof artStyles.value>;
+export type ArtStyleValue = z.infer<typeof artStyleSelectSchema>['value'];
+
 export const bulkImageGenJobs = pgTable('bulk_image_gen_job', {
   id: serial('id').primaryKey(),
   jobId: varchar('job_id').unique().notNull(),
@@ -118,7 +179,7 @@ export const bulkImageGenJobs = pgTable('bulk_image_gen_job', {
     >(),
   params: json('params').notNull().$type<{
     numGames: number;
-    artStyle: string;
+    artStyle: string; // really just artStyleValue, not renaming it
     includeStoryline: boolean;
     includeGenres: boolean;
     includeThemes: boolean;
@@ -142,7 +203,7 @@ export const BulkJobFailureSchema = z.object({
 
 export const BulkJobParamsSchema = z.object({
   numGames: z.number(),
-  artStyle: z.string(),
+  artStyle: artStyleSelectSchema.shape.value, // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
   includeStoryline: z.boolean(),
   includeGenres: z.boolean(),
   includeThemes: z.boolean(),
@@ -190,48 +251,3 @@ export const domainEvents = pgTable(
 
 export type DomainEvent = typeof domainEvents.$inferSelect;
 export type DomainEventInsert = typeof domainEvents.$inferInsert;
-
-const artStylesTable = pgTable(
-  'art_style',
-  {
-    id: serial('id').primaryKey(),
-    value: text('value').notNull().unique(),
-    label: text('label').notNull(),
-    description: text('description').notNull(),
-    isDefault: integer('is_default').notNull().default(0),
-    isActive: integer('is_active').notNull().default(1),
-    createdAt: timestamp('created_at', {
-      withTimezone: true,
-      mode: 'date',
-    }).defaultNow(),
-    updatedAt: timestamp('updated_at', {
-      withTimezone: true,
-      mode: 'date',
-    }).defaultNow(),
-  },
-  (table) => [
-    check('art_style_default_check', sql`${table.isDefault} IN (0, 1)`),
-    check('art_style_active_check', sql`${table.isActive} IN (0, 1)`),
-    // At most one record where default = 1
-    uniqueIndex('art_style_single_default_idx')
-      .on(table.isDefault)
-      .where(sql`${table.isDefault} = 1`),
-    index('art_style_value_idx').on(table.value),
-  ]
-)
-
-export const artStyleObject = {
-  id: artStylesTable.id,
-  value: artStylesTable.value,
-  label: artStylesTable.label,
-  description: artStylesTable.description,
-  isDefault: artStylesTable.isDefault,
-  isActive: artStylesTable.isActive,
-};
-
-export const artStyles = pgMaterializedView('active_art_styles').as((qb) => {
-  return qb
-    .select(artStyleObject)
-    .from(artStylesTable)
-    .where(eq(artStylesTable.isActive, 1));
-});

@@ -1,6 +1,6 @@
 {
-  "id": "d289a5f9-eed3-4c82-ac4b-facc28785c39",
-  "prevId": "96045934-2046-4e3e-8d01-afc0c85449b4",
+  "id": "0d1ca247-b260-41b2-b74e-4485592b0256",
+  "prevId": "d289a5f9-eed3-4c82-ac4b-facc28785c39",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -483,8 +483,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "name": {
-          "name": "name",
+        "title": {
+          "name": "title",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -495,14 +495,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "difficulty": {
-          "name": "difficulty",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "gradient": {
-          "name": "gradient",
+        "level": {
+          "name": "level",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -579,6 +573,10 @@
       },
       "policies": {},
       "checkConstraints": {
+        "game_mode_level_check": {
+          "name": "game_mode_level_check",
+          "value": "\"game_mode\".\"level\" IN ('easy', 'medium', 'hard')"
+        },
         "game_mode_active_check": {
           "name": "game_mode_active_check",
           "value": "\"game_mode\".\"is_active\" IN (0, 1)"
@@ -808,8 +806,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "name": {
-          "name": "name",
+        "title": {
+          "name": "title",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -820,14 +818,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "difficulty": {
-          "name": "difficulty",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "gradient": {
-          "name": "gradient",
+        "level": {
+          "name": "level",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -853,7 +845,7 @@
           "default": 0
         }
       },
-      "definition": "select \"id\", \"slug\", \"name\", \"description\", \"difficulty\", \"gradient\", \"ordinal\", \"is_active\", \"is_cover_art\" from \"game_mode\" where \"game_mode\".\"is_active\" = 1 order by \"game_mode\".\"ordinal\"",
+      "definition": "select \"id\", \"slug\", \"title\", \"description\", \"level\", \"ordinal\", \"is_active\", \"is_cover_art\" from \"game_mode\" where \"game_mode\".\"is_active\" = 1 order by \"game_mode\".\"ordinal\"",
       "name": "active_game_modes",
       "schema": "public",
       "isExisting": false,

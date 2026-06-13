@@ -127,6 +127,13 @@
       "when": 1781373794193,
       "tag": "0017_slippery_sharon_carter",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1781375435175,
+      "tag": "0018_lush_wolfpack",
+      "breakpoints": true
     }
   ]
 }

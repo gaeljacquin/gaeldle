@@ -1,6 +1,6 @@
 import { ViewTransition } from 'react';
 import { GameModeCard } from '@/components/game-mode-card';
-import { gameModes } from '@workspace/api-contract';
+import { gameModesOld } from '@workspace/api-contract';
 import { appInfo } from '@/lib/app-info';
 import Link from 'next/link';
 import ViewportDebugger from '@/components/viewport-debugger';
@@ -25,7 +25,7 @@ export default function HomeView() {
 
             <section className="mb-14">
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {gameModes.map((gameMode) => (
+                {gameModesOld.map((gameMode) => (
                   <GameModeCard
                     key={gameMode.id}
                     id={gameMode.id}

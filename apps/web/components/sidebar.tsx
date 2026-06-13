@@ -20,7 +20,7 @@ import {
 import { cn } from '@workspace/ui/lib/utils';
 import { appInfo } from '@/lib/app-info';
 import { Separator } from '@workspace/ui/separator';
-import { gameModes } from '@workspace/api-contract';
+import { gameModesOld } from '@workspace/api-contract';
 
 interface SidebarLinkProps {
   href: string;
@@ -63,7 +63,7 @@ interface SidebarGamesSectionProps {
 }
 
 interface SidebarGameLinkProps {
-  mode: (typeof gameModes)[number];
+  mode: (typeof gameModesOld)[number];
   isCollapsed: boolean;
   pathname: string;
 }
@@ -123,7 +123,7 @@ function SidebarGamesSection({
       </button>
       {isExpanded && (
         <div className={cn('mt-1 space-y-1', isCollapsed ? null : 'ml-4')}>
-          {gameModes.map((mode) => (
+          {gameModesOld.map((mode) => (
             <SidebarGameLink
               key={mode.href}
               mode={mode}

@@ -13,7 +13,7 @@ import {
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-const artStylesTable = pgTable(
+export const artStylesTable = pgTable(
   'art_style',
   {
     id: serial('id').primaryKey(),
@@ -60,7 +60,7 @@ export const artStyles = pgMaterializedView('active_art_styles').as((qb) => {
 
 export const artStyleSelectSchema = createSelectSchema(artStyles);
 
-export const artStyleValues = pgMaterializedView('active_art_styles').as(
+export const artStyleValues = pgMaterializedView('active_art_style_values').as(
   (qb) => {
     return qb
       .select({

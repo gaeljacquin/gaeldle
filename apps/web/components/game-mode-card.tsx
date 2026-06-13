@@ -1,8 +1,8 @@
 import { MenuCard, type MenuCardProps } from '@/components/menu-card';
-import { GameMode } from '@workspace/api-contract';
+import { GameModeOld } from '@workspace/api-contract';
 
 interface GameModeCardProps extends Omit<MenuCardProps, 'badge'> {
-  difficulty: GameMode['difficulty'];
+  difficulty: GameModeOld['difficulty'];
 }
 
 export function GameModeCard({ difficulty, ...rest }: GameModeCardProps) {

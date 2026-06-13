@@ -12,21 +12,21 @@ import {
 import { IMAGE_GEN_MIN, IMAGE_GEN_MAX } from '@workspace/shared';
 import { DotPaths } from './other';
 
-export const coverArtModeSlugs = ['cover-art', 'image-gen', 'artwork'];
+export const coverArtModeSlugsOld = ['cover-art', 'image-gen', 'artwork'];
 
-export const gameModeSlugs = [
-  ...coverArtModeSlugs,
+export const gameModeSlugsOld = [
+  ...coverArtModeSlugsOld,
   'timeline',
   'timeline-2',
   'specifications',
 ];
 
-export type GameModeSlug = (typeof gameModeSlugs)[number];
+export type GameModeSlugOld = (typeof gameModeSlugsOld)[number];
 
-export type CoverArtModeSlug = (typeof coverArtModeSlugs)[number];
+export type CoverArtModeSlug = (typeof coverArtModeSlugsOld)[number];
 
-export interface GameMode {
-  id: GameModeSlug;
+export interface GameModeOld {
+  id: GameModeSlugOld;
   title: string;
   description: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
@@ -34,7 +34,7 @@ export interface GameMode {
   href: string;
 }
 
-export const gameModes: GameMode[] = [
+export const gameModesOld: GameModeOld[] = [
   {
     id: 'cover-art',
     title: 'Cover Art',
@@ -85,8 +85,8 @@ export const gameModes: GameMode[] = [
   },
 ];
 
-export const GameModeSlugSchema = z.enum(
-  gameModes.map((gameMode) => {
+export const GameModeSlugSchemaOld = z.enum(
+  gameModesOld.map((gameMode) => {
     return gameMode.id;
   }),
 );
@@ -419,10 +419,10 @@ export type IgdbGameField = DotPaths<IgdbGame>;
  * @param slug - The game mode slug (e.g., "cover-art", "image-gen")
  * @returns GameMode or undefined if not found
  */
-export function getGameModeBySlug(slug: string): GameMode | undefined {
-  return gameModes.find((mode) => mode.id === slug);
+export function getGameModeBySlug(slug: string): GameModeOld | undefined {
+  return gameModesOld.find((mode) => mode.id === slug);
 }
 
-export const isGameModeSlug = (value: unknown): value is GameModeSlug =>
+export const isGameModeSlug = (value: unknown): value is GameModeSlugOld =>
   typeof value === 'string' &&
-  (gameModeSlugs as readonly string[]).includes(value);
+  (gameModeSlugsOld as readonly string[]).includes(value);

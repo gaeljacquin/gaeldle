@@ -9,7 +9,6 @@ export const getGameModes = async () => {
   }
 
   const gameModes = z.array(gameModeSelectSchema).parse(await res.json());
-
   const levelCounts: Record<string, number> = {};
 
   return gameModes.map((gameMode) => {
@@ -48,7 +47,7 @@ export const gameModesQueryOptions = {
  * @param slug - The game mode slug (e.g., "cover-art", "image-gen")
  * @returns GameMode or undefined if not found
  */
-async function getGameModeBySlug(slug: string) {
+export async function getGameModeBySlug(slug: string) {
   const mode = (await getGameModes()).find((mode) => mode.slug === slug);
 
   if (!mode) {

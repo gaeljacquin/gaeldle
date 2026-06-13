@@ -76,47 +76,6 @@ export class GamesRouter {
     });
   }
 
-  @Implement(contract.games.generateImage)
-  @UseGuards(HexclaveGuard)
-  generateImage() {
-    return implement(contract.games.generateImage).handler(
-      async ({ input }) => {
-        const result = await this.gamesService.generateImage(input);
-
-        if (!result) {
-          throw new NotFoundException('Game not found');
-        }
-
-        return result;
-      },
-    );
-  }
-
-  @Implement(contract.games.bulkGenerateImages)
-  @UseGuards(HexclaveGuard)
-  bulkGenerateImages() {
-    return implement(contract.games.bulkGenerateImages).handler(
-      async ({ input }) => {
-        const { jobId, gamesQueued } =
-          await this.gamesService.bulkGenerateImages(input);
-
-        return { success: true, jobId, gamesQueued };
-      },
-    );
-  }
-
-  @Implement(contract.games.getBulkJobStatus)
-  @UseGuards(HexclaveGuard)
-  getBulkJobStatus() {
-    return implement(contract.games.getBulkJobStatus).handler(
-      async ({ input }) => {
-        const job = await this.gamesService.getBulkJobStatus(input.jobId);
-
-        return { success: true, ...job };
-      },
-    );
-  }
-
   @Implement(contract.games.validateReplaceGame)
   @UseGuards(HexclaveGuard)
   validateReplaceGame() {

@@ -1,3 +1,4 @@
+import { InferInsertModel } from 'drizzle-orm';
 import {
   pgTable,
   serial,
@@ -10,7 +11,6 @@ import {
   text,
 } from 'drizzle-orm/pg-core';
 import { createSelectSchema, createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
 
 export const games = pgTable(
   'game',
@@ -95,5 +95,6 @@ export const GameUpdateInputSchema = GameInsertSchema.omit({
   updatedAt: true,
   igdbId: true,
 }).partial();
-export type GameUpdate = z.infer<typeof GameUpdateInputSchema>;
+
+export type GameInsert = InferInsertModel<typeof games>;
 export type Game = typeof allGames.$inferSelect;

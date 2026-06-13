@@ -3,13 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getBulkJobStatus } from '@/lib/services/game.service';
-
-export type BulkJobStatus =
-  | 'pending'
-  | 'running'
-  | 'completed'
-  | 'failed'
-  | 'idle';
+import { JobStatusPlus } from '@workspace/api-contract';
 
 export interface BulkJobFailure {
   igdbId: number;
@@ -18,7 +12,7 @@ export interface BulkJobFailure {
 }
 
 export interface BulkJobState {
-  status: BulkJobStatus;
+  status: JobStatusPlus;
   total: number;
   processed: number;
   succeeded: number;
@@ -100,7 +94,7 @@ export function useBulkImageJob({
     }
 
     return {
-      status: polledJob.status as BulkJobStatus,
+      status: polledJob.status as JobStatusPlus,
       total: polledJob.total,
       processed: polledJob.processed,
       succeeded: polledJob.succeeded,

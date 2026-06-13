@@ -1,5 +1,5 @@
 import { type Icon, ReactNode } from '@tabler/icons-react';
-import ViewportDebugger from './viewport-debugger';
+import ViewportDebugger from '@/components/viewport-debugger';
 
 interface DashboardHeaderProps {
   title: ReactNode;

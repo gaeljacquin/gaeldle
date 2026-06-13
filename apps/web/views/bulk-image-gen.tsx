@@ -8,7 +8,12 @@ import {
   IMAGE_GEN_MIN,
   IMAGE_GEN_MAX,
 } from '@workspace/shared';
-import type { ArtStyle } from '@workspace/api-contract';
+import {
+  activeJobStatus,
+  jobStatusPlus,
+  type ArtStyle,
+  type JobStatusPlus,
+} from '@workspace/api-contract';
 import {
   artStyleDefault,
   artStylesQueryOptions,
@@ -48,29 +53,10 @@ import { cn } from '@workspace/ui/lib/utils';
 import { toast } from 'sonner';
 import { DashboardHeader } from '@/components/dashboard-header';
 
-type JobStatus = 'pending' | 'running' | 'completed' | 'failed';
+function StatusBadge({ status }: { status: JobStatusPlus }) {
+  const { label, variant } = jobStatusPlus[status];
 
-function StatusBadge({ status }: { status: JobStatus | 'idle' }) {
-  const variantMap: Record<
-    JobStatus | 'idle',
-    'default' | 'secondary' | 'destructive' | 'outline'
-  > = {
-    idle: 'outline',
-    pending: 'secondary',
-    running: 'default',
-    completed: 'default',
-    failed: 'destructive',
-  };
-
-  const labelMap: Record<JobStatus | 'idle', string> = {
-    idle: 'Idle',
-    pending: 'Pending',
-    running: 'Running',
-    completed: 'Completed',
-    failed: 'Failed',
-  };
-
-  return <Badge variant={variantMap[status]}>{labelMap[status]}</Badge>;
+  return <Badge variant={variant}>{label}</Badge>;
 }
 
 interface ActiveJobPanelProps {
@@ -222,9 +208,11 @@ export default function BulkImageGen() {
   // Fetch access token for SSE
   useEffect(() => {
     let cancelled = false;
+
     user.getAccessToken().then((token) => {
       if (!cancelled && token) setAccessToken(token);
     });
+
     return () => {
       cancelled = true;
     };
@@ -236,10 +224,7 @@ export default function BulkImageGen() {
     accessToken,
   });
   const isJobActive =
-    activeJobId !== null &&
-    (jobState.status === 'pending' ||
-      jobState.status === 'running' ||
-      jobState.status === 'idle');
+    activeJobId !== null && jobState.status in activeJobStatus;
 
   const startMutation = useMutation({
     mutationFn: () =>

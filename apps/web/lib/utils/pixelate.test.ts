@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { pixelateImage, getPixelSizeForAttempt } from './pixelate';
+import { pixelateImage, getPixelSizeForAttempt } from '@/lib/utils/pixelate';
 
 describe('pixelate utilities', () => {
   describe('getPixelSizeForAttempt', () => {

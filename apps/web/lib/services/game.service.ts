@@ -1,7 +1,7 @@
 import { orpcClient } from '@/lib/orpc';
 import type { Game, GameModeSlug } from '@workspace/api-contract';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
-import { artStyleValuesEnum } from './art-style.service';
+import { artStyleValuesEnum } from '@/lib/services/art-style.service';
 import { z } from 'zod';
 
 async function handleResponse<T>(res: Response): Promise<T> {
@@ -160,7 +160,7 @@ export async function generateImage(
     artStyleValue: z.infer<typeof artStyleValuesEnum>;
   },
 ) {
-  const result = await orpcClient.games.generateImage({ igdbId, ...options });
+  const result = await orpcClient.big.generateImage({ igdbId, ...options });
 
   return result;
 }
@@ -172,13 +172,13 @@ export async function bulkGenerateImages(params: {
   includeGenres: boolean;
   includeThemes: boolean;
 }) {
-  const result = await orpcClient.games.bulkGenerateImages(params);
+  const result = await orpcClient.big.bulkGenerateImages(params);
 
   return result;
 }
 
 export async function getBulkJobStatus(jobId: string) {
-  const result = await orpcClient.games.getBulkJobStatus({ jobId });
+  const result = await orpcClient.big.getBulkJobStatus({ jobId });
 
   return result;
 }

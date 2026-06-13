@@ -65,5 +65,4 @@ export const gameModes = pgMaterializedView('active_game_modes').as((qb) => {
 
 export const gameModeSelectSchema = createSelectSchema(gameModes);
 
-export type GameMode = typeof gameModes.$inferSelect;
 export type GameModeSlug = z.infer<typeof gameModeSelectSchema>['slug'];

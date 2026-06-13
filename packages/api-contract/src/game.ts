@@ -1,89 +1,7 @@
 import { oc } from '@orpc/contract';
 import { z } from 'zod';
-import {
-  GameSelectSchema,
-  GameUpdateInputSchema,
-  BulkJobFailureSchema,
-  BulkJobParamsSchema,
-  BulkJobStatusEnum,
-  type Game,
-  artStyleSelectSchema,
-} from './schema';
-import { IMAGE_GEN_MIN, IMAGE_GEN_MAX } from '@workspace/shared';
+import { GameSelectSchema, GameUpdateInputSchema, type Game } from './schema';
 import { DotPaths } from './other';
-
-export const coverArtModeSlugsOld = ['cover-art', 'image-gen', 'artwork'];
-
-export const gameModeSlugsOld = [
-  ...coverArtModeSlugsOld,
-  'timeline',
-  'timeline-2',
-  'specifications',
-];
-
-export type GameModeSlugOld = (typeof gameModeSlugsOld)[number];
-
-export type CoverArtModeSlug = (typeof coverArtModeSlugsOld)[number];
-
-export interface GameModeOld {
-  id: GameModeSlugOld;
-  title: string;
-  description: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  gradient: string;
-  href: string;
-}
-
-export const gameModesOld: GameModeOld[] = [
-  {
-    id: 'cover-art',
-    title: 'Cover Art',
-    description: 'Identify the game from their cover art.',
-    difficulty: 'Easy',
-    gradient: '--gradient-easy-1',
-    href: '/cover-art',
-  },
-  {
-    id: 'artwork',
-    title: 'Artwork',
-    description: 'Guess the game from their artwork.',
-    difficulty: 'Medium',
-    gradient: '--gradient-medium-1',
-    href: '/artwork',
-  },
-  {
-    id: 'image-gen',
-    title: 'Image Gen',
-    description: 'Guess the game from a text-to-image rendition.',
-    difficulty: 'Medium',
-    gradient: '--gradient-medium-2',
-    href: '/image-gen',
-  },
-  {
-    id: 'timeline',
-    title: 'Timeline',
-    description: 'Arrange games in chronological order.',
-    difficulty: 'Medium',
-    gradient: '--gradient-medium-3',
-    href: '/timeline',
-  },
-  {
-    id: 'timeline-2',
-    title: 'Timeline 2',
-    description: 'Place each game in chronological order.',
-    difficulty: 'Hard',
-    gradient: '--gradient-hard-1',
-    href: '/timeline-2',
-  },
-  {
-    id: 'specifications',
-    title: 'Specifications',
-    description: 'Deduce the game from their specifications.',
-    difficulty: 'Hard',
-    gradient: '--gradient-hard-2',
-    href: '/specifications',
-  },
-];
 
 export const SyncOperationSchema = z.enum([
   'created',
@@ -161,67 +79,6 @@ export const GamesContract = {
       z.object({
         success: z.boolean(),
         url: z.string(),
-      }),
-    ),
-
-  generateImage: oc
-    .route({ method: 'POST', path: '/games/generate-image' })
-    .input(
-      z.object({
-        igdbId: z.coerce.number().int().positive(),
-        includeStoryline: z.boolean().optional().default(false),
-        includeGenres: z.boolean().optional().default(false),
-        includeThemes: z.boolean().optional().default(false),
-        artStyle: artStyleSelectSchema.shape.value.optional(), // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
-      }),
-    )
-    .output(
-      z.object({
-        success: z.boolean(),
-        url: z.string(),
-        data: GameSelectSchema,
-      }),
-    ),
-  bulkGenerateImages: oc
-    .route({ method: 'POST', path: '/games/bulk-generate-images' })
-    .input(
-      z.object({
-        numGames: z.number().int().min(IMAGE_GEN_MIN).max(IMAGE_GEN_MAX),
-        artStyle: artStyleSelectSchema.shape.value, // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
-        includeStoryline: z.boolean().default(false),
-        includeGenres: z.boolean().default(false),
-        includeThemes: z.boolean().default(false),
-      }),
-    )
-    .output(
-      z.object({
-        success: z.boolean(),
-        jobId: z.string(),
-        gamesQueued: z.number(),
-      }),
-    ),
-
-  getBulkJobStatus: oc
-    .route({ method: 'GET', path: '/games/bulk-generate-images/:jobId/status' })
-    .input(
-      z.object({
-        jobId: z.string(),
-      }),
-    )
-    .output(
-      z.object({
-        success: z.boolean(),
-        jobId: z.string(),
-        status: BulkJobStatusEnum,
-        total: z.number(),
-        processed: z.number(),
-        succeeded: z.number(),
-        failed: z.number(),
-        failures: z.array(BulkJobFailureSchema),
-        params: BulkJobParamsSchema,
-        startedAt: z.date().nullable(),
-        completedAt: z.date().nullable(),
-        createdAt: z.date(),
       }),
     ),
 
@@ -407,16 +264,3 @@ export type IgdbGame = {
 };
 
 export type IgdbGameField = DotPaths<IgdbGame>;
-
-/**
- * Get game mode by slug (pathname without leading slash)
- * @param slug - The game mode slug (e.g., "cover-art", "image-gen")
- * @returns GameMode or undefined if not found
- */
-export function getGameModeBySlug(slug: string): GameModeOld | undefined {
-  return gameModesOld.find((mode) => mode.id === slug);
-}
-
-export const isGameModeSlug = (value: unknown): value is GameModeSlugOld =>
-  typeof value === 'string' &&
-  (gameModeSlugsOld as readonly string[]).includes(value);

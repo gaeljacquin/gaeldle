@@ -1,80 +1,78 @@
 import {
   Controller,
   Param,
-  Query,
   Sse,
   UnauthorizedException,
+  NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Implement, implement } from '@orpc/nest';
 import { Observable, merge, EMPTY } from 'rxjs';
 import { map, take, filter, mergeMap } from 'rxjs/operators';
-import type { JWTPayload } from 'jose';
-import { GamesService } from '@/games/games.service';
 import {
   BulkImageJobStore,
   type BulkJobEvent,
-} from '@/image-gen/bulk-image-job.store';
+} from '@/bulk-image-gen/bulk-image-job.store';
+import { BulkImageGenService } from '@/bulk-image-gen/bulk-image-gen.service';
+import { HexclaveGuard } from '@/auth/hexclave.guard';
+import { contract } from '@workspace/api-contract';
 
-type JoseModule = typeof import('jose');
-
-let josePromise: Promise<JoseModule> | null = null;
-const getJose = () => (josePromise ??= import('jose'));
-
-@Controller('api/games')
-export class BulkImageGenController {
-  private readonly projectId: string;
-  private readonly jwksUrl: URL;
-  private jwks: ReturnType<JoseModule['createRemoteJWKSet']> | null = null;
-
+@Controller('api/bulk-image-gen')
+export class BulkImageGenRouter {
   constructor(
-    private readonly gamesService: GamesService,
+    private readonly bulkImageService: BulkImageGenService,
     private readonly bulkImageJobStore: BulkImageJobStore,
-    private readonly configService: ConfigService,
-  ) {
-    this.projectId = this.configService.get<string>('hexclaveProjectId') ?? '';
-    this.jwksUrl = new URL(
-      `https://api.hexclave.com/api/v1/projects/${this.projectId}/.well-known/jwks.json`,
+  ) {}
+
+  @Implement(contract.big.generateImage)
+  @UseGuards(HexclaveGuard)
+  generateImage() {
+    return implement(contract.big.generateImage).handler(async ({ input }) => {
+      const result = await this.bulkImageService.generateImage(input);
+
+      if (!result) {
+        throw new NotFoundException('Game not found');
+      }
+
+      return result;
+    });
+  }
+
+  @Implement(contract.big.bulkGenerateImages)
+  @UseGuards(HexclaveGuard)
+  bulkGenerateImages() {
+    return implement(contract.big.bulkGenerateImages).handler(
+      async ({ input }) => {
+        const { jobId, gamesQueued } =
+          await this.bulkImageService.bulkGenerateImages(input);
+
+        return { success: true, jobId, gamesQueued };
+      },
     );
   }
 
-  private async verifyToken(token: string): Promise<JWTPayload> {
-    if (!this.projectId) {
-      throw new UnauthorizedException('Hexclave is not configured');
-    }
+  @Implement(contract.big.getBulkJobStatus)
+  @UseGuards(HexclaveGuard)
+  getBulkJobStatus() {
+    return implement(contract.big.getBulkJobStatus).handler(
+      async ({ input }) => {
+        const job = await this.bulkImageService.getBulkJobStatus(input.jobId);
 
-    if (!this.jwks) {
-      const { createRemoteJWKSet } = await getJose();
-      this.jwks = createRemoteJWKSet(this.jwksUrl);
-    }
-
-    const { jwtVerify } = await getJose();
-
-    try {
-      const { payload } = await jwtVerify(token, this.jwks, {
-        audience: this.projectId,
-      });
-
-      return payload;
-    } catch {
-      throw new UnauthorizedException('Invalid Hexclave access token');
-    }
+        return { success: true, ...job };
+      },
+    );
   }
 
   @Sse('bulk-generate-images/:jobId/stream')
+  @UseGuards(HexclaveGuard)
   async stream(
     @Param('jobId') jobId: string,
-    @Query('token') token: string,
   ): Promise<Observable<MessageEvent>> {
-    if (!token) {
-      throw new UnauthorizedException('Missing token query parameter');
-    }
-
-    await this.verifyToken(token);
-
     // Check if job is already completed — emit immediately and close
-    let job: Awaited<ReturnType<GamesService['getBulkJobStatus']>>;
+    let job: Awaited<ReturnType<BulkImageGenService['getBulkJobStatus']>>;
+
     try {
-      job = await this.gamesService.getBulkJobStatus(jobId);
+      job = await this.bulkImageService.getBulkJobStatus(jobId);
     } catch {
       throw new UnauthorizedException(`Job ${jobId} not found`);
     }

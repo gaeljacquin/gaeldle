@@ -1,7 +1,7 @@
 'use client';
 
-import { ViewTransition } from 'react';
-import { useState } from 'react';
+import { useState, ViewTransition } from 'react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useSpecificationsGame } from '@/lib/hooks/use-specifications-game';
 import SpecificationsGrid from '@/components/specifications-grid';
 import GameSearch from '@/components/game-search';
@@ -9,14 +9,16 @@ import DevModeToggle from '@/components/dev-mode-toggle';
 import SpecificationsGameOver from '@/components/specifications-game-over';
 import { Button } from '@workspace/ui/button';
 import { Card, CardContent } from '@workspace/ui/card';
-import { getGameModeBySlug } from '@workspace/api-contract';
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';
 import { SPECIFICATIONS_MAX_ATTEMPTS } from '@workspace/shared';
 
 export default function Specifications() {
-  const gameMode = getGameModeBySlug('specifications');
+  const { data: gameMode } = useSuspenseQuery(
+    gameModeSlugQueryOptions('specifications'),
+  );
   const [showAnswerSpecs, setShowAnswerSpecs] = useState(true);
   const [isHintModalOpen, setIsHintModalOpen] = useState(false);
 

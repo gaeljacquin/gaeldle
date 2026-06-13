@@ -1,11 +1,12 @@
 'use client';
 
 import { ViewTransition } from 'react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useTimeline2Game } from '@/lib/hooks/use-timeline-2-game';
 import { Timeline2Card } from '@/components/timeline-2-card';
 import { Button } from '@workspace/ui/button';
 import { Card, CardContent } from '@workspace/ui/card';
-import { getGameModeBySlug } from '@workspace/api-contract';
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 import { useState, useRef } from 'react';
 import Attempts from '@/components/attempts';
 import { motion, useMotionValue } from 'motion/react';
@@ -15,7 +16,9 @@ import { TimelineCardSkeleton } from '@/components/timeline-card-skeleton';
 import { Timeline2CardSkeleton } from '@/components/timeline-2-card-skeleton';
 
 export default function Timeline2() {
-  const gameMode = getGameModeBySlug('timeline-2');
+  const { data: gameMode } = useSuspenseQuery(
+    gameModeSlugQueryOptions('timeline-2'),
+  );
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const timelineRef = useRef<HTMLDivElement>(null);

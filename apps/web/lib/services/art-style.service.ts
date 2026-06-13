@@ -25,7 +25,7 @@ export const artStyleDefault = (await getArtStyles()).find(
 
 export const artStyleDefaultValue = artStyleDefault.value;
 
-export type artStyleValuesEnumType = z.infer<typeof artStyleValuesEnum>;
+export type ArtStyleValuesEnumType = z.infer<typeof artStyleValuesEnum>;
 
 export const artStylesQueryOptions = {
   queryKey: ['artStyles'],

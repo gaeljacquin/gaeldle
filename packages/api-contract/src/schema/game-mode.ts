@@ -19,8 +19,8 @@ export const gameModeTable = pgTable(
     id: serial('id').primaryKey(),
     slug: varchar('slug', { length: 255 }).notNull().unique(),
     title: varchar('title', { length: 255 }).notNull(),
-    description: text('description'),
-    level: text('level'),
+    description: text('description').notNull().default('TBC'),
+    level: text('level').notNull(),
     ordinal: serial('ordinal').unique().notNull(),
     isActive: integer('is_active').notNull().default(0),
     isCoverArt: integer('is_cover_art').notNull().default(0),
@@ -34,7 +34,10 @@ export const gameModeTable = pgTable(
     }).defaultNow(),
   },
   (table) => [
-    check('game_mode_level_check', sql`${table.level} IN ('easy', 'medium', 'hard')`),
+    check(
+      'game_mode_level_check',
+      sql`${table.level} IN ('easy', 'medium', 'hard')`,
+    ),
     check('game_mode_active_check', sql`${table.isActive} IN (0, 1)`),
     check('game_mode_cover_art_check', sql`${table.isCoverArt} IN (0, 1)`),
     index('game_mode_slug_idx').on(table.slug),

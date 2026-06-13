@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useCoverArtGame } from '@/lib/hooks/use-cover-art-game';
 import ArtworkDisplay from '@/components/artwork-display';
 import CoverDisplay from '@/components/cover-display';
@@ -12,17 +13,19 @@ import { Card } from '@workspace/ui/card';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
 import {
-  getGameModeBySlug,
-  type CoverArtModeSlug,
-} from '@workspace/api-contract';
+  CoverArtSlugs,
+  gameModeSlugQueryOptions,
+} from '@/lib/services/game-mode.service';
 import { COVER_ART_MAX_ATTEMPTS } from '@workspace/shared';
 
 interface GameListPlusImageProps {
-  gameModeSlug: CoverArtModeSlug;
+  gameModeSlug: CoverArtSlugs[number];
 }
 
 export default function GameListPlusImage(props: GameListPlusImageProps) {
-  const gameMode = getGameModeBySlug(props.gameModeSlug);
+  const { data: gameMode } = useSuspenseQuery(
+    gameModeSlugQueryOptions(props.gameModeSlug),
+  );
   const [searchKey, setSearchKey] = useState(0);
 
   const {

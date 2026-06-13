@@ -43,3 +43,5 @@ export const HOLD_DURATION = 3000;
 export const COVER_ART_MAX_ATTEMPTS = 5;
 
 export const MIN_PREVIEW_PROMPT_ROWS = 4;
+
+export const GAME_MODE_SKELETON_COUNT = 6;

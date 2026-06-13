@@ -4,32 +4,32 @@ import { cn } from '@workspace/ui/lib/utils';
 import { ReactNode, ViewTransition } from 'react';
 
 export interface MenuCardProps {
-  id?: string;
-  href?: string;
+  slug?: string;
   title: string;
   description: string;
   icon?: TablerIcon;
-  gradient: string;
-  disabled?: boolean;
+  href?: string; // keeping this for now due to utility items
+  gradient?: string; // keeping this for now due to utility items
   badge?: ReactNode;
 }
 
 export function MenuCard({
-  id,
-  href,
+  slug,
   title,
   description,
   icon: Icon,
   gradient,
-  disabled = false,
   badge,
+  href,
 }: MenuCardProps) {
+  console.log(slug, gradient);
+  const resolvedHref = href ?? `/${slug}`;
+
   const cardContent = (
     <div
       className={cn(
         'group relative flex h-44 w-full flex-col justify-end overflow-hidden rounded-xl p-5 text-left transition-all duration-300',
         'hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]',
-        disabled && 'cursor-not-allowed opacity-70',
       )}
       style={{ background: `var(${gradient})` }}
     >
@@ -55,13 +55,9 @@ export function MenuCard({
     </div>
   );
 
-  if (disabled || !href) {
-    return <div className="group w-full">{cardContent}</div>;
-  }
-
   return (
-    <Link href={href} className="block w-full">
-      <ViewTransition name={id}>{cardContent}</ViewTransition>
+    <Link href={resolvedHref} className="block w-full">
+      <ViewTransition name={slug}>{cardContent}</ViewTransition>
     </Link>
   );
 }

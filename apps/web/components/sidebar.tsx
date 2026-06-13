@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { ElementType, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { UserButton, useUser } from '@hexclave/next';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import {
   IconDashboard,
   IconChevronDown,
@@ -20,11 +21,14 @@ import {
 import { cn } from '@workspace/ui/lib/utils';
 import { appInfo } from '@/lib/app-info';
 import { Separator } from '@workspace/ui/separator';
-import { gameModesOld } from '@workspace/api-contract';
+import {
+  GameMode,
+  gameModesQueryOptions,
+} from '@/lib/services/game-mode.service';
 
 interface SidebarLinkProps {
   href: string;
-  icon: React.ElementType;
+  icon: ElementType;
   label: string;
   isCollapsed: boolean;
   isActive: boolean;
@@ -63,7 +67,7 @@ interface SidebarGamesSectionProps {
 }
 
 interface SidebarGameLinkProps {
-  mode: (typeof gameModesOld)[number];
+  mode: GameMode;
   isCollapsed: boolean;
   pathname: string;
 }
@@ -73,10 +77,12 @@ function SidebarGameLink({
   isCollapsed,
   pathname,
 }: SidebarGameLinkProps) {
-  const isActive = pathname === mode.href;
+  const href = `/${mode.slug}`;
+  const isActive = pathname === href;
+
   return (
     <Link
-      href={mode.href}
+      href={href}
       className={cn(
         'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
         isCollapsed ? 'justify-center px-0' : null,
@@ -97,6 +103,8 @@ function SidebarGamesSection({
   onToggle,
   pathname,
 }: SidebarGamesSectionProps) {
+  const { data: gameModes } = useSuspenseQuery(gameModesQueryOptions);
+
   return (
     <div>
       <button
@@ -123,9 +131,9 @@ function SidebarGamesSection({
       </button>
       {isExpanded && (
         <div className={cn('mt-1 space-y-1', isCollapsed ? null : 'ml-4')}>
-          {gameModesOld.map((mode) => (
+          {gameModes.map((mode) => (
             <SidebarGameLink
-              key={mode.href}
+              key={mode.slug}
               mode={mode}
               isCollapsed={isCollapsed}
               pathname={pathname}

@@ -68,6 +68,7 @@ export class GamesService {
 
     if (immediate) {
       await this.performRefresh();
+
       return;
     }
 
@@ -276,7 +277,6 @@ export class GamesService {
 
     const currentExistsInDb = !!currentRow;
     const currentGameName = currentRow?.name ?? null;
-
     let replacementAlreadyInDb = false;
     let replacementExistsOnIgdb = false;
     let replacementGameName: string | null = null;
@@ -292,6 +292,7 @@ export class GamesService {
 
       try {
         const igdbGame = await this.igdbService.getGameById(replacement);
+
         if (igdbGame) {
           replacementExistsOnIgdb = true;
           replacementGameName = igdbGame.name ?? null;
@@ -363,8 +364,10 @@ export class GamesService {
     validPairs: Array<{ current: number; replacement: number }>,
   ): Promise<{ igdbGameMap: Map<number, GameInsert> } | ReplaceGameResult[]> {
     const replacementIds = validPairs.map((p) => p.replacement);
+
     try {
       const igdbGames = await this.igdbService.getGamesByIds(replacementIds);
+
       return {
         igdbGameMap: new Map(
           igdbGames.map((g) => [g.id, this.mapIgdbToGame(g)]),
@@ -375,6 +378,7 @@ export class GamesService {
         err instanceof Error
           ? `IGDB fetch failed: ${err.message}`
           : 'IGDB fetch failed';
+
       return validPairs.map((pair) => this.makeResult(pair, 'error', message));
     }
   }
@@ -398,6 +402,7 @@ export class GamesService {
           `No row found with igdb_id=${pair.current}`,
         ),
       );
+
       return false;
     }
 
@@ -407,6 +412,7 @@ export class GamesService {
       message: `Updated IGDB ID ${pair.current} → ${pair.replacement}`,
       gameName: updated[0].name ?? null,
     });
+
     return true;
   }
 
@@ -434,6 +440,7 @@ export class GamesService {
       };
 
     const igdbResult = await this.fetchIgdbGameMap(validPairs);
+
     if (Array.isArray(igdbResult)) {
       return { success: false, results: [...results, ...igdbResult] };
     }
@@ -454,6 +461,7 @@ export class GamesService {
         );
         continue;
       }
+
       try {
         anyUpdated = await this.updateGameHelper(gameData, pair, results);
       } catch (err) {
@@ -590,7 +598,6 @@ export class GamesService {
         await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
 
         const publicUrl = `${r2PublicUrl}/${key}`;
-
         const list = Array.isArray(game.imageGen)
           ? JSON.parse(JSON.stringify(game.imageGen))
           : [];

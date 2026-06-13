@@ -1,6 +1,7 @@
 'use client';
 
 import { ViewTransition } from 'react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useTimelineGame } from '@/lib/hooks/use-timeline-game';
 import { TimelineCard } from '@/components/timeline-card';
 import { Button } from '@workspace/ui/button';
@@ -26,7 +27,7 @@ import {
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
-import { type Game, getGameModeBySlug } from '@workspace/api-contract';
+import type { Game } from '@workspace/api-contract';
 import Attempts from '@/components/attempts';
 import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';
@@ -34,6 +35,7 @@ import TimelineDevToggle from '@/components/timeline-dev-toggle';
 import { cn } from '@workspace/ui/lib/utils';
 import { TimelineCardSkeleton } from '@/components/timeline-card-skeleton';
 import { TIMELINE_GAMES_COUNT, TIMELINE_MAX_ATTEMPTS } from '@workspace/shared';
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 
 const noOpStrategy: SortingStrategy = () => {
   return null;
@@ -88,7 +90,9 @@ function SortableCard({
 }
 
 export default function Timeline() {
-  const gameMode = getGameModeBySlug('timeline');
+  const { data: gameMode } = useSuspenseQuery(
+    gameModeSlugQueryOptions('timeline'),
+  );
   const [activeId, setActiveId] = useState<number | null>(null);
   const { swapMode, setSwapMode } = useTimelineStore();
 

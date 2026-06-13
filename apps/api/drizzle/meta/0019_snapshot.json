@@ -1,6 +1,6 @@
 {
-  "id": "0d1ca247-b260-41b2-b74e-4485592b0256",
-  "prevId": "d289a5f9-eed3-4c82-ac4b-facc28785c39",
+  "id": "34860863-7d47-4b2b-a553-b2eec3fb4209",
+  "prevId": "0d1ca247-b260-41b2-b74e-4485592b0256",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -493,7 +493,7 @@
           "name": "level",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "ordinal": {
           "name": "ordinal",
@@ -806,13 +806,14 @@
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'TBC'"
         },
         "level": {
           "name": "level",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "ordinal": {
           "name": "ordinal",

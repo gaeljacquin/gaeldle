@@ -40,7 +40,7 @@ export const gameModesOld: GameModeOld[] = [
     title: 'Cover Art',
     description: 'Identify the game from their cover art.',
     difficulty: 'Easy',
-    gradient: '--gradient-easy',
+    gradient: '--gradient-easy-1',
     href: '/cover-art',
   },
   {
@@ -84,12 +84,6 @@ export const gameModesOld: GameModeOld[] = [
     href: '/specifications',
   },
 ];
-
-export const GameModeSlugSchemaOld = z.enum(
-  gameModesOld.map((gameMode) => {
-    return gameMode.id;
-  }),
-);
 
 export const SyncOperationSchema = z.enum([
   'created',

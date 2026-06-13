@@ -15,7 +15,7 @@ const utilityItems = [
     title: 'Add Game',
     description: 'Add new games to the library by IGDB ID.',
     icon: IconCirclePlus,
-    gradient: '--gradient-easy',
+    gradient: '--gradient-easy-1',
   },
   {
     href: '/dashboard/image-gen',

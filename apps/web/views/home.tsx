@@ -1,8 +1,7 @@
 import { ViewTransition } from 'react';
-import { GameModeCard } from '@/components/game-mode-card';
-import { gameModesOld } from '@workspace/api-contract';
-import { appInfo } from '@/lib/app-info';
 import Link from 'next/link';
+import { appInfo } from '@/lib/app-info';
+import GameModesGrid from '@/components/game-mode-grid';
 import ViewportDebugger from '@/components/viewport-debugger';
 
 export default function HomeView() {
@@ -24,19 +23,7 @@ export default function HomeView() {
             </header>
 
             <section className="mb-14">
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {gameModesOld.map((gameMode) => (
-                  <GameModeCard
-                    key={gameMode.id}
-                    id={gameMode.id}
-                    href={gameMode.href}
-                    title={gameMode.title}
-                    description={gameMode.description}
-                    difficulty={gameMode.difficulty}
-                    gradient={gameMode.gradient}
-                  />
-                ))}
-              </div>
+              <GameModesGrid />
             </section>
 
             <div className="flex flex-col gap-4">

@@ -2,28 +2,28 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getBulkJobStatus } from '@/lib/services/game.service';
-import { JobStatusPlus } from '@workspace/api-contract';
+import { getImageGenStatus } from '@/lib/services/game.service';
+import { ImageGenStatusPlus } from '@workspace/api-contract';
 
-export interface BulkJobFailure {
+export interface ImageGenFailure {
   igdbId: number;
   gameName: string;
   error: string;
 }
 
-export interface BulkJobState {
-  status: JobStatusPlus;
+export interface ImageGenState {
+  status: ImageGenStatusPlus;
   total: number;
   processed: number;
   succeeded: number;
   failed: number;
-  failures: BulkJobFailure[];
+  failures: ImageGenFailure[];
   latestGame: string | null;
   processedGames: string[];
   isConnected: boolean;
 }
 
-const idleState: BulkJobState = {
+const idleState: ImageGenState = {
   status: 'idle',
   total: 0,
   processed: 0,
@@ -48,7 +48,7 @@ type ProgressEvent = {
 
 type CompletedEvent = {
   type: 'completed';
-  data: { succeeded: number; failed: number; failures: BulkJobFailure[] };
+  data: { succeeded: number; failed: number; failures: ImageGenFailure[] };
 };
 
 type ErrorEvent = {
@@ -56,31 +56,31 @@ type ErrorEvent = {
   data: { message: string };
 };
 
-type BulkJobEvent = ProgressEvent | CompletedEvent | ErrorEvent;
+type ImageGenEvent = ProgressEvent | CompletedEvent | ErrorEvent;
 
-interface UseBulkImageJobOptions {
-  jobId: string | null;
+interface UseImageGenOptions {
+  imageGenId: string | null;
   enabled?: boolean;
   accessToken?: string | null;
 }
 
-export function useBulkImageJob({
-  jobId,
+export function useImageGen({
+  imageGenId,
   enabled = true,
   accessToken,
-}: UseBulkImageJobOptions): BulkJobState {
-  const [state, setState] = useState<BulkJobState>(idleState);
+}: UseImageGenOptions): ImageGenState {
+  const [state, setState] = useState<ImageGenState>(idleState);
   const [sseConnected, setSseConnected] = useState(false);
   const [sseFailed, setSseFailed] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
   const isTerminalRef = useRef(false);
   const isTerminal = state.status === 'completed' || state.status === 'failed';
 
-  // Polling fallback: used when SSE fails or job is already terminal
+  // Polling fallback: used when SSE fails or generation is already terminal
   const { data: polledJob } = useQuery({
-    queryKey: ['bulk-job-status', jobId],
-    queryFn: () => getBulkJobStatus(jobId!),
-    enabled: !!jobId && enabled && (sseFailed || isTerminal),
+    queryKey: ['image-gen-status', imageGenId],
+    queryFn: () => getImageGenStatus(imageGenId!),
+    enabled: !!imageGenId && enabled && (sseFailed || isTerminal),
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       return status === 'completed' || status === 'failed' ? false : 3000;
@@ -88,18 +88,18 @@ export function useBulkImageJob({
   });
 
   // Derive polled state without an effect — avoids synchronous setState inside useEffect
-  const polledState = useMemo<BulkJobState | null>(() => {
+  const polledState = useMemo<ImageGenState | null>(() => {
     if (!polledJob || sseConnected) {
       return null;
     }
 
     return {
-      status: polledJob.status as JobStatusPlus,
+      status: polledJob.status as ImageGenStatusPlus,
       total: polledJob.total,
       processed: polledJob.processed,
       succeeded: polledJob.succeeded,
       failed: polledJob.failed,
-      failures: polledJob.failures as BulkJobFailure[],
+      failures: polledJob.failures as ImageGenFailure[],
       latestGame: null,
       processedGames: [],
       isConnected: false,
@@ -117,11 +117,11 @@ export function useBulkImageJob({
 
   // SSE connection
   useEffect(() => {
-    if (!jobId || !enabled || !accessToken || isTerminalRef.current) {
+    if (!imageGenId || !enabled || !accessToken || isTerminalRef.current) {
       return;
     }
 
-    const url = `${process.env.apiUrl}/api/games/bulk-generate-images/${jobId}/stream?token=${encodeURIComponent(accessToken)}`;
+    const url = `${process.env.apiUrl}/api/image-gen/generate-images/${imageGenId}/stream?token=${encodeURIComponent(accessToken)}`;
     const es = new EventSource(url);
 
     eventSourceRef.current = es;
@@ -132,9 +132,9 @@ export function useBulkImageJob({
     };
 
     es.onmessage = (ev: MessageEvent<string>) => {
-      let event: BulkJobEvent;
+      let event: ImageGenEvent;
       try {
-        event = JSON.parse(ev.data) as BulkJobEvent;
+        event = JSON.parse(ev.data) as ImageGenEvent;
       } catch {
         return;
       }
@@ -184,9 +184,9 @@ export function useBulkImageJob({
     };
 
     return closeSSE;
-  }, [jobId, enabled, accessToken, closeSSE]);
+  }, [imageGenId, enabled, accessToken, closeSSE]);
 
-  if (!jobId || !enabled) {
+  if (!imageGenId || !enabled) {
     return idleState;
   }
 

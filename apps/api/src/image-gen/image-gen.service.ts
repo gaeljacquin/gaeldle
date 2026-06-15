@@ -3,25 +3,23 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, desc, and } from 'drizzle-orm';
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { randomUUID } from 'node:crypto';
 import { DatabaseService } from '@/db/database.service';
 import {
   games,
-  bigJobTable,
+  domainEvents,
   type Game,
   gameObject,
   artStyles as artStylesView,
   type ArtStyleValue,
-  GameInsert,
-  JobStatus,
+  ImageGenStatus,
 } from '@workspace/api-contract';
-import { type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
-import { BulkImageJobStore } from '@/bulk-image-gen/bulk-image-job.store';
+import { ImageGenStore } from '@/image-gen/image-gen.store';
 import type { AppConfiguration } from '@/config/configuration';
 import { IMAGE_GEN_DIR, IMAGE_PROMPT_SUFFIX } from '@workspace/shared';
 import { GamesService } from '@/games/games.service';
@@ -31,37 +29,56 @@ interface GenerateImageInput {
   includeStoryline?: boolean;
   includeGenres?: boolean;
   includeThemes?: boolean;
-  artStyle?: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
+  artStyle?: ArtStyleValue;
 }
 
 @Injectable()
-export class BulkImageGenService {
+export class ImageGenService {
   constructor(
     private readonly gamesService: GamesService,
     private readonly databaseService: DatabaseService,
     private readonly aiService: AiService,
     private readonly s3Service: S3Service,
-    private readonly bulkImageJobStore: BulkImageJobStore,
+    private readonly imageGenStore: ImageGenStore,
     private readonly configService: ConfigService<AppConfiguration>,
   ) {}
 
-  async bulkGenerateImages(params: {
-    numGames: number;
-    artStyle: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
-    includeStoryline: boolean;
-    includeGenres: boolean;
-    includeThemes: boolean;
-  }): Promise<{ jobId: string; gamesQueued: number }> {
-    const [activeJob] = await this.databaseService.db
-      .select({ id: bigJobTable.id })
-      .from(bigJobTable)
-      .where(sql`${bigJobTable.status} IN ('pending', 'running')`)
+  async generateImages(
+    params: {
+      numGames: number;
+      artStyle: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with imageGen
+      includeStoryline: boolean;
+      includeGenres: boolean;
+      includeThemes: boolean;
+    },
+    actorId: string,
+  ): Promise<{ imageGenId: string; gamesQueued: number }> {
+    // Check if an image generation process is already active
+    const [latestStarted] = await this.databaseService.db
+      .select()
+      .from(domainEvents)
+      .where(eq(domainEvents.eventType, 'image_gen.started'))
+      .orderBy(desc(domainEvents.occurredAt))
       .limit(1);
 
-    if (activeJob) {
-      throw new ConflictException(
-        'A bulk image generation job is already active. Please wait for it to finish.',
-      );
+    if (latestStarted) {
+      const payload = latestStarted.payload as { imageGenId: string };
+      const [finished] = await this.databaseService.db
+        .select()
+        .from(domainEvents)
+        .where(
+          and(
+            eq(domainEvents.eventType, 'image_gen.finished'),
+            sql`${domainEvents.payload}->>'imageGenId' = ${payload.imageGenId}`,
+          ),
+        )
+        .limit(1);
+
+      if (!finished) {
+        throw new ConflictException(
+          'An image generation is already active. Please wait for it to finish.',
+        );
+      }
     }
 
     // Query games where ai_image_url IS NULL
@@ -79,51 +96,59 @@ export class BulkImageGenService {
       );
     }
 
-    const jobId = randomUUID();
+    const imageGenId = randomUUID();
 
-    // Insert the job record
-    await this.databaseService.db.insert(bigJobTable).values({
-      jobId,
-      status: 'pending',
-      total,
-      processed: 0,
-      succeeded: 0,
-      failed: 0,
-      failures: [],
-      params,
+    // Insert the started domain event
+    await this.databaseService.db.insert(domainEvents).values({
+      eventType: 'image_gen.started',
+      actorId,
+      payload: {
+        imageGenId,
+        total,
+        params,
+      },
     });
 
     // Run the generation loop asynchronously (fire-and-forget)
-    this.runGenerationLoop(jobId, pendingGames, params).catch((err) => {
-      console.error(`[BulkImageGen] Fatal error for job ${jobId}:`, err);
-    });
+    this.runGenerationLoop(imageGenId, pendingGames, params, actorId).catch(
+      (err) => {
+        console.error(
+          `[ImageGen] Fatal error for generation ${imageGenId}:`,
+          err,
+        );
+      },
+    );
 
-    return { jobId, gamesQueued: total };
+    return { imageGenId, gamesQueued: total };
   }
 
   private async runGenerationLoop(
-    jobId: string,
+    imageGenId: string,
     pendingGames: Game[],
     params: {
       numGames: number;
-      artStyle: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
+      artStyle: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with imageGen
       includeStoryline: boolean;
       includeGenres: boolean;
       includeThemes: boolean;
     },
+    actorId: string,
   ): Promise<void> {
     const total = pendingGames.length;
     const failures: Array<{ igdbId: number; gameName: string; error: string }> =
       [];
-    const { artStyle: artStyleValue } = params; // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
+    const { artStyle: artStyleValue } = params;
     let processed = 0;
     let succeeded = 0;
     let failed = 0;
 
-    await this.databaseService.db
-      .update(bigJobTable)
-      .set({ status: 'running', startedAt: new Date() })
-      .where(eq(bigJobTable.jobId, jobId));
+    // Set initial progress in the in-memory store
+    this.imageGenStore.setProgress(imageGenId, {
+      processed,
+      succeeded,
+      failed,
+      failures,
+    });
 
     const artStyle = await this.databaseService.db
       .select({
@@ -207,19 +232,22 @@ export class BulkImageGenService {
         });
 
         console.error(
-          `[BulkImageGen] Failed to process game ${game.name} (${game.igdbId}):`,
+          `[ImageGen] Failed to process game ${game.name} (${game.igdbId}):`,
           errorMessage,
         );
       }
 
       processed++;
 
-      await this.databaseService.db
-        .update(bigJobTable)
-        .set({ processed, succeeded, failed, failures })
-        .where(eq(bigJobTable.jobId, jobId));
+      // Update progress in the store
+      this.imageGenStore.setProgress(imageGenId, {
+        processed,
+        succeeded,
+        failed,
+        failures,
+      });
 
-      this.bulkImageJobStore.emit(jobId, {
+      this.imageGenStore.emit(imageGenId, {
         type: 'progress',
         data: {
           processed,
@@ -233,107 +261,145 @@ export class BulkImageGenService {
 
     const finalStatus = failed === total ? 'failed' : 'completed';
 
-    await this.databaseService.db
-      .update(bigJobTable)
-      .set({
+    // Insert finished domain event
+    await this.databaseService.db.insert(domainEvents).values({
+      eventType: 'image_gen.finished',
+      actorId,
+      payload: {
+        imageGenId,
         status: finalStatus,
-        completedAt: new Date(),
+        total,
         processed,
         succeeded,
         failed,
         failures,
-      })
-      .where(eq(bigJobTable.jobId, jobId));
+      },
+    });
 
-    this.bulkImageJobStore.emit(jobId, {
+    this.imageGenStore.emit(imageGenId, {
       type: 'completed',
       data: { succeeded, failed, failures },
     });
 
+    // Clean up store for this generation
+    this.imageGenStore.destroy(imageGenId);
+
     await this.gamesService.refreshAllGamesView();
   }
 
-  async getBulkJobStatus(jobId: string) {
-    const [job] = await this.databaseService.db
+  async getImageGenStatus(imageGenId: string) {
+    const [startedEvent] = await this.databaseService.db
       .select()
-      .from(bigJobTable)
-      .where(eq(bigJobTable.jobId, jobId))
+      .from(domainEvents)
+      .where(
+        and(
+          eq(domainEvents.eventType, 'image_gen.started'),
+          sql`${domainEvents.payload}->>'imageGenId' = ${imageGenId}`,
+        ),
+      )
       .limit(1);
 
-    if (!job) {
-      throw new NotFoundException(`Bulk image job ${jobId} not found`);
+    if (!startedEvent) {
+      throw new NotFoundException(`Image generation ${imageGenId} not found`);
     }
 
-    return {
-      jobId: job.jobId,
-      status: job.status as JobStatus,
-      total: job.total,
-      processed: job.processed,
-      succeeded: job.succeeded,
-      failed: job.failed,
-      failures: (job.failures ?? []) as Array<{
-        igdbId: number;
-        gameName: string;
-        error: string;
-      }>,
-      params: job.params,
-      startedAt: job.startedAt,
-      completedAt: job.completedAt,
-      createdAt: job.createdAt!,
-    };
-  }
-
-  private mapIgdbToGame(igdbGame: IgdbGame): GameInsert {
-    const formatUrl = (url?: string) => {
-      if (!url) {
-        return undefined;
-      }
-
-      const fullUrl = url.startsWith('//') ? `https:${url}` : url;
-
-      return fullUrl.replace('t_thumb', 't_720p');
+    const startPayload = startedEvent.payload as {
+      imageGenId: string;
+      total: number;
+      params: any;
     };
 
+    const [finishedEvent] = await this.databaseService.db
+      .select()
+      .from(domainEvents)
+      .where(
+        and(
+          eq(domainEvents.eventType, 'image_gen.finished'),
+          sql`${domainEvents.payload}->>'imageGenId' = ${imageGenId}`,
+        ),
+      )
+      .limit(1);
+
+    if (finishedEvent) {
+      const finishPayload = finishedEvent.payload as {
+        status: 'completed' | 'failed';
+        total: number;
+        processed: number;
+        succeeded: number;
+        failed: number;
+        failures: Array<{ igdbId: number; gameName: string; error: string }>;
+      };
+
+      return {
+        imageGenId,
+        status: finishPayload.status as ImageGenStatus,
+        total: finishPayload.total,
+        processed: finishPayload.processed,
+        succeeded: finishPayload.succeeded,
+        failed: finishPayload.failed,
+        failures: (finishPayload.failures ?? []) as Array<{
+          igdbId: number;
+          gameName: string;
+          error: string;
+        }>,
+        params: startPayload.params,
+        startedAt: startedEvent.occurredAt,
+        completedAt: finishedEvent.occurredAt,
+        createdAt: startedEvent.occurredAt!,
+      };
+    }
+
+    // Check if it's currently running in memory
+    const activeProgress = this.imageGenStore.getProgress(imageGenId);
+
+    if (activeProgress) {
+      return {
+        imageGenId,
+        status: 'running' as ImageGenStatus,
+        total: startPayload.total,
+        processed: activeProgress.processed,
+        succeeded: activeProgress.succeeded,
+        failed: activeProgress.failed,
+        failures: activeProgress.failures,
+        params: startPayload.params,
+        startedAt: startedEvent.occurredAt,
+        completedAt: null,
+        createdAt: startedEvent.occurredAt!,
+      };
+    }
+
+    // Fallback: If not running in memory and no finished event, treat as failed/stopped
     return {
-      igdbId: igdbGame.id,
-      name: igdbGame.name,
-      summary: igdbGame.summary,
-      storyline: igdbGame.storyline,
-      firstReleaseDate: igdbGame.first_release_date,
-      imageUrl: formatUrl(igdbGame.cover?.url),
-      artworks: igdbGame.artworks?.map((art) => ({
-        ...art,
-        url: formatUrl(art.url),
-      })),
-      platforms: igdbGame.platforms?.map((p) => p.name),
-      genres: igdbGame.genres?.map((g) => g.name),
-      themes: igdbGame.themes?.map((t) => t.name),
-      gameModes: igdbGame.game_modes?.map((m) => m.name),
-      playerPerspectives: igdbGame.player_perspectives?.map((p) => p.name),
-      gameEngines: igdbGame.game_engines?.map((e) => e.name),
-      involvedCompanies: igdbGame.involved_companies?.map((c) => ({
-        name: c.company?.name,
-        developer: c.developer,
-        publisher: c.publisher,
-      })),
-      keywords: igdbGame.keywords?.map((k) => k.name),
-      franchises: igdbGame.franchises?.map((f) => f.name),
-      releaseDates: igdbGame.release_dates?.map((rd) => ({
-        date: rd.date,
-        platform: rd.platform?.name,
-      })),
+      imageGenId,
+      status: 'failed' as ImageGenStatus,
+      total: startPayload.total,
+      processed: startPayload.total,
+      succeeded: 0,
+      failed: startPayload.total,
+      failures: [
+        {
+          igdbId: 0,
+          gameName: 'All games',
+          error: 'Generation stopped or server restarted',
+        },
+      ],
+      params: startPayload.params,
+      startedAt: startedEvent.occurredAt,
+      completedAt: startedEvent.occurredAt,
+      createdAt: startedEvent.occurredAt!,
     };
   }
 
   async generateImage(
     input: GenerateImageInput,
+    actorId: string,
   ): Promise<{ success: boolean; url: string; data: Game } | null> {
     const {
       igdbId,
       includeStoryline,
       includeGenres,
       includeThemes,
-      artStyle: artStyleValue, // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
+      artStyle: artStyleValue,
     } = input;
     const game = await this.gamesService.getGameByIgdbId(igdbId);
     const artStyles = await this.databaseService.db
@@ -357,6 +423,7 @@ export class BulkImageGenService {
       },
       artStyleDescription!,
     );
+
     const rawBuffer = await this.aiService.generateImage(prompt);
     const imageBuffer = await sharp(rawBuffer).jpeg({ quality: 85 }).toBuffer();
     const timestamp = Date.now();
@@ -399,6 +466,24 @@ export class BulkImageGenService {
     if (!updatedGame) {
       throw new NotFoundException('Failed to update game record');
     }
+
+    // Insert the domain event for single image generation
+    await this.databaseService.db.insert(domainEvents).values({
+      eventType: 'image_gen.generated',
+      actorId,
+      payload: {
+        igdbId,
+        gameId: game.id,
+        url: publicUrl,
+        prompt,
+        artStyle: artStyleValue,
+        params: {
+          includeStoryline: includeStoryline ?? false,
+          includeGenres: includeGenres ?? false,
+          includeThemes: includeThemes ?? false,
+        },
+      },
+    });
 
     return { success: true, url: publicUrl, data: updatedGame };
   }

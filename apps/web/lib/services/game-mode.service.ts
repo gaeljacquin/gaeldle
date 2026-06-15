@@ -2,36 +2,44 @@ import { gameModeSelectSchema } from '@workspace/api-contract';
 import { z } from 'zod';
 
 export const getGameModes = async () => {
-  const res = await fetch('/api/game-modes');
+  try {
+    const res = await fetch('/api/game-modes');
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch game modes');
+    if (!res.ok) {
+      throw new Error('Failed to fetch game modes');
+    }
+
+    const gameModes = z.array(gameModeSelectSchema).parse(await res.json());
+    const levelCounts: Record<string, number> = {};
+
+    return gameModes.map((gameMode) => {
+      const { level } = gameMode;
+      levelCounts[level] ??= 1;
+      const gradient = `--gradient-${level}-${levelCounts[level]}`;
+      levelCounts[level]++;
+
+      return { ...gameMode, gradient };
+    });
+  } catch (e) {
+    console.warn('Failed to fetch game modes:', (e as Error).message);
+
+    return [];
   }
-
-  const gameModes = z.array(gameModeSelectSchema).parse(await res.json());
-  const levelCounts: Record<string, number> = {};
-
-  return gameModes.map((gameMode) => {
-    const { level } = gameMode;
-    levelCounts[level] ??= 1;
-    const gradient = `--gradient-${level}-${levelCounts[level]}`;
-    levelCounts[level]++;
-
-    return { ...gameMode, gradient };
-  });
 };
 
 export const gameModeLevels = (await getGameModes()).map(
   (gameMode) => gameMode.title,
 );
 
-export const gameModeLevelsEnum = z.enum(gameModeLevels);
+export const gameModeLevelsEnum = z.enum(
+  gameModeLevels as [string, ...string[]],
+);
 
 export const coverArtSlugs = (await getGameModes())
   .filter((gameMode) => gameMode.isCoverArt === 1)
   .map((gameMode) => gameMode.slug);
 
-export const coverArtSlugsEnum = z.enum(coverArtSlugs);
+export const coverArtSlugsEnum = z.enum(coverArtSlugs as [string, ...string[]]);
 
 export type GameMode = Awaited<ReturnType<typeof getGameModes>>[number];
 export type GameModeLevelsEnumType = z.infer<typeof gameModeLevelsEnum>;

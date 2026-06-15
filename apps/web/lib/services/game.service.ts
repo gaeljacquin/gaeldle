@@ -160,25 +160,30 @@ export async function generateImage(
     artStyleValue: z.infer<typeof artStyleValuesEnum>;
   },
 ) {
-  const result = await orpcClient.big.generateImage({ igdbId, ...options });
+  const { artStyleValue, ...rest } = options;
+  const result = await orpcClient.imageGen.generateImage({
+    igdbId,
+    artStyle: artStyleValue,
+    ...rest,
+  });
 
   return result;
 }
 
-export async function bulkGenerateImages(params: {
+export async function generateImages(params: {
   numGames: number;
-  artStyle: z.infer<typeof artStyleValuesEnum>; // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
+  artStyle: z.infer<typeof artStyleValuesEnum>;
   includeStoryline: boolean;
   includeGenres: boolean;
   includeThemes: boolean;
 }) {
-  const result = await orpcClient.big.bulkGenerateImages(params);
+  const result = await orpcClient.imageGen.generateImages(params);
 
   return result;
 }
 
-export async function getBulkJobStatus(jobId: string) {
-  const result = await orpcClient.big.getBulkJobStatus({ jobId });
+export async function getImageGenStatus(imageGenId: string) {
+  const result = await orpcClient.imageGen.getImageGenStatus({ imageGenId });
 
   return result;
 }

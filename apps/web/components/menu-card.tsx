@@ -22,7 +22,6 @@ export function MenuCard({
   badge,
   href,
 }: MenuCardProps) {
-  console.log(slug, gradient);
   const resolvedHref = href ?? `/${slug}`;
 
   const cardContent = (

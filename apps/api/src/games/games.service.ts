@@ -24,7 +24,7 @@ interface GenerateImageInput {
   includeStoryline?: boolean;
   includeGenres?: boolean;
   includeThemes?: boolean;
-  artStyle?: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
+  artStyle?: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with imageGen
 }
 
 @Injectable()
@@ -523,7 +523,7 @@ export class GamesService {
       includeStoryline,
       includeGenres,
       includeThemes,
-      artStyle: artStyleValue, // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
+      artStyle: artStyleValue, // effectively artStyleValue, not renaming this to be consistent with imageGen
     } = input;
     const game = await this.getGameByIgdbId(igdbId);
     const artStyles = await this.databaseService.db

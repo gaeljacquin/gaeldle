@@ -9,17 +9,17 @@ import {
   IMAGE_GEN_MAX,
 } from '@workspace/shared';
 import {
-  activeJobStatus,
-  jobStatusPlus,
+  activeImageGenStatus,
+  imageGenStatusPlus,
   type ArtStyle,
-  type JobStatusPlus,
+  type ImageGenStatusPlus,
 } from '@workspace/api-contract';
 import {
   artStyleDefault,
   artStylesQueryOptions,
 } from '@/lib/services/art-style.service';
-import { bulkGenerateImages } from '@/lib/services/game.service';
-import { useBulkImageJob } from '@/lib/hooks/use-bulk-image-job';
+import { generateImages } from '@/lib/services/game.service';
+import { useImageGen } from '@/lib/hooks/use-image-gen';
 import { Button } from '@workspace/ui/button';
 import {
   DropdownMenu,
@@ -53,23 +53,26 @@ import { cn } from '@workspace/ui/lib/utils';
 import { toast } from 'sonner';
 import { DashboardHeader } from '@/components/dashboard-header';
 
-function StatusBadge({ status }: { status: JobStatusPlus }) {
-  const { label, variant } = jobStatusPlus[status];
+function StatusBadge({ status }: { status: ImageGenStatusPlus }) {
+  const { label, variant } = imageGenStatusPlus[status];
 
   return <Badge variant={variant}>{label}</Badge>;
 }
 
-interface ActiveJobPanelProps {
-  jobId: string;
+interface ActiveImageGenPanelProps {
+  imageGenId: string;
   accessToken: string | null;
 }
 
-function ActiveJobPanel({ jobId, accessToken }: ActiveJobPanelProps) {
-  const jobState = useBulkImageJob({ jobId, enabled: true, accessToken });
+function ActiveImageGenPanel({
+  imageGenId,
+  accessToken,
+}: ActiveImageGenPanelProps) {
+  const imageGenState = useImageGen({ imageGenId, enabled: true, accessToken });
 
   const progressPct =
-    jobState.total > 0
-      ? Math.round((jobState.processed / jobState.total) * 100)
+    imageGenState.total > 0
+      ? Math.round((imageGenState.processed / imageGenState.total) * 100)
       : 0;
 
   return (
@@ -80,22 +83,27 @@ function ActiveJobPanel({ jobId, accessToken }: ActiveJobPanelProps) {
             size={16}
             className={cn(
               'text-primary',
-              jobState.isConnected && 'animate-spin',
+              imageGenState.isConnected && 'animate-spin',
             )}
             aria-hidden="true"
           />
-          Active Job
+          Active Image Generation
         </CardTitle>
         <CardDescription>
-          Job ID: <span className="font-mono text-[10px]">{jobId}</span>
+          Generation ID:{' '}
+          <span className="font-mono text-[10px]">{imageGenId}</span>
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4" aria-live="polite" aria-label="Job progress">
+        <div
+          className="space-y-4"
+          aria-live="polite"
+          aria-label="Generation progress"
+        >
           {/* Status */}
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Status</span>
-            <StatusBadge status={jobState.status} />
+            <StatusBadge status={imageGenState.status} />
           </div>
 
           {/* Progress bar */}
@@ -103,7 +111,8 @@ function ActiveJobPanel({ jobId, accessToken }: ActiveJobPanelProps) {
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>Progress</span>
               <span>
-                {jobState.processed} / {jobState.total} ({progressPct}%)
+                {imageGenState.processed} / {imageGenState.total} ({progressPct}
+                %)
               </span>
             </div>
             <div className="h-2 w-full bg-muted overflow-hidden">
@@ -126,7 +135,7 @@ function ActiveJobPanel({ jobId, accessToken }: ActiveJobPanelProps) {
                 <span className="text-muted-foreground">Succeeded</span>
               </div>
               <span className="font-medium font-mono">
-                {jobState.succeeded}
+                {imageGenState.succeeded}
               </span>
             </div>
             <div className="flex items-center justify-between text-xs">
@@ -138,47 +147,51 @@ function ActiveJobPanel({ jobId, accessToken }: ActiveJobPanelProps) {
                 />
                 <span className="text-muted-foreground">Failed</span>
               </div>
-              <span className="font-medium font-mono">{jobState.failed}</span>
+              <span className="font-medium font-mono">
+                {imageGenState.failed}
+              </span>
             </div>
           </div>
 
           {/* Latest game (while running) */}
-          {jobState.latestGame && (
+          {imageGenState.latestGame && (
             <div className="text-xs text-muted-foreground border-t pt-3">
               Latest:{' '}
               <span className="font-medium text-foreground">
-                {jobState.latestGame}
+                {imageGenState.latestGame}
               </span>
             </div>
           )}
 
           {/* Processed games list (after completion) */}
-          {jobState.processedGames.length > 0 && !jobState.latestGame && (
-            <details className="text-xs border-t pt-3" open>
-              <summary className="cursor-pointer text-muted-foreground mb-2">
-                {jobState.processedGames.length} game
-                {jobState.processedGames.length === 1 ? '' : 's'} processed
-              </summary>
-              <ul className="space-y-0.5 max-h-40 overflow-y-auto">
-                {jobState.processedGames.map((name, i) => (
-                  <li key={i + 1} className="text-foreground py-0.5">
-                    {name}
-                  </li>
-                ))}
-              </ul>
-            </details>
-          )}
+          {imageGenState.processedGames.length > 0 &&
+            !imageGenState.latestGame && (
+              <details className="text-xs border-t pt-3" open>
+                <summary className="cursor-pointer text-muted-foreground mb-2">
+                  {imageGenState.processedGames.length} game
+                  {imageGenState.processedGames.length === 1 ? '' : 's'}{' '}
+                  processed
+                </summary>
+                <ul className="space-y-0.5 max-h-40 overflow-y-auto">
+                  {imageGenState.processedGames.map((name, i) => (
+                    <li key={i + 1} className="text-foreground py-0.5">
+                      {name}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
 
           {/* Failures list */}
-          {jobState.failures.length > 0 && (
+          {imageGenState.failures.length > 0 && (
             <details className="text-xs border-t pt-3">
               <summary className="cursor-pointer text-muted-foreground flex items-center gap-1">
                 <IconAlertTriangle size={12} aria-hidden="true" />
-                {jobState.failures.length} failure
-                {jobState.failures.length === 1 ? '' : 's'}
+                {imageGenState.failures.length} failure
+                {imageGenState.failures.length === 1 ? '' : 's'}
               </summary>
               <ul className="mt-2 space-y-1 max-h-32 overflow-y-auto">
-                {jobState.failures.map((f) => (
+                {imageGenState.failures.map((f) => (
                   <li key={f.igdbId} className="text-destructive">
                     <span className="font-medium">{f.gameName}</span>: {f.error}
                   </li>
@@ -192,11 +205,11 @@ function ActiveJobPanel({ jobId, accessToken }: ActiveJobPanelProps) {
   );
 }
 
-export default function BulkImageGen() {
+export default function ImageGenAdmin() {
   const user = useUser({ or: 'redirect' });
 
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [activeImageGenId, setActiveImageGenId] = useState<string | null>(null);
   const [numGames, setNumGames] = useState(DEFAULT_IMAGE_GEN_NUM);
   const [artStyle, setArtStyle] = useState<ArtStyle>(artStyleDefault);
   const [includeStoryline, setIncludeStoryline] = useState(false);
@@ -218,29 +231,31 @@ export default function BulkImageGen() {
     };
   }, [user]);
 
-  const jobState = useBulkImageJob({
-    jobId: activeJobId,
-    enabled: !!activeJobId,
+  const imageGenState = useImageGen({
+    imageGenId: activeImageGenId,
+    enabled: !!activeImageGenId,
     accessToken,
   });
-  const isJobActive =
-    activeJobId !== null && jobState.status in activeJobStatus;
+  const isImageGenActive =
+    activeImageGenId !== null && imageGenState.status in activeImageGenStatus;
 
   const startMutation = useMutation({
     mutationFn: () =>
-      bulkGenerateImages({
+      generateImages({
         numGames,
-        artStyle: artStyle?.value, // effectively artStyleValue, not renaming this to be consistent with bulkImageGenJobs
+        artStyle: artStyle?.value,
         includeStoryline,
         includeGenres,
         includeThemes,
       }),
     onSuccess: (result) => {
-      setActiveJobId(result.jobId);
-      toast.success(`Job started — ${result.gamesQueued} games queued`);
+      setActiveImageGenId(result.imageGenId);
+      toast.success(
+        `Image generation started — ${result.gamesQueued} games queued`,
+      );
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? 'Failed to start bulk generation');
+      toast.error(err.message ?? 'Failed to start image generation');
     },
   });
 
@@ -255,7 +270,7 @@ export default function BulkImageGen() {
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader title="Bulk Image Generation" icon={IconRobotFace} />
+        <DashboardHeader title="Image Generation" icon={IconRobotFace} />
 
         <div className="container mx-auto px-4 py-8 flex-1">
           <div className="max-w-lg space-y-6">
@@ -263,7 +278,7 @@ export default function BulkImageGen() {
             <Card>
               <CardContent>
                 <fieldset
-                  disabled={startMutation.isPending || isJobActive}
+                  disabled={startMutation.isPending || isImageGenActive}
                   className="space-y-5"
                 >
                   {/* Number of games */}
@@ -366,7 +381,7 @@ export default function BulkImageGen() {
                   {/* Start button */}
                   <Button
                     onClick={() => startMutation.mutate()}
-                    disabled={startMutation.isPending || isJobActive}
+                    disabled={startMutation.isPending || isImageGenActive}
                     className="cursor-pointer flex items-center gap-2"
                   >
                     {startMutation.isPending ? (
@@ -378,22 +393,27 @@ export default function BulkImageGen() {
                     ) : (
                       <IconPlayerPlay size={16} aria-hidden="true" />
                     )}
-                    {isJobActive ? 'Job already running' : 'Start Generation'}
+                    {isImageGenActive
+                      ? 'Generation already running'
+                      : 'Start Generation'}
                   </Button>
 
-                  {isJobActive && (
+                  {isImageGenActive && (
                     <p className="text-xs text-muted-foreground">
-                      A job is currently active. Wait for it to finish before
-                      starting a new one.
+                      An image generation is currently active. Wait for it to
+                      finish before starting a new one.
                     </p>
                   )}
                 </fieldset>
               </CardContent>
             </Card>
 
-            {/* Active job panel */}
-            {activeJobId && (
-              <ActiveJobPanel jobId={activeJobId} accessToken={accessToken} />
+            {/* Active generation panel */}
+            {activeImageGenId && (
+              <ActiveImageGenPanel
+                imageGenId={activeImageGenId}
+                accessToken={accessToken}
+              />
             )}
           </div>
         </div>

@@ -118,7 +118,9 @@ export const jobStatusPlus = {
 
 export const activeJobStatus = (
   Object.keys(jobStatusPlus) as Array<keyof typeof jobStatusPlus>
-).filter((key): key is JobStatus => key in jobStatus && jobStatusPlus[key].active);
+).filter(
+  (key): key is JobStatus => key in jobStatus && jobStatusPlus[key].active,
+);
 
 export type JobStatus = keyof typeof jobStatus;
 export type JobStatusPlus = keyof typeof jobStatusPlus;

@@ -35,10 +35,30 @@ export class HexclaveGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const token = this.extractToken(request);
+    const rawToken = this.extractToken(request);
 
-    if (!token) {
+    if (!rawToken) {
+      console.error('[HexclaveGuard] Missing token');
       throw new UnauthorizedException('Missing Hexclave access token');
+    }
+
+    let token: string = rawToken;
+
+    if (token.startsWith('stackauth_')) {
+      try {
+        const base64Part = token.slice('stackauth_'.length);
+        const jsonStr = Buffer.from(base64Part, 'base64').toString('utf8');
+        const parsed = JSON.parse(jsonStr);
+        if (parsed && typeof parsed.accessToken === 'string') {
+          token = parsed.accessToken;
+        }
+      } catch (e) {
+        console.error(
+          '[HexclaveGuard] Failed to parse stackauth token payload:',
+          e,
+        );
+        throw new UnauthorizedException('Invalid Hexclave session format');
+      }
     }
 
     try {
@@ -54,7 +74,12 @@ export class HexclaveGuard implements CanActivate {
       request.hexclave = payload;
 
       return true;
-    } catch {
+    } catch (err) {
+      console.error(
+        '[HexclaveGuard] Invalid token verification failed for token:',
+        JSON.stringify(token),
+        err,
+      );
       throw new UnauthorizedException('Invalid Hexclave access token');
     }
   }

@@ -58,8 +58,8 @@ export default function Settings() {
       return sendSampleMessage(message);
     },
     onSuccess: (data) => {
-      console.log(data);
       const msg = data.message + (data.messageId ? ' - ' + data.messageId : '');
+
       console.log('message:', msg);
       toast.success(data.message);
       toast.info(data.messageId ?? 'No message id.');

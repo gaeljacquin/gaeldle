@@ -8,7 +8,6 @@ import {
   ViewTransition,
 } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useUser } from '@hexclave/next';
 import { replaceGameByIdgbId } from '@/lib/services/game.service';
 import {
   useReplaceGameValidation,
@@ -36,6 +35,8 @@ import { REPLACE_GAME_MAX_ROWS } from '@workspace/shared';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { ReplaceGameResult } from '@workspace/api-contract';
 
+const replaceGamesToastId = 'replace-games';
+
 function createEmptyRow(): IgdbIdRowPairData {
   return { id: crypto.randomUUID(), current: '', replacement: '' };
 }
@@ -62,7 +63,11 @@ function addCrossFieldDupes(
 ) {
   for (const [currentId, currentRowIds] of currentIdToRows) {
     const replacementRowIds = replacementIdToRows.get(currentId);
-    if (!replacementRowIds) continue;
+
+    if (!replacementRowIds) {
+      continue;
+    }
+
     currentRowIds.forEach((id) => dupes.add(id));
     replacementRowIds.forEach((id) => dupes.add(id));
   }
@@ -111,8 +116,6 @@ function RowWithValidation({
 }
 
 export default function ReplaceGameByIgdbId() {
-  useUser({ or: 'redirect' });
-
   const [rows, setRows] = useState<IgdbIdRowPairData[]>([createEmptyRow()]);
   const [results, setResults] = useState<ReplaceGameResult[] | null>(null);
   const [validationMap, setValidationMap] = useState<
@@ -185,10 +188,10 @@ export default function ReplaceGameByIgdbId() {
       return replaceGameByIdgbId(pairs);
     },
     onMutate: () => {
-      toast.loading('Replacing games...', { id: 'replace-games' });
+      toast.loading('Replacing games...', { id: replaceGamesToastId });
     },
     onSuccess: (data) => {
-      toast.dismiss('replace-games');
+      toast.dismiss(replaceGamesToastId);
       const updatedCount = data.results.filter(
         (r) => r.status === 'updated',
       ).length;
@@ -209,7 +212,7 @@ export default function ReplaceGameByIgdbId() {
       setResults(data.results as ReplaceGameResult[]);
     },
     onError: (err: Error) => {
-      toast.dismiss('replace-games');
+      toast.dismiss(replaceGamesToastId);
       toast.error(err.message ?? 'Failed to replace games');
     },
   });
@@ -228,19 +231,27 @@ export default function ReplaceGameByIgdbId() {
 
   const handleRemove = useCallback((id: string) => {
     setRows((prev) => {
-      if (prev.length <= 1) return prev;
+      if (prev.length <= 1) {
+        return prev;
+      }
+
       return prev.filter((row) => row.id !== id);
     });
     setValidationMap((prev) => {
       const next = { ...prev };
+
       delete next[id];
+
       return next;
     });
   }, []);
 
   const handleAddRow = useCallback(() => {
     setRows((prev) => {
-      if (prev.length >= REPLACE_GAME_MAX_ROWS) return prev;
+      if (prev.length >= REPLACE_GAME_MAX_ROWS) {
+        return prev;
+      }
+
       return [...prev, createEmptyRow()];
     });
   }, []);

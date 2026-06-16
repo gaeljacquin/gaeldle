@@ -21,7 +21,7 @@ export const getGameModes = async () => {
       return { ...gameMode, gradient };
     });
   } catch (e) {
-    console.warn('Failed to fetch game modes:', (e as Error).message);
+    console.error('Failed to fetch game modes:', (e as Error).message);
 
     return [];
   }

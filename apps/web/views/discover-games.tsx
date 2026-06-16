@@ -1,7 +1,6 @@
 'use client';
 
 import { ViewTransition } from 'react';
-import { useUser } from '@hexclave/next';
 import {
   IconZoomScan,
   IconPlayerPlay,
@@ -178,8 +177,6 @@ function ResultsControls({
 }
 
 export function DiscoverGames() {
-  useUser({ or: 'redirect' });
-
   const {
     scanMutation,
     candidates,

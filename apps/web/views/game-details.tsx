@@ -73,6 +73,8 @@ import {
   ImageGenTabSkeleton,
 } from '@/components/game-details-tab-skeleton';
 
+const generateImageToastId = 'generate-image';
+
 function buildPromptPreview(
   game: Game,
   artStyles: ArtStyle[],
@@ -470,17 +472,17 @@ function ImageGenTabContent({
         artStyleValue,
       }),
     onMutate: () => {
-      toast.loading('Generating AI image...', { id: 'generate-image' });
+      toast.loading('Generating AI image...', { id: generateImageToastId });
     },
     onSuccess: () => {
       toast.success('AI image generated successfully', {
-        id: 'generate-image',
+        id: generateImageToastId,
       });
       queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
     },
     onError: (err) => {
       console.error(err);
-      toast.error('Failed to generate AI image', { id: 'generate-image' });
+      toast.error('Failed to generate AI image', { id: generateImageToastId });
     },
   });
 

@@ -206,7 +206,7 @@ function ActiveImageGenPanel({
 }
 
 export default function ImageGenAdmin() {
-  const user = useUser({ or: 'redirect' });
+  const user = useUser();
 
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [activeImageGenId, setActiveImageGenId] = useState<string | null>(null);
@@ -222,7 +222,7 @@ export default function ImageGenAdmin() {
   useEffect(() => {
     let cancelled = false;
 
-    user.getAccessToken().then((token) => {
+    user?.getAccessToken().then((token) => {
       if (!cancelled && token) setAccessToken(token);
     });
 

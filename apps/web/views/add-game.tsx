@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback, useMemo, ViewTransition } from 'react';
-import { useUser } from '@hexclave/next';
 import { addGame } from '@/lib/services/game.service';
 import { IgdbIdAddRow } from '@/components/igdb-id-add-row';
 import type { IgdbIdAddValidationState } from '@/lib/hooks/use-igdb-id-add-validation';
@@ -197,8 +196,6 @@ function RowWithValidation({
 }
 
 export function AddGame() {
-  useUser({ or: 'redirect' });
-
   const [rows, setRows] = useState<AddGameRowData[]>([createEmptyRow()]);
   const [validationMap, setValidationMap] = useState<
     Record<string, IgdbIdAddValidationState>

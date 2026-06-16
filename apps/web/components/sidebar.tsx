@@ -243,7 +243,7 @@ export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isGamesExpanded, setIsGamesExpanded] = useState(false);
   const pathname = usePathname();
-  const user = useUser({ or: 'redirect' });
+  const user = useUser();
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
   const toggleGames = () => setIsGamesExpanded((prev) => !prev);
@@ -316,7 +316,7 @@ export function Sidebar() {
         />
       </nav>
 
-      <SidebarUserFooter isCollapsed={isCollapsed} user={user} />
+      <SidebarUserFooter isCollapsed={isCollapsed} user={user!} />
     </aside>
   );
 }

@@ -15,7 +15,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export async function getGameByIgdbId(igdbId: number): Promise<Game> {
-  const res = await fetchWithTimeout(`/api/games/${igdbId}`);
+  const res = await fetchWithTimeout(`/api/private/games/${igdbId}`);
   const result = await handleResponse<{ data: Game }>(res);
 
   return result.data;

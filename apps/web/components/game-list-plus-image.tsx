@@ -12,14 +12,11 @@ import { Button } from '@workspace/ui/button';
 import { Card } from '@workspace/ui/card';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
-import {
-  CoverArtSlugs,
-  gameModeSlugQueryOptions,
-} from '@/lib/services/game-mode.service';
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 import { COVER_ART_MAX_ATTEMPTS } from '@workspace/shared';
 
 interface GameListPlusImageProps {
-  gameModeSlug: CoverArtSlugs[number];
+  gameModeSlug: string;
 }
 
 export default function GameListPlusImage(props: GameListPlusImageProps) {

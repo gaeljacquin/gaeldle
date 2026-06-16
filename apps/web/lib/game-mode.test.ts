@@ -1,9 +1,91 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   GameMode,
   getGameModeBySlug,
   getGameModes,
 } from '@/lib/services/game-mode.service';
+
+const MOCK_GAME_MODES = [
+  {
+    id: 1,
+    slug: 'cover-art',
+    title: 'Cover Art',
+    description: 'Guess the game from its cover art, pixelated!',
+    level: 'easy',
+    ordinal: 1,
+    isActive: 1,
+    isCoverArt: 1,
+  },
+  {
+    id: 2,
+    slug: 'artwork',
+    title: 'Artwork',
+    description: 'Guess the game from its official artwork!',
+    level: 'medium',
+    ordinal: 2,
+    isActive: 1,
+    isCoverArt: 1,
+  },
+  {
+    id: 3,
+    slug: 'image-gen',
+    title: 'Image Gen',
+    description: 'Guess the game from AI-generated images!',
+    level: 'medium',
+    ordinal: 3,
+    isActive: 1,
+    isCoverArt: 1,
+  },
+  {
+    id: 4,
+    slug: 'timeline',
+    title: 'Timeline',
+    description: 'Place the games in the correct chronological order!',
+    level: 'medium',
+    ordinal: 4,
+    isActive: 1,
+    isCoverArt: 0,
+  },
+  {
+    id: 5,
+    slug: 'timeline-2',
+    title: 'Timeline 2',
+    description: 'A harder chronological ordering challenge!',
+    level: 'hard',
+    ordinal: 5,
+    isActive: 1,
+    isCoverArt: 0,
+  },
+  {
+    id: 6,
+    slug: 'specifications',
+    title: 'Specifications',
+    description: 'Guess the game from its technical specifications!',
+    level: 'hard',
+    ordinal: 6,
+    isActive: 1,
+    isCoverArt: 0,
+  },
+];
+
+beforeEach(() => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation((url: string) => {
+      if (url.includes('/api/game-modes')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(MOCK_GAME_MODES),
+        });
+      }
+      return Promise.reject(new Error('Unknown fetch URL: ' + url));
+    }),
+  );
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe('game-mode utilities', () => {
   describe('gameModes array', () => {
@@ -113,32 +195,32 @@ describe('game-mode utilities', () => {
       const result = await getGameModeBySlug('cover-art');
 
       expect(result).toBeDefined();
-      expect(result.id).toBe('cover-art');
-      expect(result.title).toBe('Cover Art');
+      expect(result?.id).toBe('cover-art');
+      expect(result?.title).toBe('Cover Art');
     });
 
     it('should return artwork mode when slug is "artwork"', async () => {
       const result = await getGameModeBySlug('artwork');
 
       expect(result).toBeDefined();
-      expect(result.id).toBe('artwork');
-      expect(result.title).toBe('Artwork');
+      expect(result?.id).toBe('artwork');
+      expect(result?.title).toBe('Artwork');
     });
 
     it('should return image-gen mode when slug is "image-gen"', async () => {
       const result = await getGameModeBySlug('image-gen');
 
       expect(result).toBeDefined();
-      expect(result.id).toBe('image-gen');
-      expect(result.title).toBe('Image Gen');
+      expect(result?.id).toBe('image-gen');
+      expect(result?.title).toBe('Image Gen');
     });
 
     it('should return timeline mode when slug is "timeline"', async () => {
       const result = await getGameModeBySlug('timeline');
 
       expect(result).toBeDefined();
-      expect(result.id).toBe('timeline');
-      expect(result.title).toBe('Timeline');
+      expect(result?.id).toBe('timeline');
+      expect(result?.title).toBe('Timeline');
     });
 
     it('should return timeline-2 mode when slug is "timeline-2"', async () => {
@@ -152,46 +234,46 @@ describe('game-mode utilities', () => {
       const result = await getGameModeBySlug('specifications');
 
       expect(result).toBeDefined();
-      expect(result.id).toBe('specifications');
-      expect(result.title).toBe('Specifications');
+      expect(result?.id).toBe('specifications');
+      expect(result?.title).toBe('Specifications');
     });
 
     it('should return undefined for unknown slug', async () => {
-      const result = getGameModeBySlug('unknown');
+      const result = await getGameModeBySlug('unknown');
 
       expect(result).toBeUndefined();
     });
 
     it('should return undefined for empty string', async () => {
-      const result = getGameModeBySlug('');
+      const result = await getGameModeBySlug('');
       expect(result).toBeUndefined();
     });
 
     it('should return undefined for null-like slugs', async () => {
-      const result = getGameModeBySlug('null');
+      const result = await getGameModeBySlug('null');
 
       expect(result).toBeUndefined();
     });
 
     it('should be case-sensitive', async () => {
-      const result = getGameModeBySlug('COVER-ART');
+      const result = await getGameModeBySlug('COVER-ART');
 
       expect(result).toBeUndefined();
     });
 
     it('should return undefined for partial matches', async () => {
-      const result = getGameModeBySlug('cover');
+      const result = await getGameModeBySlug('cover');
       expect(result).toBeUndefined();
     });
 
     it('should handle slug with extra whitespace', async () => {
-      const result = getGameModeBySlug(' cover-art ');
+      const result = await getGameModeBySlug(' cover-art ');
 
       expect(result).toBeUndefined();
     });
 
     it('should return the full GameMode object with all properties', async () => {
-      const result = getGameModeBySlug('cover-art');
+      const result = await getGameModeBySlug('cover-art');
 
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('title');

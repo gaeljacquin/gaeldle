@@ -1,8 +1,8 @@
 import { MenuCard, type MenuCardProps } from '@/components/menu-card';
-import { GameModeLevelsEnumType } from '@/lib/services/game-mode.service';
+import { GameModeLevel } from '@workspace/api-contract';
 
 interface GameModeCardProps extends Omit<MenuCardProps, 'badge'> {
-  level: GameModeLevelsEnumType;
+  level: GameModeLevel;
 }
 
 export function GameModeCard(props: GameModeCardProps) {

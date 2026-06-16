@@ -14,10 +14,7 @@ import {
   type ArtStyle,
   type ImageGenStatusPlus,
 } from '@workspace/api-contract';
-import {
-  artStyleDefault,
-  artStylesQueryOptions,
-} from '@/lib/services/art-style.service';
+import { artStylesQueryOptions } from '@/lib/services/art-style.service';
 import { generateImages } from '@/lib/services/game.service';
 import { useImageGen } from '@/lib/hooks/use-image-gen';
 import { Button } from '@workspace/ui/button';
@@ -208,15 +205,17 @@ function ActiveImageGenPanel({
 export default function ImageGenAdmin() {
   const user = useUser();
 
+  const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
+
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [activeImageGenId, setActiveImageGenId] = useState<string | null>(null);
   const [numGames, setNumGames] = useState(DEFAULT_IMAGE_GEN_NUM);
-  const [artStyle, setArtStyle] = useState<ArtStyle>(artStyleDefault);
+  const [artStyle, setArtStyle] = useState<ArtStyle>(
+    () => artStyles.find((s) => s.isDefault === 1) ?? artStyles[0],
+  );
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
   const [includeThemes, setIncludeThemes] = useState(false);
-
-  const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
 
   // Fetch access token for SSE
   useEffect(() => {

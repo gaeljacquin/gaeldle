@@ -1,7 +1,8 @@
 import { gameModeSelectSchema } from '@workspace/api-contract';
+import { GameMode } from '@workspace/api-contract';
 import { z } from 'zod';
 
-export const getGameModes = async () => {
+export const getGameModes = async (): Promise<GameMode[]> => {
   try {
     const res = await fetch('/api/game-modes');
 
@@ -13,37 +14,23 @@ export const getGameModes = async () => {
     const levelCounts: Record<string, number> = {};
 
     return gameModes.map((gameMode) => {
-      const { level } = gameMode;
+      const { level, slug } = gameMode;
       levelCounts[level] ??= 1;
       const gradient = `--gradient-${level}-${levelCounts[level]}`;
       levelCounts[level]++;
 
-      return { ...gameMode, gradient };
+      return {
+        ...gameMode,
+        icon: 'IconDeviceGamepad2',
+        href: `/${slug}`,
+        gradient,
+      };
     });
   } catch (e) {
     console.error('Failed to fetch game modes:', (e as Error).message);
-
-    return [];
+    throw e;
   }
 };
-
-export const gameModeLevels = (await getGameModes()).map(
-  (gameMode) => gameMode.title,
-);
-
-export const gameModeLevelsEnum = z.enum(
-  gameModeLevels as [string, ...string[]],
-);
-
-export const coverArtSlugs = (await getGameModes())
-  .filter((gameMode) => gameMode.isCoverArt === 1)
-  .map((gameMode) => gameMode.slug);
-
-export const coverArtSlugsEnum = z.enum(coverArtSlugs as [string, ...string[]]);
-
-export type GameMode = Awaited<ReturnType<typeof getGameModes>>[number];
-export type GameModeLevelsEnumType = z.infer<typeof gameModeLevelsEnum>;
-export type CoverArtSlugs = z.infer<typeof coverArtSlugsEnum>;
 
 export const gameModesQueryOptions = {
   queryKey: ['gameModes'],
@@ -55,14 +42,16 @@ export const gameModesQueryOptions = {
  * @param slug - The game mode slug (e.g., "cover-art", "image-gen")
  * @returns GameMode or undefined if not found
  */
-export async function getGameModeBySlug(slug: string) {
-  const mode = (await getGameModes()).find((mode) => mode.slug === slug);
-
-  if (!mode) {
-    throw new Error(`Game mode not found: ${slug}`);
+export async function getGameModeBySlug(
+  slug: string,
+): Promise<GameMode | undefined> {
+  if (!slug) {
+    return undefined;
   }
 
-  return mode;
+  const modes = await getGameModes();
+
+  return modes.find((mode) => mode.slug === slug);
 }
 
 export const gameModeSlugQueryOptions = (slug: string) => {

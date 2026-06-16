@@ -6,7 +6,6 @@ import { getRandomGame } from '@/lib/services/game.service';
 import type { Game, ArtworkImage } from '@workspace/api-contract';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
 import { COVER_ART_MAX_ATTEMPTS } from '@workspace/shared';
-import { CoverArtSlugs } from '@/lib/services/game-mode.service';
 
 function getRandomArtwork(artworks: unknown): string | null {
   if (!artworks || !Array.isArray(artworks) || artworks.length === 0) {
@@ -62,7 +61,7 @@ function selectRandomAiImage(
   return null;
 }
 
-export function useCoverArtGame(mode: CoverArtSlugs) {
+export function useCoverArtGame(mode: string) {
   const [targetGame, setTargetGame] = useState<Game | null>(null);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [wrongGuesses, setWrongGuesses] = useState<(Game | null)[]>([]);

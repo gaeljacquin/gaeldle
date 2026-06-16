@@ -45,7 +45,6 @@ export const gameModeTable = pgTable(
 );
 
 export const gameModeObject = {
-  id: gameModeTable.id,
   slug: gameModeTable.slug,
   title: gameModeTable.title,
   description: gameModeTable.description,
@@ -65,4 +64,10 @@ export const gameModes = pgMaterializedView('active_game_modes').as((qb) => {
 
 export const gameModeSelectSchema = createSelectSchema(gameModes);
 
+export type GameMode = z.infer<typeof gameModeSelectSchema> & {
+  gradient: string;
+  icon: string;
+  href: string;
+};
 export type GameModeSlug = z.infer<typeof gameModeSelectSchema>['slug'];
+export type GameModeLevel = z.infer<typeof gameModeSelectSchema>['level'];

@@ -21,10 +21,8 @@ import {
 import { cn } from '@workspace/ui/lib/utils';
 import { appInfo } from '@/lib/app-info';
 import { Separator } from '@workspace/ui/separator';
-import {
-  GameMode,
-  gameModesQueryOptions,
-} from '@/lib/services/game-mode.service';
+import { gameModesQueryOptions } from '@/lib/services/game-mode.service';
+import { GameMode } from '@workspace/api-contract';
 
 interface SidebarLinkProps {
   href: string;
@@ -240,10 +238,11 @@ function SidebarUserFooter({ isCollapsed, user }: SidebarUserFooterProps) {
 }
 
 export function Sidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isGamesExpanded, setIsGamesExpanded] = useState(false);
   const pathname = usePathname();
   const user = useUser();
+
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isGamesExpanded, setIsGamesExpanded] = useState(false);
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
   const toggleGames = () => setIsGamesExpanded((prev) => !prev);

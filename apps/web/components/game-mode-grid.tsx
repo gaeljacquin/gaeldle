@@ -24,7 +24,7 @@ function GameModeContent() {
     <>
       {gameModes.map((gameMode) => (
         <GameModeCard
-          key={gameMode.id}
+          key={gameMode.slug}
           slug={gameMode.slug}
           title={gameMode.title}
           description={gameMode.description}

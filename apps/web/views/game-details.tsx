@@ -61,10 +61,7 @@ import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/tabs';
 import { Badge } from '@/components/badge';
-import {
-  artStyleDefaultValue,
-  artStylesQueryOptions,
-} from '@/lib/services/art-style.service';
+import { artStylesQueryOptions } from '@/lib/services/art-style.service';
 import type { ArtStyle } from '@workspace/api-contract';
 import {
   SidebarContentSkeleton,
@@ -848,12 +845,15 @@ export default function GameDetails({
   const { igdbId } = use(params);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
   const [includeThemes, setIncludeThemes] = useState(false);
-  const [artStyleValue, setArtStyleValue] =
-    useState<ArtStyleValue>(artStyleDefaultValue);
+  const [artStyleValue, setArtStyleValue] = useState<ArtStyleValue>(
+    () => (artStyles.find((s) => s.isDefault === 1) ?? artStyles[0]).value,
+  );
 
   // Still needed for the delete dialog — reads from cache after SidebarContent populates it
   const { data: game } = useQuery({

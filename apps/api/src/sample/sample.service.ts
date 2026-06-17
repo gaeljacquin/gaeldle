@@ -3,6 +3,7 @@ import { S3Service } from '@/lib/s3.service';
 import { SAMPLE_DIR } from '@workspace/shared';
 import configuration from '@/config/configuration';
 import { SqsService } from '@/lib/sqs.service';
+import { R2Service } from '@/lib/r2.service';
 import { DatabaseService } from '@/db/database.service';
 import { domainEvents } from '@workspace/api-contract';
 
@@ -21,11 +22,13 @@ export class SampleService {
     private readonly s3Service: S3Service,
     private readonly sqsService: SqsService,
     private readonly databaseService: DatabaseService,
+    private readonly r2Service: R2Service,
   ) {}
 
   async uploadImage(input: uploadImageProps, actorId: string) {
     let success = false;
     let errorMessage = '';
+    let url = '';
 
     try {
       const { image, extension } = input;
@@ -47,11 +50,12 @@ export class SampleService {
         throw new Error('Upload to R2 failed');
       }
 
+      url = `${this.r2Service.r2PublicUrl}/${fileName}`;
       success = true;
 
       return {
         success,
-        url: fileName,
+        url,
       };
     } catch (error) {
       errorMessage = error instanceof Error ? error.message : String(error);
@@ -65,6 +69,7 @@ export class SampleService {
         payload: {
           success,
           error: errorMessage,
+          url,
         },
       });
     }
@@ -105,10 +110,10 @@ export class SampleService {
         eventType: 'send_sample_sqs_message',
         actorId,
         payload: {
-          messageId,
-          message,
           success,
           error: errorMessage,
+          messageId,
+          message,
         },
       });
     }

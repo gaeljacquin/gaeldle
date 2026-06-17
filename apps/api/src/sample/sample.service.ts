@@ -3,6 +3,8 @@ import { S3Service } from '@/lib/s3.service';
 import { SAMPLE_DIR } from '@workspace/shared';
 import configuration from '@/config/configuration';
 import { SqsService } from '@/lib/sqs.service';
+import { DatabaseService } from '@/db/database.service';
+import { domainEvents } from '@workspace/api-contract';
 
 interface uploadImageProps {
   image: string;
@@ -18,9 +20,13 @@ export class SampleService {
   constructor(
     private readonly s3Service: S3Service,
     private readonly sqsService: SqsService,
+    private readonly databaseService: DatabaseService,
   ) {}
 
-  async uploadImage(input: uploadImageProps) {
+  async uploadImage(input: uploadImageProps, actorId: string) {
+    let success = false;
+    let errorMessage = '';
+
     try {
       const { image, extension } = input;
 
@@ -31,19 +37,36 @@ export class SampleService {
       const timestamp = Date.now();
       const fileName = `${SAMPLE_DIR}/placeholder_${timestamp}.${extension}`;
 
-      await this.s3Service.uploadImage(
+      const res = await this.s3Service.uploadImage(
         fileName,
         buffer,
         `image/${extension === 'jpg' ? 'jpeg' : extension}`,
       );
 
+      if (!res.ok) {
+        throw new Error('Upload to R2 failed');
+      }
+
+      success = true;
+
       return {
-        success: true,
+        success,
         url: fileName,
       };
     } catch (error) {
+      errorMessage = error instanceof Error ? error.message : String(error);
+
       console.error('Sample image upload failed:', error);
       throw error;
+    } finally {
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'upload_sample_image_r2',
+        actorId,
+        payload: {
+          success,
+          error: errorMessage,
+        },
+      });
     }
   }
 

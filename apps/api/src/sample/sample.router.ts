@@ -1,8 +1,11 @@
-import { Controller, UseGuards } from '@nestjs/common';
+import { Controller, UseGuards, Req } from '@nestjs/common';
 import { Implement, implement } from '@orpc/nest';
 import { contract } from '@workspace/api-contract';
 import { SampleService } from '@/sample/sample.service';
-import { HexclaveGuard } from '@/auth/hexclave.guard';
+import {
+  type AuthenticatedRequest,
+  HexclaveGuard,
+} from '@/auth/hexclave.guard';
 
 @Controller()
 export class SampleRouter {
@@ -10,9 +13,10 @@ export class SampleRouter {
 
   @Implement(contract.sample.uploadImage)
   @UseGuards(HexclaveGuard)
-  uploadImage() {
+  uploadImage(@Req() req: AuthenticatedRequest) {
     return implement(contract.sample.uploadImage).handler(async ({ input }) => {
-      const res = await this.sampleService.uploadImage(input);
+      const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+      const res = await this.sampleService.uploadImage(input, actorId);
 
       if (!res.success) {
         throw new Error('Unable to upload sample image...');

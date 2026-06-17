@@ -8,11 +8,14 @@ import { ConfigService } from '@nestjs/config';
 import type { JWTPayload } from 'jose';
 import type { Request } from 'express';
 
-type JoseModule = typeof import('jose');
-type AuthenticatedRequest = Request & { hexclave?: JWTPayload };
+export type JoseModule = typeof import('jose');
+export type AuthenticatedRequest = Request & {
+  hexclave?: JWTPayload;
+  hexclaveAuth?: JWTPayload;
+};
 
 let josePromise: Promise<JoseModule> | null = null;
-const getJose = () => (josePromise ??= import('jose'));
+export const getJose = () => (josePromise ??= import('jose'));
 
 @Injectable()
 export class HexclaveGuard implements CanActivate {

@@ -37,8 +37,11 @@ export class S3Service {
       ContentType: contentType,
     });
 
-    await this.client.send(command);
+    const res = await this.client.send(command);
 
-    return key;
+    return {
+      ok: res.$metadata.httpStatusCode === 200,
+      key,
+    };
   }
 }

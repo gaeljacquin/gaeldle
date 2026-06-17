@@ -8,19 +8,15 @@ import {
   Req,
 } from '@nestjs/common';
 import { Implement, implement } from '@orpc/nest';
-import type { Request } from 'express';
-import type { JWTPayload } from 'jose';
 import { Observable, merge, EMPTY } from 'rxjs';
 import { map, take, filter, mergeMap } from 'rxjs/operators';
 import { ImageGenStore, type ImageGenEvent } from '@/image-gen/image-gen.store';
 import { ImageGenService } from '@/image-gen/image-gen.service';
-import { HexclaveGuard } from '@/auth/hexclave.guard';
+import {
+  type AuthenticatedRequest,
+  HexclaveGuard,
+} from '@/auth/hexclave.guard';
 import { contract } from '@workspace/api-contract';
-
-type AuthenticatedRequest = Request & {
-  hexclave?: JWTPayload;
-  hexclaveAuth?: JWTPayload;
-};
 
 @Controller()
 export class ImageGenRouter {

@@ -70,21 +70,47 @@ export class SampleService {
     }
   }
 
-  async sendMessage(input: sendMessageProps) {
+  async sendMessage(input: sendMessageProps, actorId: string) {
+    let success = false;
+    let errorMessage = '';
+    let messageId = '';
+    let message = '';
+
     try {
-      const result = await this.sqsService.sendMessage(
+      const res = await this.sqsService.sendMessage(
         configuration().sampleSqsQueueUrl,
         { message: input.message },
       );
 
+      if (!res.ok) {
+        throw new Error('Failed to send sample message');
+      }
+
+      success = true;
+      messageId = res.MessageId ?? '';
+      message = input.message + ' Acknowledged!';
+
       return {
-        success: true,
-        messageId: result.MessageId ?? '',
-        message: input.message + ' Acknowledged!',
+        success,
+        messageId,
+        message,
       };
     } catch (error) {
+      errorMessage = error instanceof Error ? error.message : String(error);
+
       console.error('Sending sample message failed:', error);
       throw error;
+    } finally {
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'send_sample_sqs_message',
+        actorId,
+        payload: {
+          messageId,
+          message,
+          success,
+          error: errorMessage,
+        },
+      });
     }
   }
 
@@ -101,4 +127,8 @@ export class SampleService {
       throw error;
     }
   }
+
+  // private throwDummyError() {
+  //   throw new Error('failed!');
+  // }
 }

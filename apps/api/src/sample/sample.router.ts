@@ -28,9 +28,10 @@ export class SampleRouter {
 
   @Implement(contract.sample.sendMessage)
   @UseGuards(HexclaveGuard)
-  sendMessage() {
+  sendMessage(@Req() req: AuthenticatedRequest) {
     return implement(contract.sample.sendMessage).handler(async ({ input }) => {
-      const res = await this.sampleService.sendMessage(input);
+      const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+      const res = await this.sampleService.sendMessage(input, actorId);
 
       if (!res.success) {
         throw new Error('Unable to send sample message...');

@@ -18,7 +18,12 @@ export class SqsService {
       MessageBody: JSON.stringify(body),
     });
 
-    return this.client.send(command);
+    const res = await this.client.send(command);
+
+    return {
+      ok: res.$metadata.httpStatusCode === 200,
+      ...res,
+    };
   }
 
   async clearQueue(queueUrl: string) {

@@ -31,14 +31,6 @@ const DEFAULT_STATE: Omit<ReplaceGameValidationState, 'refetch' | 'stop'> = {
   canApply: false,
 };
 
-function parsePositiveInt(value: string): number | null {
-  const trimmed = value.trim();
-  if (trimmed === '') return null;
-  const n = Number.parseInt(trimmed, 10);
-  if (Number.isNaN(n) || n <= 0 || String(n) !== trimmed) return null;
-  return n;
-}
-
 export function useReplaceGameValidation(
   current: string,
   replacement: string,
@@ -49,16 +41,13 @@ export function useReplaceGameValidation(
   >(null);
 
   const debouncedCurrent = useDebounce(current, 600);
-
-  const currentInt = parsePositiveInt(current);
-  const debouncedCurrentInt = parsePositiveInt(debouncedCurrent);
-  const replacementInt = parsePositiveInt(replacement);
+  const currentInt = Number.parseInt(current, 10);
+  const debouncedCurrentInt = Number.parseInt(debouncedCurrent, 10);
+  const replacementInt = Number.parseInt(replacement, 10);
 
   const bothValid =
     debouncedCurrentInt !== null && forcedReplacementInt !== null;
   const sameIds = bothValid && debouncedCurrentInt === forcedReplacementInt;
-
-  // True while the user is still typing the current ID
   const isTypingCurrent = currentInt !== debouncedCurrentInt;
 
   const queryKey = useMemo(
@@ -76,12 +65,14 @@ export function useReplaceGameValidation(
 
   const handleStop = useCallback(() => {
     void queryClient.cancelQueries({ queryKey });
+
     setForcedReplacementInt(null);
   }, [queryClient, queryKey]);
 
   const handleRefetch = useCallback(() => {
     if (debouncedCurrentInt !== null && replacementInt !== null) {
       setForcedReplacementInt(replacementInt);
+
       if (replacementInt === forcedReplacementInt) {
         void refetch();
       }
@@ -92,7 +83,6 @@ export function useReplaceGameValidation(
     return { ...DEFAULT_STATE, refetch: handleRefetch, stop: handleStop };
   }
 
-  // While typing current or waiting for query
   if (isTypingCurrent || isFetching) {
     return {
       ...DEFAULT_STATE,

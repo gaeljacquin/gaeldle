@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@workspace/ui/button';
 import { cn } from '@workspace/ui/lib/utils';
+import { HOLD_DURATION } from '@workspace/shared';
 
 interface HoldToRevealButtonProps {
   onReveal: () => void;
@@ -10,13 +11,11 @@ interface HoldToRevealButtonProps {
   className?: string;
 }
 
-const HOLD_DURATION = 3000;
-
 export default function HoldToRevealButton({
   onReveal,
   disabled,
   className,
-}: Readonly<HoldToRevealButtonProps>) {
+}: HoldToRevealButtonProps) {
   const [isHolding, setIsHolding] = useState(false);
   const [progress, setProgress] = useState(0);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -24,7 +23,9 @@ export default function HoldToRevealButton({
   const animationFrameRef = useRef<number | null>(null);
 
   const startHolding = () => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
 
     setIsHolding(true);
     startTimeRef.current = 0;
@@ -33,8 +34,10 @@ export default function HoldToRevealButton({
       if (startTimeRef.current === 0) {
         startTimeRef.current = timestamp;
       }
+
       const elapsed = timestamp - startTimeRef.current;
       const newProgress = Math.min((elapsed / HOLD_DURATION) * 100, 100);
+
       setProgress(newProgress);
 
       if (newProgress < 100) {
@@ -68,6 +71,7 @@ export default function HoldToRevealButton({
       if (holdTimerRef.current) {
         clearTimeout(holdTimerRef.current);
       }
+
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }

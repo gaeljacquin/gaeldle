@@ -1,6 +1,6 @@
 import { oc } from '@orpc/contract';
 import { z } from 'zod';
-import { DISCOVER_GAMES_MAX } from '@workspace/constants';
+import { DISCOVER_GAMES_MAX } from '@workspace/shared';
 
 export const DiscoverCandidateSchema = z.object({
   igdbId: z.number(),

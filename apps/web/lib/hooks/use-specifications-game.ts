@@ -1,7 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { getRandomGame } from '@/lib/services/game.service';
+import { useState, useCallback, useMemo } from 'react';
+import { useSuspenseQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  getRandomGame,
+  randomGameQueryOptions,
+} from '@/lib/services/game.service';
 import type {
   Game,
   SpecificationGuess,
@@ -9,75 +13,25 @@ import type {
   MatchType,
 } from '@workspace/api-contract';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
+import {
+  extractArray,
+  extractPublisher,
+  extractReleaseYear,
+  SPECIFICATIONS_MAX_ATTEMPTS,
+} from '@workspace/shared';
 
-export const MAX_ATTEMPTS = 10;
-
-// Helper to extract array from JSON field
-function extractArray(data: unknown): string[] {
-  if (!data) return [];
-  if (Array.isArray(data)) {
-    return data.map((item) => {
-      // If it's already a string, use it directly
-      if (typeof item === 'string') {
-        return item;
-      }
-      // If it's an object with a name property, extract the name
-      if (typeof item === 'object' && item !== null && 'name' in item) {
-        return (item as { name: string }).name;
-      }
-      // Otherwise convert to string
-      return String(item);
-    });
-  }
-  return [];
-}
-
-// Helper to extract year from release date
-function extractReleaseYear(firstReleaseDate: number | null): string | null {
-  if (!firstReleaseDate) return null;
-  const date = new Date(firstReleaseDate * 1000);
-  return date.getFullYear().toString();
-}
-
-// Helper to extract publisher
-function extractPublisher(involved_companies: unknown): string | null {
-  if (!involved_companies || !Array.isArray(involved_companies)) return null;
-
-  const publisher = involved_companies.find(
-    (company: (typeof involved_companies)[number]) =>
-      company?.publisher === true,
-  );
-
-  if (publisher && typeof publisher === 'object') {
-    // Check if there's a nested company object with name
-    if ('company' in publisher) {
-      const companyData = publisher.company;
-      if (
-        typeof companyData === 'object' &&
-        companyData !== null &&
-        'name' in companyData
-      ) {
-        return (companyData as { name: string }).name;
-      }
-    }
-    // Check if the name is directly on the publisher object
-    if ('name' in publisher) {
-      return (publisher as { name: string }).name;
-    }
-  }
-
-  return null;
-}
-
-// Compare two arrays and determine match type
 function compareArrays(target: string[], guess: string[]): MatchType {
-  if (!target.length && !guess.length) return 'exact';
-  if (!target.length || !guess.length) return 'none';
+  if (!target.length && !guess.length) {
+    return 'exact';
+  }
+
+  if (!target.length || !guess.length) {
+    return 'none';
+  }
 
   const targetSet = new Set(target.map((s) => s.toLowerCase()));
   const guessSet = new Set(guess.map((s) => s.toLowerCase()));
 
-  // Check if they're exactly the same
   if (
     targetSet.size === guessSet.size &&
     [...targetSet].every((item) => guessSet.has(item))
@@ -85,8 +39,8 @@ function compareArrays(target: string[], guess: string[]): MatchType {
     return 'exact';
   }
 
-  // Check if there's any overlap
   const hasOverlap = [...targetSet].some((item) => guessSet.has(item));
+
   return hasOverlap ? 'partial' : 'none';
 }
 
@@ -159,38 +113,37 @@ function compareGames(
 }
 
 export function useSpecificationsGame() {
-  const [targetGame, setTargetGame] = useState<Game | null>(null);
+  const queryClient = useQueryClient();
+  const queryKey = useMemo(
+    () => ['randomGame', { excludeIds: [], mode: 'specifications' }],
+    [],
+  );
+
+  const { data: initialTarget } = useSuspenseQuery(
+    randomGameQueryOptions([], 'specifications'),
+  );
+
+  const [prevGameId, setPrevGameId] = useState<number>(initialTarget.id);
+  const [targetGame, setTargetGame] = useState<Game>(initialTarget);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [guesses, setGuesses] = useState<SpecificationGuess[]>([]);
-  const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
+  const [attemptsLeft, setAttemptsLeft] = useState(SPECIFICATIONS_MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [revealedClue, setRevealedClue] = useState<RevealedClue | null>(null);
 
-  // Load target game on mount
-  useEffect(() => {
-    async function loadTarget() {
-      try {
-        setIsLoading(true);
-        // Get a random game for the answer
-        const randomGame = await getRandomGame([], 'specifications');
-        setTargetGame(randomGame);
-      } catch (err) {
-        console.error('Error loading target game:', err);
-        setError(getFriendlyErrorMessage(err, 'Failed to load game'));
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadTarget();
-  }, []);
+  // Sync state if initialTarget changes (e.g., if cache updates or component updates)
+  if (initialTarget.id !== prevGameId) {
+    setPrevGameId(initialTarget.id);
+    setTargetGame(initialTarget);
+  }
 
   const handleSelectGame = useCallback((game: Game | number | null) => {
     if (game === null) {
       setSelectedGame(null);
+
       return;
     }
 
@@ -210,9 +163,10 @@ export function useSpecificationsGame() {
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (!targetGame || !selectedGame || isGameOver) return;
+    if (!targetGame || !selectedGame || isGameOver) {
+      return;
+    }
 
-    // Check if the selected game is correct
     if (selectedGame.id === targetGame.id) {
       const matches = compareGames(targetGame, selectedGame);
       const newGuess: SpecificationGuess = {
@@ -222,11 +176,11 @@ export function useSpecificationsGame() {
         aiImageUrl: selectedGame.aiImageUrl,
         matches,
       };
+
       setGuesses((prev) => [...prev, newGuess]);
       setIsCorrect(true);
       setIsGameOver(true);
     } else {
-      // Wrong answer - compare and add to guesses
       const matches = compareGames(targetGame, selectedGame);
       const newGuess: SpecificationGuess = {
         gameId: selectedGame.id,
@@ -239,18 +193,18 @@ export function useSpecificationsGame() {
       setGuesses((prev) => [...prev, newGuess]);
       setAttemptsLeft((prev) => prev - 1);
 
-      // Check if game is over
       if (attemptsLeft - 1 <= 0) {
         setIsGameOver(true);
       }
     }
 
-    // Reset selection
     setSelectedGame(null);
   }, [targetGame, selectedGame, isGameOver, attemptsLeft]);
 
   const revealClue = useCallback(() => {
-    if (!targetGame || revealedClue) return;
+    if (!targetGame || revealedClue) {
+      return;
+    }
 
     const fields: Array<keyof SpecificationGuess['matches']> = [
       'platforms',
@@ -263,26 +217,26 @@ export function useSpecificationsGame() {
       'perspective',
     ];
 
-    // Filter out fields that are already exact matches (green) in guesses
     const availableFields = fields.filter((field) => {
-      // If no guesses yet, all fields are available
-      if (guesses.length === 0) return true;
+      if (guesses.length === 0) {
+        return true;
+      }
 
-      // Check if any guess has an exact match for this field
       const hasExactMatch = guesses.some(
         (guess) => guess.matches[field].type === 'exact',
       );
+
       return !hasExactMatch;
     });
 
-    // If all fields are already exact, don't reveal anything (shouldn't happen in normal gameplay)
-    if (availableFields.length === 0) return;
+    if (availableFields.length === 0) {
+      return;
+    }
 
-    // Pick a random field from available fields
     const randomField =
       availableFields[Math.floor(Math.random() * availableFields.length)];
-
     let value: string | string[];
+
     switch (randomField) {
       case 'platforms':
         value = extractArray(targetGame.platforms);
@@ -318,10 +272,8 @@ export function useSpecificationsGame() {
       revealedAtGuessCount: guesses.length,
     });
 
-    // Revealing a hint costs 1 attempt
     setAttemptsLeft((prev) => prev - 1);
 
-    // Check if game is over after revealing hint
     if (attemptsLeft - 1 <= 0) {
       setIsGameOver(true);
     }
@@ -331,32 +283,38 @@ export function useSpecificationsGame() {
     try {
       setIsLoading(true);
       setGuesses([]);
-      setAttemptsLeft(MAX_ATTEMPTS);
+      setAttemptsLeft(SPECIFICATIONS_MAX_ATTEMPTS);
       setIsGameOver(false);
       setIsCorrect(false);
       setSelectedGame(null);
       setRevealedClue(null);
 
-      // Get a new random game
       const randomGame = await getRandomGame([], 'specifications');
+
       setTargetGame(randomGame);
+
+      // Update query cache so that remounts use the reset game
+      queryClient.setQueryData(queryKey, randomGame);
     } catch (err) {
       setError(getFriendlyErrorMessage(err, 'Failed to reset game'));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [queryClient, queryKey]);
 
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft((prev) => {
       const newValue = prev + delta;
-      if (newValue < 1 || newValue > MAX_ATTEMPTS) return prev;
+
+      if (newValue < 1 || newValue > SPECIFICATIONS_MAX_ATTEMPTS) {
+        return prev;
+      }
+
       return newValue;
     });
   }, []);
 
   return {
-    // Game state
     targetGame,
     selectedGame,
     guesses,
@@ -366,8 +324,6 @@ export function useSpecificationsGame() {
     isLoading,
     error,
     revealedClue,
-
-    // Actions
     handleSelectGame,
     clearSelection,
     handleSubmit,

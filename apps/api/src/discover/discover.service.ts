@@ -7,7 +7,7 @@ import {
   DiscoverCandidate,
   DiscoverApplyResult,
 } from '@workspace/api-contract';
-import { IgdbService } from '@/games/igdb.service';
+import { IgdbService } from '@/lib/igdb.service';
 import { GamesService } from '@/games/games.service';
 
 @Injectable()
@@ -28,10 +28,9 @@ export class DiscoverService {
     alreadyAddedCount: number;
   }> {
     const igdbResults = await this.igdbService.discoverCandidates(count);
-
     const igdbIds = igdbResults.map((g) => g.id);
-
     let existingSet = new Set<number>();
+
     if (igdbIds.length > 0) {
       const existingRows = await this.databaseService.db
         .select({ igdbId: games.igdbId })
@@ -44,6 +43,7 @@ export class DiscoverService {
       const rawUrl = g.cover?.url;
       const imageId = g.cover?.image_id;
       let coverUrl: string | null = null;
+
       if (imageId) {
         coverUrl = `https://images.igdb.com/igdb/image/upload/t_cover_big/${imageId}.jpg`;
       } else if (rawUrl) {
@@ -67,7 +67,6 @@ export class DiscoverService {
 
     const totalReturned = candidates.length;
     const alreadyAddedCount = candidates.filter((c) => c.isAlreadyAdded).length;
-
     const eventPayload = {
       count,
       candidates: candidates.map((c) => ({
@@ -113,6 +112,7 @@ export class DiscoverService {
           igdbId,
           false,
         );
+
         if (syncResult) {
           results.push({
             igdbId,
@@ -143,7 +143,6 @@ export class DiscoverService {
       selectedIgdbIds,
       results,
     };
-
     const [insertedEvent] = await this.databaseService.db
       .insert(domainEvents)
       .values({

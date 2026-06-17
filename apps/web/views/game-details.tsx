@@ -2,10 +2,9 @@
 
 import { use, useState, useMemo, Suspense, ViewTransition } from 'react';
 import {
-  DEFAULT_IMAGE_GEN_ART_STYLE,
   IMAGE_PROMPT_SUFFIX,
-  ART_STYLES,
-} from '@workspace/constants';
+  MIN_PREVIEW_PROMPT_ROWS,
+} from '@workspace/shared';
 import {
   useQuery,
   useSuspenseQuery,
@@ -18,7 +17,7 @@ import {
   syncGame,
   generateImage,
 } from '@/lib/services/game.service';
-import { DashboardPageHeader } from '@/components/dashboard-header';
+import { DashboardHeader } from '@/components/dashboard-header';
 import Image from 'next/image';
 import { Button } from '@workspace/ui/button';
 import { Card } from '@workspace/ui/card';
@@ -48,51 +47,77 @@ import {
   IconExternalLink,
   IconRefresh,
   IconBrush,
-  IconDashboard,
   IconCalendar,
   IconDeviceGamepad,
+  IconDeviceGamepad2,
 } from '@tabler/icons-react';
 import {
   Game,
   type ArtworkImage,
-  type ArtStyle,
+  type ArtStyleValue,
 } from '@workspace/api-contract';
 import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/tabs';
 import { Badge } from '@/components/badge';
+import { artStylesQueryOptions } from '@/lib/services/art-style.service';
+import type { ArtStyle } from '@workspace/api-contract';
+import {
+  SidebarContentSkeleton,
+  InfoTabSkeleton,
+  ArtworksTabSkeleton,
+  ImageGenTabSkeleton,
+} from '@/components/game-details-tab-skeleton';
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+const generateImageToastId = 'generate-image';
 
 function buildPromptPreview(
   game: Game,
+  artStyles: ArtStyle[],
   options: {
     includeStoryline: boolean;
     includeGenres: boolean;
     includeThemes: boolean;
-    artStyle: string;
+    artStyleValue: string;
   },
 ): string {
   const parts: string[] = [];
   const style =
-    ART_STYLES.find((s) => s.value === options.artStyle) ?? ART_STYLES[0];
+    artStyles.find((s) => s.value === options.artStyleValue) ?? artStyles[0];
+
   parts.push(
-    `${style.descriptor} of iconic characters from "${game.name}" set within the game's distinct world`,
+    `${style.description} of iconic characters from "${game.name}" set within the game's distinct world`,
   );
-  if (game.summary) parts.push(game.summary);
-  if (options.includeStoryline && game.storyline) parts.push(game.storyline);
+
+  if (game.summary) {
+    parts.push(game.summary);
+  }
+
+  if (options.includeStoryline && game.storyline) {
+    parts.push(game.storyline);
+  }
+
   const genres = game.genres as string[] | null;
-  if (options.includeGenres && genres?.length)
+
+  if (options.includeGenres && genres?.length) {
     parts.push(`Genres: ${genres.join(', ')}`);
+  }
+
   const themes = game.themes as string[] | null;
-  if (options.includeThemes && themes?.length)
+
+  if (options.includeThemes && themes?.length) {
     parts.push(`Themes: ${themes.join(', ')}`);
+  }
+
   const keywords = game.keywords as string[] | null;
-  if (keywords?.length) parts.push(`Keywords: ${keywords.join(', ')}`);
+
+  if (keywords?.length) {
+    parts.push(`Keywords: ${keywords.join(', ')}`);
+  }
+
   parts.push(IMAGE_PROMPT_SUFFIX);
+
   return parts.join('. ');
 }
 
@@ -100,94 +125,6 @@ interface Company {
   name: string;
   developer: boolean;
   publisher: boolean;
-}
-
-function Skeleton({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn('animate-pulse rounded bg-muted-foreground/10', className)}
-    />
-  );
-}
-
-function SidebarContentSkeleton() {
-  return (
-    <>
-      <div className="flex flex-wrap gap-2 justify-center">
-        <Skeleton className="h-6 w-24" />
-        <Skeleton className="h-6 w-20" />
-      </div>
-      <div className="space-y-3">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-    </>
-  );
-}
-
-function InfoTabSkeleton() {
-  return (
-    <div className="space-y-10">
-      <div className="space-y-4">
-        <Skeleton className="h-5 w-32" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-        <Skeleton className="h-4 w-4/6" />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-4">
-        <div className="space-y-3">
-          <Skeleton className="h-4 w-20" />
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-6 w-16" />
-            ))}
-          </div>
-        </div>
-        <div className="space-y-3">
-          <Skeleton className="h-4 w-16" />
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-6 w-20" />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ArtworksTabSkeleton() {
-  return (
-    <div className="space-y-6">
-      <Skeleton className="h-5 w-40" />
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <Skeleton key={i} className="aspect-video w-full" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ImageGenTabSkeleton() {
-  return (
-    <div className="flex flex-col md:flex-row gap-8">
-      <div className="w-full md:w-64 shrink-0 flex flex-col gap-4">
-        <Skeleton className="aspect-square w-full" />
-        <Skeleton className="h-24 w-full" />
-      </div>
-      <div className="flex-1 space-y-4">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-60 w-full" />
-        <Skeleton className="h-4 w-28" />
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-8 w-full" />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function SidebarContent({
@@ -356,6 +293,8 @@ function ArtworksTabContent({ igdbId }: { igdbId: string }) {
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
   });
 
+  const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
+
   const artworks = game.artworks as ArtworkImage[] | null;
 
   return (
@@ -424,14 +363,26 @@ function ArtworksTabContent({ igdbId }: { igdbId: string }) {
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {game.imageGen.map((entry, index) => {
-              if (!entry || typeof entry !== 'object') return null;
+              if (!entry || typeof entry !== 'object') {
+                return null;
+              }
+
               const keys = Object.keys(entry);
-              if (keys.length === 0) return null;
+
+              if (keys.length === 0) {
+                return null;
+              }
+
               const styleKey = keys[0];
               const data = entry[styleKey];
-              if (!data || typeof data !== 'object') return null;
+
+              if (!data || typeof data !== 'object') {
+                return null;
+              }
+
               const styleLabel =
-                ART_STYLES.find((s) => s.value === styleKey)?.label ?? styleKey;
+                artStyles.find((s) => s.value === styleKey)?.label ?? styleKey;
+
               return (
                 <Dialog key={index}>
                   <DialogTrigger
@@ -482,8 +433,8 @@ function ArtworksTabContent({ igdbId }: { igdbId: string }) {
 
 function ImageGenTabContent({
   igdbId,
-  artStyle,
-  setArtStyle,
+  artStyleValue,
+  setArtStyleValue,
   includeStoryline,
   setIncludeStoryline,
   includeGenres,
@@ -492,8 +443,8 @@ function ImageGenTabContent({
   setIncludeThemes,
 }: {
   igdbId: string;
-  artStyle: ArtStyle;
-  setArtStyle: (s: ArtStyle) => void;
+  artStyleValue: ArtStyleValue;
+  setArtStyleValue: (s: ArtStyleValue) => void;
   includeStoryline: boolean;
   setIncludeStoryline: (v: boolean) => void;
   includeGenres: boolean;
@@ -507,60 +458,93 @@ function ImageGenTabContent({
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
   });
 
+  const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
+
   const generateImageMutation = useMutation({
     mutationFn: () =>
       generateImage(Number.parseInt(igdbId, 10), {
         includeStoryline,
         includeGenres,
         includeThemes,
-        artStyle: artStyle,
+        artStyleValue,
       }),
     onMutate: () => {
-      toast.loading('Generating AI image...', { id: 'generate-image' });
+      toast.loading('Generating AI image...', { id: generateImageToastId });
     },
     onSuccess: () => {
       toast.success('AI image generated successfully', {
-        id: 'generate-image',
+        id: generateImageToastId,
       });
       queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
     },
     onError: (err) => {
       console.error(err);
-      toast.error('Failed to generate AI image', { id: 'generate-image' });
+      toast.error('Failed to generate AI image', { id: generateImageToastId });
     },
   });
 
   const generatedImage = useMemo(() => {
-    if (!game || !Array.isArray(game.imageGen)) return null;
+    if (!game || !Array.isArray(game.imageGen)) {
+      return null;
+    }
+
     const entry = game.imageGen.find(
-      (item) => item && typeof item === 'object' && artStyle in item,
+      (item) => item && typeof item === 'object' && artStyleValue in item,
     );
+
     return entry
-      ? (entry[artStyle] as { url: string; prompt: string; provider: string })
+      ? (entry[artStyleValue] as {
+          url: string;
+          prompt: string;
+          provider: string;
+        })
       : null;
-  }, [game, artStyle]);
+  }, [game, artStyleValue]);
 
   const savedPrompt = generatedImage?.prompt;
   const provider = generatedImage?.provider ?? 'N/A';
+  const artStyleLabel = artStyles.find((s) => s.value === artStyleValue)?.label;
 
   const savedPromptRows = useMemo(() => {
-    if (!savedPrompt) return 4;
-    return Math.min(15, Math.max(4, Math.ceil(savedPrompt.length / 28)));
+    if (!savedPrompt) {
+      return MIN_PREVIEW_PROMPT_ROWS;
+    }
+
+    return Math.min(
+      15,
+      Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(savedPrompt.length / 28)),
+    );
   }, [savedPrompt]);
 
   const previewPrompt = useMemo(() => {
-    if (!game) return '';
-    return buildPromptPreview(game, {
+    if (!game) {
+      return '';
+    }
+
+    return buildPromptPreview(game, artStyles, {
       includeStoryline,
       includeGenres,
       includeThemes,
-      artStyle: artStyle,
+      artStyleValue,
     });
-  }, [game, includeStoryline, includeGenres, includeThemes, artStyle]);
+  }, [
+    game,
+    artStyles,
+    includeStoryline,
+    includeGenres,
+    includeThemes,
+    artStyleValue,
+  ]);
 
   const previewPromptRows = useMemo(() => {
-    if (!previewPrompt) return 4;
-    return Math.min(15, Math.max(4, Math.ceil(previewPrompt.length / 50)));
+    if (!previewPrompt) {
+      return MIN_PREVIEW_PROMPT_ROWS;
+    }
+
+    return Math.min(
+      15,
+      Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(previewPrompt.length / 50)),
+    );
   }, [previewPrompt]);
 
   const imageGenButtonText = generateImageMutation.isPending
@@ -568,6 +552,7 @@ function ImageGenTabContent({
     : generatedImage
       ? 'Regenerate AI Image'
       : 'Generate AI Image';
+
   return (
     <div className="flex flex-col md:flex-row gap-8">
       <div className="w-full md:w-64 shrink-0 flex flex-col gap-4">
@@ -576,7 +561,7 @@ function ImageGenTabContent({
             <DialogTrigger className="relative aspect-square w-full overflow-hidden border-2 border-solid border-muted-foreground/30 group cursor-pointer hover:border-primary/50 transition-colors p-0 m-0 bg-transparent block">
               <Image
                 src={generatedImage.url}
-                alt={`${game.name} AI Image - ${ART_STYLES.find((s) => s.value === artStyle)?.label ?? artStyle}`}
+                alt={`${game.name} AI Image - ${artStyleLabel}`}
                 fill
                 unoptimized
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -593,8 +578,8 @@ function ImageGenTabContent({
               <DialogHeader className="sr-only">
                 <DialogTitle>
                   {game.name} AI Image -{' '}
-                  {ART_STYLES.find((s) => s.value === artStyle)?.label ??
-                    artStyle}
+                  {artStyles.find((s) => s.value === artStyleValue)?.label ??
+                    artStyleValue}
                 </DialogTitle>
               </DialogHeader>
               <div className="relative w-full h-full">
@@ -649,8 +634,8 @@ function ImageGenTabContent({
             Art Style
           </h3>
           <div className="border border-border bg-card/50 overflow-y-scroll scrollbar-y max-h-60 rounded-none divide-y divide-border">
-            {ART_STYLES.map((style) => {
-              const isSelected = style.value === artStyle;
+            {artStyles.map((style) => {
+              const isSelected = style.value === artStyleValue;
               const hasImage =
                 Array.isArray(game?.imageGen) &&
                 game.imageGen.some(
@@ -661,7 +646,7 @@ function ImageGenTabContent({
                 <button
                   key={style.value}
                   type="button"
-                  onClick={() => setArtStyle(style.value as ArtStyle)}
+                  onClick={() => setArtStyleValue(style.value as ArtStyleValue)}
                   disabled={generateImageMutation.isPending}
                   className={cn(
                     'w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between',
@@ -848,21 +833,26 @@ function HeaderTitle({ igdbId }: { igdbId: string }) {
     queryKey: ['game', igdbId],
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
   });
+
   return <>{game.name}</>;
 }
 
 export default function GameDetails({
   params,
-}: Readonly<{ params: Promise<{ igdbId: string }> }>) {
+}: {
+  params: Promise<{ igdbId: string }>;
+}) {
   const { igdbId } = use(params);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [includeStoryline, setIncludeStoryline] = useState(false);
   const [includeGenres, setIncludeGenres] = useState(false);
   const [includeThemes, setIncludeThemes] = useState(false);
-  const [artStyle, setArtStyle] = useState<ArtStyle>(
-    DEFAULT_IMAGE_GEN_ART_STYLE,
+  const [artStyleValue, setArtStyleValue] = useState<ArtStyleValue>(
+    () => (artStyles.find((s) => s.isDefault === 1) ?? artStyles[0]).value,
   );
 
   // Still needed for the delete dialog — reads from cache after SidebarContent populates it
@@ -888,11 +878,7 @@ export default function GameDetails({
     // error / not found state
     return (
       <div className="flex flex-col min-h-full bg-background">
-        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4">
-            <DashboardPageHeader title="Game Not Found" icon={IconDashboard} />
-          </div>
-        </div>
+        <DashboardHeader title="Game Not Found" icon={IconDeviceGamepad2} />
         <div className="container mx-auto px-4 py-10 flex-1">
           <div className="text-center py-20 border border-dashed rounded-none bg-muted/5">
             <h2 className="text-xl font-bold uppercase tracking-tight">
@@ -917,19 +903,14 @@ export default function GameDetails({
 
   return (
     <div className="flex flex-col min-h-full bg-background">
-      {/* Header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <DashboardPageHeader
-            title={
-              <Suspense fallback="Loading...">
-                <HeaderTitle igdbId={igdbId} />
-              </Suspense>
-            }
-            icon={IconDashboard}
-          />
-        </div>
-      </div>
+      <DashboardHeader
+        title={
+          <Suspense fallback="Loading...">
+            <HeaderTitle igdbId={igdbId} />
+          </Suspense>
+        }
+        icon={IconDeviceGamepad2}
+      />
 
       <div className="container mx-auto px-4 py-8 flex-1">
         <div className="flex flex-col lg:flex-row gap-10">
@@ -985,22 +966,13 @@ export default function GameDetails({
                 variant="line"
                 className="mb-8 gap-0 border-b border-border w-full justify-start"
               >
-                <TabsTrigger
-                  value="info"
-                  className="text-xs font-black uppercase tracking-widest px-8 py-3 cursor-pointer hover:text-primary data-active:text-primary data-active:after:bg-primary! data-active:after:opacity-100!"
-                >
+                <TabsTrigger value="info" className="game-details-tab">
                   Info
                 </TabsTrigger>
-                <TabsTrigger
-                  value="artworks"
-                  className="text-xs font-black uppercase tracking-widest px-8 py-3 cursor-pointer hover:text-primary data-active:text-primary data-active:after:bg-primary! data-active:after:opacity-100!"
-                >
+                <TabsTrigger value="artworks" className="game-details-tab">
                   Artworks
                 </TabsTrigger>
-                <TabsTrigger
-                  value="image-gen"
-                  className="text-xs font-black uppercase tracking-widest px-8 py-3 cursor-pointer hover:text-primary data-active:text-primary data-active:after:bg-primary! data-active:after:opacity-100!"
-                >
+                <TabsTrigger value="image-gen" className="game-details-tab">
                   Image Gen
                 </TabsTrigger>
               </TabsList>
@@ -1019,17 +991,19 @@ export default function GameDetails({
 
               <TabsContent value="image-gen" className="space-y-6 outline-none">
                 <Suspense fallback={<ImageGenTabSkeleton />}>
-                  <ImageGenTabContent
-                    igdbId={igdbId}
-                    artStyle={artStyle}
-                    setArtStyle={setArtStyle}
-                    includeStoryline={includeStoryline}
-                    setIncludeStoryline={setIncludeStoryline}
-                    includeGenres={includeGenres}
-                    setIncludeGenres={setIncludeGenres}
-                    includeThemes={includeThemes}
-                    setIncludeThemes={setIncludeThemes}
-                  />
+                  {artStyleValue !== '' && (
+                    <ImageGenTabContent
+                      igdbId={igdbId}
+                      artStyleValue={artStyleValue}
+                      setArtStyleValue={setArtStyleValue}
+                      includeStoryline={includeStoryline}
+                      setIncludeStoryline={setIncludeStoryline}
+                      includeGenres={includeGenres}
+                      setIncludeGenres={setIncludeGenres}
+                      includeThemes={includeThemes}
+                      setIncludeThemes={setIncludeThemes}
+                    />
+                  )}
                 </Suspense>
               </TabsContent>
             </Tabs>

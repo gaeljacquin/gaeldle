@@ -1,5 +1,5 @@
-import BulkImageGen from '@/views/bulk-image-gen';
+import ImageGenAdmin from '@/views/image-gen-admin';
 
 export default function ImageGenPage() {
-  return <BulkImageGen />;
+  return <ImageGenAdmin />;
 }

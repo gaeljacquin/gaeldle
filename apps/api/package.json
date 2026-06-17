@@ -22,19 +22,20 @@
     "test:e2e": "NODE_OPTIONS='--experimental-vm-modules' jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1063.0",
-    "@aws-sdk/s3-request-presigner": "^3.1063.0",
-    "@nestjs/common": "^11.1.24",
+    "@aws-sdk/client-s3": "^3.1069.0",
+    "@aws-sdk/client-sqs": "^3.1069.0",
+    "@aws-sdk/s3-request-presigner": "^3.1069.0",
+    "@nestjs/common": "^11.1.27",
     "@nestjs/config": "^4.0.4",
-    "@nestjs/core": "^11.1.24",
-    "@nestjs/platform-express": "^11.1.24",
+    "@nestjs/core": "^11.1.27",
+    "@nestjs/platform-express": "^11.1.27",
     "@nestjs/terminus": "^11.1.1",
-    "@orpc/contract": "^1.14.5",
-    "@orpc/nest": "^1.14.5",
-    "@orpc/openapi": "^1.14.5",
-    "@orpc/server": "^1.14.5",
+    "@orpc/contract": "^1.14.6",
+    "@orpc/nest": "^1.14.6",
+    "@orpc/openapi": "^1.14.6",
+    "@orpc/server": "^1.14.6",
     "@workspace/api-contract": "workspace:*",
-    "@workspace/constants": "workspace:*",
+    "@workspace/shared": "workspace:*",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.8.3",
@@ -42,24 +43,24 @@
     "pg": "^8.21.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
     "@jest/globals": "^30.4.1",
-    "@nestjs/cli": "^11.0.21",
+    "@nestjs/cli": "^11.0.23",
     "@nestjs/schematics": "^11.1.0",
-    "@nestjs/testing": "^11.1.24",
+    "@nestjs/testing": "^11.1.27",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.9.2",
+    "@types/node": "^25.9.3",
     "@types/pg": "^8.20.0",
     "@types/sharp": "^0.32.0",
-    "@types/supertest": "^6.0.3",
+    "@types/supertest": "^7.2.0",
     "drizzle-kit": "^0.31.10",
-    "eslint": "^9.39.4",
+    "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
     "globals": "^17.6.0",
@@ -70,8 +71,8 @@
     "ts-loader": "^9.6.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.60.1"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1"
   },
   "jest": {
     "preset": "ts-jest/presets/default-esm",
@@ -98,7 +99,7 @@
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
       "^@workspace/api-contract$": "<rootDir>/../../../packages/api-contract/src/index.ts",
-      "^@workspace/constants$": "<rootDir>/../../../packages/constants/src/index.ts"
+      "^@workspace/shared$": "<rootDir>/../../../packages/shared/src/index.ts"
     },
     "extensionsToTreatAsEsm": [
       ".ts"

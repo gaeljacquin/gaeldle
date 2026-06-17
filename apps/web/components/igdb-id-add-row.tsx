@@ -41,7 +41,7 @@ export function IgdbIdAddRow({
   rowId,
   onValidationChange,
   isDuplicate = false,
-}: Readonly<IgdbIdAddRowProps>) {
+}: IgdbIdAddRowProps) {
   const validationState = useIgdbIdAddValidation(value);
 
   useEffect(() => {

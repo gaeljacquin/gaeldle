@@ -11,12 +11,13 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@orpc/contract": "^1.14.5",
-    "@orpc/server": "^1.14.5",
-    "@workspace/constants": "workspace:*",
+    "@orpc/contract": "^1.14.6",
+    "@orpc/server": "^1.14.6",
+    "@tabler/icons-react": "^3.44.0",
+    "@workspace/shared": "workspace:*",
     "drizzle-orm": "^0.45.2",
-    "drizzle-zod": "^0.7.1",
-    "zod": "^3.25.76"
+    "drizzle-zod": "^0.8.3",
+    "zod": "^4.4.3"
   },
   "peerDependencies": {
     "zod": "^3.x"

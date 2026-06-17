@@ -7,6 +7,8 @@ import type {
   RevealedClue,
   Game,
   CellMatch,
+  MatchType,
+  MatchKey,
 } from '@workspace/api-contract';
 import Image from 'next/image';
 import {
@@ -14,6 +16,11 @@ import {
   IconArrowDown,
   IconArrowRight,
 } from '@tabler/icons-react';
+import {
+  extractArray,
+  extractPublisher,
+  extractReleaseYear,
+} from '@workspace/shared';
 
 interface SpecificationsGridProps {
   guesses: SpecificationGuess[];
@@ -25,7 +32,7 @@ interface SpecificationsGridProps {
 
 type CellValue = string | string[] | null;
 
-const COLUMN_HEADERS = [
+const columnHeaders = [
   { key: 'name', label: 'Name' },
   { key: 'platforms', label: 'Platforms' },
   { key: 'genres', label: 'Genres' },
@@ -37,23 +44,14 @@ const COLUMN_HEADERS = [
   { key: 'perspective', label: 'Perspective' },
 ] as const;
 
-type MatchKey = keyof SpecificationGuess['matches'];
+const matchColumns = columnHeaders
+  .filter(({ key }) => key !== 'name')
+  .map(({ key }) => ({
+    key: key as MatchKey,
+    ...(key === 'releaseDate' && { isReleaseDate: true }),
+  }));
 
-const MATCH_COLUMNS: Array<{ key: MatchKey; isReleaseDate?: boolean }> = [
-  { key: 'platforms' },
-  { key: 'genres' },
-  { key: 'themes' },
-  { key: 'releaseDate', isReleaseDate: true },
-  { key: 'gameModes' },
-  { key: 'gameEngines' },
-  { key: 'publisher' },
-  { key: 'perspective' },
-];
-
-function getCellColor(
-  matchType: 'exact' | 'partial' | 'none',
-  hasData: boolean,
-): string {
+function getCellColor(matchType: MatchType, hasData: boolean): string {
   if (!hasData) {
     return 'bg-muted/70 text-foreground';
   }
@@ -68,10 +66,16 @@ function getCellColor(
   }
 }
 
-function CellValueDisplay({ value }: Readonly<{ value: CellValue }>) {
-  if (!value) return <span className="opacity-80">No data</span>;
+function CellValueDisplay({ value }: { value: CellValue }) {
+  if (!value) {
+    return <span className="opacity-80">No data</span>;
+  }
+
   if (Array.isArray(value)) {
-    if (value.length === 0) return <span className="opacity-80">No data</span>;
+    if (value.length === 0) {
+      return <span className="opacity-80">No data</span>;
+    }
+
     return (
       <div className="flex flex-col gap-0.5">
         {value.map((item, idx) => (
@@ -84,61 +88,15 @@ function CellValueDisplay({ value }: Readonly<{ value: CellValue }>) {
 }
 
 function hasData(value: string | string[] | null): boolean {
-  if (!value) return false;
+  if (!value) {
+    return false;
+  }
+
   if (Array.isArray(value)) {
     return value.length > 0;
   }
+
   return value !== 'No data' && value !== '';
-}
-
-function extractArray(data: unknown): string[] {
-  if (!data) return [];
-  if (Array.isArray(data)) {
-    return data.map((item) => {
-      if (typeof item === 'string') return item;
-      if (typeof item === 'object' && item !== null && 'name' in item) {
-        return (item as { name: string }).name;
-      }
-      return String(item);
-    });
-  }
-  return [];
-}
-
-function extractReleaseYear(firstReleaseDate: number | null): string | null {
-  if (!firstReleaseDate) return null;
-  const date = new Date(firstReleaseDate * 1000);
-  return date.getFullYear().toString();
-}
-
-function extractPublisher(involved_companies: unknown): string | null {
-  if (!involved_companies || !Array.isArray(involved_companies)) return null;
-
-  const publisher = involved_companies.find(
-    (company: unknown) =>
-      typeof company === 'object' &&
-      company !== null &&
-      'publisher' in company &&
-      (company as { publisher: boolean }).publisher === true,
-  );
-
-  if (publisher && typeof publisher === 'object') {
-    if ('company' in publisher) {
-      const companyData = publisher.company;
-      if (
-        typeof companyData === 'object' &&
-        companyData !== null &&
-        'name' in companyData
-      ) {
-        return (companyData as { name: string }).name;
-      }
-    }
-    if ('name' in publisher) {
-      return (publisher as { name: string }).name;
-    }
-  }
-
-  return null;
 }
 
 function getBestMatch(
@@ -155,11 +113,13 @@ function getBestMatch(
   }
 
   const exactMatch = guesses.find((g) => g.matches[field].type === 'exact');
+
   if (exactMatch) {
     return exactMatch.matches[field];
   }
 
   const partialMatch = guesses.find((g) => g.matches[field].type === 'partial');
+
   if (partialMatch) {
     return partialMatch.matches[field];
   }
@@ -176,7 +136,7 @@ function renderHintRow(revealedClue: RevealedClue) {
           <IconArrowRight className="size-4" />
         </div>
       </td>
-      {COLUMN_HEADERS.slice(1).map((header) => (
+      {columnHeaders.slice(1).map((header) => (
         <td
           key={header.key}
           className={cn(
@@ -201,26 +161,35 @@ function getYearArrow(
   guessYear: string | null,
   targetYear: string | null,
 ): ReactNode {
-  if (!guessYear || !targetYear) return null;
+  if (!guessYear || !targetYear) {
+    return null;
+  }
 
   const guessYearNum = Number.parseInt(guessYear, 10);
   const targetYearNum = Number.parseInt(targetYear, 10);
 
-  if (Number.isNaN(guessYearNum) || Number.isNaN(targetYearNum)) return null;
+  if (Number.isNaN(guessYearNum) || Number.isNaN(targetYearNum)) {
+    return null;
+  }
 
   if (guessYearNum < targetYearNum) {
     return <IconArrowUp className="size-4 text-slate-700" />;
   }
+
   if (guessYearNum > targetYearNum) {
     return <IconArrowDown className="size-4 text-slate-700" />;
   }
+
   return null;
 }
 
 function ImageCell({
   imageUrl,
   name,
-}: Readonly<{ imageUrl: string | null; name: string }>) {
+}: {
+  imageUrl: string | null;
+  name: string;
+}) {
   return (
     <td className="border border-border/50 p-0 w-32">
       <div className="relative w-32 h-44 bg-muted/20">
@@ -257,7 +226,10 @@ function ImageCell({
 function ReleaseDateCell({
   match,
   targetYear,
-}: Readonly<{ match: CellMatch; targetYear: string | null }>) {
+}: {
+  match: CellMatch;
+  targetYear: string | null;
+}) {
   const arrow = getYearArrow(
     typeof match.value === 'string' ? match.value : null,
     targetYear,
@@ -278,7 +250,7 @@ function ReleaseDateCell({
   );
 }
 
-function MatchCell({ match }: Readonly<{ match: CellMatch }>) {
+function MatchCell({ match }: { match: CellMatch }) {
   return (
     <td
       className={cn(
@@ -291,7 +263,7 @@ function MatchCell({ match }: Readonly<{ match: CellMatch }>) {
   );
 }
 
-function AnswerCell({ value }: Readonly<{ value: string | string[] | null }>) {
+function AnswerCell({ value }: { value: string | string[] | null }) {
   return (
     <td className="border border-border/50 px-3 py-2 text-xs text-foreground bg-muted/70 text-center wrap-break-word">
       <CellValueDisplay value={value} />
@@ -300,7 +272,9 @@ function AnswerCell({ value }: Readonly<{ value: string | string[] | null }>) {
 }
 
 function getAnswerSpecs(targetGame?: Game | null) {
-  if (!targetGame) return null;
+  if (!targetGame) {
+    return null;
+  }
 
   return {
     platforms: extractArray(targetGame.platforms),
@@ -319,7 +293,9 @@ function getBestMatches(
   revealedClue?: RevealedClue | null,
   showAnswerOnly?: boolean,
 ) {
-  if (showAnswerOnly) return null;
+  if (showAnswerOnly) {
+    return null;
+  }
 
   return {
     platforms: getBestMatch(guesses, 'platforms', revealedClue),
@@ -336,16 +312,16 @@ function getBestMatches(
 function SummaryRow({
   bestMatches,
   targetYear,
-}: Readonly<{
+}: {
   bestMatches: Record<MatchKey, CellMatch>;
   targetYear: string | null;
-}>) {
+}) {
   return (
     <tr>
       <th className="border border-border/50 bg-secondary px-3 py-2 text-sm font-semibold text-white text-center w-32">
         Summary
       </th>
-      {MATCH_COLUMNS.map((column) =>
+      {matchColumns.map((column) =>
         column.isReleaseDate ? (
           <ReleaseDateCell
             key={column.key}
@@ -363,7 +339,7 @@ function SummaryRow({
 function HeaderRow() {
   return (
     <tr className="bg-slate-700">
-      {COLUMN_HEADERS.map((header) => (
+      {columnHeaders.map((header) => (
         <th
           key={header.key}
           className={cn(
@@ -381,10 +357,10 @@ function HeaderRow() {
 function AnswerRow({
   answerSpecs,
   targetGame,
-}: Readonly<{
+}: {
   answerSpecs: NonNullable<ReturnType<typeof getAnswerSpecs>>;
   targetGame: Game;
-}>) {
+}) {
   return (
     <tr>
       <ImageCell
@@ -424,12 +400,12 @@ function GuessRows({
   revealedClue,
   hintInsertIndex,
   targetYear,
-}: Readonly<{
+}: {
   guesses: SpecificationGuess[];
   revealedClue?: RevealedClue | null;
   hintInsertIndex: number;
   targetYear: string | null;
-}>) {
+}) {
   return (
     <>
       {guesses.map((guess, index) => (
@@ -439,7 +415,7 @@ function GuessRows({
             : null}
           <tr>
             <ImageCell imageUrl={guess.imageUrl} name={guess.gameName} />
-            {MATCH_COLUMNS.map((column) =>
+            {matchColumns.map((column) =>
               column.isReleaseDate ? (
                 <ReleaseDateCell
                   key={column.key}
@@ -466,7 +442,7 @@ export default function SpecificationsGrid({
   targetGame,
   showAnswerOnly = false,
   className,
-}: Readonly<SpecificationsGridProps>) {
+}: SpecificationsGridProps) {
   const reversedGuesses = [...guesses].reverse();
   const hintInsertIndex = revealedClue
     ? guesses.length - revealedClue.revealedAtGuessCount

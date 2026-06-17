@@ -11,7 +11,7 @@ export const orpcClient = createORPCClient<
   JsonifiedClient<ContractRouterClient<typeof contract>>
 >(
   new OpenAPILink(contract, {
-    url: `${process.env.serverUrl || 'http://localhost:8080'}`,
+    url: process.env.apiUrl!,
     fetch: async (request: Request, init: { redirect?: RequestRedirect }) => {
       const headers = new Headers(request.headers);
       const signal = request.signal;
@@ -24,15 +24,10 @@ export const orpcClient = createORPCClient<
         const user = await hexclaveClientApp.getUser({ or: 'return-null' });
 
         if (user) {
-          const authHeaders = await user.getAuthHeaders();
-          Object.entries(authHeaders).forEach(([key, value]) => {
-            headers.set(key, value);
-          });
+          const authorizationHeader = await user.getAuthorizationHeader();
 
-          // Also set the token explicitly just in case some middleware prefers it
-          const accessToken = await user.getAccessToken();
-          if (accessToken) {
-            headers.set('x-stack-access-token', accessToken);
+          if (authorizationHeader) {
+            headers.set('Authorization', authorizationHeader);
           }
         }
 
@@ -43,6 +38,7 @@ export const orpcClient = createORPCClient<
           mode: 'cors',
           timeout: 60000,
         });
+
         return response;
       } catch (e) {
         if (

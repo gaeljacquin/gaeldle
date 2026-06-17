@@ -1,7 +1,6 @@
 /**
  * Skeleton component for both artwork and cover displays
  */
-
 import { Skeleton } from '@workspace/ui/skeleton';
 import { cn } from '@workspace/ui/lib/utils';
 
@@ -11,7 +10,7 @@ interface ImageDisplaySkeletonProps {
 
 export default function ImageDisplaySkeleton({
   className,
-}: Readonly<ImageDisplaySkeletonProps>) {
+}: ImageDisplaySkeletonProps) {
   return (
     <div
       className={cn(

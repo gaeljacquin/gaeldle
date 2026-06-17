@@ -8,15 +8,12 @@ type HexclaveSignInResult = {
   expiresAtMillis: number | null;
 };
 
-const HEXCLAVE_API_BASE_URL =
+const hexclaveApiUrl =
   process.env.HEXCLAVE_API_URL || 'https://api.hexclave.com';
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
-
 const getString = (value: unknown): string | null =>
   typeof value === 'string' ? value : null;
-
 const getNumber = (value: unknown): number | null =>
   typeof value === 'number' ? value : null;
 
@@ -39,16 +36,8 @@ export class HexclaveService {
     email: string,
     password: string,
   ): Promise<HexclaveSignInResult> {
-    if (
-      !this.hexclaveProjectId ||
-      !this.hexclavePublishableClientKey ||
-      !this.hexclaveSecretServerKey
-    ) {
-      throw new UnauthorizedException('Hexclave is not configured');
-    }
-
     const response = await fetch(
-      `${HEXCLAVE_API_BASE_URL}/api/v1/auth/password/sign-in`,
+      `${hexclaveApiUrl}/api/v1/auth/password/sign-in`,
       {
         method: 'POST',
         headers: {
@@ -58,26 +47,17 @@ export class HexclaveService {
           'x-stack-publishable-client-key': this.hexclavePublishableClientKey,
           'x-stack-secret-server-key': this.hexclaveSecretServerKey,
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: JSON.stringify({ email, password }),
       },
     );
 
     const raw = (await response.json().catch(() => null)) as unknown;
+
     if (!response.ok || !isRecord(raw)) {
       throw new UnauthorizedException('Invalid Hexclave credentials');
     }
 
-    const accessToken =
-      getString(raw.access_token) ?? getString(raw.accessToken);
-    const refreshToken =
-      getString(raw.refresh_token) ?? getString(raw.refreshToken);
-    const userId = getString(raw.user_id) ?? getString(raw.userId);
-    const expiresAtMillis =
-      getNumber(raw.access_token_expires_at_millis) ??
-      getNumber(raw.accessTokenExpiresAtMillis);
+    const accessToken = getString(raw.access_token);
 
     if (!accessToken) {
       throw new UnauthorizedException('Invalid Hexclave response');
@@ -85,9 +65,9 @@ export class HexclaveService {
 
     return {
       accessToken,
-      refreshToken,
-      userId,
-      expiresAtMillis,
+      refreshToken: getString(raw.refresh_token),
+      userId: getString(raw.user_id),
+      expiresAtMillis: getNumber(raw.access_token_expires_at_millis),
     };
   }
 }

@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { ElementType, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { UserButton, useUser } from '@hexclave/next';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import {
   IconDashboard,
-  IconDeviceGamepad2,
   IconChevronDown,
   IconChevronRight,
   IconSettings,
@@ -16,15 +16,17 @@ import {
   IconHome,
   IconTools,
   IconHealthRecognition,
+  IconPlayerPlay,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { appInfo } from '@/lib/app-info';
-import { gameModes } from '@/lib/game-mode';
 import { Separator } from '@workspace/ui/separator';
+import { gameModesQueryOptions } from '@/lib/services/game-mode.service';
+import { GameMode } from '@workspace/api-contract';
 
 interface SidebarLinkProps {
   href: string;
-  icon: React.ElementType;
+  icon: ElementType;
   label: string;
   isCollapsed: boolean;
   isActive: boolean;
@@ -36,7 +38,7 @@ function SidebarLink({
   label,
   isCollapsed,
   isActive,
-}: Readonly<SidebarLinkProps>) {
+}: SidebarLinkProps) {
   return (
     <Link
       href={href}
@@ -63,7 +65,7 @@ interface SidebarGamesSectionProps {
 }
 
 interface SidebarGameLinkProps {
-  mode: (typeof gameModes)[number];
+  mode: GameMode;
   isCollapsed: boolean;
   pathname: string;
 }
@@ -72,11 +74,13 @@ function SidebarGameLink({
   mode,
   isCollapsed,
   pathname,
-}: Readonly<SidebarGameLinkProps>) {
-  const isActive = pathname === mode.href;
+}: SidebarGameLinkProps) {
+  const href = `/${mode.slug}`;
+  const isActive = pathname === href;
+
   return (
     <Link
-      href={mode.href}
+      href={href}
       className={cn(
         'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
         isCollapsed ? 'justify-center px-0' : null,
@@ -86,7 +90,6 @@ function SidebarGameLink({
       )}
       title={isCollapsed ? mode.title : undefined}
     >
-      <mode.icon size={isCollapsed ? 20 : 18} />
       {isCollapsed ? null : <span>{mode.title}</span>}
     </Link>
   );
@@ -97,7 +100,9 @@ function SidebarGamesSection({
   isExpanded,
   onToggle,
   pathname,
-}: Readonly<SidebarGamesSectionProps>) {
+}: SidebarGamesSectionProps) {
+  const { data: gameModes } = useSuspenseQuery(gameModesQueryOptions);
+
   return (
     <div>
       <button
@@ -108,7 +113,7 @@ function SidebarGamesSection({
         )}
         title={isCollapsed ? 'Modes' : undefined}
       >
-        <IconDeviceGamepad2 size={20} />
+        <IconPlayerPlay size={20} />
         {isCollapsed ? null : (
           <>
             <span>Modes</span>
@@ -126,7 +131,7 @@ function SidebarGamesSection({
         <div className={cn('mt-1 space-y-1', isCollapsed ? null : 'ml-4')}>
           {gameModes.map((mode) => (
             <SidebarGameLink
-              key={mode.href}
+              key={mode.slug}
               mode={mode}
               isCollapsed={isCollapsed}
               pathname={pathname}
@@ -143,10 +148,7 @@ interface SidebarHeaderProps {
   onToggle: () => void;
 }
 
-function SidebarHeader({
-  isCollapsed,
-  onToggle,
-}: Readonly<SidebarHeaderProps>) {
+function SidebarHeader({ isCollapsed, onToggle }: SidebarHeaderProps) {
   return (
     <button
       onClick={onToggle}
@@ -207,10 +209,7 @@ interface SidebarUserFooterProps {
   user: { displayName?: string | null };
 }
 
-function SidebarUserFooter({
-  isCollapsed,
-  user,
-}: Readonly<SidebarUserFooterProps>) {
+function SidebarUserFooter({ isCollapsed, user }: SidebarUserFooterProps) {
   return (
     <div
       className={cn(
@@ -239,10 +238,11 @@ function SidebarUserFooter({
 }
 
 export function Sidebar() {
+  const pathname = usePathname();
+  const user = useUser();
+
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isGamesExpanded, setIsGamesExpanded] = useState(false);
-  const pathname = usePathname();
-  const user = useUser({ or: 'redirect' });
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
   const toggleGames = () => setIsGamesExpanded((prev) => !prev);
@@ -315,7 +315,7 @@ export function Sidebar() {
         />
       </nav>
 
-      <SidebarUserFooter isCollapsed={isCollapsed} user={user} />
+      <SidebarUserFooter isCollapsed={isCollapsed} user={user!} />
     </aside>
   );
 }

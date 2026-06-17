@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils';
+
 interface AttemptsProps {
   maxAttempts: number;
   attemptsLeft: number;
@@ -10,7 +12,7 @@ export default function Attempts({
   attemptsLeft,
   className,
   variant = 'primary',
-}: Readonly<AttemptsProps>) {
+}: AttemptsProps) {
   const attemptsUsed = maxAttempts - attemptsLeft;
   const emptyClass =
     variant === 'neutral'
@@ -20,16 +22,18 @@ export default function Attempts({
 
   return (
     <div
-      className={`flex items-center justify-center gap-2 ${className ?? ''}`}
+      className={cn('flex items-center justify-center gap-2', className ?? '')}
     >
       {Array.from({ length: maxAttempts }).map((_, index) => {
         const isUsed = index >= maxAttempts - attemptsUsed;
+
         return (
           <div
             key={`attempt-${index + 1}`}
-            className={`size-3 rounded-none border transition-colors ${
-              isUsed ? usedClass : emptyClass
-            }`}
+            className={cn(
+              'size-3 rounded-none border transition-colors',
+              isUsed ? usedClass : emptyClass,
+            )}
           />
         );
       })}

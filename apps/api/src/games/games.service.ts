@@ -1,42 +1,31 @@
-import {
-  Injectable,
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
-import { eq, inArray, sql, InferInsertModel } from 'drizzle-orm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
-import { randomUUID } from 'node:crypto';
 import { DatabaseService } from '@/db/database.service';
 import {
   games,
-  bulkImageGenJobs,
   type Game,
   gameObject,
   type SyncOperation,
-  GameUpdate,
-  type ArtStyle,
+  ReplaceGameResult,
+  artStyles as artStylesView,
+  type ArtStyleValue,
+  GameInsert,
 } from '@workspace/api-contract';
-import { IgdbService, type IgdbGame } from '@/games/igdb.service';
+import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
-import { BulkImageJobStore } from '@/games/bulk-image-job.store';
 import type { AppConfiguration } from '@/config/configuration';
-import {
-  ART_STYLES,
-  IMAGE_PROMPT_SUFFIX,
-  IMAGE_GEN_DIR,
-} from '@workspace/constants';
+import { IMAGE_GEN_DIR, IMAGE_PROMPT_SUFFIX } from '@workspace/shared';
 
-type Result = {
-  current: number;
-  replacement: number;
-  status: 'updated' | 'skipped' | 'error';
-  message: string;
-  gameName: string | null;
-};
-
-type GameInsert = InferInsertModel<typeof games>;
+interface GenerateImageInput {
+  igdbId: number;
+  includeStoryline?: boolean;
+  includeGenres?: boolean;
+  includeThemes?: boolean;
+  artStyle?: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with imageGen
+}
 
 @Injectable()
 export class GamesService {
@@ -45,11 +34,9 @@ export class GamesService {
     private readonly igdbService: IgdbService,
     private readonly aiService: AiService,
     private readonly s3Service: S3Service,
-    private readonly bulkImageJobStore: BulkImageJobStore,
     private readonly configService: ConfigService<AppConfiguration>,
   ) {}
 
-  // Kept for internal use by generateImage in the router (not exposed as a standalone endpoint).
   async getGameByIgdbId(igdbId: number): Promise<Game | null> {
     const [game] = await this.databaseService.db
       .select(gameObject)
@@ -71,10 +58,10 @@ export class GamesService {
 
     if (immediate) {
       await this.performRefresh();
+
       return;
     }
 
-    // Debounce for 1 second
     return new Promise<void>((resolve) => {
       this.refreshTimeout = setTimeout(() => {
         void this.performRefresh().then(() => resolve());
@@ -83,7 +70,6 @@ export class GamesService {
   }
 
   private async performRefresh() {
-    // Prevent concurrent executions
     if (this.pendingRefresh) {
       return this.pendingRefresh;
     }
@@ -161,7 +147,7 @@ export class GamesService {
 
   async updateGame(
     id: number,
-    updates: GameUpdate,
+    updates: Partial<GameInsert>,
     shouldRefresh = true,
   ): Promise<Game | null> {
     const [updatedGame] = await this.databaseService.db
@@ -205,8 +191,6 @@ export class GamesService {
 
     return deletedRows.map((row) => row.id);
   }
-
-  // ─── Add Game by IGDB ID ─────────────────────────────────────────────────────────────
 
   async validateGameForAdd(igdbId: number): Promise<{
     igdbId: number;
@@ -262,8 +246,6 @@ export class GamesService {
     }
   }
 
-  // ─── Replace Game by IGDB ID ──────────────────────────────────────────────────────────
-
   async validateGameByIgdbId(
     current: number,
     replacement: number,
@@ -285,7 +267,6 @@ export class GamesService {
 
     const currentExistsInDb = !!currentRow;
     const currentGameName = currentRow?.name ?? null;
-
     let replacementAlreadyInDb = false;
     let replacementExistsOnIgdb = false;
     let replacementGameName: string | null = null;
@@ -301,6 +282,7 @@ export class GamesService {
 
       try {
         const igdbGame = await this.igdbService.getGameById(replacement);
+
         if (igdbGame) {
           replacementExistsOnIgdb = true;
           replacementGameName = igdbGame.name ?? null;
@@ -328,22 +310,20 @@ export class GamesService {
     };
   }
 
-  // Helper: build a skipped/error result inline (replaces repeated result.push blocks)
   private makeResult(
     pair: { current: number; replacement: number },
     status: 'skipped' | 'error',
     message: string,
-  ): Result {
+  ): ReplaceGameResult {
     return { ...pair, status, message, gameName: null };
   }
 
-  // Helper: separate valid pairs from immediately-skippable ones
   private partitionPairs(
     pairs: Array<{ current: number; replacement: number }>,
     existingReplacementSet: Set<number>,
-  ): { validPairs: typeof pairs; skippedResults: Result[] } {
+  ): { validPairs: typeof pairs; skippedResults: ReplaceGameResult[] } {
     const validPairs: typeof pairs = [];
-    const skippedResults: Result[] = [];
+    const skippedResults: ReplaceGameResult[] = [];
 
     for (const pair of pairs) {
       if (pair.current === pair.replacement) {
@@ -370,13 +350,14 @@ export class GamesService {
     return { validPairs, skippedResults };
   }
 
-  // Helper: fetch IGDB data or return error results for all pairs
   private async fetchIgdbGameMap(
     validPairs: Array<{ current: number; replacement: number }>,
-  ): Promise<{ igdbGameMap: Map<number, GameInsert> } | Result[]> {
+  ): Promise<{ igdbGameMap: Map<number, GameInsert> } | ReplaceGameResult[]> {
     const replacementIds = validPairs.map((p) => p.replacement);
+
     try {
       const igdbGames = await this.igdbService.getGamesByIds(replacementIds);
+
       return {
         igdbGameMap: new Map(
           igdbGames.map((g) => [g.id, this.mapIgdbToGame(g)]),
@@ -387,6 +368,7 @@ export class GamesService {
         err instanceof Error
           ? `IGDB fetch failed: ${err.message}`
           : 'IGDB fetch failed';
+
       return validPairs.map((pair) => this.makeResult(pair, 'error', message));
     }
   }
@@ -394,7 +376,7 @@ export class GamesService {
   private async updateGameHelper(
     gameData: GameInsert,
     pair: { current: number; replacement: number },
-    results: Result[],
+    results: ReplaceGameResult[],
   ): Promise<boolean> {
     const updated = await this.databaseService.db
       .update(games)
@@ -410,6 +392,7 @@ export class GamesService {
           `No row found with igdb_id=${pair.current}`,
         ),
       );
+
       return false;
     }
 
@@ -419,19 +402,18 @@ export class GamesService {
       message: `Updated IGDB ID ${pair.current} → ${pair.replacement}`,
       gameName: updated[0].name ?? null,
     });
+
     return true;
   }
 
   async replaceGameByIgdbId(
     pairs: Array<{ current: number; replacement: number }>,
-  ): Promise<{ success: boolean; results: Array<Result> }> {
-    // Check which replacement IDs already exist in DB
+  ): Promise<{ success: boolean; results: Array<ReplaceGameResult> }> {
     const allReplacementIds = pairs.map((p) => p.replacement);
     const existingReplacements = await this.databaseService.db
       .select({ igdbId: games.igdbId })
       .from(games)
       .where(inArray(games.igdbId, allReplacementIds));
-
     const existingReplacementSet = new Set(
       existingReplacements.map((r) => r.igdbId),
     );
@@ -439,20 +421,26 @@ export class GamesService {
       pairs,
       existingReplacementSet,
     );
-    const results: Array<Result> = [...skippedResults];
+    const results: Array<ReplaceGameResult> = [...skippedResults];
 
-    if (validPairs.length === 0) return { success: true, results };
+    if (validPairs.length === 0)
+      return {
+        success: true,
+        results,
+      };
 
-    // Fetch from IGDB — returns map on success, error results on failure
     const igdbResult = await this.fetchIgdbGameMap(validPairs);
-    if (Array.isArray(igdbResult))
+
+    if (Array.isArray(igdbResult)) {
       return { success: false, results: [...results, ...igdbResult] };
+    }
 
     const { igdbGameMap } = igdbResult;
     let anyUpdated = false;
 
     for (const pair of validPairs) {
       const gameData = igdbGameMap.get(pair.replacement);
+
       if (!gameData) {
         results.push(
           this.makeResult(
@@ -461,8 +449,10 @@ export class GamesService {
             `No data returned from IGDB for IGDB ID ${pair.replacement}`,
           ),
         );
+
         continue;
       }
+
       try {
         anyUpdated = await this.updateGameHelper(gameData, pair, results);
       } catch (err) {
@@ -476,261 +466,149 @@ export class GamesService {
       }
     }
 
-    if (anyUpdated) await this.refreshAllGamesView();
+    if (anyUpdated) {
+      await this.refreshAllGamesView();
+    }
+
     return { success: true, results };
   }
 
-  // ─── Bulk Image Generation ─────────────────────────────────────────────────
+  private mapIgdbToGame(igdbGame: IgdbGame): GameInsert {
+    const formatUrl = (url?: string) => {
+      if (!url) {
+        return undefined;
+      }
 
-  async bulkGenerateImages(params: {
-    numGames: number;
-    artStyle: ArtStyle;
-    includeStoryline: boolean;
-    includeGenres: boolean;
-    includeThemes: boolean;
-  }): Promise<{ jobId: string; gamesQueued: number }> {
-    // Reject if an active job exists
-    const [activeJob] = await this.databaseService.db
-      .select({ id: bulkImageGenJobs.id })
-      .from(bulkImageGenJobs)
-      .where(sql`${bulkImageGenJobs.status} IN ('pending', 'running')`)
-      .limit(1);
+      const fullUrl = url.startsWith('//') ? `https:${url}` : url;
 
-    if (activeJob) {
-      throw new ConflictException(
-        'A bulk image generation job is already active. Please wait for it to finish.',
-      );
-    }
+      return fullUrl.replace('t_thumb', 't_720p');
+    };
 
-    // Query games where ai_image_url IS NULL
-    const pendingGames = await this.databaseService.db
-      .select(gameObject)
-      .from(games)
-      .where(sql`${games.aiImageUrl} IS NULL`)
-      .limit(params.numGames);
-
-    const total = pendingGames.length;
-
-    if (total === 0) {
-      throw new ConflictException(
-        'No games without AI images found. All games already have AI-generated images.',
-      );
-    }
-
-    const jobId = randomUUID();
-
-    // Insert the job record
-    await this.databaseService.db.insert(bulkImageGenJobs).values({
-      jobId,
-      status: 'pending',
-      total,
-      processed: 0,
-      succeeded: 0,
-      failed: 0,
-      failures: [],
-      params,
-    });
-
-    // Run the generation loop asynchronously (fire-and-forget)
-    this.runGenerationLoop(jobId, pendingGames, params).catch((err) => {
-      console.error(`[BulkImageGen] Fatal error for job ${jobId}:`, err);
-    });
-
-    return { jobId, gamesQueued: total };
+    return {
+      igdbId: igdbGame.id,
+      name: igdbGame.name,
+      summary: igdbGame.summary,
+      storyline: igdbGame.storyline,
+      firstReleaseDate: igdbGame.first_release_date,
+      imageUrl: formatUrl(igdbGame.cover?.url),
+      artworks: igdbGame.artworks?.map((art) => ({
+        ...art,
+        url: formatUrl(art.url),
+      })),
+      platforms: igdbGame.platforms?.map((p) => p.name),
+      genres: igdbGame.genres?.map((g) => g.name),
+      themes: igdbGame.themes?.map((t) => t.name),
+      gameModes: igdbGame.game_modes?.map((m) => m.name),
+      playerPerspectives: igdbGame.player_perspectives?.map((p) => p.name),
+      gameEngines: igdbGame.game_engines?.map((e) => e.name),
+      involvedCompanies: igdbGame.involved_companies?.map((c) => ({
+        name: c.company?.name,
+        developer: c.developer,
+        publisher: c.publisher,
+      })),
+      keywords: igdbGame.keywords?.map((k) => k.name),
+      franchises: igdbGame.franchises?.map((f) => f.name),
+      releaseDates: igdbGame.release_dates?.map((rd) => ({
+        date: rd.date,
+        platform: rd.platform?.name,
+      })),
+    };
   }
 
-  private async runGenerationLoop(
-    jobId: string,
-    pendingGames: Game[],
-    params: {
-      numGames: number;
-      artStyle: ArtStyle;
-      includeStoryline: boolean;
-      includeGenres: boolean;
-      includeThemes: boolean;
-    },
-  ): Promise<void> {
-    const total = pendingGames.length;
-    const failures: Array<{ igdbId: number; gameName: string; error: string }> =
-      [];
-    let processed = 0;
-    let succeeded = 0;
-    let failed = 0;
+  async generateImage(
+    input: GenerateImageInput,
+  ): Promise<{ success: boolean; url: string; data: Game } | null> {
+    const {
+      igdbId,
+      includeStoryline,
+      includeGenres,
+      includeThemes,
+      artStyle: artStyleValue, // effectively artStyleValue, not renaming this to be consistent with imageGen
+    } = input;
+    const game = await this.getGameByIgdbId(igdbId);
+    const artStyles = await this.databaseService.db
+      .select()
+      .from(artStylesView);
 
-    // Mark job as running
-    await this.databaseService.db
-      .update(bulkImageGenJobs)
-      .set({ status: 'running', startedAt: new Date() })
-      .where(eq(bulkImageGenJobs.jobId, jobId));
+    if (!game || !artStyleValue) {
+      return null;
+    }
 
-    const styleEntry = ART_STYLES.find((s) => s.value === params.artStyle);
-    const styleDescriptor = styleEntry?.descriptor ?? params.artStyle;
+    const artStyleDescription = artStyles.find(
+      (artStyle) =>
+        artStyle.value.toLowerCase() === artStyleValue.toLowerCase(),
+    )?.description;
+    const prompt = this.buildImagePrompt(
+      game,
+      {
+        includeStoryline: includeStoryline ?? false,
+        includeGenres: includeGenres ?? false,
+        includeThemes: includeThemes ?? false,
+      },
+      artStyleDescription!,
+    );
+    const rawBuffer = await this.aiService.generateImage(prompt);
+    const imageBuffer = await sharp(rawBuffer).jpeg({ quality: 85 }).toBuffer();
+    const timestamp = Date.now();
+    const key = `${IMAGE_GEN_DIR}/${igdbId}_${timestamp}.jpg`;
+
+    await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
 
     const r2PublicUrlRaw =
       this.configService.get('r2PublicUrl', { infer: true }) ?? '';
     const r2PublicUrl = r2PublicUrlRaw.startsWith('http')
       ? r2PublicUrlRaw
       : `https://${r2PublicUrlRaw}`;
+    const publicUrl = `${r2PublicUrl}/${key}`;
+    const list = Array.isArray(game.imageGen)
+      ? JSON.parse(JSON.stringify(game.imageGen))
+      : [];
+    const newItem = {
+      [artStyleValue]: {
+        url: publicUrl,
+        prompt: prompt,
+        provider: 'cloudflare',
+      },
+    };
+    const existingIndex = list.findIndex(
+      (item: any) => item && typeof item === 'object' && artStyleValue in item,
+    );
 
-    for (const game of pendingGames) {
-      try {
-        const prompt = this.buildImagePromptFromGame(
-          game,
-          params,
-          styleDescriptor,
-        );
-        const rawBuffer = await this.aiService.generateImage(prompt);
-        const imageBuffer = await sharp(rawBuffer)
-          .jpeg({ quality: 85 })
-          .toBuffer();
-
-        const timestamp = Date.now();
-        const key = `${IMAGE_GEN_DIR}/${game.igdbId}_${timestamp}.jpg`;
-        await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
-
-        const publicUrl = `${r2PublicUrl}/${key}`;
-
-        const list = Array.isArray(game.imageGen)
-          ? JSON.parse(JSON.stringify(game.imageGen))
-          : [];
-        const styleKey = params.artStyle;
-        const newItem = {
-          [styleKey]: {
-            url: publicUrl,
-            prompt: prompt,
-            provider: 'cloudflare',
-          },
-        };
-        const existingIndex = list.findIndex(
-          (item: any) => item && typeof item === 'object' && styleKey in item,
-        );
-        if (existingIndex >= 0) {
-          list[existingIndex] = newItem;
-        } else {
-          list.push(newItem);
-        }
-        const updatedImageGen = list;
-
-        await this.databaseService.db
-          .update(games)
-          .set({
-            aiImageUrl: publicUrl,
-            aiPrompt: prompt,
-            imageGen: updatedImageGen,
-            updatedAt: new Date(),
-          })
-          .where(eq(games.id, game.id));
-
-        succeeded++;
-      } catch (err) {
-        failed++;
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        failures.push({
-          igdbId: game.igdbId,
-          gameName: game.name,
-          error: errorMessage,
-        });
-        console.error(
-          `[BulkImageGen] Failed to process game ${game.name} (${game.igdbId}):`,
-          errorMessage,
-        );
-      }
-
-      processed++;
-
-      // Update job progress in DB
-      await this.databaseService.db
-        .update(bulkImageGenJobs)
-        .set({ processed, succeeded, failed, failures })
-        .where(eq(bulkImageGenJobs.jobId, jobId));
-
-      // Emit progress event via EventEmitter
-      this.bulkImageJobStore.emit(jobId, {
-        type: 'progress',
-        data: {
-          processed,
-          succeeded,
-          failed,
-          total,
-          latestGame: game.name,
-        },
-      });
+    if (existingIndex >= 0) {
+      list[existingIndex] = newItem;
+    } else {
+      list.push(newItem);
     }
 
-    // Mark job as completed or failed
-    const finalStatus = failed === total ? 'failed' : 'completed';
-    await this.databaseService.db
-      .update(bulkImageGenJobs)
-      .set({
-        status: finalStatus,
-        completedAt: new Date(),
-        processed,
-        succeeded,
-        failed,
-        failures,
-      })
-      .where(eq(bulkImageGenJobs.jobId, jobId));
-
-    // Emit completed event
-    this.bulkImageJobStore.emit(jobId, {
-      type: 'completed',
-      data: { succeeded, failed, failures },
+    const updatedGame = await this.updateGame(game.id, {
+      aiImageUrl: publicUrl,
+      aiPrompt: prompt,
+      imageGen: list,
     });
 
-    // Refresh the materialized view
-    await this.refreshAllGamesView();
-  }
-
-  async getBulkJobStatus(jobId: string) {
-    const [job] = await this.databaseService.db
-      .select()
-      .from(bulkImageGenJobs)
-      .where(eq(bulkImageGenJobs.jobId, jobId))
-      .limit(1);
-
-    if (!job) {
-      throw new NotFoundException(`Bulk image job ${jobId} not found`);
+    if (!updatedGame) {
+      throw new NotFoundException('Failed to update game record');
     }
 
-    return {
-      jobId: job.jobId,
-      status: job.status as 'pending' | 'running' | 'completed' | 'failed',
-      total: job.total,
-      processed: job.processed,
-      succeeded: job.succeeded,
-      failed: job.failed,
-      failures: (job.failures ?? []) as Array<{
-        igdbId: number;
-        gameName: string;
-        error: string;
-      }>,
-      params: job.params,
-      startedAt: job.startedAt,
-      completedAt: job.completedAt,
-      createdAt: job.createdAt!,
-    };
+    return { success: true, url: publicUrl, data: updatedGame };
   }
 
-  buildImagePromptFromGame(
-    game: {
-      name: string;
-      summary?: string | null;
-      storyline?: string | null;
-      keywords?: unknown;
-      genres?: unknown;
-      themes?: unknown;
-    },
+  private buildImagePrompt(
+    game: Pick<
+      Game,
+      'name' | 'summary' | 'storyline' | 'keywords' | 'genres' | 'themes'
+    >,
     options: {
       includeStoryline: boolean;
       includeGenres: boolean;
       includeThemes: boolean;
     },
-    styleDescriptor: string,
+    artStyleDescription: string,
   ): string {
     const parts: string[] = [];
 
     parts.push(
-      `${styleDescriptor} of iconic characters from "${game.name}" set within the game's distinct world`,
+      `${artStyleDescription} of iconic characters from "${game.name}" set within the game's distinct world`,
     );
 
     if (game.summary) {
@@ -764,43 +642,5 @@ export class GamesService {
     parts.push(IMAGE_PROMPT_SUFFIX);
 
     return parts.join('. ');
-  }
-
-  private mapIgdbToGame(igdbGame: IgdbGame): GameInsert {
-    const formatUrl = (url?: string) => {
-      if (!url) return undefined;
-      const fullUrl = url.startsWith('//') ? `https:${url}` : url;
-      return fullUrl.replace('t_thumb', 't_720p');
-    };
-
-    return {
-      igdbId: igdbGame.id,
-      name: igdbGame.name,
-      summary: igdbGame.summary,
-      storyline: igdbGame.storyline,
-      firstReleaseDate: igdbGame.first_release_date,
-      imageUrl: formatUrl(igdbGame.cover?.url),
-      artworks: igdbGame.artworks?.map((art) => ({
-        ...art,
-        url: formatUrl(art.url),
-      })),
-      platforms: igdbGame.platforms?.map((p) => p.name),
-      genres: igdbGame.genres?.map((g) => g.name),
-      themes: igdbGame.themes?.map((t) => t.name),
-      gameModes: igdbGame.game_modes?.map((m) => m.name),
-      playerPerspectives: igdbGame.player_perspectives?.map((p) => p.name),
-      gameEngines: igdbGame.game_engines?.map((e) => e.name),
-      involvedCompanies: igdbGame.involved_companies?.map((c) => ({
-        name: c.company?.name,
-        developer: c.developer,
-        publisher: c.publisher,
-      })),
-      keywords: igdbGame.keywords?.map((k) => k.name),
-      franchises: igdbGame.franchises?.map((f) => f.name),
-      releaseDates: igdbGame.release_dates?.map((rd) => ({
-        date: rd.date,
-        platform: rd.platform?.name,
-      })),
-    };
   }
 }

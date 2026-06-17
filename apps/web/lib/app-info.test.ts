@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { appInfo } from './app-info';
+import { appInfo } from '@/lib/app-info';
 
 describe('appInfo', () => {
   it('should have a title property', () => {

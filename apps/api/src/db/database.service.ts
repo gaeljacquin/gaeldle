@@ -11,6 +11,7 @@ export class DatabaseService implements OnModuleDestroy {
 
   constructor(private readonly configService: ConfigService) {
     const databaseUrl = this.configService.get<string>('databaseUrl');
+
     if (!databaseUrl) {
       throw new Error('DATABASE_URL is required');
     }

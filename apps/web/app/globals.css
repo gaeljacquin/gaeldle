@@ -2,6 +2,8 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
+@import './extra.css';
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -46,7 +48,7 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  --background-image-gradient-easy: var(--gradient-easy);
+  --background-image-gradient-easy-1: var(--gradient-easy-1);
   --background-image-gradient-medium-1: var(--gradient-medium-1);
   --background-image-gradient-medium-2: var(--gradient-medium-2);
   --background-image-gradient-medium-3: var(--gradient-medium-3);
@@ -90,7 +92,7 @@
   --sidebar-accent-foreground: hsl(0 0% 98%);
   --sidebar-border: hsl(240 4% 83%);
   --sidebar-ring: hsl(171 77% 37%);
-  --gradient-easy: linear-gradient(
+  --gradient-easy-1: linear-gradient(
     135deg,
     hsl(145 70% 45%) 0%,
     hsl(170 60% 40%) 100%

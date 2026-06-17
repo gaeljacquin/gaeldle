@@ -1,0 +1,1 @@
+CREATE INDEX "art_style_value_idx" ON "art_style" USING btree ("value");

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { MAX_ATTEMPTS, useCoverArtGame } from '@/lib/hooks/use-cover-art-game';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { useCoverArtGame } from '@/lib/hooks/use-cover-art-game';
 import ArtworkDisplay from '@/components/artwork-display';
 import CoverDisplay from '@/components/cover-display';
 import GameSearch from '@/components/game-search';
@@ -9,19 +10,19 @@ import SelectedGameDisplay from '@/components/selected-game-display';
 import GuessHistoryInline from '@/components/guess-history-inline';
 import { Button } from '@workspace/ui/button';
 import { Card } from '@workspace/ui/card';
-import { getGameModeBySlug } from '@/lib/game-mode';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
-import type { CoverArtModeSlug } from '@workspace/api-contract';
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
+import { COVER_ART_MAX_ATTEMPTS } from '@workspace/shared';
 
 interface GameListPlusImageProps {
-  gameModeSlug: CoverArtModeSlug;
+  gameModeSlug: string;
 }
 
-export default function GameListPlusImage(
-  props: Readonly<GameListPlusImageProps>,
-) {
-  const gameMode = getGameModeBySlug(props.gameModeSlug);
+export default function GameListPlusImage(props: GameListPlusImageProps) {
+  const { data: gameMode } = useSuspenseQuery(
+    gameModeSlugQueryOptions(props.gameModeSlug),
+  );
   const [searchKey, setSearchKey] = useState(0);
 
   const {
@@ -31,7 +32,6 @@ export default function GameListPlusImage(
     attemptsLeft,
     isGameOver,
     isCorrect,
-    isLoading,
     error,
     currentPixelSize,
     selectedArtworkUrl,
@@ -69,7 +69,6 @@ export default function GameListPlusImage(
             imageUrl={selectedArtworkUrl}
             pixelSize={currentPixelSize}
             isGameOver={isGameOver}
-            isLoading={isLoading}
             className="size-full"
           />
         );
@@ -81,7 +80,6 @@ export default function GameListPlusImage(
             pixelSize={0}
             usePixelation={false}
             isGameOver={isGameOver}
-            isLoading={isLoading}
             className="size-full"
             sourceImageUrl={selectedAiImage?.url ?? targetGame?.aiImageUrl}
             objectFit="cover"
@@ -95,7 +93,6 @@ export default function GameListPlusImage(
             pixelSize={currentPixelSize}
             usePixelation={true}
             isGameOver={isGameOver}
-            isLoading={isLoading}
             className="size-full"
             sourceImageUrl={targetGame?.imageUrl}
             objectFit="cover"
@@ -147,7 +144,7 @@ export default function GameListPlusImage(
                     Attempts
                   </p>
                   <Attempts
-                    maxAttempts={MAX_ATTEMPTS}
+                    maxAttempts={COVER_ART_MAX_ATTEMPTS}
                     attemptsLeft={attemptsLeft}
                     variant="primary"
                   />
@@ -230,12 +227,13 @@ export default function GameListPlusImage(
           </div>
         </div>
 
-        <div className="flex items-center justify-center border-2 border-dashed p-4 text-center opacity-70 hover:opacity-100 transition-opacity mt-8">
+        <div className="flex items-center justify-center text-center opacity-70 hover:opacity-100 transition-opacity mt-8">
           <DevModeToggle
             targetGame={targetGame}
             attemptsLeft={attemptsLeft}
-            maxAttempts={MAX_ATTEMPTS}
+            maxAttempts={COVER_ART_MAX_ATTEMPTS}
             onAdjustAttempts={adjustAttempts}
+            className="border-2 border-dashed w-full p-4"
           />
         </div>
       </div>

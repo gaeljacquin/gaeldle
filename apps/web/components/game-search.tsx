@@ -3,8 +3,8 @@
 import { useState, useRef, ChangeEvent } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@workspace/ui/lib/utils';
-import type { Game, GameModeSlug } from '@workspace/api-contract';
-import { GAME_SEARCH_MIN_CHARS } from '@workspace/constants';
+import { type Game } from '@workspace/api-contract';
+import { GAME_SEARCH_MIN_CHARS } from '@workspace/shared';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import {
   InputGroup,
@@ -21,7 +21,7 @@ interface GameSearchProps {
   onSelectGame: (game: Game) => void;
   disabled?: boolean;
   className?: string;
-  mode?: GameModeSlug;
+  mode?: string;
 }
 
 function highlightMatch(name: string, query: string) {
@@ -55,11 +55,10 @@ export default function GameSearch({
   disabled = false,
   className,
   mode,
-}: Readonly<GameSearchProps>) {
+}: GameSearchProps) {
   const [searchValue, setSearchValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
-
   const { results, isLoading, isIdle, debouncedQuery } = useGameSearch(
     searchValue,
     { mode },
@@ -76,7 +75,10 @@ export default function GameSearch({
   });
 
   const handleSelect = (game: Game) => {
-    if (wrongGuesses.includes(game.id) || disabled) return;
+    if (wrongGuesses.includes(game.id) || disabled) {
+      return;
+    }
+
     onSelectGame(game);
     setSearchValue('');
     setIsOpen(false);
@@ -84,6 +86,7 @@ export default function GameSearch({
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+
     setSearchValue(value);
     setIsOpen(value.length > 0);
   };

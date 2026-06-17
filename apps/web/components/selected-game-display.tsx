@@ -2,14 +2,14 @@
 
 import { IconX } from '@tabler/icons-react';
 import Image from 'next/image';
-import type { Game, GameModeSlug } from '@workspace/api-contract';
+import { type Game } from '@workspace/api-contract';
 import { cn } from '@workspace/ui/lib/utils';
 
 interface SelectedGameDisplayProps {
   selectedGame: Game | null;
   onClearSelection?: () => void;
   className?: string;
-  mode: GameModeSlug;
+  mode: string;
 }
 
 export default function SelectedGameDisplay({
@@ -17,7 +17,7 @@ export default function SelectedGameDisplay({
   onClearSelection,
   className,
   mode = 'cover-art',
-}: Readonly<SelectedGameDisplayProps>) {
+}: SelectedGameDisplayProps) {
   return (
     <div
       className={cn(
@@ -39,6 +39,7 @@ export default function SelectedGameDisplay({
           <span className="text-xs text-muted-foreground font-mono">?</span>
         </div>
       )}
+
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold truncate text-foreground uppercase tracking-tight">
           {selectedGame?.name ?? '?'}
@@ -47,6 +48,7 @@ export default function SelectedGameDisplay({
           {selectedGame?.name ? 'Selected' : 'No selection'}
         </p>
       </div>
+
       {onClearSelection ? (
         <button
           onClick={onClearSelection}

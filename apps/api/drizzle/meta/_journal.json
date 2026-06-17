@@ -99,6 +99,48 @@
       "when": 1778292319662,
       "tag": "0013_modern_giant_man",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1781220112105,
+      "tag": "0014_nosy_silvermane",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1781220705450,
+      "tag": "0015_vengeful_sentry",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1781221176835,
+      "tag": "0016_wooden_chat",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1781373794193,
+      "tag": "0017_slippery_sharon_carter",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1781375435175,
+      "tag": "0018_lush_wolfpack",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1781378404938,
+      "tag": "0019_wide_random",
+      "breakpoints": true
     }
   ]
 }

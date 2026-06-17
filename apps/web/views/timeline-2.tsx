@@ -1,11 +1,12 @@
 'use client';
 
 import { ViewTransition } from 'react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useTimeline2Game } from '@/lib/hooks/use-timeline-2-game';
 import { Timeline2Card } from '@/components/timeline-2-card';
 import { Button } from '@workspace/ui/button';
 import { Card, CardContent } from '@workspace/ui/card';
-import { getGameModeBySlug } from '@/lib/game-mode';
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 import { useState, useRef } from 'react';
 import Attempts from '@/components/attempts';
 import { motion, useMotionValue } from 'motion/react';
@@ -15,7 +16,9 @@ import { TimelineCardSkeleton } from '@/components/timeline-card-skeleton';
 import { Timeline2CardSkeleton } from '@/components/timeline-2-card-skeleton';
 
 export default function Timeline2() {
-  const gameMode = getGameModeBySlug('timeline-2');
+  const { data: gameMode } = useSuspenseQuery(
+    gameModeSlugQueryOptions('timeline-2'),
+  );
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -41,7 +44,9 @@ export default function Timeline2() {
   const y = useMotionValue(0);
 
   const findDropZone = (clientX: number, clientY: number): number | null => {
-    if (!timelineRef.current) return null;
+    if (!timelineRef.current) {
+      return null;
+    }
 
     const timelineRect = timelineRef.current.getBoundingClientRect();
 
@@ -51,7 +56,9 @@ export default function Timeline2() {
 
     const cards = timelineRef.current.querySelectorAll('[data-timeline-card]');
 
-    if (cards.length === 0) return null;
+    if (cards.length === 0) {
+      return null;
+    }
 
     for (let i = 0; i < cards.length; i++) {
       const cardRect = cards[i].getBoundingClientRect();
@@ -102,6 +109,7 @@ export default function Timeline2() {
     if (isAnimating) {
       return lastPlacementCorrect === true ? 'green' : 'red';
     }
+
     return 'none';
   };
 
@@ -265,12 +273,13 @@ export default function Timeline2() {
             </CardContent>
           </Card>
 
-          <div className="mx-auto mt-8 max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
+          <div className="mx-auto mt-8 text-center opacity-70 hover:opacity-100 transition-opacity">
             <Timeline2DevToggle
               dealtCard={dealtCard}
               attemptsLeft={attemptsLeft}
               maxAttempts={maxAttempts}
               onAdjustAttempts={adjustAttempts}
+              className="border-2 border-dashed w-full p-6"
             />
           </div>
         </div>

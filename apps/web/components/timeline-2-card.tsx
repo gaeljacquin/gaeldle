@@ -4,6 +4,7 @@ import { forwardRef } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
 import type { Game } from '@workspace/api-contract';
 import Image from 'next/image';
+import { timelineFormatDate } from '@workspace/shared';
 
 interface Timeline2CardProps {
   game: Game;
@@ -11,15 +12,6 @@ interface Timeline2CardProps {
   showTopBanner?: boolean;
   className?: string;
   bannerColor?: 'green' | 'red' | 'slate' | 'none';
-}
-
-function formatDate(timestamp: number | null): string {
-  if (!timestamp) return '????-??-??';
-  const date = new Date(timestamp * 1000);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 }
 
 export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
@@ -71,7 +63,7 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
               bannerColor === 'slate' && 'bg-slate-600',
             )}
           >
-            {showDate && formatDate(game.firstReleaseDate)}
+            {showDate && timelineFormatDate(game.firstReleaseDate)}
           </div>
         )}
 

@@ -1,11 +1,11 @@
 'use client';
 
 import { ViewTransition } from 'react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useTimelineGame } from '@/lib/hooks/use-timeline-game';
 import { TimelineCard } from '@/components/timeline-card';
 import { Button } from '@workspace/ui/button';
 import { Card, CardContent } from '@workspace/ui/card';
-import { getGameModeBySlug } from '@/lib/game-mode';
 import {
   DndContext,
   closestCenter,
@@ -34,10 +34,8 @@ import { motion } from 'motion/react';
 import TimelineDevToggle from '@/components/timeline-dev-toggle';
 import { cn } from '@workspace/ui/lib/utils';
 import { TimelineCardSkeleton } from '@/components/timeline-card-skeleton';
-import {
-  TIMELINE_GAMES_COUNT,
-  TIMELINE_MAX_ATTEMPTS,
-} from '@workspace/constants';
+import { TIMELINE_GAMES_COUNT, TIMELINE_MAX_ATTEMPTS } from '@workspace/shared';
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 
 const noOpStrategy: SortingStrategy = () => {
   return null;
@@ -49,13 +47,13 @@ function SortableCard({
   showDate,
   disabled,
   isGameOver,
-}: Readonly<{
+}: {
   game: Game;
   isCorrect?: boolean;
   showDate?: boolean;
   disabled?: boolean;
   isGameOver?: boolean;
-}>) {
+}) {
   const {
     attributes,
     listeners,
@@ -92,7 +90,9 @@ function SortableCard({
 }
 
 export default function Timeline() {
-  const gameMode = getGameModeBySlug('timeline');
+  const { data: gameMode } = useSuspenseQuery(
+    gameModeSlugQueryOptions('timeline'),
+  );
   const [activeId, setActiveId] = useState<number | null>(null);
   const { swapMode, setSwapMode } = useTimelineStore();
 
@@ -383,12 +383,13 @@ export default function Timeline() {
             </CardContent>
           </Card>
 
-          <div className="mx-auto mt-8 max-w-md border-2 border-dashed p-6 text-center opacity-70 hover:opacity-100 transition-opacity">
+          <div className="mx-auto mt-8 text-center opacity-70 hover:opacity-100 transition-opacity">
             <TimelineDevToggle
               getCorrectOrder={getCorrectOrder}
               attemptsLeft={attemptsLeft}
               maxAttempts={TIMELINE_MAX_ATTEMPTS}
               onAdjustAttempts={adjustAttempts}
+              className="border-2 border-dashed w-full p-6"
             />
           </div>
         </div>

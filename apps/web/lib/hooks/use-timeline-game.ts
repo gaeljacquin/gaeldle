@@ -4,16 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { getRandomGames } from '@/lib/services/game.service';
 import type { Game } from '@workspace/api-contract';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
-import {
-  TIMELINE_GAMES_COUNT,
-  TIMELINE_MAX_ATTEMPTS,
-} from '@workspace/constants';
+import { TIMELINE_GAMES_COUNT, TIMELINE_MAX_ATTEMPTS } from '@workspace/shared';
 
 export function useTimelineGame() {
   const [selectedGames, setSelectedGames] = useState<Game[]>([]);
   const [userOrder, setUserOrder] = useState<Game[]>([]);
-  const [savedOrder, setSavedOrder] = useState<Game[]>([]); // Order at last submit (or initial)
-  const [correctGameIds, setCorrectGameIds] = useState<Set<number>>(new Set()); // IDs of games that were correct
+  const [savedOrder, setSavedOrder] = useState<Game[]>([]);
+  const [correctGameIds, setCorrectGameIds] = useState<Set<number>>(new Set());
   const [correctPositionMap, setCorrectPositionMap] = useState<
     Map<number, number>
   >(new Map()); // position → correct game ID
@@ -24,7 +21,6 @@ export function useTimelineGame() {
   const [error, setError] = useState<string | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  // Load random games on mount
   useEffect(() => {
     async function loadGames() {
       try {
@@ -55,16 +51,17 @@ export function useTimelineGame() {
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (isGameOver || selectedGames.length === 0) return;
+    if (isGameOver || selectedGames.length === 0) {
+      return;
+    }
 
-    // Sort selected games by release date to get correct order
     const correctOrder = [...selectedGames].sort((a, b) => {
       const dateA = a.firstReleaseDate || 0;
       const dateB = b.firstReleaseDate || 0;
+
       return dateA - dateB;
     });
 
-    // Track which game IDs were correctly placed and their positions
     const newCorrectGameIds = new Set<number>();
     const newCorrectPositionMap = new Map<number, number>();
     let allCorrect = true;
@@ -81,13 +78,14 @@ export function useTimelineGame() {
     setCorrectGameIds(newCorrectGameIds);
     setCorrectPositionMap(newCorrectPositionMap);
     setHasSubmitted(true);
-    setSavedOrder([...userOrder]); // Save current order
+    setSavedOrder([...userOrder]);
 
     if (allCorrect) {
       setIsWinner(true);
       setIsGameOver(true);
     } else {
       const newAttemptsLeft = attemptsLeft - 1;
+
       setAttemptsLeft(newAttemptsLeft);
 
       if (newAttemptsLeft <= 0) {
@@ -97,15 +95,18 @@ export function useTimelineGame() {
   }, [userOrder, selectedGames, attemptsLeft, isGameOver]);
 
   const handleResetToSaved = useCallback(() => {
-    if (isGameOver) return;
+    if (isGameOver) {
+      return;
+    }
 
-    // Reset to saved order
     setUserOrder([...savedOrder]);
   }, [savedOrder, isGameOver]);
 
-  // Check if current order matches saved order
   const isOrderSameAsSaved = useCallback(() => {
-    if (userOrder.length !== savedOrder.length) return false;
+    if (userOrder.length !== savedOrder.length) {
+      return false;
+    }
+
     return userOrder.every((game, index) => game.id === savedOrder[index].id);
   }, [userOrder, savedOrder]);
 
@@ -119,7 +120,6 @@ export function useTimelineGame() {
       setIsGameOver(false);
       setIsWinner(false);
 
-      // Select new random games
       const selected = await getRandomGames(
         TIMELINE_GAMES_COUNT,
         [],
@@ -128,7 +128,7 @@ export function useTimelineGame() {
 
       setSelectedGames(selected);
       setUserOrder(selected);
-      setSavedOrder(selected); // Reset saved order
+      setSavedOrder(selected);
     } catch (err) {
       setError(getFriendlyErrorMessage(err, 'Failed to reset game'));
     } finally {
@@ -141,6 +141,7 @@ export function useTimelineGame() {
     return [...selectedGames].sort((a, b) => {
       const dateA = a.firstReleaseDate || 0;
       const dateB = b.firstReleaseDate || 0;
+
       return dateA - dateB;
     });
   }, [selectedGames]);
@@ -148,7 +149,11 @@ export function useTimelineGame() {
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft((prev) => {
       const newValue = prev + delta;
-      if (newValue < 1 || newValue > TIMELINE_MAX_ATTEMPTS) return prev;
+
+      if (newValue < 1 || newValue > TIMELINE_MAX_ATTEMPTS) {
+        return prev;
+      }
+
       return newValue;
     });
   }, []);

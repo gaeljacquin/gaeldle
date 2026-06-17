@@ -10,10 +10,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { GamesService } from '@/games/games.service';
 import { DatabaseService } from '@/db/database.service';
-import { IgdbService, type IgdbGame } from '@/games/igdb.service';
+import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
-import { BulkImageJobStore } from '@/games/bulk-image-job.store';
+import { BulkImageJobStore } from '@/big/bulk-image-job.store';
 
 type AsyncMock = jest.Mock<(...args: unknown[]) => Promise<unknown>>;
 

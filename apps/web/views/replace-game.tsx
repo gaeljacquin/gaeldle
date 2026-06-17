@@ -8,7 +8,6 @@ import {
   ViewTransition,
 } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useUser } from '@hexclave/next';
 import { replaceGameByIdgbId } from '@/lib/services/game.service';
 import {
   useReplaceGameValidation,
@@ -16,10 +15,7 @@ import {
 } from '@/lib/hooks/use-replace-game-validation';
 import { IgdbIdRowPair } from '@/components/igdb-id-row-pair';
 import type { IgdbIdRowPairData } from '@/components/igdb-id-row-pair';
-import {
-  ReplaceGameResultsTable,
-  type ReplaceGameResult,
-} from '@/components/replace-game-results-table';
+import { ReplaceGameResultsTable } from '@/components/replace-game-results-table';
 import { Button } from '@workspace/ui/button';
 import {
   Card,
@@ -35,19 +31,14 @@ import {
   IconLoader,
 } from '@tabler/icons-react';
 import { toast } from 'sonner';
-import { REPLACE_GAME_MAX_ROWS } from '@workspace/constants';
-import { DashboardPageHeader } from '@/components/dashboard-header';
+import { REPLACE_GAME_MAX_ROWS } from '@workspace/shared';
+import { DashboardHeader } from '@/components/dashboard-header';
+import { ReplaceGameResult } from '@workspace/api-contract';
+
+const replaceGamesToastId = 'replace-games';
 
 function createEmptyRow(): IgdbIdRowPairData {
   return { id: crypto.randomUUID(), current: '', replacement: '' };
-}
-
-function parsePositiveInt(value: string): number | null {
-  const trimmed = value.trim();
-  if (trimmed === '') return null;
-  const n = Number.parseInt(trimmed, 10);
-  if (Number.isNaN(n) || n <= 0 || String(n) !== trimmed) return null;
-  return n;
 }
 
 function pushToMap(map: Map<number, string[]>, key: number, rowId: string) {
@@ -72,7 +63,11 @@ function addCrossFieldDupes(
 ) {
   for (const [currentId, currentRowIds] of currentIdToRows) {
     const replacementRowIds = replacementIdToRows.get(currentId);
-    if (!replacementRowIds) continue;
+
+    if (!replacementRowIds) {
+      continue;
+    }
+
     currentRowIds.forEach((id) => dupes.add(id));
     replacementRowIds.forEach((id) => dupes.add(id));
   }
@@ -97,7 +92,7 @@ function RowWithValidation({
   canRemove,
   onValidationChange,
   isDuplicate,
-}: Readonly<RowWithValidationProps>) {
+}: RowWithValidationProps) {
   const validationState = useReplaceGameValidation(
     row.current,
     row.replacement,
@@ -121,8 +116,6 @@ function RowWithValidation({
 }
 
 export default function ReplaceGameByIgdbId() {
-  useUser({ or: 'redirect' });
-
   const [rows, setRows] = useState<IgdbIdRowPairData[]>([createEmptyRow()]);
   const [results, setResults] = useState<ReplaceGameResult[] | null>(null);
   const [validationMap, setValidationMap] = useState<
@@ -133,6 +126,7 @@ export default function ReplaceGameByIgdbId() {
     (id: string, state: ReplaceGameValidationState) => {
       setValidationMap((prev) => {
         const current = prev[id];
+
         if (
           current?.canApply === state.canApply &&
           current?.isLoading === state.isLoading &&
@@ -140,6 +134,7 @@ export default function ReplaceGameByIgdbId() {
         ) {
           return prev;
         }
+
         return { ...prev, [id]: state };
       });
     },
@@ -152,14 +147,19 @@ export default function ReplaceGameByIgdbId() {
 
     for (const row of rows) {
       const state = validationMap[row.id];
-      if (!state?.isReady) continue;
 
-      const currentInt = parsePositiveInt(row.current);
+      if (!state?.isReady) {
+        continue;
+      }
+
+      const currentInt = Number.parseInt(row.current, 10);
+
       if (currentInt !== null && state.currentExistsInDb === true) {
         pushToMap(currentIdToRows, currentInt, row.id);
       }
 
-      const replacementInt = parsePositiveInt(row.replacement);
+      const replacementInt = Number.parseInt(row.replacement, 10);
+
       if (replacementInt !== null && state.replacementExistsOnIgdb === true) {
         pushToMap(replacementIdToRows, replacementInt, row.id);
       }
@@ -188,10 +188,10 @@ export default function ReplaceGameByIgdbId() {
       return replaceGameByIdgbId(pairs);
     },
     onMutate: () => {
-      toast.loading('Replacing games...', { id: 'replace-games' });
+      toast.loading('Replacing games...', { id: replaceGamesToastId });
     },
     onSuccess: (data) => {
-      toast.dismiss('replace-games');
+      toast.dismiss(replaceGamesToastId);
       const updatedCount = data.results.filter(
         (r) => r.status === 'updated',
       ).length;
@@ -212,7 +212,7 @@ export default function ReplaceGameByIgdbId() {
       setResults(data.results as ReplaceGameResult[]);
     },
     onError: (err: Error) => {
-      toast.dismiss('replace-games');
+      toast.dismiss(replaceGamesToastId);
       toast.error(err.message ?? 'Failed to replace games');
     },
   });
@@ -231,19 +231,27 @@ export default function ReplaceGameByIgdbId() {
 
   const handleRemove = useCallback((id: string) => {
     setRows((prev) => {
-      if (prev.length <= 1) return prev;
+      if (prev.length <= 1) {
+        return prev;
+      }
+
       return prev.filter((row) => row.id !== id);
     });
     setValidationMap((prev) => {
       const next = { ...prev };
+
       delete next[id];
+
       return next;
     });
   }, []);
 
   const handleAddRow = useCallback(() => {
     setRows((prev) => {
-      if (prev.length >= REPLACE_GAME_MAX_ROWS) return prev;
+      if (prev.length >= REPLACE_GAME_MAX_ROWS) {
+        return prev;
+      }
+
       return [...prev, createEmptyRow()];
     });
   }, []);
@@ -251,17 +259,8 @@ export default function ReplaceGameByIgdbId() {
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
-        {/* Sticky header */}
-        <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4">
-            <DashboardPageHeader
-              title="Replace Game"
-              icon={IconArrowsExchange}
-            />
-          </div>
-        </div>
+        <DashboardHeader title="Replace Game" icon={IconArrowsExchange} />
 
-        {/* Main content */}
         <div className="container mx-auto px-4 py-8 flex-1">
           <div className="max-w-2xl space-y-6">
             {/* Input form */}

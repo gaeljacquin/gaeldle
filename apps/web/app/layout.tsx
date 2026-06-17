@@ -1,10 +1,11 @@
+import './globals.css';
+
 import type { Metadata } from 'next';
 import { ReactNode, Suspense } from 'react';
+import Loading from './loading';
+import Providers from './providers';
 import { Figtree, JetBrains_Mono } from 'next/font/google';
 import { LayoutWrapper } from '@/components/layout-wrapper';
-import Providers from './providers';
-import Loading from './loading';
-import './globals.css';
 import { appInfo } from '@/lib/app-info';
 
 const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
@@ -19,11 +20,7 @@ export const metadata: Metadata = {
   description: appInfo.description,
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={figtree.variable}>
       <body className={`${jetbrainsMono.variable} font-sans antialiased`}>

@@ -4,26 +4,31 @@ import { cn } from './utils';
 describe('cn utility', () => {
   it('should combine simple class names', () => {
     const result = cn('px-4', 'py-2');
+
     expect(result).toBe('px-4 py-2');
   });
 
   it('should handle empty strings', () => {
     const result = cn('px-4', '', 'py-2');
+
     expect(result).toBe('px-4 py-2');
   });
 
   it('should handle undefined and null values', () => {
     const result = cn('px-4', undefined, null, 'py-2');
+
     expect(result).toBe('px-4 py-2');
   });
 
   it('should handle boolean values', () => {
     const result = cn('px-4', false, 'py-2');
+
     expect(result).toBe('px-4 py-2');
   });
 
   it('should handle arrays of class names', () => {
     const result = cn(['px-4', 'py-2']);
+
     expect(result).toContain('px-4');
     expect(result).toContain('py-2');
   });
@@ -41,6 +46,7 @@ describe('cn utility', () => {
       { 'bg-red-500': true, 'bg-blue-500': false },
       'p-4',
     );
+
     expect(result).toContain('border');
     expect(result).toContain('rounded-lg');
     expect(result).toContain('bg-red-500');
@@ -50,11 +56,13 @@ describe('cn utility', () => {
 
   it('should handle no arguments', () => {
     const result = cn();
+
     expect(result).toBe('');
   });
 
   it('should handle only undefined arguments', () => {
     const result = cn(undefined, undefined);
+
     expect(result).toBe('');
   });
 
@@ -64,6 +72,7 @@ describe('cn utility', () => {
       'gap-2': true,
       hidden: false,
     });
+
     expect(result).toContain('flex');
     expect(result).toContain('gap-2');
     expect(result).not.toContain('hidden');
@@ -75,6 +84,7 @@ describe('cn utility', () => {
       { 'font-bold': true, italic: false },
       'text-gray-700',
     );
+
     expect(result).toContain('text-sm');
     expect(result).toContain('font-bold');
     expect(result).toContain('text-gray-700');

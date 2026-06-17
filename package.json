@@ -4,8 +4,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev",
+    "build": "turbo run build --filter=!@workspace/newapi",
+    "dev": "turbo run dev --filter=!@workspace/newapi",
     "lint": "turbo lint --filter '!@workspace/ui'",
     "lint:fix": "turbo lint --filter '!@workspace/ui' -- --fix",
     "lint:web": "turbo lint --filter @workspace/web",
@@ -27,14 +27,14 @@
     "prepare": "husky"
   },
   "keywords": [],
-  "packageManager": "pnpm@11.5.0",
+  "packageManager": "pnpm@11.5.3",
   "devDependencies": {
-    "@commitlint/cli": "^20.5.3",
-    "@commitlint/config-conventional": "^20.5.3",
-    "@types/node": "^25.9.2",
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
+    "@types/node": "^25.9.3",
     "husky": "^9.1.7",
-    "prettier": "^3.8.3",
-    "turbo": "^2.9.16"
+    "prettier": "^3.8.4",
+    "turbo": "^2.9.18"
   },
   "dependencies": {
     "@types/react": "^19.2.17",

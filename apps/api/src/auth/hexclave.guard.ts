@@ -9,10 +9,10 @@ import type { JWTPayload } from 'jose';
 import type { Request } from 'express';
 
 type JoseModule = typeof import('jose');
+type AuthenticatedRequest = Request & { hexclave?: JWTPayload };
+
 let josePromise: Promise<JoseModule> | null = null;
 const getJose = () => (josePromise ??= import('jose'));
-
-type AuthenticatedRequest = Request & { hexclave?: JWTPayload };
 
 @Injectable()
 export class HexclaveGuard implements CanActivate {
@@ -35,9 +35,30 @@ export class HexclaveGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const token = this.extractToken(request);
-    if (!token) {
+    const rawToken = this.extractToken(request);
+
+    if (!rawToken) {
+      console.error('[HexclaveGuard] Missing token');
       throw new UnauthorizedException('Missing Hexclave access token');
+    }
+
+    let token: string = rawToken;
+
+    if (token.startsWith('stackauth_')) {
+      try {
+        const base64Part = token.slice('stackauth_'.length);
+        const jsonStr = Buffer.from(base64Part, 'base64').toString('utf8');
+        const parsed = JSON.parse(jsonStr);
+        if (parsed && typeof parsed.accessToken === 'string') {
+          token = parsed.accessToken;
+        }
+      } catch (e) {
+        console.error(
+          '[HexclaveGuard] Failed to parse stackauth token payload:',
+          e,
+        );
+        throw new UnauthorizedException('Invalid Hexclave session format');
+      }
     }
 
     try {
@@ -51,19 +72,27 @@ export class HexclaveGuard implements CanActivate {
         audience: this.projectId,
       });
       request.hexclave = payload;
+
       return true;
-    } catch {
+    } catch (err) {
+      console.error(
+        '[HexclaveGuard] Invalid token verification failed for token:',
+        JSON.stringify(token),
+        err,
+      );
       throw new UnauthorizedException('Invalid Hexclave access token');
     }
   }
 
   private extractToken(request: Request): string | null {
     const authHeader = request.headers.authorization;
+
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       return authHeader.slice(7).trim();
     }
 
     const hexclaveTokenHeader = request.headers['x-stack-access-token'];
+
     if (typeof hexclaveTokenHeader === 'string') {
       return hexclaveTokenHeader;
     }

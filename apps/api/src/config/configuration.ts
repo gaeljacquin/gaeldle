@@ -1,7 +1,6 @@
 export type AppConfiguration = {
   appEnv: string;
   port: number;
-  clientPort: number;
   corsAllowedOrigins: string[];
   hexclaveProjectId: string;
   hexclavePublishableClientKey: string;
@@ -16,6 +15,10 @@ export type AppConfiguration = {
   r2PublicUrl: string;
   cfAccountId: string;
   cfApiToken: string;
+  awsAccessKeyId: string;
+  awsSecretAccessKey: string;
+  awsRegion: string;
+  sampleSqsQueueUrl: string;
 };
 
 const configuration = (): AppConfiguration => {
@@ -24,25 +27,15 @@ const configuration = (): AppConfiguration => {
     process.env.NODE_ENV ||
     'development'
   ).toLowerCase();
-
-  const portRaw = process.env.PORT ?? process.env.SERVER_PORT ?? '3000';
-  const port = Number.parseInt(portRaw, 10) || 8080;
-
-  const clientPortRaw = process.env.CLIENT_PORT ?? '3000';
-  const clientPort = Number.parseInt(clientPortRaw, 10) || 3000;
-
+  const portRaw = process.env.PORT || '3000';
+  const port = Number.parseInt(portRaw, 10);
   const corsAllowedOrigins = process.env.CORS_ALLOWED_ORIGINS
     ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((origin) => origin.trim())
-    : [
-        `http://localhost:${clientPort}`,
-        `http://127.0.0.1:${clientPort}`,
-        `http://web:${clientPort}`,
-      ];
+    : [];
 
   return {
     appEnv,
     port,
-    clientPort,
     corsAllowedOrigins,
     hexclaveProjectId: process.env.HEXCLAVE_PROJECT_ID ?? '',
     hexclavePublishableClientKey:
@@ -58,6 +51,12 @@ const configuration = (): AppConfiguration => {
     r2PublicUrl: process.env.R2_PUBLIC_URL ?? '',
     cfAccountId: process.env.CF_ACCOUNT_ID ?? '',
     cfApiToken: process.env.CF_API_TOKEN ?? '',
+    awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID ?? '',
+    awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? '',
+    awsRegion: process.env.AWS_REGION ?? '',
+    sampleSqsQueueUrl:
+      process.env.SAMPLE_SQS_QUEUE_URL ?? 'gaeldle-sample-queue',
   };
 };
+
 export default configuration;

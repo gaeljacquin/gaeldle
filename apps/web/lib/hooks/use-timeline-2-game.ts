@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRandomGame } from '@/lib/services/game.service';
 import type { Game } from '@workspace/api-contract';
-import { TIMELINE_2_MAX_ATTEMPTS } from '@workspace/constants';
+import { TIMELINE_2_MAX_ATTEMPTS } from '@workspace/shared';
 
 export function useTimeline2Game() {
   const [timelineCards, setTimelineCards] = useState<Game[]>([]);
@@ -25,10 +25,8 @@ export function useTimeline2Game() {
     try {
       setIsLoading(true);
 
-      // Get first card for timeline (with date revealed)
       const firstCard = await getRandomGame([], 'timeline-2');
 
-      // Filter games with valid release dates
       if (!firstCard.firstReleaseDate) {
         throw new Error('First card has no release date');
       }
@@ -36,7 +34,6 @@ export function useTimeline2Game() {
       setTimelineCards([firstCard]);
       setFirstCardId(firstCard.id);
 
-      // Deal first card to player (date hidden)
       const secondCard = await getRandomGame([firstCard.id]);
 
       if (!secondCard.firstReleaseDate) {
@@ -55,13 +52,14 @@ export function useTimeline2Game() {
     const timer = setTimeout(() => {
       void initializeGame();
     }, 0);
+
     return () => clearTimeout(timer);
   }, [initializeGame]);
 
-  // Get all excluded IDs (timeline + dealt card)
   const getExcludedIds = useCallback((): number[] => {
     const timelineIds = timelineCards.map((card) => card.id);
     const dealtCardId = dealtCard ? [dealtCard.id] : [];
+
     return [...timelineIds, ...dealtCardId];
   }, [timelineCards, dealtCard]);
 
@@ -72,8 +70,8 @@ export function useTimeline2Game() {
       const nextCard = await getRandomGame(excludedIds, 'timeline-2');
 
       if (!nextCard.firstReleaseDate) {
-        // No more valid cards, end game
         setIsGameOver(true);
+
         return;
       }
 
@@ -118,6 +116,7 @@ export function useTimeline2Game() {
         // Correct placement - insert card at position and track it
         const newTimeline = [...timelineCards];
         newTimeline.splice(position, 0, cardToPlace);
+
         setTimelineCards(newTimeline);
         setScore((prev) => prev + 1);
         setCorrectlyPlacedCards((prev) => new Set(prev).add(cardToPlace.id));
@@ -133,11 +132,13 @@ export function useTimeline2Game() {
       } else {
         // Wrong placement - show error and insert at correct position
         const newAttempts = attemptsLeft - 1;
+
         setAttemptsLeft(newAttempts);
 
         // Insert at correct position immediately (framer-motion will animate it)
         const newTimeline = [...timelineCards];
         newTimeline.splice(correctPosition, 0, cardToPlace);
+
         setTimelineCards(newTimeline);
 
         // Check game over
@@ -171,7 +172,6 @@ export function useTimeline2Game() {
     ],
   );
 
-  // Reset game
   const resetGame = useCallback(() => {
     setTimelineCards([]);
     setDealtCard(null);
@@ -189,7 +189,11 @@ export function useTimeline2Game() {
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft((prev) => {
       const newValue = prev + delta;
-      if (newValue < 1 || newValue > TIMELINE_2_MAX_ATTEMPTS) return prev;
+
+      if (newValue < 1 || newValue > TIMELINE_2_MAX_ATTEMPTS) {
+        return prev;
+      }
+
       return newValue;
     });
   }, []);

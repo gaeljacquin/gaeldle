@@ -1,35 +1,34 @@
 import Link from 'next/link';
 import { type TablerIcon } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
-import { ViewTransition } from 'react';
+import { ReactNode, ViewTransition } from 'react';
 
 export interface MenuCardProps {
-  id?: string;
-  href?: string;
+  slug?: string;
   title: string;
   description: string;
-  icon: TablerIcon;
-  gradient: string;
-  disabled?: boolean;
-  badge?: React.ReactNode;
+  icon?: TablerIcon;
+  href?: string; // keeping this for now due to utility items
+  gradient?: string; // keeping this for now due to utility items
+  badge?: ReactNode;
 }
 
 export function MenuCard({
-  id,
-  href,
+  slug,
   title,
   description,
   icon: Icon,
   gradient,
-  disabled = false,
   badge,
-}: Readonly<MenuCardProps>) {
+  href,
+}: MenuCardProps) {
+  const resolvedHref = href ?? `/${slug}`;
+
   const cardContent = (
     <div
       className={cn(
         'group relative flex h-44 w-full flex-col justify-end overflow-hidden rounded-xl p-5 text-left transition-all duration-300',
         'hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]',
-        disabled && 'cursor-not-allowed opacity-70',
       )}
       style={{ background: `var(${gradient})` }}
     >
@@ -40,9 +39,11 @@ export function MenuCard({
 
       {badge}
 
-      <div className="absolute right-4 top-4 rounded-lg bg-card/20 p-2 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
-        <Icon size={20} className="text-primary-foreground" />
-      </div>
+      {Icon && (
+        <div className="absolute right-4 top-4 rounded-lg bg-card/20 p-2 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
+          <Icon size={20} className="text-primary-foreground" />
+        </div>
+      )}
 
       <div className="relative z-10">
         <h2 className="text-xl font-bold text-primary-foreground">{title}</h2>
@@ -53,13 +54,9 @@ export function MenuCard({
     </div>
   );
 
-  if (disabled || !href) {
-    return <div className="group w-full">{cardContent}</div>;
-  }
-
   return (
-    <Link href={href} className="block w-full">
-      <ViewTransition name={id}>{cardContent}</ViewTransition>
+    <Link href={resolvedHref} className="block w-full">
+      <ViewTransition name={slug}>{cardContent}</ViewTransition>
     </Link>
   );
 }

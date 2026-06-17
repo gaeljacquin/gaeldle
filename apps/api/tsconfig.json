@@ -32,7 +32,7 @@
     "test/**/*",
     "scripts/**/*",
     "../../packages/api-contract/src/**/*",
-    "../../packages/constants/src/**/*",
+    "../../packages/shared/src/**/*",
     "**/*.cjs"
   ]
 }

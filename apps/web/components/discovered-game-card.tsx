@@ -16,7 +16,10 @@ interface DiscoveredGameCardProps {
 }
 
 function releaseDate(timestamp: number | null): string | null {
-  if (timestamp === null) return null;
+  if (timestamp === null) {
+    return null;
+  }
+
   return new Date(timestamp * 1000).toISOString().slice(0, 10);
 }
 
@@ -28,6 +31,7 @@ function statusBadge(isApplied: boolean, isAlreadyAdded: boolean): ReactNode {
       </div>
     );
   }
+
   if (isAlreadyAdded) {
     return (
       <div className="absolute top-1.5 right-1.5 rounded-none bg-blue-700 px-1.5 py-0.5 text-[10px] font-semibold text-white">
@@ -35,6 +39,7 @@ function statusBadge(isApplied: boolean, isAlreadyAdded: boolean): ReactNode {
       </div>
     );
   }
+
   return null;
 }
 
@@ -48,8 +53,8 @@ export function DiscoveredGameCard({
   isApplied,
   isDisabled,
   onToggle,
-}: Readonly<DiscoveredGameCardProps>) {
-  const date = releaseDate(firstReleaseDate);
+}: DiscoveredGameCardProps) {
+  const processedFirstReleaseDate = releaseDate(firstReleaseDate);
   const isCheckboxDisabled = isAlreadyAdded || isApplied || isDisabled;
 
   return (
@@ -61,7 +66,6 @@ export function DiscoveredGameCard({
         isApplied ? 'opacity-75' : null,
       )}
     >
-      {/* Cover image */}
       <div className="relative aspect-2/3 w-full overflow-hidden bg-muted">
         {coverUrl ? (
           <Image
@@ -77,11 +81,9 @@ export function DiscoveredGameCard({
           </div>
         )}
 
-        {/* Status badge */}
         {statusBadge(isApplied, isAlreadyAdded)}
       </div>
 
-      {/* Bottom bar: checkbox, truncated title, year */}
       <div className="flex items-start gap-2 px-2 py-2" title={name}>
         <div className="mt-0.5 shrink-0">
           <Checkbox
@@ -107,8 +109,11 @@ export function DiscoveredGameCard({
           >
             {name}
           </p>
-          {date ? (
-            <p className="text-[10px] text-muted-foreground">{date}</p>
+
+          {processedFirstReleaseDate ? (
+            <p className="text-[10px] text-muted-foreground">
+              {processedFirstReleaseDate}
+            </p>
           ) : null}
         </div>
       </div>

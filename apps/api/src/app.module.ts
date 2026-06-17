@@ -8,6 +8,7 @@ import configuration from '@/config/configuration';
 import { GamesModule } from '@/games/games.module';
 import { HealthModule } from '@/health/health.module';
 import { DiscoverModule } from '@/discover/discover.module';
+import { SampleModule } from '@/sample/sample.module';
 import { ORPCModule } from '@orpc/nest';
 
 const appEnv = (
@@ -34,6 +35,7 @@ const envFilePath = [
     GamesModule,
     HealthModule,
     DiscoverModule,
+    SampleModule,
   ],
   controllers: [AppController],
   providers: [AppService, S3Service],

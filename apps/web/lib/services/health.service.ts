@@ -1,5 +1,3 @@
-const baseApiUrl = process.env.serverUrl || 'http://localhost:8080';
-
 export type HealthStatus = 'up' | 'down';
 
 export interface HealthIndicatorDetail {
@@ -16,7 +14,10 @@ export interface HealthCheckResult {
 
 async function pingApi(): Promise<HealthIndicatorDetail> {
   try {
-    const response = await fetch(`${baseApiUrl}/`, { cache: 'no-store' });
+    const response = await fetch(`${process.env.apiUrl}/`, {
+      cache: 'no-store',
+    });
+
     return response.ok
       ? { status: 'up' }
       : { status: 'down', message: `HTTP ${response.status}` };
@@ -32,6 +33,7 @@ async function pingClient(
     const response = await fetch(`${baseClientUrl}/api/games?pageSize=1`, {
       cache: 'no-store',
     });
+
     return response.ok
       ? { status: 'up' }
       : { status: 'down', message: `HTTP ${response.status}` };
@@ -44,7 +46,7 @@ export async function fetchHealthStatus(
   baseClientUrl: string,
 ): Promise<HealthCheckResult> {
   const [healthResult, apiPing, clientPing] = await Promise.allSettled([
-    fetch(`${baseApiUrl}/health`, { cache: 'no-store' }).then(
+    fetch(`${process.env.apiUrl}/health`, { cache: 'no-store' }).then(
       (r) => r.json() as Promise<HealthCheckResult>,
     ),
     pingApi(),

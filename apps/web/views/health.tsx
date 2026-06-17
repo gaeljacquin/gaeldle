@@ -15,9 +15,7 @@ import {
 import { Button } from '@workspace/ui/button';
 import { cn } from '@workspace/ui/lib/utils';
 
-function StatusIcon({
-  status,
-}: Readonly<{ status: HealthIndicatorDetail['status'] }>) {
+function StatusIcon({ status }: { status: HealthIndicatorDetail['status'] }) {
   if (status === 'up') {
     return (
       <IconCircleCheck
@@ -38,8 +36,11 @@ function StatusIcon({
 
 function OverallStatusBadge({
   status,
-}: Readonly<{ status: HealthCheckResult['status'] }>) {
+}: {
+  status: HealthCheckResult['status'];
+}) {
   const isOk = status === 'ok';
+
   return (
     <span
       className={cn(
@@ -63,10 +64,10 @@ function OverallStatusBadge({
 function ServiceRow({
   name,
   detail,
-}: Readonly<{
+}: {
   name: string;
   detail: HealthIndicatorDetail;
-}>) {
+}) {
   return (
     <div className="flex items-start justify-between gap-4 py-4 border-b border-border last:border-b-0">
       <div className="flex items-center gap-3 min-w-0">
@@ -99,10 +100,7 @@ interface HealthViewProps {
   baseClientUrl: string;
 }
 
-export function HealthView({
-  initialData,
-  baseClientUrl,
-}: Readonly<HealthViewProps>) {
+export function HealthView({ initialData, baseClientUrl }: HealthViewProps) {
   const { data, isLoading, isFetching, dataUpdatedAt, refetch } = useQuery({
     queryKey: ['health'],
     queryFn: () => fetchHealthStatus(baseClientUrl),

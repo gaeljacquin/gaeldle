@@ -12,8 +12,7 @@ interface GuessHistoryInlineProps {
 export default function GuessHistoryInline({
   guesses,
   className,
-}: Readonly<GuessHistoryInlineProps>) {
-  // Reverse to show newest first
+}: GuessHistoryInlineProps) {
   const reversedGuesses = [...guesses].reverse();
 
   return (

@@ -114,17 +114,41 @@ export class SampleService {
     }
   }
 
-  async clearQueue() {
+  async clearQueue(actorId: string) {
+    let success = false;
+    let errorMessage = '';
+    const queueUrl = configuration().sampleSqsQueueUrl;
+    const queueId = queueUrl.split('/').pop() || queueUrl;
+
     try {
-      await this.sqsService.clearQueue(configuration().sampleSqsQueueUrl);
+      const res = await this.sqsService.clearQueue(queueUrl);
+
+      if (!res.ok) {
+        throw new Error('Clearing SQS queue failed');
+      }
+
+      success = true;
 
       return {
-        success: true,
-        message: 'Cleared sample queue.',
+        success,
+        message: 'Cleared sample SQS queue.',
       };
     } catch (error) {
+      errorMessage = error instanceof Error ? error.message : String(error);
+
       console.error('Clearing sample queue failed:', error);
       throw error;
+    } finally {
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'clear_sample_sqs_queue',
+        actorId,
+        payload: {
+          success,
+          error: errorMessage,
+          queueUrl,
+          queueId,
+        },
+      });
     }
   }
 

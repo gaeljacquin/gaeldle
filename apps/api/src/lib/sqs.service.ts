@@ -31,6 +31,11 @@ export class SqsService {
       QueueUrl: queueUrl,
     });
 
-    return this.client.send(command);
+    const res = await this.client.send(command);
+
+    return {
+      ok: res.$metadata.httpStatusCode === 200,
+      ...res,
+    };
   }
 }

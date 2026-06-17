@@ -43,9 +43,10 @@ export class SampleRouter {
 
   @Implement(contract.sample.clearQueue)
   @UseGuards(HexclaveGuard)
-  clearQueue() {
+  clearQueue(@Req() req: AuthenticatedRequest) {
     return implement(contract.sample.clearQueue).handler(async () => {
-      const res = await this.sampleService.clearQueue();
+      const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+      const res = await this.sampleService.clearQueue(actorId);
 
       if (!res.success) {
         throw new Error('Unable to clear sample queue...');

@@ -1,9 +1,5 @@
 import { orpcClient } from '@/lib/orpc';
-import type {
-  Game,
-  GameModeSlug,
-  ArtStyleValue,
-} from '@workspace/api-contract';
+import type { Game, ArtStyleValue } from '@workspace/api-contract';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -76,7 +72,7 @@ export async function getPaginatedGames(
 
 export async function getRandomGame(
   excludeIds: number[] = [],
-  mode?: GameModeSlug,
+  mode?: string,
 ): Promise<Game> {
   const params = new URLSearchParams();
 
@@ -99,7 +95,7 @@ export async function getRandomGame(
 export async function getRandomGames(
   count: number,
   excludeIds: number[] = [],
-  mode?: GameModeSlug,
+  mode?: string,
 ): Promise<Game[]> {
   const params = new URLSearchParams({ count: String(count) });
 
@@ -122,7 +118,7 @@ export async function getRandomGames(
 export async function searchGames(
   query: string,
   limit: number = 100,
-  mode?: GameModeSlug,
+  mode?: string,
 ): Promise<Game[]> {
   if (query.length < 2) {
     return [];
@@ -252,7 +248,7 @@ export const paginatedGamesQueryOptions = (
 
 export const randomGameQueryOptions = (
   excludeIds: number[] = [],
-  mode?: GameModeSlug,
+  mode?: string,
 ) => ({
   queryKey: ['randomGame', { excludeIds, mode }],
   queryFn: () => getRandomGame(excludeIds, mode),
@@ -261,7 +257,7 @@ export const randomGameQueryOptions = (
 export const randomGamesQueryOptions = (
   count: number,
   excludeIds: number[] = [],
-  mode?: GameModeSlug,
+  mode?: string,
 ) => ({
   queryKey: ['randomGames', { count, excludeIds, mode }],
   queryFn: () => getRandomGames(count, excludeIds, mode),
@@ -270,7 +266,7 @@ export const randomGamesQueryOptions = (
 export const searchGamesQueryOptions = (
   query: string,
   limit: number = 100,
-  mode?: GameModeSlug,
+  mode?: string,
 ) => ({
   queryKey: ['searchGames', { query, limit, mode }],
   queryFn: () => searchGames(query, limit, mode),

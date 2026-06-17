@@ -153,16 +153,16 @@ describe('game-mode utilities', () => {
       expect(mode?.level).toBe('hard');
     });
 
-    it('should have unique ids', async () => {
-      const ids = (await getGameModes()).map((m: GameMode) => m.id);
-      const uniqueIds = new Set(ids);
+    it('should have unique slugs', async () => {
+      const slugs = (await getGameModes()).map((m: GameMode) => m.slug);
+      const uniqueSlugs = new Set(slugs);
 
-      expect(uniqueIds.size).toBe(ids.length);
+      expect(uniqueSlugs.size).toBe(slugs.length);
     });
 
     it('should all have required properties', async () => {
       (await getGameModes()).forEach((mode) => {
-        expect(mode.id).toBeDefined();
+        expect(mode.slug).toBeDefined();
         expect(mode.title).toBeDefined();
         expect(mode.description).toBeDefined();
         expect(mode.level).toBeDefined();
@@ -195,7 +195,7 @@ describe('game-mode utilities', () => {
       const result = await getGameModeBySlug('cover-art');
 
       expect(result).toBeDefined();
-      expect(result?.id).toBe('cover-art');
+      expect(result?.slug).toBe('cover-art');
       expect(result?.title).toBe('Cover Art');
     });
 
@@ -203,7 +203,7 @@ describe('game-mode utilities', () => {
       const result = await getGameModeBySlug('artwork');
 
       expect(result).toBeDefined();
-      expect(result?.id).toBe('artwork');
+      expect(result?.slug).toBe('artwork');
       expect(result?.title).toBe('Artwork');
     });
 
@@ -211,7 +211,7 @@ describe('game-mode utilities', () => {
       const result = await getGameModeBySlug('image-gen');
 
       expect(result).toBeDefined();
-      expect(result?.id).toBe('image-gen');
+      expect(result?.slug).toBe('image-gen');
       expect(result?.title).toBe('Image Gen');
     });
 
@@ -219,14 +219,14 @@ describe('game-mode utilities', () => {
       const result = await getGameModeBySlug('timeline');
 
       expect(result).toBeDefined();
-      expect(result?.id).toBe('timeline');
+      expect(result?.slug).toBe('timeline');
       expect(result?.title).toBe('Timeline');
     });
 
     it('should return timeline-2 mode when slug is "timeline-2"', async () => {
       const result = await getGameModeBySlug('timeline-2');
       expect(result).toBeDefined();
-      expect(result?.id).toBe('timeline-2');
+      expect(result?.slug).toBe('timeline-2');
       expect(result?.title).toBe('Timeline 2');
     });
 
@@ -234,7 +234,7 @@ describe('game-mode utilities', () => {
       const result = await getGameModeBySlug('specifications');
 
       expect(result).toBeDefined();
-      expect(result?.id).toBe('specifications');
+      expect(result?.slug).toBe('specifications');
       expect(result?.title).toBe('Specifications');
     });
 
@@ -275,7 +275,7 @@ describe('game-mode utilities', () => {
     it('should return the full GameMode object with all properties', async () => {
       const result = await getGameModeBySlug('cover-art');
 
-      expect(result).toHaveProperty('id');
+      expect(result).toHaveProperty('slug');
       expect(result).toHaveProperty('title');
       expect(result).toHaveProperty('description');
       expect(result).toHaveProperty('level');
@@ -288,7 +288,7 @@ describe('game-mode utilities', () => {
       const result1 = await getGameModeBySlug('artwork');
       const result2 = await getGameModeBySlug('artwork');
 
-      expect(result1?.id).toBe(result2?.id);
+      expect(result1?.slug).toBe(result2?.slug);
       expect(result1?.title).toBe(result2?.title);
     });
   });

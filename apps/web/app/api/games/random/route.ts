@@ -7,7 +7,7 @@ import {
   type SQL,
 } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { games, gameObject, type GameModeSlug } from '@workspace/api-contract';
+import { games, gameObject } from '@workspace/api-contract';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,9 +22,7 @@ export async function GET(request: NextRequest) {
       Math.min(50, Number(searchParams.get('count') ?? 1)),
     );
 
-    const mode = (searchParams.get('mode') ?? undefined) as
-      | GameModeSlug
-      | undefined;
+    const mode = (searchParams.get('mode') ?? undefined) as string | undefined;
 
     const conditions: (SQL | undefined)[] = [];
 

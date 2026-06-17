@@ -1,8 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+import { useSuspenseQuery, useQueryClient } from '@tanstack/react-query';
 import { getPixelSizeForAttempt } from '@/lib/utils/pixelate';
-import { getRandomGame } from '@/lib/services/game.service';
+import {
+  getRandomGame,
+  randomGameQueryOptions,
+} from '@/lib/services/game.service';
 import type { Game, ArtworkImage } from '@workspace/api-contract';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
 import { COVER_ART_MAX_ATTEMPTS } from '@workspace/shared';
@@ -62,39 +66,42 @@ function selectRandomAiImage(
 }
 
 export function useCoverArtGame(mode: string) {
-  const [targetGame, setTargetGame] = useState<Game | null>(null);
+  const queryClient = useQueryClient();
+  const queryKey = useMemo(
+    () => ['randomGame', { excludeIds: [], mode }],
+    [mode],
+  );
+
+  const { data: initialTarget } = useSuspenseQuery(
+    randomGameQueryOptions([], mode as string),
+  );
+
+  const [prevGameId, setPrevGameId] = useState<number>(initialTarget.id);
+  const [targetGame, setTargetGame] = useState<Game>(initialTarget);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [wrongGuesses, setWrongGuesses] = useState<(Game | null)[]>([]);
   const [attemptsLeft, setAttemptsLeft] = useState(COVER_ART_MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedAiImage, setSelectedAiImage] = useState<{
     url: string;
     prompt: string;
-  } | null>(null);
+  } | null>(() =>
+    mode === 'image-gen' ? selectRandomAiImage(initialTarget) : null,
+  );
 
-  useEffect(() => {
-    async function loadTarget() {
-      try {
-        setIsLoading(true);
-        const target = await getRandomGame([], mode);
-
-        setTargetGame(target);
-
-        if (mode === 'image-gen') {
-          setSelectedAiImage(selectRandomAiImage(target));
-        }
-      } catch (err) {
-        setError(getFriendlyErrorMessage(err, 'Failed to load game'));
-      } finally {
-        setIsLoading(false);
-      }
+  // Sync state if initialTarget changes (e.g., when the mode changes)
+  if (initialTarget.id !== prevGameId) {
+    setPrevGameId(initialTarget.id);
+    setTargetGame(initialTarget);
+    if (mode === 'image-gen') {
+      setSelectedAiImage(selectRandomAiImage(initialTarget));
+    } else {
+      setSelectedAiImage(null);
     }
-
-    loadTarget();
-  }, [mode]);
+  }
 
   const currentPixelSize = getPixelSizeForAttempt(
     COVER_ART_MAX_ATTEMPTS - attemptsLeft,
@@ -167,18 +174,21 @@ export function useCoverArtGame(mode: string) {
       setIsGameOver(false);
       setIsCorrect(false);
       setSelectedGame(null);
-      const target = await getRandomGame([], mode);
+      const target = await getRandomGame([], mode as string);
       setTargetGame(target);
 
       if (mode === 'image-gen') {
         setSelectedAiImage(selectRandomAiImage(target));
       }
+
+      // Update query cache so that remounts use the reset game
+      queryClient.setQueryData(queryKey, target);
     } catch (err) {
       setError(getFriendlyErrorMessage(err, 'Failed to reset game'));
     } finally {
       setIsLoading(false);
     }
-  }, [mode]);
+  }, [mode, queryClient, queryKey]);
 
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft((prev) => {

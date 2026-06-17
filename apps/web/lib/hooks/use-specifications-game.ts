@@ -1,7 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { getRandomGame } from '@/lib/services/game.service';
+import { useState, useCallback, useMemo } from 'react';
+import { useSuspenseQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  getRandomGame,
+  randomGameQueryOptions,
+} from '@/lib/services/game.service';
 import type {
   Game,
   SpecificationGuess,
@@ -109,34 +113,32 @@ function compareGames(
 }
 
 export function useSpecificationsGame() {
-  const [targetGame, setTargetGame] = useState<Game | null>(null);
+  const queryClient = useQueryClient();
+  const queryKey = useMemo(
+    () => ['randomGame', { excludeIds: [], mode: 'specifications' }],
+    [],
+  );
+
+  const { data: initialTarget } = useSuspenseQuery(
+    randomGameQueryOptions([], 'specifications'),
+  );
+
+  const [prevGameId, setPrevGameId] = useState<number>(initialTarget.id);
+  const [targetGame, setTargetGame] = useState<Game>(initialTarget);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [guesses, setGuesses] = useState<SpecificationGuess[]>([]);
   const [attemptsLeft, setAttemptsLeft] = useState(SPECIFICATIONS_MAX_ATTEMPTS);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [revealedClue, setRevealedClue] = useState<RevealedClue | null>(null);
 
-  useEffect(() => {
-    async function loadTarget() {
-      try {
-        setIsLoading(true);
-
-        const randomGame = await getRandomGame([], 'specifications');
-
-        setTargetGame(randomGame);
-      } catch (err) {
-        console.error('Error loading target game:', err);
-        setError(getFriendlyErrorMessage(err, 'Failed to load game'));
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadTarget();
-  }, []);
+  // Sync state if initialTarget changes (e.g., if cache updates or component updates)
+  if (initialTarget.id !== prevGameId) {
+    setPrevGameId(initialTarget.id);
+    setTargetGame(initialTarget);
+  }
 
   const handleSelectGame = useCallback((game: Game | number | null) => {
     if (game === null) {
@@ -290,12 +292,15 @@ export function useSpecificationsGame() {
       const randomGame = await getRandomGame([], 'specifications');
 
       setTargetGame(randomGame);
+
+      // Update query cache so that remounts use the reset game
+      queryClient.setQueryData(queryKey, randomGame);
     } catch (err) {
       setError(getFriendlyErrorMessage(err, 'Failed to reset game'));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [queryClient, queryKey]);
 
   const adjustAttempts = useCallback((delta: number) => {
     setAttemptsLeft((prev) => {

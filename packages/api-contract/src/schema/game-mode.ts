@@ -69,5 +69,4 @@ export type GameMode = z.infer<typeof gameModeSelectSchema> & {
   icon: string;
   href: string;
 };
-export type GameModeSlug = z.infer<typeof gameModeSelectSchema>['slug'];
 export type GameModeLevel = z.infer<typeof gameModeSelectSchema>['level'];

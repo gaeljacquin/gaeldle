@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { and, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { games, gameObject, type GameModeSlug } from '@workspace/api-contract';
+import { games, gameObject } from '@workspace/api-contract';
 import { GAME_SEARCH_MIN_CHARS } from '@workspace/shared';
 
 export async function GET(request: NextRequest) {
@@ -10,9 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl;
     const q = searchParams.get('q') ?? '';
     const limit = Math.max(1, Number(searchParams.get('limit') ?? 20));
-    const mode = (searchParams.get('mode') ?? undefined) as
-      | GameModeSlug
-      | undefined;
+    const mode = (searchParams.get('mode') ?? undefined) as string | undefined;
 
     if (q.length < GAME_SEARCH_MIN_CHARS) {
       return NextResponse.json({ success: true, data: [] });

@@ -3,7 +3,7 @@
 import { useState, useRef, ChangeEvent } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@workspace/ui/lib/utils';
-import type { Game, GameModeSlug } from '@workspace/api-contract';
+import { type Game } from '@workspace/api-contract';
 import { GAME_SEARCH_MIN_CHARS } from '@workspace/shared';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import {
@@ -21,7 +21,7 @@ interface GameSearchProps {
   onSelectGame: (game: Game) => void;
   disabled?: boolean;
   className?: string;
-  mode?: GameModeSlug;
+  mode?: string;
 }
 
 function highlightMatch(name: string, query: string) {

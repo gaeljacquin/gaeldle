@@ -2,14 +2,14 @@
 
 import { IconX } from '@tabler/icons-react';
 import Image from 'next/image';
-import type { Game, GameModeSlug } from '@workspace/api-contract';
+import { type Game } from '@workspace/api-contract';
 import { cn } from '@workspace/ui/lib/utils';
 
 interface SelectedGameDisplayProps {
   selectedGame: Game | null;
   onClearSelection?: () => void;
   className?: string;
-  mode: GameModeSlug;
+  mode: string;
 }
 
 export default function SelectedGameDisplay({

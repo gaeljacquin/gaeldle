@@ -244,8 +244,24 @@ export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isGamesExpanded, setIsGamesExpanded] = useState(false);
 
-  const toggleSidebar = () => setIsCollapsed((prev) => !prev);
-  const toggleGames = () => setIsGamesExpanded((prev) => !prev);
+  const toggleSidebar = () => {
+    setIsCollapsed((prev) => {
+      const nextCollapsed = !prev;
+      if (nextCollapsed) {
+        setIsGamesExpanded(false);
+      }
+      return nextCollapsed;
+    });
+  };
+
+  const toggleGames = () => {
+    if (isCollapsed) {
+      setIsCollapsed(false);
+      setIsGamesExpanded(true);
+    } else {
+      setIsGamesExpanded((prev) => !prev);
+    }
+  };
 
   return (
     <aside

@@ -469,17 +469,17 @@ function ImageGenTabContent({
         artStyleValue,
       }),
     onMutate: () => {
-      toast.loading('Generating AI image...', { id: generateImageToastId });
+      toast.loading('Generating image...', { id: generateImageToastId });
     },
     onSuccess: () => {
-      toast.success('AI image generated successfully', {
+      toast.success('Image generated successfully', {
         id: generateImageToastId,
       });
       queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
     },
     onError: (err) => {
       console.error(err);
-      toast.error('Failed to generate AI image', { id: generateImageToastId });
+      toast.error('Failed to generate image', { id: generateImageToastId });
     },
   });
 
@@ -550,8 +550,8 @@ function ImageGenTabContent({
   const imageGenButtonText = generateImageMutation.isPending
     ? 'Generating...'
     : generatedImage
-      ? 'Regenerate AI Image'
-      : 'Generate AI Image';
+      ? 'Regenerate Image'
+      : 'Generate Image';
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
@@ -561,7 +561,7 @@ function ImageGenTabContent({
             <DialogTrigger className="relative aspect-square w-full overflow-hidden border-2 border-solid border-muted-foreground/30 group cursor-pointer hover:border-primary/50 transition-colors p-0 m-0 bg-transparent block">
               <Image
                 src={generatedImage.url}
-                alt={`${game.name} AI Image - ${artStyleLabel}`}
+                alt={`${game.name} Image Gen - ${artStyleLabel}`}
                 fill
                 unoptimized
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -577,7 +577,7 @@ function ImageGenTabContent({
             <DialogContent className="fixed! inset-0! m-auto! translate-x-0! translate-y-0! max-w-2xl w-full aspect-square p-0 overflow-hidden bg-transparent border-none ring-0">
               <DialogHeader className="sr-only">
                 <DialogTitle>
-                  {game.name} AI Image -{' '}
+                  {game.name} Image Gen -{' '}
                   {artStyles.find((s) => s.value === artStyleValue)?.label ??
                     artStyleValue}
                 </DialogTitle>
@@ -585,7 +585,7 @@ function ImageGenTabContent({
               <div className="relative w-full h-full">
                 <Image
                   src={generatedImage.url}
-                  alt={`${game.name} AI Image`}
+                  alt={`${game.name} Image Gen`}
                   fill
                   unoptimized
                   className="object-cover"

@@ -3,7 +3,6 @@
 import { ViewTransition } from 'react';
 import {
   IconCirclePlus,
-  IconRobotFace,
   IconArrowsExchange,
   IconZoomScan,
   IconTools,
@@ -18,13 +17,6 @@ const utilityItems = [
     description: 'Add new games to the library by IGDB ID.',
     icon: IconCirclePlus,
     gradient: '--gradient-easy-1',
-  },
-  {
-    href: '/dashboard/image-gen',
-    title: 'Bulk Image Gen',
-    description: 'Generate AI images for games in bulk.',
-    icon: IconRobotFace,
-    gradient: '--gradient-medium-1',
   },
   {
     href: '/dashboard/replace-game',

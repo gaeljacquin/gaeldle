@@ -30,7 +30,7 @@ const MOCK_GAME_MODES = [
     id: 3,
     slug: 'image-gen',
     title: 'Image Gen',
-    description: 'Guess the game from AI-generated images!',
+    description: 'Guess the game from generated images!',
     level: 'medium',
     ordinal: 3,
     isActive: 1,

@@ -74,7 +74,6 @@ export default function Dashboard() {
     view,
     setView,
   } = useDashboardStore();
-
   const queryClient = useQueryClient();
   const debouncedSearch = useDebounce(search, 500);
   const debouncedSearchIgdbId = useDebounce(searchIgdbId, 500);
@@ -228,6 +227,46 @@ export default function Dashboard() {
 
   const dataLengthZero = () => {
     if (!data || isLoading) {
+      if (view === 'list') {
+        return (
+          <div className="grid gap-6 grid-cols-1">
+            {Array.from({ length: Number.parseInt(pageSize, 10) }).map(
+              (_, i) => (
+                <div
+                  key={i}
+                  className="flex gap-8 p-6 border border-border bg-card animate-pulse"
+                >
+                  {/* Left side card skeleton */}
+                  <div className="flex flex-col items-center gap-3 shrink-0">
+                    <div className="relative overflow-hidden border-2 border-border bg-muted w-32 h-44 shadow-sm">
+                      <div className="absolute inset-x-0 bottom-0 h-6 border-t bg-muted-foreground/10" />
+                    </div>
+                  </div>
+
+                  {/* Right side info skeleton */}
+                  <div className="flex flex-col justify-start pt-1 min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="h-8 w-1/3 bg-muted rounded" />
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <div className="h-5 w-24 bg-muted rounded-none" />
+                      <div className="h-5 w-20 bg-muted rounded-none" />
+                    </div>
+
+                    <div className="space-y-2 mt-4">
+                      <div className="h-4 w-full bg-muted rounded" />
+                      <div className="h-4 w-11/12 bg-muted rounded" />
+                      <div className="h-4 w-4/5 bg-muted rounded" />
+                    </div>
+                  </div>
+                </div>
+              ),
+            )}
+          </div>
+        );
+      }
+
       return (
         <div
           className={cn(

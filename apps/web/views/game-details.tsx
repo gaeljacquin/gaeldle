@@ -878,7 +878,11 @@ export default function GameDetails({
     // error / not found state
     return (
       <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader title="Game Not Found" icon={IconDeviceGamepad2} />
+        <DashboardHeader
+          title="Game Not Found"
+          icon={IconDeviceGamepad2}
+          dashboardBacklinkProps={{ text: 'Dashboard', href: '/dashboard' }}
+        />
         <div className="container mx-auto px-4 py-10 flex-1">
           <div className="text-center py-20 border border-dashed rounded-none bg-muted/5">
             <h2 className="text-xl font-bold uppercase tracking-tight">
@@ -910,6 +914,7 @@ export default function GameDetails({
           </Suspense>
         }
         icon={IconDeviceGamepad2}
+        dashboardBacklinkProps={{ text: 'Dashboard', href: '/dashboard' }}
       />
 
       <div className="container mx-auto px-4 py-8 flex-1">

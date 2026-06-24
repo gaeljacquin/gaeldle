@@ -206,7 +206,14 @@ export function DiscoverGames() {
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader title="Discover Games" icon={IconZoomScan} />
+        <DashboardHeader
+          title="Discover Games"
+          icon={IconZoomScan}
+          dashboardBacklinkProps={{
+            text: 'Utilities',
+            href: '/dashboard/utilities',
+          }}
+        />
 
         <div className="container mx-auto px-4 py-8 flex-1">
           <div className="max-w-2xl space-y-6">

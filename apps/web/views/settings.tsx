@@ -86,7 +86,11 @@ export default function Settings() {
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader title="Settings" icon={IconSettings} />
+        <DashboardHeader
+          title="Settings"
+          icon={IconSettings}
+          dashboardBacklinkProps={{ text: 'Dashboard', href: '/dashboard' }}
+        />
 
         <div className="container mx-auto px-4 py-8 flex-1 space-y-8">
           <div className="max-w-2xl space-y-6">

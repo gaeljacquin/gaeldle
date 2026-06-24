@@ -1,3 +1,5 @@
+'use client';
+
 import { ViewTransition } from 'react';
 import {
   IconCirclePlus,
@@ -44,7 +46,11 @@ export default function UtilitiesView() {
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader title="Utilities" icon={IconTools} />
+        <DashboardHeader
+          title="Utilities"
+          icon={IconTools}
+          dashboardBacklinkProps={{ text: 'Dashboard', href: '/dashboard' }}
+        />
 
         <div className="container mx-auto px-4 py-8">
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

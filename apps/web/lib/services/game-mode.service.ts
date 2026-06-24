@@ -1,4 +1,5 @@
-import { gameModeSelectSchema, GameMode } from '@workspace/api-contract';
+import { gameModeSelectSchema, type GameMode } from '@workspace/api-contract';
+export type { GameMode };
 import { z } from 'zod';
 
 export const getGameModes = async (): Promise<GameMode[]> => {

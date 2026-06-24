@@ -351,7 +351,14 @@ export function AddGame() {
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader title="Add Game" icon={IconCirclePlus} />
+        <DashboardHeader
+          title="Add Game"
+          icon={IconCirclePlus}
+          dashboardBacklinkProps={{
+            text: 'Utilities',
+            href: '/dashboard/utilities',
+          }}
+        />
 
         <div className="container mx-auto px-4 py-8 flex-1">
           <div className="max-w-2xl space-y-6">

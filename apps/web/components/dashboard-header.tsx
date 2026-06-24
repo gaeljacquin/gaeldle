@@ -1,10 +1,17 @@
+'use client';
+
 import { type Icon, ReactNode } from '@tabler/icons-react';
 import ViewportDebugger from '@/components/viewport-debugger';
+import {
+  DashboardBacklink,
+  DashboardBacklinkProps,
+} from '@/components/dashboard-backlink';
 
 interface DashboardHeaderProps {
   title: ReactNode;
   icon: Icon;
   extraElements?: ReactNode;
+  dashboardBacklinkProps?: DashboardBacklinkProps;
 }
 
 export function DashboardHeader(props: DashboardHeaderProps) {
@@ -17,6 +24,7 @@ export function DashboardHeader(props: DashboardHeaderProps) {
             {props.title}
           </h1>
           <ViewportDebugger />
+          <DashboardBacklink {...props.dashboardBacklinkProps} />
         </div>
         {props.extraElements}
       </div>

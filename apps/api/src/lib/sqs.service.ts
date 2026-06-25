@@ -3,6 +3,8 @@ import {
   PurgeQueueCommand,
   SQSClient,
   SendMessageCommand,
+  ReceiveMessageCommand,
+  DeleteMessageCommand,
 } from '@aws-sdk/client-sqs';
 import configuration from '@/config/configuration';
 
@@ -10,6 +12,13 @@ import configuration from '@/config/configuration';
 export class SqsService {
   private readonly client = new SQSClient({
     region: configuration().awsRegion,
+    credentials:
+      configuration().awsAccessKeyId && configuration().awsSecretAccessKey
+        ? {
+            accessKeyId: configuration().awsAccessKeyId,
+            secretAccessKey: configuration().awsSecretAccessKey,
+          }
+        : undefined,
   });
 
   async sendMessage(queueUrl: string, body: Record<string, unknown>) {
@@ -24,6 +33,30 @@ export class SqsService {
       ok: res.$metadata.httpStatusCode === 200,
       ...res,
     };
+  }
+
+  async receiveMessage(
+    queueUrl: string,
+    maxMessages = 1,
+    waitTimeSeconds = 20,
+    abortSignal?: AbortSignal,
+  ) {
+    const command = new ReceiveMessageCommand({
+      QueueUrl: queueUrl,
+      MaxNumberOfMessages: maxMessages,
+      WaitTimeSeconds: waitTimeSeconds,
+    });
+
+    return this.client.send(command, { abortSignal });
+  }
+
+  async deleteMessage(queueUrl: string, receiptHandle: string) {
+    const command = new DeleteMessageCommand({
+      QueueUrl: queueUrl,
+      ReceiptHandle: receiptHandle,
+    });
+
+    return this.client.send(command);
   }
 
   async clearQueue(queueUrl: string) {

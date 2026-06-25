@@ -22,6 +22,8 @@ import { R2Service } from '@/lib/r2.service';
 import { ImageGenStore } from '@/image-gen/image-gen.store';
 import { IMAGE_GEN_DIR, IMAGE_PROMPT_SUFFIX } from '@workspace/shared';
 import { GamesService } from '@/games/games.service';
+import { SqsService } from '@/lib/sqs.service';
+import configuration from '@/config/configuration';
 
 interface GenerateImageInput {
   igdbId: number;
@@ -40,6 +42,7 @@ export class ImageGenService {
     private readonly s3Service: S3Service,
     private readonly imageGenStore: ImageGenStore,
     private readonly r2Service: R2Service,
+    private readonly sqsService: SqsService,
   ) {}
 
   async generateImages(
@@ -384,6 +387,43 @@ export class ImageGenService {
   }
 
   async generateImage(
+    input: GenerateImageInput,
+    actorId: string,
+  ): Promise<{ success: boolean; messageId?: string } | null> {
+    const { igdbId } = input;
+    const game = await this.gamesService.getGameByIgdbId(igdbId);
+
+    if (!game) {
+      return null;
+    }
+
+    const queueUrl = configuration().imageGenSqsQueueUrl;
+    const res = await this.sqsService.sendMessage(queueUrl, {
+      type: 'image-gen',
+      input,
+      actorId,
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to send image generation job to SQS queue');
+    }
+
+    // Insert the queued domain event
+    await this.databaseService.db.insert(domainEvents).values({
+      eventType: 'image_gen.queued',
+      actorId,
+      payload: {
+        igdbId,
+        artStyle: input.artStyle,
+        messageId: res.MessageId,
+        queueUrl,
+      },
+    });
+
+    return { success: true, messageId: res.MessageId };
+  }
+
+  async runSingleGeneration(
     input: GenerateImageInput,
     actorId: string,
   ): Promise<{ success: boolean; url: string; data: Game } | null> {

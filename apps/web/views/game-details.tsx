@@ -1,6 +1,13 @@
 'use client';
 
-import { use, useState, useMemo, Suspense, ViewTransition } from 'react';
+import {
+  use,
+  useState,
+  useMemo,
+  useEffect,
+  Suspense,
+  ViewTransition,
+} from 'react';
 import {
   IMAGE_PROMPT_SUFFIX,
   MIN_PREVIEW_PROMPT_ROWS,
@@ -452,36 +459,17 @@ function ImageGenTabContent({
   includeThemes: boolean;
   setIncludeThemes: (v: boolean) => void;
 }) {
+  const [isPolling, setIsPolling] = useState(false);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+
   const queryClient = useQueryClient();
   const { data: game } = useSuspenseQuery({
     queryKey: ['game', igdbId],
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
+    refetchInterval: isPolling ? 2000 : false,
   });
 
   const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
-
-  const generateImageMutation = useMutation({
-    mutationFn: () =>
-      generateImage(Number.parseInt(igdbId, 10), {
-        includeStoryline,
-        includeGenres,
-        includeThemes,
-        artStyleValue,
-      }),
-    onMutate: () => {
-      toast.loading('Generating image...', { id: generateImageToastId });
-    },
-    onSuccess: () => {
-      toast.success('Image generated successfully', {
-        id: generateImageToastId,
-      });
-      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
-    },
-    onError: (err) => {
-      console.error(err);
-      toast.error('Failed to generate image', { id: generateImageToastId });
-    },
-  });
 
   const generatedImage = useMemo(() => {
     if (!game || !Array.isArray(game.imageGen)) {
@@ -500,6 +488,62 @@ function ImageGenTabContent({
         })
       : null;
   }, [game, artStyleValue]);
+
+  const generateImageMutation = useMutation({
+    mutationFn: () =>
+      generateImage(Number.parseInt(igdbId, 10), {
+        includeStoryline,
+        includeGenres,
+        includeThemes,
+        artStyleValue,
+      }),
+    onMutate: () => {
+      toast.loading('Generating image...', { id: generateImageToastId });
+      setPrevUrl(generatedImage?.url ?? null);
+    },
+    onSuccess: () => {
+      toast.info('Image generation queued! It will appear in one moment.', {
+        id: generateImageToastId,
+        duration: Infinity,
+      });
+      setIsPolling(true);
+      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+    },
+    onError: (err) => {
+      console.error(err);
+      toast.error('Failed to generate image', { id: generateImageToastId });
+    },
+  });
+
+  useEffect(() => {
+    if (isPolling) {
+      const currentUrl = generatedImage?.url ?? null;
+
+      if (currentUrl && currentUrl !== prevUrl) {
+        setTimeout(() => {
+          setIsPolling(false);
+        }, 0);
+        toast.success('Image generated successfully!', {
+          id: generateImageToastId,
+        });
+      }
+    }
+  }, [generatedImage?.url, isPolling, prevUrl]);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    if (isPolling) {
+      timeoutId = setTimeout(() => {
+        setIsPolling(false);
+        toast.error('Image generation timed out. Please check again later.', {
+          id: generateImageToastId,
+        });
+      }, 60000);
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [isPolling]);
 
   const savedPrompt = generatedImage?.prompt;
   const provider = generatedImage?.provider ?? 'N/A';
@@ -547,11 +591,12 @@ function ImageGenTabContent({
     );
   }, [previewPrompt]);
 
-  const imageGenButtonText = generateImageMutation.isPending
-    ? 'Generating...'
-    : generatedImage
-      ? 'Regenerate Image'
-      : 'Generate Image';
+  const imageGenButtonText =
+    generateImageMutation.isPending || isPolling
+      ? 'Generating...'
+      : generatedImage
+        ? 'Regenerate Image'
+        : 'Generate Image';
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
@@ -647,7 +692,7 @@ function ImageGenTabContent({
                   key={style.value}
                   type="button"
                   onClick={() => setArtStyleValue(style.value as ArtStyleValue)}
-                  disabled={generateImageMutation.isPending}
+                  disabled={generateImageMutation.isPending || isPolling}
                   className={cn(
                     'w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between',
                     isSelected
@@ -738,7 +783,9 @@ function ImageGenTabContent({
               <Checkbox
                 id={id}
                 checked={hasValue ? checked : false}
-                disabled={!hasValue || generateImageMutation.isPending}
+                disabled={
+                  !hasValue || generateImageMutation.isPending || isPolling
+                }
                 onCheckedChange={(v) => onCheckedChange(v === true)}
               />
               <Label
@@ -773,18 +820,18 @@ function ImageGenTabContent({
           variant="outline"
           className={cn(
             'w-full font-bold h-10 rounded-none text-white hover:text-white',
-            generateImageMutation.isPending
+            generateImageMutation.isPending || isPolling
               ? 'bg-slate-500 hover:bg-slate-500 cursor-not-allowed'
               : 'bg-slate-600 hover:bg-slate-700 cursor-pointer',
           )}
           onClick={() => generateImageMutation.mutate()}
-          disabled={generateImageMutation.isPending}
+          disabled={generateImageMutation.isPending || isPolling}
         >
           <IconBrush
             aria-hidden="true"
             className={cn(
               'mr-2 size-4',
-              generateImageMutation.isPending && 'animate-pulse',
+              (generateImageMutation.isPending || isPolling) && 'animate-pulse',
             )}
           />
           {imageGenButtonText}

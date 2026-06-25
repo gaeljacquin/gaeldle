@@ -10,6 +10,8 @@ import { R2Service } from '@/lib/r2.service';
 import { ImageGenStore } from '@/image-gen/image-gen.store';
 import { ImageGenService } from '@/image-gen/image-gen.service';
 import { ImageGenRouter } from '@/image-gen/image-gen.router';
+import { SqsService } from '@/lib/sqs.service';
+import { ImageGenConsumer } from '@/image-gen/image-gen.consumer';
 
 @Module({
   imports: [DatabaseModule, AuthModule],
@@ -22,6 +24,8 @@ import { ImageGenRouter } from '@/image-gen/image-gen.router';
     R2Service,
     ImageGenService,
     ImageGenStore,
+    SqsService,
+    ImageGenConsumer,
   ],
   exports: [GamesService, IgdbService],
 })

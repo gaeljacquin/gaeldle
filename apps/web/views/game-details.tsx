@@ -1027,6 +1027,9 @@ export default function GameDetails({
                 <TabsTrigger value="image-gen" className="game-details-tab">
                   Image Gen
                 </TabsTrigger>
+                <TabsTrigger value="text-gen" className="game-details-tab">
+                  Text Gen
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="info" className="space-y-10 outline-none">
@@ -1056,6 +1059,12 @@ export default function GameDetails({
                       setIncludeThemes={setIncludeThemes}
                     />
                   )}
+                </Suspense>
+              </TabsContent>
+
+              <TabsContent value="text-gen" className="space-y-10 outline-none">
+                <Suspense fallback={<ArtworksTabSkeleton />}>
+                  <p>Coming soon!</p>
                 </Suspense>
               </TabsContent>
             </Tabs>

@@ -4,6 +4,6 @@
 
 @layer utilities {
   .game-details-tab {
-    @apply text-xs font-black uppercase tracking-widest px-8 py-3 cursor-pointer hover:text-primary data-active:text-primary data-active:after:bg-primary! shrink-0 whitespace-nowrap;
+    @apply text-xs font-black uppercase tracking-widest px-8 py-3 cursor-pointer hover:text-primary data-active:text-primary shrink-0 whitespace-nowrap;
   }
 }

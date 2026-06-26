@@ -17,7 +17,6 @@ import {
   extractArray,
   extractPublisher,
   extractReleaseYear,
-  SPECIFICATIONS_MAX_ATTEMPTS,
 } from '@workspace/shared';
 
 function compareArrays(target: string[], guess: string[]): MatchType {
@@ -112,7 +111,18 @@ function compareGames(
   };
 }
 
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
+
 export function useSpecificationsGame() {
+  const { data: gameMode } = useSuspenseQuery(
+    gameModeSlugQueryOptions('specifications'),
+  );
+
+  if (!gameMode) {
+    throw new Error('Game mode "specifications" not found');
+  }
+
+  const maxAttempts = gameMode.maxAttempts;
   const queryClient = useQueryClient();
   const queryKey = useMemo(
     () => ['randomGame', { excludeIds: [], mode: 'specifications' }],
@@ -127,7 +137,7 @@ export function useSpecificationsGame() {
   const [targetGame, setTargetGame] = useState<Game>(initialTarget);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [guesses, setGuesses] = useState<SpecificationGuess[]>([]);
-  const [attemptsLeft, setAttemptsLeft] = useState(SPECIFICATIONS_MAX_ATTEMPTS);
+  const [attemptsLeft, setAttemptsLeft] = useState(maxAttempts);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -283,7 +293,7 @@ export function useSpecificationsGame() {
     try {
       setIsLoading(true);
       setGuesses([]);
-      setAttemptsLeft(SPECIFICATIONS_MAX_ATTEMPTS);
+      setAttemptsLeft(maxAttempts);
       setIsGameOver(false);
       setIsCorrect(false);
       setSelectedGame(null);
@@ -300,19 +310,22 @@ export function useSpecificationsGame() {
     } finally {
       setIsLoading(false);
     }
-  }, [queryClient, queryKey]);
+  }, [queryClient, queryKey, maxAttempts]);
 
-  const adjustAttempts = useCallback((delta: number) => {
-    setAttemptsLeft((prev) => {
-      const newValue = prev + delta;
+  const adjustAttempts = useCallback(
+    (delta: number) => {
+      setAttemptsLeft((prev) => {
+        const newValue = prev + delta;
 
-      if (newValue < 1 || newValue > SPECIFICATIONS_MAX_ATTEMPTS) {
-        return prev;
-      }
+        if (newValue < 1 || newValue > maxAttempts) {
+          return prev;
+        }
 
-      return newValue;
-    });
-  }, []);
+        return newValue;
+      });
+    },
+    [maxAttempts],
+  );
 
   return {
     targetGame,

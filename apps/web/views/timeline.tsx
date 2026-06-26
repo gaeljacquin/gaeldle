@@ -34,7 +34,7 @@ import { motion } from 'motion/react';
 import TimelineDevToggle from '@/components/timeline-dev-toggle';
 import { cn } from '@workspace/ui/lib/utils';
 import { TimelineCardSkeleton } from '@/components/timeline-card-skeleton';
-import { TIMELINE_GAMES_COUNT, TIMELINE_MAX_ATTEMPTS } from '@workspace/shared';
+import { TIMELINE_GAMES_COUNT } from '@workspace/shared';
 import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 
 const noOpStrategy: SortingStrategy = () => {
@@ -93,6 +93,11 @@ export default function Timeline() {
   const { data: gameMode } = useSuspenseQuery(
     gameModeSlugQueryOptions('timeline'),
   );
+
+  if (!gameMode) {
+    throw new Error('Game mode "timeline" not found');
+  }
+
   const [activeId, setActiveId] = useState<number | null>(null);
   const { swapMode, setSwapMode } = useTimelineStore();
 
@@ -303,7 +308,7 @@ export default function Timeline() {
                       Attempts
                     </p>
                     <Attempts
-                      maxAttempts={TIMELINE_MAX_ATTEMPTS}
+                      maxAttempts={gameMode.maxAttempts}
                       attemptsLeft={attemptsLeft}
                       variant="primary"
                     />
@@ -387,7 +392,7 @@ export default function Timeline() {
             <TimelineDevToggle
               getCorrectOrder={getCorrectOrder}
               attemptsLeft={attemptsLeft}
-              maxAttempts={TIMELINE_MAX_ATTEMPTS}
+              maxAttempts={gameMode.maxAttempts}
               onAdjustAttempts={adjustAttempts}
               className="border-2 border-dashed w-full p-6"
             />

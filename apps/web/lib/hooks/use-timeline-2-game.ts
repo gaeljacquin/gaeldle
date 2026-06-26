@@ -1,12 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRandomGame } from '@/lib/services/game.service';
 import type { Game } from '@workspace/api-contract';
-import { TIMELINE_2_MAX_ATTEMPTS } from '@workspace/shared';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 
 export function useTimeline2Game() {
+  const { data: gameMode } = useSuspenseQuery(
+    gameModeSlugQueryOptions('timeline-2'),
+  );
+
+  if (!gameMode) {
+    throw new Error('Game mode "timeline-2" not found');
+  }
+
+  const maxAttempts = gameMode.maxAttempts;
   const [timelineCards, setTimelineCards] = useState<Game[]>([]);
   const [dealtCard, setDealtCard] = useState<Game | null>(null);
-  const [attemptsLeft, setAttemptsLeft] = useState(TIMELINE_2_MAX_ATTEMPTS);
+  const [attemptsLeft, setAttemptsLeft] = useState(maxAttempts);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -175,7 +185,7 @@ export function useTimeline2Game() {
   const resetGame = useCallback(() => {
     setTimelineCards([]);
     setDealtCard(null);
-    setAttemptsLeft(TIMELINE_2_MAX_ATTEMPTS);
+    setAttemptsLeft(maxAttempts);
     setIsGameOver(false);
     setScore(0);
     setLastPlacementCorrect(null);
@@ -184,25 +194,28 @@ export function useTimeline2Game() {
     setIsDealingCard(false);
     setFirstCardId(null);
     initializeGame();
-  }, [initializeGame]);
+  }, [initializeGame, maxAttempts]);
 
-  const adjustAttempts = useCallback((delta: number) => {
-    setAttemptsLeft((prev) => {
-      const newValue = prev + delta;
+  const adjustAttempts = useCallback(
+    (delta: number) => {
+      setAttemptsLeft((prev) => {
+        const newValue = prev + delta;
 
-      if (newValue < 1 || newValue > TIMELINE_2_MAX_ATTEMPTS) {
-        return prev;
-      }
+        if (newValue < 1 || newValue > maxAttempts) {
+          return prev;
+        }
 
-      return newValue;
-    });
-  }, []);
+        return newValue;
+      });
+    },
+    [maxAttempts],
+  );
 
   return {
     timelineCards,
     dealtCard,
     attemptsLeft,
-    maxAttempts: TIMELINE_2_MAX_ATTEMPTS,
+    maxAttempts,
     isGameOver,
     score,
     isLoading,

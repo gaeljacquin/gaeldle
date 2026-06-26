@@ -19,6 +19,11 @@ export default function Timeline2() {
   const { data: gameMode } = useSuspenseQuery(
     gameModeSlugQueryOptions('timeline-2'),
   );
+
+  if (!gameMode) {
+    throw new Error('Game mode "timeline-2" not found');
+  }
+
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const timelineRef = useRef<HTMLDivElement>(null);

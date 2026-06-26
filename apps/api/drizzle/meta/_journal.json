@@ -141,6 +141,20 @@
       "when": 1781378404938,
       "tag": "0019_wide_random",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1782514829840,
+      "tag": "0020_elite_joseph",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1782515899390,
+      "tag": "0021_eminent_vanisher",
+      "breakpoints": true
     }
   ]
 }

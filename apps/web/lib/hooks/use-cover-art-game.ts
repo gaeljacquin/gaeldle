@@ -9,7 +9,6 @@ import {
 } from '@/lib/services/game.service';
 import type { Game, ArtworkImage } from '@workspace/api-contract';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
-import { COVER_ART_MAX_ATTEMPTS } from '@workspace/shared';
 
 function getRandomArtwork(artworks: unknown): string | null {
   if (!artworks || !Array.isArray(artworks) || artworks.length === 0) {
@@ -65,7 +64,18 @@ function selectRandomAiImage(
   return null;
 }
 
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
+
 export function useCoverArtGame(mode: string) {
+  const { data: gameMode } = useSuspenseQuery(
+    gameModeSlugQueryOptions(mode),
+  );
+
+  if (!gameMode) {
+    throw new Error(`Game mode "${mode}" not found`);
+  }
+
+  const maxAttempts = gameMode.maxAttempts;
   const queryClient = useQueryClient();
   const queryKey = useMemo(
     () => ['randomGame', { excludeIds: [], mode }],
@@ -80,7 +90,7 @@ export function useCoverArtGame(mode: string) {
   const [targetGame, setTargetGame] = useState<Game>(initialTarget);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [wrongGuesses, setWrongGuesses] = useState<(Game | null)[]>([]);
-  const [attemptsLeft, setAttemptsLeft] = useState(COVER_ART_MAX_ATTEMPTS);
+  const [attemptsLeft, setAttemptsLeft] = useState(maxAttempts);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -104,8 +114,8 @@ export function useCoverArtGame(mode: string) {
   }
 
   const currentPixelSize = getPixelSizeForAttempt(
-    COVER_ART_MAX_ATTEMPTS - attemptsLeft,
-    COVER_ART_MAX_ATTEMPTS,
+    maxAttempts - attemptsLeft,
+    maxAttempts,
   );
 
   const selectedArtworkUrl = useMemo(() => {
@@ -170,7 +180,7 @@ export function useCoverArtGame(mode: string) {
     try {
       setIsLoading(true);
       setWrongGuesses([]);
-      setAttemptsLeft(COVER_ART_MAX_ATTEMPTS);
+      setAttemptsLeft(maxAttempts);
       setIsGameOver(false);
       setIsCorrect(false);
       setSelectedGame(null);
@@ -188,19 +198,22 @@ export function useCoverArtGame(mode: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [mode, queryClient, queryKey]);
+  }, [mode, queryClient, queryKey, maxAttempts]);
 
-  const adjustAttempts = useCallback((delta: number) => {
-    setAttemptsLeft((prev) => {
-      const newValue = prev + delta;
+  const adjustAttempts = useCallback(
+    (delta: number) => {
+      setAttemptsLeft((prev) => {
+        const newValue = prev + delta;
 
-      if (newValue < 1 || newValue > COVER_ART_MAX_ATTEMPTS) {
-        return prev;
-      }
+        if (newValue < 1 || newValue > maxAttempts) {
+          return prev;
+        }
 
-      return newValue;
-    });
-  }, []);
+        return newValue;
+      });
+    },
+    [maxAttempts],
+  );
 
   return {
     targetGame,

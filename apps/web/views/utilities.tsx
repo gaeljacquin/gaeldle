@@ -15,7 +15,7 @@ const utilityItems = [
   {
     href: '/dashboard/add-game',
     title: 'Add Game',
-    description: 'Add new games to the library by IGDB ID.',
+    description: 'Add new games to the library.',
     icon: IconCirclePlus,
     gradient:
       'linear-gradient(135deg, hsl(145 70% 45%) 0%, hsl(170 60% 40%) 100%)',
@@ -39,10 +39,18 @@ const utilityItems = [
   {
     href: '/dashboard/edit-modes',
     title: 'Edit Modes',
-    description: 'Manage and update active and inactive game modes.',
+    description: 'Manage game modes.',
     icon: IconPlayerPlay,
     gradient:
       'linear-gradient(135deg, hsl(195 80% 45%) 0%, hsl(220 70% 50%) 100%)',
+  },
+  {
+    href: '/dashboard/new-mode',
+    title: 'New Mode',
+    description: 'Create new game modes.',
+    icon: IconCirclePlus,
+    gradient:
+      'linear-gradient(135deg, hsl(30 90% 50%) 0%, hsl(10 90% 45%) 100%)',
   },
 ] as const;
 

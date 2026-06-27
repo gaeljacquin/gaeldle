@@ -102,3 +102,45 @@ export async function PATCH(request: NextRequest) {
     );
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { slug, title, description, level, maxAttempts, isCoverArt } = body;
+
+    if (!slug || !title || !level) {
+      return NextResponse.json(
+        { error: 'Slug, title, and level are required' },
+        { status: 400 },
+      );
+    }
+
+    await db.insert(gameModeTable).values({
+      slug,
+      title,
+      description,
+      level,
+      maxAttempts: Number(maxAttempts) || 3,
+      isCoverArt: isCoverArt ? 1 : 0,
+    });
+
+    return NextResponse.json({ success: true }, { status: 201 });
+  } catch (error) {
+    console.error('Error creating game mode:', error);
+
+    // Provide a cleaner error message if it's a unique constraint violation on slug
+    const errorMessage = (error as Error).message;
+
+    if (
+      errorMessage.includes('unique constraint') &&
+      errorMessage.includes('slug')
+    ) {
+      return NextResponse.json(
+        { error: 'A game mode with this slug already exists.' },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
+  }
+}

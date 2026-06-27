@@ -132,3 +132,26 @@ export const updateGameModesOrder = async (
     throw new Error(err.error || 'Failed to update game modes order');
   }
 };
+
+export const createGameMode = async (gameMode: {
+  slug: string;
+  title: string;
+  description: string;
+  level: 'easy' | 'medium' | 'hard';
+  maxAttempts: number;
+  isCoverArt: boolean;
+}): Promise<void> => {
+  const res = await fetch('/api/game-modes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(gameMode),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+
+    throw new Error(err.error || 'Failed to create game mode');
+  }
+};

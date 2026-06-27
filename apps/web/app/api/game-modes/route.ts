@@ -2,9 +2,11 @@ import { db } from '@/lib/db';
 import {
   gameModes as gameModesView,
   gameModeTable,
+  domainEvents,
 } from '@workspace/api-contract';
 import { NextRequest, NextResponse } from 'next/server';
-import { asc, eq, sql } from 'drizzle-orm';
+import { asc, eq, sql, inArray } from 'drizzle-orm';
+import { hexclaveServerApp } from '@/hexclave/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,7 +40,24 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
 
     if (Array.isArray(body)) {
+      const user = await hexclaveServerApp.getUser({ or: 'return-null' });
+      const actorId = user?.id ?? 'unknown';
+      const idsToUpdate = body
+        .map((item) => item.id)
+        .filter((id) => id !== undefined);
+
       await db.transaction(async (tx) => {
+        const previousModes =
+          idsToUpdate.length > 0
+            ? await tx
+                .select({
+                  id: gameModeTable.id,
+                  ordinal: gameModeTable.ordinal,
+                })
+                .from(gameModeTable)
+                .where(inArray(gameModeTable.id, idsToUpdate))
+            : [];
+
         for (const item of body) {
           const { id, ordinal } = item;
 
@@ -54,6 +73,32 @@ export async function PATCH(request: NextRequest) {
             })
             .where(eq(gameModeTable.id, id));
         }
+
+        const newModes =
+          idsToUpdate.length > 0
+            ? await tx
+                .select({
+                  id: gameModeTable.id,
+                  ordinal: gameModeTable.ordinal,
+                })
+                .from(gameModeTable)
+                .where(inArray(gameModeTable.id, idsToUpdate))
+            : [];
+
+        await tx.insert(domainEvents).values({
+          eventType: 'game_mode.ordinals.updated',
+          actorId,
+          payload: {
+            previousOrder: previousModes.map((item) => ({
+              id: item.id,
+              ordinal: item.ordinal,
+            })),
+            newOrder: newModes.map((item) => ({
+              id: item.id,
+              ordinal: item.ordinal,
+            })),
+          },
+        });
       });
 
       await db.execute(sql`REFRESH MATERIALIZED VIEW active_game_modes`);
@@ -76,7 +121,10 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'id is required' }, { status: 400 });
     }
 
-    await db
+    const user = await hexclaveServerApp.getUser({ or: 'return-null' });
+    const actorId = user?.id ?? 'unknown';
+
+    const [updatedGameMode] = await db
       .update(gameModeTable)
       .set({
         slug,
@@ -88,7 +136,25 @@ export async function PATCH(request: NextRequest) {
         isCoverArt: isCoverArt ? 1 : 0,
         updatedAt: new Date(),
       })
-      .where(eq(gameModeTable.id, id));
+      .where(eq(gameModeTable.id, id))
+      .returning();
+
+    if (updatedGameMode) {
+      await db.insert(domainEvents).values({
+        eventType: 'game_mode.updated',
+        actorId,
+        payload: {
+          gameModeId: updatedGameMode.id,
+          slug: updatedGameMode.slug,
+          title: updatedGameMode.title,
+          description: updatedGameMode.description,
+          level: updatedGameMode.level,
+          maxAttempts: updatedGameMode.maxAttempts,
+          isActive: updatedGameMode.isActive,
+          isCoverArt: updatedGameMode.isCoverArt,
+        },
+      });
+    }
 
     await db.execute(sql`REFRESH MATERIALIZED VIEW active_game_modes`);
 
@@ -115,14 +181,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await db.insert(gameModeTable).values({
-      slug,
-      title,
-      description,
-      level,
-      maxAttempts: Number(maxAttempts) || 3,
-      isCoverArt: isCoverArt ? 1 : 0,
-    });
+    const [insertedGameMode] = await db
+      .insert(gameModeTable)
+      .values({
+        slug,
+        title,
+        description,
+        level,
+        maxAttempts: Number(maxAttempts) || 3,
+        isCoverArt: isCoverArt ? 1 : 0,
+      })
+      .returning();
+
+    const user = await hexclaveServerApp.getUser({ or: 'return-null' });
+    const actorId = user?.id ?? 'unknown';
+
+    if (insertedGameMode) {
+      await db.insert(domainEvents).values({
+        eventType: 'game_mode.created',
+        actorId,
+        payload: {
+          gameModeId: insertedGameMode.id,
+          slug: insertedGameMode.slug,
+          title: insertedGameMode.title,
+          description: insertedGameMode.description,
+          level: insertedGameMode.level,
+          maxAttempts: insertedGameMode.maxAttempts,
+          isActive: insertedGameMode.isActive,
+          isCoverArt: insertedGameMode.isCoverArt,
+        },
+      });
+    }
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {

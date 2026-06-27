@@ -8,7 +8,7 @@ services:
     ports:
       - '5433:5432'
     volumes:
-      - gaeldle_postgres_data:/var/lib/postgresql
+      - gaeldle_db_data:/var/lib/postgresql
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U user -d gaeldle']
       interval: 5s
@@ -29,7 +29,6 @@ services:
       - /workspaces/gaeldle/packages/shared/node_modules
       - /workspaces/gaeldle/packages/ui/node_modules
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/gaeldle
       - COREPACK_ENABLE_STRICT=0
       - COREPACK_ENABLE_AUTO_PIN=0
     depends_on:
@@ -39,4 +38,4 @@ services:
     command: sleep infinity
 
 volumes:
-  gaeldle_postgres_data:
+  gaeldle_db_data:

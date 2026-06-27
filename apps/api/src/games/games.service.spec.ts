@@ -13,7 +13,7 @@ import { DatabaseService } from '@/db/database.service';
 import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
-import { BulkImageJobStore } from '@/big/bulk-image-job.store';
+import { R2Service } from '@/lib/r2.service';
 
 type AsyncMock = jest.Mock<(...args: unknown[]) => Promise<unknown>>;
 
@@ -170,12 +170,12 @@ describe('GamesService', () => {
           useValue: { uploadImage: jest.fn() },
         },
         {
-          provide: BulkImageJobStore,
-          useValue: { emit: jest.fn() },
-        },
-        {
           provide: ConfigService,
           useValue: { get: jest.fn() },
+        },
+        {
+          provide: R2Service,
+          useValue: { r2PublicUrl: 'https://test-r2-public-url.com' },
         },
       ],
     }).compile();

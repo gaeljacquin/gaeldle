@@ -1,6 +1,13 @@
 'use client';
 
-import { use, useState, useMemo, Suspense, ViewTransition } from 'react';
+import {
+  use,
+  useState,
+  useMemo,
+  useEffect,
+  Suspense,
+  ViewTransition,
+} from 'react';
 import {
   IMAGE_PROMPT_SUFFIX,
   MIN_PREVIEW_PROMPT_ROWS,
@@ -452,36 +459,17 @@ function ImageGenTabContent({
   includeThemes: boolean;
   setIncludeThemes: (v: boolean) => void;
 }) {
+  const [isPolling, setIsPolling] = useState(false);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+
   const queryClient = useQueryClient();
   const { data: game } = useSuspenseQuery({
     queryKey: ['game', igdbId],
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
+    refetchInterval: isPolling ? 2000 : false,
   });
 
   const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
-
-  const generateImageMutation = useMutation({
-    mutationFn: () =>
-      generateImage(Number.parseInt(igdbId, 10), {
-        includeStoryline,
-        includeGenres,
-        includeThemes,
-        artStyleValue,
-      }),
-    onMutate: () => {
-      toast.loading('Generating AI image...', { id: generateImageToastId });
-    },
-    onSuccess: () => {
-      toast.success('AI image generated successfully', {
-        id: generateImageToastId,
-      });
-      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
-    },
-    onError: (err) => {
-      console.error(err);
-      toast.error('Failed to generate AI image', { id: generateImageToastId });
-    },
-  });
 
   const generatedImage = useMemo(() => {
     if (!game || !Array.isArray(game.imageGen)) {
@@ -500,6 +488,62 @@ function ImageGenTabContent({
         })
       : null;
   }, [game, artStyleValue]);
+
+  const generateImageMutation = useMutation({
+    mutationFn: () =>
+      generateImage(Number.parseInt(igdbId, 10), {
+        includeStoryline,
+        includeGenres,
+        includeThemes,
+        artStyleValue,
+      }),
+    onMutate: () => {
+      toast.loading('Generating image...', { id: generateImageToastId });
+      setPrevUrl(generatedImage?.url ?? null);
+    },
+    onSuccess: () => {
+      toast.info('Image generation queued! It will appear in one moment.', {
+        id: generateImageToastId,
+        duration: Infinity,
+      });
+      setIsPolling(true);
+      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+    },
+    onError: (err) => {
+      console.error(err);
+      toast.error('Failed to generate image', { id: generateImageToastId });
+    },
+  });
+
+  useEffect(() => {
+    if (isPolling) {
+      const currentUrl = generatedImage?.url ?? null;
+
+      if (currentUrl && currentUrl !== prevUrl) {
+        setTimeout(() => {
+          setIsPolling(false);
+        }, 0);
+        toast.success('Image generated successfully!', {
+          id: generateImageToastId,
+        });
+      }
+    }
+  }, [generatedImage?.url, isPolling, prevUrl]);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    if (isPolling) {
+      timeoutId = setTimeout(() => {
+        setIsPolling(false);
+        toast.error('Image generation timed out. Please check again later.', {
+          id: generateImageToastId,
+        });
+      }, 60000);
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [isPolling]);
 
   const savedPrompt = generatedImage?.prompt;
   const provider = generatedImage?.provider ?? 'N/A';
@@ -547,11 +591,12 @@ function ImageGenTabContent({
     );
   }, [previewPrompt]);
 
-  const imageGenButtonText = generateImageMutation.isPending
-    ? 'Generating...'
-    : generatedImage
-      ? 'Regenerate AI Image'
-      : 'Generate AI Image';
+  const imageGenButtonText =
+    generateImageMutation.isPending || isPolling
+      ? 'Generating...'
+      : generatedImage
+        ? 'Regenerate Image'
+        : 'Generate Image';
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
@@ -561,7 +606,7 @@ function ImageGenTabContent({
             <DialogTrigger className="relative aspect-square w-full overflow-hidden border-2 border-solid border-muted-foreground/30 group cursor-pointer hover:border-primary/50 transition-colors p-0 m-0 bg-transparent block">
               <Image
                 src={generatedImage.url}
-                alt={`${game.name} AI Image - ${artStyleLabel}`}
+                alt={`${game.name} Image Gen - ${artStyleLabel}`}
                 fill
                 unoptimized
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -577,7 +622,7 @@ function ImageGenTabContent({
             <DialogContent className="fixed! inset-0! m-auto! translate-x-0! translate-y-0! max-w-2xl w-full aspect-square p-0 overflow-hidden bg-transparent border-none ring-0">
               <DialogHeader className="sr-only">
                 <DialogTitle>
-                  {game.name} AI Image -{' '}
+                  {game.name} Image Gen -{' '}
                   {artStyles.find((s) => s.value === artStyleValue)?.label ??
                     artStyleValue}
                 </DialogTitle>
@@ -585,7 +630,7 @@ function ImageGenTabContent({
               <div className="relative w-full h-full">
                 <Image
                   src={generatedImage.url}
-                  alt={`${game.name} AI Image`}
+                  alt={`${game.name} Image Gen`}
                   fill
                   unoptimized
                   className="object-cover"
@@ -647,7 +692,7 @@ function ImageGenTabContent({
                   key={style.value}
                   type="button"
                   onClick={() => setArtStyleValue(style.value as ArtStyleValue)}
-                  disabled={generateImageMutation.isPending}
+                  disabled={generateImageMutation.isPending || isPolling}
                   className={cn(
                     'w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between',
                     isSelected
@@ -738,7 +783,9 @@ function ImageGenTabContent({
               <Checkbox
                 id={id}
                 checked={hasValue ? checked : false}
-                disabled={!hasValue || generateImageMutation.isPending}
+                disabled={
+                  !hasValue || generateImageMutation.isPending || isPolling
+                }
                 onCheckedChange={(v) => onCheckedChange(v === true)}
               />
               <Label
@@ -773,18 +820,18 @@ function ImageGenTabContent({
           variant="outline"
           className={cn(
             'w-full font-bold h-10 rounded-none text-white hover:text-white',
-            generateImageMutation.isPending
+            generateImageMutation.isPending || isPolling
               ? 'bg-slate-500 hover:bg-slate-500 cursor-not-allowed'
               : 'bg-slate-600 hover:bg-slate-700 cursor-pointer',
           )}
           onClick={() => generateImageMutation.mutate()}
-          disabled={generateImageMutation.isPending}
+          disabled={generateImageMutation.isPending || isPolling}
         >
           <IconBrush
             aria-hidden="true"
             className={cn(
               'mr-2 size-4',
-              generateImageMutation.isPending && 'animate-pulse',
+              (generateImageMutation.isPending || isPolling) && 'animate-pulse',
             )}
           />
           {imageGenButtonText}
@@ -878,7 +925,11 @@ export default function GameDetails({
     // error / not found state
     return (
       <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader title="Game Not Found" icon={IconDeviceGamepad2} />
+        <DashboardHeader
+          title="Game Not Found"
+          icon={IconDeviceGamepad2}
+          dashboardBacklinkProps={{ text: 'Dashboard', href: '/dashboard' }}
+        />
         <div className="container mx-auto px-4 py-10 flex-1">
           <div className="text-center py-20 border border-dashed rounded-none bg-muted/5">
             <h2 className="text-xl font-bold uppercase tracking-tight">
@@ -910,6 +961,7 @@ export default function GameDetails({
           </Suspense>
         }
         icon={IconDeviceGamepad2}
+        dashboardBacklinkProps={{ text: 'Dashboard', href: '/dashboard' }}
       />
 
       <div className="container mx-auto px-4 py-8 flex-1">
@@ -975,6 +1027,9 @@ export default function GameDetails({
                 <TabsTrigger value="image-gen" className="game-details-tab">
                   Image Gen
                 </TabsTrigger>
+                <TabsTrigger value="info-gen" className="game-details-tab">
+                  Info Gen
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="info" className="space-y-10 outline-none">
@@ -1004,6 +1059,12 @@ export default function GameDetails({
                       setIncludeThemes={setIncludeThemes}
                     />
                   )}
+                </Suspense>
+              </TabsContent>
+
+              <TabsContent value="info-gen" className="space-y-10 outline-none">
+                <Suspense fallback={<ArtworksTabSkeleton />}>
+                  <p>Info Gen coming soon!</p>
                 </Suspense>
               </TabsContent>
             </Tabs>

@@ -4,9 +4,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { getRandomGames } from '@/lib/services/game.service';
 import type { Game } from '@workspace/api-contract';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
-import { TIMELINE_GAMES_COUNT, TIMELINE_MAX_ATTEMPTS } from '@workspace/shared';
+import { TIMELINE_GAMES_COUNT } from '@workspace/shared';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 
 export function useTimelineGame() {
+  const { data: gameMode } = useSuspenseQuery(
+    gameModeSlugQueryOptions('timeline'),
+  );
+  const maxAttempts = gameMode.maxAttempts;
   const [selectedGames, setSelectedGames] = useState<Game[]>([]);
   const [userOrder, setUserOrder] = useState<Game[]>([]);
   const [savedOrder, setSavedOrder] = useState<Game[]>([]);
@@ -14,7 +20,7 @@ export function useTimelineGame() {
   const [correctPositionMap, setCorrectPositionMap] = useState<
     Map<number, number>
   >(new Map()); // position → correct game ID
-  const [attemptsLeft, setAttemptsLeft] = useState(TIMELINE_MAX_ATTEMPTS);
+  const [attemptsLeft, setAttemptsLeft] = useState(maxAttempts);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isWinner, setIsWinner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -116,7 +122,7 @@ export function useTimelineGame() {
       setHasSubmitted(false);
       setCorrectGameIds(new Set());
       setCorrectPositionMap(new Map());
-      setAttemptsLeft(TIMELINE_MAX_ATTEMPTS);
+      setAttemptsLeft(maxAttempts);
       setIsGameOver(false);
       setIsWinner(false);
 
@@ -134,7 +140,7 @@ export function useTimelineGame() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [maxAttempts]);
 
   // Get correct order for display
   const getCorrectOrder = useCallback(() => {
@@ -146,17 +152,20 @@ export function useTimelineGame() {
     });
   }, [selectedGames]);
 
-  const adjustAttempts = useCallback((delta: number) => {
-    setAttemptsLeft((prev) => {
-      const newValue = prev + delta;
+  const adjustAttempts = useCallback(
+    (delta: number) => {
+      setAttemptsLeft((prev) => {
+        const newValue = prev + delta;
 
-      if (newValue < 1 || newValue > TIMELINE_MAX_ATTEMPTS) {
-        return prev;
-      }
+        if (newValue < 1 || newValue > maxAttempts) {
+          return prev;
+        }
 
-      return newValue;
-    });
-  }, []);
+        return newValue;
+      });
+    },
+    [maxAttempts],
+  );
 
   return {
     userOrder,

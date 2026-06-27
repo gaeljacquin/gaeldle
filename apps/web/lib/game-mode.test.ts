@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  GameMode,
   getGameModeBySlug,
   getGameModes,
 } from '@/lib/services/game-mode.service';
+import type { GameModePlus } from '@workspace/api-contract';
 
 const MOCK_GAME_MODES = [
   {
@@ -12,6 +12,9 @@ const MOCK_GAME_MODES = [
     title: 'Cover Art',
     description: 'Guess the game from its cover art, pixelated!',
     level: 'easy',
+    maxAttempts: 5,
+    gradient:
+      'linear-gradient(135deg, hsl(220 80% 50%) 0%, hsl(280 70% 55%) 100%)',
     ordinal: 1,
     isActive: 1,
     isCoverArt: 1,
@@ -22,6 +25,9 @@ const MOCK_GAME_MODES = [
     title: 'Artwork',
     description: 'Guess the game from its official artwork!',
     level: 'medium',
+    maxAttempts: 5,
+    gradient:
+      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
     ordinal: 2,
     isActive: 1,
     isCoverArt: 1,
@@ -30,8 +36,11 @@ const MOCK_GAME_MODES = [
     id: 3,
     slug: 'image-gen',
     title: 'Image Gen',
-    description: 'Guess the game from AI-generated images!',
+    description: 'Guess the game from generated images!',
     level: 'medium',
+    maxAttempts: 5,
+    gradient:
+      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
     ordinal: 3,
     isActive: 1,
     isCoverArt: 1,
@@ -42,6 +51,9 @@ const MOCK_GAME_MODES = [
     title: 'Timeline',
     description: 'Place the games in the correct chronological order!',
     level: 'medium',
+    maxAttempts: 3,
+    gradient:
+      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
     ordinal: 4,
     isActive: 1,
     isCoverArt: 0,
@@ -52,6 +64,9 @@ const MOCK_GAME_MODES = [
     title: 'Timeline 2',
     description: 'A harder chronological ordering challenge!',
     level: 'hard',
+    maxAttempts: 7,
+    gradient:
+      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
     ordinal: 5,
     isActive: 1,
     isCoverArt: 0,
@@ -62,6 +77,9 @@ const MOCK_GAME_MODES = [
     title: 'Specifications',
     description: 'Guess the game from its technical specifications!',
     level: 'hard',
+    maxAttempts: 10,
+    gradient:
+      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
     ordinal: 6,
     isActive: 1,
     isCoverArt: 0,
@@ -95,7 +113,7 @@ describe('game-mode utilities', () => {
 
     it('should contain cover-art mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'cover-art',
+        (m: GameModePlus) => m.slug === 'cover-art',
       );
 
       expect(mode).toBeDefined();
@@ -105,7 +123,7 @@ describe('game-mode utilities', () => {
 
     it('should contain artwork mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'artwork',
+        (m: GameModePlus) => m.slug === 'artwork',
       );
 
       expect(mode).toBeDefined();
@@ -115,7 +133,7 @@ describe('game-mode utilities', () => {
 
     it('should contain image-gen mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'image-gen',
+        (m: GameModePlus) => m.slug === 'image-gen',
       );
 
       expect(mode).toBeDefined();
@@ -125,7 +143,7 @@ describe('game-mode utilities', () => {
 
     it('should contain timeline mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'timeline',
+        (m: GameModePlus) => m.slug === 'timeline',
       );
 
       expect(mode).toBeDefined();
@@ -135,7 +153,7 @@ describe('game-mode utilities', () => {
 
     it('should contain timeline-2 mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'timeline-2',
+        (m: GameModePlus) => m.slug === 'timeline-2',
       );
 
       expect(mode).toBeDefined();
@@ -145,7 +163,7 @@ describe('game-mode utilities', () => {
 
     it('should contain specifications mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'specifications',
+        (m: GameModePlus) => m.slug === 'specifications',
       );
 
       expect(mode).toBeDefined();
@@ -154,7 +172,7 @@ describe('game-mode utilities', () => {
     });
 
     it('should have unique slugs', async () => {
-      const slugs = (await getGameModes()).map((m: GameMode) => m.slug);
+      const slugs = (await getGameModes()).map((m: GameModePlus) => m.slug);
       const uniqueSlugs = new Set(slugs);
 
       expect(uniqueSlugs.size).toBe(slugs.length);
@@ -238,38 +256,40 @@ describe('game-mode utilities', () => {
       expect(result?.title).toBe('Specifications');
     });
 
-    it('should return undefined for unknown slug', async () => {
-      const result = await getGameModeBySlug('unknown');
-
-      expect(result).toBeUndefined();
+    it('should throw for unknown slug', async () => {
+      await expect(getGameModeBySlug('unknown')).rejects.toThrowError(
+        'Game mode "unknown" not found',
+      );
     });
 
-    it('should return undefined for empty string', async () => {
-      const result = await getGameModeBySlug('');
-      expect(result).toBeUndefined();
+    it('should throw for empty string', async () => {
+      await expect(getGameModeBySlug('')).rejects.toThrowError(
+        'Slug is required',
+      );
     });
 
-    it('should return undefined for null-like slugs', async () => {
-      const result = await getGameModeBySlug('null');
-
-      expect(result).toBeUndefined();
+    it('should throw for null-like slugs', async () => {
+      await expect(getGameModeBySlug('null')).rejects.toThrowError(
+        'Game mode "null" not found',
+      );
     });
 
-    it('should be case-sensitive', async () => {
-      const result = await getGameModeBySlug('COVER-ART');
-
-      expect(result).toBeUndefined();
+    it('should be case-sensitive and throw', async () => {
+      await expect(getGameModeBySlug('COVER-ART')).rejects.toThrowError(
+        'Game mode "COVER-ART" not found',
+      );
     });
 
-    it('should return undefined for partial matches', async () => {
-      const result = await getGameModeBySlug('cover');
-      expect(result).toBeUndefined();
+    it('should throw for partial matches', async () => {
+      await expect(getGameModeBySlug('cover')).rejects.toThrowError(
+        'Game mode "cover" not found',
+      );
     });
 
-    it('should handle slug with extra whitespace', async () => {
-      const result = await getGameModeBySlug(' cover-art ');
-
-      expect(result).toBeUndefined();
+    it('should throw for slug with extra whitespace', async () => {
+      await expect(getGameModeBySlug(' cover-art ')).rejects.toThrowError(
+        'Game mode " cover-art " not found',
+      );
     });
 
     it('should return the full GameMode object with all properties', async () => {

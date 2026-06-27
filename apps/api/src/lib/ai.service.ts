@@ -41,6 +41,7 @@ export class AiService {
     }
 
     const contentType = response.headers.get('content-type') ?? '';
+
     if (!contentType.includes('image')) {
       const body = await response.text();
 

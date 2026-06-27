@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { eq, sql, desc, and } from 'drizzle-orm';
-import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { randomUUID } from 'node:crypto';
 import { DatabaseService } from '@/db/database.service';
@@ -19,10 +18,12 @@ import {
 } from '@workspace/api-contract';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
+import { R2Service } from '@/lib/r2.service';
 import { ImageGenStore } from '@/image-gen/image-gen.store';
-import type { AppConfiguration } from '@/config/configuration';
 import { IMAGE_GEN_DIR, IMAGE_PROMPT_SUFFIX } from '@workspace/shared';
 import { GamesService } from '@/games/games.service';
+import { SqsService } from '@/lib/sqs.service';
+import configuration from '@/config/configuration';
 
 interface GenerateImageInput {
   igdbId: number;
@@ -40,7 +41,8 @@ export class ImageGenService {
     private readonly aiService: AiService,
     private readonly s3Service: S3Service,
     private readonly imageGenStore: ImageGenStore,
-    private readonly configService: ConfigService<AppConfiguration>,
+    private readonly r2Service: R2Service,
+    private readonly sqsService: SqsService,
   ) {}
 
   async generateImages(
@@ -163,12 +165,6 @@ export class ImageGenService {
       throw new Error('No art style description found.');
     }
 
-    const r2PublicUrlRaw =
-      this.configService.get('r2PublicUrl', { infer: true }) ?? '';
-    const r2PublicUrl = r2PublicUrlRaw.startsWith('http')
-      ? r2PublicUrlRaw
-      : `https://${r2PublicUrlRaw}`;
-
     for (const game of pendingGames) {
       try {
         const prompt = this.buildImagePrompt(
@@ -185,7 +181,7 @@ export class ImageGenService {
 
         await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
 
-        const publicUrl = `${r2PublicUrl}/${key}`;
+        const publicUrl = `${this.r2Service.r2PublicUrl}/${key}`;
         const list = Array.isArray(game.imageGen)
           ? JSON.parse(JSON.stringify(game.imageGen))
           : [];
@@ -393,6 +389,43 @@ export class ImageGenService {
   async generateImage(
     input: GenerateImageInput,
     actorId: string,
+  ): Promise<{ success: boolean; messageId?: string } | null> {
+    const { igdbId } = input;
+    const game = await this.gamesService.getGameByIgdbId(igdbId);
+
+    if (!game) {
+      return null;
+    }
+
+    const queueUrl = configuration().imageGenSqsQueueUrl;
+    const res = await this.sqsService.sendMessage(queueUrl, {
+      type: 'image-gen',
+      input,
+      actorId,
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to send image generation job to SQS queue');
+    }
+
+    // Insert the queued domain event
+    await this.databaseService.db.insert(domainEvents).values({
+      eventType: 'image_gen.queued',
+      actorId,
+      payload: {
+        igdbId,
+        artStyle: input.artStyle,
+        messageId: res.MessageId,
+        queueUrl,
+      },
+    });
+
+    return { success: true, messageId: res.MessageId };
+  }
+
+  async runSingleGeneration(
+    input: GenerateImageInput,
+    actorId: string,
   ): Promise<{ success: boolean; url: string; data: Game } | null> {
     const {
       igdbId,
@@ -431,12 +464,7 @@ export class ImageGenService {
 
     await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
 
-    const r2PublicUrlRaw =
-      this.configService.get('r2PublicUrl', { infer: true }) ?? '';
-    const r2PublicUrl = r2PublicUrlRaw.startsWith('http')
-      ? r2PublicUrlRaw
-      : `https://${r2PublicUrlRaw}`;
-    const publicUrl = `${r2PublicUrl}/${key}`;
+    const publicUrl = `${this.r2Service.r2PublicUrl}/${key}`;
     const list = Array.isArray(game.imageGen)
       ? JSON.parse(JSON.stringify(game.imageGen))
       : [];

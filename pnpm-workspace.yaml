@@ -9,18 +9,11 @@ allowBuilds:
   unrs-resolver: true
 engineStrict: true
 minimumReleaseAgeExclude:
-  - '@turbo/darwin-64@2.9.16'
-  - '@turbo/darwin-arm64@2.9.16'
-  - '@turbo/linux-64@2.9.16'
-  - '@turbo/linux-arm64@2.9.16'
-  - '@turbo/windows-64@2.9.16'
-  - '@turbo/windows-arm64@2.9.16'
-  - turbo@2.9.16
-  - '@turbo/darwin-64@2.9.17'
-  - '@turbo/darwin-arm64@2.9.17'
-  - '@turbo/gen@2.9.17'
-  - '@turbo/linux-64@2.9.17'
-  - '@turbo/linux-arm64@2.9.17'
-  - '@turbo/windows-64@2.9.17'
-  - '@turbo/windows-arm64@2.9.17'
-  - turbo@2.9.17
+  - '@turbo/darwin-64@2.9.16 || 2.9.17 || 2.10.0'
+  - '@turbo/darwin-arm64@2.9.16 || 2.9.17 || 2.10.0'
+  - '@turbo/linux-64@2.9.16 || 2.9.17 || 2.10.0'
+  - '@turbo/linux-arm64@2.9.16 || 2.9.17 || 2.10.0'
+  - '@turbo/windows-64@2.9.16 || 2.9.17 || 2.10.0'
+  - '@turbo/windows-arm64@2.9.16 || 2.9.17 || 2.10.0'
+  - turbo@2.9.16 || 2.9.17 || 2.10.0
+  - '@turbo/gen@2.9.17 || 2.10.0'

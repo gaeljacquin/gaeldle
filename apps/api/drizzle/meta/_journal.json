@@ -141,6 +141,34 @@
       "when": 1781378404938,
       "tag": "0019_wide_random",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1782514829840,
+      "tag": "0020_elite_joseph",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1782515899390,
+      "tag": "0021_eminent_vanisher",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1782524300808,
+      "tag": "0022_thankful_stryfe",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1782531879264,
+      "tag": "0023_panoramic_roulette",
+      "breakpoints": true
     }
   ]
 }

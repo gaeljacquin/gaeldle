@@ -24,8 +24,7 @@ export const ImageGenContract = {
     .output(
       z.object({
         success: z.boolean(),
-        url: z.string(),
-        data: GameSelectSchema,
+        messageId: z.string().optional(),
       }),
     ),
 

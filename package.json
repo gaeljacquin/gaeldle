@@ -9,6 +9,10 @@
     "lint": "turbo lint --filter '!@workspace/ui'",
     "lint:fix": "turbo lint --filter '!@workspace/ui' -- --fix",
     "lint:web": "turbo lint --filter @workspace/web",
+    "db:generate": "pnpm --filter ./apps/api db:generate",
+    "db:migrate": "pnpm --filter ./apps/api db:migrate",
+    "db:push": "pnpm --filter ./apps/api db:push",
+    "db:studio": "pnpm --filter ./apps/api db:studio",
     "test": "turbo test",
     "test:web": "turbo test --filter @workspace/web",
     "format": "prettier --check .",
@@ -27,19 +31,19 @@
     "prepare": "husky"
   },
   "keywords": [],
-  "packageManager": "pnpm@11.5.3",
+  "packageManager": "pnpm@11.9.0",
   "devDependencies": {
-    "@commitlint/cli": "^21.0.2",
-    "@commitlint/config-conventional": "^21.0.2",
-    "@types/node": "^25.9.3",
+    "@commitlint/cli": "^21.1.0",
+    "@commitlint/config-conventional": "^21.1.0",
+    "@types/node": "^25.9.4",
     "husky": "^9.1.7",
     "prettier": "^3.8.4",
-    "turbo": "^2.9.18"
+    "turbo": "^2.10.0"
   },
   "dependencies": {
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "motion": "^12.40.0",
+    "motion": "^12.41.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "zod": "^4.4.3"

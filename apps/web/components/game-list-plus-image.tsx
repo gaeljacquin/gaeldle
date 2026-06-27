@@ -13,7 +13,6 @@ import { Card } from '@workspace/ui/card';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
 import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
-import { COVER_ART_MAX_ATTEMPTS } from '@workspace/shared';
 
 interface GameListPlusImageProps {
   gameModeSlug: string;
@@ -144,7 +143,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                     Attempts
                   </p>
                   <Attempts
-                    maxAttempts={COVER_ART_MAX_ATTEMPTS}
+                    maxAttempts={gameMode.maxAttempts}
                     attemptsLeft={attemptsLeft}
                     variant="primary"
                   />
@@ -231,7 +230,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
           <DevModeToggle
             targetGame={targetGame}
             attemptsLeft={attemptsLeft}
-            maxAttempts={COVER_ART_MAX_ATTEMPTS}
+            maxAttempts={gameMode.maxAttempts}
             onAdjustAttempts={adjustAttempts}
             className="border-2 border-dashed w-full p-4"
           />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, ViewTransition } from 'react';
+import { Suspense, useState, ViewTransition } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useSpecificationsGame } from '@/lib/hooks/use-specifications-game';
 import SpecificationsGrid from '@/components/specifications-grid';
@@ -13,9 +13,10 @@ import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';
-import { SPECIFICATIONS_MAX_ATTEMPTS } from '@workspace/shared';
+import { ErrorBoundary } from '@/components/error-boundary';
+import SpecificationsSkeleton from '@/components/specifications-skeleton';
 
-export default function Specifications() {
+function SpecificationsContent() {
   const { data: gameMode } = useSuspenseQuery(
     gameModeSlugQueryOptions('specifications'),
   );
@@ -110,7 +111,7 @@ export default function Specifications() {
                   Attempts
                 </p>
                 <Attempts
-                  maxAttempts={SPECIFICATIONS_MAX_ATTEMPTS}
+                  maxAttempts={gameMode.maxAttempts}
                   attemptsLeft={attemptsLeft}
                   variant="primary"
                 />
@@ -159,7 +160,7 @@ export default function Specifications() {
                 <SpecificationsGameOver
                   isCorrect={isCorrect}
                   targetGame={targetGame}
-                  attemptsUsed={SPECIFICATIONS_MAX_ATTEMPTS - attemptsLeft}
+                  attemptsUsed={gameMode.maxAttempts - attemptsLeft}
                   onPlayAgain={handleResetGame}
                   onToggleTable={() => setShowAnswerSpecs(!showAnswerSpecs)}
                   showingAnswer={showAnswerSpecs}
@@ -182,7 +183,7 @@ export default function Specifications() {
               <DevModeToggle
                 targetGame={targetGame}
                 attemptsLeft={attemptsLeft}
-                maxAttempts={SPECIFICATIONS_MAX_ATTEMPTS}
+                maxAttempts={gameMode.maxAttempts}
                 onAdjustAttempts={adjustAttempts}
                 className="border-2 border-dashed w-full p-6"
               />
@@ -191,5 +192,21 @@ export default function Specifications() {
         </div>
       </div>
     </ViewTransition>
+  );
+}
+
+export default function Specifications() {
+  return (
+    <ErrorBoundary>
+      <Suspense
+        fallback={
+          <ViewTransition enter="slide-down">
+            <SpecificationsSkeleton />
+          </ViewTransition>
+        }
+      >
+        <SpecificationsContent />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

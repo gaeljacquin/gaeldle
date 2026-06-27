@@ -19,6 +19,8 @@ export type AppConfiguration = {
   awsSecretAccessKey: string;
   awsRegion: string;
   sampleSqsQueueUrl: string;
+  imageGenSqsQueueUrl: string;
+  imageGenConsumerPollDelayMs: number;
 };
 
 const configuration = (): AppConfiguration => {
@@ -56,6 +58,12 @@ const configuration = (): AppConfiguration => {
     awsRegion: process.env.AWS_REGION ?? '',
     sampleSqsQueueUrl:
       process.env.SAMPLE_SQS_QUEUE_URL ?? 'gaeldle-sample-queue',
+    imageGenSqsQueueUrl:
+      process.env.IMAGE_GEN_SQS_QUEUE_URL ?? 'gaeldle-image-gen-queue',
+    imageGenConsumerPollDelayMs: Number.parseInt(
+      process.env.IMAGE_GEN_CONSUMER_POLL_DELAY_MS ?? '0',
+      10,
+    ),
   };
 };
 

@@ -106,7 +106,7 @@ export const allGameModesQueryOptions = {
 export const updateGameMode = async (
   gameMode: Omit<
     GameMode & { id: number },
-    'ordinal'
+    'ordinal' | 'gradient'
   >,
 ): Promise<void> => {
   const res = await fetch('/api/game-modes', {

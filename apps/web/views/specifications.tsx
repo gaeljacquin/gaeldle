@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, ViewTransition } from 'react';
+import { Suspense, useState, ViewTransition } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useSpecificationsGame } from '@/lib/hooks/use-specifications-game';
 import SpecificationsGrid from '@/components/specifications-grid';
@@ -13,14 +13,13 @@ import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 import Attempts from '@/components/attempts';
 import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';
+import { ErrorBoundary } from '@/components/error-boundary';
+import SpecificationsSkeleton from '@/components/specifications-skeleton';
 
-export default function Specifications() {
+function SpecificationsContent() {
   const { data: gameMode } = useSuspenseQuery(
     gameModeSlugQueryOptions('specifications'),
   );
-  if (!gameMode) {
-    throw new Error('Game mode "specifications" not found');
-  }
   const [showAnswerSpecs, setShowAnswerSpecs] = useState(true);
   const [isHintModalOpen, setIsHintModalOpen] = useState(false);
 
@@ -193,5 +192,21 @@ export default function Specifications() {
         </div>
       </div>
     </ViewTransition>
+  );
+}
+
+export default function Specifications() {
+  return (
+    <ErrorBoundary>
+      <Suspense
+        fallback={
+          <ViewTransition enter="slide-down">
+            <SpecificationsSkeleton />
+          </ViewTransition>
+        }
+      >
+        <SpecificationsContent />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

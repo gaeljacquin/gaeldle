@@ -1,13 +1,14 @@
 'use client';
 
-import { ViewTransition } from 'react';
+import { Suspense, ViewTransition, useState, useRef } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useTimeline2Game } from '@/lib/hooks/use-timeline-2-game';
 import { Timeline2Card } from '@/components/timeline-2-card';
 import { Button } from '@workspace/ui/button';
 import { Card, CardContent } from '@workspace/ui/card';
 import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
-import { useState, useRef } from 'react';
+import { ErrorBoundary } from '@/components/error-boundary';
+import Timeline2Skeleton from '@/components/timeline-2-skeleton';
 import Attempts from '@/components/attempts';
 import { motion, useMotionValue } from 'motion/react';
 import { cn } from '@workspace/ui/lib/utils';
@@ -15,14 +16,10 @@ import Timeline2DevToggle from '@/components/timeline-2-dev-toggle';
 import { TimelineCardSkeleton } from '@/components/timeline-card-skeleton';
 import { Timeline2CardSkeleton } from '@/components/timeline-2-card-skeleton';
 
-export default function Timeline2() {
+function Timeline2Content() {
   const { data: gameMode } = useSuspenseQuery(
     gameModeSlugQueryOptions('timeline-2'),
   );
-
-  if (!gameMode) {
-    throw new Error('Game mode "timeline-2" not found');
-  }
 
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -125,10 +122,10 @@ export default function Timeline2() {
           <div className="relative mb-12">
             <div className="text-center pt-8 md:pt-0">
               <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">
-                {gameMode?.title}
+                {gameMode.title}
               </h1>
               <p className="mt-2 text-muted-foreground">
-                {gameMode?.description}
+                {gameMode.description}
               </p>
             </div>
           </div>
@@ -290,5 +287,21 @@ export default function Timeline2() {
         </div>
       </div>
     </ViewTransition>
+  );
+}
+
+export default function Timeline2() {
+  return (
+    <ErrorBoundary>
+      <Suspense
+        fallback={
+          <ViewTransition enter="slide-down">
+            <Timeline2Skeleton />
+          </ViewTransition>
+        }
+      >
+        <Timeline2Content />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

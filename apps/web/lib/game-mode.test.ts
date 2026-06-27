@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  GameMode,
   getGameModeBySlug,
   getGameModes,
 } from '@/lib/services/game-mode.service';
+import type { GameMode } from '@workspace/api-contract';
 
 const MOCK_GAME_MODES = [
   {
@@ -244,38 +244,40 @@ describe('game-mode utilities', () => {
       expect(result?.title).toBe('Specifications');
     });
 
-    it('should return undefined for unknown slug', async () => {
-      const result = await getGameModeBySlug('unknown');
-
-      expect(result).toBeUndefined();
+    it('should throw for unknown slug', async () => {
+      await expect(getGameModeBySlug('unknown')).rejects.toThrowError(
+        'Game mode "unknown" not found',
+      );
     });
 
-    it('should return undefined for empty string', async () => {
-      const result = await getGameModeBySlug('');
-      expect(result).toBeUndefined();
+    it('should throw for empty string', async () => {
+      await expect(getGameModeBySlug('')).rejects.toThrowError(
+        'Slug is required',
+      );
     });
 
-    it('should return undefined for null-like slugs', async () => {
-      const result = await getGameModeBySlug('null');
-
-      expect(result).toBeUndefined();
+    it('should throw for null-like slugs', async () => {
+      await expect(getGameModeBySlug('null')).rejects.toThrowError(
+        'Game mode "null" not found',
+      );
     });
 
-    it('should be case-sensitive', async () => {
-      const result = await getGameModeBySlug('COVER-ART');
-
-      expect(result).toBeUndefined();
+    it('should be case-sensitive and throw', async () => {
+      await expect(getGameModeBySlug('COVER-ART')).rejects.toThrowError(
+        'Game mode "COVER-ART" not found',
+      );
     });
 
-    it('should return undefined for partial matches', async () => {
-      const result = await getGameModeBySlug('cover');
-      expect(result).toBeUndefined();
+    it('should throw for partial matches', async () => {
+      await expect(getGameModeBySlug('cover')).rejects.toThrowError(
+        'Game mode "cover" not found',
+      );
     });
 
-    it('should handle slug with extra whitespace', async () => {
-      const result = await getGameModeBySlug(' cover-art ');
-
-      expect(result).toBeUndefined();
+    it('should throw for slug with extra whitespace', async () => {
+      await expect(getGameModeBySlug(' cover-art ')).rejects.toThrowError(
+        'Game mode " cover-art " not found',
+      );
     });
 
     it('should return the full GameMode object with all properties', async () => {

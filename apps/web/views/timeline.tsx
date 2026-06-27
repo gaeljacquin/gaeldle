@@ -1,6 +1,6 @@
 'use client';
 
-import { ViewTransition } from 'react';
+import { Suspense, ViewTransition, useState } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useTimelineGame } from '@/lib/hooks/use-timeline-game';
 import { TimelineCard } from '@/components/timeline-card';
@@ -26,7 +26,8 @@ import {
 } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useState } from 'react';
+import { ErrorBoundary } from '@/components/error-boundary';
+import TimelineSkeleton from '@/components/timeline-skeleton';
 import type { Game } from '@workspace/api-contract';
 import Attempts from '@/components/attempts';
 import { useTimelineStore } from '@/lib/stores/timeline-store';
@@ -89,14 +90,10 @@ function SortableCard({
   );
 }
 
-export default function Timeline() {
+function TimelineContent() {
   const { data: gameMode } = useSuspenseQuery(
     gameModeSlugQueryOptions('timeline'),
   );
-
-  if (!gameMode) {
-    throw new Error('Game mode "timeline" not found');
-  }
 
   const [activeId, setActiveId] = useState<number | null>(null);
   const { swapMode, setSwapMode } = useTimelineStore();
@@ -198,10 +195,10 @@ export default function Timeline() {
           <div className="relative mb-12">
             <div className="text-center pt-8 md:pt-0">
               <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">
-                {gameMode?.title}
+                {gameMode.title}
               </h1>
               <p className="mt-2 text-muted-foreground">
-                {gameMode?.description}
+                {gameMode.description}
               </p>
             </div>
           </div>
@@ -400,5 +397,21 @@ export default function Timeline() {
         </div>
       </div>
     </ViewTransition>
+  );
+}
+
+export default function Timeline() {
+  return (
+    <ErrorBoundary>
+      <Suspense
+        fallback={
+          <ViewTransition enter="slide-down">
+            <TimelineSkeleton />
+          </ViewTransition>
+        }
+      >
+        <TimelineContent />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

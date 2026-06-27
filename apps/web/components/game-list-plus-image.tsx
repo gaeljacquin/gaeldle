@@ -22,11 +22,6 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
   const { data: gameMode } = useSuspenseQuery(
     gameModeSlugQueryOptions(props.gameModeSlug),
   );
-
-  if (!gameMode) {
-    throw new Error(`Game mode "${props.gameModeSlug}" not found`);
-  }
-
   const [searchKey, setSearchKey] = useState(0);
 
   const {

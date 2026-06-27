@@ -67,9 +67,7 @@ function selectRandomAiImage(
 import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 
 export function useCoverArtGame(mode: string) {
-  const { data: gameMode } = useSuspenseQuery(
-    gameModeSlugQueryOptions(mode),
-  );
+  const { data: gameMode } = useSuspenseQuery(gameModeSlugQueryOptions(mode));
 
   if (!gameMode) {
     throw new Error(`Game mode "${mode}" not found`);

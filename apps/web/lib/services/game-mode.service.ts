@@ -1,6 +1,6 @@
 import { gameModeSelectSchema, type GameMode } from '@workspace/api-contract';
-export type { GameMode };
 import { z } from 'zod';
+import { queryOptions } from '@tanstack/react-query';
 
 export const getGameModes = async (): Promise<GameMode[]> => {
   try {
@@ -40,23 +40,25 @@ export const gameModesQueryOptions = {
 /**
  * Get game mode by slug (pathname without leading slash)
  * @param slug - The game mode slug (e.g., "cover-art", "image-gen")
- * @returns GameMode or undefined if not found
+ * @returns GameMode (throws if not found)
  */
-export async function getGameModeBySlug(
-  slug: string,
-): Promise<GameMode | undefined> {
+export async function getGameModeBySlug(slug: string): Promise<GameMode> {
   if (!slug) {
-    return undefined;
+    throw new Error('Slug is required');
   }
 
-  const modes = await getGameModes();
+  const modes = await getGameModes(); // let this throw naturally on failure
+  const mode = modes.find((m) => m.slug === slug);
 
-  return modes.find((mode) => mode.slug === slug);
+  if (!mode) {
+    throw new Error(`Game mode "${slug}" not found`);
+  }
+
+  return mode;
 }
 
-export const gameModeSlugQueryOptions = (slug: string) => {
-  return {
+export const gameModeSlugQueryOptions = (slug: string) =>
+  queryOptions({
     queryKey: ['gameModeSlug', slug],
     queryFn: () => getGameModeBySlug(slug),
-  };
-};
+  });

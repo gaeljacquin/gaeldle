@@ -12,11 +12,6 @@ export function useTimelineGame() {
   const { data: gameMode } = useSuspenseQuery(
     gameModeSlugQueryOptions('timeline'),
   );
-
-  if (!gameMode) {
-    throw new Error('Game mode "timeline" not found');
-  }
-
   const maxAttempts = gameMode.maxAttempts;
   const [selectedGames, setSelectedGames] = useState<Game[]>([]);
   const [userOrder, setUserOrder] = useState<Game[]>([]);

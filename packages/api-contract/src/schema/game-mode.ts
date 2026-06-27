@@ -22,7 +22,11 @@ export const gameModeTable = pgTable(
     description: text('description').notNull().default('TBC'),
     level: text('level').notNull(),
     maxAttempts: integer('max_attempts').notNull().default(3),
-    gradient: text('gradient').notNull().default('linear-gradient(135deg, hsl(215 19% 35%) 0%, hsl(215 28% 17%) 100%)'),
+    gradient: text('gradient')
+      .notNull()
+      .default(
+        'linear-gradient(135deg, hsl(215 19% 35%) 0%, hsl(215 28% 17%) 100%)',
+      ),
     ordinal: serial('ordinal').unique().notNull(),
     isActive: integer('is_active').notNull().default(0),
     isCoverArt: integer('is_cover_art').notNull().default(0),
@@ -68,7 +72,7 @@ export const gameModes = pgMaterializedView('active_game_modes').as((qb) => {
 
 export const gameModeSelectSchema = createSelectSchema(gameModes);
 
-export type GameMode = z.infer<typeof gameModeSelectSchema>
+export type GameMode = z.infer<typeof gameModeSelectSchema>;
 export type GameModePlus = GameMode & {
   icon: string;
   href: string;

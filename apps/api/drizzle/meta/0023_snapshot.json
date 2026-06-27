@@ -178,9 +178,7 @@
         "games_igdb_key": {
           "name": "games_igdb_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "igdb_id"
-          ]
+          "columns": ["igdb_id"]
         }
       },
       "policies": {},
@@ -283,9 +281,7 @@
         "art_style_value_unique": {
           "name": "art_style_value_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "value"
-          ]
+          "columns": ["value"]
         }
       },
       "policies": {},
@@ -408,16 +404,12 @@
         "game_mode_slug_unique": {
           "name": "game_mode_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         },
         "game_mode_ordinal_unique": {
           "name": "game_mode_ordinal_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "ordinal"
-          ]
+          "columns": ["ordinal"]
         }
       },
       "policies": {},

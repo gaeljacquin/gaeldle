@@ -292,45 +292,32 @@ export default function EditModesView() {
                       className={cn(
                         'flex flex-col w-full text-left p-4 rounded-xl border transition-all cursor-pointer relative overflow-hidden group',
                         isSelected
-                          ? 'bg-card border-primary ring-1 ring-primary shadow-md'
-                          : 'bg-card/50 border-border hover:bg-card hover:border-border/80 hover:shadow-sm',
+                          ? 'border-white/10 shadow-lg opacity-100'
+                          : 'border-white/10 hover:border-white/30 hover:shadow-md opacity-80 hover:opacity-100',
                       )}
+                      style={{ background: mode.gradient }}
                     >
-                      {isSelected && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary" />
-                      )}
+                      <div
+                        className={cn(
+                          'absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100',
+                          isSelected && 'opacity-100',
+                        )}
+                        style={{ background: 'var(--gradient-card-overlay)' }}
+                      />
 
-                      <div className="flex items-center justify-between w-full">
-                        <span
-                          className={cn(
-                            'font-bold text-sm transition-colors',
-                            isSelected
-                              ? 'text-primary'
-                              : 'text-foreground group-hover:text-primary',
-                          )}
-                        >
+                      <div className="flex items-center justify-between w-full relative z-10">
+                        <span className="font-bold text-sm text-white">
                           {mode.title}
                         </span>
                         <div className="flex items-center gap-1.5">
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              'text-[11px] h-5.5 px-2.5 py-0.5 capitalize border font-medium',
-                              mode.level === 'easy' &&
-                                'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/25',
-                              mode.level === 'medium' &&
-                                'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/25',
-                              mode.level === 'hard' &&
-                                'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/25',
-                            )}
-                          >
+                          <span className="rounded-full bg-card/90 px-2 py-0.5 text-[11px] font-semibold tracking-wide text-foreground uppercase">
                             {mode.level}
-                          </Badge>
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between w-full mt-2">
-                        <span className="text-[11px] font-mono text-muted-foreground">
+                      <div className="flex items-center justify-between w-full mt-2 relative z-10">
+                        <span className="text-[11px] font-mono text-white">
                           /{mode.slug}
                         </span>
 

@@ -8,11 +8,6 @@ export function useTimeline2Game() {
   const { data: gameMode } = useSuspenseQuery(
     gameModeSlugQueryOptions('timeline-2'),
   );
-
-  if (!gameMode) {
-    throw new Error('Game mode "timeline-2" not found');
-  }
-
   const maxAttempts = gameMode.maxAttempts;
   const [timelineCards, setTimelineCards] = useState<Game[]>([]);
   const [dealtCard, setDealtCard] = useState<Game | null>(null);

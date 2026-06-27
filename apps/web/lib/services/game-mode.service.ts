@@ -1,4 +1,8 @@
-import { GameMode, gameModeSelectSchema, type GameModePlus } from '@workspace/api-contract';
+import {
+  GameMode,
+  gameModeSelectSchema,
+  type GameModePlus,
+} from '@workspace/api-contract';
 import { z } from 'zod';
 import { queryOptions } from '@tanstack/react-query';
 
@@ -11,19 +15,14 @@ export const getGameModes = async (): Promise<GameModePlus[]> => {
     }
 
     const gameModes = z.array(gameModeSelectSchema).parse(await res.json());
-    const levelCounts: Record<string, number> = {};
 
     return gameModes.map((gameMode) => {
-      const { level, slug } = gameMode;
-      levelCounts[level] ??= 1;
-      const gradient = `--gradient-${level}-${levelCounts[level]}`;
-      levelCounts[level]++;
+      const { slug } = gameMode;
 
       return {
         ...gameMode,
         icon: 'IconDeviceGamepad2',
         href: `/${slug}`,
-        gradient,
       };
     });
   } catch (e) {
@@ -77,19 +76,14 @@ export const getAllGameModes = async (): Promise<
       id: z.number(),
     });
     const gameModes = z.array(gameModeWithIdSchema).parse(await res.json());
-    const levelCounts: Record<string, number> = {};
 
     return gameModes.map((gameMode) => {
-      const { level, slug } = gameMode;
-      levelCounts[level] ??= 1;
-      const gradient = `--gradient-${level}-${levelCounts[level]}`;
-      levelCounts[level]++;
+      const { slug } = gameMode;
 
       return {
         ...gameMode,
         icon: 'IconDeviceGamepad2',
         href: `/${slug}`,
-        gradient,
       };
     });
   } catch (e) {
@@ -104,10 +98,7 @@ export const allGameModesQueryOptions = {
 };
 
 export const updateGameMode = async (
-  gameMode: Omit<
-    GameMode & { id: number },
-    'ordinal' | 'gradient'
-  >,
+  gameMode: Omit<GameMode & { id: number }, 'ordinal' | 'gradient'>,
 ): Promise<void> => {
   const res = await fetch('/api/game-modes', {
     method: 'PATCH',

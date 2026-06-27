@@ -13,6 +13,8 @@ const MOCK_GAME_MODES = [
     description: 'Guess the game from its cover art, pixelated!',
     level: 'easy',
     maxAttempts: 5,
+    gradient:
+      'linear-gradient(135deg, hsl(220 80% 50%) 0%, hsl(280 70% 55%) 100%)',
     ordinal: 1,
     isActive: 1,
     isCoverArt: 1,
@@ -24,6 +26,8 @@ const MOCK_GAME_MODES = [
     description: 'Guess the game from its official artwork!',
     level: 'medium',
     maxAttempts: 5,
+    gradient:
+      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
     ordinal: 2,
     isActive: 1,
     isCoverArt: 1,
@@ -35,6 +39,8 @@ const MOCK_GAME_MODES = [
     description: 'Guess the game from generated images!',
     level: 'medium',
     maxAttempts: 5,
+    gradient:
+      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
     ordinal: 3,
     isActive: 1,
     isCoverArt: 1,
@@ -46,6 +52,8 @@ const MOCK_GAME_MODES = [
     description: 'Place the games in the correct chronological order!',
     level: 'medium',
     maxAttempts: 3,
+    gradient:
+      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
     ordinal: 4,
     isActive: 1,
     isCoverArt: 0,
@@ -57,6 +65,8 @@ const MOCK_GAME_MODES = [
     description: 'A harder chronological ordering challenge!',
     level: 'hard',
     maxAttempts: 7,
+    gradient:
+      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
     ordinal: 5,
     isActive: 1,
     isCoverArt: 0,
@@ -68,6 +78,8 @@ const MOCK_GAME_MODES = [
     description: 'Guess the game from its technical specifications!',
     level: 'hard',
     maxAttempts: 10,
+    gradient:
+      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
     ordinal: 6,
     isActive: 1,
     isCoverArt: 0,

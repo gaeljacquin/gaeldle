@@ -18,6 +18,7 @@ import {
   extractPublisher,
   extractReleaseYear,
 } from '@workspace/shared';
+import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 
 function compareArrays(target: string[], guess: string[]): MatchType {
   if (!target.length && !guess.length) {
@@ -111,17 +112,10 @@ function compareGames(
   };
 }
 
-import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
-
 export function useSpecificationsGame() {
   const { data: gameMode } = useSuspenseQuery(
     gameModeSlugQueryOptions('specifications'),
   );
-
-  if (!gameMode) {
-    throw new Error('Game mode "specifications" not found');
-  }
-
   const maxAttempts = gameMode.maxAttempts;
   const queryClient = useQueryClient();
   const queryKey = useMemo(

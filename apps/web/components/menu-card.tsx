@@ -30,7 +30,13 @@ export function MenuCard({
         'group relative flex h-44 w-full flex-col justify-end overflow-hidden rounded-xl p-5 text-left transition-all duration-300',
         'hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]',
       )}
-      style={{ background: `var(${gradient})` }}
+      style={{
+        background: gradient
+          ? gradient.startsWith('--')
+            ? `var(${gradient})`
+            : gradient
+          : undefined,
+      }}
     >
       <div
         className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"

@@ -114,3 +114,21 @@ export const updateGameMode = async (
     throw new Error(err.error || 'Failed to update game mode');
   }
 };
+
+export const updateGameModesOrder = async (
+  orders: { id: number; ordinal: number }[],
+): Promise<void> => {
+  const res = await fetch('/api/game-modes', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(orders),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+
+    throw new Error(err.error || 'Failed to update game modes order');
+  }
+};

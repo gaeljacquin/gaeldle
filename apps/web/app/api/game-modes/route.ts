@@ -36,6 +36,31 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
+
+    if (Array.isArray(body)) {
+      await db.transaction(async (tx) => {
+        for (const item of body) {
+          const { id, ordinal } = item;
+
+          if (id === undefined || ordinal === undefined) {
+            throw new Error('id and ordinal are required for bulk updates');
+          }
+
+          await tx
+            .update(gameModeTable)
+            .set({
+              ordinal: Number(ordinal),
+              updatedAt: new Date(),
+            })
+            .where(eq(gameModeTable.id, id));
+        }
+      });
+
+      await db.execute(sql`REFRESH MATERIALIZED VIEW active_game_modes`);
+
+      return NextResponse.json({ success: true });
+    }
+
     const {
       id,
       slug,

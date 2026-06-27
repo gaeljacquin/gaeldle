@@ -155,6 +155,13 @@
       "when": 1782515899390,
       "tag": "0021_eminent_vanisher",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1782524300808,
+      "tag": "0022_thankful_stryfe",
+      "breakpoints": true
     }
   ]
 }

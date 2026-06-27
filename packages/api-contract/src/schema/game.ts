@@ -41,6 +41,18 @@ export const games = pgTable(
         >
       >
     >(),
+    infoGen: json('info_gen').$type<
+      Array<
+        Record<
+          string,
+          {
+            info: string;
+            prompt: string;
+            provider: string;
+          }
+        >
+      >
+    >(),
     artworks: json('artworks').$type<any>(),
     keywords: json('keywords').$type<any>(),
     franchises: json('franchises').$type<any>(),
@@ -67,6 +79,7 @@ export const gameObject = {
   aiImageUrl: games.aiImageUrl,
   aiPrompt: games.aiPrompt,
   imageGen: games.imageGen,
+  infoGen: games.infoGen,
   artworks: games.artworks,
   keywords: games.keywords,
   franchises: games.franchises,

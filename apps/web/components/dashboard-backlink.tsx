@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { IconArrowBackUp } from '@tabler/icons-react';
+import { IconArrowLeft } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
 
 export interface DashboardBacklinkProps {
@@ -24,7 +24,7 @@ export function DashboardBacklink({
       href={href}
       className="flex flex-row cursor-pointer items-center gap-2"
     >
-      <IconArrowBackUp stroke={2} size={18} />
+      <IconArrowLeft stroke={2} size={18} />
       <span className="text-sm">{text}</span>
     </Link>
   );

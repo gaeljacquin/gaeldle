@@ -1,8 +1,8 @@
-import { gameModeSelectSchema, type GameMode } from '@workspace/api-contract';
+import { GameMode, gameModeSelectSchema, type GameModePlus } from '@workspace/api-contract';
 import { z } from 'zod';
 import { queryOptions } from '@tanstack/react-query';
 
-export const getGameModes = async (): Promise<GameMode[]> => {
+export const getGameModes = async (): Promise<GameModePlus[]> => {
   try {
     const res = await fetch('/api/game-modes');
 
@@ -42,7 +42,7 @@ export const gameModesQueryOptions = {
  * @param slug - The game mode slug (e.g., "cover-art", "image-gen")
  * @returns GameMode (throws if not found)
  */
-export async function getGameModeBySlug(slug: string): Promise<GameMode> {
+export async function getGameModeBySlug(slug: string): Promise<GameModePlus> {
   if (!slug) {
     throw new Error('Slug is required');
   }
@@ -62,3 +62,64 @@ export const gameModeSlugQueryOptions = (slug: string) =>
     queryKey: ['gameModeSlug', slug],
     queryFn: () => getGameModeBySlug(slug),
   });
+
+export const getAllGameModes = async (): Promise<
+  (GameModePlus & { id: number })[]
+> => {
+  try {
+    const res = await fetch('/api/game-modes?all=true');
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch all game modes');
+    }
+
+    const gameModeWithIdSchema = gameModeSelectSchema.extend({
+      id: z.number(),
+    });
+    const gameModes = z.array(gameModeWithIdSchema).parse(await res.json());
+    const levelCounts: Record<string, number> = {};
+
+    return gameModes.map((gameMode) => {
+      const { level, slug } = gameMode;
+      levelCounts[level] ??= 1;
+      const gradient = `--gradient-${level}-${levelCounts[level]}`;
+      levelCounts[level]++;
+
+      return {
+        ...gameMode,
+        icon: 'IconDeviceGamepad2',
+        href: `/${slug}`,
+        gradient,
+      };
+    });
+  } catch (e) {
+    console.error('Failed to fetch all game modes:', (e as Error).message);
+    throw e;
+  }
+};
+
+export const allGameModesQueryOptions = {
+  queryKey: ['allGameModes'],
+  queryFn: getAllGameModes,
+};
+
+export const updateGameMode = async (
+  gameMode: Omit<
+    GameMode & { id: number },
+    'ordinal'
+  >,
+): Promise<void> => {
+  const res = await fetch('/api/game-modes', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(gameMode),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+
+    throw new Error(err.error || 'Failed to update game mode');
+  }
+};

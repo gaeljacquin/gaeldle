@@ -6,6 +6,7 @@ import {
   IconArrowsExchange,
   IconZoomScan,
   IconTools,
+  IconPlayerPlay,
 } from '@tabler/icons-react';
 import { MenuCard } from '@/components/menu-card';
 import { DashboardHeader } from '@/components/dashboard-header';
@@ -31,6 +32,13 @@ const utilityItems = [
     description: 'Browse and discover new games on IGDB.',
     icon: IconZoomScan,
     gradient: '--gradient-hard-1',
+  },
+  {
+    href: '/dashboard/edit-modes',
+    title: 'Edit Modes',
+    description: 'Manage and update active and inactive game modes.',
+    icon: IconPlayerPlay,
+    gradient: '--gradient-medium-3',
   },
 ] as const;
 

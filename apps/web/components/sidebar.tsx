@@ -22,7 +22,7 @@ import { cn } from '@workspace/ui/lib/utils';
 import { appInfo } from '@/lib/app-info';
 import { Separator } from '@workspace/ui/separator';
 import { gameModesQueryOptions } from '@/lib/services/game-mode.service';
-import { GameMode } from '@workspace/api-contract';
+import { GameModePlus } from '@workspace/api-contract';
 
 interface SidebarLinkProps {
   href: string;
@@ -65,7 +65,7 @@ interface SidebarGamesSectionProps {
 }
 
 interface SidebarGameLinkProps {
-  mode: GameMode;
+  mode: GameModePlus;
   isCollapsed: boolean;
   pathname: string;
 }

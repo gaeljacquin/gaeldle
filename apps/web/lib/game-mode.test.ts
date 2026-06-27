@@ -3,7 +3,7 @@ import {
   getGameModeBySlug,
   getGameModes,
 } from '@/lib/services/game-mode.service';
-import type { GameMode } from '@workspace/api-contract';
+import type { GameModePlus } from '@workspace/api-contract';
 
 const MOCK_GAME_MODES = [
   {
@@ -101,7 +101,7 @@ describe('game-mode utilities', () => {
 
     it('should contain cover-art mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'cover-art',
+        (m: GameModePlus) => m.slug === 'cover-art',
       );
 
       expect(mode).toBeDefined();
@@ -111,7 +111,7 @@ describe('game-mode utilities', () => {
 
     it('should contain artwork mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'artwork',
+        (m: GameModePlus) => m.slug === 'artwork',
       );
 
       expect(mode).toBeDefined();
@@ -121,7 +121,7 @@ describe('game-mode utilities', () => {
 
     it('should contain image-gen mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'image-gen',
+        (m: GameModePlus) => m.slug === 'image-gen',
       );
 
       expect(mode).toBeDefined();
@@ -131,7 +131,7 @@ describe('game-mode utilities', () => {
 
     it('should contain timeline mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'timeline',
+        (m: GameModePlus) => m.slug === 'timeline',
       );
 
       expect(mode).toBeDefined();
@@ -141,7 +141,7 @@ describe('game-mode utilities', () => {
 
     it('should contain timeline-2 mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'timeline-2',
+        (m: GameModePlus) => m.slug === 'timeline-2',
       );
 
       expect(mode).toBeDefined();
@@ -151,7 +151,7 @@ describe('game-mode utilities', () => {
 
     it('should contain specifications mode', async () => {
       const mode = (await getGameModes()).find(
-        (m: GameMode) => m.slug === 'specifications',
+        (m: GameModePlus) => m.slug === 'specifications',
       );
 
       expect(mode).toBeDefined();
@@ -160,7 +160,7 @@ describe('game-mode utilities', () => {
     });
 
     it('should have unique slugs', async () => {
-      const slugs = (await getGameModes()).map((m: GameMode) => m.slug);
+      const slugs = (await getGameModes()).map((m: GameModePlus) => m.slug);
       const uniqueSlugs = new Set(slugs);
 
       expect(uniqueSlugs.size).toBe(slugs.length);

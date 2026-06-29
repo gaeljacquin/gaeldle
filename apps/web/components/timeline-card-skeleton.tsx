@@ -8,22 +8,15 @@ export function TimelineCardSkeleton({ className }: TimelineCardSkeletonProps) {
   return (
     <div
       className={cn(
-        'flex flex-col items-center gap-2 w-25 shrink-0 animate-pulse',
+        'relative overflow-hidden border-2 border-border bg-card w-32 h-44 shrink-0 animate-pulse',
         className,
       )}
     >
-      <div className="w-full rounded-md overflow-hidden border border-border">
-        {/* Image + date badge share a relative container */}
-        <div className="relative aspect-3/4 w-full bg-muted">
-          {/* Date badge overlaid at top-center, same as the real card */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-5 w-full bg-muted-foreground/30" />
-        </div>
-        {/* Game name */}
-        <div className="p-2 space-y-1.5">
-          <div className="h-3 w-full rounded bg-muted" />
-          <div className="h-3 w-3/4 rounded bg-muted" />
-        </div>
-      </div>
+      <div className="absolute inset-0 bg-muted/40" />
+      {/* Date badge placeholder */}
+      <div className="absolute top-0 left-0 right-0 h-7 bg-muted" />
+      {/* Name banner placeholder */}
+      <div className="absolute inset-x-0 bottom-0 h-6 bg-muted border-t" />
     </div>
   );
 }

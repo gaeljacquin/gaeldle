@@ -6,7 +6,7 @@ import { TIMELINE_GAMES_COUNT } from '@workspace/shared';
 export default function TimelineSkeleton() {
   return (
     <div className="min-h-full bg-background text-foreground animate-pulse">
-      <div className="container mx-auto py-10">
+      <div className="max-w-[1600px] mx-auto px-4 py-10">
         {/* Title + description */}
         <div className="relative mb-12">
           <div className="text-center pt-8 md:pt-0">
@@ -56,9 +56,11 @@ export default function TimelineSkeleton() {
         </Card>
 
         {/* Dev Toggle */}
-        <div className="mx-auto mt-8 border-2 border-dashed w-full p-6 text-center opacity-70">
-          <Skeleton className="h-8 w-48 mx-auto" />
-        </div>
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mx-auto mt-8 border-2 border-dashed w-full p-6 text-center opacity-70">
+            <Skeleton className="h-8 w-48 mx-auto" />
+          </div>
+        )}
       </div>
     </div>
   );

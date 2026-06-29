@@ -48,9 +48,11 @@ export default function Timeline2Skeleton() {
         </Card>
 
         {/* Dev Toggle */}
-        <div className="mx-auto mt-8 border-2 border-dashed w-full p-6 text-center opacity-70">
-          <Skeleton className="h-8 w-48 mx-auto" />
-        </div>
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mx-auto mt-8 border-2 border-dashed w-full p-6 text-center opacity-70">
+            <Skeleton className="h-8 w-48 mx-auto" />
+          </div>
+        )}
       </div>
     </div>
   );

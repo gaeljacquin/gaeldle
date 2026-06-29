@@ -26,6 +26,10 @@ export function Navbar() {
   const authHref = isSignedIn ? '/dashboard' : '/handler/sign-in';
   const isActive = (path: string) => pathname === path;
 
+  const visibleLinks = navLinks.filter(
+    (link) => link.href !== '/health' || isSignedIn
+  );
+
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -46,7 +50,7 @@ export function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
-          {navLinks.map((link) => (
+          {visibleLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -100,7 +104,7 @@ export function Navbar() {
       {isOpen && (
         <div className="border-t border-border bg-background/95 md:hidden">
           <div className="flex flex-col space-y-1 px-4 py-4">
-            {navLinks.map((link) => (
+            {visibleLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

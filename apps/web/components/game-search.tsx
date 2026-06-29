@@ -182,7 +182,7 @@ export default function GameSearch({
           onChange={handleInputChange}
           disabled={disabled}
           onFocus={() => (searchValue.length > 0 ? setIsOpen(true) : null)}
-          className="h-full px-9"
+          className="h-full !pl-9 !pr-9"
         />
         {searchValue.length > 0 ? (
           <InputGroupAddon align="inline-end">

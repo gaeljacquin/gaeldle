@@ -218,7 +218,7 @@ function Timeline2Content() {
                     ref={timelineRef}
                     className="border-2 border-dashed border-border p-6 overflow-x-auto scrollbar-x flex items-center bg-card/50 min-h-55"
                   >
-                    <div className="flex gap-4 items-center px-4 mx-auto">
+                    <div className="flex gap-4 items-center px-4 mx-auto justify-center">
                       {timelineCards.length === 0 ? (
                         <TimelineCardSkeleton />
                       ) : (

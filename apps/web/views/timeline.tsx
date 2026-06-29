@@ -191,7 +191,7 @@ function TimelineContent() {
   return (
     <ViewTransition enter="slide-up">
       <div className="min-h-full bg-background text-foreground">
-        <div className="container mx-auto py-10">
+        <div className="max-w-[1600px] mx-auto px-4 py-10">
           <div className="relative mb-12">
             <div className="text-center pt-8 md:pt-0">
               <h1 className="text-3xl font-bold tracking-tight md:text-4xl uppercase">
@@ -220,7 +220,7 @@ function TimelineContent() {
                         swapMode ? noOpStrategy : horizontalListSortingStrategy
                       }
                     >
-                      <div className="flex gap-6 min-w-max px-2 mx-auto">
+                      <div className="flex gap-6 min-w-max px-2 mx-auto justify-center">
                         {userOrder.length === 0 && isLoading
                           ? Array.from({ length: TIMELINE_GAMES_COUNT }).map(
                               (_, i) => <TimelineCardSkeleton key={i} />,

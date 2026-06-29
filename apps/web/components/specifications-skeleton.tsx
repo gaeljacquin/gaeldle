@@ -32,6 +32,7 @@ export default function SpecificationsSkeleton() {
               <Skeleton className="flex-1 h-10" />
               <Skeleton className="h-10 w-24" />
             </div>
+            <Skeleton className="h-14 w-full" />
           </div>
 
           {/* Attempts tracker */}
@@ -94,9 +95,11 @@ export default function SpecificationsSkeleton() {
           </Card>
 
           {/* DevToggle skeleton */}
-          <div className="mx-auto border-2 border-dashed w-full p-6 text-center opacity-70">
-            <Skeleton className="h-8 w-48 mx-auto" />
-          </div>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mx-auto border-2 border-dashed w-full p-6 text-center opacity-70">
+              <Skeleton className="h-8 w-48 mx-auto" />
+            </div>
+          )}
         </div>
       </div>
     </div>

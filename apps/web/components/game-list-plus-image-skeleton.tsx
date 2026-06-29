@@ -53,9 +53,11 @@ export default function GameListPlusImageSkeleton() {
         </div>
 
         {/* DevModeToggle */}
-        <div className="flex items-center justify-center border-2 border-dashed p-4 text-center opacity-70 mt-8">
-          <Skeleton className="h-8 w-48" />
-        </div>
+        {process.env.NODE_ENV === 'development' && (
+          <div className="flex items-center justify-center border-2 border-dashed p-4 text-center opacity-70 mt-8">
+            <Skeleton className="h-8 w-48" />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -10,18 +10,15 @@ export function Timeline2CardSkeleton({
   return (
     <div
       className={cn(
-        'flex flex-col items-center gap-2 w-40 h-44 animate-pulse',
+        'relative overflow-hidden border-2 border-border bg-card w-32 h-44 shrink-0 animate-pulse',
         className,
       )}
     >
-      {/* Card body */}
-      <div className="w-full rounded-md overflow-hidden border border-border">
-        <div className="aspect-3/4 w-full bg-muted" />
-        {/* Game name */}
-        <div className="p-2 space-y-1.5">
-          <div className="h-3 w-full rounded bg-muted" />
-        </div>
-      </div>
+      <div className="absolute inset-0 bg-muted/40" />
+      {/* Date banner placeholder */}
+      <div className="absolute top-0 left-0 right-0 h-7 bg-muted" />
+      {/* Name banner placeholder */}
+      <div className="absolute inset-x-0 bottom-0 h-6 bg-muted border-t" />
     </div>
   );
 }

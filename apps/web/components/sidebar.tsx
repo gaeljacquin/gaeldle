@@ -290,7 +290,7 @@ export function Sidebar() {
             pathname.startsWith('/dashboard/utilities') ||
             [
               '/dashboard/image-gen',
-              '/dashboard/add-game',
+              '/dashboard/new-game',
               '/dashboard/replace-game',
               '/dashboard/discover-games',
             ].includes(pathname)

@@ -13,8 +13,8 @@ import { DashboardHeader } from '@/components/dashboard-header';
 
 const utilityItems = [
   {
-    href: '/dashboard/add-game',
-    title: 'Add Game',
+    href: '/dashboard/new-game',
+    title: 'New Game',
     description: 'Add new games to the library.',
     icon: IconCirclePlus,
     gradient:

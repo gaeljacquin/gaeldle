@@ -38,7 +38,7 @@ export interface AddGameResult {
   igdbId: number;
   gameName: string | null;
   operation: 'created' | 'updated';
-  gameDbId: number | null;
+  gameId: number | null;
   error: string | null;
 }
 
@@ -140,7 +140,7 @@ function ResultsTable({ results, onAddMore }: ResultsTableProps) {
                     <OperationCell result={result} />
                   </td>
                   <td className="px-4 py-3">
-                    {result.gameDbId && !result.error ? (
+                    {result.gameId && !result.error ? (
                       <a
                         href={`/dashboard/games/${result.igdbId}`}
                         target="_blank"
@@ -195,7 +195,7 @@ function RowWithValidation({
   );
 }
 
-export function AddGame() {
+export function NewGame() {
   const [rows, setRows] = useState<AddGameRowData[]>([createEmptyRow()]);
   const [validationMap, setValidationMap] = useState<
     Record<string, IgdbIdAddValidationState>
@@ -326,7 +326,7 @@ export function AddGame() {
             igdbId,
             gameName: syncResult.data.name,
             operation: syncResult.operation,
-            gameDbId: syncResult.data.igdbId,
+            gameId: syncResult.data.igdbId,
             error: null,
           };
         }
@@ -337,7 +337,7 @@ export function AddGame() {
           igdbId,
           gameName: validationMap[row.id]?.gameName ?? null,
           operation: 'created' as const,
-          gameDbId: null,
+          gameId: null,
           error: err instanceof Error ? err.message : 'Unknown error',
         };
       });
@@ -352,95 +352,82 @@ export function AddGame() {
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
         <DashboardHeader
-          title="Add Game"
+          title="New Game"
           icon={IconCirclePlus}
           dashboardBacklinkProps={{
             text: 'Utilities',
             href: '/dashboard/utilities',
           }}
+          extraElements={
+            results === null ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  onClick={handleApply}
+                  disabled={!allCanAdd || isMutating}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  {isMutating ? (
+                    <IconLoader
+                      size={16}
+                      className="animate-spin"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <IconPlayerPlay size={16} aria-hidden="true" />
+                  )}
+                  Apply
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddRow}
+                  disabled={rows.length >= ADD_GAME_MAX_ROWS || isMutating}
+                  className="flex items-center gap-1.5 shrink-0 cursor-pointer"
+                >
+                  <IconPlus size={14} aria-hidden="true" />
+                  Add entry ({rows.length} / {ADD_GAME_MAX_ROWS})
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  All entries must pass validation before clicking apply.
+                </span>
+              </div>
+            ) : null
+          }
         />
 
         <div className="container mx-auto px-4 py-8 flex-1">
-          <div className="max-w-2xl space-y-6">
-            {results === null ? (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Up to {ADD_GAME_MAX_ROWS} games</CardTitle>
-                      <CardDescription />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={handleAddRow}
-                      disabled={rows.length >= ADD_GAME_MAX_ROWS || isMutating}
-                      className="w-24 flex items-center gap-1.5 shrink-0 cursor-pointer"
-                    >
-                      <IconPlus size={14} aria-hidden="true" />
-                      Add row
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {rows.map((row) => (
-                    <RowWithValidation
-                      key={row.id}
-                      row={row}
-                      isLastRow={rows.length === 1}
-                      onIgdbIdChange={handleIgdbIdChange}
-                      onRemove={handleRemove}
-                      onValidationChange={handleValidationChange}
-                      isDuplicate={duplicateRowIds.has(row.id)}
-                    />
-                  ))}
+          {results === null ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {rows.map((row) => (
+                <RowWithValidation
+                  key={row.id}
+                  row={row}
+                  isLastRow={rows.length === 1}
+                  onIgdbIdChange={handleIgdbIdChange}
+                  onRemove={handleRemove}
+                  onValidationChange={handleValidationChange}
+                  isDuplicate={duplicateRowIds.has(row.id)}
+                />
+              ))}
 
-                  {hasAnyNotFound ? (
-                    <p className="text-xs text-destructive pt-1">
-                      One or more IGDB IDs were not found. Fix them or remove
-                      the affected rows before applying.
-                    </p>
-                  ) : null}
+              {hasAnyNotFound ? (
+                <p className="text-xs text-destructive pt-1 md:col-span-2">
+                  One or more IGDB IDs were not found. Fix them or remove
+                  the affected rows before applying.
+                </p>
+              ) : null}
 
-                  {hasDuplicates ? (
-                    <p className="text-xs text-destructive pt-1">
-                      Duplicate IGDB IDs detected. Fix or remove the highlighted
-                      rows before applying.
-                    </p>
-                  ) : null}
-
-                  <div className="pt-2 flex items-center gap-3">
-                    <Button
-                      type="button"
-                      onClick={handleApply}
-                      disabled={!allCanAdd || isMutating}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      {isMutating ? (
-                        <IconLoader
-                          size={16}
-                          className="animate-spin"
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        <IconPlayerPlay size={16} aria-hidden="true" />
-                      )}
-                      Apply
-                    </Button>
-                    <span className="text-xs text-muted-foreground">
-                      {rows.length} / {ADD_GAME_MAX_ROWS} rows
-                      {!allCanAdd && rows.length > 0 ? (
-                        <> &mdash; all rows must pass validation</>
-                      ) : null}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <ResultsTable results={results} onAddMore={handleAddMore} />
-            )}
-          </div>
+              {hasDuplicates ? (
+                <p className="text-xs text-destructive pt-1 md:col-span-2">
+                  Duplicate IGDB IDs detected. Fix or remove the highlighted
+                  rows before applying.
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <ResultsTable results={results} onAddMore={handleAddMore} />
+          )}
         </div>
       </div>
     </ViewTransition>

@@ -76,27 +76,6 @@ export class GamesRouter {
     });
   }
 
-  @Implement(contract.games.validateReplaceGame)
-  @UseGuards(HexclaveGuard)
-  validateReplaceGame() {
-    return implement(contract.games.validateReplaceGame).handler(
-      async ({ input }) => {
-        return this.gamesService.validateGameByIgdbId(
-          input.current,
-          input.replacement,
-        );
-      },
-    );
-  }
-
-  @Implement(contract.games.replaceGames)
-  @UseGuards(HexclaveGuard)
-  replaceGames() {
-    return implement(contract.games.replaceGames).handler(async ({ input }) => {
-      return this.gamesService.replaceGameByIgdbId(input);
-    });
-  }
-
   @Implement(contract.games.validateIgdbIdAdd)
   @UseGuards(HexclaveGuard)
   validateIgdbIdAdd() {

@@ -6,8 +6,7 @@ import { Button } from '@workspace/ui/button';
 interface Props {
   children?: ReactNode;
   fallback?:
-    | ReactNode
-    | ((props: { error: Error; reset: () => void }) => ReactNode);
+    ReactNode | ((props: { error: Error; reset: () => void }) => ReactNode);
 }
 
 interface State {

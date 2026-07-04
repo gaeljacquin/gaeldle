@@ -27,9 +27,7 @@ export type ImageGenErrorEvent = {
 };
 
 export type ImageGenEvent =
-  | ImageGenProgressEvent
-  | ImageGenCompletedEvent
-  | ImageGenErrorEvent;
+  ImageGenProgressEvent | ImageGenCompletedEvent | ImageGenErrorEvent;
 
 @Injectable()
 export class ImageGenStore {

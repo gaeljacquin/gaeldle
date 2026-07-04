@@ -46,7 +46,8 @@ export function IgdbIdAddRow({
 }: IgdbIdAddRowProps) {
   const validationState = useIgdbIdAddValidation(value);
 
-  const { isLoading, isReady, existsOnIgdb, alreadyInDb, gameName, canAdd } = validationState;
+  const { isLoading, isReady, existsOnIgdb, alreadyInDb, gameName, canAdd } =
+    validationState;
 
   useEffect(() => {
     onValidationChange(rowId, {
@@ -59,7 +60,18 @@ export function IgdbIdAddRow({
       refetch: validationState.refetch,
       stop: validationState.stop,
     });
-  }, [rowId, isLoading, isReady, existsOnIgdb, alreadyInDb, gameName, canAdd, onValidationChange, validationState.refetch, validationState.stop]);
+  }, [
+    rowId,
+    isLoading,
+    isReady,
+    existsOnIgdb,
+    alreadyInDb,
+    gameName,
+    canAdd,
+    onValidationChange,
+    validationState.refetch,
+    validationState.stop,
+  ]);
 
   const hasError =
     !!error ||

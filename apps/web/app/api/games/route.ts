@@ -13,9 +13,7 @@ export async function GET(request: NextRequest) {
     const igdbId = searchParams.get('igdbId') ?? undefined;
 
     const sortBy = (searchParams.get('sortBy') ?? 'name') as
-      | 'name'
-      | 'firstReleaseDate'
-      | 'igdbId';
+      'name' | 'firstReleaseDate' | 'igdbId';
 
     const sortDir = (searchParams.get('sortDir') ?? 'asc') as 'asc' | 'desc';
     const offset = (page - 1) * pageSize;

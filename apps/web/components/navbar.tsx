@@ -27,7 +27,7 @@ export function Navbar() {
   const isActive = (path: string) => pathname === path;
 
   const visibleLinks = navLinks.filter(
-    (link) => link.href !== '/health' || isSignedIn
+    (link) => link.href !== '/health' || isSignedIn,
   );
 
   return (

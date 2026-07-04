@@ -168,15 +168,20 @@ function ResultsTable({ results, onAddMore }: ResultsTableProps) {
 }
 
 const igdbIdValidators = {
-  onChange: z.string().refine(
-    (val) => !val.trim() || (/^\d+$/.test(val.trim()) && Number.parseInt(val, 10) > 0),
-    'Must be a positive integer'
-  ),
-  onBlur: z.string()
+  onChange: z
+    .string()
+    .refine(
+      (val) =>
+        !val.trim() ||
+        (/^\d+$/.test(val.trim()) && Number.parseInt(val, 10) > 0),
+      'Must be a positive integer',
+    ),
+  onBlur: z
+    .string()
     .min(1, 'IGDB ID is required')
     .refine(
       (val) => /^\d+$/.test(val.trim()) && Number.parseInt(val, 10) > 0,
-      'Must be a positive integer'
+      'Must be a positive integer',
     ),
 };
 
@@ -230,7 +235,7 @@ export function NewGame() {
 
         setResults(addResults);
       } catch (err) {
-        console.error('Error:', (err as Error).message)
+        console.error('Error:', (err as Error).message);
       }
     },
   });
@@ -266,9 +271,7 @@ export function NewGame() {
     <ViewTransition>
       <form.Field name="games" mode="array">
         {(gamesField) => (
-          <form.Subscribe
-            selector={(state) => [state.isSubmitting] as const}
-          >
+          <form.Subscribe selector={(state) => [state.isSubmitting] as const}>
             {([isSubmitting]) => {
               const games = gamesField.state.value;
               const duplicateRowIds = (() => {
@@ -362,14 +365,17 @@ export function NewGame() {
                                 gamesField.pushValue(createEmptyRow());
                               }
                             }}
-                            disabled={games.length >= ADD_GAME_MAX_ROWS || isSubmitting}
+                            disabled={
+                              games.length >= ADD_GAME_MAX_ROWS || isSubmitting
+                            }
                             className="flex items-center gap-1.5 shrink-0 cursor-pointer"
                           >
                             <IconPlus size={14} aria-hidden="true" />
                             Add entry ({games.length} / {ADD_GAME_MAX_ROWS})
                           </Button>
                           <span className="text-xs text-muted-foreground">
-                            All entries must pass validation before clicking apply.
+                            All entries must pass validation before clicking
+                            apply.
                           </span>
                         </div>
                       ) : null
@@ -406,8 +412,9 @@ export function NewGame() {
                                 isDuplicate={duplicateRowIds.has(row.id)}
                                 error={
                                   field.state.meta.isTouched
-                                    ? ((field.state.meta.errors?.[0] as any)?.message ??
-                                      (field.state.meta.errors?.[0] as any))
+                                    ? ((field.state.meta.errors?.[0] as Error)
+                                        ?.message ??
+                                      (field.state.meta.errors?.[0] as Error))
                                     : undefined
                                 }
                               />
@@ -417,20 +424,23 @@ export function NewGame() {
 
                         {hasAnyNotFound ? (
                           <p className="text-xs text-destructive pt-1 md:col-span-2">
-                            One or more IGDB IDs were not found. Fix them or remove
-                            the affected rows before applying.
+                            One or more IGDB IDs were not found. Fix them or
+                            remove the affected rows before applying.
                           </p>
                         ) : null}
 
                         {hasDuplicates ? (
                           <p className="text-xs text-destructive pt-1 md:col-span-2">
-                            Duplicate IGDB IDs detected. Fix or remove the highlighted
-                            rows before applying.
+                            Duplicate IGDB IDs detected. Fix or remove the
+                            highlighted rows before applying.
                           </p>
                         ) : null}
                       </div>
                     ) : (
-                      <ResultsTable results={results} onAddMore={handleAddMore} />
+                      <ResultsTable
+                        results={results}
+                        onAddMore={handleAddMore}
+                      />
                     )}
                   </div>
                 </form>

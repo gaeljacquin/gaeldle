@@ -189,30 +189,6 @@ export async function getImageGenStatus(imageGenId: string) {
   return result;
 }
 
-export async function validateReplaceGame(
-  current: number,
-  replacement: number,
-  signal?: AbortSignal,
-) {
-  const result = await orpcClient.games.validateReplaceGame(
-    {
-      current,
-      replacement,
-    },
-    { signal },
-  );
-
-  return result;
-}
-
-export async function replaceGameByIdgbId(
-  pairs: Array<{ current: number; replacement: number }>,
-) {
-  const result = await orpcClient.games.replaceGames(pairs);
-
-  return result;
-}
-
 export async function validateIgdbIdAdd(igdbId: number, signal?: AbortSignal) {
   const result = await orpcClient.games.validateIgdbIdAdd(
     { igdbId },

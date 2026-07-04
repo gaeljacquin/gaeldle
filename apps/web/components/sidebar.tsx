@@ -291,7 +291,6 @@ export function Sidebar() {
             [
               '/dashboard/image-gen',
               '/dashboard/new-game',
-              '/dashboard/replace-game',
               '/dashboard/discover-games',
             ].includes(pathname)
           }

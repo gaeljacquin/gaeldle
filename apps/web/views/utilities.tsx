@@ -3,7 +3,6 @@
 import { ViewTransition } from 'react';
 import {
   IconCirclePlus,
-  IconArrowsExchange,
   IconZoomScan,
   IconTools,
   IconPlayerPlay,
@@ -19,14 +18,6 @@ const utilityItems = [
     icon: IconCirclePlus,
     gradient:
       'linear-gradient(135deg, hsl(145 70% 45%) 0%, hsl(170 60% 40%) 100%)',
-  },
-  {
-    href: '/dashboard/replace-game',
-    title: 'Replace Game',
-    description: 'Swap games using IGDB IDs.',
-    icon: IconArrowsExchange,
-    gradient:
-      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
   },
   {
     href: '/dashboard/discover-games',

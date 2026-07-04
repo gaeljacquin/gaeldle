@@ -58,12 +58,25 @@ export async function PATCH(request: NextRequest) {
                 .where(inArray(gameModeTable.id, idsToUpdate))
             : [];
 
+        // First, temporarily set all ordinals to unique negative values to prevent unique constraint violations
         for (const item of body) {
           const { id, ordinal } = item;
 
           if (id === undefined || ordinal === undefined) {
             throw new Error('id and ordinal are required for bulk updates');
           }
+
+          await tx
+            .update(gameModeTable)
+            .set({
+              ordinal: -Number(id),
+            })
+            .where(eq(gameModeTable.id, id));
+        }
+
+        // Second, update ordinals to their final desired values
+        for (const item of body) {
+          const { id, ordinal } = item;
 
           await tx
             .update(gameModeTable)

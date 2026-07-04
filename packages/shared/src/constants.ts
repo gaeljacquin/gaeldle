@@ -37,3 +37,5 @@ export const MIN_PREVIEW_PROMPT_ROWS = 4;
 export const GAME_MODE_SKELETON_COUNT = 6;
 
 export const VIEWPORT_DIMENSIONS_FALLBACK = '0:0:16';
+
+export const PLACEHOLDER_IGDB_IDS = [1942, 348330].join(',');

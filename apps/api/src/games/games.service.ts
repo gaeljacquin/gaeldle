@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { eq, inArray, sql } from 'drizzle-orm';
+import { eq, inArray, sql, and, desc } from 'drizzle-orm';
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { DatabaseService } from '@/db/database.service';
@@ -11,6 +11,7 @@ import {
   artStyles as artStylesView,
   type ArtStyleValue,
   GameInsert,
+  domainEvents,
 } from '@workspace/api-contract';
 import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
@@ -97,13 +98,41 @@ export class GamesService {
     game: Game;
     operation: SyncOperation;
   } | null> {
-    const igdbGame = await this.igdbService.getGameById(igdbId);
+    let gameData: GameInsert | null = null;
 
-    if (!igdbGame) {
-      return null;
+    try {
+      const [latestEvent] = await this.databaseService.db
+        .select()
+        .from(domainEvents)
+        .where(
+          and(
+            eq(domainEvents.eventType, 'game.queried'),
+            sql`${domainEvents.payload}->>'igdbId' = ${String(igdbId)}`,
+          ),
+        )
+        .orderBy(desc(domainEvents.occurredAt))
+        .limit(1);
+
+      if (latestEvent) {
+        const payload = latestEvent.payload as { gameInfo?: GameInsert };
+
+        if (payload && payload.gameInfo) {
+          gameData = payload.gameInfo;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to retrieve game info from domain events:', e);
     }
 
-    const gameData = this.mapIgdbToGame(igdbGame);
+    if (!gameData) {
+      const igdbGame = await this.igdbService.getGameById(igdbId);
+
+      if (!igdbGame) {
+        return null;
+      }
+
+      gameData = this.mapIgdbToGame(igdbGame);
+    }
 
     const [existingGame] = await this.databaseService.db
       .select()
@@ -116,6 +145,7 @@ export class GamesService {
         .update(games)
         .set({
           ...gameData,
+          updatedAt: new Date(),
         })
         .where(eq(games.igdbId, igdbId))
         .returning();
@@ -192,7 +222,10 @@ export class GamesService {
     return deletedRows.map((row) => row.id);
   }
 
-  async validateGameForAdd(igdbId: number): Promise<{
+  async validateGameForAdd(
+    igdbId: number,
+    actorId = 'unknown',
+  ): Promise<{
     igdbId: number;
     existsOnIgdb: boolean;
     alreadyInDb: boolean;
@@ -206,6 +239,17 @@ export class GamesService {
       .limit(1);
 
     if (existingRow) {
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'game.queried',
+        actorId,
+        payload: {
+          igdbId,
+          gameName: existingRow.name ?? null,
+          found: true,
+          alreadyInDb: true,
+        },
+      });
+
       return {
         igdbId,
         existsOnIgdb: true,
@@ -219,6 +263,16 @@ export class GamesService {
       const igdbGame = await this.igdbService.getGameById(igdbId);
 
       if (!igdbGame) {
+        await this.databaseService.db.insert(domainEvents).values({
+          eventType: 'game.queried',
+          actorId,
+          payload: {
+            igdbId,
+            found: false,
+            alreadyInDb: false,
+          },
+        });
+
         return {
           igdbId,
           existsOnIgdb: false,
@@ -228,6 +282,20 @@ export class GamesService {
         };
       }
 
+      const gameData = this.mapIgdbToGame(igdbGame);
+
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'game.queried',
+        actorId,
+        payload: {
+          igdbId,
+          gameName: igdbGame.name ?? null,
+          found: true,
+          alreadyInDb: false,
+          gameInfo: gameData,
+        },
+      });
+
       return {
         igdbId,
         existsOnIgdb: true,
@@ -235,7 +303,18 @@ export class GamesService {
         gameName: igdbGame.name ?? null,
         canAdd: true,
       };
-    } catch {
+    } catch (error) {
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'game.queried',
+        actorId,
+        payload: {
+          igdbId,
+          found: false,
+          alreadyInDb: false,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      });
+
       return {
         igdbId,
         existsOnIgdb: false,

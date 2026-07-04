@@ -15,6 +15,7 @@ import {
 } from '@/lib/hooks/use-igdb-id-add-validation';
 import { IgdbAddValidationBadge } from '@/components/igdb-add-validation-badge';
 import { toast } from 'sonner';
+import { PLACEHOLDER_IGDB_IDS } from '@workspace/shared';
 
 export interface IgdbIdAddRowData {
   id: string;
@@ -110,7 +111,7 @@ export function IgdbIdAddRow({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onBlur={onBlur}
-            placeholder="e.g. 1942"
+            placeholder={`e.g. ${PLACEHOLDER_IGDB_IDS},...`}
             className="flex-1 min-w-0 h-full bg-transparent px-3 py-2 font-mono text-sm outline-none placeholder:text-muted-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             aria-invalid={hasError}
           />

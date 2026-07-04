@@ -14,6 +14,7 @@ import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';
+import { domainEvents } from '@workspace/api-contract';
 
 type AsyncMock = jest.Mock<(...args: unknown[]) => Promise<unknown>>;
 
@@ -302,6 +303,146 @@ describe('GamesService', () => {
           igdbId: 101,
           name: 'Updated Game',
           updatedAt: expect.any(Date),
+        }),
+      );
+    });
+
+    it('should use pre-fetched game info from domain events and not call IGDB', async () => {
+      const mockGameInfo = {
+        igdbId: 101,
+        name: 'Event Cached Game',
+      };
+
+      resolveValue = {
+        then(resolve: any) {
+          const lastFromCall =
+            mockDb.from.mock.calls[mockDb.from.mock.calls.length - 1];
+          const queriedTable = lastFromCall?.[0];
+
+          if (queriedTable === domainEvents) {
+            resolve([
+              {
+                id: 1,
+                eventType: 'game.queried',
+                payload: {
+                  igdbId: 101,
+                  gameInfo: mockGameInfo,
+                },
+              },
+            ]);
+          } else {
+            resolve([]);
+          }
+        },
+      };
+
+      jest
+        .spyOn(service, 'refreshAllGamesView' as any)
+        .mockResolvedValue(undefined);
+
+      await service.syncGameByIgdbId(101);
+
+      expect(mockIgdbService.getGameById).not.toHaveBeenCalled();
+      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.objectContaining({
+          igdbId: 101,
+          name: 'Event Cached Game',
+        }),
+      );
+    });
+  });
+
+  describe('validateGameForAdd', () => {
+    it('should return alreadyInDb true if game exists in db', async () => {
+      resolveValue = [{ id: 1, name: 'Existing Game' }];
+
+      const result = await service.validateGameForAdd(101, 'user-1');
+
+      expect(result).toEqual({
+        igdbId: 101,
+        existsOnIgdb: true,
+        alreadyInDb: true,
+        gameName: 'Existing Game',
+        canAdd: false,
+      });
+
+      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: 'game.queried',
+          actorId: 'user-1',
+          payload: expect.objectContaining({
+            igdbId: 101,
+            gameName: 'Existing Game',
+            found: true,
+            alreadyInDb: true,
+          }),
+        }),
+      );
+    });
+
+    it('should return existsOnIgdb false if game does not exist on IGDB', async () => {
+      resolveValue = [];
+      mockIgdbService.getGameById.mockResolvedValue(null);
+
+      const result = await service.validateGameForAdd(101, 'user-1');
+
+      expect(result).toEqual({
+        igdbId: 101,
+        existsOnIgdb: false,
+        alreadyInDb: false,
+        gameName: null,
+        canAdd: false,
+      });
+
+      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: 'game.queried',
+          actorId: 'user-1',
+          payload: expect.objectContaining({
+            igdbId: 101,
+            found: false,
+            alreadyInDb: false,
+          }),
+        }),
+      );
+    });
+
+    it('should return found and save gameInfo if game is found on IGDB', async () => {
+      resolveValue = [];
+      const igdbGame: IgdbGame = {
+        id: 101,
+        name: 'New Game',
+      };
+      mockIgdbService.getGameById.mockResolvedValue(igdbGame);
+
+      const result = await service.validateGameForAdd(101, 'user-1');
+
+      expect(result).toEqual({
+        igdbId: 101,
+        existsOnIgdb: true,
+        alreadyInDb: false,
+        gameName: 'New Game',
+        canAdd: true,
+      });
+
+      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: 'game.queried',
+          actorId: 'user-1',
+          payload: expect.objectContaining({
+            igdbId: 101,
+            gameName: 'New Game',
+            found: true,
+            alreadyInDb: false,
+            gameInfo: expect.objectContaining({
+              igdbId: 101,
+              name: 'New Game',
+            }),
+          }),
         }),
       );
     });

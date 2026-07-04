@@ -1,8 +1,11 @@
-import { Controller, UseGuards, NotFoundException } from '@nestjs/common';
+import { Controller, UseGuards, NotFoundException, Req } from '@nestjs/common';
 import { Implement, implement } from '@orpc/nest';
 import { contract } from '@workspace/api-contract';
 import { GamesService } from '@/games/games.service';
-import { HexclaveGuard } from '@/auth/hexclave.guard';
+import {
+  HexclaveGuard,
+  type AuthenticatedRequest,
+} from '@/auth/hexclave.guard';
 
 @Controller()
 export class GamesRouter {
@@ -78,9 +81,11 @@ export class GamesRouter {
 
   @Implement(contract.games.validateIgdbIdAdd)
   @UseGuards(HexclaveGuard)
-  validateIgdbIdAdd() {
-    return implement(contract.games.validateIgdbIdAdd).handler(({ input }) =>
-      this.gamesService.validateGameForAdd(input.igdbId),
-    );
+  validateIgdbIdAdd(@Req() req: AuthenticatedRequest) {
+    return implement(contract.games.validateIgdbIdAdd).handler(({ input }) => {
+      const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+
+      return this.gamesService.validateGameForAdd(input.igdbId, actorId);
+    });
   }
 }

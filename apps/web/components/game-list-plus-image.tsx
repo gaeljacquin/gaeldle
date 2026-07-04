@@ -190,7 +190,10 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                 )}
               </div>
 
-              <GuessHistoryInline guesses={wrongGuesses} className="max-h-full" />
+              <GuessHistoryInline
+                guesses={wrongGuesses}
+                className="max-h-full"
+              />
 
               {isGameOver ? (
                 <div className="border border-border bg-card/60 p-4 text-center animate-in fade-in zoom-in duration-300">

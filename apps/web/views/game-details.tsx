@@ -913,7 +913,8 @@ export default function GameDetails({
     onSuccess: () => {
       toast.success('Game deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['games'] });
-      router.push('/dashboard');
+      const search = typeof window !== 'undefined' ? window.location.search : '';
+      router.push(`/dashboard${search}`);
     },
     onError: (err) => {
       toast.error('Failed to delete game');
@@ -942,7 +943,10 @@ export default function GameDetails({
             <Button
               variant="outline"
               className="mt-8 font-black uppercase tracking-widest rounded-none px-8 h-12 cursor-pointer border-2 hover:bg-primary hover:text-primary-foreground transition-all"
-              onClick={() => router.push('/dashboard')}
+              onClick={() => {
+                const search = typeof window !== 'undefined' ? window.location.search : '';
+                router.push(`/dashboard${search}`);
+              }}
             >
               Return to Dashboard
             </Button>

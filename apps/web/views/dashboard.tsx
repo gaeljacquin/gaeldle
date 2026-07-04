@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, ViewTransition } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 import { useSelector } from '@tanstack/react-store';
@@ -41,6 +42,7 @@ import {
   IconSelector,
   IconCalendar,
   IconDeviceGamepad,
+  IconRestore,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { Game, NumericString } from '@workspace/api-contract';
@@ -68,25 +70,46 @@ export default function Dashboard() {
     setSortOption,
     pageSize,
     setPageSize,
-    page,
-    setPage,
     view,
     setView,
   } = useDashboardStore();
   const queryClient = useQueryClient();
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const urlSearch = searchParams.get('search') ?? '';
+  const urlSearchIgdbId = searchParams.get('searchIgdbId') ?? '';
+  const urlSortOption = searchParams.get('sortOption') ?? '';
+  const urlPageSize = searchParams.get('pageSize') ?? '';
+  const urlPage = searchParams.get('page')
+    ? Number(searchParams.get('page'))
+    : NaN;
+
+  const defaultSearch = urlSearch;
+  const defaultSearchIgdbId = urlSearchIgdbId;
+  const defaultSortOption =
+    urlSortOption && sortOptions.some((opt) => opt.value === urlSortOption)
+      ? (urlSortOption as SortOption)
+      : sortOption;
+  const defaultPageSize =
+    urlPageSize && pageSizes.includes(urlPageSize as NumericString)
+      ? (urlPageSize as NumericString)
+      : pageSize;
+  const defaultPage = !isNaN(urlPage) && urlPage > 0 ? urlPage : 1;
+
   const form = useForm({
     defaultValues: {
-      search: '',
-      searchIgdbId: '',
-      sortOption: sortOption,
-      pageSize: pageSize,
-      page: page,
+      search: defaultSearch,
+      searchIgdbId: defaultSearchIgdbId,
+      sortOption: defaultSortOption,
+      pageSize: defaultPageSize,
+      page: defaultPage,
     },
   });
 
   const formValues = useSelector(form.store, (state) => state.values);
-  const isFirstRender = useRef(true);
 
   // Sync form values back to the zustand store when they change
   useEffect(() => {
@@ -97,14 +120,174 @@ export default function Dashboard() {
     setPageSize(formValues.pageSize);
   }, [formValues.pageSize, setPageSize]);
 
-  useEffect(() => {
-    setPage(formValues.page);
-  }, [formValues.page, setPage]);
-
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [debouncedSearchIgdbId, setDebouncedSearchIgdbId] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState(defaultSearch);
+  const [debouncedSearchIgdbId, setDebouncedSearchIgdbId] =
+    useState(defaultSearchIgdbId);
   const skipDebounceSearchRef = useRef(false);
   const skipDebounceSearchIgdbIdRef = useRef(false);
+
+  const debouncedSearchRef = useRef(debouncedSearch);
+  useEffect(() => {
+    debouncedSearchRef.current = debouncedSearch;
+  }, [debouncedSearch]);
+
+  const debouncedSearchIgdbIdRef = useRef(debouncedSearchIgdbId);
+  useEffect(() => {
+    debouncedSearchIgdbIdRef.current = debouncedSearchIgdbId;
+  }, [debouncedSearchIgdbId]);
+
+  // On mount, if the URL is empty or missing parameters, sync the store values to the URL.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    let changed = false;
+
+    if (!params.has('sortOption')) {
+      params.set('sortOption', sortOption);
+      changed = true;
+    }
+    if (!params.has('pageSize')) {
+      params.set('pageSize', pageSize);
+      changed = true;
+    }
+    if (!params.has('page')) {
+      params.set('page', '1');
+      changed = true;
+    }
+
+    if (changed) {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const currentSearchRef = useRef(defaultSearch);
+  const currentSearchIgdbIdRef = useRef(defaultSearchIgdbId);
+
+  // Sync refs inside an effect to avoid reading/writing refs during render
+  useEffect(() => {
+    currentSearchRef.current = formValues.search;
+    currentSearchIgdbIdRef.current = formValues.searchIgdbId;
+  }, [formValues.search, formValues.searchIgdbId]);
+
+  const currentSortOption = formValues.sortOption;
+  const currentPageSize = formValues.pageSize;
+  const currentPage = formValues.page;
+
+  const isDebouncing =
+    formValues.search !== debouncedSearch ||
+    formValues.searchIgdbId !== debouncedSearchIgdbId;
+
+  // Sync URL params -> Form state (handles back/forward navigation)
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') ?? '';
+    const urlSearchIgdbId = searchParams.get('searchIgdbId') ?? '';
+    const urlSortOption = searchParams.get('sortOption') ?? '';
+    const urlPageSize = searchParams.get('pageSize') ?? '';
+    const urlPageStr = searchParams.get('page');
+    const urlPage = urlPageStr ? Number(urlPageStr) : NaN;
+
+    let searchChanged = false;
+    let searchIgdbIdChanged = false;
+
+    if (currentSearchRef.current !== urlSearch) {
+      form.setFieldValue('search', urlSearch);
+      searchChanged = true;
+    }
+    if (currentSearchIgdbIdRef.current !== urlSearchIgdbId) {
+      form.setFieldValue('searchIgdbId', urlSearchIgdbId);
+      searchIgdbIdChanged = true;
+    }
+
+    if (
+      urlSortOption &&
+      sortOptions.some((opt) => opt.value === urlSortOption)
+    ) {
+      if (currentSortOption !== urlSortOption) {
+        form.setFieldValue('sortOption', urlSortOption as SortOption);
+      }
+    }
+
+    if (urlPageSize && pageSizes.includes(urlPageSize as NumericString)) {
+      if (currentPageSize !== urlPageSize) {
+        form.setFieldValue('pageSize', urlPageSize as NumericString);
+      }
+    }
+
+    if (!isNaN(urlPage) && urlPage > 0) {
+      if (currentPage !== urlPage) {
+        form.setFieldValue('page', urlPage);
+      }
+    } else if (urlPageStr === null) {
+      if (currentPage !== 1) {
+        form.setFieldValue('page', 1);
+      }
+    }
+
+    if (searchChanged) {
+      skipDebounceSearchRef.current = true;
+      setDebouncedSearch(urlSearch);
+    }
+    if (searchIgdbIdChanged) {
+      skipDebounceSearchIgdbIdRef.current = true;
+      setDebouncedSearchIgdbId(urlSearchIgdbId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, form]);
+
+  // Sync state -> URL parameters
+  useEffect(() => {
+    if (isDebouncing) {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (debouncedSearch) {
+      params.set('search', debouncedSearch);
+    } else {
+      params.delete('search');
+    }
+
+    if (debouncedSearchIgdbId) {
+      params.set('searchIgdbId', debouncedSearchIgdbId);
+    } else {
+      params.delete('searchIgdbId');
+    }
+
+    if (formValues.sortOption) {
+      params.set('sortOption', formValues.sortOption);
+    } else {
+      params.delete('sortOption');
+    }
+
+    if (formValues.pageSize) {
+      params.set('pageSize', formValues.pageSize);
+    } else {
+      params.delete('pageSize');
+    }
+
+    if (formValues.page) {
+      params.set('page', String(formValues.page));
+    } else {
+      params.delete('page');
+    }
+
+    const newSearch = params.toString();
+    const currentSearch = window.location.search.replace(/^\?/, '');
+
+    if (newSearch !== currentSearch) {
+      router.replace(`${pathname}?${newSearch}`, { scroll: false });
+    }
+  }, [
+    debouncedSearch,
+    debouncedSearchIgdbId,
+    formValues.sortOption,
+    formValues.pageSize,
+    formValues.page,
+    isDebouncing,
+    pathname,
+    router,
+  ]);
 
   // Debounce search value with bypass
   useEffect(() => {
@@ -116,11 +299,14 @@ export default function Dashboard() {
     }
 
     const handler = setTimeout(() => {
-      setDebouncedSearch(formValues.search);
-    }, 500);
+      if (formValues.search !== debouncedSearchRef.current) {
+        form.setFieldValue('page', 1);
+        setDebouncedSearch(formValues.search);
+      }
+    }, 300);
 
     return () => clearTimeout(handler);
-  }, [formValues.search]);
+  }, [formValues.search, form]);
 
   // Debounce searchIgdbId value with bypass
   useEffect(() => {
@@ -132,26 +318,16 @@ export default function Dashboard() {
     }
 
     const handler = setTimeout(() => {
-      setDebouncedSearchIgdbId(formValues.searchIgdbId);
-    }, 500);
+      if (formValues.searchIgdbId !== debouncedSearchIgdbIdRef.current) {
+        form.setFieldValue('page', 1);
+        setDebouncedSearchIgdbId(formValues.searchIgdbId);
+      }
+    }, 300);
 
     return () => clearTimeout(handler);
-  }, [formValues.searchIgdbId]);
+  }, [formValues.searchIgdbId, form]);
 
-  const isDebouncing =
-    formValues.search !== debouncedSearch ||
-    formValues.searchIgdbId !== debouncedSearchIgdbId;
 
-  // Reset page to 1 only when debounced search values actually change
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-
-      return;
-    }
-
-    form.setFieldValue('page', 1);
-  }, [debouncedSearch, debouncedSearchIgdbId, form]);
 
   const [sortBy, sortDir] = formValues.sortOption.split('-') as [
     SortField,
@@ -198,7 +374,7 @@ export default function Dashboard() {
     setSelectedIds(new Set());
   };
 
-  const { data, isLoading, isPlaceholderData } = useQuery<
+  const { data, isLoading, isPlaceholderData, isFetching } = useQuery<
     PaginatedResponse<Game>
   >({
     queryKey: [
@@ -389,7 +565,6 @@ export default function Dashboard() {
               key={game.id}
               className={cn(
                 'transition-opacity duration-200 relative group/game',
-                isPlaceholderData && 'opacity-50',
                 view === 'list' &&
                   'flex gap-8 p-6 border border-border bg-card hover:bg-accent/50 transition-colors',
               )}
@@ -411,7 +586,11 @@ export default function Dashboard() {
                   </div>
                 )}
                 <Link
-                  href={isMultiSelect ? '#' : `/dashboard/games/${game.igdbId}`}
+                  href={
+                    isMultiSelect
+                      ? '#'
+                      : `/dashboard/games/${game.igdbId}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+                  }
                   onClick={(e: React.MouseEvent) => {
                     if (isMultiSelect) {
                       e.preventDefault();
@@ -440,7 +619,9 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between gap-4">
                     <Link
                       href={
-                        isMultiSelect ? '#' : `/dashboard/games/${game.igdbId}`
+                        isMultiSelect
+                          ? '#'
+                          : `/dashboard/games/${game.igdbId}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
                       }
                       onClick={(e: React.MouseEvent) => {
                         if (isMultiSelect) {
@@ -557,6 +738,23 @@ export default function Dashboard() {
                       </div>
                     )}
                   </form.Field>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      skipDebounceSearchRef.current = true;
+                      skipDebounceSearchIgdbIdRef.current = true;
+                      form.setFieldValue('search', '');
+                      form.setFieldValue('searchIgdbId', '');
+                      form.setFieldValue('page', 1);
+                    }}
+                    disabled={!formValues.search && !formValues.searchIgdbId}
+                    className="w-full sm:w-auto cursor-pointer gap-2"
+                    title="Clear search and filters"
+                  >
+                    <IconX size={16} />
+                    Clear search and filters
+                  </Button>
                 </div>
 
                 <div className="flex items-center gap-4 justify-between sm:justify-end">
@@ -755,7 +953,10 @@ export default function Dashboard() {
                               : 'cursor-pointer',
                           )}
                         >
-                          Clear
+                          <span className="flex flex-row gap-2">
+                            <IconRestore size={16} />
+                            Clear
+                          </span>
                         </Button>
                       </div>
                     )}
@@ -858,7 +1059,8 @@ export default function Dashboard() {
         <div
           className={cn(
             'container mx-auto px-4 py-8 flex-1 transition-opacity duration-200',
-            isDebouncing && 'opacity-50 pointer-events-none',
+            (isDebouncing || isLoading || isPlaceholderData || isFetching) &&
+              'opacity-50 pointer-events-none',
           )}
         >
           {dataLengthZero()}

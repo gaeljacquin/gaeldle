@@ -21,7 +21,10 @@ export default function Timeline2Skeleton() {
               {/* Dealt card section */}
               <div className="flex justify-center">
                 <div className="border-2 border-dashed border-border flex justify-center items-center w-32 h-44 bg-card/50">
-                  <Timeline2CardSkeleton className="animate-none" showTopBanner={false} />
+                  <Timeline2CardSkeleton
+                    className="animate-none"
+                    showTopBanner={false}
+                  />
                 </div>
               </div>
 

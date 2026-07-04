@@ -332,7 +332,11 @@ export default function Dashboard() {
         >
           {Array.from({ length: Number.parseInt(formValues.pageSize, 10) }).map(
             (_, i) => (
-              <Timeline2CardSkeleton key={i} className="sm:w-36 sm:h-56" />
+              <Timeline2CardSkeleton
+                key={i}
+                className="sm:w-36 sm:h-56"
+                showTopBanner={false}
+              />
             ),
           )}
         </div>

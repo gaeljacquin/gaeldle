@@ -30,7 +30,7 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
       <div
         ref={ref}
         className={cn(
-          'relative overflow-hidden border-2 border-border bg-card shadow-sm select-none',
+          'relative overflow-hidden border-2 border-border bg-card shadow-sm select-none shrink-0',
           'w-32 h-44',
           className,
         )}

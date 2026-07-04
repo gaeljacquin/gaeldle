@@ -25,7 +25,9 @@ export const games = pgTable(
     updatedAt: timestamp('updated_at', {
       withTimezone: true,
       mode: 'date',
-    }).defaultNow(),
+    })
+      .defaultNow()
+      .$onUpdate(() => new Date()),
     imageUrl: varchar('image_url'),
     aiImageUrl: varchar('ai_image_url'),
     aiPrompt: varchar('ai_prompt'),

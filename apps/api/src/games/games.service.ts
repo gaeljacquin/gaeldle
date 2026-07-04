@@ -116,7 +116,6 @@ export class GamesService {
         .update(games)
         .set({
           ...gameData,
-          updatedAt: new Date(),
         })
         .where(eq(games.igdbId, igdbId))
         .returning();

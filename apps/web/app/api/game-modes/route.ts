@@ -82,7 +82,6 @@ export async function PATCH(request: NextRequest) {
             .update(gameModeTable)
             .set({
               ordinal: Number(ordinal),
-              updatedAt: new Date(),
             })
             .where(eq(gameModeTable.id, id));
         }
@@ -147,7 +146,6 @@ export async function PATCH(request: NextRequest) {
         maxAttempts: Number(maxAttempts),
         isActive: isActive ? 1 : 0,
         isCoverArt: isCoverArt ? 1 : 0,
-        updatedAt: new Date(),
       })
       .where(eq(gameModeTable.id, id))
       .returning();

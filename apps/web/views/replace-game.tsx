@@ -8,6 +8,7 @@ import {
   ViewTransition,
 } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { useForm } from '@tanstack/react-form';
 import { replaceGameByIdgbId } from '@/lib/services/game.service';
 import {
   useReplaceGameValidation,
@@ -116,76 +117,25 @@ function RowWithValidation({
 }
 
 export default function ReplaceGameByIgdbId() {
-  const [rows, setRows] = useState<IgdbIdRowPairData[]>([createEmptyRow()]);
   const [results, setResults] = useState<ReplaceGameResult[] | null>(null);
   const [validationMap, setValidationMap] = useState<
     Record<string, ReplaceGameValidationState>
   >({});
 
-  const handleValidationChange = useCallback(
-    (id: string, state: ReplaceGameValidationState) => {
-      setValidationMap((prev) => {
-        const current = prev[id];
-
-        if (
-          current?.canApply === state.canApply &&
-          current?.isLoading === state.isLoading &&
-          current?.isReady === state.isReady
-        ) {
-          return prev;
-        }
-
-        return { ...prev, [id]: state };
-      });
-    },
+  const defaultValues = useMemo(
+    () => ({
+      pairs: [createEmptyRow()] as IgdbIdRowPairData[],
+    }),
     [],
   );
 
-  const duplicateRowIds = useMemo(() => {
-    const currentIdToRows = new Map<number, string[]>();
-    const replacementIdToRows = new Map<number, string[]>();
-
-    for (const row of rows) {
-      const state = validationMap[row.id];
-
-      if (!state?.isReady) {
-        continue;
-      }
-
-      const currentInt = Number.parseInt(row.current, 10);
-
-      if (currentInt !== null && state.currentExistsInDb === true) {
-        pushToMap(currentIdToRows, currentInt, row.id);
-      }
-
-      const replacementInt = Number.parseInt(row.replacement, 10);
-
-      if (replacementInt !== null && state.replacementExistsOnIgdb === true) {
-        pushToMap(replacementIdToRows, replacementInt, row.id);
-      }
-    }
-
-    const dupes = new Set<string>();
-    addDupesFromMap(currentIdToRows, dupes);
-    addDupesFromMap(replacementIdToRows, dupes);
-    addCrossFieldDupes(currentIdToRows, replacementIdToRows, dupes);
-    return dupes;
-  }, [rows, validationMap]);
-
-  const hasDuplicates = duplicateRowIds.size > 0;
-
-  const allPairsValid =
-    rows.length > 0 &&
-    !hasDuplicates &&
-    rows.every((row) => validationMap[row.id]?.canApply === true);
-
   const applyMutation = useMutation({
-    mutationFn: () => {
-      const pairs = rows.map((row) => ({
+    mutationFn: (pairs: IgdbIdRowPairData[]) => {
+      const formattedPairs = pairs.map((row) => ({
         current: Number.parseInt(row.current, 10),
         replacement: Number.parseInt(row.replacement, 10),
       }));
-      return replaceGameByIdgbId(pairs);
+      return replaceGameByIdgbId(formattedPairs);
     },
     onMutate: () => {
       toast.loading('Replacing games...', { id: replaceGamesToastId });
@@ -217,149 +167,199 @@ export default function ReplaceGameByIgdbId() {
     },
   });
 
-  const handleCurrentChange = useCallback((id: string, value: string) => {
-    setRows((prev) =>
-      prev.map((row) => (row.id === id ? { ...row, current: value } : row)),
-    );
-  }, []);
+  const form = useForm({
+    defaultValues,
+    onSubmit: async ({ value }) => {
+      applyMutation.mutate(value.pairs);
+    },
+  });
 
-  const handleReplacementChange = useCallback((id: string, value: string) => {
-    setRows((prev) =>
-      prev.map((row) => (row.id === id ? { ...row, replacement: value } : row)),
-    );
-  }, []);
+  const handleValidationChange = useCallback(
+    (id: string, state: ReplaceGameValidationState) => {
+      setValidationMap((prev) => {
+        const current = prev[id];
 
-  const handleRemove = useCallback((id: string) => {
-    setRows((prev) => {
-      if (prev.length <= 1) {
-        return prev;
-      }
+        if (
+          current?.canApply === state.canApply &&
+          current?.isLoading === state.isLoading &&
+          current?.isReady === state.isReady
+        ) {
+          return prev;
+        }
 
-      return prev.filter((row) => row.id !== id);
-    });
-    setValidationMap((prev) => {
-      const next = { ...prev };
-
-      delete next[id];
-
-      return next;
-    });
-  }, []);
-
-  const handleAddRow = useCallback(() => {
-    setRows((prev) => {
-      if (prev.length >= REPLACE_GAME_MAX_ROWS) {
-        return prev;
-      }
-
-      return [...prev, createEmptyRow()];
-    });
-  }, []);
+        return { ...prev, [id]: state };
+      });
+    },
+    [],
+  );
 
   return (
     <ViewTransition>
-      <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader
-          title="Replace Game"
-          icon={IconArrowsExchange}
-          dashboardBacklinkProps={{
-            text: 'Utilities',
-            href: '/dashboard/utilities',
-          }}
-        />
+      <form.Field name="pairs" mode="array">
+        {(pairsField) => {
+          const rows = pairsField.state.value;
 
-        <div className="container mx-auto px-4 py-8 flex-1">
-          <div className="max-w-2xl space-y-6">
-            {/* Input form */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Up to {REPLACE_GAME_MAX_ROWS} games.</CardTitle>
-                    <CardDescription />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={handleAddRow}
-                    disabled={
-                      rows.length >= REPLACE_GAME_MAX_ROWS ||
-                      applyMutation.isPending
-                    }
-                    className="w-24 flex items-center gap-1.5 shrink-0 cursor-pointer"
-                  >
-                    <IconPlus size={14} aria-hidden="true" />
-                    Add row
-                  </Button>
+          const duplicateRowIds = (() => {
+            const currentIdToRows = new Map<number, string[]>();
+            const replacementIdToRows = new Map<number, string[]>();
+
+            for (const row of rows) {
+              const state = validationMap[row.id];
+
+              if (!state?.isReady) {
+                continue;
+              }
+
+              const currentInt = Number.parseInt(row.current, 10);
+
+              if (currentInt !== null && state.currentExistsInDb === true) {
+                pushToMap(currentIdToRows, currentInt, row.id);
+              }
+
+              const replacementInt = Number.parseInt(row.replacement, 10);
+
+              if (replacementInt !== null && state.replacementExistsOnIgdb === true) {
+                pushToMap(replacementIdToRows, replacementInt, row.id);
+              }
+            }
+
+            const dupes = new Set<string>();
+            addDupesFromMap(currentIdToRows, dupes);
+            addDupesFromMap(replacementIdToRows, dupes);
+            addCrossFieldDupes(currentIdToRows, replacementIdToRows, dupes);
+            return dupes;
+          })();
+
+          const hasDuplicates = duplicateRowIds.size > 0;
+
+          const allPairsValid =
+            rows.length > 0 &&
+            !hasDuplicates &&
+            rows.every((row) => validationMap[row.id]?.canApply === true);
+
+          return (
+            <div className="flex flex-col min-h-full bg-background">
+              <DashboardHeader
+                title="Replace Game"
+                icon={IconArrowsExchange}
+                dashboardBacklinkProps={{
+                  text: 'Utilities',
+                  href: '/dashboard/utilities',
+                }}
+              />
+
+              <div className="container mx-auto px-4 py-8 flex-1">
+                <div className="max-w-2xl space-y-6">
+                  {/* Input form */}
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle>Up to {REPLACE_GAME_MAX_ROWS} games.</CardTitle>
+                          <CardDescription />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            if (rows.length < REPLACE_GAME_MAX_ROWS) {
+                              pairsField.pushValue(createEmptyRow());
+                            }
+                          }}
+                          disabled={
+                            rows.length >= REPLACE_GAME_MAX_ROWS ||
+                            applyMutation.isPending
+                          }
+                          className="w-24 flex items-center gap-1.5 shrink-0 cursor-pointer"
+                        >
+                          <IconPlus size={14} aria-hidden="true" />
+                          Add row
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {rows.map((row, index) => (
+                        <RowWithValidation
+                          key={row.id}
+                          row={row}
+                          onCurrentChange={(id, value) => {
+                            form.setFieldValue(`pairs[${index}].current`, value);
+                          }}
+                          onReplacementChange={(id, value) => {
+                            form.setFieldValue(`pairs[${index}].replacement`, value);
+                          }}
+                          onRemove={() => {
+                            if (rows.length > 1) {
+                              pairsField.removeValue(index);
+                              setValidationMap((prev) => {
+                                const next = { ...prev };
+                                delete next[row.id];
+                                return next;
+                              });
+                            }
+                          }}
+                          canRemove={rows.length > 1}
+                          onValidationChange={handleValidationChange}
+                          isDuplicate={duplicateRowIds.has(row.id)}
+                        />
+                      ))}
+
+                      {hasDuplicates ? (
+                        <p className="text-xs text-destructive pt-1">
+                          Duplicate IGDB IDs detected. Fix or remove the highlighted
+                          rows before applying.
+                        </p>
+                      ) : null}
+
+                      <div className="pt-2 flex items-center gap-3">
+                        <Button
+                          type="button"
+                          onClick={() => form.handleSubmit()}
+                          disabled={!allPairsValid || applyMutation.isPending}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          {applyMutation.isPending ? (
+                            <IconLoader
+                              size={16}
+                              className="animate-spin"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <IconPlayerPlay size={16} aria-hidden="true" />
+                          )}
+                          Apply
+                        </Button>
+                        <span className="text-xs text-muted-foreground">
+                          {rows.length} / {REPLACE_GAME_MAX_ROWS} pairs
+                          {!allPairsValid && rows.length > 0 && (
+                            <> &mdash; all pairs must pass validation</>
+                          )}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Results table */}
+                  {results !== null && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Results</CardTitle>
+                        <CardDescription>
+                          Post-update state from the database.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        <ReplaceGameResultsTable results={results} />
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {rows.map((row) => (
-                  <RowWithValidation
-                    key={row.id}
-                    row={row}
-                    onCurrentChange={handleCurrentChange}
-                    onReplacementChange={handleReplacementChange}
-                    onRemove={handleRemove}
-                    canRemove={rows.length > 1}
-                    onValidationChange={handleValidationChange}
-                    isDuplicate={duplicateRowIds.has(row.id)}
-                  />
-                ))}
-
-                {hasDuplicates ? (
-                  <p className="text-xs text-destructive pt-1">
-                    Duplicate IGDB IDs detected. Fix or remove the highlighted
-                    rows before applying.
-                  </p>
-                ) : null}
-
-                <div className="pt-2 flex items-center gap-3">
-                  <Button
-                    type="button"
-                    onClick={() => applyMutation.mutate()}
-                    disabled={!allPairsValid || applyMutation.isPending}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    {applyMutation.isPending ? (
-                      <IconLoader
-                        size={16}
-                        className="animate-spin"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <IconPlayerPlay size={16} aria-hidden="true" />
-                    )}
-                    Apply
-                  </Button>
-                  <span className="text-xs text-muted-foreground">
-                    {rows.length} / {REPLACE_GAME_MAX_ROWS} pairs
-                    {!allPairsValid && rows.length > 0 && (
-                      <> &mdash; all pairs must pass validation</>
-                    )}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Results table */}
-            {results !== null && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Results</CardTitle>
-                  <CardDescription>
-                    Post-update state from the database.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <ReplaceGameResultsTable results={results} />
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-      </div>
+              </div>
+            </div>
+          );
+        }}
+      </form.Field>
     </ViewTransition>
   );
 }

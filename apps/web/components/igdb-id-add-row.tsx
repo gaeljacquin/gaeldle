@@ -24,32 +24,48 @@ export interface IgdbIdAddRowData {
 interface IgdbIdAddRowProps {
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   onRemove: () => void;
   isLastRow: boolean;
   rowId: string;
   onValidationChange: (id: string, state: IgdbIdAddValidationState) => void;
   isDuplicate?: boolean;
+  error?: string;
 }
 
 export function IgdbIdAddRow({
   value,
   onChange,
+  onBlur,
   onRemove,
   isLastRow,
   rowId,
   onValidationChange,
   isDuplicate = false,
+  error,
 }: IgdbIdAddRowProps) {
   const validationState = useIgdbIdAddValidation(value);
 
+  const { isLoading, isReady, existsOnIgdb, alreadyInDb, gameName, canAdd } = validationState;
+
   useEffect(() => {
-    onValidationChange(rowId, validationState);
-  }, [rowId, validationState, onValidationChange]);
+    onValidationChange(rowId, {
+      isLoading,
+      isReady,
+      existsOnIgdb,
+      alreadyInDb,
+      gameName,
+      canAdd,
+      refetch: validationState.refetch,
+      stop: validationState.stop,
+    });
+  }, [rowId, isLoading, isReady, existsOnIgdb, alreadyInDb, gameName, canAdd, onValidationChange, validationState.refetch, validationState.stop]);
 
   const hasError =
-    validationState.isReady &&
-    !validationState.isLoading &&
-    !validationState.canAdd;
+    !!error ||
+    (validationState.isReady &&
+      !validationState.isLoading &&
+      !validationState.canAdd);
 
   const canSync = value.trim() !== '' && !validationState.isLoading;
 
@@ -81,6 +97,7 @@ export function IgdbIdAddRow({
             min={1}
             value={value}
             onChange={(e) => onChange(e.target.value)}
+            onBlur={onBlur}
             placeholder="e.g. 1942"
             className="flex-1 min-w-0 h-full bg-transparent px-3 py-2 font-mono text-sm outline-none placeholder:text-muted-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             aria-invalid={hasError}
@@ -137,7 +154,13 @@ export function IgdbIdAddRow({
       >
         Row ID: {rowId}
       </div>
-      {validationState.isReady && (
+      {error && (
+        <div className="flex items-center gap-1.5 text-xs text-destructive">
+          <IconSquareRoundedX size={12} aria-hidden="true" />
+          <span>{error}</span>
+        </div>
+      )}
+      {validationState.isReady && !error && (
         <div aria-live="polite" aria-atomic="true">
           <IgdbAddValidationBadge state={validationState} />
         </div>

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ViewTransition } from 'react';
+import { motion } from 'motion/react';
 import {
   IconPlayerPlay,
   IconLoader,
@@ -105,9 +106,15 @@ function SortableGameModeItem({
   };
 
   return (
-    <button
+    <motion.button
       ref={setNodeRef}
       style={style}
+      layout={!isReorderMode}
+      transition={{
+        type: 'spring',
+        stiffness: 300,
+        damping: 30,
+      }}
       {...attributes}
       {...(isReorderMode ? listeners : {})}
       type="button"
@@ -156,40 +163,109 @@ function SortableGameModeItem({
         </div>
       </div>
 
-      <div className="flex items-center justify-between w-full mt-2 relative z-10">
+      <div className="flex items-center justify-between w-full mt-2.5 h-5 relative z-10">
         <span className="text-[11px] font-mono text-white">/{mode.slug}</span>
 
         {!isReorderMode && hasEdits && (
           <Badge
             variant="default"
-            className="bg-amber-500 hover:bg-amber-500 text-black border-amber-500 text-[11px] h-5.5 px-2 py-0.5 font-bold"
+            className="bg-amber-500 hover:bg-amber-500 text-black border-amber-500 text-[11px] h-5 px-2 py-0.5 font-bold"
           >
             Unsaved
           </Badge>
         )}
       </div>
-    </button>
+    </motion.button>
   );
 }
 
 export default function EditModesView() {
   const queryClient = useQueryClient();
-  const {
-    data: allGameModes,
-    isLoading,
-    error,
-  } = useQuery(allGameModesQueryOptions);
-
+  const reorderModeUpdateToastId = 'reorder-mode-update';
+  const formModeUpdateToastId = 'form-mode-update';
   const [selectedModeSlug, setSelectedModeSlug] = useState<string | null>(null);
   const [formEdits, setFormEdits] = useState<Record<string, EditFormValues>>(
     {},
   );
   const [isSlugEditable, setIsSlugEditable] = useState(false);
-
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [orderedIds, setOrderedIds] = useState<number[] | null>(null);
+  const hasActiveEdits = Object.keys(formEdits).length > 0;
+
+  const {
+    data: allGameModes,
+    isLoading,
+    error,
+  } = useQuery({
+    ...allGameModesQueryOptions,
+    refetchInterval: isReorderMode || hasActiveEdits ? false : 5000,
+  });
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [activeId, setActiveId] = useState<number | null>(null);
+
+  const lastGameModesRef = useRef<typeof allGameModes | null>(null);
+  const justSavedOrderRef = useRef<boolean>(false);
+  const justSavedFormRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (!allGameModes) {
+      return;
+    }
+
+    if (lastGameModesRef.current) {
+      // 1. Check order/presence changes
+      const currentIds = allGameModes.map((m) => m.id);
+      const prevIds = lastGameModesRef.current.map((m) => m.id);
+
+      const isOrderDifferent =
+        currentIds.length !== prevIds.length ||
+        currentIds.some((id, index) => id !== prevIds[index]);
+
+      if (isOrderDifferent) {
+        if (justSavedOrderRef.current) {
+          justSavedOrderRef.current = false;
+        } else {
+          toast.info('Another user reordered the modes', {
+            id: reorderModeUpdateToastId,
+          });
+        }
+      }
+
+      // 2. Check property changes (form updates)
+      const updatedModes: string[] = [];
+      for (const mode of allGameModes) {
+        const prevMode = lastGameModesRef.current.find((m) => m.id === mode.id);
+        if (prevMode) {
+          const fieldsMatch =
+            mode.slug === prevMode.slug &&
+            mode.title === prevMode.title &&
+            mode.description === prevMode.description &&
+            mode.level === prevMode.level &&
+            mode.maxAttempts === prevMode.maxAttempts &&
+            mode.isActive === prevMode.isActive &&
+            mode.isCoverArt === prevMode.isCoverArt;
+
+          if (!fieldsMatch) {
+            updatedModes.push(mode.title);
+          }
+        }
+      }
+
+      if (updatedModes.length > 0) {
+        if (justSavedFormRef.current) {
+          justSavedFormRef.current = false;
+        } else {
+          const message =
+            updatedModes.length === 1
+              ? `Another user updated the "${updatedModes[0]}" mode`
+              : `Another user updated the following modes: ${updatedModes.join(', ')}`;
+          toast.info(message, { id: formModeUpdateToastId });
+        }
+      }
+    }
+
+    lastGameModesRef.current = allGameModes;
+  }, [allGameModes]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -248,9 +324,11 @@ export default function EditModesView() {
         const currentIds = prev || allGameModes?.map((m) => m.id) || [];
         const oldIndex = currentIds.indexOf(Number(active.id));
         const newIndex = currentIds.indexOf(Number(over.id));
+
         if (oldIndex !== -1 && newIndex !== -1) {
           return arrayMove(currentIds, oldIndex, newIndex);
         }
+
         return currentIds;
       });
     }
@@ -263,11 +341,13 @@ export default function EditModesView() {
         id: mode.id,
         ordinal: index + 1,
       }));
+
       await updateGameModesOrder(orders);
     },
     onSuccess: () => {
       toast.success('Game mode order saved');
       setOrderedIds(null);
+      justSavedOrderRef.current = true;
       queryClient.invalidateQueries({ queryKey: ['allGameModes'] });
       queryClient.invalidateQueries({ queryKey: ['gameModes'] });
     },
@@ -415,6 +495,7 @@ export default function EditModesView() {
     },
     onSuccess: (_, oldSlug) => {
       toast.success('Game mode updated');
+      justSavedFormRef.current = true;
 
       const edits = formEdits[oldSlug];
       if (edits && edits.slug !== oldSlug) {
@@ -591,7 +672,7 @@ export default function EditModesView() {
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between w-full mt-2 relative z-10">
+                        <div className="flex items-center justify-between w-full mt-2.5 h-5 relative z-10">
                           <span className="text-[11px] font-mono text-white">
                             /{activeMode.slug}
                           </span>
@@ -616,15 +697,15 @@ export default function EditModesView() {
                               Form is disabled in reorder mode
                             </Item>
                           )}
-                          <CardHeader>
+                          <CardHeader className="-space-y-1">
                             <CardTitle className="text-lg flex items-center gap-2">
                               {selectedMode.title}
                             </CardTitle>
-                            <CardDescription className="text-sm">
+                            <CardDescription className="text-xs">
                               Ordinal {selectedMode.ordinal}
                             </CardDescription>
                           </CardHeader>
-                          <CardContent className="space-y-6 pb-0">
+                          <CardContent className="space-y-6 mt-3">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div className="flex flex-col gap-1.5">
                                 <Label

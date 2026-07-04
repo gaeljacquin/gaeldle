@@ -12,6 +12,7 @@ import {
   type ArtStyleValue,
   GameInsert,
   domainEvents,
+  queriedGames,
 } from '@workspace/api-contract';
 import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
@@ -71,6 +72,28 @@ export class GamesService {
     });
   }
 
+  private pendingQueriedRefresh: Promise<void> | null = null;
+
+  async refreshQueriedGamesView(): Promise<void> {
+    if (this.pendingQueriedRefresh) {
+      return this.pendingQueriedRefresh;
+    }
+
+    this.pendingQueriedRefresh = (async () => {
+      try {
+        await this.databaseService.db.execute(
+          sql`REFRESH MATERIALIZED VIEW queried_games`,
+        );
+      } catch (e) {
+        console.error('Failed to refresh queried_games materialized view', e);
+      } finally {
+        this.pendingQueriedRefresh = null;
+      }
+    })();
+
+    return this.pendingQueriedRefresh;
+  }
+
   private async performRefresh() {
     if (this.pendingRefresh) {
       return this.pendingRefresh;
@@ -81,6 +104,7 @@ export class GamesService {
         await this.databaseService.db.execute(
           sql`REFRESH MATERIALIZED VIEW all_games`,
         );
+        await this.refreshQueriedGamesView();
       } catch (e) {
         console.error('Failed to refresh materialized view', e);
       } finally {
@@ -260,6 +284,38 @@ export class GamesService {
     }
 
     try {
+      const [cachedQueriedGame] = await this.databaseService.db
+        .select()
+        .from(queriedGames)
+        .where(eq(queriedGames.igdbId, igdbId))
+        .limit(1);
+
+      if (cachedQueriedGame) {
+        await this.databaseService.db.insert(domainEvents).values({
+          eventType: 'game.queried',
+          actorId,
+          payload: {
+            igdbId,
+            gameName: cachedQueriedGame.name ?? null,
+            found: true,
+            alreadyInDb: false,
+            gameInfo: cachedQueriedGame.gameInfo ?? undefined,
+          },
+        });
+
+        return {
+          igdbId,
+          existsOnIgdb: true,
+          alreadyInDb: false,
+          gameName: cachedQueriedGame.name ?? null,
+          canAdd: true,
+        };
+      }
+    } catch (e) {
+      console.error('Failed to query queried_games materialized view:', e);
+    }
+
+    try {
       const igdbGame = await this.igdbService.getGameById(igdbId);
 
       if (!igdbGame) {
@@ -295,6 +351,8 @@ export class GamesService {
           gameInfo: gameData,
         },
       });
+
+      void this.refreshQueriedGamesView();
 
       return {
         igdbId,

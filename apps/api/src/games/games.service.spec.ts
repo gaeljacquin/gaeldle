@@ -14,7 +14,7 @@ import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';
-import { domainEvents } from '@workspace/api-contract';
+import { domainEvents, queriedGames } from '@workspace/api-contract';
 
 type AsyncMock = jest.Mock<(...args: unknown[]) => Promise<unknown>>;
 
@@ -441,6 +441,60 @@ describe('GamesService', () => {
             gameInfo: expect.objectContaining({
               igdbId: 101,
               name: 'New Game',
+            }),
+          }),
+        }),
+      );
+    });
+
+    it('should return found and not query IGDB if game is found in queriedGames materialized view', async () => {
+      resolveValue = {
+        then(resolve: any) {
+          const lastFromCall =
+            mockDb.from.mock.calls[mockDb.from.mock.calls.length - 1];
+          const queriedTable = lastFromCall?.[0];
+
+          if (queriedTable === queriedGames) {
+            resolve([
+              {
+                igdbId: 101,
+                name: 'Cached View Game',
+                gameInfo: {
+                  igdbId: 101,
+                  name: 'Cached View Game',
+                },
+              },
+            ]);
+          } else {
+            resolve([]);
+          }
+        },
+      };
+
+      const result = await service.validateGameForAdd(101, 'user-1');
+
+      expect(result).toEqual({
+        igdbId: 101,
+        existsOnIgdb: true,
+        alreadyInDb: false,
+        gameName: 'Cached View Game',
+        canAdd: true,
+      });
+
+      expect(mockIgdbService.getGameById).not.toHaveBeenCalled();
+      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: 'game.queried',
+          actorId: 'user-1',
+          payload: expect.objectContaining({
+            igdbId: 101,
+            gameName: 'Cached View Game',
+            found: true,
+            alreadyInDb: false,
+            gameInfo: expect.objectContaining({
+              igdbId: 101,
+              name: 'Cached View Game',
             }),
           }),
         }),

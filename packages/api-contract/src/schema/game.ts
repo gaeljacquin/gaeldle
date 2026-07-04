@@ -130,7 +130,7 @@ export const queriedGames = pgMaterializedView('queried_games', {
     AND NOT EXISTS (
       SELECT 1 FROM game WHERE game.igdb_id = (payload->>'igdbId')::integer
     )
-  ORDER BY (payload->>'igdbId')::integer, occurred_at DESC`
+  ORDER BY (payload->>'igdbId')::integer, occurred_at DESC`,
 );
 
 export type QueriedGame = typeof queriedGames.$inferSelect;

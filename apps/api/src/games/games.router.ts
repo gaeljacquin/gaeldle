@@ -13,9 +13,14 @@ export class GamesRouter {
 
   @Implement(contract.games.sync)
   @UseGuards(HexclaveGuard)
-  sync() {
+  sync(@Req() req: AuthenticatedRequest) {
     return implement(contract.games.sync).handler(async ({ input }) => {
-      const result = await this.gamesService.syncGameByIgdbId(input.igdb_id);
+      const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+      const result = await this.gamesService.syncGameByIgdbId(
+        input.igdb_id,
+        true,
+        actorId,
+      );
 
       if (!result) {
         throw new NotFoundException('Game not found in IGDB');

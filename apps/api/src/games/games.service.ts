@@ -118,85 +118,119 @@ export class GamesService {
   async syncGameByIgdbId(
     igdbId: number,
     shouldRefresh = true,
+    actorId = 'unknown',
   ): Promise<{
     game: Game;
     operation: SyncOperation;
   } | null> {
-    let gameData: GameInsert | null = null;
+    let success = false;
+    let errorMessage = '';
+    let operation: SyncOperation | null = null;
+    let syncedGame: Game | null = null;
 
     try {
-      const [latestEvent] = await this.databaseService.db
+      let gameData: GameInsert | null = null;
+
+      try {
+        const [latestEvent] = await this.databaseService.db
+          .select()
+          .from(domainEvents)
+          .where(
+            and(
+              eq(domainEvents.eventType, 'game.queried'),
+              sql`${domainEvents.payload}->>'igdbId' = ${String(igdbId)}`,
+            ),
+          )
+          .orderBy(desc(domainEvents.occurredAt))
+          .limit(1);
+
+        if (latestEvent) {
+          const payload = latestEvent.payload as { gameInfo?: GameInsert };
+
+          if (payload && payload.gameInfo) {
+            gameData = payload.gameInfo;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to retrieve game info from domain events:', e);
+      }
+
+      if (!gameData) {
+        const igdbGame = await this.igdbService.getGameById(igdbId);
+
+        if (!igdbGame) {
+          errorMessage = 'Game not found on IGDB';
+
+          return null;
+        }
+
+        gameData = this.mapIgdbToGame(igdbGame);
+      }
+
+      const [existingGame] = await this.databaseService.db
         .select()
-        .from(domainEvents)
-        .where(
-          and(
-            eq(domainEvents.eventType, 'game.queried'),
-            sql`${domainEvents.payload}->>'igdbId' = ${String(igdbId)}`,
-          ),
-        )
-        .orderBy(desc(domainEvents.occurredAt))
+        .from(games)
+        .where(eq(games.igdbId, igdbId))
         .limit(1);
 
-      if (latestEvent) {
-        const payload = latestEvent.payload as { gameInfo?: GameInsert };
+      if (existingGame) {
+        const [updatedGame] = await this.databaseService.db
+          .update(games)
+          .set({
+            ...gameData,
+            updatedAt: new Date(),
+          })
+          .where(eq(games.igdbId, igdbId))
+          .returning();
 
-        if (payload && payload.gameInfo) {
-          gameData = payload.gameInfo;
+        if (shouldRefresh) {
+          void this.refreshAllGamesView();
         }
+
+        operation = 'updated';
+        syncedGame = updatedGame;
+        success = true;
+
+        return {
+          game: syncedGame,
+          operation,
+        };
       }
-    } catch (e) {
-      console.error('Failed to retrieve game info from domain events:', e);
-    }
 
-    if (!gameData) {
-      const igdbGame = await this.igdbService.getGameById(igdbId);
-
-      if (!igdbGame) {
-        return null;
-      }
-
-      gameData = this.mapIgdbToGame(igdbGame);
-    }
-
-    const [existingGame] = await this.databaseService.db
-      .select()
-      .from(games)
-      .where(eq(games.igdbId, igdbId))
-      .limit(1);
-
-    if (existingGame) {
-      const [updatedGame] = await this.databaseService.db
-        .update(games)
-        .set({
-          ...gameData,
-          updatedAt: new Date(),
-        })
-        .where(eq(games.igdbId, igdbId))
+      const [newGame] = await this.databaseService.db
+        .insert(games)
+        .values(gameData)
         .returning();
 
       if (shouldRefresh) {
         void this.refreshAllGamesView();
       }
 
+      operation = 'created';
+      syncedGame = newGame;
+      success = true;
+
       return {
-        game: updatedGame as unknown as Game,
-        operation: 'updated',
+        game: syncedGame,
+        operation,
       };
+    } catch (e) {
+      errorMessage = e instanceof Error ? e.message : String(e);
+      throw e;
+    } finally {
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'game.added',
+        actorId,
+        payload: {
+          success,
+          igdbId,
+          operation: operation ?? undefined,
+          gameId: syncedGame?.id ?? undefined,
+          gameName: syncedGame?.name ?? undefined,
+          error: errorMessage || undefined,
+        },
+      });
     }
-
-    const [newGame] = await this.databaseService.db
-      .insert(games)
-      .values(gameData)
-      .returning();
-
-    if (shouldRefresh) {
-      void this.refreshAllGamesView();
-    }
-
-    return {
-      game: newGame as unknown as Game,
-      operation: 'created',
-    };
   }
 
   async updateGame(

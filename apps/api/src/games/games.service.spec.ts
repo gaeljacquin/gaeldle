@@ -351,6 +351,59 @@ describe('GamesService', () => {
         }),
       );
     });
+
+    it('should record game.added event on successful creation', async () => {
+      const igdbGame: IgdbGame = {
+        id: 101,
+        name: 'New Game',
+      };
+
+      mockIgdbService.getGameById.mockResolvedValue(igdbGame);
+      resolveValue = [];
+
+      jest
+        .spyOn(service, 'refreshAllGamesView' as any)
+        .mockResolvedValue(undefined);
+
+      await service.syncGameByIgdbId(101, true, 'actor-123');
+
+      expect(mockDb.insert).toHaveBeenCalledWith(domainEvents);
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: 'game.added',
+          actorId: 'actor-123',
+          payload: expect.objectContaining({
+            success: true,
+            igdbId: 101,
+            operation: 'created',
+          }),
+        }),
+      );
+    });
+
+    it('should record game.added event on error', async () => {
+      mockIgdbService.getGameById.mockRejectedValue(
+        new Error('IGDB connection timed out'),
+      );
+      resolveValue = [];
+
+      await expect(
+        service.syncGameByIgdbId(101, true, 'actor-123'),
+      ).rejects.toThrow('IGDB connection timed out');
+
+      expect(mockDb.insert).toHaveBeenCalledWith(domainEvents);
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: 'game.added',
+          actorId: 'actor-123',
+          payload: expect.objectContaining({
+            success: false,
+            igdbId: 101,
+            error: 'IGDB connection timed out',
+          }),
+        }),
+      );
+    });
   });
 
   describe('validateGameForAdd', () => {

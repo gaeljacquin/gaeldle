@@ -33,7 +33,10 @@ mutagen sync create \
   --ignore ".turbo" \
   --ignore "dist" \
   --ignore "build" \
-  --ignore ".cache"
+  --ignore ".cache" \
+  --ignore ".env" \
+  --ignore ".env.*" \
+  --ignore "!.env.example"
 
 if [ $? -eq 0 ]; then
   echo ""

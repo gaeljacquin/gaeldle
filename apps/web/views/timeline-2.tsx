@@ -155,9 +155,9 @@ function Timeline2Content() {
                   </div>
                 ) : (
                   <div className="flex justify-center">
-                    <div className="border-2 border-dashed border-border p-4 flex justify-center items-center w-36 h-48 bg-card/50">
+                    <div className="border-2 border-dashed border-border flex justify-center items-center w-32 h-44 bg-card/50">
                       {isDealingCard || isGameOver || !dealtCard ? (
-                        <Timeline2CardSkeleton />
+                        <Timeline2CardSkeleton showTopBanner={false} />
                       ) : (
                         <div className="relative">
                           {isDragging && (
@@ -180,7 +180,7 @@ function Timeline2Content() {
                             style={{ x, y }}
                             className="cursor-grab active:cursor-grabbing touch-none"
                             initial={{ scale: 1 }}
-                            whileDrag={{ scale: 1.05, zIndex: 50 }}
+                            whileDrag={{ scale: 1, zIndex: 50 }}
                             animate={
                               isAnimating
                                 ? {
@@ -218,9 +218,9 @@ function Timeline2Content() {
                     ref={timelineRef}
                     className="border-2 border-dashed border-border p-6 overflow-x-auto scrollbar-x flex items-center bg-card/50 min-h-55"
                   >
-                    <div className="flex gap-4 items-center px-4 mx-auto justify-center">
+                    <div className="flex items-center px-4 mx-auto justify-center">
                       {timelineCards.length === 0 ? (
-                        <TimelineCardSkeleton />
+                        <TimelineCardSkeleton className="mx-2" />
                       ) : (
                         timelineCards.map((game, index) => {
                           const correctlyPlacedCardColor =
@@ -232,7 +232,7 @@ function Timeline2Content() {
                           return (
                             <motion.div
                               key={game.id}
-                              className="flex items-center"
+                              className="flex items-center mx-2"
                               layout
                               initial={{ opacity: 0, scale: 0.8 }}
                               animate={{ opacity: 1, scale: 1 }}

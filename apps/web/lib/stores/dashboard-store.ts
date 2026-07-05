@@ -8,7 +8,6 @@ type SelectOption<T> = { value: T; label: string };
 export type SortField = 'name' | 'firstReleaseDate' | 'igdbId';
 export type SortDir = 'asc' | 'desc';
 export type SortOption = `${SortField}-${SortDir}`;
-
 export type ViewOption = 'grid' | 'list';
 
 interface DashboardStore {
@@ -16,8 +15,6 @@ interface DashboardStore {
   setSortOption: (sortOption: SortOption) => void;
   pageSize: NumericString;
   setPageSize: (pageSize: NumericString) => void;
-  page: number;
-  setPage: (updater: number | ((prev: number) => number)) => void;
   view: ViewOption;
   setView: (view: ViewOption) => void;
 }
@@ -45,11 +42,6 @@ export const useDashboardStore = create<DashboardStore>()(
       setSortOption: (newSortOption) => set({ sortOption: newSortOption }),
       pageSize: '10',
       setPageSize: (newPageSize) => set({ pageSize: newPageSize }),
-      page: 1,
-      setPage: (updater) =>
-        set((state) => ({
-          page: typeof updater === 'function' ? updater(state.page) : updater,
-        })),
       view: 'grid',
       setView: (newView) => set({ view: newView }),
     }),

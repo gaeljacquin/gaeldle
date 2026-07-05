@@ -29,7 +29,9 @@ export const artStylesTable = pgTable(
     updatedAt: timestamp('updated_at', {
       withTimezone: true,
       mode: 'date',
-    }).defaultNow(),
+    })
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
   (table) => [
     check('art_style_default_check', sql`${table.isDefault} IN (0, 1)`),

@@ -1,8 +1,11 @@
-import { Controller, UseGuards, NotFoundException } from '@nestjs/common';
+import { Controller, UseGuards, NotFoundException, Req } from '@nestjs/common';
 import { Implement, implement } from '@orpc/nest';
 import { contract } from '@workspace/api-contract';
 import { GamesService } from '@/games/games.service';
-import { HexclaveGuard } from '@/auth/hexclave.guard';
+import {
+  HexclaveGuard,
+  type AuthenticatedRequest,
+} from '@/auth/hexclave.guard';
 
 @Controller()
 export class GamesRouter {
@@ -10,9 +13,14 @@ export class GamesRouter {
 
   @Implement(contract.games.sync)
   @UseGuards(HexclaveGuard)
-  sync() {
+  sync(@Req() req: AuthenticatedRequest) {
     return implement(contract.games.sync).handler(async ({ input }) => {
-      const result = await this.gamesService.syncGameByIgdbId(input.igdb_id);
+      const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+      const result = await this.gamesService.syncGameByIgdbId(
+        input.igdb_id,
+        true,
+        actorId,
+      );
 
       if (!result) {
         throw new NotFoundException('Game not found in IGDB');
@@ -76,32 +84,13 @@ export class GamesRouter {
     });
   }
 
-  @Implement(contract.games.validateReplaceGame)
-  @UseGuards(HexclaveGuard)
-  validateReplaceGame() {
-    return implement(contract.games.validateReplaceGame).handler(
-      async ({ input }) => {
-        return this.gamesService.validateGameByIgdbId(
-          input.current,
-          input.replacement,
-        );
-      },
-    );
-  }
-
-  @Implement(contract.games.replaceGames)
-  @UseGuards(HexclaveGuard)
-  replaceGames() {
-    return implement(contract.games.replaceGames).handler(async ({ input }) => {
-      return this.gamesService.replaceGameByIgdbId(input);
-    });
-  }
-
   @Implement(contract.games.validateIgdbIdAdd)
   @UseGuards(HexclaveGuard)
-  validateIgdbIdAdd() {
-    return implement(contract.games.validateIgdbIdAdd).handler(({ input }) =>
-      this.gamesService.validateGameForAdd(input.igdbId),
-    );
+  validateIgdbIdAdd(@Req() req: AuthenticatedRequest) {
+    return implement(contract.games.validateIgdbIdAdd).handler(({ input }) => {
+      const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+
+      return this.gamesService.validateGameForAdd(input.igdbId, actorId);
+    });
   }
 }

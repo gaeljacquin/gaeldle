@@ -1,4 +1,4 @@
-import { InferInsertModel } from 'drizzle-orm';
+import { InferInsertModel, sql } from 'drizzle-orm';
 import {
   pgTable,
   serial,
@@ -25,7 +25,9 @@ export const games = pgTable(
     updatedAt: timestamp('updated_at', {
       withTimezone: true,
       mode: 'date',
-    }).defaultNow(),
+    })
+      .defaultNow()
+      .$onUpdate(() => new Date()),
     imageUrl: varchar('image_url'),
     aiImageUrl: varchar('ai_image_url'),
     aiPrompt: varchar('ai_prompt'),
@@ -111,3 +113,24 @@ export const GameUpdateInputSchema = GameInsertSchema.omit({
 
 export type GameInsert = InferInsertModel<typeof games>;
 export type Game = typeof allGames.$inferSelect;
+
+export const queriedGames = pgMaterializedView('queried_games', {
+  igdbId: integer('igdb_id'),
+  name: varchar('name', { length: 255 }),
+  gameInfo: json('game_info').$type<GameInsert>(),
+}).as(
+  sql`SELECT DISTINCT ON ((payload->>'igdbId')::integer)
+    (payload->>'igdbId')::integer AS igdb_id,
+    payload->>'gameName' AS name,
+    payload->'gameInfo' AS game_info
+  FROM domain_event
+  WHERE event_type = 'game.queried'
+    AND (payload->>'alreadyInDb')::boolean = false
+    AND (payload->>'found')::boolean = true
+    AND NOT EXISTS (
+      SELECT 1 FROM game WHERE game.igdb_id = (payload->>'igdbId')::integer
+    )
+  ORDER BY (payload->>'igdbId')::integer, occurred_at DESC`,
+);
+
+export type QueriedGame = typeof queriedGames.$inferSelect;

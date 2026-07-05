@@ -190,18 +190,21 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                 )}
               </div>
 
-              <GuessHistoryInline guesses={wrongGuesses} className="max-h-60" />
+              <GuessHistoryInline
+                guesses={wrongGuesses}
+                className="max-h-full"
+              />
 
               {isGameOver ? (
-                <div className="border border-border bg-card/60 p-6 text-center animate-in fade-in zoom-in duration-300">
+                <div className="border border-border bg-card/60 p-4 text-center animate-in fade-in zoom-in duration-300">
                   {isCorrect ? (
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <p className="text-2xl font-bold text-green-600">
                         Correct!
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <p className="text-2xl font-bold text-destructive">
                         Game Over!
                       </p>
@@ -216,7 +219,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                   <Button
                     onClick={resetGame}
                     size="lg"
-                    className="mt-8 cursor-pointer font-bold px-12"
+                    className="mt-5 cursor-pointer font-bold px-12"
                   >
                     {isCorrect ? 'Keep Playing' : 'Play Again'}
                   </Button>

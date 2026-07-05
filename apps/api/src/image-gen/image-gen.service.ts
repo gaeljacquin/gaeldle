@@ -211,7 +211,6 @@ export class ImageGenService {
             aiImageUrl: publicUrl,
             aiPrompt: prompt,
             imageGen: updatedImageGen,
-            updatedAt: new Date(),
           })
           .where(eq(games.id, game.id));
 

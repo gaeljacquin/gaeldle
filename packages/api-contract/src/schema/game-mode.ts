@@ -37,7 +37,9 @@ export const gameModeTable = pgTable(
     updatedAt: timestamp('updated_at', {
       withTimezone: true,
       mode: 'date',
-    }).defaultNow(),
+    })
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
   (table) => [
     check(

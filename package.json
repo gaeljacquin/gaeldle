@@ -13,6 +13,7 @@
     "db:migrate": "pnpm --filter ./apps/api db:migrate",
     "db:push": "pnpm --filter ./apps/api db:push",
     "db:studio": "pnpm --filter ./apps/api db:studio",
+    "db:refresh-all-mat-views": "pnpm --filter ./apps/api db:refresh-all-mat-views",
     "test": "turbo test",
     "test:web": "turbo test --filter @workspace/web",
     "format": "prettier --check .",
@@ -33,17 +34,17 @@
   "keywords": [],
   "packageManager": "pnpm@11.9.0",
   "devDependencies": {
-    "@commitlint/cli": "^21.1.0",
-    "@commitlint/config-conventional": "^21.1.0",
+    "@commitlint/cli": "^21.2.0",
+    "@commitlint/config-conventional": "^21.2.0",
     "@types/node": "^25.9.4",
     "husky": "^9.1.7",
-    "prettier": "^3.8.4",
-    "turbo": "^2.10.0"
+    "prettier": "^3.9.4",
+    "turbo": "^2.10.3"
   },
   "dependencies": {
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "motion": "^12.41.0",
+    "motion": "^12.42.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "zod": "^4.4.3"

@@ -20,8 +20,11 @@ export default function Timeline2Skeleton() {
             <div className="space-y-20">
               {/* Dealt card section */}
               <div className="flex justify-center">
-                <div className="border-2 border-dashed border-border p-4 flex justify-center items-center w-36 h-48 bg-card/50">
-                  <Timeline2CardSkeleton className="animate-none" />
+                <div className="border-2 border-dashed border-border flex justify-center items-center w-32 h-44 bg-card/50">
+                  <Timeline2CardSkeleton
+                    className="animate-none"
+                    showTopBanner={false}
+                  />
                 </div>
               </div>
 
@@ -38,8 +41,8 @@ export default function Timeline2Skeleton() {
               {/* Placed cards timeline */}
               <div className="text-center">
                 <div className="border-2 border-dashed border-border p-6 overflow-x-auto flex items-center bg-card/50 min-h-55">
-                  <div className="flex gap-4 items-center px-4 mx-auto justify-center">
-                    <TimelineCardSkeleton className="animate-none" />
+                  <div className="flex items-center px-4 mx-auto justify-center">
+                    <TimelineCardSkeleton className="animate-none mx-2" />
                   </div>
                 </div>
               </div>

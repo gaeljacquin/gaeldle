@@ -111,6 +111,7 @@ export class DiscoverService {
         const syncResult = await this.gamesService.syncGameByIgdbId(
           igdbId,
           false,
+          actorId,
         );
 
         if (syncResult) {

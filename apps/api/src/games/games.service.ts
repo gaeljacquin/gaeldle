@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { eq, inArray, sql } from 'drizzle-orm';
+import { eq, inArray, sql, and, desc } from 'drizzle-orm';
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { DatabaseService } from '@/db/database.service';
@@ -8,10 +8,11 @@ import {
   type Game,
   gameObject,
   type SyncOperation,
-  ReplaceGameResult,
   artStyles as artStylesView,
   type ArtStyleValue,
   GameInsert,
+  domainEvents,
+  queriedGames,
 } from '@workspace/api-contract';
 import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
@@ -71,6 +72,28 @@ export class GamesService {
     });
   }
 
+  private pendingQueriedRefresh: Promise<void> | null = null;
+
+  async refreshQueriedGamesView(): Promise<void> {
+    if (this.pendingQueriedRefresh) {
+      return this.pendingQueriedRefresh;
+    }
+
+    this.pendingQueriedRefresh = (async () => {
+      try {
+        await this.databaseService.db.execute(
+          sql`REFRESH MATERIALIZED VIEW queried_games`,
+        );
+      } catch (e) {
+        console.error('Failed to refresh queried_games materialized view', e);
+      } finally {
+        this.pendingQueriedRefresh = null;
+      }
+    })();
+
+    return this.pendingQueriedRefresh;
+  }
+
   private async performRefresh() {
     if (this.pendingRefresh) {
       return this.pendingRefresh;
@@ -81,6 +104,7 @@ export class GamesService {
         await this.databaseService.db.execute(
           sql`REFRESH MATERIALIZED VIEW all_games`,
         );
+        await this.refreshQueriedGamesView();
       } catch (e) {
         console.error('Failed to refresh materialized view', e);
       } finally {
@@ -94,57 +118,119 @@ export class GamesService {
   async syncGameByIgdbId(
     igdbId: number,
     shouldRefresh = true,
+    actorId = 'unknown',
   ): Promise<{
     game: Game;
     operation: SyncOperation;
   } | null> {
-    const igdbGame = await this.igdbService.getGameById(igdbId);
+    let success = false;
+    let errorMessage = '';
+    let operation: SyncOperation | null = null;
+    let syncedGame: Game | null = null;
 
-    if (!igdbGame) {
-      return null;
-    }
+    try {
+      let gameData: GameInsert | null = null;
 
-    const gameData = this.mapIgdbToGame(igdbGame);
+      try {
+        const [latestEvent] = await this.databaseService.db
+          .select()
+          .from(domainEvents)
+          .where(
+            and(
+              eq(domainEvents.eventType, 'game.queried'),
+              sql`${domainEvents.payload}->>'igdbId' = ${String(igdbId)}`,
+            ),
+          )
+          .orderBy(desc(domainEvents.occurredAt))
+          .limit(1);
 
-    const [existingGame] = await this.databaseService.db
-      .select()
-      .from(games)
-      .where(eq(games.igdbId, igdbId))
-      .limit(1);
+        if (latestEvent) {
+          const payload = latestEvent.payload as { gameInfo?: GameInsert };
 
-    if (existingGame) {
-      const [updatedGame] = await this.databaseService.db
-        .update(games)
-        .set({
-          ...gameData,
-          updatedAt: new Date(),
-        })
+          if (payload && payload.gameInfo) {
+            gameData = payload.gameInfo;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to retrieve game info from domain events:', e);
+      }
+
+      if (!gameData) {
+        const igdbGame = await this.igdbService.getGameById(igdbId);
+
+        if (!igdbGame) {
+          errorMessage = 'Game not found on IGDB';
+
+          return null;
+        }
+
+        gameData = this.mapIgdbToGame(igdbGame);
+      }
+
+      const [existingGame] = await this.databaseService.db
+        .select()
+        .from(games)
         .where(eq(games.igdbId, igdbId))
+        .limit(1);
+
+      if (existingGame) {
+        const [updatedGame] = await this.databaseService.db
+          .update(games)
+          .set({
+            ...gameData,
+            updatedAt: new Date(),
+          })
+          .where(eq(games.igdbId, igdbId))
+          .returning();
+
+        if (shouldRefresh) {
+          void this.refreshAllGamesView();
+        }
+
+        operation = 'updated';
+        syncedGame = updatedGame;
+        success = true;
+
+        return {
+          game: syncedGame,
+          operation,
+        };
+      }
+
+      const [newGame] = await this.databaseService.db
+        .insert(games)
+        .values(gameData)
         .returning();
 
       if (shouldRefresh) {
         void this.refreshAllGamesView();
       }
 
+      operation = 'created';
+      syncedGame = newGame;
+      success = true;
+
       return {
-        game: updatedGame as unknown as Game,
-        operation: 'updated',
+        game: syncedGame,
+        operation,
       };
+    } catch (e) {
+      errorMessage = e instanceof Error ? e.message : String(e);
+      throw e;
+    } finally {
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'game.added',
+        actorId,
+        payload: {
+          success,
+          igdbId,
+          operation: operation ?? undefined,
+          gameId: syncedGame?.id ?? undefined,
+          gameName: syncedGame?.name ?? undefined,
+          error: errorMessage || undefined,
+        },
+      });
     }
-
-    const [newGame] = await this.databaseService.db
-      .insert(games)
-      .values(gameData)
-      .returning();
-
-    if (shouldRefresh) {
-      void this.refreshAllGamesView();
-    }
-
-    return {
-      game: newGame as unknown as Game,
-      operation: 'created',
-    };
   }
 
   async updateGame(
@@ -194,7 +280,10 @@ export class GamesService {
     return deletedRows.map((row) => row.id);
   }
 
-  async validateGameForAdd(igdbId: number): Promise<{
+  async validateGameForAdd(
+    igdbId: number,
+    actorId = 'unknown',
+  ): Promise<{
     igdbId: number;
     existsOnIgdb: boolean;
     alreadyInDb: boolean;
@@ -208,6 +297,17 @@ export class GamesService {
       .limit(1);
 
     if (existingRow) {
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'game.queried',
+        actorId,
+        payload: {
+          igdbId,
+          gameName: existingRow.name ?? null,
+          found: true,
+          alreadyInDb: true,
+        },
+      });
+
       return {
         igdbId,
         existsOnIgdb: true,
@@ -218,9 +318,51 @@ export class GamesService {
     }
 
     try {
+      const [cachedQueriedGame] = await this.databaseService.db
+        .select()
+        .from(queriedGames)
+        .where(eq(queriedGames.igdbId, igdbId))
+        .limit(1);
+
+      if (cachedQueriedGame) {
+        await this.databaseService.db.insert(domainEvents).values({
+          eventType: 'game.queried',
+          actorId,
+          payload: {
+            igdbId,
+            gameName: cachedQueriedGame.name ?? null,
+            found: true,
+            alreadyInDb: false,
+            gameInfo: cachedQueriedGame.gameInfo ?? undefined,
+          },
+        });
+
+        return {
+          igdbId,
+          existsOnIgdb: true,
+          alreadyInDb: false,
+          gameName: cachedQueriedGame.name ?? null,
+          canAdd: true,
+        };
+      }
+    } catch (e) {
+      console.error('Failed to query queried_games materialized view:', e);
+    }
+
+    try {
       const igdbGame = await this.igdbService.getGameById(igdbId);
 
       if (!igdbGame) {
+        await this.databaseService.db.insert(domainEvents).values({
+          eventType: 'game.queried',
+          actorId,
+          payload: {
+            igdbId,
+            found: false,
+            alreadyInDb: false,
+          },
+        });
+
         return {
           igdbId,
           existsOnIgdb: false,
@@ -230,6 +372,22 @@ export class GamesService {
         };
       }
 
+      const gameData = this.mapIgdbToGame(igdbGame);
+
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'game.queried',
+        actorId,
+        payload: {
+          igdbId,
+          gameName: igdbGame.name ?? null,
+          found: true,
+          alreadyInDb: false,
+          gameInfo: gameData,
+        },
+      });
+
+      void this.refreshQueriedGamesView();
+
       return {
         igdbId,
         existsOnIgdb: true,
@@ -237,7 +395,18 @@ export class GamesService {
         gameName: igdbGame.name ?? null,
         canAdd: true,
       };
-    } catch {
+    } catch (error) {
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'game.queried',
+        actorId,
+        payload: {
+          igdbId,
+          found: false,
+          alreadyInDb: false,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      });
+
       return {
         igdbId,
         existsOnIgdb: false,
@@ -246,233 +415,6 @@ export class GamesService {
         canAdd: false,
       };
     }
-  }
-
-  async validateGameByIgdbId(
-    current: number,
-    replacement: number,
-  ): Promise<{
-    current: number;
-    replacement: number;
-    currentExistsInDb: boolean;
-    replacementExistsOnIgdb: boolean;
-    replacementAlreadyInDb: boolean;
-    replacementGameName: string | null;
-    canApply: boolean;
-    currentGameName: string | null;
-  }> {
-    const [currentRow] = await this.databaseService.db
-      .select({ id: games.id, name: games.name })
-      .from(games)
-      .where(eq(games.igdbId, current))
-      .limit(1);
-
-    const currentExistsInDb = !!currentRow;
-    const currentGameName = currentRow?.name ?? null;
-    let replacementAlreadyInDb = false;
-    let replacementExistsOnIgdb = false;
-    let replacementGameName: string | null = null;
-
-    if (currentExistsInDb) {
-      const [replacementRow] = await this.databaseService.db
-        .select({ id: games.id })
-        .from(games)
-        .where(eq(games.igdbId, replacement))
-        .limit(1);
-
-      replacementAlreadyInDb = !!replacementRow;
-
-      try {
-        const igdbGame = await this.igdbService.getGameById(replacement);
-
-        if (igdbGame) {
-          replacementExistsOnIgdb = true;
-          replacementGameName = igdbGame.name ?? null;
-        }
-      } catch {
-        replacementExistsOnIgdb = false;
-      }
-    }
-
-    const canApply =
-      currentExistsInDb &&
-      replacementExistsOnIgdb &&
-      !replacementAlreadyInDb &&
-      current !== replacement;
-
-    return {
-      current,
-      replacement,
-      currentExistsInDb,
-      currentGameName,
-      replacementExistsOnIgdb,
-      replacementAlreadyInDb,
-      replacementGameName,
-      canApply,
-    };
-  }
-
-  private makeResult(
-    pair: { current: number; replacement: number },
-    status: 'skipped' | 'error',
-    message: string,
-  ): ReplaceGameResult {
-    return { ...pair, status, message, gameName: null };
-  }
-
-  private partitionPairs(
-    pairs: Array<{ current: number; replacement: number }>,
-    existingReplacementSet: Set<number>,
-  ): { validPairs: typeof pairs; skippedResults: ReplaceGameResult[] } {
-    const validPairs: typeof pairs = [];
-    const skippedResults: ReplaceGameResult[] = [];
-
-    for (const pair of pairs) {
-      if (pair.current === pair.replacement) {
-        skippedResults.push(
-          this.makeResult(
-            pair,
-            'skipped',
-            'Current and replacement IGDB IDs are the same',
-          ),
-        );
-      } else if (existingReplacementSet.has(pair.replacement)) {
-        skippedResults.push(
-          this.makeResult(
-            pair,
-            'skipped',
-            'Replacement IGDB ID already exists in the database',
-          ),
-        );
-      } else {
-        validPairs.push(pair);
-      }
-    }
-
-    return { validPairs, skippedResults };
-  }
-
-  private async fetchIgdbGameMap(
-    validPairs: Array<{ current: number; replacement: number }>,
-  ): Promise<{ igdbGameMap: Map<number, GameInsert> } | ReplaceGameResult[]> {
-    const replacementIds = validPairs.map((p) => p.replacement);
-
-    try {
-      const igdbGames = await this.igdbService.getGamesByIds(replacementIds);
-
-      return {
-        igdbGameMap: new Map(
-          igdbGames.map((g) => [g.id, this.mapIgdbToGame(g)]),
-        ),
-      };
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? `IGDB fetch failed: ${err.message}`
-          : 'IGDB fetch failed';
-
-      return validPairs.map((pair) => this.makeResult(pair, 'error', message));
-    }
-  }
-
-  private async updateGameHelper(
-    gameData: GameInsert,
-    pair: { current: number; replacement: number },
-    results: ReplaceGameResult[],
-  ): Promise<boolean> {
-    const updated = await this.databaseService.db
-      .update(games)
-      .set({ ...gameData, updatedAt: new Date() })
-      .where(eq(games.igdbId, pair.current))
-      .returning({ igdbId: games.igdbId, name: games.name });
-
-    if (updated.length === 0) {
-      results.push(
-        this.makeResult(
-          pair,
-          'skipped',
-          `No row found with igdb_id=${pair.current}`,
-        ),
-      );
-
-      return false;
-    }
-
-    results.push({
-      ...pair,
-      status: 'updated',
-      message: `Updated IGDB ID ${pair.current} → ${pair.replacement}`,
-      gameName: updated[0].name ?? null,
-    });
-
-    return true;
-  }
-
-  async replaceGameByIgdbId(
-    pairs: Array<{ current: number; replacement: number }>,
-  ): Promise<{ success: boolean; results: Array<ReplaceGameResult> }> {
-    const allReplacementIds = pairs.map((p) => p.replacement);
-    const existingReplacements = await this.databaseService.db
-      .select({ igdbId: games.igdbId })
-      .from(games)
-      .where(inArray(games.igdbId, allReplacementIds));
-    const existingReplacementSet = new Set(
-      existingReplacements.map((r) => r.igdbId),
-    );
-    const { validPairs, skippedResults } = this.partitionPairs(
-      pairs,
-      existingReplacementSet,
-    );
-    const results: Array<ReplaceGameResult> = [...skippedResults];
-
-    if (validPairs.length === 0)
-      return {
-        success: true,
-        results,
-      };
-
-    const igdbResult = await this.fetchIgdbGameMap(validPairs);
-
-    if (Array.isArray(igdbResult)) {
-      return { success: false, results: [...results, ...igdbResult] };
-    }
-
-    const { igdbGameMap } = igdbResult;
-    let anyUpdated = false;
-
-    for (const pair of validPairs) {
-      const gameData = igdbGameMap.get(pair.replacement);
-
-      if (!gameData) {
-        results.push(
-          this.makeResult(
-            pair,
-            'skipped',
-            `No data returned from IGDB for IGDB ID ${pair.replacement}`,
-          ),
-        );
-
-        continue;
-      }
-
-      try {
-        anyUpdated = await this.updateGameHelper(gameData, pair, results);
-      } catch (err) {
-        results.push(
-          this.makeResult(
-            pair,
-            'error',
-            err instanceof Error ? err.message : 'Database update failed',
-          ),
-        );
-      }
-    }
-
-    if (anyUpdated) {
-      await this.refreshAllGamesView();
-    }
-
-    return { success: true, results };
   }
 
   private mapIgdbToGame(igdbGame: IgdbGame): GameInsert {

@@ -58,6 +58,7 @@ export async function PATCH(request: NextRequest) {
                 .where(inArray(gameModeTable.id, idsToUpdate))
             : [];
 
+        // First, temporarily set all ordinals to unique negative values to prevent unique constraint violations
         for (const item of body) {
           const { id, ordinal } = item;
 
@@ -68,8 +69,19 @@ export async function PATCH(request: NextRequest) {
           await tx
             .update(gameModeTable)
             .set({
+              ordinal: -Number(id),
+            })
+            .where(eq(gameModeTable.id, id));
+        }
+
+        // Second, update ordinals to their final desired values
+        for (const item of body) {
+          const { id, ordinal } = item;
+
+          await tx
+            .update(gameModeTable)
+            .set({
               ordinal: Number(ordinal),
-              updatedAt: new Date(),
             })
             .where(eq(gameModeTable.id, id));
         }
@@ -134,7 +146,6 @@ export async function PATCH(request: NextRequest) {
         maxAttempts: Number(maxAttempts),
         isActive: isActive ? 1 : 0,
         isCoverArt: isCoverArt ? 1 : 0,
-        updatedAt: new Date(),
       })
       .where(eq(gameModeTable.id, id))
       .returning();

@@ -40,7 +40,7 @@ if [ $? -eq 0 ]; then
   echo "✓ Sync session '$SYNC_NAME' created successfully!"
   echo ""
   echo "Useful commands:"
-  echo "  mutagen sync list                    # View all sync sessions"
+  echo "  mutagen sync list                       # View all sync sessions"
   echo "  mutagen sync monitor $SYNC_NAME         # Monitor sync progress"
   echo "  mutagen sync pause $SYNC_NAME           # Pause syncing"
   echo "  mutagen sync resume $SYNC_NAME          # Resume syncing"

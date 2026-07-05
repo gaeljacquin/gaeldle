@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, ViewTransition } from 'react';
+import { useForm } from '@tanstack/react-form';
 import { addGame } from '@/lib/services/game.service';
 import { IgdbIdAddRow } from '@/components/igdb-id-add-row';
 import type { IgdbIdAddValidationState } from '@/lib/hooks/use-igdb-id-add-validation';
@@ -24,6 +25,7 @@ import {
 import { cn } from '@workspace/ui/lib/utils';
 import { ADD_GAME_MAX_ROWS } from '@workspace/shared';
 import { DashboardHeader } from '@/components/dashboard-header';
+import { z } from 'zod';
 
 interface AddGameRowData {
   id: string;
@@ -38,7 +40,7 @@ export interface AddGameResult {
   igdbId: number;
   gameName: string | null;
   operation: 'created' | 'updated';
-  gameDbId: number | null;
+  gameId: number | null;
   error: string | null;
 }
 
@@ -140,7 +142,7 @@ function ResultsTable({ results, onAddMore }: ResultsTableProps) {
                     <OperationCell result={result} />
                   </td>
                   <td className="px-4 py-3">
-                    {result.gameDbId && !result.error ? (
+                    {result.gameId && !result.error ? (
                       <a
                         href={`/dashboard/games/${result.igdbId}`}
                         target="_blank"
@@ -165,43 +167,78 @@ function ResultsTable({ results, onAddMore }: ResultsTableProps) {
   );
 }
 
-interface RowWithValidationProps {
-  row: AddGameRowData;
-  isLastRow: boolean;
-  onIgdbIdChange: (id: string, value: string) => void;
-  onRemove: (id: string) => void;
-  onValidationChange: (id: string, state: IgdbIdAddValidationState) => void;
-  isDuplicate: boolean;
-}
+const igdbIdValidators = {
+  onChange: z
+    .string()
+    .refine(
+      (val) =>
+        !val.trim() ||
+        (/^\d+$/.test(val.trim()) && Number.parseInt(val, 10) > 0),
+      'Must be a positive integer',
+    ),
+  onBlur: z
+    .string()
+    .min(1, 'IGDB ID is required')
+    .refine(
+      (val) => /^\d+$/.test(val.trim()) && Number.parseInt(val, 10) > 0,
+      'Must be a positive integer',
+    ),
+};
 
-function RowWithValidation({
-  row,
-  isLastRow,
-  onIgdbIdChange,
-  onRemove,
-  onValidationChange,
-  isDuplicate,
-}: RowWithValidationProps) {
-  return (
-    <IgdbIdAddRow
-      rowId={row.id}
-      value={row.igdbId}
-      onChange={(value) => onIgdbIdChange(row.id, value)}
-      onRemove={() => onRemove(row.id)}
-      isLastRow={isLastRow}
-      onValidationChange={onValidationChange}
-      isDuplicate={isDuplicate}
-    />
-  );
-}
-
-export function AddGame() {
-  const [rows, setRows] = useState<AddGameRowData[]>([createEmptyRow()]);
+export function NewGame() {
   const [validationMap, setValidationMap] = useState<
     Record<string, IgdbIdAddValidationState>
   >({});
   const [results, setResults] = useState<AddGameResult[] | null>(null);
-  const [isMutating, setIsMutating] = useState(false);
+
+  const defaultValues = useMemo(
+    () => ({
+      games: [createEmptyRow()] as AddGameRowData[],
+    }),
+    [],
+  );
+
+  const form = useForm({
+    defaultValues,
+    onSubmit: async ({ value }) => {
+      try {
+        const settled = await Promise.allSettled(
+          value.games.map((row) => addGame(Number.parseInt(row.igdbId, 10))),
+        );
+
+        const addResults: AddGameResult[] = value.games.map((row, i) => {
+          const outcome = settled[i];
+          const igdbId = Number.parseInt(row.igdbId, 10);
+
+          if (outcome.status === 'fulfilled') {
+            const syncResult = outcome.value;
+
+            return {
+              igdbId,
+              gameName: syncResult.data.name,
+              operation: syncResult.operation,
+              gameId: syncResult.data.igdbId,
+              error: null,
+            };
+          }
+
+          const err = outcome.reason;
+
+          return {
+            igdbId,
+            gameName: validationMap[row.id]?.gameName ?? null,
+            operation: 'created' as const,
+            gameId: null,
+            error: err instanceof Error ? err.message : 'Unknown error',
+          };
+        });
+
+        setResults(addResults);
+      } catch (err) {
+        console.error('Error:', (err as Error).message);
+      }
+    },
+  });
 
   const handleValidationChange = useCallback(
     (id: string, state: IgdbIdAddValidationState) => {
@@ -224,225 +261,194 @@ export function AddGame() {
     [],
   );
 
-  const handleIgdbIdChange = useCallback((id: string, value: string) => {
-    setRows((prev) =>
-      prev.map((row) => (row.id === id ? { ...row, igdbId: value } : row)),
-    );
-  }, []);
-
-  const handleRemove = useCallback((id: string) => {
-    setRows((prev) => {
-      if (prev.length <= 1) {
-        return prev;
-      }
-
-      return prev.filter((row) => row.id !== id);
-    });
-    setValidationMap((prev) => {
-      const next = { ...prev };
-      delete next[id];
-
-      return next;
-    });
-  }, []);
-
-  const handleAddRow = useCallback(() => {
-    setRows((prev) => {
-      if (prev.length >= ADD_GAME_MAX_ROWS) return prev;
-      return [...prev, createEmptyRow()];
-    });
-  }, []);
-
   const handleAddMore = useCallback(() => {
     setResults(null);
-    setRows([createEmptyRow()]);
+    form.reset();
     setValidationMap({});
-  }, []);
-
-  const duplicateRowIds = useMemo(() => {
-    const idToRowIds = new Map<number, string[]>();
-
-    for (const row of rows) {
-      const n = Number.parseInt(row.igdbId, 10);
-
-      if (n === null) {
-        continue;
-      }
-
-      const state = validationMap[row.id];
-
-      if (!state?.isReady || state.existsOnIgdb !== true) {
-        continue;
-      }
-
-      if (!idToRowIds.has(n)) {
-        idToRowIds.set(n, []);
-      }
-
-      idToRowIds.get(n)!.push(row.id);
-    }
-    const dupes = new Set<string>();
-
-    for (const rowIds of idToRowIds.values()) {
-      if (rowIds.length > 1) {
-        rowIds.forEach((id) => dupes.add(id));
-      }
-    }
-
-    return dupes;
-  }, [rows, validationMap]);
-
-  const hasDuplicates = duplicateRowIds.size > 0;
-
-  const allCanAdd =
-    rows.length > 0 &&
-    !hasDuplicates &&
-    rows.every((row) => validationMap[row.id]?.canAdd === true);
-
-  const hasAnyNotFound =
-    rows.length > 1 &&
-    rows.some(
-      (row) =>
-        validationMap[row.id]?.isReady === true &&
-        validationMap[row.id]?.existsOnIgdb === false,
-    );
-
-  const handleApply = useCallback(async () => {
-    setIsMutating(true);
-
-    try {
-      const settled = await Promise.allSettled(
-        rows.map((row) => addGame(Number.parseInt(row.igdbId, 10))),
-      );
-
-      const addResults: AddGameResult[] = rows.map((row, i) => {
-        const outcome = settled[i];
-        const igdbId = Number.parseInt(row.igdbId, 10);
-
-        if (outcome.status === 'fulfilled') {
-          const syncResult = outcome.value;
-
-          return {
-            igdbId,
-            gameName: syncResult.data.name,
-            operation: syncResult.operation,
-            gameDbId: syncResult.data.igdbId,
-            error: null,
-          };
-        }
-
-        const err = outcome.reason;
-
-        return {
-          igdbId,
-          gameName: validationMap[row.id]?.gameName ?? null,
-          operation: 'created' as const,
-          gameDbId: null,
-          error: err instanceof Error ? err.message : 'Unknown error',
-        };
-      });
-
-      setResults(addResults);
-    } finally {
-      setIsMutating(false);
-    }
-  }, [rows, validationMap]);
+  }, [form]);
 
   return (
     <ViewTransition>
-      <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader
-          title="Add Game"
-          icon={IconCirclePlus}
-          dashboardBacklinkProps={{
-            text: 'Utilities',
-            href: '/dashboard/utilities',
-          }}
-        />
+      <form.Field name="games" mode="array">
+        {(gamesField) => (
+          <form.Subscribe selector={(state) => [state.isSubmitting] as const}>
+            {([isSubmitting]) => {
+              const games = gamesField.state.value;
+              const duplicateRowIds = (() => {
+                const idToRowIds = new Map<number, string[]>();
 
-        <div className="container mx-auto px-4 py-8 flex-1">
-          <div className="max-w-2xl space-y-6">
-            {results === null ? (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Up to {ADD_GAME_MAX_ROWS} games</CardTitle>
-                      <CardDescription />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={handleAddRow}
-                      disabled={rows.length >= ADD_GAME_MAX_ROWS || isMutating}
-                      className="w-24 flex items-center gap-1.5 shrink-0 cursor-pointer"
-                    >
-                      <IconPlus size={14} aria-hidden="true" />
-                      Add row
-                    </Button>
+                for (const row of games) {
+                  const n = Number.parseInt(row.igdbId, 10);
+
+                  if (Number.isNaN(n)) {
+                    continue;
+                  }
+
+                  const state = validationMap[row.id];
+
+                  if (!state?.isReady || state.existsOnIgdb !== true) {
+                    continue;
+                  }
+
+                  if (!idToRowIds.has(n)) {
+                    idToRowIds.set(n, []);
+                  }
+
+                  idToRowIds.get(n)!.push(row.id);
+                }
+                const dupes = new Set<string>();
+
+                for (const rowIds of idToRowIds.values()) {
+                  if (rowIds.length > 1) {
+                    rowIds.forEach((id) => dupes.add(id));
+                  }
+                }
+
+                return dupes;
+              })();
+
+              const hasDuplicates = duplicateRowIds.size > 0;
+
+              const allCanAdd =
+                games.length > 0 &&
+                !hasDuplicates &&
+                games.every((row) => validationMap[row.id]?.canAdd === true);
+
+              const hasAnyNotFound =
+                games.length > 1 &&
+                games.some(
+                  (row) =>
+                    validationMap[row.id]?.isReady === true &&
+                    validationMap[row.id]?.existsOnIgdb === false,
+                );
+
+              return (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    void form.handleSubmit();
+                  }}
+                  className="flex flex-col min-h-full bg-background"
+                >
+                  <DashboardHeader
+                    title="New Game"
+                    icon={IconCirclePlus}
+                    dashboardBacklinkProps={{
+                      text: 'Utilities',
+                      href: '/dashboard/utilities',
+                    }}
+                    extraElements={
+                      results === null ? (
+                        <div className="flex flex-wrap items-center gap-3">
+                          <Button
+                            type="submit"
+                            disabled={!allCanAdd || isSubmitting}
+                            className="flex items-center gap-2 cursor-pointer"
+                          >
+                            {isSubmitting ? (
+                              <IconLoader
+                                size={16}
+                                className="animate-spin"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <IconPlayerPlay size={16} aria-hidden="true" />
+                            )}
+                            Apply
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              if (games.length < ADD_GAME_MAX_ROWS) {
+                                gamesField.pushValue(createEmptyRow());
+                              }
+                            }}
+                            disabled={
+                              games.length >= ADD_GAME_MAX_ROWS || isSubmitting
+                            }
+                            className="flex items-center gap-1.5 shrink-0 cursor-pointer"
+                          >
+                            <IconPlus size={14} aria-hidden="true" />
+                            Add entry ({games.length} / {ADD_GAME_MAX_ROWS})
+                          </Button>
+                          <span className="text-xs text-muted-foreground">
+                            All entries must pass validation before clicking
+                            apply.
+                          </span>
+                        </div>
+                      ) : null
+                    }
+                  />
+
+                  <div className="container mx-auto px-4 py-8 flex-1">
+                    {results === null ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {games.map((row, index) => (
+                          <form.Field
+                            key={row.id}
+                            name={`games[${index}].igdbId`}
+                            validators={igdbIdValidators}
+                          >
+                            {(field) => (
+                              <IgdbIdAddRow
+                                value={field.state.value}
+                                onChange={(val) => field.handleChange(val)}
+                                onBlur={field.handleBlur}
+                                onRemove={() => {
+                                  if (games.length > 1) {
+                                    gamesField.removeValue(index);
+                                    setValidationMap((prev) => {
+                                      const next = { ...prev };
+                                      delete next[row.id];
+                                      return next;
+                                    });
+                                  }
+                                }}
+                                isLastRow={games.length === 1}
+                                rowId={row.id}
+                                onValidationChange={handleValidationChange}
+                                isDuplicate={duplicateRowIds.has(row.id)}
+                                error={
+                                  field.state.meta.isTouched
+                                    ? ((field.state.meta.errors?.[0] as Error)
+                                        ?.message ??
+                                      (field.state.meta.errors?.[0] as Error))
+                                    : undefined
+                                }
+                              />
+                            )}
+                          </form.Field>
+                        ))}
+
+                        {hasAnyNotFound ? (
+                          <p className="text-xs text-destructive pt-1 md:col-span-2">
+                            One or more IGDB IDs were not found. Fix them or
+                            remove the affected rows before applying.
+                          </p>
+                        ) : null}
+
+                        {hasDuplicates ? (
+                          <p className="text-xs text-destructive pt-1 md:col-span-2">
+                            Duplicate IGDB IDs detected. Fix or remove the
+                            highlighted rows before applying.
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <ResultsTable
+                        results={results}
+                        onAddMore={handleAddMore}
+                      />
+                    )}
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {rows.map((row) => (
-                    <RowWithValidation
-                      key={row.id}
-                      row={row}
-                      isLastRow={rows.length === 1}
-                      onIgdbIdChange={handleIgdbIdChange}
-                      onRemove={handleRemove}
-                      onValidationChange={handleValidationChange}
-                      isDuplicate={duplicateRowIds.has(row.id)}
-                    />
-                  ))}
-
-                  {hasAnyNotFound ? (
-                    <p className="text-xs text-destructive pt-1">
-                      One or more IGDB IDs were not found. Fix them or remove
-                      the affected rows before applying.
-                    </p>
-                  ) : null}
-
-                  {hasDuplicates ? (
-                    <p className="text-xs text-destructive pt-1">
-                      Duplicate IGDB IDs detected. Fix or remove the highlighted
-                      rows before applying.
-                    </p>
-                  ) : null}
-
-                  <div className="pt-2 flex items-center gap-3">
-                    <Button
-                      type="button"
-                      onClick={handleApply}
-                      disabled={!allCanAdd || isMutating}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      {isMutating ? (
-                        <IconLoader
-                          size={16}
-                          className="animate-spin"
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        <IconPlayerPlay size={16} aria-hidden="true" />
-                      )}
-                      Apply
-                    </Button>
-                    <span className="text-xs text-muted-foreground">
-                      {rows.length} / {ADD_GAME_MAX_ROWS} rows
-                      {!allCanAdd && rows.length > 0 ? (
-                        <> &mdash; all rows must pass validation</>
-                      ) : null}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <ResultsTable results={results} onAddMore={handleAddMore} />
-            )}
-          </div>
-        </div>
-      </div>
+                </form>
+              );
+            }}
+          </form.Subscribe>
+        )}
+      </form.Field>
     </ViewTransition>
   );
 }

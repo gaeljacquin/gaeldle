@@ -15,8 +15,6 @@ export const SAMPLE_DIR = 'sample-dir';
 
 export const IMAGE_GEN_DIR = 'res';
 
-export const REPLACE_GAME_MAX_ROWS = 20;
-
 export const ADD_GAME_MAX_ROWS = 20;
 
 export const PLACEHOLDER_IMAGE = 'placeholder.jpg';
@@ -39,3 +37,5 @@ export const MIN_PREVIEW_PROMPT_ROWS = 4;
 export const GAME_MODE_SKELETON_COUNT = 6;
 
 export const VIEWPORT_DIMENSIONS_FALLBACK = '0:0:16';
+
+export const PLACEHOLDER_IGDB_IDS = [1942, 348330].join(',');

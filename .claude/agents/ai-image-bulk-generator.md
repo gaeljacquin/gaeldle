@@ -205,7 +205,7 @@ cd /path/to/repo && \
   NUM_GAMES=5 \
   INCLUDE_STORYLINE=false INCLUDE_GENRES=false INCLUDE_THEMES=false \
   IMAGE_STYLE=funko-pop-chibi \
-  pnpm run apps/api/scripts/bulk-generate-images.ts
+  pnpm exec tsx apps/api/scripts/bulk-generate-images.ts
 ```
 
 Set `NUM_GAMES` to the resolved `num_games` value (clamped to [1, 50], default 5). Set `INCLUDE_*` variables to `true` based on the user's override input. Set `IMAGE_STYLE` to the resolved style value slug (e.g. `simpsons`). Omit or leave empty to use the default (`funko-pop-chibi`).

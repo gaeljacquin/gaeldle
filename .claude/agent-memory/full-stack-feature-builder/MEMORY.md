@@ -2,9 +2,9 @@
 
 ## Package Manager
 
-- Use `bun` for all commands (not pnpm or npm)
-- `pnpm run lint` — runs turbo lint across all packages
-- Do NOT run `pnpm type-check` (global rule)
+- Use `nr` for all commands (unified package manager tool)
+- `nr lint` — runs turbo lint across all packages
+- Do NOT run `pnpm type-check` (use `nr typecheck` instead)
 
 ## Monorepo Structure
 
@@ -134,7 +134,7 @@ export default function SomePage() {
 - SQL file: `apps/api/drizzle/<idx>_<tag>.sql`
 - Journal: `apps/api/drizzle/meta/_journal.json` — add new entry with idx, version, when (ms timestamp), tag, breakpoints: true
 - Snapshot: `apps/api/drizzle/meta/<idx>_snapshot.json` — copy previous, update `id` and `prevId`
-- Run with: `pnpm run db:migrate` inside `apps/api`
+- Run with: `nr db:migrate` inside `apps/api`
 
 ### lib/hooks barrel
 

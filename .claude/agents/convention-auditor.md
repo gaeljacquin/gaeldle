@@ -48,7 +48,7 @@ Document every SonarQube finding with:
 
 ### Step 4: Run Linting
 
-Execute: `pnpm run lint`
+Execute: `nr lint`
 
 Capture all output. For each linting error or warning:
 
@@ -59,7 +59,7 @@ Capture all output. For each linting error or warning:
 
 ### Step 5: Run Type Checking
 
-Execute: `pnpm run type-check`
+Execute: `nr typecheck`
 
 Capture all TypeScript errors. For each error:
 
@@ -96,8 +96,8 @@ For every issue found across Steps 3–5, apply fixes that follow the exact patt
 
 After applying all fixes:
 
-1. Re-run `pnpm run lint` — confirm zero errors
-2. Re-run `pnpm run type-check` — confirm zero errors
+1. Re-run `nr lint` — confirm zero errors
+2. Re-run `nr typecheck` — confirm zero errors
 3. Re-check SonarQube issues if tools allow — confirm resolved issues
 
 If new issues are introduced by your fixes, resolve them before concluding.
@@ -147,8 +147,8 @@ Produce a structured summary:
 Before concluding the audit, verify:
 
 - [ ] All Blocker and Critical SonarQube issues are resolved or explicitly acknowledged
-- [ ] `pnpm run lint` exits with code 0
-- [ ] `pnpm run type-check` exits with code 0
+- [ ] `nr lint` exits with code 0
+- [ ] `nr typecheck` exits with code 0
 - [ ] All applied fixes follow patterns from the conventions files
 - [ ] No new issues were introduced by the fixes
 - [ ] The audit report is complete and accurate

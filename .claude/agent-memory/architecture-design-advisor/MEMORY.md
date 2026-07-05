@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App Router web (`apps/web`, port 3000). Package manager: `bun`. See `docs/agents/architecture.md` for topology.
+Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App Router web (`apps/web`, port 3000). Package manager: `nr`. See `docs/architecture.md` for topology.
 
 ## Key Packages
 

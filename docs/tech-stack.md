@@ -30,15 +30,11 @@ docs/           # Developer documentation
 
 ## Getting Started
 
-1. **Prerequisite**: Use the provided VS Code **Dev Container**. This ensures a consistent environment with Node.js, `ni`, and PostgreSQL.
-2. **Security**: The `DEVBOX` environment variable is set inside the container.
-
-### CRITICAL: No Bare Metal
-**Do not run `ni`, `nr`, or `nup` on your local host machine (bare metal).** Always use the Dev Container terminal. This isolates your host from potentially compromised npm packages.
+Make sure you have Node.js, `pnpm`, and PostgreSQL installed and running.
 
 ## Commands
 
-Run all commands inside the Dev Container terminal:
+Run the development commands in your terminal:
 
 ```bash
 nr dev        # Start development servers (Turbo)

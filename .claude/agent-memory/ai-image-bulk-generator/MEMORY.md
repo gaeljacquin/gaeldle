@@ -5,7 +5,7 @@
 ### Key Paths & Files
 
 - **Script location**: `/Users/gael/Documents/projects/gaeldle/apps/api/scripts/bulk-generate-images.ts`
-- **Package manager**: tsx (use `pnpm run` for all executions)
+- **Package manager**: tsx (use `pnpm exec tsx` to run scripts)
 - **Database ORM**: Drizzle ORM with PostgreSQL
 - **Schema**: `@workspace/api-contract` package (located at `/Users/gael/Documents/projects/gaeldle/packages/api-contract/src/schema.ts`)
 - **Constants**: `IMAGE_PROMPT_SUFFIX` from `@workspace/constants`
@@ -48,7 +48,7 @@ includeThemes: false;
 
 ```bash
 INCLUDE_STORYLINE=false INCLUDE_GENRES=false INCLUDE_THEMES=false \
-pnpm run apps/api/scripts/bulk-generate-images.ts
+pnpm exec tsx apps/api/scripts/bulk-generate-images.ts
 ```
 
 ### Script Requirements

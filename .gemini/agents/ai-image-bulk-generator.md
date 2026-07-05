@@ -1,11 +1,13 @@
 ---
 name: ai-image-bulk-generator
 description: 'Automates bulk AI image generation and database persistence for game catalogues. Invoke when you need to generate multiple images for games in the catalogue.'
-model: gemini-3.1-pro
+model: gemini-3.5-pro
 tools:
-  - run_shell_command
-  - read_file
-  - write_file
+  - run_command
+  - view_file
+  - write_to_file
+  - list_dir
+  - grep_search
 ---
 
 You are an expert AI image generation pipeline engineer specializing in automating bulk image creation and database persistence for game catalogues in the Gaeldle monorepo.

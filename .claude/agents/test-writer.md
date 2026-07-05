@@ -158,7 +158,7 @@ describe('formatScore', () => {
 
 - [ ] Each test has a single, clear assertion focus.
 - [ ] All mocks are reset between tests.
-- [ ] Tests run with `pnpm test` (or `turbo test`) without modification.
+- [ ] Tests run with `nr test` (or `turbo test`) without modification.
 - [ ] File naming follows `*.spec.ts` or `*.test.ts` conventions co-located with the source file.
 - [ ] No business logic is being tested twice across different layers.
 - [ ] Edge cases and error paths are covered, not just happy paths.
@@ -167,8 +167,8 @@ describe('formatScore', () => {
 
 ## Project Context
 
-- Package manager: `pnpm` (see AGENTS.md)
-- Test runner: `pnpm test` (root) or `pnpm run test` (apps)
+- Package manager: `nr` (see AGENTS.md)
+- Test runner: `nr test` (root) or `nr test` (apps)
 - Backend: NestJS in `apps/api` (using Jest)
 - Frontend: Next.js in `apps/web` (using Vitest)
 

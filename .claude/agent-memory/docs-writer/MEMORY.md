@@ -6,7 +6,7 @@
 - Web app router pages: `apps/web/app/` (routes), views: `apps/web/views/`, components: `apps/web/components/`.
 - Game mode config (titles, descriptions, difficulty, slugs): `apps/web/lib/game-mode.ts`.
 - Game hook files: `apps/web/lib/hooks/use-<mode>-game.ts` — contain `MAX_ATTEMPTS` and game logic.
-- Docs: `docs/agents/` contains architecture.md, backend-conventions.md, commands.md, frontend-conventions.md, workflows.md.
+- Docs: `docs/` contains architecture.md, backend-conventions.md, commands.md, frontend-conventions.md, workflows.md.
 - Game modes user-facing doc: `docs/game-modes.md` (full rules and mechanics for all six modes).
 - Public README at repo root `/Users/gael/Documents/projects/gaeldle/README.md` is a glossary/doc index only.
 
@@ -27,7 +27,7 @@ Cover Art, Artwork, and Image Gen all use the `GameListPlusImage` component and 
 
 - Root README is a glossary/doc index: brief project intro + a table linking to every file in `docs/`.
 - Game modes detail lives in `docs/game-modes.md`, not the README.
-- Developer/architecture rules go in `docs/agents/` files (see AGENTS.md for the list).
+- Developer/architecture rules go in `docs/` files (see AGENTS.md for the list).
 - README must not contain detailed content (env vars, ports, build commands, game mode rules) — link to the relevant doc file instead.
 
 ## API Architecture (as of 2026-02-26)
@@ -50,9 +50,9 @@ Health page (`/health`) monitors both APIs:
 - "writes api" = NestJS ping via `GET /`
 - "reads api" = Next.js ping via `GET /api/games?pageSize=1`
 
-Architecture doc updated: `docs/agents/architecture.md` — see "API Responsibility Split" section.
-Backend doc updated: `docs/agents/backend-conventions.md` — see "Next.js API Routes" section.
-Frontend doc updated: `docs/agents/frontend-conventions.md` — revised "Read vs. write transport" rule.
+Architecture doc updated: `docs/architecture.md` — see "API Responsibility Split" section.
+Backend doc updated: `docs/backend-conventions.md` — see "Next.js API Routes" section.
+Frontend doc updated: `docs/frontend-conventions.md` — revised "Read vs. write transport" rule.
 
 ## Admin Dashboard Pages (as of 2026-03-04)
 

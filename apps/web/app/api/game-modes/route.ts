@@ -38,28 +38,48 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
+    let newOrder: { id: number; ordinal: number }[] = [];
+    let expectedOrder: { id: number; ordinal: number }[] | null = null;
 
     if (Array.isArray(body)) {
+      newOrder = body;
+    } else if (body && typeof body === 'object' && Array.isArray(body.newOrder)) {
+      newOrder = body.newOrder;
+      expectedOrder = Array.isArray(body.expectedOrder) ? body.expectedOrder : null;
+    }
+
+    if (newOrder.length > 0) {
       const user = await hexclaveServerApp.getUser({ or: 'return-null' });
       const actorId = user?.id ?? 'unknown';
-      const idsToUpdate = body
+      const idsToUpdate = newOrder
         .map((item) => item.id)
         .filter((id) => id !== undefined);
 
       await db.transaction(async (tx) => {
-        const previousModes =
-          idsToUpdate.length > 0
-            ? await tx
-                .select({
-                  id: gameModeTable.id,
-                  ordinal: gameModeTable.ordinal,
-                })
-                .from(gameModeTable)
-                .where(inArray(gameModeTable.id, idsToUpdate))
-            : [];
+        const allDbModes = await tx
+          .select({
+            id: gameModeTable.id,
+            ordinal: gameModeTable.ordinal,
+          })
+          .from(gameModeTable);
+
+        if (expectedOrder) {
+          if (expectedOrder.length !== allDbModes.length) {
+            throw new Error('CONCURRENT_CONFLICT');
+          }
+
+          for (const expected of expectedOrder) {
+            const current = allDbModes.find((m) => m.id === expected.id);
+            if (!current || current.ordinal !== expected.ordinal) {
+              throw new Error('CONCURRENT_CONFLICT');
+            }
+          }
+        }
+
+        const previousModes = allDbModes.filter((m) => idsToUpdate.includes(m.id));
 
         // First, temporarily set all ordinals to unique negative values to prevent unique constraint violations
-        for (const item of body) {
+        for (const item of newOrder) {
           const { id, ordinal } = item;
 
           if (id === undefined || ordinal === undefined) {
@@ -75,7 +95,7 @@ export async function PATCH(request: NextRequest) {
         }
 
         // Second, update ordinals to their final desired values
-        for (const item of body) {
+        for (const item of newOrder) {
           const { id, ordinal } = item;
 
           await tx
@@ -172,6 +192,13 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error updating game mode:', error);
+
+    if (error instanceof Error && error.message === 'CONCURRENT_CONFLICT') {
+      return NextResponse.json(
+        { error: 'Someone else already changed the order, refresh first' },
+        { status: 409 },
+      );
+    }
 
     return NextResponse.json(
       { error: (error as Error).message },

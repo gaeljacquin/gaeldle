@@ -46,7 +46,7 @@ import {
 } from '@workspace/ui/alert-dialog';
 import {
   DndContext,
-  closestCenter,
+  closestCorners,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -80,6 +80,7 @@ interface SortableGameModeItemProps {
   isSelected: boolean;
   hasEdits: boolean;
   isReorderMode: boolean;
+  isOrderConflict: boolean;
   onClick: () => void;
 }
 
@@ -88,6 +89,7 @@ function SortableGameModeItem({
   isSelected,
   hasEdits,
   isReorderMode,
+  isOrderConflict,
   onClick,
 }: SortableGameModeItemProps) {
   const {
@@ -97,7 +99,7 @@ function SortableGameModeItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: mode.id, disabled: !isReorderMode });
+  } = useSortable({ id: mode.id, disabled: !isReorderMode || isOrderConflict });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -116,13 +118,15 @@ function SortableGameModeItem({
         damping: 30,
       }}
       {...attributes}
-      {...(isReorderMode ? listeners : {})}
+      {...(isReorderMode && !isOrderConflict ? listeners : {})}
       type="button"
       onClick={isReorderMode ? undefined : onClick}
       className={cn(
         'flex flex-col w-full text-left p-4 rounded-xl border transition-[opacity,border-color,background-color,box-shadow] duration-200 relative overflow-hidden group touch-none',
         isReorderMode
-          ? 'border-white/10 opacity-100 cursor-grab active:cursor-grabbing'
+          ? isOrderConflict
+            ? 'border-white/10 opacity-60 cursor-not-allowed'
+            : 'border-white/10 opacity-100 cursor-grab active:cursor-grabbing'
           : isSelected
             ? 'border-white/10 shadow-lg opacity-100 cursor-pointer'
             : 'border-white/10 hover:border-white/30 hover:shadow-md opacity-80 hover:opacity-100 cursor-pointer',
@@ -183,6 +187,7 @@ export default function EditModesView() {
   const queryClient = useQueryClient();
   const reorderModeUpdateToastId = 'reorder-mode-update';
   const formModeUpdateToastId = 'form-mode-update';
+  const formModeReorderToastId = 'form-mode-reorder-update';
   const [selectedModeSlug, setSelectedModeSlug] = useState<string | null>(null);
   const [formEdits, setFormEdits] = useState<Record<string, EditFormValues>>(
     {},
@@ -190,6 +195,7 @@ export default function EditModesView() {
   const [isSlugEditable, setIsSlugEditable] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [orderedIds, setOrderedIds] = useState<number[] | null>(null);
+  const [isOrderConflict, setIsOrderConflict] = useState(false);
   const hasActiveEdits = Object.keys(formEdits).length > 0;
 
   const {
@@ -198,7 +204,7 @@ export default function EditModesView() {
     error,
   } = useQuery({
     ...allGameModesQueryOptions,
-    refetchInterval: isReorderMode || hasActiveEdits ? false : 5000,
+    refetchInterval: hasActiveEdits ? false : 5000,
   });
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -210,6 +216,12 @@ export default function EditModesView() {
   useEffect(() => {
     if (!allGameModes) {
       return;
+    }
+
+    if (isReorderMode && !orderedIds) {
+      setTimeout(() => {
+        setOrderedIds(allGameModes.map((m) => m.id));
+      }, 0);
     }
 
     if (lastGameModesRef.current) {
@@ -224,9 +236,35 @@ export default function EditModesView() {
       if (isOrderDifferent) {
         if (justSavedOrderRef.current) {
           justSavedOrderRef.current = false;
+          setTimeout(() => {
+            setOrderedIds(allGameModes.map((m) => m.id));
+          }, 0);
+        } else if (isReorderMode) {
+          setTimeout(() => {
+            setIsOrderConflict(true);
+            toast.info(
+              'Someone else already changed the order, refresh first',
+              {
+                id: reorderModeUpdateToastId,
+                duration: Infinity,
+                action: {
+                  label: 'Refresh',
+                  onClick: () => {
+                    setIsOrderConflict(false);
+                    setOrderedIds(null);
+                    queryClient.invalidateQueries({
+                      queryKey: ['allGameModes'],
+                    });
+                    queryClient.invalidateQueries({ queryKey: ['gameModes'] });
+                    toast.dismiss(reorderModeUpdateToastId);
+                  },
+                },
+              },
+            );
+          }, 0);
         } else {
           toast.info('Another user reordered the modes', {
-            id: reorderModeUpdateToastId,
+            id: formModeReorderToastId,
           });
         }
       }
@@ -235,6 +273,7 @@ export default function EditModesView() {
       const updatedModes: string[] = [];
       for (const mode of allGameModes) {
         const prevMode = lastGameModesRef.current.find((m) => m.id === mode.id);
+
         if (prevMode) {
           const fieldsMatch =
             mode.slug === prevMode.slug &&
@@ -265,7 +304,7 @@ export default function EditModesView() {
     }
 
     lastGameModesRef.current = allGameModes;
-  }, [allGameModes]);
+  }, [allGameModes, isReorderMode, queryClient, orderedIds]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -337,34 +376,68 @@ export default function EditModesView() {
 
   const orderMutation = useMutation({
     mutationFn: async (newOrder: (GameModePlus & { id: number })[]) => {
+      if (!allGameModes) {
+        throw new Error('No game modes loaded');
+      }
+
       const orders = newOrder.map((mode, index) => ({
         id: mode.id,
         ordinal: index + 1,
       }));
+      const expected = allGameModes.map((mode) => ({
+        id: mode.id,
+        ordinal: mode.ordinal,
+      }));
 
-      await updateGameModesOrder(orders);
+      await updateGameModesOrder(orders, expected);
     },
     onSuccess: () => {
       toast.success('Game mode order saved');
-      setOrderedIds(null);
+      setIsOrderConflict(false);
       justSavedOrderRef.current = true;
       queryClient.invalidateQueries({ queryKey: ['allGameModes'] });
       queryClient.invalidateQueries({ queryKey: ['gameModes'] });
     },
     onError: (err) => {
-      toast.error(err.message || 'Failed to save game mode order');
+      const errorWithStatus = err as Error & { status?: number };
+
+      if (errorWithStatus.status === 409) {
+        setIsOrderConflict(true);
+        toast.info('Someone else already changed the order, refresh first', {
+          id: reorderModeUpdateToastId,
+          duration: Infinity,
+          action: {
+            label: 'Refresh',
+            onClick: () => {
+              setIsOrderConflict(false);
+              setOrderedIds(null);
+              queryClient.invalidateQueries({ queryKey: ['allGameModes'] });
+              queryClient.invalidateQueries({ queryKey: ['gameModes'] });
+              toast.dismiss(reorderModeUpdateToastId);
+            },
+          },
+        });
+      } else {
+        toast.error(err.message || 'Failed to save game mode order');
+      }
     },
   });
 
   const handleSwitchMode = () => {
     if (isReorderMode) {
-      if (isOrderChanged) {
+      if (isOrderChanged && !isOrderConflict) {
         setIsConfirmOpen(true);
       } else {
         setIsReorderMode(false);
+        setIsOrderConflict(false);
+        setOrderedIds(null);
+        toast.dismiss(reorderModeUpdateToastId);
+        toast.dismiss(formModeReorderToastId);
       }
     } else {
       setIsReorderMode(true);
+      setIsOrderConflict(false);
+      toast.dismiss(formModeReorderToastId);
     }
   };
 
@@ -372,6 +445,9 @@ export default function EditModesView() {
     setIsConfirmOpen(false);
     setIsReorderMode(false);
     setOrderedIds(null);
+    setIsOrderConflict(false);
+    toast.dismiss(reorderModeUpdateToastId);
+    toast.dismiss(formModeReorderToastId);
   };
 
   const defaultModeSlug = allGameModes?.[0]?.slug ?? null;
@@ -605,7 +681,7 @@ export default function EditModesView() {
               <div className="w-full md:w-80 lg:w-96 shrink-0 space-y-4">
                 <DndContext
                   sensors={sensors}
-                  collisionDetection={closestCenter}
+                  collisionDetection={closestCorners}
                   onDragStart={handleDragStart}
                   onDragCancel={handleDragCancel}
                   onDragEnd={handleDragEnd}
@@ -626,6 +702,7 @@ export default function EditModesView() {
                             isSelected={isSelected}
                             hasEdits={hasEdits}
                             isReorderMode={isReorderMode}
+                            isOrderConflict={isOrderConflict}
                             onClick={() => {
                               setSelectedModeSlug(mode.slug);
                               setIsSlugEditable(false);
@@ -917,7 +994,9 @@ export default function EditModesView() {
                               type="submit"
                               disabled={
                                 isReorderMode
-                                  ? !isOrderChanged || orderMutation.isPending
+                                  ? !isOrderChanged ||
+                                    orderMutation.isPending ||
+                                    isOrderConflict
                                   : !isEdited(currentSlug) ||
                                     isSlugEditable ||
                                     mutation.isPending
@@ -960,12 +1039,16 @@ export default function EditModesView() {
                               variant="outline"
                               disabled={
                                 isReorderMode
-                                  ? !isOrderChanged || orderMutation.isPending
+                                  ? (!isOrderChanged && !isOrderConflict) ||
+                                    orderMutation.isPending
                                   : !isEdited(currentSlug) || mutation.isPending
                               }
                               onClick={() => {
                                 if (isReorderMode) {
                                   setOrderedIds(null);
+                                  setIsOrderConflict(false);
+                                  toast.dismiss(reorderModeUpdateToastId);
+                                  toast.dismiss(formModeReorderToastId);
                                   return;
                                 }
 

@@ -176,6 +176,13 @@
       "when": 1783189133158,
       "tag": "0024_odd_blur",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1783302580420,
+      "tag": "0025_wandering_speedball",
+      "breakpoints": true
     }
   ]
 }

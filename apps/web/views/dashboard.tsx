@@ -65,14 +65,8 @@ export default function Dashboard() {
   const [isMultiSelect, setIsMultiSelect] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const {
-    sortOption,
-    setSortOption,
-    pageSize,
-    setPageSize,
-    view,
-    setView,
-  } = useDashboardStore();
+  const { sortOption, setSortOption, pageSize, setPageSize, view, setView } =
+    useDashboardStore();
   const queryClient = useQueryClient();
 
   const searchParams = useSearchParams();
@@ -326,8 +320,6 @@ export default function Dashboard() {
 
     return () => clearTimeout(handler);
   }, [formValues.searchIgdbId, form]);
-
-
 
   const [sortBy, sortDir] = formValues.sortOption.split('-') as [
     SortField,

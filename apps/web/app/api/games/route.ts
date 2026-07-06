@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const igdbId = searchParams.get('igdbId') ?? undefined;
 
     const sortBy = (searchParams.get('sortBy') ?? 'name') as
-      'name' | 'firstReleaseDate' | 'igdbId';
+      'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt';
 
     const sortDir = (searchParams.get('sortDir') ?? 'asc') as 'asc' | 'desc';
     const offset = (page - 1) * pageSize;
@@ -32,6 +32,10 @@ export async function GET(request: NextRequest) {
         return sortDir === 'asc'
           ? sql`first_release_date ASC NULLS LAST`
           : sql`first_release_date DESC NULLS LAST`;
+      }
+
+      if (sortBy === 'createdAt') {
+        return sortDir === 'asc' ? asc(games.createdAt) : desc(games.createdAt);
       }
 
       const col = sortBy === 'igdbId' ? games.igdbId : games.name;

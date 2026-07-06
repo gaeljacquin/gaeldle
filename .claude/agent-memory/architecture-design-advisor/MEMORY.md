@@ -102,7 +102,7 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 - Validation: `games.validateIgdbIdAdd` oRPC procedure (POST /games/add/validate-one).
 - Constant: `ADD_GAME_MAX_ROWS = 20` in `packages/constants/src/index.ts`.
 - Hook: `use-igdb-id-add-validation.ts` — debounces 600ms, TanStack Query, returns `IgdbIdAddValidationState`.
-- Component: `igdb-id-add-row.tsx` — single-field row with inline validation badge.
+- Component: `igdb-id-add-entry.tsx` — single-field row with inline validation badge.
 - View: `apps/web/views/add-game.tsx` — `RowWithValidation` wrapper pattern (Rules of Hooks avoidance).
 - Page: `apps/web/app/dashboard/add-game/page.tsx` — thin wrapper.
 

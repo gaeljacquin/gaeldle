@@ -132,12 +132,12 @@ Dashboard pages for game catalogue management and utilities. The sidebar exposes
 | Route                       | View file                           | Description                                                                                         |
 | --------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `/dashboard/utilities`      | `apps/web/views/utilities.tsx`      | Hub page listing all admin utility tools as `MenuCard` tiles.                                       |
-| `/dashboard/add-game`       | `apps/web/views/add-game.tsx`       | Add one or more new games to the DB by IGDB ID. Max `ADD_GAME_MAX_ROWS` (20) rows per submission.   |
+| `/dashboard/add-game`       | `apps/web/views/add-game.tsx`       | Add one or more new games to the DB by IGDB ID. Max `ADD_GAME_MAX_ROWS` (20) entries per submission. |
 | `/dashboard/replace-game`   | `apps/web/views/replace-game.tsx`   | Replace existing games by swapping IGDB IDs. Max `REPLACE_GAME_MAX_ROWS` (20) pairs per submission. |
 | `/dashboard/image-gen`      | `apps/web/views/image-gen.tsx`      | Bulk AI image generation for games.                                                                 |
 | `/dashboard/discover-games` | `apps/web/views/discover-games.tsx` | Browse and discover games from IGDB; select games to add to the library.                            |
 
-The Add Game and Replace Game pages use a validate-then-commit pattern: each row validates in real time via a debounced TanStack Query call, and the submit button is only enabled when all rows pass validation.
+The Add Game and Replace Game pages use a validate-then-commit pattern: each entry or row validates in real time via a debounced TanStack Query call, and the submit button is only enabled when all entries/rows pass validation.
 
 ### Validation Hooks
 
@@ -182,11 +182,11 @@ interface ReplaceGameValidationState {
 
 Query key: `['replace-game-validate', debouncedCurrentInt, debouncedReplacementInt]`. Stale time: 30 s.
 
-### Row-level Validation Components
+### Row and Entry Validation Components
 
-- `apps/web/components/igdb-id-add-row.tsx` — single row for the Add Game form; renders an IGDB ID input and an inline validation badge.
+- `apps/web/components/igdb-id-add-entry.tsx` — single entry for the Add Game form; renders an IGDB ID input and an inline validation badge.
 - `apps/web/components/igdb-id-pair-row.tsx` — single row for the Replace Game form; renders current + replacement inputs with inline validation badges.
-- `apps/web/components/igdb-add-validation-badge.tsx` — displays the validation result (spinner, game name, error states) for a single IGDB ID add row.
+- `apps/web/components/igdb-add-validation-badge.tsx` — displays the validation result (spinner, game name, error states) for a single IGDB ID add entry.
 
 ### Duplicate Detection (Replace Game)
 

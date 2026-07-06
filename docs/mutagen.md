@@ -17,9 +17,9 @@ Automatically sync changes in this project from your local machine to a remote L
    # Edit .env with your actual values
    ```
 
-3. **Make the script executable**:
+3. **Make the scripts executable**:
    ```bash
-   chmod +x remote-sync.sh
+   chmod +x start-remote-sync.sh stop-remote-sync.sh
    ```
 
 ## Usage
@@ -37,35 +37,40 @@ nr sync
 ### Directly:
 
 ```bash
-./remote-sync.sh
+# Start remote sync
+./start-remote-sync.sh
+
+# Stop remote sync
+./stop-remote-sync.sh
 ```
 
 ## Default Values
 
 If a variable is not set in `.env`, the script falls back to these defaults:
 
-| Variable      | Default              |
-| ------------- | -------------------- |
-| `LOCAL_PATH`  | `$HOME/gaeldle`      |
-| `REMOTE_USER` | `<your-remote-user>` |
-| `REMOTE_HOST` | `<your-remote-host>` |
-| `REMOTE_PATH` | `<your-remote-path>` |
+| Variable       | Default                       |
+| -------------- | ----------------------------- |
+| `PROJECT_NAME` | (Required in `.env`, e.g. `gaeldle`) |
+| `LOCAL_PATH`   | `$HOME/$PROJECT_NAME`         |
+| `REMOTE_USER`  | `demouser`                    |
+| `REMOTE_HOST`  | `demohost`                    |
+| `REMOTE_PATH`  | `/home/demouser/$PROJECT_NAME`|
 
-`PROJECT_NAME` is hardcoded as `gaeldle` in the script and is not configurable via `.env`.
+`PROJECT_NAME` is loaded dynamically from `.env` and used to set the paths and session names.
 
 ## Management Commands
 
 After creating the sync session, use either the `nr sync:*` shorthands or raw `mutagen` commands:
 
-| Action                          | nr shorthand            | mutagen command                  |
+| Action                          | nr shorthand            | mutagen command/script           |
 | ------------------------------- | ----------------------- | -------------------------------- |
 | View all sessions               | `nr sync:list`          | `mutagen sync list`              |
 | View all sessions (verbose)     | `nr sync:list-long`     | `mutagen sync list --long`       |
-| Monitor real-time progress      | `nr sync:monitor`       | `mutagen sync monitor gaeldle`   |
-| Pause syncing                   | `nr sync:pause`         | `mutagen sync pause gaeldle`     |
-| Resume syncing                  | `nr sync:resume`        | `mutagen sync resume gaeldle`    |
-| Stop and remove session         | `nr sync:terminate`     | `mutagen sync terminate gaeldle` |
-| Reset session (if issues occur) | `nr sync:reset`         | `mutagen sync reset gaeldle`     |
+| Monitor real-time progress      | `nr sync:monitor`       | `mutagen sync monitor $PROJECT_NAME` |
+| Pause syncing                   | `nr sync:pause`         | `mutagen sync pause $PROJECT_NAME`   |
+| Resume syncing                  | `nr sync:resume`        | `mutagen sync resume $PROJECT_NAME`  |
+| Stop and remove session         | `nr sync:terminate`     | `./stop-remote-sync.sh`          |
+| Reset session (if issues occur) | `nr sync:reset`         | `mutagen sync reset $PROJECT_NAME`   |
 
 ## Ignored Files and Folders
 
@@ -75,7 +80,7 @@ The sync uses the `--ignore-vcs` flag, which automatically respects `.gitignore`
 - The `.git` directory is always excluded.
 - No need to manually list ignore patterns.
 
-To exclude additional files not covered by `.gitignore`, add custom `--ignore` flags to `remote-sync.sh`.
+To exclude additional files not covered by `.gitignore`, add custom `--ignore` flags to `start-remote-sync.sh`.
 
 ## Troubleshooting
 

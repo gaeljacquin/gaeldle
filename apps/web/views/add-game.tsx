@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo, ViewTransition } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { addGame } from '@/lib/services/game.service';
-import { IgdbIdAddRow } from '@/components/igdb-id-add-row';
+import { IgdbIdAddEntry } from '@/components/igdb-id-add-entry';
 import type { IgdbIdAddValidationState } from '@/lib/hooks/use-igdb-id-add-validation';
 import { Button } from '@workspace/ui/button';
 import {
@@ -27,12 +27,12 @@ import { ADD_GAME_MAX_ROWS } from '@workspace/shared';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { z } from 'zod';
 
-interface AddGameRowData {
+interface AddGameEntryData {
   id: string;
   igdbId: string;
 }
 
-function createEmptyRow(): AddGameRowData {
+function createEmptyEntry(): AddGameEntryData {
   return { id: crypto.randomUUID(), igdbId: '' };
 }
 
@@ -193,7 +193,7 @@ export function NewGame() {
 
   const defaultValues = useMemo(
     () => ({
-      games: [createEmptyRow()] as AddGameRowData[],
+      games: [createEmptyEntry()] as AddGameEntryData[],
     }),
     [],
   );
@@ -203,12 +203,14 @@ export function NewGame() {
     onSubmit: async ({ value }) => {
       try {
         const settled = await Promise.allSettled(
-          value.games.map((row) => addGame(Number.parseInt(row.igdbId, 10))),
+          value.games.map((entry) =>
+            addGame(Number.parseInt(entry.igdbId, 10)),
+          ),
         );
 
-        const addResults: AddGameResult[] = value.games.map((row, i) => {
+        const addResults: AddGameResult[] = value.games.map((entry, i) => {
           const outcome = settled[i];
-          const igdbId = Number.parseInt(row.igdbId, 10);
+          const igdbId = Number.parseInt(entry.igdbId, 10);
 
           if (outcome.status === 'fulfilled') {
             const syncResult = outcome.value;
@@ -226,7 +228,7 @@ export function NewGame() {
 
           return {
             igdbId,
-            gameName: validationMap[row.id]?.gameName ?? null,
+            gameName: validationMap[entry.id]?.gameName ?? null,
             operation: 'created' as const,
             gameId: null,
             error: err instanceof Error ? err.message : 'Unknown error',
@@ -274,52 +276,54 @@ export function NewGame() {
           <form.Subscribe selector={(state) => [state.isSubmitting] as const}>
             {([isSubmitting]) => {
               const games = gamesField.state.value;
-              const duplicateRowIds = (() => {
-                const idToRowIds = new Map<number, string[]>();
+              const duplicateEntryIds = (() => {
+                const idToEntryIds = new Map<number, string[]>();
 
-                for (const row of games) {
-                  const n = Number.parseInt(row.igdbId, 10);
+                for (const entry of games) {
+                  const n = Number.parseInt(entry.igdbId, 10);
 
                   if (Number.isNaN(n)) {
                     continue;
                   }
 
-                  const state = validationMap[row.id];
+                  const state = validationMap[entry.id];
 
                   if (!state?.isReady || state.existsOnIgdb !== true) {
                     continue;
                   }
 
-                  if (!idToRowIds.has(n)) {
-                    idToRowIds.set(n, []);
+                  if (!idToEntryIds.has(n)) {
+                    idToEntryIds.set(n, []);
                   }
 
-                  idToRowIds.get(n)!.push(row.id);
+                  idToEntryIds.get(n)!.push(entry.id);
                 }
                 const dupes = new Set<string>();
 
-                for (const rowIds of idToRowIds.values()) {
-                  if (rowIds.length > 1) {
-                    rowIds.forEach((id) => dupes.add(id));
+                for (const entryIds of idToEntryIds.values()) {
+                  if (entryIds.length > 1) {
+                    entryIds.forEach((id) => dupes.add(id));
                   }
                 }
 
                 return dupes;
               })();
 
-              const hasDuplicates = duplicateRowIds.size > 0;
+              const hasDuplicates = duplicateEntryIds.size > 0;
 
               const allCanAdd =
                 games.length > 0 &&
                 !hasDuplicates &&
-                games.every((row) => validationMap[row.id]?.canAdd === true);
+                games.every(
+                  (entry) => validationMap[entry.id]?.canAdd === true,
+                );
 
               const hasAnyNotFound =
                 games.length > 1 &&
                 games.some(
-                  (row) =>
-                    validationMap[row.id]?.isReady === true &&
-                    validationMap[row.id]?.existsOnIgdb === false,
+                  (entry) =>
+                    validationMap[entry.id]?.isReady === true &&
+                    validationMap[entry.id]?.existsOnIgdb === false,
                 );
 
               return (
@@ -362,7 +366,7 @@ export function NewGame() {
                             variant="outline"
                             onClick={() => {
                               if (games.length < ADD_GAME_MAX_ROWS) {
-                                gamesField.pushValue(createEmptyRow());
+                                gamesField.pushValue(createEmptyEntry());
                               }
                             }}
                             disabled={
@@ -385,14 +389,14 @@ export function NewGame() {
                   <div className="container mx-auto px-4 py-8 flex-1">
                     {results === null ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {games.map((row, index) => (
+                        {games.map((entry, index) => (
                           <form.Field
-                            key={row.id}
+                            key={entry.id}
                             name={`games[${index}].igdbId`}
                             validators={igdbIdValidators}
                           >
                             {(field) => (
-                              <IgdbIdAddRow
+                              <IgdbIdAddEntry
                                 value={field.state.value}
                                 onChange={(val) => field.handleChange(val)}
                                 onBlur={field.handleBlur}
@@ -401,15 +405,15 @@ export function NewGame() {
                                     gamesField.removeValue(index);
                                     setValidationMap((prev) => {
                                       const next = { ...prev };
-                                      delete next[row.id];
+                                      delete next[entry.id];
                                       return next;
                                     });
                                   }
                                 }}
-                                isLastRow={games.length === 1}
-                                rowId={row.id}
+                                isLastEntry={games.length === 1}
+                                entryId={entry.id}
                                 onValidationChange={handleValidationChange}
-                                isDuplicate={duplicateRowIds.has(row.id)}
+                                isDuplicate={duplicateEntryIds.has(entry.id)}
                                 error={
                                   field.state.meta.isTouched
                                     ? ((field.state.meta.errors?.[0] as Error)
@@ -425,14 +429,14 @@ export function NewGame() {
                         {hasAnyNotFound ? (
                           <p className="text-xs text-destructive pt-1 md:col-span-2">
                             One or more IGDB IDs were not found. Fix them or
-                            remove the affected rows before applying.
+                            remove the affected entries before applying.
                           </p>
                         ) : null}
 
                         {hasDuplicates ? (
                           <p className="text-xs text-destructive pt-1 md:col-span-2">
                             Duplicate IGDB IDs detected. Fix or remove the
-                            highlighted rows before applying.
+                            highlighted entries before applying.
                           </p>
                         ) : null}
                       </div>

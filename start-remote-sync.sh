@@ -3,7 +3,14 @@
 # Load .env file if it exists
 if [ -f .env ]; then
   echo "Loading environment variables from .env..."
-  export $(grep -v '^#' .env | xargs)
+  while IFS= read -r line || [ -n "$line" ]; do
+    # Strip leading/trailing whitespace
+    line=$(echo "$line" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    # Skip empty lines and comments
+    [[ -z "$line" || "$line" =~ ^# ]] && continue
+    # Export variable
+    export "$line"
+  done < .env
 fi
 
 # Configuration

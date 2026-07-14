@@ -5,7 +5,7 @@ import { type NumericString } from '@workspace/api-contract';
 
 type SelectOption<T> = { value: T; label: string };
 
-export type SortField = 'name' | 'firstReleaseDate' | 'igdbId';
+export type SortField = 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt';
 export type SortDir = 'asc' | 'desc';
 export type SortOption = `${SortField}-${SortDir}`;
 export type ViewOption = 'grid' | 'list';
@@ -26,6 +26,8 @@ export const sortOptions: SelectOption<SortOption>[] = [
   { value: 'firstReleaseDate-desc', label: 'Release Date ↓' },
   { value: 'igdbId-asc', label: 'IGDB ID ↑' },
   { value: 'igdbId-desc', label: 'IGDB ID ↓' },
+  { value: 'createdAt-asc', label: 'Added ↑' },
+  { value: 'createdAt-desc', label: 'Added ↓' },
 ];
 
 export const pageSizes: NumericString[] = ['10', '25', '50'];

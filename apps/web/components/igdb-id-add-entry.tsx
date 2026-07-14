@@ -17,41 +17,41 @@ import { IgdbAddValidationBadge } from '@/components/igdb-add-validation-badge';
 import { toast } from 'sonner';
 import { PLACEHOLDER_IGDB_IDS } from '@workspace/shared';
 
-export interface IgdbIdAddRowData {
+export interface IgdbIdAddEntryData {
   id: string;
   igdbId: string;
 }
 
-interface IgdbIdAddRowProps {
+interface IgdbIdAddEntryProps {
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
   onRemove: () => void;
-  isLastRow: boolean;
-  rowId: string;
+  isLastEntry: boolean;
+  entryId: string;
   onValidationChange: (id: string, state: IgdbIdAddValidationState) => void;
   isDuplicate?: boolean;
   error?: string;
 }
 
-export function IgdbIdAddRow({
+export function IgdbIdAddEntry({
   value,
   onChange,
   onBlur,
   onRemove,
-  isLastRow,
-  rowId,
+  isLastEntry,
+  entryId,
   onValidationChange,
   isDuplicate = false,
   error,
-}: IgdbIdAddRowProps) {
+}: IgdbIdAddEntryProps) {
   const validationState = useIgdbIdAddValidation(value);
 
   const { isLoading, isReady, existsOnIgdb, alreadyInDb, gameName, canAdd } =
     validationState;
 
   useEffect(() => {
-    onValidationChange(rowId, {
+    onValidationChange(entryId, {
       isLoading,
       isReady,
       existsOnIgdb,
@@ -62,7 +62,7 @@ export function IgdbIdAddRow({
       stop: validationState.stop,
     });
   }, [
-    rowId,
+    entryId,
     isLoading,
     isReady,
     existsOnIgdb,
@@ -105,7 +105,7 @@ export function IgdbIdAddRow({
             IGDB ID
           </div>
           <input
-            id={`igdb-add-${rowId}`}
+            id={`igdb-add-${entryId}`}
             type="number"
             min={1}
             value={value}
@@ -152,9 +152,9 @@ export function IgdbIdAddRow({
             type="button"
             variant="outline"
             onClick={onRemove}
-            disabled={isLastRow}
-            aria-label="Remove row"
-            title="Remove row"
+            disabled={isLastEntry}
+            aria-label="Remove entry"
+            title="Remove entry"
             className="text-muted-foreground hover:text-destructive cursor-pointer h-11 px-4 py-1 rounded-none flex items-center justify-center shrink-0"
           >
             <IconTrash size={20} aria-hidden="true" />
@@ -163,9 +163,9 @@ export function IgdbIdAddRow({
       </div>
       <div
         className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/70 select-all truncate"
-        title={rowId}
+        title={entryId}
       >
-        Row ID: {rowId}
+        Entry ID: {entryId}
       </div>
       {error && (
         <div className="flex items-center gap-1.5 text-xs text-destructive">

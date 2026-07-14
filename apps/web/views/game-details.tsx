@@ -913,7 +913,8 @@ export default function GameDetails({
     onSuccess: () => {
       toast.success('Game deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['games'] });
-      const search = typeof window !== 'undefined' ? window.location.search : '';
+      const search =
+        typeof window !== 'undefined' ? window.location.search : '';
       router.push(`/dashboard${search}`);
     },
     onError: (err) => {
@@ -944,7 +945,8 @@ export default function GameDetails({
               variant="outline"
               className="mt-8 font-black uppercase tracking-widest rounded-none px-8 h-12 cursor-pointer border-2 hover:bg-primary hover:text-primary-foreground transition-all"
               onClick={() => {
-                const search = typeof window !== 'undefined' ? window.location.search : '';
+                const search =
+                  typeof window !== 'undefined' ? window.location.search : '';
                 router.push(`/dashboard${search}`);
               }}
             >

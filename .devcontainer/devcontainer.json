@@ -40,10 +40,15 @@
       }
     }
   },
-  "remoteEnv": {
-    "DEVBOX": "true"
-  },
   "forwardPorts": [3000, 8080],
   "remoteUser": "root",
-  "postCreateCommand": "pnpm install"
+  "containerEnv": {
+    "PYTHON_KEYRING_BACKEND": "keyrings.alt.file.PlaintextKeyring"
+  },
+  "mounts": [
+    "source=${localEnv:HOME}/.gemini,target=/root/.gemini,type=bind",
+    // Mount a host directory to persist the container's keyring file
+    "source=${localEnv:HOME}/.gemini/devcontainer-keyring,target=/root/.local/share/python_keyring,type=bind"
+  ],
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
 }

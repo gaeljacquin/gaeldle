@@ -96,6 +96,7 @@ export const gameObject = {
   firstReleaseDate: games.firstReleaseDate,
   summary: games.summary,
   storyline: games.storyline,
+  createdAt: games.createdAt,
 };
 
 export const allGames = pgMaterializedView('all_games').as((qb) => {

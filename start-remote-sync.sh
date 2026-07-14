@@ -3,7 +3,14 @@
 # Load .env file if it exists
 if [ -f .env ]; then
   echo "Loading environment variables from .env..."
-  export $(grep -v '^#' .env | xargs)
+  while IFS= read -r line || [ -n "$line" ]; do
+    # Strip leading/trailing whitespace
+    line=$(echo "$line" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    # Skip empty lines and comments
+    [[ -z "$line" || "$line" =~ ^# ]] && continue
+    # Export variable
+    export "$line"
+  done < .env
 fi
 
 # Configuration
@@ -33,7 +40,10 @@ mutagen sync create \
   --ignore ".turbo" \
   --ignore "dist" \
   --ignore "build" \
-  --ignore ".cache"
+  --ignore ".cache" \
+  --ignore ".env" \
+  --ignore ".env.*" \
+  --ignore "!.env.example"
 
 if [ $? -eq 0 ]; then
   echo ""

@@ -45,7 +45,7 @@ export async function getPaginatedGames(
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' = 'name',
+  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
 ): Promise<PaginatedResponse<Game>> {

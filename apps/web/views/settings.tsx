@@ -25,12 +25,13 @@ import {
   IconQueuePopOut,
 } from '@tabler/icons-react';
 import { DashboardHeader } from '@/components/dashboard-header';
+import { PLACEHOLDER_IMAGE } from '@workspace/shared';
 
 export default function Settings() {
   const uploadSampleImageMutation = useMutation({
     mutationFn: async () => {
       // Fetch and convert the placeholder image to base64
-      const response = await fetch('/placeholder.jpg');
+      const response = await fetch(`/${PLACEHOLDER_IMAGE}`);
       const blob = await response.blob();
 
       const base64data = await new Promise<string>((resolve, reject) => {
@@ -105,7 +106,7 @@ export default function Settings() {
                 <div className="flex flex-col items-center gap-4">
                   <div className="relative size-40 border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-muted/50 overflow-hidden">
                     <Image
-                      src="/placeholder.jpg"
+                      src={`/${PLACEHOLDER_IMAGE}`}
                       alt="Test Placeholder"
                       fill
                       className="object-cover"
@@ -115,7 +116,7 @@ export default function Settings() {
                   </div>
                   <div className="text-center space-y-2">
                     <p className="text-xs font-mono text-muted-foreground">
-                      public/placeholder.jpg
+                      public/{PLACEHOLDER_IMAGE}
                     </p>
                     <Button
                       onClick={() => uploadSampleImageMutation.mutate()}

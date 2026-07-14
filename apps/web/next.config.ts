@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
   env: {
     apiUrl: process.env.SERVER_URL ?? 'http://localhost:8080',
     newApiUrl: process.env.NEW_API_URL ?? 'http://localhost:8081',
-    r2PublicUrl: process.env.NEXT_PUBLIC_R2_PUBLIC_URL,
   },
   images: {
     unoptimized: true,

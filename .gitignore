@@ -158,4 +158,4 @@ TODO.md
 .kilo*/
 
 # Go build
-api
+apps/*/api

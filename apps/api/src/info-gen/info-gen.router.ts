@@ -14,21 +14,23 @@ export class InfoGenRouter {
   @Implement(contract.infoGen.generateInfo)
   @UseGuards(HexclaveGuard)
   generateInfo(@Req() req: AuthenticatedRequest) {
-    return implement(contract.infoGen.generateInfo).handler(async ({ input }) => {
-      const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
-      const updatedGame = await this.infoGenService.generateInfo(
-        input.igdbId,
-        actorId,
-      );
+    return implement(contract.infoGen.generateInfo).handler(
+      async ({ input }) => {
+        const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+        const updatedGame = await this.infoGenService.generateInfo(
+          input.igdbId,
+          actorId,
+        );
 
-      if (!updatedGame) {
-        throw new NotFoundException('Game not found');
-      }
+        if (!updatedGame) {
+          throw new NotFoundException('Game not found');
+        }
 
-      return {
-        success: true,
-        data: updatedGame,
-      };
-    });
+        return {
+          success: true,
+          data: updatedGame,
+        };
+      },
+    );
   }
 }

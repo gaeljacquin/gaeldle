@@ -189,6 +189,12 @@ export async function getImageGenStatus(imageGenId: string) {
   return result;
 }
 
+export async function generateInfo(igdbId: number) {
+  const result = await orpcClient.infoGen.generateInfo({ igdbId });
+
+  return result;
+}
+
 export async function validateIgdbIdAdd(igdbId: number, signal?: AbortSignal) {
   const result = await orpcClient.games.validateIgdbIdAdd(
     { igdbId },

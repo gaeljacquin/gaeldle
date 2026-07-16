@@ -43,9 +43,15 @@ export async function PATCH(request: NextRequest) {
 
     if (Array.isArray(body)) {
       newOrder = body;
-    } else if (body && typeof body === 'object' && Array.isArray(body.newOrder)) {
+    } else if (
+      body &&
+      typeof body === 'object' &&
+      Array.isArray(body.newOrder)
+    ) {
       newOrder = body.newOrder;
-      expectedOrder = Array.isArray(body.expectedOrder) ? body.expectedOrder : null;
+      expectedOrder = Array.isArray(body.expectedOrder)
+        ? body.expectedOrder
+        : null;
     }
 
     if (newOrder.length > 0) {
@@ -76,7 +82,9 @@ export async function PATCH(request: NextRequest) {
           }
         }
 
-        const previousModes = allDbModes.filter((m) => idsToUpdate.includes(m.id));
+        const previousModes = allDbModes.filter((m) =>
+          idsToUpdate.includes(m.id),
+        );
 
         // First, temporarily set all ordinals to unique negative values to prevent unique constraint violations
         for (const item of newOrder) {

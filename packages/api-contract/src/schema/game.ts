@@ -43,18 +43,13 @@ export const games = pgTable(
         >
       >
     >(),
-    infoGen: json('info_gen').$type<
-      Array<
-        Record<
-          string,
-          {
-            info: string;
-            prompt: string;
-            provider: string;
-          }
-        >
-      >
-    >(),
+    infoGen: json('info_gen').$type<{
+      clue: string;
+      prompt: string;
+      provider: string;
+      model: string;
+      createdAt: string;
+    }>(),
     artworks: json('artworks').$type<any>(),
     keywords: json('keywords').$type<any>(),
     franchises: json('franchises').$type<any>(),

@@ -84,6 +84,19 @@ const MOCK_GAME_MODES = [
     isActive: 1,
     isCoverArt: 0,
   },
+  {
+    id: 7,
+    slug: 'clue',
+    title: 'Clue',
+    description: 'Guess the game from the AI-generated clue!',
+    level: 'medium',
+    maxAttempts: 5,
+    gradient:
+      'linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(320 80% 55%) 100%)',
+    ordinal: 7,
+    isActive: 1,
+    isCoverArt: 0,
+  },
 ];
 
 beforeEach(() => {
@@ -107,8 +120,8 @@ afterEach(() => {
 
 describe('game-mode utilities', () => {
   describe('gameModes array', () => {
-    it('should have exactly 6 game modes', async () => {
-      expect((await getGameModes()).length).toBe(6);
+    it('should have exactly 7 game modes', async () => {
+      expect((await getGameModes()).length).toBe(7);
     });
 
     it('should contain cover-art mode', async () => {
@@ -138,6 +151,16 @@ describe('game-mode utilities', () => {
 
       expect(mode).toBeDefined();
       expect(mode?.title).toBe('Image Gen');
+      expect(mode?.level).toBe('medium');
+    });
+
+    it('should contain clue mode', async () => {
+      const mode = (await getGameModes()).find(
+        (m: GameModePlus) => m.slug === 'clue',
+      );
+
+      expect(mode).toBeDefined();
+      expect(mode?.title).toBe('Clue');
       expect(mode?.level).toBe('medium');
     });
 
@@ -231,6 +254,14 @@ describe('game-mode utilities', () => {
       expect(result).toBeDefined();
       expect(result?.slug).toBe('image-gen');
       expect(result?.title).toBe('Image Gen');
+    });
+
+    it('should return clue mode when slug is "clue"', async () => {
+      const result = await getGameModeBySlug('clue');
+
+      expect(result).toBeDefined();
+      expect(result?.slug).toBe('clue');
+      expect(result?.title).toBe('Clue');
     });
 
     it('should return timeline mode when slug is "timeline"', async () => {

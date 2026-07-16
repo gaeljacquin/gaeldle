@@ -46,8 +46,8 @@ import GameDetailsInfoTab from '@/components/game-details-info-tab';
 import GameDetailsImageGenTab from '@/components/game-details-image-gen-tab';
 import GameDetailsCover from '@/components/game-details-cover';
 import GameDetailsHeaderTitle from '@/components/game-details-header-title';
+import GameDetailsClueTab from '@/components/game-details-clue';
 import GameDetailsArtworksTab from '@/components/game-details-artworks-tab';
-import GameDetailsInfoGenTab from '@/components/game-details-info-gen';
 
 export default function GameDetails({
   params,
@@ -198,8 +198,8 @@ export default function GameDetails({
                 <TabsTrigger value="image-gen" className="game-details-tab">
                   Image Gen
                 </TabsTrigger>
-                <TabsTrigger value="info-gen" className="game-details-tab">
-                  Info Gen
+                <TabsTrigger value="clue" className="game-details-tab">
+                  Clue
                 </TabsTrigger>
               </TabsList>
 
@@ -233,9 +233,9 @@ export default function GameDetails({
                 </Suspense>
               </TabsContent>
 
-              <TabsContent value="info-gen" className="space-y-10 outline-none">
+              <TabsContent value="clue" className="space-y-10 outline-none">
                 <Suspense fallback={<ArtworksTabSkeleton />}>
-                  <GameDetailsInfoGenTab igdbId={igdbId} />
+                  <GameDetailsClueTab igdbId={igdbId} />
                 </Suspense>
               </TabsContent>
             </Tabs>

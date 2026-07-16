@@ -43,7 +43,7 @@ export const games = pgTable(
         >
       >
     >(),
-    infoGen: json('info_gen').$type<{
+    clue: json('clue').$type<{
       clue: string;
       prompt: string;
       provider: string;
@@ -76,7 +76,7 @@ export const gameObject = {
   aiImageUrl: games.aiImageUrl,
   aiPrompt: games.aiPrompt,
   imageGen: games.imageGen,
-  infoGen: games.infoGen,
+  clue: games.clue,
   artworks: games.artworks,
   keywords: games.keywords,
   franchises: games.franchises,

@@ -42,6 +42,8 @@ export async function GET(request: NextRequest) {
         sql`image_gen IS NOT NULL`,
         sql`json_array_length(image_gen) > 0`,
       );
+    } else if (mode === 'clue') {
+      conditions.push(sql`clue IS NOT NULL`);
     } else if (mode === 'timeline' || mode === 'timeline-2') {
       conditions.push(sql`first_release_date IS NOT NULL`);
     }

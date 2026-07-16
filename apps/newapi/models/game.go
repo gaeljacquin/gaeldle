@@ -15,7 +15,7 @@ type Game struct {
 	AiImageURL         *string         `json:"aiImageUrl"`
 	AiPrompt           *string         `json:"aiPrompt"`
 	ImageGen           json.RawMessage `json:"imageGen"`
-	InfoGen            json.RawMessage `json:"infoGen"`
+	Clue               json.RawMessage `json:"clue"`
 	Artworks           json.RawMessage `json:"artworks"`
 	Keywords           json.RawMessage `json:"keywords"`
 	Franchises         json.RawMessage `json:"franchises"`

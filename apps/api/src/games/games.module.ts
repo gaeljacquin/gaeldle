@@ -12,12 +12,12 @@ import { ImageGenService } from '@/image-gen/image-gen.service';
 import { ImageGenRouter } from '@/image-gen/image-gen.router';
 import { SqsService } from '@/lib/sqs.service';
 import { ImageGenConsumer } from '@/image-gen/image-gen.consumer';
-import { InfoGenRouter } from '@/info-gen/info-gen.router';
-import { InfoGenService } from '@/info-gen/info-gen.service';
+import { ClueRouter } from '@/clue/clue.router';
+import { ClueService } from '@/clue/clue.service';
 
 @Module({
   imports: [DatabaseModule, AuthModule],
-  controllers: [GamesRouter, ImageGenRouter, InfoGenRouter],
+  controllers: [GamesRouter, ImageGenRouter, ClueRouter],
   providers: [
     GamesService,
     IgdbService,
@@ -28,7 +28,7 @@ import { InfoGenService } from '@/info-gen/info-gen.service';
     ImageGenStore,
     SqsService,
     ImageGenConsumer,
-    InfoGenService,
+    ClueService,
   ],
   exports: [GamesService, IgdbService],
 })

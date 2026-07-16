@@ -3,13 +3,13 @@ import { GamesContract } from './game';
 import { DiscoverContract } from './discover';
 import { SampleContract } from './sample';
 import { ImageGenContract } from './image-gen';
-import { InfoGenContract } from './info-gen';
+import { ClueContract } from './clue';
 
 export const contract = oc.prefix('/api').router({
   games: GamesContract,
   discover: DiscoverContract,
   imageGen: ImageGenContract,
-  infoGen: InfoGenContract,
+  clue: ClueContract,
   sample: SampleContract,
 });
 
@@ -17,5 +17,5 @@ export * from './game';
 export * from './schema';
 export * from './discover';
 export * from './image-gen';
-export * from './info-gen';
+export * from './clue';
 export * from './other';

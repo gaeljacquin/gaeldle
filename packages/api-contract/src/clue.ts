@@ -2,9 +2,9 @@ import { oc } from '@orpc/contract';
 import { z } from 'zod';
 import { GameSelectSchema } from './schema';
 
-export const InfoGenContract = {
-  generateInfo: oc
-    .route({ method: 'POST', path: '/info-gen/generate-info' })
+export const ClueContract = {
+  generateClue: oc
+    .route({ method: 'POST', path: '/clue/generate-clue' })
     .input(
       z.object({
         igdbId: z.coerce.number().int().positive(),

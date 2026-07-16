@@ -183,6 +183,13 @@
       "when": 1783302580420,
       "tag": "0025_wandering_speedball",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1784241256407,
+      "tag": "0026_nasty_bill_hollister",
+      "breakpoints": true
     }
   ]
 }

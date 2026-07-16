@@ -5,14 +5,14 @@ import { AiService } from '@/lib/ai.service';
 import { domainEvents, type Game } from '@workspace/api-contract';
 
 @Injectable()
-export class InfoGenService {
+export class ClueService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly gamesService: GamesService,
     private readonly aiService: AiService,
   ) {}
 
-  async generateInfo(
+  async generateClue(
     igdbId: number,
     actorId = 'unknown',
   ): Promise<Game | null> {
@@ -102,7 +102,7 @@ export class InfoGenService {
     };
 
     const updatedGame = await this.gamesService.updateGame(game.id, {
-      infoGen: newItem,
+      clue: newItem,
     });
 
     if (!updatedGame) {
@@ -111,7 +111,7 @@ export class InfoGenService {
 
     // Insert the domain event for info generation
     await this.databaseService.db.insert(domainEvents).values({
-      eventType: 'info_gen.generated',
+      eventType: 'clue.generated',
       actorId,
       payload: {
         igdbId,

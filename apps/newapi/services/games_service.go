@@ -21,7 +21,7 @@ func NewGamesService(db *sql.DB) *GamesService {
 func (s *GamesService) GetGameByIgdbId(igdbID int) (*models.Game, error) {
 	query := `
 		SELECT id, igdb_id, name, image_url, ai_image_url, ai_prompt, 
-		       image_gen, info_gen, artworks, keywords, franchises, 
+		       image_gen, clue, artworks, keywords, franchises, 
 		       game_engines, game_modes, genres, involved_companies, 
 		       platforms, player_perspectives, release_dates, themes, 
 		       first_release_date, summary, storyline, created_at, updated_at
@@ -30,11 +30,11 @@ func (s *GamesService) GetGameByIgdbId(igdbID int) (*models.Game, error) {
 		LIMIT 1`
 
 	var game models.Game
-	var imageGen, infoGen, artworks, keywords, franchises, gameEngines, gameModes, genres, involvedCompanies, platforms, playerPerspectives, releaseDates, themes []byte
+	var imageGen, clue, artworks, keywords, franchises, gameEngines, gameModes, genres, involvedCompanies, platforms, playerPerspectives, releaseDates, themes []byte
 
 	err := s.db.QueryRow(query, igdbID).Scan(
 		&game.ID, &game.IgdbID, &game.Name, &game.ImageURL, &game.AiImageURL, &game.AiPrompt,
-		&imageGen, &infoGen, &artworks, &keywords, &franchises,
+		&imageGen, &clue, &artworks, &keywords, &franchises,
 		&gameEngines, &gameModes, &genres, &involvedCompanies,
 		&platforms, &playerPerspectives, &releaseDates, &themes,
 		&game.FirstReleaseDate, &game.Summary, &game.Storyline, &game.CreatedAt, &game.UpdatedAt,
@@ -48,7 +48,7 @@ func (s *GamesService) GetGameByIgdbId(igdbID int) (*models.Game, error) {
 	}
 
 	game.ImageGen = json.RawMessage(imageGen)
-	game.InfoGen = json.RawMessage(infoGen)
+	game.Clue = json.RawMessage(clue)
 	game.Artworks = json.RawMessage(artworks)
 	game.Keywords = json.RawMessage(keywords)
 	game.Franchises = json.RawMessage(franchises)
@@ -70,7 +70,7 @@ func (s *GamesService) GetPaginatedGames(page, pageSize int, q, igdbIdFilter, so
 
 	baseQuery := `
 		SELECT id, igdb_id, name, image_url, ai_image_url, ai_prompt, 
-		       image_gen, info_gen, artworks, keywords, franchises, 
+		       image_gen, clue, artworks, keywords, franchises, 
 		       game_engines, game_modes, genres, involved_companies, 
 		       platforms, player_perspectives, release_dates, themes, 
 		       first_release_date, summary, storyline, created_at, updated_at
@@ -149,11 +149,11 @@ func (s *GamesService) GetPaginatedGames(page, pageSize int, q, igdbIdFilter, so
 	var games []*models.Game
 	for rows.Next() {
 		var game models.Game
-		var imageGen, infoGen, artworks, keywords, franchises, gameEngines, gameModes, genres, involvedCompanies, platforms, playerPerspectives, releaseDates, themes []byte
+		var imageGen, clue, artworks, keywords, franchises, gameEngines, gameModes, genres, involvedCompanies, platforms, playerPerspectives, releaseDates, themes []byte
 
 		err := rows.Scan(
 			&game.ID, &game.IgdbID, &game.Name, &game.ImageURL, &game.AiImageURL, &game.AiPrompt,
-			&imageGen, &infoGen, &artworks, &keywords, &franchises,
+			&imageGen, &clue, &artworks, &keywords, &franchises,
 			&gameEngines, &gameModes, &genres, &involvedCompanies,
 			&platforms, &playerPerspectives, &releaseDates, &themes,
 			&game.FirstReleaseDate, &game.Summary, &game.Storyline, &game.CreatedAt, &game.UpdatedAt,
@@ -163,7 +163,7 @@ func (s *GamesService) GetPaginatedGames(page, pageSize int, q, igdbIdFilter, so
 		}
 
 		game.ImageGen = json.RawMessage(imageGen)
-		game.InfoGen = json.RawMessage(infoGen)
+		game.Clue = json.RawMessage(clue)
 		game.Artworks = json.RawMessage(artworks)
 		game.Keywords = json.RawMessage(keywords)
 		game.Franchises = json.RawMessage(franchises)
@@ -186,7 +186,7 @@ func (s *GamesService) GetPaginatedGames(page, pageSize int, q, igdbIdFilter, so
 func (s *GamesService) GetRandomGames(excludeIds []int, mode string, count int) ([]*models.Game, error) {
 	baseQuery := `
 		SELECT id, igdb_id, name, image_url, ai_image_url, ai_prompt, 
-		       image_gen, info_gen, artworks, keywords, franchises, 
+		       image_gen, clue, artworks, keywords, franchises, 
 		       game_engines, game_modes, genres, involved_companies, 
 		       platforms, player_perspectives, release_dates, themes, 
 		       first_release_date, summary, storyline, created_at, updated_at
@@ -233,11 +233,11 @@ func (s *GamesService) GetRandomGames(excludeIds []int, mode string, count int) 
 	var games []*models.Game
 	for rows.Next() {
 		var game models.Game
-		var imageGen, infoGen, artworks, keywords, franchises, gameEngines, gameModes, genres, involvedCompanies, platforms, playerPerspectives, releaseDates, themes []byte
+		var imageGen, clue, artworks, keywords, franchises, gameEngines, gameModes, genres, involvedCompanies, platforms, playerPerspectives, releaseDates, themes []byte
 
 		err := rows.Scan(
 			&game.ID, &game.IgdbID, &game.Name, &game.ImageURL, &game.AiImageURL, &game.AiPrompt,
-			&imageGen, &infoGen, &artworks, &keywords, &franchises,
+			&imageGen, &clue, &artworks, &keywords, &franchises,
 			&gameEngines, &gameModes, &genres, &involvedCompanies,
 			&platforms, &playerPerspectives, &releaseDates, &themes,
 			&game.FirstReleaseDate, &game.Summary, &game.Storyline, &game.CreatedAt, &game.UpdatedAt,
@@ -247,7 +247,7 @@ func (s *GamesService) GetRandomGames(excludeIds []int, mode string, count int) 
 		}
 
 		game.ImageGen = json.RawMessage(imageGen)
-		game.InfoGen = json.RawMessage(infoGen)
+		game.Clue = json.RawMessage(clue)
 		game.Artworks = json.RawMessage(artworks)
 		game.Keywords = json.RawMessage(keywords)
 		game.Franchises = json.RawMessage(franchises)
@@ -270,7 +270,7 @@ func (s *GamesService) GetRandomGames(excludeIds []int, mode string, count int) 
 func (s *GamesService) SearchGames(q string, limit int, mode string) ([]*models.Game, error) {
 	baseQuery := `
 		SELECT id, igdb_id, name, image_url, ai_image_url, ai_prompt, 
-		       image_gen, info_gen, artworks, keywords, franchises, 
+		       image_gen, clue, artworks, keywords, franchises, 
 		       game_engines, game_modes, genres, involved_companies, 
 		       platforms, player_perspectives, release_dates, themes, 
 		       first_release_date, summary, storyline, created_at, updated_at
@@ -308,11 +308,11 @@ func (s *GamesService) SearchGames(q string, limit int, mode string) ([]*models.
 	var games []*models.Game
 	for rows.Next() {
 		var game models.Game
-		var imageGen, infoGen, artworks, keywords, franchises, gameEngines, gameModes, genres, involvedCompanies, platforms, playerPerspectives, releaseDates, themes []byte
+		var imageGen, clue, artworks, keywords, franchises, gameEngines, gameModes, genres, involvedCompanies, platforms, playerPerspectives, releaseDates, themes []byte
 
 		err := rows.Scan(
 			&game.ID, &game.IgdbID, &game.Name, &game.ImageURL, &game.AiImageURL, &game.AiPrompt,
-			&imageGen, &infoGen, &artworks, &keywords, &franchises,
+			&imageGen, &clue, &artworks, &keywords, &franchises,
 			&gameEngines, &gameModes, &genres, &involvedCompanies,
 			&platforms, &playerPerspectives, &releaseDates, &themes,
 			&game.FirstReleaseDate, &game.Summary, &game.Storyline, &game.CreatedAt, &game.UpdatedAt,
@@ -322,7 +322,7 @@ func (s *GamesService) SearchGames(q string, limit int, mode string) ([]*models.
 		}
 
 		game.ImageGen = json.RawMessage(imageGen)
-		game.InfoGen = json.RawMessage(infoGen)
+		game.Clue = json.RawMessage(clue)
 		game.Artworks = json.RawMessage(artworks)
 		game.Keywords = json.RawMessage(keywords)
 		game.Franchises = json.RawMessage(franchises)

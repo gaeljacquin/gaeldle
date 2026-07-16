@@ -6,7 +6,7 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { getGameByIgdbId, generateInfo } from '@/lib/services/game.service';
+import { getGameByIgdbId, generateClue } from '@/lib/services/game.service';
 import { Button } from '@workspace/ui/button';
 import {
   Card,
@@ -31,9 +31,9 @@ import {
   AlertDialogTitle,
 } from '@workspace/ui/alert-dialog';
 
-const generateInfoToastId = 'generate-info';
+const generateClueToastId = 'generate-clue';
 
-export default function GameDetailsInfoGenTab({ igdbId }: { igdbId: string }) {
+export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
   const [copiedActive, setCopiedActive] = useState(false);
   const [isPromptExpanded, setIsPromptExpanded] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -45,11 +45,11 @@ export default function GameDetailsInfoGenTab({ igdbId }: { igdbId: string }) {
   });
 
   const generatedClue = useMemo(() => {
-    if (!game || !game.infoGen) {
+    if (!game || !game.clue) {
       return null;
     }
 
-    return game.infoGen as {
+    return game.clue as {
       clue: string;
       prompt: string;
       provider: string;
@@ -58,20 +58,20 @@ export default function GameDetailsInfoGenTab({ igdbId }: { igdbId: string }) {
     };
   }, [game]);
 
-  const generateInfoMutation = useMutation({
-    mutationFn: () => generateInfo(Number.parseInt(igdbId, 10)),
+  const generateClueMutation = useMutation({
+    mutationFn: () => generateClue(Number.parseInt(igdbId, 10)),
     onMutate: () => {
-      toast.loading('Generating clue...', { id: generateInfoToastId });
+      toast.loading('Generating clue...', { id: generateClueToastId });
     },
     onSuccess: () => {
       toast.success('Clue generated successfully!', {
-        id: generateInfoToastId,
+        id: generateClueToastId,
       });
       queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
     },
     onError: (err) => {
       console.error(err);
-      toast.error('Failed to generate clue', { id: generateInfoToastId });
+      toast.error('Failed to generate clue', { id: generateClueToastId });
     },
   });
 
@@ -86,7 +86,7 @@ export default function GameDetailsInfoGenTab({ igdbId }: { igdbId: string }) {
     if (generatedClue) {
       setIsConfirmOpen(true);
     } else {
-      generateInfoMutation.mutate();
+      generateClueMutation.mutate();
     }
   };
 
@@ -186,21 +186,21 @@ export default function GameDetailsInfoGenTab({ igdbId }: { igdbId: string }) {
             variant="outline"
             className={cn(
               'w-full font-bold h-11 rounded-none text-white hover:text-white transition-all',
-              generateInfoMutation.isPending
+              generateClueMutation.isPending
                 ? 'bg-slate-500 hover:bg-slate-500 cursor-not-allowed'
                 : 'bg-slate-600 hover:bg-slate-700 cursor-pointer',
             )}
             onClick={handleButtonClick}
-            disabled={generateInfoMutation.isPending}
+            disabled={generateClueMutation.isPending}
           >
             <IconRefresh
               aria-hidden="true"
               className={cn(
                 'mr-2 size-4',
-                generateInfoMutation.isPending && 'animate-spin',
+                generateClueMutation.isPending && 'animate-spin',
               )}
             />
-            {generateInfoMutation.isPending
+            {generateClueMutation.isPending
               ? 'Generating Clue...'
               : generatedClue
                 ? 'Regenerate Clue'
@@ -304,7 +304,7 @@ export default function GameDetailsInfoGenTab({ igdbId }: { igdbId: string }) {
               className="bg-slate-600 hover:bg-slate-700 text-white font-bold rounded-none flex-1 cursor-pointer"
               onClick={() => {
                 setIsConfirmOpen(false);
-                generateInfoMutation.mutate();
+                generateClueMutation.mutate();
               }}
             >
               Regenerate

@@ -54,4 +54,47 @@ export class AiService {
 
     return Buffer.from(await response.arrayBuffer());
   }
+
+  async generateText(
+    model: string,
+    messages: Array<{ role: string; content: string }>,
+    responseFormat?:
+      { type: 'json_object' } | { type: 'json_schema'; json_schema: any },
+  ): Promise<string> {
+    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/ai/run/${model}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.apiToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages,
+        ...(responseFormat ? { response_format: responseFormat } : {}),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      console.error(
+        `[AiService] Cloudflare AI error: ${response.status}`,
+        errorText,
+      );
+      throw new Error(`Cloudflare AI failed: ${response.status} ${errorText}`);
+    }
+
+    const json = await response.json();
+    if (!json.success) {
+      console.error('[AiService] Cloudflare Workers AI success=false:', json);
+      throw new Error(
+        `Cloudflare Workers AI invocation failed: ${JSON.stringify(
+          json.errors,
+        )}`,
+      );
+    }
+
+    return json.result.response;
+  }
 }

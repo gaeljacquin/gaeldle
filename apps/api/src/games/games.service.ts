@@ -94,6 +94,31 @@ export class GamesService {
     return this.pendingQueriedRefresh;
   }
 
+  private pendingClueHistoryRefresh: Promise<void> | null = null;
+
+  async refreshGamesClueHistoryView(): Promise<void> {
+    if (this.pendingClueHistoryRefresh) {
+      return this.pendingClueHistoryRefresh;
+    }
+
+    this.pendingClueHistoryRefresh = (async () => {
+      try {
+        await this.databaseService.db.execute(
+          sql`REFRESH MATERIALIZED VIEW games_clue_history`,
+        );
+      } catch (e) {
+        console.error(
+          'Failed to refresh games_clue_history materialized view',
+          e,
+        );
+      } finally {
+        this.pendingClueHistoryRefresh = null;
+      }
+    })();
+
+    return this.pendingClueHistoryRefresh;
+  }
+
   private async performRefresh() {
     if (this.pendingRefresh) {
       return this.pendingRefresh;
@@ -105,6 +130,7 @@ export class GamesService {
           sql`REFRESH MATERIALIZED VIEW all_games`,
         );
         await this.refreshQueriedGamesView();
+        await this.refreshGamesClueHistoryView();
       } catch (e) {
         console.error('Failed to refresh materialized view', e);
       } finally {

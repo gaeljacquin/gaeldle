@@ -3,10 +3,16 @@
 import { useState, useMemo } from 'react';
 import {
   useSuspenseQuery,
+  useQuery,
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { getGameByIgdbId, generateClue } from '@/lib/services/game.service';
+import {
+  getGameByIgdbId,
+  generateClue,
+  getClueHistory,
+  restoreClue,
+} from '@/lib/services/game.service';
 import { Button } from '@workspace/ui/button';
 import {
   Card,
@@ -37,11 +43,20 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
   const [copiedActive, setCopiedActive] = useState(false);
   const [isPromptExpanded, setIsPromptExpanded] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [clueToRestore, setClueToRestore] = useState<{
+    id: number;
+    clue: string;
+  } | null>(null);
 
   const queryClient = useQueryClient();
   const { data: game } = useSuspenseQuery({
     queryKey: ['game', igdbId],
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
+  });
+
+  const { data: clueHistory, refetch: refetchClueHistory } = useQuery({
+    queryKey: ['game-clue-history', igdbId],
+    queryFn: () => getClueHistory(Number.parseInt(igdbId, 10)),
   });
 
   const generatedClue = useMemo(() => {
@@ -68,10 +83,28 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
         id: generateClueToastId,
       });
       queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+      refetchClueHistory();
     },
     onError: (err) => {
       console.error(err);
       toast.error('Failed to generate clue', { id: generateClueToastId });
+    },
+  });
+
+  const restoreClueMutation = useMutation({
+    mutationFn: (historyId: number) =>
+      restoreClue(Number.parseInt(igdbId, 10), historyId),
+    onMutate: () => {
+      toast.loading('Restoring clue...', { id: 'restore-clue' });
+    },
+    onSuccess: () => {
+      toast.success('Clue restored successfully!', { id: 'restore-clue' });
+      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+      refetchClueHistory();
+    },
+    onError: (err) => {
+      console.error(err);
+      toast.error('Failed to restore clue', { id: 'restore-clue' });
     },
   });
 
@@ -281,6 +314,88 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
         </CardContent>
       </Card>
 
+      {/* Clue History Card */}
+      <Card className="rounded-none border-2 border-border bg-card shadow-sm">
+        <CardHeader className="border-b border-border pb-4">
+          <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">
+            Clue History
+          </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            View previous clues generated for this game and restore them.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-4">
+          {!clueHistory || clueHistory.length === 0 ? (
+            <div className="text-center py-8 border border-dashed rounded-none bg-muted/10">
+              <p className="text-sm text-muted-foreground font-medium">
+                No clue history found.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {clueHistory.map((item) => {
+                if (item.id === null || item.clue === null) {
+                  return null;
+                }
+                const historyId = item.id;
+                const historyClue = item.clue;
+                const isActive = generatedClue?.clue === historyClue;
+                return (
+                  <div
+                    key={historyId}
+                    className="py-4 first:pt-0 last:pb-0 flex flex-col md:flex-row md:items-start md:justify-between gap-4"
+                  >
+                    <div className="space-y-1.5 flex-1">
+                      <p className="text-sm font-medium leading-relaxed text-foreground select-text font-serif italic">
+                        &ldquo;{historyClue}&rdquo;
+                      </p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground font-mono">
+                        <span>
+                          {item.occurredAt
+                            ? new Date(item.occurredAt).toLocaleString(
+                                undefined,
+                                {
+                                  dateStyle: 'medium',
+                                  timeStyle: 'short',
+                                },
+                              )
+                            : 'N/A'}
+                        </span>
+                        <span>•</span>
+                        <span>Model: {item.model ?? 'N/A'}</span>
+                        <span>•</span>
+                        <span>Provider: {item.provider ?? 'N/A'}</span>
+                        {isActive && (
+                          <>
+                            <span>•</span>
+                            <span className="text-primary font-bold uppercase tracking-wider text-[10px]">
+                              Active
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 self-end md:self-start">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={isActive || restoreClueMutation.isPending}
+                        onClick={() =>
+                          setClueToRestore({ id: historyId, clue: historyClue })
+                        }
+                        className="h-8 rounded-none px-3 font-semibold uppercase tracking-wider border-2 cursor-pointer text-xs"
+                      >
+                        Restore Clue
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Confirmation Dialog for Regeneration */}
       <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
         <AlertDialogContent className="rounded-none">
@@ -308,6 +423,48 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
               }}
             >
               Regenerate
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmation Dialog for Restoration */}
+      <AlertDialog
+        open={clueToRestore !== null}
+        onOpenChange={(open) => {
+          if (!open) setClueToRestore(null);
+        }}
+      >
+        <AlertDialogContent className="rounded-none">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black uppercase">
+              Restore Clue?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              Are you sure you want to restore the selected clue? This will
+              replace the currently active clue with:
+              <span className="block mt-3 p-4 bg-muted font-serif italic text-sm border-l-4 border-primary select-text">
+                &ldquo;{clueToRestore?.clue}&rdquo;
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 gap-3">
+            <AlertDialogCancel
+              className="font-bold rounded-none flex-1 cursor-pointer"
+              onClick={() => setClueToRestore(null)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-slate-600 hover:bg-slate-700 text-white font-bold rounded-none flex-1 cursor-pointer"
+              onClick={() => {
+                if (clueToRestore) {
+                  restoreClueMutation.mutate(clueToRestore.id);
+                  setClueToRestore(null);
+                }
+              }}
+            >
+              Restore
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

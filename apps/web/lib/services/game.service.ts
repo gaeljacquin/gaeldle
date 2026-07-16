@@ -195,6 +195,18 @@ export async function generateClue(igdbId: number) {
   return result;
 }
 
+export async function getClueHistory(igdbId: number) {
+  const result = await orpcClient.clue.getClueHistory({ igdbId });
+
+  return result;
+}
+
+export async function restoreClue(igdbId: number, historyId: number) {
+  const result = await orpcClient.clue.restoreClue({ igdbId, historyId });
+
+  return result;
+}
+
 export async function validateIgdbIdAdd(igdbId: number, signal?: AbortSignal) {
   const result = await orpcClient.games.validateIgdbIdAdd(
     { igdbId },

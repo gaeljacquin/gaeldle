@@ -2,7 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '@/db/database.service';
 import { GamesService } from '@/games/games.service';
 import { AiService } from '@/lib/ai.service';
-import { domainEvents, type Game } from '@workspace/api-contract';
+import {
+  domainEvents,
+  gamesClueHistory,
+  type Game,
+  type GameClueHistory,
+} from '@workspace/api-contract';
+import { eq, desc } from 'drizzle-orm';
 
 @Injectable()
 export class ClueService {
@@ -122,6 +128,84 @@ export class ClueService {
         provider: 'cloudflare',
       },
     });
+
+    // Refresh views immediately to include this event
+    await this.gamesService.refreshAllGamesView(true);
+
+    return updatedGame;
+  }
+
+  async getClueHistory(igdbId: number): Promise<GameClueHistory[]> {
+    return this.databaseService.db
+      .select()
+      .from(gamesClueHistory)
+      .where(eq(gamesClueHistory.igdbId, igdbId))
+      .orderBy(desc(gamesClueHistory.occurredAt));
+  }
+
+  async restoreClue(
+    igdbId: number,
+    historyId: number,
+    actorId = 'unknown',
+  ): Promise<Game | null> {
+    const [historyEntry] = await this.databaseService.db
+      .select()
+      .from(gamesClueHistory)
+      .where(eq(gamesClueHistory.id, historyId))
+      .limit(1);
+
+    if (!historyEntry) {
+      throw new NotFoundException('Clue history entry not found');
+    }
+
+    if (historyEntry.igdbId !== igdbId) {
+      throw new NotFoundException(
+        'Clue history entry does not belong to this game',
+      );
+    }
+
+    if (!historyEntry.gameId) {
+      throw new NotFoundException(
+        'Clue history entry is missing a game reference',
+      );
+    }
+
+    const restoredClue = {
+      clue: historyEntry.clue ?? '',
+      prompt: historyEntry.prompt ?? '',
+      provider: historyEntry.provider ?? '',
+      model: historyEntry.model ?? '',
+      createdAt: new Date().toISOString(),
+    };
+
+    const updatedGame = await this.gamesService.updateGame(
+      historyEntry.gameId,
+      {
+        clue: restoredClue,
+      },
+    );
+
+    if (!updatedGame) {
+      throw new NotFoundException('Failed to update game record');
+    }
+
+    // Insert domain event for clue restoration
+    await this.databaseService.db.insert(domainEvents).values({
+      eventType: 'clue.restored',
+      actorId,
+      payload: {
+        igdbId,
+        gameId: historyEntry.gameId,
+        clue: restoredClue.clue,
+        prompt: restoredClue.prompt,
+        model: restoredClue.model,
+        provider: restoredClue.provider,
+        restoredFromId: historyId,
+      },
+    });
+
+    // Refresh views immediately to include this event
+    await this.gamesService.refreshAllGamesView(true);
 
     return updatedGame;
   }

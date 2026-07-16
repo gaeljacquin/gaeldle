@@ -31,4 +31,36 @@ export class ClueRouter {
       };
     });
   }
+
+  @Implement(contract.clue.getClueHistory)
+  @UseGuards(HexclaveGuard)
+  getClueHistory() {
+    return implement(contract.clue.getClueHistory).handler(
+      async ({ input }) => {
+        return this.clueService.getClueHistory(input.igdbId);
+      },
+    );
+  }
+
+  @Implement(contract.clue.restoreClue)
+  @UseGuards(HexclaveGuard)
+  restoreClue(@Req() req: AuthenticatedRequest) {
+    return implement(contract.clue.restoreClue).handler(async ({ input }) => {
+      const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+      const updatedGame = await this.clueService.restoreClue(
+        input.igdbId,
+        input.historyId,
+        actorId,
+      );
+
+      if (!updatedGame) {
+        throw new NotFoundException('Game not found');
+      }
+
+      return {
+        success: true,
+        data: updatedGame,
+      };
+    });
+  }
 }

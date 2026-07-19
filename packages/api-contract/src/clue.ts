@@ -8,6 +8,7 @@ export const ClueContract = {
     .input(
       z.object({
         igdbId: z.coerce.number().int().positive(),
+        provider: z.string(),
       }),
     )
     .output(

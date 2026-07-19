@@ -20,6 +20,20 @@ export class ClueService {
 
   async generateClue(
     igdbId: number,
+    provider: string,
+    actorId = 'unknown',
+  ): Promise<Game | null> {
+    switch (provider) {
+      case 'cloudflare':
+        return this.generateClueCloudflare(igdbId, provider, actorId);
+      default:
+        throw new Error(`Unsupported model/provider: ${provider}`);
+    }
+  }
+
+  private async generateClueCloudflare(
+    igdbId: number,
+    provider: string,
     actorId = 'unknown',
   ): Promise<Game | null> {
     const game = await this.gamesService.getGameByIgdbId(igdbId);
@@ -102,7 +116,7 @@ export class ClueService {
     const newItem = {
       clue: clueString,
       prompt: `System: ${systemPrompt}\nUser: ${userPrompt}`,
-      provider: 'cloudflare',
+      provider,
       model: model,
       createdAt: new Date().toISOString(),
     };
@@ -125,7 +139,7 @@ export class ClueService {
         clue: clueString,
         prompt: `System: ${systemPrompt}\nUser: ${userPrompt}`,
         model,
-        provider: 'cloudflare',
+        provider,
       },
     });
 

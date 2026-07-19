@@ -18,6 +18,7 @@ export class ClueRouter {
       const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
       const updatedGame = await this.clueService.generateClue(
         input.igdbId,
+        input.provider,
         actorId,
       );
 

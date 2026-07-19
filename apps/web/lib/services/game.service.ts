@@ -191,8 +191,8 @@ export async function getImageGenStatus(imageGenId: string) {
   return result;
 }
 
-export async function generateClue(igdbId: number) {
-  const result = await orpcClient.clue.generateClue({ igdbId });
+export async function generateClue(igdbId: number, provider: string) {
+  const result = await orpcClient.clue.generateClue({ igdbId, provider });
 
   return result;
 }

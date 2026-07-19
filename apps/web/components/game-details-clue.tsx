@@ -27,6 +27,13 @@ import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@workspace/ui/select';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -47,6 +54,7 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
     id: number;
     clue: string;
   } | null>(null);
+  const [providerVal, setProviderVal] = useState<string>('cloudflare');
 
   const queryClient = useQueryClient();
   const { data: game } = useSuspenseQuery({
@@ -74,7 +82,7 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
   }, [game]);
 
   const generateClueMutation = useMutation({
-    mutationFn: () => generateClue(Number.parseInt(igdbId, 10)),
+    mutationFn: () => generateClue(Number.parseInt(igdbId, 10), providerVal),
     onMutate: () => {
       toast.loading('Generating clue...', { id: generateClueToastId });
     },
@@ -214,6 +222,41 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
               </p>
             </div>
           )}
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+              Model / Provider
+            </Label>
+            <Select
+              value={providerVal}
+              onValueChange={(val) => val && setProviderVal(val)}
+              disabled={generateClueMutation.isPending}
+            >
+              <SelectTrigger className="w-full h-10 rounded-none bg-card/50 border-border text-sm flex">
+                <SelectValue placeholder="Select provider">
+                  {(value) =>
+                    value === 'cloudflare'
+                      ? 'Cloudflare Workers AI'
+                      : value === 'nova-2-lite-v1'
+                        ? 'Nova 2 Lite'
+                        : ''
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="border border-border bg-popover rounded-none">
+                <SelectItem value="cloudflare" className="text-sm">
+                  Cloudflare Workers AI
+                </SelectItem>
+                <SelectItem
+                  value="nova-2-lite-v1"
+                  disabled
+                  className="text-sm"
+                >
+                  Nova 2 Lite
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <Button
             variant="outline"

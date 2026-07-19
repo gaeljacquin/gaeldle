@@ -247,11 +247,7 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
                 <SelectItem value="cloudflare" className="text-sm">
                   Cloudflare Workers AI
                 </SelectItem>
-                <SelectItem
-                  value="nova-2-lite-v1"
-                  disabled
-                  className="text-sm"
-                >
+                <SelectItem value="nova-2-lite-v1" className="text-sm">
                   Nova 2 Lite
                 </SelectItem>
               </SelectContent>

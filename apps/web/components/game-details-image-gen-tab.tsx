@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import {
+  DEFAULT_PROVIDER,
   IMAGE_PROMPT_SUFFIX,
   MIN_PREVIEW_PROMPT_ROWS,
 } from '@workspace/shared';
@@ -29,6 +30,13 @@ import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
 import { artStylesQueryOptions } from '@/lib/services/art-style.service';
 import type { ArtStyle } from '@workspace/api-contract';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@workspace/ui/select';
 
 const generateImageToastId = 'generate-image';
 
@@ -104,6 +112,7 @@ export default function GameDetailsImageGenTab({
 }) {
   const [isPolling, setIsPolling] = useState(false);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [providerVal, setProviderVal] = useState<string>(DEFAULT_PROVIDER);
 
   const queryClient = useQueryClient();
   const { data: game } = useSuspenseQuery({
@@ -139,6 +148,7 @@ export default function GameDetailsImageGenTab({
         includeGenres,
         includeThemes,
         artStyleValue,
+        provider: providerVal,
       }),
     onMutate: () => {
       toast.loading('Generating image...', { id: generateImageToastId });
@@ -360,6 +370,41 @@ export default function GameDetailsImageGenTab({
               );
             })}
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+            Model / Provider
+          </h3>
+          <Select
+            value={providerVal}
+            onValueChange={(val) => val && setProviderVal(val)}
+            disabled={generateImageMutation.isPending || isPolling}
+          >
+            <SelectTrigger className="w-full h-10 rounded-none bg-card/50 border-border text-sm flex">
+              <SelectValue placeholder="Select provider">
+                {(value) =>
+                  value === 'cloudflare'
+                    ? 'Cloudflare Workers AI'
+                    : value === 'stable-image-core'
+                      ? 'Stable Image Core'
+                      : ''
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent className="border border-border bg-popover rounded-none">
+              <SelectItem value="cloudflare" className="text-sm">
+                Cloudflare Workers AI
+              </SelectItem>
+              <SelectItem
+                value="stable-image-core"
+                disabled
+                className="text-sm"
+              >
+                Stable Image Core
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">

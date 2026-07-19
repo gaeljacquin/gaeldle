@@ -19,6 +19,7 @@ export const ImageGenContract = {
         includeGenres: z.boolean().optional().default(false),
         includeThemes: z.boolean().optional().default(false),
         artStyle: artStyleSelectSchema.shape.value.optional(),
+        provider: z.string(),
       }),
     )
     .output(
@@ -37,6 +38,7 @@ export const ImageGenContract = {
         includeStoryline: z.boolean().default(false),
         includeGenres: z.boolean().default(false),
         includeThemes: z.boolean().default(false),
+        provider: z.string(),
       }),
     )
     .output(

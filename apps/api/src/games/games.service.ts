@@ -27,6 +27,7 @@ interface GenerateImageInput {
   includeGenres?: boolean;
   includeThemes?: boolean;
   artStyle?: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with imageGen
+  provider: string;
 }
 
 @Injectable()
@@ -494,6 +495,7 @@ export class GamesService {
       includeGenres,
       includeThemes,
       artStyle: artStyleValue, // effectively artStyleValue, not renaming this to be consistent with imageGen
+      provider,
     } = input;
     const game = await this.getGameByIgdbId(igdbId);
     const artStyles = await this.databaseService.db
@@ -517,7 +519,7 @@ export class GamesService {
       },
       artStyleDescription!,
     );
-    const rawBuffer = await this.aiService.generateImage(prompt);
+    const rawBuffer = await this.aiService.generateImage(prompt, provider);
     const imageBuffer = await sharp(rawBuffer).jpeg({ quality: 85 }).toBuffer();
     const timestamp = Date.now();
     const key = `${IMAGE_GEN_DIR}/${igdbId}_${timestamp}.jpg`;
@@ -531,8 +533,8 @@ export class GamesService {
     const newItem = {
       [artStyleValue]: {
         url: publicUrl,
-        prompt: prompt,
-        provider: 'cloudflare',
+        prompt,
+        provider,
       },
     };
     const existingIndex = list.findIndex(

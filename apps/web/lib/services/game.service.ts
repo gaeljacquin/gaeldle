@@ -159,6 +159,7 @@ export async function generateImage(
     includeGenres?: boolean;
     includeThemes?: boolean;
     artStyleValue: ArtStyleValue;
+    provider: string;
   },
 ) {
   const { artStyleValue, ...rest } = options;
@@ -177,6 +178,7 @@ export async function generateImages(params: {
   includeStoryline: boolean;
   includeGenres: boolean;
   includeThemes: boolean;
+  provider: string;
 }) {
   const result = await orpcClient.imageGen.generateImages(params);
 

@@ -13,7 +13,16 @@ export class AiService {
     this.apiToken = this.configService.get('cfApiToken', { infer: true }) ?? '';
   }
 
-  async generateImage(prompt: string): Promise<Buffer> {
+  async generateImage(prompt: string, provider: string): Promise<Buffer> {
+    switch (provider) {
+      case 'cloudflare':
+        return this.generateImageCloudflare(prompt);
+      default:
+        throw new Error(`Unsupported model/provider: ${provider}`);
+    }
+  }
+
+  private async generateImageCloudflare(prompt: string): Promise<Buffer> {
     const model = '@cf/stabilityai/stable-diffusion-xl-base-1.0';
     const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/ai/run/${model}`;
 
@@ -86,6 +95,7 @@ export class AiService {
     }
 
     const json = await response.json();
+
     if (!json.success) {
       console.error('[AiService] Cloudflare Workers AI success=false:', json);
       throw new Error(

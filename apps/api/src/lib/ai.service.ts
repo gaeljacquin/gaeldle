@@ -1,16 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { AppConfiguration } from '@/config/configuration';
+import {
+  BedrockRuntimeClient,
+  ConverseCommand,
+} from '@aws-sdk/client-bedrock-runtime';
 
 @Injectable()
 export class AiService {
   private readonly accountId: string;
   private readonly apiToken: string;
+  private readonly bedrockClient: BedrockRuntimeClient;
 
   constructor(private readonly configService: ConfigService<AppConfiguration>) {
     this.accountId =
       this.configService.get('cfAccountId', { infer: true }) ?? '';
     this.apiToken = this.configService.get('cfApiToken', { infer: true }) ?? '';
+
+    const awsAccessKeyId =
+      this.configService.get('awsAccessKeyId', { infer: true }) ?? '';
+    const awsSecretAccessKey =
+      this.configService.get('awsSecretAccessKey', { infer: true }) ?? '';
+    const awsRegion =
+      this.configService.get('awsRegion', { infer: true }) ?? '';
+    const clientConfig: any = {
+      region: awsRegion,
+    };
+
+    if (awsAccessKeyId && awsSecretAccessKey) {
+      clientConfig.credentials = {
+        accessKeyId: awsAccessKeyId,
+        secretAccessKey: awsSecretAccessKey,
+      };
+    }
+
+    this.bedrockClient = new BedrockRuntimeClient(clientConfig);
   }
 
   async generateImage(prompt: string, provider: string): Promise<Buffer> {
@@ -106,5 +130,43 @@ export class AiService {
     }
 
     return json.result.response;
+  }
+
+  async generateTextBedrock(
+    model: string,
+    messages: Array<{ role: string; content: string }>,
+  ): Promise<string> {
+    const systemMessages = messages.filter((m) => m.role === 'system');
+    const conversationMessages = messages.filter((m) => m.role !== 'system');
+
+    const system = systemMessages.map((m) => ({ text: m.content }));
+    const converseMessages = conversationMessages.map((m) => ({
+      role: m.role as 'user' | 'assistant',
+      content: [{ text: m.content }],
+    }));
+
+    try {
+      const command = new ConverseCommand({
+        modelId: model,
+        messages: converseMessages,
+        system: system.length > 0 ? system : undefined,
+        inferenceConfig: {
+          maxTokens: 1000,
+          temperature: 0.7,
+        },
+      });
+
+      const response = await this.bedrockClient.send(command);
+      const text = response.output?.message?.content?.[0]?.text;
+
+      if (!text) {
+        throw new Error('Bedrock returned an empty response output');
+      }
+
+      return text;
+    } catch (error) {
+      console.error('[AiService] Bedrock AI error:', error);
+      throw error;
+    }
   }
 }

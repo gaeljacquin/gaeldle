@@ -8,6 +8,7 @@ import {
   type Game,
   type GameClueHistory,
 } from '@workspace/api-contract';
+import { CLUE_SYSTEM_PROMPT as systemPrompt } from '@workspace/shared';
 import { eq, desc } from 'drizzle-orm';
 
 @Injectable()
@@ -26,6 +27,9 @@ export class ClueService {
     switch (provider) {
       case 'cloudflare':
         return this.generateClueCloudflare(igdbId, provider, actorId);
+      case 'bedrock':
+      case 'nova-2-lite-v1':
+        return this.generateClueBedrock(igdbId, provider, actorId);
       default:
         throw new Error(`Unsupported model/provider: ${provider}`);
     }
@@ -41,21 +45,6 @@ export class ClueService {
     if (!game) {
       return null;
     }
-
-    const systemPrompt = `
-      You are an expert quiz master.
-
-      Your task is to generate exactly 1 clue for the game provided in the user request.
-
-      Rules:
-      1. Do NOT mention the name of the game in the clue.
-      2. Rely only on the fields provided in the game JSON (name, summary, storyline, first_release_date, themes, keywords, game_modes, genres) to derive the clue. Do not make up facts outside the provided context, but rephrase them creatively.
-      3. The resulting clue should NOT simply list or contain every provided input field. Choose the most interesting aspects to create a cohesive, single clue.
-      4. You must respond with a JSON object in this format:
-      {
-        "clue": "Your clue here"
-      }
-    `;
 
     const gameData = {
       name: game.name,
@@ -90,6 +79,94 @@ export class ClueService {
         },
       },
     );
+
+    let clueString: string;
+
+    if (typeof responseText === 'string') {
+      const cleaned = responseText
+        .trim()
+        .replace(/^```(?:json)?\n?/, '')
+        .replace(/\n?```$/, '')
+        .trim();
+
+      try {
+        clueString = this.extractClue(JSON.parse(cleaned)) ?? responseText;
+      } catch (e) {
+        console.warn('Failed to parse AI response as JSON:', e);
+        clueString = responseText;
+      }
+    } else if (responseText && typeof responseText === 'object') {
+      clueString =
+        this.extractClue(responseText) ?? JSON.stringify(responseText);
+    } else {
+      clueString = String(responseText ?? '');
+    }
+
+    const newItem = {
+      clue: clueString,
+      prompt: `System: ${systemPrompt}\nUser: ${userPrompt}`,
+      provider,
+      model: model,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updatedGame = await this.gamesService.updateGame(game.id, {
+      clue: newItem,
+    });
+
+    if (!updatedGame) {
+      throw new NotFoundException('Failed to update game record');
+    }
+
+    // Insert the domain event for info generation
+    await this.databaseService.db.insert(domainEvents).values({
+      eventType: 'clue.generated',
+      actorId,
+      payload: {
+        igdbId,
+        gameId: game.id,
+        clue: clueString,
+        prompt: `System: ${systemPrompt}\nUser: ${userPrompt}`,
+        model,
+        provider,
+      },
+    });
+
+    // Refresh views immediately to include this event
+    await this.gamesService.refreshAllGamesView(true);
+
+    return updatedGame;
+  }
+
+  private async generateClueBedrock(
+    igdbId: number,
+    provider: string,
+    actorId = 'unknown',
+  ): Promise<Game | null> {
+    const game = await this.gamesService.getGameByIgdbId(igdbId);
+
+    if (!game) {
+      return null;
+    }
+
+    const gameData = {
+      name: game.name,
+      summary: game.summary,
+      storyline: game.storyline,
+      first_release_date: game.firstReleaseDate,
+      themes: game.themes,
+      keywords: game.keywords,
+      game_modes: game.gameModes,
+      genres: game.genres,
+    };
+
+    const userPrompt = JSON.stringify(gameData, null, 2);
+    const model = 'us.amazon.nova-2-lite-v1:0';
+
+    const responseText = await this.aiService.generateTextBedrock(model, [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ]);
 
     let clueString: string;
 

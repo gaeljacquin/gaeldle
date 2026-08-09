@@ -11,9 +11,9 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@orpc/contract": "^1.14.8",
-    "@orpc/server": "^1.14.8",
-    "@tabler/icons-react": "^3.44.0",
+    "@orpc/contract": "^1.14.15",
+    "@orpc/server": "^1.14.15",
+    "@tabler/icons-react": "^3.46.0",
     "@workspace/shared": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.8.3",

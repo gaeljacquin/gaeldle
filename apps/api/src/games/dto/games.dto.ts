@@ -58,12 +58,18 @@ export class TestSendMessageDto {
   message!: string;
 }
 
+export class SyncGameDataDto {
+  @ApiProperty({ type: Number }) id!: number;
+  @ApiProperty({ type: Number }) igdbId!: number;
+  @ApiProperty({ type: String }) name!: string;
+}
+
 export class SyncGameResponseDto {
   @ApiProperty({ type: Boolean }) success!: boolean;
   @ApiProperty({ type: String }) message!: string;
   @ApiProperty({ enum: ['created', 'updated'] }) operation!:
     'created' | 'updated';
-  @ApiProperty({ type: Object }) data!: any;
+  @ApiProperty({ type: SyncGameDataDto }) data!: SyncGameDataDto;
 }
 
 export class GameResponseDto {

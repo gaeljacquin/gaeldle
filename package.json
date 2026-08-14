@@ -21,6 +21,7 @@
     "format:write": "prettier --write . --ignore-unknown",
     "typecheck": "turbo typecheck",
     "add:web": "pnpm --filter ./apps/web add",
+    "add:api": "pnpm --filter ./apps/api add",
     "add:ui": "pnpm --filter ./packages/ui add",
     "sync": "./start-remote-sync.sh",
     "sync:list": "mutagen sync list",
@@ -35,17 +36,17 @@
   "keywords": [],
   "packageManager": "pnpm@11.10.0",
   "devDependencies": {
-    "@commitlint/cli": "^21.2.1",
-    "@commitlint/config-conventional": "^21.2.0",
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@types/node": "^26.2.0",
     "husky": "^9.1.7",
     "prettier": "^3.9.6",
-    "turbo": "^2.10.9"
+    "turbo": "^2.10.10"
   },
   "dependencies": {
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "motion": "^13.0.0",
+    "motion": "^13.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "zod": "^4.4.3"

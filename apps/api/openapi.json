@@ -10,7 +10,9 @@
             "description": ""
           }
         },
-        "tags": ["App"]
+        "tags": [
+          "App"
+        ]
       }
     },
     "/api/auth/hexclave": {
@@ -22,7 +24,9 @@
             "description": ""
           }
         },
-        "tags": ["HexclaveAuth"]
+        "tags": [
+          "HexclaveAuth"
+        ]
       }
     },
     "/api/games/sync": {
@@ -52,7 +56,9 @@
           }
         },
         "summary": "Sync game by IGDB ID",
-        "tags": ["games"]
+        "tags": [
+          "games"
+        ]
       }
     },
     "/api/games/{id}": {
@@ -91,7 +97,9 @@
           }
         },
         "summary": "Update game details",
-        "tags": ["games"]
+        "tags": [
+          "games"
+        ]
       },
       "delete": {
         "operationId": "GamesRouter_delete",
@@ -118,7 +126,9 @@
           }
         },
         "summary": "Delete game by ID",
-        "tags": ["games"]
+        "tags": [
+          "games"
+        ]
       }
     },
     "/api/games/bulk": {
@@ -148,7 +158,9 @@
           }
         },
         "summary": "Delete multiple games by ID",
-        "tags": ["games"]
+        "tags": [
+          "games"
+        ]
       }
     },
     "/api/games/add/validate-one": {
@@ -178,7 +190,9 @@
           }
         },
         "summary": "Validate IGDB ID before adding",
-        "tags": ["games"]
+        "tags": [
+          "games"
+        ]
       }
     },
     "/api/image-gen/generate-image": {
@@ -208,7 +222,9 @@
           }
         },
         "summary": "Generate a single AI image for a game",
-        "tags": ["imageGen"]
+        "tags": [
+          "imageGen"
+        ]
       }
     },
     "/api/image-gen/generate-images": {
@@ -238,7 +254,9 @@
           }
         },
         "summary": "Generate AI images for multiple games",
-        "tags": ["imageGen"]
+        "tags": [
+          "imageGen"
+        ]
       }
     },
     "/api/image-gen/generate-images/{imageGenId}/status": {
@@ -267,7 +285,9 @@
           }
         },
         "summary": "Get bulk image generation status",
-        "tags": ["imageGen"]
+        "tags": [
+          "imageGen"
+        ]
       }
     },
     "/api/image-gen/generate-images/{imageGenId}/stream": {
@@ -289,7 +309,9 @@
           }
         },
         "summary": "Stream image generation progress via SSE",
-        "tags": ["imageGen"]
+        "tags": [
+          "imageGen"
+        ]
       }
     },
     "/api/clue/generate-clue": {
@@ -319,7 +341,9 @@
           }
         },
         "summary": "Generate a text clue for a game",
-        "tags": ["clue"]
+        "tags": [
+          "clue"
+        ]
       }
     },
     "/api/clue/history": {
@@ -351,7 +375,9 @@
           }
         },
         "summary": "Get clue generation history for a game",
-        "tags": ["clue"]
+        "tags": [
+          "clue"
+        ]
       }
     },
     "/api/clue/restore": {
@@ -381,7 +407,9 @@
           }
         },
         "summary": "Restore a previous clue from history",
-        "tags": ["clue"]
+        "tags": [
+          "clue"
+        ]
       }
     },
     "/health": {
@@ -409,7 +437,9 @@
                       },
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -424,7 +454,9 @@
                       "example": {},
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -443,7 +475,9 @@
                       },
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -477,7 +511,9 @@
                       },
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -497,7 +533,9 @@
                       },
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -520,7 +558,9 @@
                       },
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -535,7 +575,9 @@
             }
           }
         },
-        "tags": ["Health"]
+        "tags": [
+          "Health"
+        ]
       }
     },
     "/api/discover/scan": {
@@ -565,7 +607,9 @@
           }
         },
         "summary": "Scan for discoverable games from IGDB",
-        "tags": ["discover"]
+        "tags": [
+          "discover"
+        ]
       }
     },
     "/api/discover/apply": {
@@ -595,7 +639,9 @@
           }
         },
         "summary": "Apply selected discover candidates",
-        "tags": ["discover"]
+        "tags": [
+          "discover"
+        ]
       }
     },
     "/api/sample/upload-image": {
@@ -625,7 +671,9 @@
           }
         },
         "summary": "Upload sample image",
-        "tags": ["sample"]
+        "tags": [
+          "sample"
+        ]
       }
     },
     "/api/sample/send-message": {
@@ -655,7 +703,9 @@
           }
         },
         "summary": "Send sample message to queue",
-        "tags": ["sample"]
+        "tags": [
+          "sample"
+        ]
       }
     },
     "/api/sample/clear-queue": {
@@ -675,7 +725,9 @@
           }
         },
         "summary": "Clear sample message queue",
-        "tags": ["sample"]
+        "tags": [
+          "sample"
+        ]
       }
     }
   },
@@ -698,7 +750,9 @@
             "example": 1234
           }
         },
-        "required": ["igdb_id"]
+        "required": [
+          "igdb_id"
+        ]
       },
       "SyncGameDataDto": {
         "type": "object",
@@ -726,13 +780,21 @@
           },
           "operation": {
             "type": "string",
-            "enum": ["created", "updated"]
+            "enum": [
+              "created",
+              "updated"
+            ]
           },
           "data": {
             "type": "object"
           }
         },
-        "required": ["success", "message", "operation", "data"]
+        "required": [
+          "success",
+          "message",
+          "operation",
+          "data"
+        ]
       },
       "GameUpdateInputDto": {
         "type": "object",
@@ -800,7 +862,9 @@
             "$ref": "#/components/schemas/GameUpdateInputDto"
           }
         },
-        "required": ["updates"]
+        "required": [
+          "updates"
+        ]
       },
       "GameResponseDto": {
         "type": "object",
@@ -812,7 +876,10 @@
             "type": "object"
           }
         },
-        "required": ["success", "data"]
+        "required": [
+          "success",
+          "data"
+        ]
       },
       "DeleteBulkDto": {
         "type": "object",
@@ -825,7 +892,9 @@
             }
           }
         },
-        "required": ["ids"]
+        "required": [
+          "ids"
+        ]
       },
       "DeleteBulkGamesDataDto": {
         "type": "object",
@@ -837,7 +906,9 @@
             }
           }
         },
-        "required": ["deletedIds"]
+        "required": [
+          "deletedIds"
+        ]
       },
       "DeleteBulkGamesResponseDto": {
         "type": "object",
@@ -849,7 +920,10 @@
             "$ref": "#/components/schemas/DeleteBulkGamesDataDto"
           }
         },
-        "required": ["success", "data"]
+        "required": [
+          "success",
+          "data"
+        ]
       },
       "DeleteGameDataDto": {
         "type": "object",
@@ -858,7 +932,9 @@
             "type": "number"
           }
         },
-        "required": ["id"]
+        "required": [
+          "id"
+        ]
       },
       "DeleteGameResponseDto": {
         "type": "object",
@@ -870,7 +946,10 @@
             "$ref": "#/components/schemas/DeleteGameDataDto"
           }
         },
-        "required": ["success", "data"]
+        "required": [
+          "success",
+          "data"
+        ]
       },
       "ValidateIgdbIdAddDto": {
         "type": "object",
@@ -880,7 +959,9 @@
             "description": "IGDB ID to validate"
           }
         },
-        "required": ["igdbId"]
+        "required": [
+          "igdbId"
+        ]
       },
       "ValidateIgdbIdAddResponseDto": {
         "type": "object",
@@ -902,7 +983,12 @@
             "type": "boolean"
           }
         },
-        "required": ["igdbId", "existsOnIgdb", "alreadyInDb", "canAdd"]
+        "required": [
+          "igdbId",
+          "existsOnIgdb",
+          "alreadyInDb",
+          "canAdd"
+        ]
       },
       "GenerateImageDto": {
         "type": "object",
@@ -929,7 +1015,10 @@
             "type": "string"
           }
         },
-        "required": ["igdbId", "provider"]
+        "required": [
+          "igdbId",
+          "provider"
+        ]
       },
       "GenerateImageResponseDto": {
         "type": "object",
@@ -941,7 +1030,9 @@
             "type": "string"
           }
         },
-        "required": ["success"]
+        "required": [
+          "success"
+        ]
       },
       "GenerateImagesDto": {
         "type": "object",
@@ -968,7 +1059,11 @@
             "type": "string"
           }
         },
-        "required": ["numGames", "artStyle", "provider"]
+        "required": [
+          "numGames",
+          "artStyle",
+          "provider"
+        ]
       },
       "GenerateImagesResponseDto": {
         "type": "object",
@@ -983,7 +1078,11 @@
             "type": "number"
           }
         },
-        "required": ["success", "imageGenId", "gamesQueued"]
+        "required": [
+          "success",
+          "imageGenId",
+          "gamesQueued"
+        ]
       },
       "ImageGenFailureDto": {
         "type": "object",
@@ -998,7 +1097,11 @@
             "type": "string"
           }
         },
-        "required": ["igdbId", "gameName", "error"]
+        "required": [
+          "igdbId",
+          "gameName",
+          "error"
+        ]
       },
       "ImageGenStatusResponseDto": {
         "type": "object",
@@ -1068,7 +1171,10 @@
             "type": "string"
           }
         },
-        "required": ["igdbId", "provider"]
+        "required": [
+          "igdbId",
+          "provider"
+        ]
       },
       "GenerateClueResponseDto": {
         "type": "object",
@@ -1080,7 +1186,10 @@
             "type": "object"
           }
         },
-        "required": ["success", "data"]
+        "required": [
+          "success",
+          "data"
+        ]
       },
       "GameClueHistoryDto": {
         "type": "object",
@@ -1135,7 +1244,10 @@
             "type": "number"
           }
         },
-        "required": ["igdbId", "historyId"]
+        "required": [
+          "igdbId",
+          "historyId"
+        ]
       },
       "DiscoverScanDto": {
         "type": "object",
@@ -1147,7 +1259,9 @@
             "maximum": 50
           }
         },
-        "required": ["count"]
+        "required": [
+          "count"
+        ]
       },
       "DiscoverCandidateDto": {
         "type": "object",
@@ -1190,7 +1304,13 @@
             "type": "boolean"
           }
         },
-        "required": ["igdbId", "name", "genres", "platforms", "isAlreadyAdded"]
+        "required": [
+          "igdbId",
+          "name",
+          "genres",
+          "platforms",
+          "isAlreadyAdded"
+        ]
       },
       "DiscoverScanResponseDto": {
         "type": "object",
@@ -1231,7 +1351,10 @@
             }
           }
         },
-        "required": ["scanEventId", "selectedIgdbIds"]
+        "required": [
+          "scanEventId",
+          "selectedIgdbIds"
+        ]
       },
       "DiscoverApplyResultDto": {
         "type": "object",
@@ -1245,14 +1368,21 @@
           },
           "status": {
             "type": "string",
-            "enum": ["created", "updated", "error"]
+            "enum": [
+              "created",
+              "updated",
+              "error"
+            ]
           },
           "error": {
             "type": "string",
             "nullable": true
           }
         },
-        "required": ["igdbId", "status"]
+        "required": [
+          "igdbId",
+          "status"
+        ]
       },
       "DiscoverApplyResponseDto": {
         "type": "object",
@@ -1270,7 +1400,11 @@
             }
           }
         },
-        "required": ["success", "applyEventId", "results"]
+        "required": [
+          "success",
+          "applyEventId",
+          "results"
+        ]
       },
       "SampleUploadImageDto": {
         "type": "object",
@@ -1284,7 +1418,9 @@
             "default": "jpg"
           }
         },
-        "required": ["image"]
+        "required": [
+          "image"
+        ]
       },
       "UploadImageResponseDto": {
         "type": "object",
@@ -1296,7 +1432,10 @@
             "type": "string"
           }
         },
-        "required": ["success", "url"]
+        "required": [
+          "success",
+          "url"
+        ]
       },
       "SampleSendMessageDto": {
         "type": "object",
@@ -1305,7 +1444,9 @@
             "type": "string"
           }
         },
-        "required": ["message"]
+        "required": [
+          "message"
+        ]
       },
       "SampleSendMessageResponseDto": {
         "type": "object",
@@ -1320,7 +1461,10 @@
             "type": "string"
           }
         },
-        "required": ["success", "message"]
+        "required": [
+          "success",
+          "message"
+        ]
       },
       "SampleClearQueueResponseDto": {
         "type": "object",
@@ -1332,7 +1476,10 @@
             "type": "string"
           }
         },
-        "required": ["success", "message"]
+        "required": [
+          "success",
+          "message"
+        ]
       }
     }
   }

@@ -9,15 +9,16 @@
 ## Monorepo Structure
 
 - `apps/web` — Next.js 16 App Router frontend
-- `apps/api` — NestJS backend
-- `packages/api-contract` — oRPC contracts (source of truth for types)
+- `apps/web` — Next.js 16 App Router frontend
+- `apps/api` — NestJS backend (exposes OpenAPI spec at openapi.json)
+- `packages/api-client` — Generated openapi-fetch client and TypeScript schema (`@workspace/api-client`)
 
 ## Frontend Architecture (`apps/web`)
 
 - `app/` — thin route pages (Server Components by default, no logic)
 - `views/` — `'use client'` views with TanStack Query hooks, business logic
 - `components/` — purely presentational, props-driven, no API calls
-- `lib/services/` — API service functions (oRPC client OR raw fetch for non-contract endpoints)
+- `lib/services/` — API service functions (`apiClient` from `@workspace/api-client` OR raw fetch for local Next.js API routes)
 - `lib/hooks/` — custom stateful hooks
 - `lib/stores/` — Zustand stores
 
@@ -40,9 +41,8 @@ export default function SomePage() {
 
 ### Service file pattern
 
-- For oRPC routes: `import { orpcClient } from '@/lib/orpc'`
-- For non-oRPC (e.g. health endpoint): raw `fetch` with try/catch returning synthetic error shape
-- API base URL: `process.env.serverUrl || 'http://localhost:8080'`
+- For NestJS write endpoints: `import { apiClient } from '@/lib/api-client'`
+- For local Next.js API read routes: raw `fetch` with try/catch returning synthetic error shape
 
 ### Styling
 

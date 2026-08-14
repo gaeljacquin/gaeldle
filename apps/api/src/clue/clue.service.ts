@@ -7,7 +7,7 @@ import {
   gamesClueHistory,
   type Game,
   type GameClueHistory,
-} from '@workspace/api-contract';
+} from '@/db/schema';
 import { CLUE_SYSTEM_PROMPT as systemPrompt } from '@workspace/shared';
 import { eq, desc } from 'drizzle-orm';
 

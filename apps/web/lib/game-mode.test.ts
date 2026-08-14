@@ -3,7 +3,7 @@ import {
   getGameModeBySlug,
   getGameModes,
 } from '@/lib/services/game-mode.service';
-import type { GameModePlus } from '@workspace/api-contract';
+import type { GameModePlus } from '@workspace/api/db';
 
 const MOCK_GAME_MODES = [
   {

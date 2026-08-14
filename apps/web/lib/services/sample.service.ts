@@ -1,24 +1,35 @@
-import { orpcClient } from '@/lib/orpc';
+import { apiClient } from '@/lib/api-client';
 
 export async function uploadImage(image: string, extension: string = 'jpg') {
-  const result = await orpcClient.sample.uploadImage({
-    image,
-    extension,
+  const { data, error } = await apiClient.POST('/api/sample/upload-image', {
+    body: { image, extension },
   });
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to upload sample image');
+  }
+
+  return data;
 }
 
 export async function sendMessage(message: string) {
-  const result = await orpcClient.sample.sendMessage({
-    message,
+  const { data, error } = await apiClient.POST('/api/sample/send-message', {
+    body: { message },
   });
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to send sample message');
+  }
+
+  return data;
 }
 
 export async function clearQueue() {
-  const result = await orpcClient.sample.clearQueue();
+  const { data, error } = await apiClient.POST('/api/sample/clear-queue');
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to clear queue');
+  }
+
+  return data;
 }

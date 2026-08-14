@@ -22,7 +22,7 @@ import { cn } from '@workspace/ui/lib/utils';
 import { appInfo } from '@/lib/app-info';
 import { Separator } from '@workspace/ui/separator';
 import { gameModesQueryOptions } from '@/lib/services/game-mode.service';
-import { GameModePlus } from '@workspace/api-contract';
+import { GameModePlus } from '@workspace/api/db';
 
 interface SidebarLinkProps {
   href: string;

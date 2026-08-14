@@ -37,10 +37,20 @@ A collection of video game guessing challenges. Test your gaming knowledge acros
 | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | [docs/tech-stack.md](docs/tech-stack.md)                                   | The technology stack: monorepo tools, frontend/backend frameworks, database, and auth.                   |
 | [docs/architecture.md](docs/architecture.md)                 | Monorepo topology, ports, CORS config, health checks, environment variables, and code quality standards. |
-| [docs/backend-conventions.md](docs/backend-conventions.md)   | NestJS API structure, contract-first approach with oRPC and Zod, router and service separation rules.    |
+| [docs/backend-conventions.md](docs/backend-conventions.md)   | NestJS API structure, OpenAPI spec generation, controllers, and service separation rules.             |
 | [docs/frontend-conventions.md](docs/frontend-conventions.md) | Next.js 16 tech stack, theming, component/view/hook separation rules, and agent skills.                  |
 | [docs/commands.md](docs/commands.md)                         | CLI commands for running, building, testing, linting, and cleaning the monorepo.                         |
 | [docs/workflows.md](docs/workflows.md)                       | Step-by-step workflows for common tasks such as adding a new API endpoint or web page.                   |
+
+### OpenAPI Codegen
+
+API contracts are shared between `apps/api` and `apps/web` via `apps/api/openapi.json` and the `@workspace/api-client` package:
+
+```bash
+pnpm codegen
+```
+
+This boots NestJS to dump `apps/api/openapi.json` and generates typed TypeScript bindings in `packages/api-client/src/schema.d.ts`. Both generated files are checked into git and should be committed after backend API changes.
 
 ---
 

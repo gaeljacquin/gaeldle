@@ -215,11 +215,13 @@ export function NewGame() {
           if (outcome.status === 'fulfilled') {
             const syncResult = outcome.value;
 
+            const gameData = syncResult.data as any;
+
             return {
               igdbId,
-              gameName: syncResult.data.name,
+              gameName: gameData?.name ?? '',
               operation: syncResult.operation,
-              gameId: syncResult.data.igdbId,
+              gameId: gameData?.igdbId ?? igdbId,
               error: null,
             };
           }

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Optional, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 type HexclaveSignInResult = {
@@ -23,13 +23,13 @@ export class HexclaveService {
   private readonly hexclavePublishableClientKey: string;
   private readonly hexclaveSecretServerKey: string;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(@Optional() private readonly configService?: ConfigService) {
     this.hexclaveProjectId =
-      this.configService.get<string>('hexclaveProjectId') ?? '';
+      this.configService?.get<string>('hexclaveProjectId') ?? '';
     this.hexclavePublishableClientKey =
-      this.configService.get<string>('hexclavePublishableClientKey') ?? '';
+      this.configService?.get<string>('hexclavePublishableClientKey') ?? '';
     this.hexclaveSecretServerKey =
-      this.configService.get<string>('hexclaveSecretServerKey') ?? '';
+      this.configService?.get<string>('hexclaveSecretServerKey') ?? '';
   }
 
   async signInWithPassword(
@@ -41,33 +41,40 @@ export class HexclaveService {
       {
         method: 'POST',
         headers: {
-          'content-type': 'application/json',
-          'x-stack-access-type': 'server',
+          'Content-Type': 'application/json',
           'x-stack-project-id': this.hexclaveProjectId,
           'x-stack-publishable-client-key': this.hexclavePublishableClientKey,
-          'x-stack-secret-server-key': this.hexclaveSecretServerKey,
+          'x-stack-access-type': 'client',
         },
         body: JSON.stringify({ email, password }),
       },
     );
 
-    const raw = (await response.json().catch(() => null)) as unknown;
-
-    if (!response.ok || !isRecord(raw)) {
-      throw new UnauthorizedException('Invalid Hexclave credentials');
+    const payload = (await response.json().catch(() => null)) as unknown;
+    if (!response.ok) {
+      const message =
+        isRecord(payload) && typeof payload.message === 'string'
+          ? payload.message
+          : 'Invalid credentials';
+      throw new UnauthorizedException(message);
     }
 
-    const accessToken = getString(raw.access_token);
+    if (!isRecord(payload)) {
+      throw new UnauthorizedException(
+        'Invalid response structure from auth API',
+      );
+    }
 
+    const accessToken = getString(payload.access_token);
     if (!accessToken) {
-      throw new UnauthorizedException('Invalid Hexclave response');
+      throw new UnauthorizedException('Missing access token in auth response');
     }
 
     return {
       accessToken,
-      refreshToken: getString(raw.refresh_token),
-      userId: getString(raw.user_id),
-      expiresAtMillis: getNumber(raw.access_token_expires_at_millis),
+      refreshToken: getString(payload.refresh_token),
+      userId: getString(payload.user_id),
+      expiresAtMillis: getNumber(payload.expires_at_millis),
     };
   }
 }

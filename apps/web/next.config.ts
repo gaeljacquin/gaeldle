@@ -21,9 +21,6 @@ const nextConfig: NextConfig = {
     ],
   },
   allowedDevOrigins: ['dev-client.gaeljacquin.com'],
-  experimental: {
-    viewTransition: true,
-  },
 };
 
 export default nextConfig;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRandomGame } from '@/lib/services/game.service';
-import type { Game } from '@workspace/api-contract';
+import type { Game } from '@workspace/api/db';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 

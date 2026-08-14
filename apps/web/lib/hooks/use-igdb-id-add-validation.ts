@@ -72,7 +72,7 @@ export function useIgdbIdAddValidation(
     isReady: true,
     existsOnIgdb: data.existsOnIgdb,
     alreadyInDb: data.alreadyInDb,
-    gameName: data.gameName,
+    gameName: data.gameName ?? null,
     canAdd: data.canAdd,
     refetch: handleRefetch,
     stop: handleStop,

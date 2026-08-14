@@ -9,7 +9,6 @@ import { GamesModule } from '@/games/games.module';
 import { HealthModule } from '@/health/health.module';
 import { DiscoverModule } from '@/discover/discover.module';
 import { SampleModule } from '@/sample/sample.module';
-import { ORPCModule } from '@orpc/nest';
 
 const appEnv = (
   process.env.APP_ENV ||
@@ -30,7 +29,6 @@ const envFilePath = [
       envFilePath,
       load: [configuration],
     }),
-    ORPCModule.forRoot({}),
     AuthModule,
     GamesModule,
     HealthModule,

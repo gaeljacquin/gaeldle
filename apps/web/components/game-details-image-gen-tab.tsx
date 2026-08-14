@@ -24,12 +24,12 @@ import {
 } from '@workspace/ui/dialog';
 import { toast } from 'sonner';
 import { IconExternalLink, IconBrush } from '@tabler/icons-react';
-import { Game, type ArtStyleValue } from '@workspace/api-contract';
+import { Game, type ArtStyleValue } from '@workspace/api/db';
 import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
 import { artStylesQueryOptions } from '@/lib/services/art-style.service';
-import type { ArtStyle } from '@workspace/api-contract';
+import type { ArtStyle } from '@workspace/api/db';
 import {
   Select,
   SelectContent,

@@ -7,7 +7,7 @@ import {
   getRandomGame,
   randomGameQueryOptions,
 } from '@/lib/services/game.service';
-import type { Game, ArtworkImage } from '@workspace/api-contract';
+import type { Game, ArtworkImage } from '@workspace/api/db';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
 
 function getRandomArtwork(artworks: unknown): string | null {

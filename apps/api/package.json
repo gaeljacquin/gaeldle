@@ -1,8 +1,13 @@
 {
   "name": "@workspace/api",
   "private": true,
+  "exports": {
+    "./db": "./src/db/schema/index.ts"
+  },
   "scripts": {
     "build": "nest build",
+    "codegen": "pnpm generate:openapi",
+    "generate:openapi": "tsx scripts/generate-openapi.ts",
     "start": "nest start",
     "dev": "INFISICAL_DISABLE_KEYRING=true ../../scripts/infisical-dev.sh run --path=/api --env=dev -- nest start --watch || nest start --watch",
     "start:dev": "nest start --watch",
@@ -31,12 +36,8 @@
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.28",
     "@nestjs/platform-express": "^11.1.28",
+    "@nestjs/swagger": "^11.0.6",
     "@nestjs/terminus": "^11.1.1",
-    "@orpc/contract": "^1.14.15",
-    "@orpc/nest": "^1.14.15",
-    "@orpc/openapi": "^1.14.15",
-    "@orpc/server": "^1.14.15",
-    "@workspace/api-contract": "workspace:*",
     "@workspace/shared": "workspace:*",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
@@ -73,7 +74,8 @@
     "ts-loader": "^9.6.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "~7.0.2",
+    "tsx": "^4.23.11",
+    "typescript": "^5.7.3",
     "typescript-eslint": "^8.66.0"
   },
   "jest": {
@@ -100,7 +102,7 @@
     "coverageDirectory": "../coverage",
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
-      "^@workspace/api-contract$": "<rootDir>/../../../packages/api-contract/src/index.ts",
+      "^@workspace/api/db$": "<rootDir>/db/schema/index.ts",
       "^@workspace/shared$": "<rootDir>/../../../packages/shared/src/index.ts"
     },
     "extensionsToTreatAsEsm": [

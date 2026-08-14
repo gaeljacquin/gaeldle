@@ -2,7 +2,7 @@
 
 import { IconX } from '@tabler/icons-react';
 import Image from 'next/image';
-import { type Game } from '@workspace/api-contract';
+import { type Game } from '@workspace/api/db';
 import { cn } from '@workspace/ui/lib/utils';
 
 interface SelectedGameDisplayProps {

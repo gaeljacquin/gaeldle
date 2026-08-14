@@ -5,7 +5,7 @@ import configuration from '@/config/configuration';
 import { SqsService } from '@/lib/sqs.service';
 import { R2Service } from '@/lib/r2.service';
 import { DatabaseService } from '@/db/database.service';
-import { domainEvents } from '@workspace/api-contract';
+import { domainEvents } from '@/db/schema';
 
 interface uploadImageProps {
   image: string;
@@ -40,15 +40,11 @@ export class SampleService {
       const timestamp = Date.now();
       const fileName = `${SAMPLE_DIR}/placeholder_${timestamp}.${extension}`;
 
-      const res = await this.s3Service.uploadImage(
+      await this.s3Service.uploadImage(
         fileName,
         buffer,
         `image/${extension === 'jpg' ? 'jpeg' : extension}`,
       );
-
-      if (!res.ok) {
-        throw new Error('Upload to R2 failed');
-      }
 
       url = `${this.r2Service.r2PublicUrl}/${fileName}`;
       success = true;

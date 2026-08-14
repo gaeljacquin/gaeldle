@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { AppConfiguration } from '@/config/configuration';
 import {
@@ -12,17 +12,21 @@ export class AiService {
   private readonly apiToken: string;
   private readonly bedrockClient: BedrockRuntimeClient;
 
-  constructor(private readonly configService: ConfigService<AppConfiguration>) {
+  constructor(
+    @Optional()
+    private readonly configService?: ConfigService<AppConfiguration>,
+  ) {
     this.accountId =
-      this.configService.get('cfAccountId', { infer: true }) ?? '';
-    this.apiToken = this.configService.get('cfApiToken', { infer: true }) ?? '';
+      this.configService?.get('cfAccountId', { infer: true }) ?? '';
+    this.apiToken =
+      this.configService?.get('cfApiToken', { infer: true }) ?? '';
 
     const awsAccessKeyId =
-      this.configService.get('awsAccessKeyId', { infer: true }) ?? '';
+      this.configService?.get('awsAccessKeyId', { infer: true }) ?? '';
     const awsSecretAccessKey =
-      this.configService.get('awsSecretAccessKey', { infer: true }) ?? '';
+      this.configService?.get('awsSecretAccessKey', { infer: true }) ?? '';
     const awsRegion =
-      this.configService.get('awsRegion', { infer: true }) ?? '';
+      this.configService?.get('awsRegion', { infer: true }) || 'us-east-1';
     const clientConfig: any = {
       region: awsRegion,
     };

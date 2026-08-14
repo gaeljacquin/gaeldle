@@ -11,7 +11,7 @@ import configuration from '@/config/configuration';
 @Injectable()
 export class SqsService {
   private readonly client = new SQSClient({
-    region: configuration().awsRegion,
+    region: configuration().awsRegion || 'us-east-1',
     credentials:
       configuration().awsAccessKeyId && configuration().awsSecretAccessKey
         ? {

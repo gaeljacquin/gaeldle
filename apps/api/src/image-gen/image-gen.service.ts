@@ -15,7 +15,7 @@ import {
   artStyles as artStylesView,
   type ArtStyleValue,
   ImageGenStatus,
-} from '@workspace/api-contract';
+} from '@/db/schema';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';
@@ -49,10 +49,10 @@ export class ImageGenService {
   async generateImages(
     params: {
       numGames: number;
-      artStyle: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with imageGen
-      includeStoryline: boolean;
-      includeGenres: boolean;
-      includeThemes: boolean;
+      artStyle: string;
+      includeStoryline?: boolean;
+      includeGenres?: boolean;
+      includeThemes?: boolean;
       provider: string;
     },
     actorId: string,
@@ -131,10 +131,10 @@ export class ImageGenService {
     pendingGames: Game[],
     params: {
       numGames: number;
-      artStyle: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with imageGen
-      includeStoryline: boolean;
-      includeGenres: boolean;
-      includeThemes: boolean;
+      artStyle: string;
+      includeStoryline?: boolean;
+      includeGenres?: boolean;
+      includeThemes?: boolean;
       provider: string;
     },
     actorId: string,
@@ -525,9 +525,9 @@ export class ImageGenService {
       'name' | 'summary' | 'storyline' | 'keywords' | 'genres' | 'themes'
     >,
     options: {
-      includeStoryline: boolean;
-      includeGenres: boolean;
-      includeThemes: boolean;
+      includeStoryline?: boolean;
+      includeGenres?: boolean;
+      includeThemes?: boolean;
     },
     artStyleDescription: string,
   ): string {

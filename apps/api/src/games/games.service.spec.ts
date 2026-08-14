@@ -14,7 +14,7 @@ import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';
-import { domainEvents, queriedGames } from '@workspace/api-contract';
+import { domainEvents, queriedGames } from '@/db/schema';
 
 type AsyncMock = jest.Mock<(...args: unknown[]) => Promise<unknown>>;
 

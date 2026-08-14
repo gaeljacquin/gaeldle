@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build --filter=!@workspace/newapi",
+    "codegen": "pnpm --filter @workspace/api generate:openapi && pnpm --filter @workspace/api-client generate",
     "dev": "turbo run dev --filter=!@workspace/newapi",
     "lint": "turbo lint --filter '!@workspace/ui'",
     "lint:fix": "turbo lint --filter '!@workspace/ui' -- --fix",

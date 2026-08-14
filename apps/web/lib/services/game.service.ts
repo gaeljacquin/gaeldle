@@ -1,5 +1,5 @@
-import { orpcClient } from '@/lib/orpc';
-import type { Game, ArtStyleValue } from '@workspace/api-contract';
+import { apiClient } from '@/lib/api-client';
+import type { Game, ArtStyleValue } from '@workspace/api/db';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -21,15 +21,27 @@ export async function getGameByIgdbId(igdbId: number): Promise<Game> {
 }
 
 export async function deleteGame(id: number): Promise<boolean> {
-  const result = await orpcClient.games.delete({ id });
+  const { data, error } = await apiClient.DELETE('/api/games/{id}', {
+    params: { path: { id } },
+  });
 
-  return result.success;
+  if (error || !data) {
+    throw new Error('Failed to delete game');
+  }
+
+  return data.success;
 }
 
 export async function deleteBulkGames(ids: number[]): Promise<boolean> {
-  const result = await orpcClient.games.deleteBulk(ids);
+  const { data, error } = await apiClient.DELETE('/api/games/bulk', {
+    body: { ids },
+  });
 
-  return result.success;
+  if (error || !data) {
+    throw new Error('Failed to bulk delete games');
+  }
+
+  return data.success;
 }
 
 export interface PaginatedResponse<T> {
@@ -138,18 +150,27 @@ export async function searchGames(
 }
 
 export async function syncGame(igdbId: number) {
-  const result = await orpcClient.games.sync({ igdb_id: igdbId });
+  const { data, error } = await apiClient.POST('/api/games/sync', {
+    body: { igdb_id: igdbId },
+  });
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to sync game');
+  }
+
+  return data;
 }
 
 export async function testUpload(image: string, extension: string = 'jpg') {
-  const result = await orpcClient.games.testUpload({
-    image,
-    extension,
+  const { data, error } = await apiClient.POST('/api/sample/upload-image', {
+    body: { image, extension },
   });
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to test upload');
+  }
+
+  return data;
 }
 
 export async function generateImage(
@@ -162,14 +183,32 @@ export async function generateImage(
     provider: string;
   },
 ) {
-  const { artStyleValue, ...rest } = options;
-  const result = await orpcClient.imageGen.generateImage({
-    igdbId,
-    artStyle: artStyleValue,
-    ...rest,
-  });
+  const {
+    artStyleValue,
+    includeStoryline = false,
+    includeGenres = false,
+    includeThemes = false,
+    provider,
+  } = options;
+  const { data, error } = await apiClient.POST(
+    '/api/image-gen/generate-image',
+    {
+      body: {
+        igdbId,
+        artStyle: artStyleValue,
+        includeStoryline,
+        includeGenres,
+        includeThemes,
+        provider,
+      },
+    },
+  );
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to generate image');
+  }
+
+  return data;
 }
 
 export async function generateImages(params: {
@@ -180,48 +219,86 @@ export async function generateImages(params: {
   includeThemes: boolean;
   provider: string;
 }) {
-  const result = await orpcClient.imageGen.generateImages(params);
+  const { data, error } = await apiClient.POST(
+    '/api/image-gen/generate-images',
+    {
+      body: params,
+    },
+  );
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to generate images');
+  }
+
+  return data;
 }
 
 export async function getImageGenStatus(imageGenId: string) {
-  const result = await orpcClient.imageGen.getImageGenStatus({ imageGenId });
+  const { data, error } = await apiClient.GET(
+    '/api/image-gen/generate-images/{imageGenId}/status',
+    {
+      params: { path: { imageGenId } },
+    },
+  );
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to get image gen status');
+  }
+
+  return data;
 }
 
 export async function generateClue(igdbId: number, provider: string) {
-  const result = await orpcClient.clue.generateClue({ igdbId, provider });
+  const { data, error } = await apiClient.POST('/api/clue/generate-clue', {
+    body: { igdbId, provider },
+  });
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to generate clue');
+  }
+
+  return data;
 }
 
 export async function getClueHistory(igdbId: number) {
-  const result = await orpcClient.clue.getClueHistory({ igdbId });
+  const { data, error } = await apiClient.GET('/api/clue/history', {
+    params: { query: { igdbId } },
+  });
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to get clue history');
+  }
+
+  return data;
 }
 
 export async function restoreClue(igdbId: number, historyId: number) {
-  const result = await orpcClient.clue.restoreClue({ igdbId, historyId });
+  const { data, error } = await apiClient.POST('/api/clue/restore', {
+    body: { igdbId, historyId },
+  });
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to restore clue');
+  }
+
+  return data;
 }
 
 export async function validateIgdbIdAdd(igdbId: number, signal?: AbortSignal) {
-  const result = await orpcClient.games.validateIgdbIdAdd(
-    { igdbId },
-    { signal },
-  );
+  const { data, error } = await apiClient.POST('/api/games/add/validate-one', {
+    body: { igdbId },
+    signal,
+  });
 
-  return result;
+  if (error || !data) {
+    throw new Error('Failed to validate IGDB ID');
+  }
+
+  return data;
 }
 
 export async function addGame(igdbId: number) {
-  const result = await orpcClient.games.sync({ igdb_id: igdbId });
-
-  return result;
+  return syncGame(igdbId);
 }
 
 export const gameByIgdbIdQueryOptions = (igdbId: number) => ({

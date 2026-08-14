@@ -31,7 +31,6 @@
     "src/**/*",
     "test/**/*",
     "scripts/**/*",
-    "../../packages/api-contract/src/**/*",
     "../../packages/shared/src/**/*",
     "**/*.cjs"
   ]

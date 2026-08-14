@@ -1,6 +1,5 @@
----
-name: orpc-contract-auditor
-description: 'Audits oRPC API contracts and their consumers to ensure type safety, schema quality, and consistent usage across the monorepo. Invoke to verify that the API contract remains the single source of truth and to detect unsafe data handling or raw fetch calls.'
+name: openapi-contract-auditor
+description: 'Audits OpenAPI specifications and @workspace/api-client consumers to ensure type safety, DTO completeness, and consistent usage across the monorepo.'
 model: gemini-3.5-pro
 tools:
   - run_command

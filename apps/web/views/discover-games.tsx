@@ -21,10 +21,7 @@ import {
 } from '@workspace/ui/card';
 import { DiscoveredGameCard } from '@/components/discovered-game-card';
 import { useDiscoverGames } from '@/lib/hooks/use-discover-games';
-import type {
-  DiscoverCandidate,
-  DiscoverApplyResult,
-} from '@workspace/api-contract';
+import type { DiscoverCandidate, DiscoverApplyResult } from '@workspace/api/db';
 
 function ApplyResultsRow({ result }: { result: DiscoverApplyResult }) {
   if (result.status === 'error') {

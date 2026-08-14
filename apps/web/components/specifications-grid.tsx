@@ -9,7 +9,7 @@ import type {
   CellMatch,
   MatchType,
   MatchKey,
-} from '@workspace/api-contract';
+} from '@workspace/api/db';
 import Image from 'next/image';
 import {
   IconArrowUp,

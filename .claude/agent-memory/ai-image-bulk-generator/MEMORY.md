@@ -7,7 +7,7 @@
 - **Script location**: `/Users/gael/Documents/projects/gaeldle/apps/api/scripts/bulk-generate-images.ts`
 - **Package manager**: tsx (use `pnpm exec tsx` to run scripts)
 - **Database ORM**: Drizzle ORM with PostgreSQL
-- **Schema**: `@workspace/api-contract` package (located at `/Users/gael/Documents/projects/gaeldle/packages/api-contract/src/schema.ts`)
+- **Schema**: `@workspace/api/db` export (located at `apps/api/src/db/schema/index.ts`)
 - **Constants**: `IMAGE_PROMPT_SUFFIX` from `@workspace/constants`
 
 ### Database Configuration

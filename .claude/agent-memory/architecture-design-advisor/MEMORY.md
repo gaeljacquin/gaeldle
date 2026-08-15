@@ -6,28 +6,28 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 
 ## Key Packages
 
-- `packages/api-contract`: oRPC contracts + Zod schemas + Drizzle schema. Package: `@workspace/api-contract`. Entry: `src/index.ts`, `src/games.ts`, `src/schema.ts`.
+- `packages/api-client`: Generated openapi-fetch client and TypeScript schema (@workspace/api-client). Entry: `src/index.ts`, `src/schema.d.ts`.
+- `apps/api/src/db/schema/`: Drizzle ORM schema exported at `@workspace/api/db`.
 - `packages/constants`: `IMAGE_STYLES`, `IMAGE_PROMPT_SUFFIX`, `DEFAULT_IMAGE_GEN_STYLE`. Package: `@workspace/constants`.
 
 ## Auth Pattern
 
-- `StackAuthGuard` in `apps/api/src/auth/stack-auth.guard.ts` - validates JWT from `x-stack-access-token` or `Authorization: Bearer` header.
-- All mutating/privileged endpoints use `@UseGuards(StackAuthGuard)`.
-- Dashboard layout at `apps/web/app/dashboard/layout.tsx` gates all routes behind `stackServerApp.getUser({ or: "redirect" })`.
-- No role-based authorization exists yet — auth is binary (logged in or not). No admin role concept.
+- `HexclaveGuard` / `StackAuthGuard` in `apps/api` - validates JWT / auth headers.
+- All mutating/privileged endpoints use `@UseGuards(HexclaveGuard)`.
+- Dashboard layout at `apps/web/app/dashboard/layout.tsx` gates all routes behind auth layout gate.
 
-## oRPC Contract Convention
+## OpenAPI & API Client Convention
 
-- Defined in `packages/api-contract/src/games.ts` using `oc` from `@orpc/contract`.
-- Pattern: `oc.route({ method, path }).input(ZodSchema).output(ZodSchema)`.
-- All procedures live in `GamesContract`, mounted at `contract.games.*`.
-- Naming: flat noun within the `games` namespace (e.g., `games.list`, `games.generateImage`, `games.deleteBulk`).
+- NestJS Controllers in `apps/api` decorated with `@Controller`, `@ApiTags`, `@ApiOperation`, `@ApiBody`.
+- OpenAPI spec generated to `apps/api/openapi.json` via `pnpm codegen`.
+- `@workspace/api-client` generated via `openapi-typescript`.
+- Frontend consumes NestJS write endpoints via `apiClient` (`createApiClient`).
 
 ## Frontend Conventions
 
 - Pages: `apps/web/app/[route]/page.tsx` — thin wrappers, import from `views/`.
 - Views: `apps/web/views/[name].tsx` — main content, client components.
-- Services: `apps/web/lib/services/[resource].service.ts` — wraps `orpcClient.*` calls.
+- Services: `apps/web/lib/services/[resource].service.ts` — wraps `apiClient.*` calls.
 - State: TanStack Query (`useQuery`/`useMutation`) for server state. Zustand for complex client state.
 - Notifications: `sonner` toast (`toast.success`, `toast.error`, `toast.loading` with `id` for updates).
 - cn utility: must be used for conditional classNames.
@@ -53,9 +53,9 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 
 ## Read vs. Write Transport Split (Confirmed)
 
-- Reads: Next.js route handlers at `apps/web/app/api/games/` — use plain `fetch` in service, no oRPC.
-- Writes: NestJS API via oRPC — all in `GamesContract` in `packages/api-contract/src/games.ts`.
-- Validation or existence checks that are read-only but belong to admin flows: route them through NestJS oRPC if they are part of a write workflow (the fixIgdbIds feature validates then mutates).
+- Reads: Next.js route handlers at `apps/web/app/api/games/` — use plain `fetch` in service.
+- Writes: NestJS API via OpenAPI `apiClient` from `@workspace/api-client`.
+- Validation or existence checks that belong to write workflows: route through NestJS API.
 
 ## NestJS Games Module Structure
 
@@ -94,12 +94,12 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 - Row component: `apps/web/components/id-pair-row.tsx` — presentational, receives `validationState` as prop, renders `CurrentBadge` and `ReplacementBadge` sub-components inline.
 - Results table: `apps/web/components/igdb-fix-results-table.tsx` — separate presentational component.
 - Max rows constant: `REPLACE_GAME_MAX_ROWS = 20` in `packages/constants/src/index.ts`.
-- The `sync` contract procedure (POST /games/sync) already handles "upsert by IGDB ID" — it creates OR updates a game. This is the correct backend target for Add Game.
+- The `sync` endpoint (POST /api/games/sync) handles "upsert by IGDB ID" — it creates OR updates a game. This is the correct backend target for Add Game.
 
 ## Add Game Feature (implemented as of 2026-02-26)
 
-- Uses `games.sync` contract (POST /games/sync) — `syncGameByIgdbId` in GamesService.
-- Validation: `games.validateIgdbIdAdd` oRPC procedure (POST /games/add/validate-one).
+- Uses `POST /api/games/sync` — `syncGameByIgdbId` in GamesService.
+- Validation: NestJS endpoint (POST /api/games/add/validate-one).
 - Constant: `ADD_GAME_MAX_ROWS = 20` in `packages/constants/src/index.ts`.
 - Hook: `use-igdb-id-add-validation.ts` — debounces 600ms, TanStack Query, returns `IgdbIdAddValidationState`.
 - Component: `igdb-id-add-entry.tsx` — single-field row with inline validation badge.
@@ -127,14 +127,12 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 
 - StackAuthGuard sets `request.stackAuth = JWTPayload` on the Express request after verifying the JWT.
 - JWT `sub` claim = Stack Auth user ID (actorId).
-- No existing oRPC handler reads this — Discover Games is the FIRST to use it.
-- Approach: inject `@Req()` NestJS decorator on the router method, read `req.stackAuth?.sub`.
-- If @orpc/nest does not support mixing @Req() with implement().handler(), fallback: pass actorId via oRPC input from the frontend Stack Auth session. Builder to resolve.
+- Approach: inject `@Req()` NestJS decorator on the controller method, read `req.stackAuth?.sub`.
 
 ## Discover Games Feature (final design 2026-03-03, approved for handoff)
 
 - Full notes in `.claude/agent-memory/architecture-design-advisor/discover-games.md`.
-- New `DiscoverContract` in `packages/api-contract/src/discover.ts`; new `DiscoverModule` in `apps/api/src/discover/`.
+- New `DiscoverController` in `apps/api/src/discover/discover.router.ts`; new `DiscoverModule` in `apps/api/src/discover/`.
 - IGDB query: NO exclusion list. `category=0 & status=0 & total_rating_count > 50 & themes != (42)`, sort by total_rating_count desc, limit=count param.
 - Post-filter: backend checks returned igdbIds against DB; marks with `isAlreadyAdded: boolean` on each candidate.
 - Two events: `discover_games.scanned` at scan time, `discover_games.applied` at apply time. Both written to `domain_event` table.
@@ -151,4 +149,4 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 - `pg_trgm` extension already installed on local, dev, and prod (Neon). No enablement migration needed.
 - Stray file: `apps/api/drizzle/0001_add_name_search_tsvector.sql` — NOT in the journal, never applied. Previous partial attempt. Builder must not renumber around it or treat it as applied.
 - Approved improvement: GIN trigram index on `game.name` + `similarity()` ordering + `useQuery` refactor in `GameSearch`. Migration is a single handwritten SQL file (Drizzle Kit cannot generate it — no schema.ts change needed).
-- Drizzle Kit config: `apps/api/drizzle.config.ts` — schema from `packages/api-contract/src/schema.ts`, output to `apps/api/drizzle/`. Next migration number is 0012.
+- Drizzle Kit config: `apps/api/drizzle.config.ts` — schema from `apps/api/src/db/schema/index.ts` (exported at `@workspace/api/db`), output to `apps/api/drizzle/`. Next migration number is 0012.

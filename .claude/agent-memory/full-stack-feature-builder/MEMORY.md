@@ -63,9 +63,9 @@ export default function SomePage() {
 - Size variants: `default`, `xs`, `sm`, `lg`, `icon`, `icon-xs`, `icon-sm`, `icon-lg`
 - All corners are sharp (radius: 0)
 
-### oRPC Date Serialization (CRITICAL)
+### Date Serialization (CRITICAL)
 
-- oRPC OpenAPI fetch client returns Date fields as ISO strings, NOT Date objects
+- OpenAPI fetch client returns Date fields as ISO strings, NOT Date objects
 - Frontend prop types must use `Date | string | null` not `Date | null`
 - See patterns.md for full notes
 
@@ -93,23 +93,10 @@ export default function SomePage() {
 - `IconArrowsExchange` — confirmed in @tabler/icons-react for Replace IGDB IDs feature
 - `IconCirclePlus` — confirmed in @tabler/icons-react for Add Game feature
 
-### oRPC router handler — no-await pattern
+### actorId injection in NestJS Controllers
 
-- When the handler body is a single `return someService.asyncMethod(...)`, omit `async` on the arrow function
-- Use `({ input }) => this.service.method(input.field)` (not `async ({ input }) => { return ... }`)
-- This avoids the TS "async function has no await" lint error
-
-### actorId injection in oRPC routers
-
-- `@orpc/nest` does NOT support a context factory in `ORPCModule.forRoot({})`
-- Use `@Req() req: AuthenticatedRequest` on the router method, then close over it inside `implement().handler()`
-- Pattern: `scan(@Req() req: AuthenticatedRequest) { return implement(...).handler(({ input }) => { const actorId = req.stackAuth?.sub ?? 'unknown'; ... }); }`
-
-### New contract namespace pattern
-
-- A new `discover` namespace was added to the root contract in `packages/api-contract/src/index.ts`
-- Add to `oc.prefix('/api').router({ games: ..., discover: DiscoverContract })`
-- Export from `index.ts` via `export * from './discover'`
+- Use `@Req() req: AuthenticatedRequest` on the controller method to access Stack Auth payload
+- Extract `req.stackAuth?.sub` for `actorId`
 
 ### GamesModule exports
 
@@ -118,7 +105,7 @@ export default function SomePage() {
 
 ### Domain Events table
 
-- `domainEvents` table added to `packages/api-contract/src/schema.ts`
+- `domainEvents` table added to `apps/api/src/db/schema/domain-event.ts` exported via `@workspace/api/db`
 - Migration generated at `apps/api/drizzle/0011_simple_whirlwind.sql`
 
 ### pg_trgm GIN index migration (migration 0012)

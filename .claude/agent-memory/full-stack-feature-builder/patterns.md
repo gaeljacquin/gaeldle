@@ -34,9 +34,7 @@ check for `status IN ('pending', 'running')` before inserting.
 
 ## NestJS @Sse() Controller Path
 
-NestJS controllers registered alongside oRPC routers must use the FULL path prefix
-including `/api/` since the `@Controller()` decorator on the SSE controller uses
-`@Controller('api/games')` to match the oRPC contract path prefix.
+NestJS SSE controllers use the path prefix `@Controller('api/games')`.
 
 ## Checkbox in Views
 

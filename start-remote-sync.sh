@@ -36,6 +36,7 @@ mutagen sync create \
   --ignore-vcs \
   --sync-mode=one-way-replica \
   --ignore "node_modules" \
+  --ignore ".pnpm-store" \
   --ignore ".next" \
   --ignore ".turbo" \
   --ignore "dist" \

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { pixelateImage } from '@/lib/utils/pixelate';
 import { cn } from '@workspace/ui/lib/utils';
-import type { Game } from '@workspace/api-contract';
+import type { Game } from '@workspace/api/db';
 import ImageDisplaySkeleton from '@/components/image-display-skeleton';
 
 interface CoverDisplayProps {

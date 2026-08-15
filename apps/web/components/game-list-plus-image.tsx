@@ -85,6 +85,32 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
           />
         );
         break;
+      case 'clue':
+        if (!isGameOver) {
+          const clueText =
+            (targetGame?.clue as { clue?: string } | null)?.clue ??
+            'No clue available for this game.';
+          imageDisplayed = (
+            <div className="size-full flex flex-col justify-center items-center p-8 bg-card select-text relative">
+              <p className="font-serif text-lg md:text-xl leading-relaxed text-foreground text-center italic">
+                &ldquo;{clueText}&rdquo;
+              </p>
+            </div>
+          );
+        } else {
+          imageDisplayed = (
+            <CoverDisplay
+              game={targetGame}
+              pixelSize={0}
+              usePixelation={false}
+              isGameOver={isGameOver}
+              className="size-full"
+              sourceImageUrl={targetGame?.imageUrl}
+              objectFit="cover"
+            />
+          );
+        }
+        break;
       default:
         imageDisplayed = (
           <CoverDisplay
@@ -169,7 +195,8 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                     Submit
                   </Button>
                   {(props.gameModeSlug === 'cover-art' ||
-                    props.gameModeSlug === 'artwork') && (
+                    props.gameModeSlug === 'artwork' ||
+                    props.gameModeSlug === 'clue') && (
                     <Button
                       onClick={handleSkipWithClear}
                       disabled={isGameOver}
@@ -225,6 +252,18 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                   </Button>
                 </div>
               ) : null}
+
+              {isGameOver && props.gameModeSlug === 'clue' && (
+                <div className="p-4 bg-muted/30 border border-border text-sm italic text-muted-foreground font-serif">
+                  <p className="font-sans text-[10px] uppercase font-bold tracking-wider not-italic mb-1 text-muted-foreground/60">
+                    Clue
+                  </p>
+                  &ldquo;
+                  {(targetGame?.clue as { clue?: string } | null)?.clue ??
+                    'No clue available.'}
+                  &rdquo;
+                </div>
+              )}
             </div>
           </div>
         </div>

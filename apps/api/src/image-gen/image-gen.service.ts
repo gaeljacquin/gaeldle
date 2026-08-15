@@ -15,7 +15,7 @@ import {
   artStyles as artStylesView,
   type ArtStyleValue,
   ImageGenStatus,
-} from '@workspace/api-contract';
+} from '@/db/schema';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';
@@ -31,6 +31,7 @@ interface GenerateImageInput {
   includeGenres?: boolean;
   includeThemes?: boolean;
   artStyle?: ArtStyleValue;
+  provider: string;
 }
 
 @Injectable()
@@ -48,10 +49,11 @@ export class ImageGenService {
   async generateImages(
     params: {
       numGames: number;
-      artStyle: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with imageGen
-      includeStoryline: boolean;
-      includeGenres: boolean;
-      includeThemes: boolean;
+      artStyle: string;
+      includeStoryline?: boolean;
+      includeGenres?: boolean;
+      includeThemes?: boolean;
+      provider: string;
     },
     actorId: string,
   ): Promise<{ imageGenId: string; gamesQueued: number }> {
@@ -129,17 +131,18 @@ export class ImageGenService {
     pendingGames: Game[],
     params: {
       numGames: number;
-      artStyle: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with imageGen
-      includeStoryline: boolean;
-      includeGenres: boolean;
-      includeThemes: boolean;
+      artStyle: string;
+      includeStoryline?: boolean;
+      includeGenres?: boolean;
+      includeThemes?: boolean;
+      provider: string;
     },
     actorId: string,
   ): Promise<void> {
     const total = pendingGames.length;
     const failures: Array<{ igdbId: number; gameName: string; error: string }> =
       [];
-    const { artStyle: artStyleValue } = params;
+    const { artStyle: artStyleValue, provider } = params;
     let processed = 0;
     let succeeded = 0;
     let failed = 0;
@@ -172,7 +175,7 @@ export class ImageGenService {
           params,
           artStyle?.description,
         );
-        const rawBuffer = await this.aiService.generateImage(prompt);
+        const rawBuffer = await this.aiService.generateImage(prompt, provider);
         const imageBuffer = await sharp(rawBuffer)
           .jpeg({ quality: 85 })
           .toBuffer();
@@ -189,8 +192,8 @@ export class ImageGenService {
         const newItem = {
           [asvKey]: {
             url: publicUrl,
-            prompt: prompt,
-            provider: 'cloudflare',
+            prompt,
+            provider,
           },
         };
         const existingIndex = list.findIndex(
@@ -432,6 +435,7 @@ export class ImageGenService {
       includeGenres,
       includeThemes,
       artStyle: artStyleValue,
+      provider,
     } = input;
     const game = await this.gamesService.getGameByIgdbId(igdbId);
     const artStyles = await this.databaseService.db
@@ -456,7 +460,7 @@ export class ImageGenService {
       artStyleDescription!,
     );
 
-    const rawBuffer = await this.aiService.generateImage(prompt);
+    const rawBuffer = await this.aiService.generateImage(prompt, provider);
     const imageBuffer = await sharp(rawBuffer).jpeg({ quality: 85 }).toBuffer();
     const timestamp = Date.now();
     const key = `${IMAGE_GEN_DIR}/${igdbId}_${timestamp}.jpg`;
@@ -471,7 +475,7 @@ export class ImageGenService {
       [artStyleValue]: {
         url: publicUrl,
         prompt: prompt,
-        provider: 'cloudflare',
+        provider,
       },
     };
     const existingIndex = list.findIndex(
@@ -521,9 +525,9 @@ export class ImageGenService {
       'name' | 'summary' | 'storyline' | 'keywords' | 'genres' | 'themes'
     >,
     options: {
-      includeStoryline: boolean;
-      includeGenres: boolean;
-      includeThemes: boolean;
+      includeStoryline?: boolean;
+      includeGenres?: boolean;
+      includeThemes?: boolean;
     },
     artStyleDescription: string,
   ): string {

@@ -34,8 +34,8 @@ Cover Art, Artwork, and Image Gen all use the `GameListPlusImage` component and 
 
 Game operations are split between two APIs:
 
-- **Reads** (list, search, random, artwork, get-by-igdbId): Next.js route handlers in `apps/web/app/api/games/`. DB accessed directly via Drizzle singleton at `apps/web/lib/db.ts`. Service layer uses plain `fetch`. No oRPC contract.
-- **Writes** (delete, sync, generateImage, bulkGenerateImages, validateIgdbIdAdd, validateReplaceGame, replaceGames): NestJS via `orpcClient`. Covered by `packages/api-contract`.
+- **Reads** (list, search, random, artwork, get-by-igdbId): Next.js route handlers in `apps/web/app/api/games/`. DB accessed directly via Drizzle singleton at `apps/web/lib/db.ts`. Service layer uses plain `fetch`.
+- **Writes** (delete, sync, generateImage, bulkGenerateImages, validateIgdbIdAdd, validateReplaceGame, replaceGames): NestJS via `apiClient` (`@workspace/api-client`). Generated from OpenAPI spec via `pnpm codegen`.
 
 New NestJS write endpoints added 2026-02-25/26:
 

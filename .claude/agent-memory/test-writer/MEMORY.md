@@ -57,6 +57,6 @@ Tests created for `/apps/web/lib/` utilities:
 - Hooks (use-debounce, use-mobile, use-cover-art-game, etc.) - require React Testing Library
 - Services (game.service.ts) - require dependency injection and API mocking
 - Stores (timeline-store.ts) - require Zustand store testing
-- orpc.ts - complex integration with auth/fetch, better as integration test
+- api-client.ts - integration with auth/fetch, better as integration test
 
 These should be addressed in separate test sessions with appropriate testing libraries.

@@ -2,7 +2,7 @@
 
 import { forwardRef } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
-import type { Game } from '@workspace/api-contract';
+import type { Game } from '@workspace/api/db';
 import Image from 'next/image';
 import { timelineFormatDate } from '@workspace/shared';
 

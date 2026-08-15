@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -23,8 +24,8 @@ export class HexclaveGuard implements CanActivate {
   private readonly jwksUrl: URL;
   private jwks: ReturnType<JoseModule['createRemoteJWKSet']> | null = null;
 
-  constructor(private readonly configService: ConfigService) {
-    this.projectId = this.configService.get<string>('hexclaveProjectId') ?? '';
+  constructor(@Optional() private readonly configService?: ConfigService) {
+    this.projectId = this.configService?.get<string>('hexclaveProjectId') ?? '';
     const apiBaseUrl =
       process.env.HEXCLAVE_API_URL || 'https://api.hexclave.com';
     this.jwksUrl = new URL(

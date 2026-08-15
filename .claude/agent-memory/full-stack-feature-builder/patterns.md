@@ -1,27 +1,10 @@
 # Gaeldle Patterns
 
-## oRPC Date Serialization (critical)
+## OpenAPI Date Serialization (critical)
 
-oRPC with the OpenAPI fetch client serializes `Date` fields as ISO strings over the wire.
-Frontend prop types for data coming from `orpcClient` must use `Date | string` (or just `string`)
-for timestamp fields — NOT `Date`. If you write `Date` you'll get a TS type error at build time.
-
-Example:
-
-```ts
-// WRONG - causes build error:
-startedAt: Date | null;
-// CORRECT - matches what oRPC actually returns on the client:
-startedAt: Date | string | null;
-```
-
-## SSE Authentication Pattern
-
-For SSE endpoints that need auth (can't send custom headers with EventSource):
-
-- Pass the Stack Auth JWT as `?token=<accessToken>` query param
-- Controller verifies using the same JWKS as StackAuthGuard (copy the verifyToken logic)
-- Get token on frontend: `await user.getAccessToken()` from `useUser({ or: 'redirect' })`
+`openapi-fetch` serializes `Date` fields as ISO strings over the wire.
+Frontend prop types for data coming from `apiClient` must use `Date | string` (or just `string`)
+for timestamp fields — NOT `Date`.
 
 ## Drizzle Migrations
 
@@ -29,7 +12,7 @@ Run from `apps/api` dir:
 
 - Generate: `pnpm drizzle-kit generate`
 - Apply: `pnpm drizzle-kit migrate`
-  Schema source: `packages/api-contract/src/schema.ts`
+  Schema source: `apps/api/src/db/schema/index.ts`
 
 ## Background Jobs (fire-and-forget) in NestJS
 
@@ -51,9 +34,7 @@ check for `status IN ('pending', 'running')` before inserting.
 
 ## NestJS @Sse() Controller Path
 
-NestJS controllers registered alongside oRPC routers must use the FULL path prefix
-including `/api/` since the `@Controller()` decorator on the SSE controller uses
-`@Controller('api/games')` to match the oRPC contract path prefix.
+NestJS SSE controllers use the path prefix `@Controller('api/games')`.
 
 ## Checkbox in Views
 

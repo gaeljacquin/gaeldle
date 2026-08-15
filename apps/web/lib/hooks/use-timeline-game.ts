@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getRandomGames } from '@/lib/services/game.service';
-import type { Game } from '@workspace/api-contract';
+import type { Game } from '@workspace/api/db';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
 import { TIMELINE_GAMES_COUNT } from '@workspace/shared';
 import { useSuspenseQuery } from '@tanstack/react-query';

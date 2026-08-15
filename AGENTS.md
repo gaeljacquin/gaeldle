@@ -7,6 +7,7 @@ Gaeldle is a Turborepo monorepo with a Next.js web app and a NestJS API.
 - Package manager: `nr` (unified for root and apps).
 - Commands:
   - `nr build` (or `turbo build`)
+  - `nr codegen` (or `pnpm codegen`)
   - `nr test` (or `turbo test`)
   - `nr typecheck` (or `turbo type-check`)
   - `nr lint` (or `turbo lint`)

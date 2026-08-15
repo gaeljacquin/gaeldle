@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { AppConfiguration } from '@/config/configuration';
@@ -8,40 +8,53 @@ export class S3Service {
   private readonly client: S3Client;
   private readonly bucketName: string;
 
-  constructor(private readonly configService: ConfigService<AppConfiguration>) {
+  constructor(
+    @Optional()
+    private readonly configService?: ConfigService<AppConfiguration>,
+  ) {
+    const endpoint =
+      this.configService?.get('r2Endpoint', { infer: true }) ||
+      'https://localhost';
+    const accessKeyId =
+      this.configService?.get('r2AccessKeyId', { infer: true }) || 'dummy';
+    const secretAccessKey =
+      this.configService?.get('r2SecretAccessKey', { infer: true }) || 'dummy';
+    this.bucketName =
+      this.configService?.get('r2BucketName', { infer: true }) || 'dummy';
+
     this.client = new S3Client({
       region: 'auto',
-      endpoint: this.configService.get('r2Endpoint', { infer: true }),
+      endpoint,
       forcePathStyle: true,
       credentials: {
-        accessKeyId: this.configService.get('r2AccessKeyId', { infer: true })!,
-        secretAccessKey: this.configService.get('r2SecretAccessKey', {
-          infer: true,
-        })!,
+        accessKeyId,
+        secretAccessKey,
       },
     });
-    this.bucketName = this.configService.get('r2BucketName', {
-      infer: true,
-    })!;
+  }
+
+  async uploadFile(
+    fileBuffer: Buffer,
+    key: string,
+    contentType: string,
+  ): Promise<string> {
+    return this.uploadImage(key, fileBuffer, contentType);
   }
 
   async uploadImage(
     key: string,
-    body: Buffer,
-    contentType: string = 'image/jpeg',
-  ) {
+    fileBuffer: Buffer,
+    contentType: string,
+  ): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,
-      Body: body,
+      Body: fileBuffer,
       ContentType: contentType,
     });
 
-    const res = await this.client.send(command);
+    await this.client.send(command);
 
-    return {
-      ok: res.$metadata.httpStatusCode === 200,
-      key,
-    };
+    return key;
   }
 }

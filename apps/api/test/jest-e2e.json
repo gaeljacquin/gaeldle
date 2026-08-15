@@ -13,7 +13,7 @@
   },
   "moduleNameMapper": {
     "^@/(.*)$": "<rootDir>/../src/$1",
-    "^@workspace/api-contract$": "<rootDir>/../../../packages/api-contract/src/index.ts"
+    "^@workspace/api/db$": "<rootDir>/../src/db/schema/index.ts"
   },
   "extensionsToTreatAsEsm": [".ts"]
 }

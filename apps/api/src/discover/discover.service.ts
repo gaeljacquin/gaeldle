@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { inArray } from 'drizzle-orm';
 import { DatabaseService } from '@/db/database.service';
-import {
-  games,
-  domainEvents,
-  DiscoverCandidate,
-  DiscoverApplyResult,
-} from '@workspace/api-contract';
+import { games, domainEvents } from '@/db/schema';
+import type {
+  DiscoverCandidateDto as DiscoverCandidate,
+  DiscoverApplyResultDto as DiscoverApplyResult,
+} from '@/discover/dto/discover.dto';
 import { IgdbService } from '@/lib/igdb.service';
 import { GamesService } from '@/games/games.service';
 

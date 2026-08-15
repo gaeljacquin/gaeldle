@@ -55,7 +55,7 @@ apps/web/
 - **API calls via services**: All API communication must go through service functions in `lib/services/`. Components and hooks must not call `fetch` directly.
 - **Read vs. write transport**:
   - Read operations (game lists, search, random, artwork) call the local Next.js API routes via plain `fetch` inside `lib/services/game.service.ts`.
-  - Write operations (delete, sync, image gen, add game, replace game, validate IGDB IDs) use the oRPC client (`orpcClient`) to communicate with NestJS.
+  - Write operations (delete, sync, image gen, add game, replace game, validate IGDB IDs) use `apiClient` from `@workspace/api-client` to communicate with NestJS.
 - **No Direct Data Access**: No raw `fetch` or `axios` calls inside components or hooks. Call the service layer instead.
 - **Custom Hooks**: Complex stateful logic, especially game logic, belongs in `lib/hooks/`.
 - **Views**: Complex pages should have their main content in `views/` to keep `app/` files clean.

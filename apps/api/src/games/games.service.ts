@@ -13,7 +13,7 @@ import {
   GameInsert,
   domainEvents,
   queriedGames,
-} from '@workspace/api-contract';
+} from '@/db/schema';
 import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
@@ -27,6 +27,7 @@ interface GenerateImageInput {
   includeGenres?: boolean;
   includeThemes?: boolean;
   artStyle?: ArtStyleValue; // effectively artStyleValue, not renaming this to be consistent with imageGen
+  provider: string;
 }
 
 @Injectable()
@@ -94,6 +95,31 @@ export class GamesService {
     return this.pendingQueriedRefresh;
   }
 
+  private pendingClueHistoryRefresh: Promise<void> | null = null;
+
+  async refreshGamesClueHistoryView(): Promise<void> {
+    if (this.pendingClueHistoryRefresh) {
+      return this.pendingClueHistoryRefresh;
+    }
+
+    this.pendingClueHistoryRefresh = (async () => {
+      try {
+        await this.databaseService.db.execute(
+          sql`REFRESH MATERIALIZED VIEW games_clue_history`,
+        );
+      } catch (e) {
+        console.error(
+          'Failed to refresh games_clue_history materialized view',
+          e,
+        );
+      } finally {
+        this.pendingClueHistoryRefresh = null;
+      }
+    })();
+
+    return this.pendingClueHistoryRefresh;
+  }
+
   private async performRefresh() {
     if (this.pendingRefresh) {
       return this.pendingRefresh;
@@ -105,6 +131,7 @@ export class GamesService {
           sql`REFRESH MATERIALIZED VIEW all_games`,
         );
         await this.refreshQueriedGamesView();
+        await this.refreshGamesClueHistoryView();
       } catch (e) {
         console.error('Failed to refresh materialized view', e);
       } finally {
@@ -468,6 +495,7 @@ export class GamesService {
       includeGenres,
       includeThemes,
       artStyle: artStyleValue, // effectively artStyleValue, not renaming this to be consistent with imageGen
+      provider,
     } = input;
     const game = await this.getGameByIgdbId(igdbId);
     const artStyles = await this.databaseService.db
@@ -491,7 +519,7 @@ export class GamesService {
       },
       artStyleDescription!,
     );
-    const rawBuffer = await this.aiService.generateImage(prompt);
+    const rawBuffer = await this.aiService.generateImage(prompt, provider);
     const imageBuffer = await sharp(rawBuffer).jpeg({ quality: 85 }).toBuffer();
     const timestamp = Date.now();
     const key = `${IMAGE_GEN_DIR}/${igdbId}_${timestamp}.jpg`;
@@ -505,8 +533,8 @@ export class GamesService {
     const newItem = {
       [artStyleValue]: {
         url: publicUrl,
-        prompt: prompt,
-        provider: 'cloudflare',
+        prompt,
+        provider,
       },
     };
     const existingIndex = list.findIndex(

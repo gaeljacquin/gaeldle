@@ -1,12 +1,28 @@
-import { orpcClient } from '@/lib/orpc';
+import { apiClient } from '@/lib/api-client';
 
 export async function discoverScan(count: number) {
-  return orpcClient.discover.scan({ count });
+  const { data, error } = await apiClient.POST('/api/discover/scan', {
+    body: { count },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to scan for games');
+  }
+
+  return data;
 }
 
 export async function discoverApply(
   scanEventId: number,
   selectedIgdbIds: number[],
 ) {
-  return orpcClient.discover.apply({ scanEventId, selectedIgdbIds });
+  const { data, error } = await apiClient.POST('/api/discover/apply', {
+    body: { scanEventId, selectedIgdbIds },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to apply discovered games');
+  }
+
+  return data;
 }

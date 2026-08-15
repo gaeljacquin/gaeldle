@@ -4,7 +4,7 @@
 
 ## Key Decisions
 
-- **New DiscoverContract** separate from GamesContract in `packages/api-contract/src/discover.ts`
+- **New DiscoverController** in `apps/api/src/discover/discover.router.ts`
 - **New DiscoverModule** in `apps/api/src/discover/` — IgdbService shared via GamesModule export
 - **IGDB query**: no exclusion list; fetch freely, post-filter against DB; `category=0 & status=0 & total_rating_count > 50 & themes != (42)`
 - **isAlreadyAdded flag**: candidates include all IGDB results; backend checks igdbIds against DB and marks already-present ones
@@ -27,30 +27,13 @@
 
 ## actorId Pattern (NEW — first use in this codebase)
 
-In `discover.router.ts`, the `apply` handler must receive the raw request to read `stackAuth.sub`:
-
-```ts
-import { Req } from '@nestjs/common';
-import type { Request } from 'express';
-import type { JWTPayload } from 'jose';
-
-// Inside the handler:
-handler(async ({ input }, { context }) => {
-  // context is oRPC context — does NOT have request
-  // Use @Req() decorator on the router method to access the Express request
-});
-```
-
-Alternative: since oRPC `implement().handler()` does not natively expose the raw Express request, use a NestJS `@Req()` parameter on the method alongside the `implement()` call. Check `@orpc/nest` docs for context injection. If unavailable, use a custom decorator or pass userId via the oRPC input field (signed by the frontend from Stack Auth session — less ideal). Implementation detail for the builder to resolve.
+Use NestJS `@Req() req: AuthenticatedRequest` parameter on the controller method to access the Express request and `req.stackAuth?.sub`.
 
 ## File Tree
 
 ```
 packages/
-  api-contract/src/
-    schema.ts              # MODIFIED: add domainEvents table + Zod schemas
-    discover.ts            # NEW: DiscoverContract
-    index.ts               # MODIFIED: add discover namespace
+  api-client/              # Generated openapi-fetch client and schema
 
   constants/src/
     index.ts               # MODIFIED: DISCOVER_GAMES_MAX=50, DISCOVER_GAMES_DEFAULT=10

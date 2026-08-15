@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
 import { IconPlus, IconMinus } from '@tabler/icons-react';
-import type { Game } from '@workspace/api-contract';
+import type { Game } from '@workspace/api/db';
 
 interface DevModeToggleProps {
   targetGame: Game | null;

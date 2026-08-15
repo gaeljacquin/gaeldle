@@ -1,12 +1,10 @@
 import { db } from '@/lib/db';
-import {
-  gameModes as gameModesView,
-  gameModeTable,
-  domainEvents,
-} from '@workspace/api-contract';
+import { gameModes, gameModeTable, domainEvents } from '@workspace/api/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { asc, eq, sql, inArray } from 'drizzle-orm';
 import { hexclaveServerApp } from '@/hexclave/server';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,9 +20,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(allGameModes);
     }
 
-    const gameModes = await db.select().from(gameModesView);
+    const activeGameModesList = await db.select().from(gameModes);
 
-    return NextResponse.json(gameModes);
+    return NextResponse.json(activeGameModesList);
   } catch (error) {
     console.error('Error fetching game modes:', error);
 
@@ -43,9 +41,15 @@ export async function PATCH(request: NextRequest) {
 
     if (Array.isArray(body)) {
       newOrder = body;
-    } else if (body && typeof body === 'object' && Array.isArray(body.newOrder)) {
+    } else if (
+      body &&
+      typeof body === 'object' &&
+      Array.isArray(body.newOrder)
+    ) {
       newOrder = body.newOrder;
-      expectedOrder = Array.isArray(body.expectedOrder) ? body.expectedOrder : null;
+      expectedOrder = Array.isArray(body.expectedOrder)
+        ? body.expectedOrder
+        : null;
     }
 
     if (newOrder.length > 0) {
@@ -76,7 +80,9 @@ export async function PATCH(request: NextRequest) {
           }
         }
 
-        const previousModes = allDbModes.filter((m) => idsToUpdate.includes(m.id));
+        const previousModes = allDbModes.filter((m) =>
+          idsToUpdate.includes(m.id),
+        );
 
         // First, temporarily set all ordinals to unique negative values to prevent unique constraint violations
         for (const item of newOrder) {

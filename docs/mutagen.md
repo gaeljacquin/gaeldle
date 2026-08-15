@@ -76,7 +76,7 @@ After creating the sync session, use either the `nr sync:*` shorthands or raw `m
 
 The sync uses the `--ignore-vcs` flag, which automatically respects `.gitignore`. This means:
 
-- Everything listed in `.gitignore` is excluded (e.g. `node_modules`, `dist`, `.turbo`, `*.tsbuildinfo`).
+- Everything listed in `.gitignore` is excluded (e.g. `node_modules`, `.pnpm-store`, `dist`, `.turbo`, `*.tsbuildinfo`).
 - The `.git` directory is always excluded.
 - No need to manually list ignore patterns.
 

@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { artStyles as artStylesView } from '@workspace/api-contract';
+import { artStyles as artStylesView } from '@workspace/api/db';
 import { NextResponse } from 'next/server';
 
 export async function GET() {

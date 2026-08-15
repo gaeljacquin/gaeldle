@@ -2,9 +2,9 @@
 
 ## Topology
 
-- `apps/api`: NestJS API using oRPC (TypeScript), default port 8080.
+- `apps/api`: NestJS API exposing OpenAPI spec, default port 8080.
 - `apps/web`: Next.js 16 App Router app (TypeScript, Tailwind v4), default port 3000.
-- `packages/api-contract`: Shared oRPC contract and Zod schemas used by both API and Web. Package name: `@workspace/api-contract`.
+- `packages/api-client`: Generated `openapi-fetch` client typed against `apps/api/openapi.json`. Package name: `@workspace/api-client`.
 - `packages/constants`: Shared constants consumed by both API and Web. Package name: `@workspace/constants`.
 - Monorepo: Turborepo workspace with apps under `apps/` and packages under `packages/`.
 
@@ -15,14 +15,14 @@ Game operations are split across two APIs:
 | Operation type                                                             | API                  | Transport                     |
 | -------------------------------------------------------------------------- | -------------------- | ----------------------------- |
 | Read (list, search, random, artwork, get by IGDB ID)                       | Next.js (`apps/web`) | plain `fetch` to local routes |
-| Write (delete, sync, image gen, add game, replace game, validate IGDB IDs) | NestJS (`apps/api`)  | oRPC client (`orpcClient`)    |
+| Write (delete, sync, image gen, add game, replace game, validate IGDB IDs) | NestJS (`apps/api`)  | OpenAPI client (`apiClient`)  |
 
-Read operations are implemented as Next.js App Router API route handlers under `apps/web/app/api/games/`. They query the database directly using a Drizzle client (`apps/web/lib/db.ts`). Write operations remain in the NestJS API and are called via the oRPC contract.
+Read operations are implemented as Next.js App Router API route handlers under `apps/web/app/api/games/`. They query the database directly using a Drizzle client (`apps/web/lib/db.ts`). Write operations remain in the NestJS API and are called via `@workspace/api-client`.
 
 ## Data & Auth
 
 - Database: PostgreSQL 17 (default port 5432).
-- oRPC: Used for end-to-end type-safe communication with the NestJS API (write operations only).
+- OpenAPI + Codegen: OpenAPI spec generated from NestJS controllers (`pnpm codegen`), providing `openapi-fetch` client typed via `packages/api-client/src/schema.d.ts` (write operations).
 - Auth: Stack Auth used in both frontend and backend.
 
 ## Ports

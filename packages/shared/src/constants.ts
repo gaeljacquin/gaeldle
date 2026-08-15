@@ -1,9 +1,7 @@
 export const IMAGE_PROMPT_SUFFIX =
   "Funko Pop chibi art style, big head small body, large expressive eyes, scene depicts the game's iconic setting and atmosphere, vibrant colorful illustration, highly detailed digital art, no packaging, no box, no shelf, no text, no letters, no words, no titles, no logos, no watermarks, no labels, no UI elements, no written characters of any kind.";
 
-export const DEFAULT_IMAGE_GEN_ART_STYLE = 'funko-pop-chibi';
-
-export const DEFAULT_IMAGE_GEN_NUM = 5;
+export const DEFAULT_PROVIDER = 'cloudflare';
 
 export const IMAGE_GEN_MIN = 1;
 
@@ -18,9 +16,6 @@ export const IMAGE_GEN_DIR = 'res';
 export const ADD_GAME_MAX_ROWS = 20;
 
 export const PLACEHOLDER_IMAGE = 'placeholder.jpg';
-
-export const PLACEHOLDER_IMAGE_R2 = (r2PublicUrl: string) =>
-  `${r2PublicUrl}/${PLACEHOLDER_IMAGE}`;
 
 export const DISCOVER_GAMES_MAX = 50;
 
@@ -39,3 +34,18 @@ export const GAME_MODE_SKELETON_COUNT = 6;
 export const VIEWPORT_DIMENSIONS_FALLBACK = '0:0:16';
 
 export const PLACEHOLDER_IGDB_IDS = [1942, 348330].join(',');
+
+export const CLUE_SYSTEM_PROMPT = `
+  You are an expert quiz master.
+
+  Your task is to generate exactly 1 clue for the game provided in the user request.
+
+  Rules:
+  1. Do NOT mention the name of the game in the clue.
+  2. Rely only on the fields provided in the game JSON (name, summary, storyline, first_release_date, themes, keywords, game_modes, genres) to derive the clue. Do not make up facts outside the provided context, but rephrase them creatively.
+  3. The resulting clue should NOT simply list or contain every provided input field. Choose the most interesting aspects to create a cohesive, single clue.
+  4. You must respond with a JSON object in this format:
+  {
+    "clue": "Your clue here"
+  }
+`;

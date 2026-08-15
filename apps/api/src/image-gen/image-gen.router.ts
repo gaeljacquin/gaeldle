@@ -1,5 +1,8 @@
 import {
   Controller,
+  Post,
+  Get,
+  Body,
   Param,
   Sse,
   UnauthorizedException,
@@ -7,7 +10,13 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { Implement, implement } from '@orpc/nest';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+} from '@nestjs/swagger';
 import { Observable, merge, EMPTY } from 'rxjs';
 import { map, take, filter, mergeMap } from 'rxjs/operators';
 import { ImageGenStore, type ImageGenEvent } from '@/image-gen/image-gen.store';
@@ -16,62 +25,80 @@ import {
   type AuthenticatedRequest,
   HexclaveGuard,
 } from '@/auth/hexclave.guard';
-import { contract } from '@workspace/api-contract';
+import {
+  GenerateImageDto,
+  GenerateImageResponseDto,
+  GenerateImagesDto,
+  GenerateImagesResponseDto,
+  ImageGenStatusResponseDto,
+} from '@/image-gen/dto/image-gen.dto';
 
-@Controller()
+@ApiTags('imageGen')
+@Controller('api/image-gen')
 export class ImageGenRouter {
   constructor(
     private readonly imageGenService: ImageGenService,
     private readonly imageGenStore: ImageGenStore,
   ) {}
 
-  @Implement(contract.imageGen.generateImage)
+  @Post('generate-image')
   @UseGuards(HexclaveGuard)
-  generateImage(@Req() req: AuthenticatedRequest) {
-    return implement(contract.imageGen.generateImage).handler(
-      async ({ input }) => {
-        const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
-        const result = await this.imageGenService.generateImage(input, actorId);
+  @ApiOperation({ summary: 'Generate a single AI image for a game' })
+  @ApiBody({ type: GenerateImageDto })
+  @ApiResponse({ status: 200, type: GenerateImageResponseDto })
+  async generateImage(
+    @Body() body: GenerateImageDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<GenerateImageResponseDto> {
+    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+    const result = await this.imageGenService.generateImage(body, actorId);
 
-        if (!result) {
-          throw new NotFoundException('Game not found');
-        }
+    if (!result) {
+      throw new NotFoundException('Game not found');
+    }
 
-        return result;
-      },
-    );
+    return result;
   }
 
-  @Implement(contract.imageGen.generateImages)
+  @Post('generate-images')
   @UseGuards(HexclaveGuard)
-  generateImages(@Req() req: AuthenticatedRequest) {
-    return implement(contract.imageGen.generateImages).handler(
-      async ({ input }) => {
-        const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
-        const { imageGenId, gamesQueued } =
-          await this.imageGenService.generateImages(input, actorId);
+  @ApiOperation({ summary: 'Generate AI images for multiple games' })
+  @ApiBody({ type: GenerateImagesDto })
+  @ApiResponse({ status: 200, type: GenerateImagesResponseDto })
+  async generateImages(
+    @Body() body: GenerateImagesDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<GenerateImagesResponseDto> {
+    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+    const { imageGenId, gamesQueued } =
+      await this.imageGenService.generateImages(body, actorId);
 
-        return { success: true, imageGenId, gamesQueued };
-      },
-    );
+    return { success: true, imageGenId, gamesQueued };
   }
 
-  @Implement(contract.imageGen.getImageGenStatus)
+  @Get('generate-images/:imageGenId/status')
   @UseGuards(HexclaveGuard)
-  getImageGenStatus() {
-    return implement(contract.imageGen.getImageGenStatus).handler(
-      async ({ input }) => {
-        const result = await this.imageGenService.getImageGenStatus(
-          input.imageGenId,
-        );
+  @ApiOperation({ summary: 'Get bulk image generation status' })
+  @ApiParam({ name: 'imageGenId', type: String })
+  @ApiResponse({ status: 200, type: ImageGenStatusResponseDto })
+  async getImageGenStatus(
+    @Param('imageGenId') imageGenId: string,
+  ): Promise<ImageGenStatusResponseDto> {
+    const result = await this.imageGenService.getImageGenStatus(imageGenId);
 
-        return { success: true, ...result };
-      },
-    );
+    return {
+      success: true,
+      ...result,
+      startedAt: result.startedAt ? result.startedAt.toISOString() : null,
+      completedAt: result.completedAt ? result.completedAt.toISOString() : null,
+      createdAt: result.createdAt.toISOString(),
+    };
   }
 
-  @Sse('api/image-gen/generate-images/:imageGenId/stream')
+  @Sse('generate-images/:imageGenId/stream')
   @UseGuards(HexclaveGuard)
+  @ApiOperation({ summary: 'Stream image generation progress via SSE' })
+  @ApiParam({ name: 'imageGenId', type: String })
   async stream(
     @Param('imageGenId') imageGenId: string,
   ): Promise<Observable<MessageEvent>> {

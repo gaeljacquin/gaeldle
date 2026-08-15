@@ -5,7 +5,7 @@
 - **Monorepo**: Turborepo + `ni` (pnpm workspaces)
 - **Backend**: NestJS (API)
 - **Frontend**: Next.js 16 (App Router)
-- **API Protocol**: oRPC (Type-safe communication)
+- **API Protocol**: OpenAPI + openapi-typescript + openapi-fetch (Type-safe communication)
 - **Database**: PostgreSQL 17 + Drizzle ORM
 - **Authentication**: Stack Auth
 - **Styling**: Tailwind CSS v4 + Vanilla CSS
@@ -18,11 +18,11 @@
 
 ```
 apps/
-  api/        # NestJS API (Write operations, Image generation)
+  api/        # NestJS API (Write operations, Image generation, OpenAPI spec)
   web/        # Next.js App (Read operations, Game views)
 packages/
-  api-contract/ # Shared oRPC contract and Zod schemas
-  constants/    # Shared workspace constants
+  api-client/ # Generated openapi-fetch client and TypeScript schema (@workspace/api-client)
+  constants/  # Shared workspace constants
   ui/           # Shared UI component library (@workspace/ui)
 docs/           # Developer documentation
 .gemini/        # Agent definitions and skills

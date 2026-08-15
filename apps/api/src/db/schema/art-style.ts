@@ -36,7 +36,6 @@ export const artStylesTable = pgTable(
   (table) => [
     check('art_style_default_check', sql`${table.isDefault} IN (0, 1)`),
     check('art_style_active_check', sql`${table.isActive} IN (0, 1)`),
-    // At most one record where default = 1
     uniqueIndex('art_style_single_default_idx')
       .on(table.isDefault)
       .where(sql`${table.isDefault} = 1`),

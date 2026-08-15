@@ -6,29 +6,30 @@ All backend code must separate contracts, routers, services, config, and utils.
 
 ### Structure
 
-```
-packages/api-contract/src/
-├── index.ts          # Main contract entry point
-├── schema.ts         # Zod schemas and DB types
-└── [resource].ts     # Resource-specific oRPC routes
+### Structure
 
+```
 apps/api/src/
-├── app.module.ts     # Root module with oRPC setup
+├── app.module.ts     # Root module
 ├── config/           # Environment/config
 ├── utils/            # Pure helpers
 ├── [resource]/       # NestJS modules per resource
+│   ├── dto/                   # DTOs with @ApiProperty / @ApiPropertyOptional
 │   ├── [resource].module.ts
-│   ├── [resource].router.ts   # oRPC implementation
+│   ├── [resource].controller.ts (or router) # NestJS Controller decorated with @Controller, @ApiTags, @ApiOperation, @ApiBody
 │   └── [resource].service.ts  # Business logic
-└── db/               # Database schema/connection
+├── db/
+│   └── schema/       # Drizzle schema exported at @workspace/api/db
+└── scripts/
+    └── generate-openapi.ts    # Standalone script booting Nest context to write apps/api/openapi.json
 ```
 
 ### Rules
 
-- **Contract First**: Define API endpoints in `packages/api-contract` using oRPC and Zod before implementation.
-- **Routers**: Use `@Implement(contract.path)` and `implement(contract.path).handler()` in NestJS controllers (routers). Routers should only handle input/output mapping and call services.
-- **Services**: Contain business logic and DB/external integrations. They are injected into routers.
-- **Validation**: Use Zod in the contract for automated input/output validation.
+- **OpenAPI First with NestJS Decorators**: Define API endpoints using standard NestJS controllers decorated with `@Controller`, `@ApiTags`, `@ApiOperation`, `@ApiBody`, `@ApiParam`, `@ApiQuery`, and `@ApiResponse`.
+- **DTO Validation & Schema Specs**: Annotate DTO properties with `@ApiProperty` or `@ApiPropertyOptional` so `@nestjs/swagger` accurately reflects property types in `openapi.json`.
+- **Codegen Pipeline**: Run `pnpm codegen` (or `pnpm --filter @workspace/api generate:openapi && pnpm --filter @workspace/api-client generate`) whenever backend endpoints change. This updates `apps/api/openapi.json` and regenerates `packages/api-client/src/schema.d.ts`. Both generated files are committed to git.
+- **Services**: Contain business logic and DB/external integrations. They are injected into controllers.
 - **Config**: Use NestJS `ConfigService` or the typed config exports in `src/config/`.
 - **Utils**: Pure and side-effect free helpers.
 
@@ -75,23 +76,23 @@ All route handlers return `NextResponse.json` with a consistent envelope:
 
 ### Rules
 
-- **Read routes only**: Next.js API routes handle reads. Write operations (delete, sync, generateImage, bulkGenerateImages, add game, replace game) stay in NestJS and are called via oRPC.
-- **No oRPC contract needed**: These routes are not part of the oRPC contract in `packages/api-contract`. They are plain HTTP endpoints consumed by `fetch`.
+- **Read routes only**: Next.js API routes handle reads. Write operations (delete, sync, generateImage, bulkGenerateImages, add game, replace game) stay in NestJS and are called via `apiClient` from `@workspace/api-client`.
+- **No contract package**: Shared types are generated from NestJS OpenAPI spec via `pnpm codegen`.
 - **Server-only DB access**: Import `db` from `@/lib/db` only in server-side code (route handlers, server components, server actions). Never import it in client components.
 
-## NestJS Write Endpoints (GamesContract)
+## NestJS Write Endpoints
 
-All write and admin operations live in `packages/api-contract/src/games.ts` under `GamesContract` and are implemented in `apps/api/src/games/games.router.ts`. All are guarded by `StackAuthGuard`.
+All write and admin operations are implemented in `apps/api` controllers and typed via `@workspace/api-client`. All are guarded by `HexclaveGuard`.
 
-| Contract key          | Method | Path                               | Description                                                                                                                                                                                                                                    |
-| --------------------- | ------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------- |
-| `sync`                | POST   | `/games/sync`                      | Sync (upsert) a single game from IGDB by `igdb_id`. Used by the Add Game feature to commit a validated game.                                                                                                                                   |
-| `deleteGame`          | POST   | `/games/delete`                    | Delete a single game by IGDB ID.                                                                                                                                                                                                               |
-| `deleteGames`         | POST   | `/games/delete-many`               | Bulk delete games by IGDB ID.                                                                                                                                                                                                                  |
-| `generateImage`       | POST   | `/games/generate-image`            | Generate an AI image for a single game.                                                                                                                                                                                                        |
-| `bulkGenerateImages`  | POST   | `/games/bulk-generate-images`      | Start a bulk AI image generation job.                                                                                                                                                                                                          |
-| `getBulkJobStatus`    | GET    | `/games/bulk-job-status/:jobId`    | Poll the status of an in-progress bulk image job.                                                                                                                                                                                              |
-| `validateIgdbIdAdd`   | POST   | `/games/add/validate-one`          | Validate a single IGDB ID before adding: checks IGDB existence and DB duplicate. Returns `{ igdbId, existsOnIgdb, alreadyInDb, gameName, canAdd }`.                                                                                            |
+| Endpoint Path                      | Method | Description                                                                                                                                                                                                                                    |
+| ---------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/games/sync`                  | POST   | Sync (upsert) a single game from IGDB by `igdb_id`. Used by the Add Game feature to commit a validated game.                                                                                                                                   |
+| `/api/games/:id`                   | DELETE | Delete a single game by ID.                                                                                                                                                                                                                    |
+| `/api/games/bulk`                  | DELETE | Bulk delete games by ID array.                                                                                                                                                                                                                 |
+| `/api/image-gen/generate-image`    | POST   | Generate an AI image for a single game.                                                                                                                                                                                                        |
+| `/api/image-gen/generate-images`   | POST   | Start a bulk AI image generation job.                                                                                                                                                                                                          |
+| `/api/image-gen/generate-images/:imageGenId/status` | GET | Poll the status of an in-progress bulk image job.                                                                                                                                                                                        |
+| `/api/games/add/validate-one`      | POST   | Validate a single IGDB ID before adding: checks IGDB existence and DB duplicate. Returns `{ igdbId, existsOnIgdb, alreadyInDb, gameName, canAdd }`.                                                                                            |
 | `validateReplaceGame` | POST   | `/games/replace-game/validate-one` | Validate a current/replacement IGDB ID pair before replacing: checks both DB and IGDB. Returns `{ current, replacement, currentExistsInDb, currentGameName, replacementExistsOnIgdb, replacementAlreadyInDb, replacementGameName, canApply }`. |
 | `replaceGames`        | POST   | `/games/replace-games`             | Replace up to 20 games by swapping their IGDB IDs. Input: array of `{ current, replacement }` pairs. Output: `{ success, results[] }` where each result has `status: 'updated'                                                                 | 'skipped' | 'error'`. |
 

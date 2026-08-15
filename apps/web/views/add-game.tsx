@@ -217,9 +217,9 @@ export function NewGame() {
 
             return {
               igdbId,
-              gameName: syncResult.data.name,
+              gameName: syncResult.data.name ?? '',
               operation: syncResult.operation,
-              gameId: syncResult.data.igdbId,
+              gameId: syncResult.data.igdbId ?? igdbId,
               error: null,
             };
           }

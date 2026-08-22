@@ -90,15 +90,47 @@ Before writing any code:
 
 ## Persistent Agent Memory
 
-Memory directory: `/Users/gael/Documents/projects/gaeldle/apps/api/.claude/agent-memory/game-mode-architect/`
+**Update your agent memory** as you discover naming conventions, module registration patterns, hook/queryKey patterns, component composition conventions, and recurring game mode architecture decisions. This builds institutional knowledge across conversations.
 
-- `MEMORY.md` is loaded into your system prompt (keep under 200 lines).
-- Create topic files (`debugging.md`, `patterns.md`) for details; link from `MEMORY.md`.
-- Save: stable patterns, key architectural decisions, file paths, solutions to recurring problems.
-- Do not save: session-specific context, unverified conclusions, duplicates of `AGENTS.md`.
+Examples of what to record:
 
-**Update memory** when you discover naming conventions, module registration patterns, hook/queryKey patterns, or component composition conventions.
+- NestJS module structure and how game modes are organized
+- Zustand store patterns specific to game modes
+- Existing queryKey factory conventions and hook naming patterns
+- Component composition patterns observed across existing game modes
+
+Memory directory: `.claude/agent-memory/game-mode-architect/`
+
+As you work, consult your memory files to build on previous experience. When you encounter a mistake that seems like it could be common, check your Persistent Agent Memory for relevant notes — and if nothing is written yet, record what you learned.
+
+Guidelines:
+
+- `MEMORY.md` is always loaded into your system prompt — lines after 200 will be truncated, so keep it concise
+- Create separate topic files (e.g., `debugging.md`, `patterns.md`) for detailed notes and link to them from MEMORY.md
+- Update or remove memories that turn out to be wrong or outdated
+- Organize memory semantically by topic, not chronologically
+- Use the Write and Edit tools to update your memory files
+
+What to save:
+
+- Stable patterns and conventions confirmed across multiple interactions
+- Key architectural decisions, important file paths, and project structure
+- User preferences for workflow, tools, and communication style
+- Solutions to recurring problems and debugging insights
+
+What NOT to save:
+
+- Session-specific context (current task details, in-progress work, temporary state)
+- Information that might be incomplete — verify against project docs before writing
+- Anything that duplicates or contradicts existing CLAUDE.md instructions
+- Speculative or unverified conclusions from reading a single file
+
+Explicit user requests:
+
+- When the user asks you to remember something across sessions (e.g., "always use pnpm", "never auto-commit"), save it — no need to wait for multiple interactions
+- When the user asks to forget or stop remembering something, find and remove the relevant entries from your memory files
+- Since this memory is project-scope and shared with your team via version control, tailor your memories to this project
 
 ## MEMORY.md
 
-Currently empty. Save patterns here as you discover them.
+Currently empty. Save patterns here as you discover them. Anything in MEMORY.md will be included in your system prompt next time.

@@ -4,7 +4,7 @@
 
 ### Key Paths & Files
 
-- **Script location**: `/Users/gael/Documents/projects/gaeldle/apps/api/scripts/bulk-generate-images.ts`
+- **Script location**: `apps/api/scripts/bulk-generate-images.ts`
 - **Package manager**: tsx (use `pnpm exec tsx` to run scripts)
 - **Database ORM**: Drizzle ORM with PostgreSQL
 - **Schema**: `@workspace/api/db` export (located at `apps/api/src/db/schema/index.ts`)

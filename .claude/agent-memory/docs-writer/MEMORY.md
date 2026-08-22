@@ -8,7 +8,7 @@
 - Game hook files: `apps/web/lib/hooks/use-<mode>-game.ts` — contain `MAX_ATTEMPTS` and game logic.
 - Docs: `docs/` contains architecture.md, backend-conventions.md, commands.md, frontend-conventions.md, workflows.md.
 - Game modes user-facing doc: `docs/game-modes.md` (full rules and mechanics for all six modes).
-- Public README at repo root `/Users/gael/Documents/projects/gaeldle/README.md` is a glossary/doc index only.
+- Public README at repo root `README.md` is a glossary/doc index only.
 
 ## Game Modes (as of 2026-02-20)
 

@@ -1,11 +1,138 @@
 package services
 
-type SqsService struct{}
+import (
+	"bytes"
+	"encoding/json"
+	"encoding/xml"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
 
-func NewSqsService() *SqsService {
-	return &SqsService{}
+	"gaeldle/newapi/config"
+	"gaeldle/newapi/lib"
+)
+
+type SqsService struct {
+	accessKeyID     string
+	secretAccessKey string
+	region          string
+	client          *http.Client
 }
 
-func (s *SqsService) SendMessage(queueURL string, body string) (string, error) {
-	return "dummy-message-id", nil
+func NewSqsService(cfg *config.AppConfig) *SqsService {
+	region := cfg.AwsRegion
+	if region == "" {
+		region = "us-east-1"
+	}
+	return &SqsService{
+		accessKeyID:     cfg.AwsAccessKeyID,
+		secretAccessKey: cfg.AwsSecretAccessKey,
+		region:          region,
+		client:          &http.Client{Timeout: 15 * time.Second},
+	}
+}
+
+type SendMessageResponse struct {
+	XMLName           xml.Name `xml:"SendMessageResponse"`
+	SendMessageResult struct {
+		MessageId string `xml:"MessageId"`
+	} `xml:"SendMessageResult"`
+}
+
+func (s *SqsService) SendMessage(queueURL string, body interface{}) (string, error) {
+	if queueURL == "" {
+		return "", fmt.Errorf("queue URL is empty")
+	}
+
+	var messageBody string
+	switch v := body.(type) {
+	case string:
+		messageBody = v
+	default:
+		b, err := json.Marshal(v)
+		if err != nil {
+			return "", fmt.Errorf("failed to marshal message body: %w", err)
+		}
+		messageBody = string(b)
+	}
+
+	form := url.Values{}
+	form.Set("Action", "SendMessage")
+	form.Set("MessageBody", messageBody)
+	form.Set("Version", "2012-11-05")
+
+	encodedForm := form.Encode()
+	req, err := http.NewRequest("POST", queueURL, strings.NewReader(encodedForm))
+	if err != nil {
+		return "", fmt.Errorf("failed to create SQS request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	if s.accessKeyID != "" && s.secretAccessKey != "" {
+		now := time.Now().UTC()
+		if err := lib.SignRequest(req, []byte(encodedForm), "sqs", s.region, s.accessKeyID, s.secretAccessKey, now); err != nil {
+			return "", fmt.Errorf("failed to sign SQS request: %w", err)
+		}
+	}
+
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute SQS request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		return "", fmt.Errorf("SQS SendMessage returned status %d: %s", resp.StatusCode, buf.String())
+	}
+
+	var xmlResp SendMessageResponse
+	if err := xml.NewDecoder(resp.Body).Decode(&xmlResp); err == nil && xmlResp.SendMessageResult.MessageId != "" {
+		return xmlResp.SendMessageResult.MessageId, nil
+	}
+
+	return "sqs-msg-success", nil
+}
+
+func (s *SqsService) ClearQueue(queueURL string) error {
+	if queueURL == "" {
+		return fmt.Errorf("queue URL is empty")
+	}
+
+	form := url.Values{}
+	form.Set("Action", "PurgeQueue")
+	form.Set("Version", "2012-11-05")
+
+	encodedForm := form.Encode()
+	req, err := http.NewRequest("POST", queueURL, strings.NewReader(encodedForm))
+	if err != nil {
+		return fmt.Errorf("failed to create SQS PurgeQueue request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	if s.accessKeyID != "" && s.secretAccessKey != "" {
+		now := time.Now().UTC()
+		if err := lib.SignRequest(req, []byte(encodedForm), "sqs", s.region, s.accessKeyID, s.secretAccessKey, now); err != nil {
+			return fmt.Errorf("failed to sign SQS PurgeQueue request: %w", err)
+		}
+	}
+
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to execute SQS PurgeQueue request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		return fmt.Errorf("SQS PurgeQueue returned status %d: %s", resp.StatusCode, buf.String())
+	}
+
+	return nil
 }

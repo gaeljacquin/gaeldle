@@ -10,6 +10,7 @@ import (
 	"gaeldle/newapi/config"
 	"gaeldle/newapi/db"
 	"gaeldle/newapi/handlers"
+	"gaeldle/newapi/middleware"
 	"gaeldle/newapi/services"
 )
 
@@ -92,19 +93,18 @@ func main() {
 	}
 
 	// 3. Instantiate services
-	gamesService := services.NewGamesService(database)
-	igdbService := services.NewIgdbService()
-	aiService := services.NewAiService()
-	s3Service := services.NewS3Service()
-	r2Service := services.NewR2Service(cfg.R2PublicURL)
-	sqsService := services.NewSqsService()
-	hexclaveService := services.NewHexclaveService()
-	discoverService := services.NewDiscoverService()
-	imageGenService := services.NewImageGenService()
-	sampleService := services.NewSampleService()
+	igdbService := services.NewIgdbService(cfg)
+	gamesService := services.NewGamesService(database, igdbService)
+	aiService := services.NewAiService(cfg)
+	s3Service := services.NewS3Service(cfg)
+	r2Service := services.NewR2Service(cfg)
+	sqsService := services.NewSqsService(cfg)
+	hexclaveService := services.NewHexclaveService(cfg)
+	discoverService := services.NewDiscoverService(database, igdbService, gamesService)
+	imageGenService := services.NewImageGenService(database, sqsService, r2Service, gamesService, cfg)
+	sampleService := services.NewSampleService(sqsService, s3Service, r2Service, cfg)
 
-	// Suppress unused warnings by logging basic info
-	log.Printf("Loaded services: IGDB=%p, AI=%p, S3=%p, R2=%p, SQS=%p\n", 
+	log.Printf("Services initialized: IGDB=%p, AI=%p, S3=%p, R2=%p, SQS=%p\n",
 		igdbService, aiService, s3Service, r2Service, sqsService)
 
 	// 4. Instantiate handlers
@@ -115,8 +115,9 @@ func main() {
 	sampleHandler := handlers.NewSampleHandler(sampleService)
 	authHandler := handlers.NewAuthHandler(hexclaveService)
 
-	// 5. Setup Router (using Go 1.22's enhanced pattern matching)
+	// 5. Setup Router
 	mux := http.NewServeMux()
+	authMiddleware := middleware.HexclaveAuth(cfg)
 
 	// Root AppController route
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
@@ -131,36 +132,35 @@ func main() {
 	// Auth Endpoints
 	mux.HandleFunc("POST /api/auth/hexclave", authHandler.HexclaveSignIn)
 
-	// Games Endpoints
-	// Reads (Real Functionality)
+	// Games Endpoints - Public Reads
 	mux.HandleFunc("GET /api/games", gamesHandler.GetGames)
 	mux.HandleFunc("GET /api/games/random", gamesHandler.GetRandomGame)
 	mux.HandleFunc("GET /api/games/search", gamesHandler.SearchGames)
 	mux.HandleFunc("GET /api/private/games/{igdbId}", gamesHandler.GetGameByIgdbId)
 
-	// Writes (Dummy/Stubs)
-	mux.HandleFunc("POST /api/games/sync", gamesHandler.SyncGame)
-	mux.HandleFunc("PATCH /api/games/{id}", gamesHandler.UpdateGame)
-	mux.HandleFunc("DELETE /api/games/{id}", gamesHandler.DeleteGame)
-	mux.HandleFunc("DELETE /api/games/bulk", gamesHandler.DeleteBulk)
-	mux.HandleFunc("POST /api/games/add/validate-one", gamesHandler.ValidateIgdbIdAdd)
-	mux.HandleFunc("POST /api/games/test-upload", gamesHandler.TestUpload)
-	mux.HandleFunc("POST /api/test/send-message", gamesHandler.TestSendMessage)
+	// Games Endpoints - Protected Writes
+	mux.Handle("POST /api/games/sync", authMiddleware(http.HandlerFunc(gamesHandler.SyncGame)))
+	mux.Handle("PATCH /api/games/{id}", authMiddleware(http.HandlerFunc(gamesHandler.UpdateGame)))
+	mux.Handle("DELETE /api/games/{id}", authMiddleware(http.HandlerFunc(gamesHandler.DeleteGame)))
+	mux.Handle("DELETE /api/games/bulk", authMiddleware(http.HandlerFunc(gamesHandler.DeleteBulk)))
+	mux.Handle("POST /api/games/add/validate-one", authMiddleware(http.HandlerFunc(gamesHandler.ValidateIgdbIdAdd)))
+	mux.Handle("POST /api/games/test-upload", authMiddleware(http.HandlerFunc(gamesHandler.TestUpload)))
+	mux.Handle("POST /api/test/send-message", authMiddleware(http.HandlerFunc(gamesHandler.TestSendMessage)))
 
-	// Discover Endpoints (Dummy/Stubs)
-	mux.HandleFunc("POST /api/discover/scan", discoverHandler.Scan)
-	mux.HandleFunc("POST /api/discover/apply", discoverHandler.Apply)
+	// Discover Endpoints - Protected
+	mux.Handle("POST /api/discover/scan", authMiddleware(http.HandlerFunc(discoverHandler.Scan)))
+	mux.Handle("POST /api/discover/apply", authMiddleware(http.HandlerFunc(discoverHandler.Apply)))
 
-	// Image Generation Endpoints (Dummy/Stubs)
-	mux.HandleFunc("POST /api/image-gen/generate-image", imageGenHandler.GenerateImage)
-	mux.HandleFunc("POST /api/image-gen/generate-images", imageGenHandler.GenerateImages)
-	mux.HandleFunc("GET /api/image-gen/generate-images/{imageGenId}/status", imageGenHandler.GetImageGenStatus)
-	mux.HandleFunc("GET /api/image-gen/generate-images/{imageGenId}/stream", imageGenHandler.Stream)
+	// Image Generation Endpoints - Protected
+	mux.Handle("POST /api/image-gen/generate-image", authMiddleware(http.HandlerFunc(imageGenHandler.GenerateImage)))
+	mux.Handle("POST /api/image-gen/generate-images", authMiddleware(http.HandlerFunc(imageGenHandler.GenerateImages)))
+	mux.Handle("GET /api/image-gen/generate-images/{imageGenId}/status", authMiddleware(http.HandlerFunc(imageGenHandler.GetImageGenStatus)))
+	mux.Handle("GET /api/image-gen/generate-images/{imageGenId}/stream", authMiddleware(http.HandlerFunc(imageGenHandler.Stream)))
 
-	// Sample Endpoints (Dummy/Stubs)
-	mux.HandleFunc("POST /api/sample/upload-image", sampleHandler.UploadImage)
-	mux.HandleFunc("POST /api/sample/send-message", sampleHandler.SendMessage)
-	mux.HandleFunc("POST /api/sample/clear-queue", sampleHandler.ClearQueue)
+	// Sample Endpoints - Protected
+	mux.Handle("POST /api/sample/upload-image", authMiddleware(http.HandlerFunc(sampleHandler.UploadImage)))
+	mux.Handle("POST /api/sample/send-message", authMiddleware(http.HandlerFunc(sampleHandler.SendMessage)))
+	mux.Handle("POST /api/sample/clear-queue", authMiddleware(http.HandlerFunc(sampleHandler.ClearQueue)))
 
 	// 6. Wrap router in middlewares
 	handlerChain := loggingMiddleware(corsMiddleware(cfg, mux))

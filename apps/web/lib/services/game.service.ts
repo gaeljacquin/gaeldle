@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api-client';
-import type { Game, ArtStyleValue } from '@workspace/api/db';
+import type { Game, ArtStyleValue } from '@workspace/db';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 async function handleResponse<T>(response: Response): Promise<T> {

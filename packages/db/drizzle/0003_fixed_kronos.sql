@@ -1,0 +1,1 @@
+CREATE MATERIALIZED VIEW "public"."all_games" AS (select "id", "igdb_id", "name", "image_url", "artworks", "keywords", "franchises", "game_engines", "game_modes", "genres", "involved_companies", "platforms", "player_perspectives", "release_dates", "themes", "first_release_date", "ai_image_url", "ai_prompt" from "game" order by "game"."name");

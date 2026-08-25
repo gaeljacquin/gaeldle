@@ -2,7 +2,7 @@ import {
   GameMode,
   gameModeSelectSchema,
   type GameModePlus,
-} from '@workspace/api/db';
+} from '@workspace/db';
 import { z } from 'zod';
 import { queryOptions } from '@tanstack/react-query';
 

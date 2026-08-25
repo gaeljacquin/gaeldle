@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "go run main.go",
     "build": "go build -o api main.go",
-    "lint": "echo 'Go linting not configured yet'",
-    "format": "echo 'Go formatting not configured yet'"
+    "lint": "go vet ./...",
+    "format": "gofmt -l .",
+    "format:write": "gofmt -w ."
   }
 }

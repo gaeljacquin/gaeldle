@@ -23,9 +23,9 @@ services:
       - ..:/workspaces/gaeldle:cached
       # Anonymous volumes for node_modules to ensure they stay in the container
       - /workspaces/gaeldle/node_modules
-      - /workspaces/gaeldle/apps/api/node_modules
       - /workspaces/gaeldle/apps/web/node_modules
       - /workspaces/gaeldle/packages/api-client/node_modules
+      - /workspaces/gaeldle/packages/db/node_modules
       - /workspaces/gaeldle/packages/shared/node_modules
       - /workspaces/gaeldle/packages/ui/node_modules
     environment:

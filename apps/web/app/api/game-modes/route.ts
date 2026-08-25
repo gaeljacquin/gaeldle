@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { gameModes, gameModeTable, domainEvents } from '@workspace/api/db';
+import { gameModes, gameModeTable, domainEvents } from '@workspace/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { asc, eq, sql, inArray } from 'drizzle-orm';
 import { hexclaveServerApp } from '@/hexclave/server';

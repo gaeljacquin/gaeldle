@@ -74,7 +74,7 @@
     ".git",
     "pnpm-lock.yaml",
     "package.json",
-    "apps/api/dist",
+    "apps/newapi/api",
     "apps/web/dist",
     "tmp",
     "coverage",

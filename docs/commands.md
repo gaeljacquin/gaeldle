@@ -15,11 +15,11 @@ turbo dev
 nr dev
 
 # Specific projects
-turbo dev --filter @gaeldle/web
-turbo dev --filter @gaeldle/api
+turbo dev --filter @workspace/web
+turbo dev --filter @workspace/newapi
 
 # Direct commands
-cd apps/api && nr dev
+cd apps/newapi && nr dev
 cd apps/web && nr dev
 ```
 
@@ -32,11 +32,11 @@ turbo build
 nr build
 
 # Build specific project
-turbo build --filter @gaeldle/api
-turbo build --filter @gaeldle/web
+turbo build --filter @workspace/newapi
+turbo build --filter @workspace/web
 
 # Direct build commands
-cd apps/api && nr build
+cd apps/newapi && nr build
 cd apps/web && nr build
 ```
 
@@ -48,20 +48,20 @@ turbo test
 # or
 nr test
 
-# Test API
-turbo test --filter @gaeldle/api
-cd apps/api && nr test
+# Test Web
+turbo test --filter @workspace/web
+cd apps/web && nr test
 ```
 
 ## Type Checking & Linting
 
 ```bash
 # All projects
-turbo type-check
+turbo typecheck
 turbo lint
 
-# API
-cd apps/api && nr typecheck
+# Newapi
+cd apps/newapi && nr lint
 
 # Web
 cd apps/web && nr typecheck
@@ -72,5 +72,5 @@ cd apps/web && nr lint
 
 ```bash
 # Clean build artifacts
-rm -rf .turbo apps/api/dist apps/web/.next
+rm -rf .turbo apps/newapi/api apps/web/.next
 ```

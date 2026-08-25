@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"gaeldle/newapi/middleware"
 	"gaeldle/newapi/services"
 )
 
@@ -16,36 +17,81 @@ func NewImageGenHandler(imageGenService *services.ImageGenService) *ImageGenHand
 	return &ImageGenHandler{imageGenService: imageGenService}
 }
 
-// GenerateImage dummy implementation: POST /api/image-gen/generate-image
+// GenerateImage handles POST /api/image-gen/generate-image
 func (h *ImageGenHandler) GenerateImage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var body map[string]interface{}
-	_ = json.NewDecoder(r.Body).Decode(&body)
+	actorID := middleware.GetActorID(r)
 
-	result, _ := h.imageGenService.GenerateImage(body, "unknown")
+	var body map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Invalid request body",
+		})
+		return
+	}
+
+	result, err := h.imageGenService.GenerateImage(body, actorID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(result)
 }
 
-// GenerateImages dummy implementation: POST /api/image-gen/generate-images
+// GenerateImages handles POST /api/image-gen/generate-images
 func (h *ImageGenHandler) GenerateImages(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var body map[string]interface{}
-	_ = json.NewDecoder(r.Body).Decode(&body)
+	actorID := middleware.GetActorID(r)
 
-	result, _ := h.imageGenService.GenerateImages(body, "unknown")
+	var body map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Invalid request body",
+		})
+		return
+	}
+
+	result, err := h.imageGenService.GenerateImages(body, actorID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(result)
 }
 
-// GetImageGenStatus dummy implementation: GET /api/image-gen/generate-images/{imageGenId}/status
+// GetImageGenStatus handles GET /api/image-gen/generate-images/{imageGenId}/status
 func (h *ImageGenHandler) GetImageGenStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	imageGenId := r.PathValue("imageGenId")
+	imageGenID := r.PathValue("imageGenId")
 
-	result, _ := h.imageGenService.GetImageGenStatus(imageGenId)
+	result, err := h.imageGenService.GetImageGenStatus(imageGenID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(result)
 }
 
-// Stream dummy SSE implementation: GET /api/image-gen/generate-images/{imageGenId}/stream
+// Stream handles SSE streaming: GET /api/image-gen/generate-images/{imageGenId}/stream
 func (h *ImageGenHandler) Stream(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")

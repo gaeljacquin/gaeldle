@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gaeldle/newapi/middleware"
 	"gaeldle/newapi/services"
 )
 
@@ -15,29 +16,62 @@ func NewSampleHandler(sampleService *services.SampleService) *SampleHandler {
 	return &SampleHandler{sampleService: sampleService}
 }
 
-// UploadImage dummy implementation: POST /api/sample/upload-image
+// UploadImage handles POST /api/sample/upload-image
 func (h *SampleHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	actorID := middleware.GetActorID(r)
+
 	var body map[string]interface{}
 	_ = json.NewDecoder(r.Body).Decode(&body)
 
-	result, _ := h.sampleService.UploadImage(body, "unknown")
+	result, err := h.sampleService.UploadImage(body, actorID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(result)
 }
 
-// SendMessage dummy implementation: POST /api/sample/send-message
+// SendMessage handles POST /api/sample/send-message
 func (h *SampleHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	actorID := middleware.GetActorID(r)
+
 	var body map[string]interface{}
 	_ = json.NewDecoder(r.Body).Decode(&body)
 
-	result, _ := h.sampleService.SendMessage(body, "unknown")
+	result, err := h.sampleService.SendMessage(body, actorID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(result)
 }
 
-// ClearQueue dummy implementation: POST /api/sample/clear-queue
+// ClearQueue handles POST /api/sample/clear-queue
 func (h *SampleHandler) ClearQueue(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	result, _ := h.sampleService.ClearQueue("unknown")
+	actorID := middleware.GetActorID(r)
+
+	result, err := h.sampleService.ClearQueue(actorID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(result)
 }

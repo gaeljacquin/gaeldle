@@ -3,7 +3,7 @@
 import { useState, useRef, ChangeEvent } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@workspace/ui/lib/utils';
-import { type Game } from '@workspace/api/db';
+import { type Game } from '@workspace/db';
 import { GAME_SEARCH_MIN_CHARS } from '@workspace/shared';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import {

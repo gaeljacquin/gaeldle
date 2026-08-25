@@ -45,7 +45,7 @@ import {
   IconRestore,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
-import { Game, NumericString } from '@workspace/api/db';
+import { Game, NumericString } from '@workspace/db';
 import { Checkbox } from '@workspace/ui/checkbox';
 import Link from 'next/link';
 import { toast } from 'sonner';

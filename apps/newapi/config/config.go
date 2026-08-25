@@ -2,7 +2,6 @@ package config
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -112,17 +111,22 @@ func LoadConfig() (*AppConfig, error) {
 
 	bucketName := os.Getenv("R2_BUCKET_NAME")
 	if bucketName == "" {
-		return nil, fmt.Errorf("R2_BUCKET_NAME is required")
+		log.Println("WARNING: R2_BUCKET_NAME is not set. S3/R2 operations will fail.")
 	}
 
 	sampleSqs := os.Getenv("SAMPLE_SQS_QUEUE_URL")
 	if sampleSqs == "" {
-		return nil, fmt.Errorf("SAMPLE_SQS_QUEUE_URL is required")
+		log.Println("WARNING: SAMPLE_SQS_QUEUE_URL is not set. Sample SQS operations will fail.")
 	}
 
 	imageGenSqs := os.Getenv("IMAGE_GEN_SQS_QUEUE_URL")
 	if imageGenSqs == "" {
-		return nil, fmt.Errorf("IMAGE_GEN_SQS_QUEUE_URL is required")
+		log.Println("WARNING: IMAGE_GEN_SQS_QUEUE_URL is not set. Image gen SQS operations will fail.")
+	}
+
+	awsRegion := os.Getenv("AWS_REGION")
+	if awsRegion == "" {
+		awsRegion = "us-east-1"
 	}
 
 	return &AppConfig{
@@ -146,7 +150,7 @@ func LoadConfig() (*AppConfig, error) {
 		CfAPIToken:                   os.Getenv("CF_API_TOKEN"),
 		AwsAccessKeyID:               os.Getenv("AWS_ACCESS_KEY_ID"),
 		AwsSecretAccessKey:           os.Getenv("AWS_SECRET_ACCESS_KEY"),
-		AwsRegion:                    os.Getenv("AWS_REGION"),
+		AwsRegion:                    awsRegion,
 		SampleSqsQueueURL:            sampleSqs,
 		ImageGenSqsQueueURL:          imageGenSqs,
 		ImageGenConsumerPollDelayMs:  pollDelayMs,

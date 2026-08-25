@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"gaeldle/newapi/middleware"
 	"gaeldle/newapi/models"
 	"gaeldle/newapi/services"
 )
@@ -59,7 +60,7 @@ func (h *GamesHandler) GetGames(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if gamesList == nil {
-		gamesList = []*models.Game{} // Ensure it returns empty array instead of null in JSON
+		gamesList = []*models.Game{}
 	}
 
 	json.NewEncoder(w).Encode(map[string]interface{}{
@@ -120,7 +121,6 @@ func (h *GamesHandler) GetRandomGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// If count is 1 and count was not explicitly requested, return a single object
 	if count == 1 && !hasCount {
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": true,
@@ -186,7 +186,8 @@ func (h *GamesHandler) GetGameByIgdbId(w http.ResponseWriter, r *http.Request) {
 	if err != nil || igdbId <= 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"error": "Invalid igdbId",
+			"success": false,
+			"error":   "Invalid igdbId",
 		})
 		return
 	}
@@ -204,7 +205,8 @@ func (h *GamesHandler) GetGameByIgdbId(w http.ResponseWriter, r *http.Request) {
 	if game == nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"error": "Game not found",
+			"success": false,
+			"error":   "Game not found",
 		})
 		return
 	}
@@ -215,26 +217,42 @@ func (h *GamesHandler) GetGameByIgdbId(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// SyncGame dummy implementation: POST /api/games/sync
+// SyncGame handles POST /api/games/sync
 func (h *GamesHandler) SyncGame(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	actorID := middleware.GetActorID(r)
+
 	var body struct {
 		IgdbID int `json:"igdb_id"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.IgdbID <= 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
-			"error":   "Invalid request body",
+			"error":   "Invalid request body or igdb_id",
 		})
 		return
 	}
 
-	result, _ := h.gamesService.SyncGameByIgdbId(body.IgdbID, true, "unknown")
-	json.NewEncoder(w).Encode(result)
+	result, err := h.gamesService.SyncGameByIgdbId(body.IgdbID, true, actorID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success":   true,
+		"message":   "Game " + result.Operation,
+		"operation": result.Operation,
+		"data":      result.Game,
+	})
 }
 
-// UpdateGame dummy implementation: PATCH /api/games/{id}
+// UpdateGame handles PATCH /api/games/{id}
 func (h *GamesHandler) UpdateGame(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	idStr := r.PathValue("id")
@@ -248,14 +266,47 @@ func (h *GamesHandler) UpdateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var updates map[string]interface{}
-	_ = json.NewDecoder(r.Body).Decode(&updates)
+	var body map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Invalid request body",
+		})
+		return
+	}
 
-	result, _ := h.gamesService.UpdateGame(id, updates)
-	json.NewEncoder(w).Encode(result)
+	updates := body
+	if u, ok := body["updates"].(map[string]interface{}); ok {
+		updates = u
+	}
+
+	updatedGame, err := h.gamesService.UpdateGame(id, updates)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if updatedGame == nil {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Game not found",
+		})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"data":    updatedGame,
+	})
 }
 
-// DeleteGame dummy implementation: DELETE /api/games/{id}
+// DeleteGame handles DELETE /api/games/{id}
 func (h *GamesHandler) DeleteGame(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	idStr := r.PathValue("id")
@@ -269,50 +320,106 @@ func (h *GamesHandler) DeleteGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deletedId, _ := h.gamesService.DeleteGame(id)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"data": map[string]interface{}{
-			"id": deletedId,
-		},
-	})
-}
-
-// DeleteBulk dummy implementation: DELETE /api/games/bulk
-func (h *GamesHandler) DeleteBulk(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var ids []int
-	if err := json.NewDecoder(r.Body).Decode(&ids); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	deletedID, err := h.gamesService.DeleteGame(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
-			"error":   "Invalid request body, array of IDs expected",
+			"error":   err.Error(),
 		})
 		return
 	}
 
-	deletedIds, _ := h.gamesService.DeleteGames(ids)
+	if deletedID == nil {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Game not found",
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"data": map[string]interface{}{
-			"deletedIds": deletedIds,
+			"id": *deletedID,
 		},
 	})
 }
 
-// ValidateIgdbIdAdd dummy implementation: POST /api/games/add/validate-one
+// DeleteBulk handles DELETE /api/games/bulk
+func (h *GamesHandler) DeleteBulk(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var raw json.RawMessage
+	if err := json.NewDecoder(r.Body).Decode(&raw); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Invalid request body",
+		})
+		return
+	}
+
+	var ids []int
+	if err := json.Unmarshal(raw, &ids); err != nil {
+		var wrapper struct {
+			IDs []int `json:"ids"`
+		}
+		if err := json.Unmarshal(raw, &wrapper); err == nil {
+			ids = wrapper.IDs
+		}
+	}
+
+	deletedIDs, err := h.gamesService.DeleteGames(ids)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"data": map[string]interface{}{
+			"deletedIds": deletedIDs,
+		},
+	})
+}
+
+// ValidateIgdbIdAdd handles POST /api/games/add/validate-one
 func (h *GamesHandler) ValidateIgdbIdAdd(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	actorID := middleware.GetActorID(r)
+
 	var body struct {
 		IgdbID int `json:"igdbId"`
 	}
-	_ = json.NewDecoder(r.Body).Decode(&body)
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.IgdbID <= 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Invalid request body or igdbId",
+		})
+		return
+	}
 
-	result, _ := h.gamesService.ValidateGameForAdd(body.IgdbID, "unknown")
+	result, err := h.gamesService.ValidateGameForAdd(body.IgdbID, actorID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(result)
 }
 
-// TestUpload dummy implementation: POST /api/games/test-upload
+// TestUpload handles POST /api/games/test-upload
 func (h *GamesHandler) TestUpload(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
@@ -321,7 +428,7 @@ func (h *GamesHandler) TestUpload(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// TestSendMessage dummy implementation: POST /api/test/send-message
+// TestSendMessage handles POST /api/test/send-message
 func (h *GamesHandler) TestSendMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{

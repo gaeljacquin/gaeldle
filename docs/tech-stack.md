@@ -3,29 +3,30 @@
 ## Moving Parts
 
 - **Monorepo**: Turborepo + `ni` (pnpm workspaces)
-- **Backend**: NestJS (API)
+- **Backend**: Go (apps/newapi)
 - **Frontend**: Next.js 16 (App Router)
 - **API Protocol**: OpenAPI + openapi-typescript + openapi-fetch (Type-safe communication)
-- **Database**: PostgreSQL 17 + Drizzle ORM
-- **Authentication**: Stack Auth
+- **Database**: PostgreSQL 17 + Drizzle ORM (@workspace/db)
+- **Authentication**: Stack Auth / Hexclave
 - **Styling**: Tailwind CSS v4 + Vanilla CSS
 - **Icons**: Lucide React
 - **Validation**: Zod
-- **Testing**: Vitest (Web) + Jest (API)
+- **Testing**: Vitest (Web) + Go tests (API)
 - **UI Library**: `packages/ui` (Shared workspace components)
 
 ## Monorepo Structure
 
 ```
 apps/
-  api/        # NestJS API (Write operations, Image generation, OpenAPI spec)
+  newapi/     # Go API (Write operations, Image generation, IGDB sync)
   web/        # Next.js App (Read operations, Game views)
 packages/
   api-client/ # Generated openapi-fetch client and TypeScript schema (@workspace/api-client)
   constants/  # Shared workspace constants
-  ui/           # Shared UI component library (@workspace/ui)
-docs/           # Developer documentation
-.gemini/        # Agent definitions and skills
+  db/         # Database schema & migrations (@workspace/db)
+  ui/         # Shared UI component library (@workspace/ui)
+docs/         # Developer documentation
+.gemini/      # Agent definitions and skills
 ```
 
 ## Getting Started

@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import type { Game } from '@workspace/api/db';
+import type { Game } from '@workspace/db';
 import { cn } from '@workspace/ui/lib/utils';
 
 interface GuessHistoryInlineProps {

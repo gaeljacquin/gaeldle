@@ -2,10 +2,11 @@
 
 ## Topology
 
-- `apps/api`: NestJS API exposing OpenAPI spec, default port 8080.
+- `apps/newapi`: Go API exposing OpenAPI endpoints, default port 8080.
 - `apps/web`: Next.js 16 App Router app (TypeScript, Tailwind v4), default port 3000.
-- `packages/api-client`: Generated `openapi-fetch` client typed against `apps/api/openapi.json`. Package name: `@workspace/api-client`.
+- `packages/api-client`: Generated `openapi-fetch` client typed against `apps/newapi/openapi.json`. Package name: `@workspace/api-client`.
 - `packages/constants`: Shared constants consumed by both API and Web. Package name: `@workspace/constants`.
+- `packages/db`: Shared Drizzle schema and migrations. Package name: `@workspace/db`.
 - Monorepo: Turborepo workspace with apps under `apps/` and packages under `packages/`.
 
 ## API Responsibility Split
@@ -15,15 +16,15 @@ Game operations are split across two APIs:
 | Operation type                                                             | API                  | Transport                     |
 | -------------------------------------------------------------------------- | -------------------- | ----------------------------- |
 | Read (list, search, random, artwork, get by IGDB ID)                       | Next.js (`apps/web`) | plain `fetch` to local routes |
-| Write (delete, sync, image gen, add game, replace game, validate IGDB IDs) | NestJS (`apps/api`)  | OpenAPI client (`apiClient`)  |
+| Write (delete, sync, image gen, add game, replace game, validate IGDB IDs) | Go (`apps/newapi`)   | OpenAPI client (`apiClient`)  |
 
-Read operations are implemented as Next.js App Router API route handlers under `apps/web/app/api/games/`. They query the database directly using a Drizzle client (`apps/web/lib/db.ts`). Write operations remain in the NestJS API and are called via `@workspace/api-client`.
+Read operations are implemented as Next.js App Router API route handlers under `apps/web/app/api/games/`. They query the database directly using a Drizzle client (`apps/web/lib/db.ts`). Write operations remain in the Go API and are called via `@workspace/api-client`.
 
 ## Data & Auth
 
 - Database: PostgreSQL 17 (default port 5432).
-- OpenAPI + Codegen: OpenAPI spec generated from NestJS controllers (`pnpm codegen`), providing `openapi-fetch` client typed via `packages/api-client/src/schema.d.ts` (write operations).
-- Auth: Stack Auth used in both frontend and backend.
+- OpenAPI + Codegen: OpenAPI spec from `apps/newapi/openapi.json` (`pnpm codegen`), providing `openapi-fetch` client typed via `packages/api-client/src/schema.d.ts` (write operations).
+- Auth: Stack Auth / Hexclave used in both frontend and backend.
 
 ## Ports
 
@@ -35,13 +36,13 @@ Read operations are implemented as Next.js App Router API route handlers under `
 
 - Default allowed origins: `http://localhost:3000`, `http://127.0.0.1:3000`, `http://web:3000`.
 - Override with `CORS_ALLOWED_ORIGINS` (comma-separated).
-- Implementation lives in `apps/api/src/config/env.ts`.
+- Implementation lives in `apps/newapi/main.go`.
 
 ## Health Checks
 
-- NestJS API: `GET /health` — powered by `@nestjs/terminus` via `HealthModule` (`apps/api/src/health/`). Runs a live database check (`SELECT 1`) and returns a terminus-formatted response: `{ status, info, error, details }`.
+- Go API: `GET /health` — Runs a live database check (`SELECT 1`) and returns a health check response: `{ status, info, error, details }`.
 - Web dashboard: `http://localhost:3000/health`. Monitors two APIs:
-  - **"writes api"** — NestJS (port 8080). Pinged via `GET /` to confirm reachability.
+  - **"writes api"** — Go API (port 8080). Pinged via `GET /` to confirm reachability.
   - **"reads api"** — Next.js (port 3000). Pinged via `GET /api/games?pageSize=1` to confirm the local DB route is up.
 - Health service: `apps/web/lib/services/health.service.ts`. Uses `NEXT_PUBLIC_APP_URL` for the reads-api base URL and `serverUrl` (server-side) for the writes-api base URL.
 
@@ -56,7 +57,7 @@ These standards apply across the entire monorepo (API, Web, and Packages).
 
 ## Environment Variables
 
-### API (`apps/api`)
+### API (`apps/newapi`)
 
 - `PORT` or `SERVER_PORT`
 - `CLIENT_PORT`
@@ -65,7 +66,8 @@ These standards apply across the entire monorepo (API, Web, and Packages).
 
 ### Web (`apps/web`)
 
-- `SERVER_URL` (server-side, base URL for the NestJS API)
+- `SERVER_URL` (server-side, base URL for the Go API)
 - `CLIENT_PORT`
 - `DATABASE_URL` (required for the Next.js Drizzle DB client in `lib/db.ts`)
 - `NEXT_PUBLIC_APP_URL` (base URL for the Next.js app, used by the health service to ping the reads API)
+

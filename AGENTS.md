@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Gaeldle is a Turborepo monorepo with a Next.js web app and a NestJS API.
+Gaeldle is a Turborepo monorepo with a Next.js web app and a Go API (newapi).
 
 ## Essentials
 

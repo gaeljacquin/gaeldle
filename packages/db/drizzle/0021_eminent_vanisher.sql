@@ -1,0 +1,2 @@
+DROP MATERIALIZED VIEW "public"."active_game_modes";--> statement-breakpoint
+CREATE MATERIALIZED VIEW "public"."active_game_modes" AS (select "slug", "title", "description", "level", "max_attempts", "ordinal", "is_active", "is_cover_art" from "game_mode" where "game_mode"."is_active" = 1 order by "game_mode"."ordinal");

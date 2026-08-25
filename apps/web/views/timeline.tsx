@@ -28,7 +28,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ErrorBoundary } from '@/components/error-boundary';
 import TimelineSkeleton from '@/components/timeline-skeleton';
-import type { Game } from '@workspace/api/db';
+import type { Game } from '@workspace/db';
 import Attempts from '@/components/attempts';
 import { useTimelineStore } from '@/lib/stores/timeline-store';
 import { motion } from 'motion/react';

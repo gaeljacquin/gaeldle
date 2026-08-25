@@ -17,3 +17,6 @@ yarn.lock
 *.md
 next-env.d.ts
 packages/ui
+packages/db/drizzle
+apps/api
+apps/newapi/openapi.json

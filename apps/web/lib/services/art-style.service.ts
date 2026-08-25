@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { artStyleSelectSchema } from '@workspace/api/db';
-import type { ArtStyle } from '@workspace/api/db';
+import { artStyleSelectSchema } from '@workspace/db';
+import type { ArtStyle } from '@workspace/db';
 
 export const getArtStyles = async (): Promise<ArtStyle[]> => {
   try {

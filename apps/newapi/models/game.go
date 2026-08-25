@@ -31,3 +31,22 @@ type Game struct {
 	Summary            *string         `json:"summary"`
 	Storyline          *string         `json:"storyline"`
 }
+
+type DiscoverCandidate struct {
+	IgdbID           int      `json:"igdbId"`
+	Name             string   `json:"name"`
+	FirstReleaseDate *int64   `json:"firstReleaseDate"`
+	CoverURL         *string  `json:"coverUrl"`
+	TotalRating      *float64 `json:"totalRating"`
+	TotalRatingCount *int     `json:"totalRatingCount"`
+	Genres           []string `json:"genres"`
+	Platforms        []string `json:"platforms"`
+	IsAlreadyAdded   bool     `json:"isAlreadyAdded"`
+}
+
+type DiscoverApplyResult struct {
+	IgdbID int     `json:"igdbId"`
+	Name   *string `json:"name"`
+	Status string  `json:"status"`
+	Error  *string `json:"error"`
+}

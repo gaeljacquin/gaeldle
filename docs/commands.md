@@ -16,10 +16,10 @@ nr dev
 
 # Specific projects
 turbo dev --filter @workspace/web
-turbo dev --filter @workspace/newapi
+turbo dev --filter @workspace/api
 
 # Direct commands
-cd apps/newapi && nr dev
+cd apps/api && nr dev
 cd apps/web && nr dev
 ```
 
@@ -32,11 +32,11 @@ turbo build
 nr build
 
 # Build specific project
-turbo build --filter @workspace/newapi
+turbo build --filter @workspace/api
 turbo build --filter @workspace/web
 
 # Direct build commands
-cd apps/newapi && nr build
+cd apps/api && nr build
 cd apps/web && nr build
 ```
 
@@ -60,8 +60,8 @@ cd apps/web && nr test
 turbo typecheck
 turbo lint
 
-# Newapi
-cd apps/newapi && nr lint
+# API
+cd apps/api && nr lint
 
 # Web
 cd apps/web && nr typecheck
@@ -72,5 +72,5 @@ cd apps/web && nr lint
 
 ```bash
 # Clean build artifacts
-rm -rf .turbo apps/newapi/api apps/web/.next
+rm -rf .turbo apps/api/api apps/web/.next
 ```

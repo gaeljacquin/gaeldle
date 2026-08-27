@@ -18,5 +18,8 @@ yarn.lock
 next-env.d.ts
 packages/ui
 packages/db/drizzle
-apps/api
-apps/newapi/openapi.json
+packages/api-client/src/index.js
+packages/api-client/src/index.d.ts
+packages/api-client/src/schema.d.ts
+apps/api/openapi.json
+apps/api/api

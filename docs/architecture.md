@@ -2,9 +2,9 @@
 
 ## Topology
 
-- `apps/newapi`: Go API exposing OpenAPI endpoints, default port 8080.
+- `apps/api`: Go API exposing OpenAPI endpoints, default port 8080.
 - `apps/web`: Next.js 16 App Router app (TypeScript, Tailwind v4), default port 3000.
-- `packages/api-client`: Generated `openapi-fetch` client typed against `apps/newapi/openapi.json`. Package name: `@workspace/api-client`.
+- `packages/api-client`: Generated `openapi-fetch` client typed against `apps/api/openapi.json`. Package name: `@workspace/api-client`.
 - `packages/constants`: Shared constants consumed by both API and Web. Package name: `@workspace/constants`.
 - `packages/db`: Shared Drizzle schema and migrations. Package name: `@workspace/db`.
 - Monorepo: Turborepo workspace with apps under `apps/` and packages under `packages/`.
@@ -16,14 +16,14 @@ Game operations are split across two APIs:
 | Operation type                                                             | API                  | Transport                     |
 | -------------------------------------------------------------------------- | -------------------- | ----------------------------- |
 | Read (list, search, random, artwork, get by IGDB ID)                       | Next.js (`apps/web`) | plain `fetch` to local routes |
-| Write (delete, sync, image gen, add game, replace game, validate IGDB IDs) | Go (`apps/newapi`)   | OpenAPI client (`apiClient`)  |
+| Write (delete, sync, image gen, add game, replace game, validate IGDB IDs) | Go (`apps/api`)      | OpenAPI client (`apiClient`)  |
 
 Read operations are implemented as Next.js App Router API route handlers under `apps/web/app/api/games/`. They query the database directly using a Drizzle client (`apps/web/lib/db.ts`). Write operations remain in the Go API and are called via `@workspace/api-client`.
 
 ## Data & Auth
 
 - Database: PostgreSQL 17 (default port 5432).
-- OpenAPI + Codegen: OpenAPI spec from `apps/newapi/openapi.json` (`pnpm codegen`), providing `openapi-fetch` client typed via `packages/api-client/src/schema.d.ts` (write operations).
+- OpenAPI + Codegen: OpenAPI spec from `apps/api/openapi.json` (`pnpm codegen`), providing `openapi-fetch` client typed via `packages/api-client/src/schema.d.ts` (write operations).
 - Auth: Stack Auth / Hexclave used in both frontend and backend.
 
 ## Ports
@@ -36,7 +36,7 @@ Read operations are implemented as Next.js App Router API route handlers under `
 
 - Default allowed origins: `http://localhost:3000`, `http://127.0.0.1:3000`, `http://web:3000`.
 - Override with `CORS_ALLOWED_ORIGINS` (comma-separated).
-- Implementation lives in `apps/newapi/main.go`.
+- Implementation lives in `apps/api/main.go`.
 
 ## Health Checks
 
@@ -57,7 +57,7 @@ These standards apply across the entire monorepo (API, Web, and Packages).
 
 ## Environment Variables
 
-### API (`apps/newapi`)
+### API (`apps/api`)
 
 - `PORT` or `SERVER_PORT`
 - `CLIENT_PORT`

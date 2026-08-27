@@ -44,13 +44,13 @@ A collection of video game guessing challenges. Test your gaming knowledge acros
 
 ### OpenAPI Codegen
 
-API contracts are shared between `apps/newapi` and `apps/web` via `apps/newapi/openapi.json` and the `@workspace/api-client` package:
+API contracts are shared between `apps/api` and `apps/web` via `apps/api/openapi.json` and the `@workspace/api-client` package:
 
 ```bash
 pnpm codegen
 ```
 
-This generates typed TypeScript bindings in `packages/api-client/src/schema.d.ts` from `apps/newapi/openapi.json`. Both generated files are checked into git.
+This generates typed TypeScript bindings in `packages/api-client/src/schema.d.ts` from `apps/api/openapi.json`. Both generated files are checked into git.
 
 ---
 

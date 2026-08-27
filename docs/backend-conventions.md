@@ -1,13 +1,13 @@
-# Backend Conventions (apps/newapi)
+# Backend Conventions (apps/api)
 
 ## Architecture & Structure
 
-The backend API is implemented in Go (`apps/newapi`) providing HTTP endpoints for game operations, administrative actions, image generation, and third-party integrations (IGDB, S3/R2, SQS, Cloudflare AI, Hexclave).
+The backend API is implemented in Go (`apps/api`) providing HTTP endpoints for game operations, administrative actions, image generation, and third-party integrations (IGDB, S3/R2, SQS, Cloudflare AI, Hexclave).
 
 ### Directory Structure
 
 ```
-apps/newapi/
+apps/api/
 ├── config/       # Configuration loading and environment mapping (AppConfig)
 ├── db/           # PostgreSQL connection pool initialization
 ├── handlers/     # HTTP route handlers (Games, Discover, ImageGen, Auth, Health, Sample)
@@ -24,7 +24,7 @@ apps/newapi/
 - **Standard Library First**: Core capabilities use standard library packages (`net/http`, `crypto`, `encoding/json`, `database/sql`).
 - **Separation of Concerns**: Handlers handle HTTP requests and JSON encoding/decoding; services encapsulate business logic and database queries.
 - **Authentication**: Protected write/admin endpoints are guarded with the `HexclaveAuth` middleware verifying RS256 JWTs against remote JWKS.
-- **API Contracts**: OpenAPI specifications are defined in `apps/newapi/openapi.json` and consumed via the `@workspace/api-client` package.
+- **API Contracts**: OpenAPI specifications are defined in `apps/api/openapi.json` and consumed via the `@workspace/api-client` package.
 
 ## Next.js API Routes (Read-Only Game Operations)
 
@@ -42,7 +42,7 @@ Read-only game operations are implemented as Next.js App Router route handlers i
 
 ## Go API Write Endpoints
 
-All write and admin operations are implemented in `apps/newapi` handlers and typed via `@workspace/api-client`. All write endpoints are guarded by `HexclaveAuth`.
+All write and admin operations are implemented in `apps/api` handlers and typed via `@workspace/api-client`. All write endpoints are guarded by `HexclaveAuth`.
 
 | Endpoint Path                      | Method | Description                                                                                                                                                                                                                                    |
 | ---------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

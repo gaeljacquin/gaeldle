@@ -46,7 +46,7 @@ importers:
         specifier: ^2.10.11
         version: 2.10.11
 
-  apps/newapi: {}
+  apps/api: {}
 
   apps/web:
     dependencies:

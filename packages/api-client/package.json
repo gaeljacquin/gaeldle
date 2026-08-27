@@ -10,7 +10,7 @@
   },
   "scripts": {
     "codegen": "pnpm generate",
-    "generate": "openapi-typescript ../../apps/newapi/openapi.json -o src/schema.d.ts",
+    "generate": "openapi-typescript ../../apps/api/openapi.json -o src/schema.d.ts",
     "typecheck": "tsc --noEmit",
     "build": "tsc"
   },

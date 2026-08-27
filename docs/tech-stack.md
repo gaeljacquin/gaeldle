@@ -3,7 +3,7 @@
 ## Moving Parts
 
 - **Monorepo**: Turborepo + `ni` (pnpm workspaces)
-- **Backend**: Go (apps/newapi)
+- **Backend**: Go (apps/api)
 - **Frontend**: Next.js 16 (App Router)
 - **API Protocol**: OpenAPI + openapi-typescript + openapi-fetch (Type-safe communication)
 - **Database**: PostgreSQL 17 + Drizzle ORM (@workspace/db)
@@ -18,7 +18,7 @@
 
 ```
 apps/
-  newapi/     # Go API (Write operations, Image generation, IGDB sync)
+  api/        # Go API (Write operations, Image generation, IGDB sync)
   web/        # Next.js App (Read operations, Game views)
 packages/
   api-client/ # Generated openapi-fetch client and TypeScript schema (@workspace/api-client)

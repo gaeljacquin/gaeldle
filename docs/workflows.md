@@ -2,9 +2,9 @@
 
 ## Add a New API Endpoint
 
-1. **Handler**: Define the handler in `apps/newapi/handlers/[resource].go` and mount it on the router in `apps/newapi/main.go`.
-2. **Service**: Implement business logic in `apps/newapi/services/[resource]_service.go`.
-3. **OpenAPI Spec**: Update `apps/newapi/openapi.json`.
+1. **Handler**: Define the handler in `apps/api/handlers/[resource].go` and mount it on the router in `apps/api/main.go`.
+2. **Service**: Implement business logic in `apps/api/services/[resource]_service.go`.
+3. **OpenAPI Spec**: Update `apps/api/openapi.json`.
 4. **Codegen**: Run `pnpm codegen` to regenerate TypeScript types in `packages/api-client/src/schema.d.ts`. Commit both files.
 5. **Client**: Call `apiClient.POST` or `apiClient.GET` from `@workspace/api-client` inside `apps/web/lib/services/`.
 
@@ -27,7 +27,7 @@ Dashboard pages that perform write operations (add, replace, delete) follow a co
 4. **Validation hook** (if input must be validated before committing): Create `apps/web/lib/hooks/use-<feature>-validation.ts`. Use `useDebounce` (600 ms) before calling the service function. Use TanStack Query with a descriptive query key. Set `staleTime: 30_000`.
 5. **Row/Entry component**: If the form is a variable-length list of inputs, create a component in `apps/web/components/<feature>-row.tsx` or `<feature>-entry.tsx` (e.g., `igdb-id-add-entry.tsx`). Each row/entry gets its own hook invocation (wrapped in a small intermediate component) so React's rules of hooks are not violated.
 6. **Service functions**: Add the API call wrappers to `apps/web/lib/services/game.service.ts`. Validation calls go to Go API via `apiClient`.
-7. **Handler**: Add the Go route and handler in `apps/newapi/`, implement business logic in `apps/newapi/services/`, and run `pnpm codegen`.
+7. **Handler**: Add the Go route and handler in `apps/api/`, implement business logic in `apps/api/services/`, and run `pnpm codegen`.
 8. **Utilities hub**: Add a `MenuCard` entry in `apps/web/views/utilities.tsx` linking to the new page. The sidebar exposes a single **Utilities** link (`/dashboard/utilities`, icon `IconTools`) that routes to this hub — do not add individual `<SidebarLink>` entries for each admin tool page.
 9. **Shared constants**: If the feature needs a max-rows limit or other shareable constant, add it to `packages/constants/src/index.ts` and import from `@workspace/constants` in both web and API code.
 

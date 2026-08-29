@@ -4,9 +4,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "turbo run build --filter=!@workspace/newapi",
+    "build": "turbo run build",
     "codegen": "pnpm --filter @workspace/api generate:openapi && pnpm --filter @workspace/api-client generate",
-    "dev": "turbo run dev --filter=!@workspace/newapi",
+    "dev": "turbo run dev",
     "lint": "turbo lint --filter '!@workspace/ui'",
     "lint:fix": "turbo lint --filter '!@workspace/ui' -- --fix",
     "lint:web": "turbo lint --filter @workspace/web",
@@ -49,6 +49,6 @@
     "motion": "^13.1.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "zod": "^4.4.3"
+    "zod": "^4.5.1"
   }
 }

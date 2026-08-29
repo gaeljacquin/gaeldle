@@ -24,8 +24,8 @@ importers:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
       zod:
-        specifier: ^4.4.3
-        version: 4.4.3
+        specifier: ^4.5.1
+        version: 4.5.1
     devDependencies:
       '@commitlint/cli':
         specifier: ^21.2.2
@@ -190,8 +190,6 @@ importers:
       typescript-eslint:
         specifier: ^8.68.0
         version: 8.68.0(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.7.3)
-
-  apps/newapi: {}
 
   apps/web:
     dependencies:

@@ -3,7 +3,6 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   env: {
     apiUrl: process.env.SERVER_URL ?? 'http://localhost:8080',
-    newApiUrl: process.env.NEW_API_URL ?? 'http://localhost:8081',
   },
   images: {
     unoptimized: true,

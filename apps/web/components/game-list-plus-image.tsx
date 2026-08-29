@@ -219,6 +219,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
 
               <GuessHistoryInline
                 guesses={wrongGuesses}
+                targetGame={targetGame}
                 className="max-h-full"
               />
 

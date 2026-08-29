@@ -479,6 +479,15 @@ export class GamesService {
       })),
       keywords: igdbGame.keywords?.map((k) => k.name),
       franchises: igdbGame.franchises?.map((f) => f.name),
+      collections: (() => {
+        const list = igdbGame.collections
+          ?.map((c) => c.name)
+          .filter(
+            (name): name is string =>
+              typeof name === 'string' && name.trim().length > 0,
+          );
+        return list && list.length > 0 ? list : undefined;
+      })(),
       releaseDates: igdbGame.release_dates?.map((rd) => ({
         date: rd.date,
         platform: rd.platform?.name,

@@ -364,7 +364,7 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
-          {!clueHistory || clueHistory.length === 0 ? (
+          {!Array.isArray(clueHistory) || clueHistory.length === 0 ? (
             <div className="text-center py-8 border border-dashed rounded-none bg-muted/10">
               <p className="text-sm text-muted-foreground font-medium">
                 No clue history found.

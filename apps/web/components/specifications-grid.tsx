@@ -14,13 +14,13 @@ import Image from 'next/image';
 import {
   IconArrowUp,
   IconArrowDown,
-  IconArrowRight,
 } from '@tabler/icons-react';
 import {
   extractArray,
   extractPublisher,
   extractReleaseYear,
 } from '@workspace/shared';
+import { Badge } from '@/components/badge';
 
 interface SpecificationsGridProps {
   guesses: SpecificationGuess[];
@@ -132,8 +132,7 @@ function renderHintRow(revealedClue: RevealedClue) {
     <tr key="hint-row" className="bg-muted/70 text-center">
       <td className="border border-border/50 px-3 py-2 text-xs w-32 text-foreground font-bold">
         <div className="flex gap-1 items-center justify-center">
-          <span>Hint</span>
-          <IconArrowRight className="size-4" />
+          <Badge variant="secondary">Hint</Badge>
         </div>
       </td>
       {columnHeaders.slice(1).map((header) => (

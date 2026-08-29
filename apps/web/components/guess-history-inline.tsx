@@ -32,6 +32,10 @@ export default function GuessHistoryInline({
   targetGame,
   className,
 }: GuessHistoryInlineProps) {
+  if (guesses.length === 0) {
+    return null;
+  }
+
   const reversedGuesses = [...guesses].reverse();
 
   return (

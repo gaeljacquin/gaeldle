@@ -127,12 +127,19 @@ function Timeline2Content() {
               <p className="mt-2 text-muted-foreground">
                 {gameMode.description}
               </p>
+              <div className="mt-4 flex justify-center">
+                <Attempts
+                  maxAttempts={maxAttempts}
+                  attemptsLeft={attemptsLeft}
+                  variant="primary"
+                />
+              </div>
             </div>
           </div>
 
           <Card className="border shadow-none bg-muted/5">
             <CardContent>
-              <div className="space-y-20">
+              <div className="space-y-8">
                 {isGameOver ? (
                   <div className="border border-border bg-card/60 p-8 text-center animate-in fade-in zoom-in duration-300">
                     <div className="space-y-4">
@@ -201,17 +208,6 @@ function Timeline2Content() {
                     </div>
                   </div>
                 )}
-
-                <div className="flex flex-col items-center gap-2 -mt-8">
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Attempts
-                  </p>
-                  <Attempts
-                    maxAttempts={maxAttempts}
-                    attemptsLeft={attemptsLeft}
-                    variant="primary"
-                  />
-                </div>
 
                 <div className="text-center">
                   <div

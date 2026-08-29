@@ -200,6 +200,13 @@ function TimelineContent() {
               <p className="mt-2 text-muted-foreground">
                 {gameMode.description}
               </p>
+              <div className="mt-4 flex justify-center">
+                <Attempts
+                  maxAttempts={gameMode.maxAttempts}
+                  attemptsLeft={attemptsLeft}
+                  variant="primary"
+                />
+              </div>
             </div>
           </div>
 
@@ -298,17 +305,6 @@ function TimelineContent() {
                     >
                       Swap
                     </button>
-                  </div>
-
-                  <div className="flex flex-col items-center gap-2">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                      Attempts
-                    </p>
-                    <Attempts
-                      maxAttempts={gameMode.maxAttempts}
-                      attemptsLeft={attemptsLeft}
-                      variant="primary"
-                    />
                   </div>
                 </div>
 

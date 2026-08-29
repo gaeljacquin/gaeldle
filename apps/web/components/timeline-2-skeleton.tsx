@@ -12,12 +12,17 @@ export default function Timeline2Skeleton() {
           <div className="text-center pt-8 md:pt-0">
             <Skeleton className="h-10 w-64 mx-auto" />
             <Skeleton className="h-4 w-80 mx-auto mt-2" />
+            <div className="mt-4 flex gap-2 justify-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="size-3 rounded-none" />
+              ))}
+            </div>
           </div>
         </div>
 
         <Card className="border shadow-none bg-muted/5">
           <CardContent>
-            <div className="space-y-20">
+            <div className="space-y-8">
               {/* Dealt card section */}
               <div className="flex justify-center">
                 <div className="border-2 border-dashed border-border flex justify-center items-center w-32 h-44 bg-card/50">
@@ -25,16 +30,6 @@ export default function Timeline2Skeleton() {
                     className="animate-none"
                     showTopBanner={false}
                   />
-                </div>
-              </div>
-
-              {/* Attempts */}
-              <div className="flex flex-col items-center gap-2 -mt-8">
-                <Skeleton className="h-3 w-16" />
-                <div className="flex gap-1.5 justify-center">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="size-6 rounded-full" />
-                  ))}
                 </div>
               </div>
 

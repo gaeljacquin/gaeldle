@@ -18,7 +18,7 @@ export default function Attempts({
     variant === 'neutral'
       ? 'border-muted-foreground bg-transparent'
       : 'border-primary bg-primary';
-  const usedClass = 'border-foreground/20 bg-foreground/10';
+  const usedClass = 'border-foreground/20 bg-red-700';
 
   return (
     <div

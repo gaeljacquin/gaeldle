@@ -50,3 +50,9 @@ type DiscoverApplyResult struct {
 	Status string  `json:"status"`
 	Error  *string `json:"error"`
 }
+
+type ImageGenError struct {
+	IgdbID   int    `json:"igdbId"`
+	GameName string `json:"gameName"`
+	Error    string `json:"error"`
+}

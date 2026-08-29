@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"log"
@@ -101,16 +102,22 @@ func main() {
 	sqsService := services.NewSqsService(cfg)
 	hexclaveService := services.NewHexclaveService(cfg)
 	discoverService := services.NewDiscoverService(database, igdbService, gamesService)
-	imageGenService := services.NewImageGenService(database, sqsService, r2Service, gamesService, cfg)
+	clueService := services.NewClueService(database, gamesService, aiService)
+	imageGenService := services.NewImageGenService(database, sqsService, s3Service, r2Service, gamesService, aiService, cfg)
 	sampleService := services.NewSampleService(sqsService, s3Service, r2Service, cfg)
 
-	log.Printf("Services initialized: IGDB=%p, AI=%p, S3=%p, R2=%p, SQS=%p\n",
-		igdbService, aiService, s3Service, r2Service, sqsService)
+	// Start SQS consumer for image generation in background if configured
+	imageGenConsumer := services.NewImageGenConsumer(sqsService, imageGenService, cfg)
+	imageGenConsumer.Start(context.Background())
+
+	log.Printf("Services initialized: IGDB=%p, AI=%p, S3=%p, R2=%p, SQS=%p, Clue=%p, ImageGen=%p\n",
+		igdbService, aiService, s3Service, r2Service, sqsService, clueService, imageGenService)
 
 	// 4. Instantiate handlers
 	healthHandler := handlers.NewHealthHandler(database)
 	gamesHandler := handlers.NewGamesHandler(gamesService)
 	discoverHandler := handlers.NewDiscoverHandler(discoverService)
+	clueHandler := handlers.NewClueHandler(clueService)
 	imageGenHandler := handlers.NewImageGenHandler(imageGenService)
 	sampleHandler := handlers.NewSampleHandler(sampleService)
 	authHandler := handlers.NewAuthHandler(hexclaveService)
@@ -150,6 +157,11 @@ func main() {
 	// Discover Endpoints - Protected
 	mux.Handle("POST /api/discover/scan", authMiddleware(http.HandlerFunc(discoverHandler.Scan)))
 	mux.Handle("POST /api/discover/apply", authMiddleware(http.HandlerFunc(discoverHandler.Apply)))
+
+	// Clue Endpoints - Protected
+	mux.Handle("POST /api/clue/generate-clue", authMiddleware(http.HandlerFunc(clueHandler.GenerateClue)))
+	mux.Handle("GET /api/clue/history", authMiddleware(http.HandlerFunc(clueHandler.GetClueHistory)))
+	mux.Handle("POST /api/clue/restore", authMiddleware(http.HandlerFunc(clueHandler.RestoreClue)))
 
 	// Image Generation Endpoints - Protected
 	mux.Handle("POST /api/image-gen/generate-image", authMiddleware(http.HandlerFunc(imageGenHandler.GenerateImage)))

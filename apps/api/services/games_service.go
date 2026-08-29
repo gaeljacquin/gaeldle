@@ -597,7 +597,7 @@ func (s *GamesService) SyncGameByIgdbId(igdbID int, shouldRefresh bool, actorID 
 
 		payloadBytes, _ := json.Marshal(payload)
 		_, _ = s.db.Exec(`
-			INSERT INTO domain_events (event_type, actor_id, payload)
+			INSERT INTO domain_event (event_type, actor_id, payload)
 			VALUES ($1, $2, $3)
 		`, "game.added", actorID, string(payloadBytes))
 	}()
@@ -934,7 +934,7 @@ func (s *GamesService) ValidateGameForAdd(igdbID int, actorID string) (*Validate
 			"alreadyInDb": true,
 		})
 		_, _ = s.db.Exec(`
-			INSERT INTO domain_events (event_type, actor_id, payload)
+			INSERT INTO domain_event (event_type, actor_id, payload)
 			VALUES ($1, $2, $3)
 		`, "game.queried", actorID, string(payload))
 
@@ -958,7 +958,7 @@ func (s *GamesService) ValidateGameForAdd(igdbID int, actorID string) (*Validate
 			"alreadyInDb": false,
 		})
 		_, _ = s.db.Exec(`
-			INSERT INTO domain_events (event_type, actor_id, payload)
+			INSERT INTO domain_event (event_type, actor_id, payload)
 			VALUES ($1, $2, $3)
 		`, "game.queried", actorID, string(payload))
 
@@ -980,7 +980,7 @@ func (s *GamesService) ValidateGameForAdd(igdbID int, actorID string) (*Validate
 			"alreadyInDb": false,
 		})
 		_, _ = s.db.Exec(`
-			INSERT INTO domain_events (event_type, actor_id, payload)
+			INSERT INTO domain_event (event_type, actor_id, payload)
 			VALUES ($1, $2, $3)
 		`, "game.queried", actorID, string(payload))
 
@@ -1001,7 +1001,7 @@ func (s *GamesService) ValidateGameForAdd(igdbID int, actorID string) (*Validate
 		"alreadyInDb": false,
 	})
 	_, _ = s.db.Exec(`
-		INSERT INTO domain_events (event_type, actor_id, payload)
+		INSERT INTO domain_event (event_type, actor_id, payload)
 		VALUES ($1, $2, $3)
 	`, "game.queried", actorID, string(payload))
 

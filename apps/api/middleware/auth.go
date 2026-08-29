@@ -3,6 +3,8 @@ package middleware
 import (
 	"context"
 	"crypto"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
@@ -36,6 +38,9 @@ type JWK struct {
 	Use string `json:"use"`
 	Kid string `json:"kid"`
 	Alg string `json:"alg"`
+	Crv string `json:"crv"`
+	X   string `json:"x"`
+	Y   string `json:"y"`
 	N   string `json:"n"`
 	E   string `json:"e"`
 }
@@ -137,6 +142,48 @@ func parseRSAPublicKey(nStr, eStr string) (*rsa.PublicKey, error) {
 	}, nil
 }
 
+func parseECPublicKey(crv, xStr, yStr string) (*ecdsa.PublicKey, error) {
+	var curve elliptic.Curve
+	switch crv {
+	case "P-256", "":
+		curve = elliptic.P256()
+	case "P-384":
+		curve = elliptic.P384()
+	case "P-521":
+		curve = elliptic.P521()
+	default:
+		return nil, fmt.Errorf("unsupported curve: %s", crv)
+	}
+
+	xBytes, err := decodeBase64URL(xStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid x: %w", err)
+	}
+	yBytes, err := decodeBase64URL(yStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid y: %w", err)
+	}
+
+	x := new(big.Int).SetBytes(xBytes)
+	y := new(big.Int).SetBytes(yBytes)
+
+	return &ecdsa.PublicKey{
+		Curve: curve,
+		X:     x,
+		Y:     y,
+	}, nil
+}
+
+func verifyECDSASignature(pubKey *ecdsa.PublicKey, hashed []byte, sigBytes []byte) bool {
+	curveOrderBytes := (pubKey.Curve.Params().BitSize + 7) / 8
+	if len(sigBytes) != 2*curveOrderBytes {
+		return false
+	}
+	r := new(big.Int).SetBytes(sigBytes[:curveOrderBytes])
+	s := new(big.Int).SetBytes(sigBytes[curveOrderBytes:])
+	return ecdsa.Verify(pubKey, hashed, r, s)
+}
+
 type JWTClaims struct {
 	Sub string      `json:"sub"`
 	Aud interface{} `json:"aud"`
@@ -164,8 +211,13 @@ func verifyJWT(tokenStr, projectID string) (*JWTClaims, error) {
 		return nil, fmt.Errorf("invalid header JSON: %w", err)
 	}
 
-	if header.Alg != "RS256" && header.Alg != "" {
-		return nil, fmt.Errorf("unsupported algorithm: %s", header.Alg)
+	alg := header.Alg
+	if alg == "" {
+		alg = "ES256"
+	}
+
+	if alg != "ES256" && alg != "RS256" {
+		return nil, fmt.Errorf("unsupported algorithm: %s", alg)
 	}
 
 	jwks, err := getJWKS(projectID, false)
@@ -198,11 +250,6 @@ func verifyJWT(tokenStr, projectID string) (*JWTClaims, error) {
 		return nil, fmt.Errorf("key id %s not found in JWKS", header.Kid)
 	}
 
-	pubKey, err := parseRSAPublicKey(matchingKey.N, matchingKey.E)
-	if err != nil {
-		return nil, fmt.Errorf("invalid public key: %w", err)
-	}
-
 	signedContent := parts[0] + "." + parts[1]
 	sigBytes, err := decodeBase64URL(parts[2])
 	if err != nil {
@@ -213,8 +260,24 @@ func verifyJWT(tokenStr, projectID string) (*JWTClaims, error) {
 	h.Write([]byte(signedContent))
 	hashed := h.Sum(nil)
 
-	if err := rsa.VerifyPKCS1v15(pubKey, crypto.SHA256, hashed, sigBytes); err != nil {
-		return nil, fmt.Errorf("signature verification failed: %w", err)
+	if matchingKey.Kty == "EC" || alg == "ES256" {
+		pubKey, err := parseECPublicKey(matchingKey.Crv, matchingKey.X, matchingKey.Y)
+		if err != nil {
+			return nil, fmt.Errorf("invalid EC public key: %w", err)
+		}
+		if !verifyECDSASignature(pubKey, hashed, sigBytes) {
+			return nil, fmt.Errorf("signature verification failed")
+		}
+	} else if matchingKey.Kty == "RSA" || alg == "RS256" {
+		pubKey, err := parseRSAPublicKey(matchingKey.N, matchingKey.E)
+		if err != nil {
+			return nil, fmt.Errorf("invalid RSA public key: %w", err)
+		}
+		if err := rsa.VerifyPKCS1v15(pubKey, crypto.SHA256, hashed, sigBytes); err != nil {
+			return nil, fmt.Errorf("signature verification failed: %w", err)
+		}
+	} else {
+		return nil, fmt.Errorf("unsupported key type: %s", matchingKey.Kty)
 	}
 
 	payloadBytes, err := decodeBase64URL(parts[1])

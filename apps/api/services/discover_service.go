@@ -129,7 +129,7 @@ func (s *DiscoverService) Scan(count int, actorID string) (*DiscoverScanResult, 
 		})
 
 		_ = s.db.QueryRow(`
-			INSERT INTO domain_events (event_type, actor_id, payload)
+			INSERT INTO domain_event (event_type, actor_id, payload)
 			VALUES ($1, $2, $3)
 			RETURNING id
 		`, "discover_games.scanned", actorID, string(eventPayload)).Scan(&scanEventID)
@@ -190,7 +190,7 @@ func (s *DiscoverService) Apply(selectedIgdbIds []int, scanEventID int, actorID 
 		})
 
 		_ = s.db.QueryRow(`
-			INSERT INTO domain_events (event_type, actor_id, payload)
+			INSERT INTO domain_event (event_type, actor_id, payload)
 			VALUES ($1, $2, $3)
 			RETURNING id
 		`, "discover_games.applied", actorID, string(eventPayload)).Scan(&applyEventID)

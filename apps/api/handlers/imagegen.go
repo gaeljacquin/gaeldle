@@ -103,15 +103,52 @@ func (h *ImageGenHandler) Stream(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload := map[string]interface{}{
-		"type": "completed",
-		"data": map[string]interface{}{
-			"succeeded": 1,
-			"failed":    0,
-			"failures":  []interface{}{},
-		},
+	imageGenID := r.PathValue("imageGenId")
+
+	status, err := h.imageGenService.GetImageGenStatus(imageGenID)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
-	bytes, _ := json.Marshal(payload)
-	fmt.Fprintf(w, "data: %s\n\n", string(bytes))
-	flusher.Flush()
+
+	st, _ := status["status"].(string)
+	if st == "completed" || st == "failed" {
+		payload := map[string]interface{}{
+			"type": "completed",
+			"data": map[string]interface{}{
+				"succeeded": status["succeeded"],
+				"failed":    status["failed"],
+				"failures":  status["failures"],
+			},
+		}
+		b, _ := json.Marshal(payload)
+		fmt.Fprintf(w, "data: %s\n\n", string(b))
+		flusher.Flush()
+		return
+	}
+
+	// Subscribe to live events
+	eventCh, unsubscribe := h.imageGenService.GetStore().Subscribe(imageGenID)
+	defer unsubscribe()
+
+	for {
+		select {
+		case <-r.Context().Done():
+			return
+		case event, ok := <-eventCh:
+			if !ok {
+				return
+			}
+			b, err := json.Marshal(event)
+			if err != nil {
+				continue
+			}
+			fmt.Fprintf(w, "data: %s\n\n", string(b))
+			flusher.Flush()
+
+			if event.Type == "completed" || event.Type == "error" {
+				return
+			}
+		}
+	}
 }

@@ -17,3 +17,5 @@ yarn.lock
 *.md
 next-env.d.ts
 packages/ui
+apps/api/openapi.json
+packages/api-client/src/schema.d.ts

@@ -11,10 +11,7 @@ import type {
   MatchKey,
 } from '@workspace/api/db';
 import Image from 'next/image';
-import {
-  IconArrowUp,
-  IconArrowDown,
-} from '@tabler/icons-react';
+import { IconArrowUp, IconArrowDown } from '@tabler/icons-react';
 import {
   extractArray,
   extractPublisher,

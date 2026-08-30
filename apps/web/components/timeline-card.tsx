@@ -10,6 +10,7 @@ interface TimelineCardProps {
   game: Game;
   isCorrect?: boolean;
   showDate?: boolean;
+  isMovedFound?: boolean;
   isDragging?: boolean;
   isGameOver?: boolean;
   className?: string;
@@ -21,6 +22,7 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
       game,
       isCorrect,
       showDate = false,
+      isMovedFound = false,
       isDragging = false,
       isGameOver = false,
       className,
@@ -29,6 +31,8 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
     ref,
   ) => {
     const shouldGrayscale = isGameOver && isCorrect === false;
+    const isFoundDisplaced =
+      isMovedFound || (isCorrect === undefined && showDate);
 
     return (
       <div
@@ -62,10 +66,13 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
 
         <div
           className={cn(
-            'absolute top-0 left-0 right-0 px-2 py-1 text-center text-sm font-semibold text-white',
-            isCorrect === true && 'bg-green-600',
-            isCorrect === false && 'bg-destructive',
-            isCorrect === undefined && 'bg-slate-600',
+            'absolute top-0 left-0 right-0 px-2 py-1 text-center text-sm font-semibold',
+            isCorrect === true && 'bg-green-600/90 text-white',
+            isCorrect === false && 'bg-destructive/90 text-white',
+            isFoundDisplaced && 'bg-primary/90 text-primary-foreground',
+            isCorrect === undefined &&
+              !isFoundDisplaced &&
+              'bg-slate-600 text-white',
           )}
         >
           {showDate ? timelineFormatDate(game.firstReleaseDate) : '?'}
@@ -76,7 +83,10 @@ export const TimelineCard = forwardRef<HTMLDivElement, TimelineCardProps>(
             'absolute inset-x-0 bottom-0 px-2 py-1 text-center border-t',
             isCorrect === true && 'bg-green-600/90 text-white',
             isCorrect === false && 'bg-destructive/90 text-white',
-            isCorrect === undefined && 'bg-primary/90 text-primary-foreground',
+            isFoundDisplaced && 'bg-primary/90 text-primary-foreground',
+            isCorrect === undefined &&
+              !isFoundDisplaced &&
+              'bg-slate-600/90 text-white',
           )}
         >
           <p className="truncate text-xs font-medium" title={game.name}>

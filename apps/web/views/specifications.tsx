@@ -150,7 +150,9 @@ function SpecificationsContent() {
                     disabled={attemptsLeft <= 1 || !!revealedClue}
                     className="font-bold h-10 cursor-pointer"
                   >
-                    {revealedClue ? 'Hint revealed' : 'Reveal Hint (-1 attempt)'}
+                    {revealedClue
+                      ? 'Hint revealed'
+                      : 'Reveal Hint (-1 attempt)'}
                   </Button>
                 </div>
               </div>

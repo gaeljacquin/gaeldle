@@ -8,7 +8,6 @@
 - **Package manager**: tsx (use `pnpm exec tsx` to run scripts)
 - **Database ORM**: Drizzle ORM with PostgreSQL
 - **Schema**: `@workspace/api/db` export (located at `apps/api/src/db/schema/index.ts`)
-- **Constants**: `IMAGE_PROMPT_SUFFIX` from `@workspace/constants`
 
 ### Database Configuration
 
@@ -32,7 +31,6 @@ The script uses the same `buildImagePrompt()` function as `games.router.ts`:
 - Add game summary if available
 - Conditionally add: storyline, genres, themes (all false by default)
 - Always include: keywords (if available)
-- Append: `IMAGE_PROMPT_SUFFIX` for consistent styling
 
 ### Default Prompt Options
 

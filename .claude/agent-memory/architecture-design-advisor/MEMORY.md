@@ -8,7 +8,7 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 
 - `packages/api-client`: Generated openapi-fetch client and TypeScript schema (@workspace/api-client). Entry: `src/index.ts`, `src/schema.d.ts`.
 - `apps/api/src/db/schema/`: Drizzle ORM schema exported at `@workspace/api/db`.
-- `packages/constants`: `IMAGE_STYLES`, `IMAGE_PROMPT_SUFFIX`, `DEFAULT_IMAGE_GEN_STYLE`. Package: `@workspace/constants`.
+- `packages/constants`: `IMAGE_STYLES`, `DEFAULT_IMAGE_GEN_STYLE`. Package: `@workspace/constants`.
 
 ## Auth Pattern
 

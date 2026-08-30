@@ -19,7 +19,7 @@ import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';
 import type { AppConfiguration } from '@/config/configuration';
-import { IMAGE_GEN_DIR, IMAGE_PROMPT_SUFFIX } from '@workspace/shared';
+import { IMAGE_GEN_DIR } from '@workspace/shared';
 
 interface GenerateImageInput {
   igdbId: number;
@@ -614,8 +614,6 @@ export class GamesService {
     if (Array.isArray(game.keywords) && game.keywords.length > 0) {
       parts.push(`Keywords: ${(game.keywords as string[]).join(', ')}`);
     }
-
-    parts.push(IMAGE_PROMPT_SUFFIX);
 
     return parts.join('. ');
   }

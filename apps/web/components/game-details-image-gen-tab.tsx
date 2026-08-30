@@ -1,11 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import {
-  DEFAULT_PROVIDER,
-  IMAGE_PROMPT_SUFFIX,
-  MIN_PREVIEW_PROMPT_ROWS,
-} from '@workspace/shared';
+import { DEFAULT_PROVIDER, MIN_PREVIEW_PROMPT_ROWS } from '@workspace/shared';
 import {
   useSuspenseQuery,
   useMutation,
@@ -83,8 +79,6 @@ function buildPromptPreview(
   if (keywords?.length) {
     parts.push(`Keywords: ${keywords.join(', ')}`);
   }
-
-  parts.push(IMAGE_PROMPT_SUFFIX);
 
   return parts.join('. ');
 }

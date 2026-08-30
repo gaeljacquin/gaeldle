@@ -20,7 +20,7 @@ import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';
 import { ImageGenStore } from '@/image-gen/image-gen.store';
-import { IMAGE_GEN_DIR, IMAGE_PROMPT_SUFFIX } from '@workspace/shared';
+import { IMAGE_GEN_DIR } from '@workspace/shared';
 import { GamesService } from '@/games/games.service';
 import { SqsService } from '@/lib/sqs.service';
 import configuration from '@/config/configuration';
@@ -564,8 +564,6 @@ export class ImageGenService {
     if (Array.isArray(game.keywords) && game.keywords.length > 0) {
       parts.push(`Keywords: ${(game.keywords as string[]).join(', ')}`);
     }
-
-    parts.push(IMAGE_PROMPT_SUFFIX);
 
     return parts.join('. ');
   }

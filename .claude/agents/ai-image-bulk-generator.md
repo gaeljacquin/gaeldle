@@ -116,7 +116,7 @@ The script must:
      .where(sql`ai_image_url IS NULL`)
      .limit(limit);
    ```
-4. **Build the prompt** using the exact same logic as `buildImagePrompt` in `apps/api/src/games/games.router.ts` and `IMAGE_PROMPT_SUFFIX` / `IMAGE_STYLES` from `packages/constants/src/index.ts`. Resolve the style descriptor from `IMAGE_STYLES` by matching `IMAGE_STYLE` env var against `value` or `label` (case-insensitive); fall back to `DEFAULT_IMAGE_GEN_STYLE`:
+4. **Build the prompt** using the exact same logic as `buildImagePrompt` in `apps/api/src/games/games.router.ts` and `IMAGE_STYLES` from `packages/constants/src/index.ts`. Resolve the style descriptor from `IMAGE_STYLES` by matching `IMAGE_STYLE` env var against `value` or `label` (case-insensitive); fall back to `DEFAULT_IMAGE_GEN_STYLE`:
    ```typescript
    const parts: string[] = [];
    parts.push(
@@ -138,7 +138,6 @@ The script must:
      parts.push(`Themes: ${(game.themes as string[]).join(', ')}`);
    if (Array.isArray(game.keywords) && game.keywords.length > 0)
      parts.push(`Keywords: ${(game.keywords as string[]).join(', ')}`);
-   parts.push(IMAGE_PROMPT_SUFFIX);
    const prompt = parts.join('. ');
    ```
 5. **Call Cloudflare AI** — same as `AiService.generateImage` in `apps/api/src/lib/ai.service.ts`:

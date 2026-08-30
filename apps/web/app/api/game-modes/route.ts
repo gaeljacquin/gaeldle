@@ -151,6 +151,7 @@ export async function PATCH(request: NextRequest) {
       description,
       level,
       maxAttempts,
+      gradient,
       isActive,
       isCoverArt,
     } = body;
@@ -170,6 +171,7 @@ export async function PATCH(request: NextRequest) {
         description,
         level,
         maxAttempts: Number(maxAttempts),
+        ...(gradient !== undefined ? { gradient } : {}),
         isActive: isActive ? 1 : 0,
         isCoverArt: isCoverArt ? 1 : 0,
       })
@@ -187,6 +189,7 @@ export async function PATCH(request: NextRequest) {
           description: updatedGameMode.description,
           level: updatedGameMode.level,
           maxAttempts: updatedGameMode.maxAttempts,
+          gradient: updatedGameMode.gradient,
           isActive: updatedGameMode.isActive,
           isCoverArt: updatedGameMode.isCoverArt,
         },

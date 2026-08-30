@@ -98,7 +98,7 @@ export const allGameModesQueryOptions = {
 };
 
 export const updateGameMode = async (
-  gameMode: Omit<GameMode & { id: number }, 'ordinal' | 'gradient'>,
+  gameMode: Omit<GameMode & { id: number }, 'ordinal'>,
 ): Promise<void> => {
   const res = await fetch('/api/game-modes', {
     method: 'PATCH',

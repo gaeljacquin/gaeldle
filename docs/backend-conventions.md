@@ -80,43 +80,64 @@ All route handlers return `NextResponse.json` with a consistent envelope:
 - **No contract package**: Shared types are generated from NestJS OpenAPI spec via `pnpm codegen`.
 - **Server-only DB access**: Import `db` from `@/lib/db` only in server-side code (route handlers, server components, server actions). Never import it in client components.
 
-## NestJS Write Endpoints
+## NestJS Write & Feature Endpoints
 
-All write and admin operations are implemented in `apps/api` controllers and typed via `@workspace/api-client`. All are guarded by `HexclaveGuard`.
+All write, admin, and AI generation operations are implemented in `apps/api` controllers and typed via `@workspace/api-client`. All are guarded by `HexclaveGuard`.
 
-| Endpoint Path                      | Method | Description                                                                                                                                                                                                                                    |
-| ---------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/games/sync`                  | POST   | Sync (upsert) a single game from IGDB by `igdb_id`. Used by the Add Game feature to commit a validated game.                                                                                                                                   |
-| `/api/games/:id`                   | DELETE | Delete a single game by ID.                                                                                                                                                                                                                    |
-| `/api/games/bulk`                  | DELETE | Bulk delete games by ID array.                                                                                                                                                                                                                 |
-| `/api/image-gen/generate-image`    | POST   | Generate an AI image for a single game.                                                                                                                                                                                                        |
-| `/api/image-gen/generate-images`   | POST   | Start a bulk AI image generation job.                                                                                                                                                                                                          |
-| `/api/image-gen/generate-images/:imageGenId/status` | GET | Poll the status of an in-progress bulk image job.                                                                                                                                                                                        |
-| `/api/games/add/validate-one`      | POST   | Validate a single IGDB ID before adding: checks IGDB existence and DB duplicate. Returns `{ igdbId, existsOnIgdb, alreadyInDb, gameName, canAdd }`.                                                                                            |
-| `validateReplaceGame` | POST   | `/games/replace-game/validate-one` | Validate a current/replacement IGDB ID pair before replacing: checks both DB and IGDB. Returns `{ current, replacement, currentExistsInDb, currentGameName, replacementExistsOnIgdb, replacementAlreadyInDb, replacementGameName, canApply }`. |
-| `replaceGames`        | POST   | `/games/replace-games`             | Replace up to 20 games by swapping their IGDB IDs. Input: array of `{ current, replacement }` pairs. Output: `{ success, results[] }` where each result has `status: 'updated'                                                                 | 'skipped' | 'error'`. |
+| Endpoint Path                                      | Method | Description                                                                                                                                                                                                                                    |
+| -------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/games/sync`                                  | POST   | Sync (upsert) a single game from IGDB by `igdb_id`. Used by the Add Game feature to commit a validated game.                                                                                                                                   |
+| `/api/games/:id`                                   | DELETE | Delete a single game by ID.                                                                                                                                                                                                                    |
+| `/api/games/bulk`                                  | DELETE | Bulk delete games by ID array.                                                                                                                                                                                                                 |
+| `/api/image-gen/generate-image`                    | POST   | Generate an AI image for a single game.                                                                                                                                                                                                        |
+| `/api/image-gen/generate-images`                   | POST   | Start a bulk AI image generation job.                                                                                                                                                                                                          |
+| `/api/image-gen/generate-images/:imageGenId/status` | GET    | Poll the status of an in-progress bulk image job.                                                                                                                                                                                              |
+| `/api/games/add/validate-one`                      | POST   | Validate a single IGDB ID before adding: checks IGDB existence and DB duplicate. Returns `{ igdbId, existsOnIgdb, alreadyInDb, gameName, canAdd }`.                                                                                            |
+| `/api/games/replace-game/validate-one`              | POST   | Validate a current/replacement IGDB ID pair before replacing: checks both DB and IGDB. Returns `{ current, replacement, currentExistsInDb, currentGameName, replacementExistsOnIgdb, replacementAlreadyInDb, replacementGameName, canApply }`. |
+| `/api/games/replace-games`                         | POST   | Replace up to 20 games by swapping their IGDB IDs. Input: array of `{ current, replacement }` pairs. Output: `{ success, results[] }` where each result has `status: 'updated' \| 'skipped' \| 'error'`.                                    |
+| `/api/clue/generate-clue`                          | POST   | Generate an AI textual clue for a game by `igdbId` using the specified AI provider (`cloudflare` or `bedrock`).                                                                                                                               |
+| `/api/clue/history`                                | GET    | Get clue generation history for a game by `igdbId`.                                                                                                                                                                                            |
+| `/api/clue/restore`                                | POST   | Restore a previously generated clue from history by `historyId`.                                                                                                                                                                               |
 
-## IgdbService
+## AI & External Services
 
-`apps/api/src/games/igdb.service.ts` — NestJS injectable service that communicates with the IGDB API (via Twitch OAuth2 credentials).
+### AiService (`apps/api/src/lib/ai.service.ts`)
+Injectable service providing multi-provider AI text and image generation:
+- **Image Generation**: Cloudflare AI (`@cf/stabilityai/stable-diffusion-xl-base-1.0`).
+- **Text Generation (Cloudflare)**: Cloudflare Workers AI for JSON and prompt completions.
+- **Text Generation (AWS Bedrock)**: AWS Bedrock runtime (`@aws-sdk/client-bedrock-runtime`) using `ConverseCommand` for high-quality game clues.
 
-- `getGameById(igdbId: number): Promise<IgdbGame | null>` — fetch a single game by IGDB ID.
-- `getGamesByIds(igdbIds: number[]): Promise<IgdbGame[]>` — batch-fetch multiple games by IGDB ID.
-- Token management is internal: the service caches the Twitch access token and refreshes it when it expires. Requires `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET` in the API config.
+### IgdbService (`apps/api/src/lib/igdb.service.ts`)
+Injectable service that communicates with the IGDB API (via Twitch OAuth2 credentials):
+- `getGameById(igdbId: number): Promise<IgdbGame | null>` — fetch a single game by IGDB ID with covers, artworks, franchises, collections, platforms, genres, themes, game engines, and involved companies.
+- `getGamesByIds(igdbIds: number[]): Promise<IgdbGame[]>` — batch-fetch multiple games by IGDB IDs.
+- Token management is internal: caches and auto-refreshes Twitch OAuth tokens.
 
-## Shared Constants (`@workspace/constants`)
+## Shared Package (`@workspace/shared`)
 
-Constants previously duplicated between `apps/api/src/lib/constants.ts` and `apps/web/lib/constants.ts` were consolidated into `packages/constants/src/index.ts`. Relevant additions:
+Shared constants and utility functions are consolidated in `packages/shared/src/index.ts`:
+
+### Constants
 
 | Constant                 | Value                     | Purpose                                                                                                                         |
 | ------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `TEST_DIR`               | `'test-dir'`              | Directory used in test uploads.                                                                                                 |
-| `IMAGE_GEN_DIR`          | `'res'`                   | Directory for AI-generated images in R2.                                                                                        |
-| `REPLACE_GAME_MAX_ROWS`  | `20`                      | Maximum number of current/replacement pairs in a single Replace Game submission.                                                |
-| `ADD_GAME_MAX_ROWS`      | `20`                      | Maximum number of games that can be added in a single Add Game submission.                                                      |
-| `PLACEHOLDER_IMAGE`      | `'placeholder.jpg'`       | Filename of the placeholder image.                                                                                              |
-| `PLACEHOLDER_IMAGE_R2`   | `(r2PublicUrl) => string` | Builds the full R2 URL for the placeholder image.                                                                               |
+| `DEFAULT_PROVIDER`       | `'cloudflare'`            | Default AI provider slug.                                                                                                       |
+| `IMAGE_GEN_MIN`          | `1`                       | Minimum count for bulk image generation.                                                                                        |
+| `IMAGE_GEN_MAX`          | `50`                      | Maximum count for bulk image generation.                                                                                        |
 | `FILE_SIZE_LIMIT`        | `'10mb'`                  | Body size limit for the NestJS API.                                                                                             |
-| `DISCOVER_GAMES_MAX`     | `50`                      | Maximum number of games returnable by the Discover Games endpoint.                                                              |
-| `DISCOVER_GAMES_DEFAULT` | `10`                      | Default count for the Discover Games endpoint.                                                                                  |
-| `GAME_SEARCH_MIN_CHARS`  | `3`                       | Minimum query length for `GET /api/games/search` and the `useGameSearch` hook. Matches `pg_trgm`'s minimum trigram requirement. |
+| `SAMPLE_DIR`             | `'sample-dir'`            | Sample directory identifier.                                                                                                    |
+| `IMAGE_GEN_DIR`          | `'res'`                   | Directory for AI-generated images in R2.                                                                                        |
+| `ADD_GAME_MAX_ROWS`      | `20`                      | Maximum number of games in a single Add Game submission.                                                                        |
+| `PLACEHOLDER_IMAGE`      | `'placeholder.jpg'`       | Filename of the placeholder image.                                                                                              |
+| `DISCOVER_GAMES_MAX`     | `50`                      | Maximum number of games returnable by Discover Games.                                                                           |
+| `DISCOVER_GAMES_DEFAULT` | `10`                      | Default count for Discover Games.                                                                                               |
+| `GAME_SEARCH_MIN_CHARS`  | `3`                       | Minimum query length for `GET /api/games/search` and `useGameSearch`. Matches `pg_trgm`'s trigram requirement.                  |
+| `TIMELINE_GAMES_COUNT`   | `10`                      | Number of games in a Timeline game session.                                                                                     |
+| `CLUE_SYSTEM_PROMPT`     | `string`                  | System prompt for generating single mystery game clues without leaking the game title.                                          |
+
+### Helper Functions
+
+- `timelineFormatDate(timestamp: number | null): string` — Formats unix timestamp into `YYYY-MM-DD` (or `????-??-??` if null).
+- `extractReleaseYear(firstReleaseDate: number | null): string | null` — Extracts release year string from timestamp.
+- `extractArray(data: unknown): string[]` — Extracts string array from string arrays or object arrays with `.name`.
+- `extractPublisher(involvedCompanies: unknown): string | null` — Extracts publisher company name from involved companies array.

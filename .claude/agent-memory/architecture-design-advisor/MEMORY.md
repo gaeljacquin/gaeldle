@@ -8,7 +8,7 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 
 - `packages/api-client`: Generated openapi-fetch client and TypeScript schema (@workspace/api-client). Entry: `src/index.ts`, `src/schema.d.ts`.
 - `apps/api/src/db/schema/`: Drizzle ORM schema exported at `@workspace/api/db`.
-- `packages/constants`: `IMAGE_STYLES`, `DEFAULT_IMAGE_GEN_STYLE`. Package: `@workspace/constants`.
+- `packages/shared`: Shared constants (`CLUE_SYSTEM_PROMPT`, `DISCOVER_GAMES_MAX`, `DISCOVER_GAMES_DEFAULT`, `ADD_GAME_MAX_ROWS`, `GAME_SEARCH_MIN_CHARS`, `TIMELINE_GAMES_COUNT`, `IMAGE_GEN_DIR`, `IMAGE_GEN_MIN`, `IMAGE_GEN_MAX`, etc.) and utility functions (`extractArray`, `extractPublisher`, `extractReleaseYear`, `timelineFormatDate`). Package: `@workspace/shared`. Note: art styles (previously `IMAGE_STYLES`) are now stored in the `art_style` DB table (`active_art_styles` materialized view), not in this package.
 
 ## Auth Pattern
 
@@ -93,14 +93,14 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 - Validation hook: `apps/web/lib/hooks/use-igdb-id-fix-validation.ts` — debounces inputs (600ms), calls `validateIgdbIdFix` service, returns `IgdbIdFixValidationState` with `canApply`, `isLoading`, `isReady` etc.
 - Row component: `apps/web/components/id-pair-row.tsx` — presentational, receives `validationState` as prop, renders `CurrentBadge` and `ReplacementBadge` sub-components inline.
 - Results table: `apps/web/components/igdb-fix-results-table.tsx` — separate presentational component.
-- Max rows constant: `REPLACE_GAME_MAX_ROWS = 20` in `packages/constants/src/index.ts`.
+- Max rows constant: `REPLACE_GAME_MAX_ROWS = 20` in `packages/shared/src/index.ts`.
 - The `sync` endpoint (POST /api/games/sync) handles "upsert by IGDB ID" — it creates OR updates a game. This is the correct backend target for Add Game.
 
 ## Add Game Feature (implemented as of 2026-02-26)
 
 - Uses `POST /api/games/sync` — `syncGameByIgdbId` in GamesService.
 - Validation: NestJS endpoint (POST /api/games/add/validate-one).
-- Constant: `ADD_GAME_MAX_ROWS = 20` in `packages/constants/src/index.ts`.
+- Constant: `ADD_GAME_MAX_ROWS = 20` in `packages/shared/src/index.ts`.
 - Hook: `use-igdb-id-add-validation.ts` — debounces 600ms, TanStack Query, returns `IgdbIdAddValidationState`.
 - Component: `igdb-id-add-entry.tsx` — single-field row with inline validation badge.
 - View: `apps/web/views/add-game.tsx` — `RowWithValidation` wrapper pattern (Rules of Hooks avoidance).
@@ -150,3 +150,26 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 - Stray file: `apps/api/drizzle/0001_add_name_search_tsvector.sql` — NOT in the journal, never applied. Previous partial attempt. Builder must not renumber around it or treat it as applied.
 - Approved improvement: GIN trigram index on `game.name` + `similarity()` ordering + `useQuery` refactor in `GameSearch`. Migration is a single handwritten SQL file (Drizzle Kit cannot generate it — no schema.ts change needed).
 - Drizzle Kit config: `apps/api/drizzle.config.ts` — schema from `apps/api/src/db/schema/index.ts` (exported at `@workspace/api/db`), output to `apps/api/drizzle/`. Next migration number is 0012.
+
+## Clue Game Mode Architecture (implemented)
+
+- **Backend**: `apps/api/src/clue/` — `ClueController` (`clue.router.ts`), `ClueService` (`clue.service.ts`), `ClueModule` (`clue.module.ts`).
+- **Endpoints** (all `@UseGuards(HexclaveGuard)`):
+  - `POST /api/clue/generate-clue` — generate an AI clue for a game by `igdbId`; accepts `provider` (`cloudflare` | `bedrock`).
+  - `GET /api/clue/history` — fetch clue generation history for a game by `igdbId`.
+  - `POST /api/clue/restore` — restore a previously generated clue from history by `historyId`.
+- **Frontend**: hook at `apps/web/lib/hooks/use-clue-game.ts`; manages clue text, hints, attempts.
+- **Hints system**: hints cost an attempt each — Release Year, Genres, Platforms, Publisher.
+- **System prompt**: `CLUE_SYSTEM_PROMPT` constant in `@workspace/shared`.
+
+## AiService Multi-Provider Architecture (apps/api/src/lib/ai.service.ts)
+
+- **Image generation**: Cloudflare AI (`@cf/stabilityai/stable-diffusion-xl-base-1.0`) — used by Image Gen mode.
+- **Text generation (Cloudflare)**: Cloudflare Workers AI — general JSON / prompt completions.
+- **Text generation (AWS Bedrock)**: `@aws-sdk/client-bedrock-runtime` using `ConverseCommand` — used for Clue mode (high-quality game clues). Provider selected at call time via `provider` param.
+
+## game Table Schema Updates
+
+- `collections` column added (alongside `franchises`) — stores IGDB collection memberships as JSON array.
+- Franchise/Series badges in guess history: `franchises` → Franchise badge (indigo), `collections` → Series badge (cyan).
+

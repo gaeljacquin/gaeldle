@@ -8,8 +8,10 @@
 - **API Protocol**: OpenAPI + openapi-typescript + openapi-fetch (Type-safe communication)
 - **Database**: PostgreSQL 17 + Drizzle ORM
 - **Authentication**: Stack Auth
+- **AI Providers**: Cloudflare Workers AI (Image Gen, Text) & AWS Bedrock (Clue Text Generation)
+- **Storage**: Cloudflare R2 (S3-compatible)
 - **Styling**: Tailwind CSS v4 + Vanilla CSS
-- **Icons**: Lucide React
+- **Icons**: Tabler Icons (`@tabler/icons-react`) & Lucide React
 - **Validation**: Zod
 - **Testing**: Vitest (Web) + Jest (API)
 - **UI Library**: `packages/ui` (Shared workspace components)
@@ -18,14 +20,14 @@
 
 ```
 apps/
-  api/        # NestJS API (Write operations, Image generation, OpenAPI spec)
+  api/        # NestJS API (Write operations, Image/Clue generation, OpenAPI spec)
   web/        # Next.js App (Read operations, Game views)
 packages/
   api-client/ # Generated openapi-fetch client and TypeScript schema (@workspace/api-client)
-  constants/  # Shared workspace constants
-  ui/           # Shared UI component library (@workspace/ui)
-docs/           # Developer documentation
-.gemini/        # Agent definitions and skills
+  shared/     # Shared constants and utility functions (@workspace/shared)
+  ui/         # Shared UI component library (@workspace/ui)
+docs/         # Developer documentation
+.gemini/      # Agent definitions and skills
 ```
 
 ## Getting Started

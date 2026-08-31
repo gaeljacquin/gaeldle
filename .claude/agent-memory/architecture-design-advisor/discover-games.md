@@ -35,7 +35,7 @@ Use NestJS `@Req() req: AuthenticatedRequest` parameter on the controller method
 packages/
   api-client/              # Generated openapi-fetch client and schema
 
-  constants/src/
+  shared/src/
     index.ts               # MODIFIED: DISCOVER_GAMES_MAX=50, DISCOVER_GAMES_DEFAULT=10
 
 apps/api/src/

@@ -49,21 +49,13 @@ Always read `AGENTS.md` before starting.
 - Plain text style (value slug or label): e.g. `simpsons`, `Simpsons Style`, `lego`, `Lego Style`
 - JSON object: `{"includeStoryline": true, "imageStyle": "simpsons"}`
 
-**Available styles** (from `IMAGE_STYLES` in `packages/constants/src/index.ts`):
-| Value | Label |
-|---|---|
-| `funko-pop-chibi` | Funko Pop Chibi Style |
-| `simpsons` | Simpsons Style |
-| `rubber-hose-animation` | Rubber Hose Animation Style |
-| `muppet` | Muppet Style |
-| `lego` | Lego Style |
-| `claymation` | Claymation Style |
-| `vector-art` | Vector Art Style |
-| `digital-cel-shaded` | Digital Cel-shaded Portrait Illustration Style |
-| `western-animation-concept-art` | Western Animation Concept Art Style |
-| `graphic-novel-illustration` | Graphic Novel Illustration Style |
+**Available styles**: Art styles are stored in the `art_style` DB table and queried via the `active_art_styles` materialized view (Drizzle: `artStyles` view from `@/db/schema`). Each record has `value`, `label`, `description`, and `isDefault`. There is no hardcoded `IMAGE_STYLES` constant — styles come from the DB at runtime.
 
-If the provided style cannot be matched by value slug or label (case-insensitive), fall back to `funko-pop-chibi`.
+To resolve the art style for the script:
+1. Query `active_art_styles` to get all active styles.
+2. Match `IMAGE_STYLE` env var against `value` (case-insensitive).
+3. Fall back to the row where `isDefault = 1` if no match.
+4. Use the matched record's `description` field as `artStyleDescription` in `buildImagePrompt`.
 
 Parse the user's invocation input to extract any overrides before running.
 
@@ -116,25 +108,25 @@ The script must:
      .where(sql`ai_image_url IS NULL`)
      .limit(limit);
    ```
-4. **Build the prompt** using the exact same logic as `buildImagePrompt` in `apps/api/src/games/games.router.ts` and `IMAGE_STYLES` from `packages/constants/src/index.ts`. Resolve the style descriptor from `IMAGE_STYLES` by matching `IMAGE_STYLE` env var against `value` or `label` (case-insensitive); fall back to `DEFAULT_IMAGE_GEN_STYLE`:
+4. **Build the prompt** using the same logic as `buildImagePrompt` in `apps/api/src/games/games.service.ts`. Art style description comes from the `active_art_styles` DB view — query it and match `IMAGE_STYLE` env var against `value` (case-insensitive); fall back to the row where `isDefault = 1`:
    ```typescript
+   // Query art styles from DB
+   const artStyles = await db.select().from(schema.artStyles);
+   const artStyleValue = process.env.IMAGE_STYLE ?? '';
+   const artStyleDescription =
+     artStyles.find((s) => s.value.toLowerCase() === artStyleValue.toLowerCase())?.description
+     ?? artStyles.find((s) => s.isDefault === 1)?.description
+     ?? '';
+
    const parts: string[] = [];
    parts.push(
-     `${resolvedStyle.descriptor} of iconic characters from "${game.name}" set within the game's distinct world`,
+     `${artStyleDescription} of iconic characters from "${game.name}" set within the game's distinct world`,
    );
    if (game.summary) parts.push(game.summary);
    if (options.includeStoryline && game.storyline) parts.push(game.storyline);
-   if (
-     options.includeGenres &&
-     Array.isArray(game.genres) &&
-     game.genres.length > 0
-   )
+   if (options.includeGenres && Array.isArray(game.genres) && game.genres.length > 0)
      parts.push(`Genre: ${(game.genres as string[]).join(', ')}`);
-   if (
-     options.includeThemes &&
-     Array.isArray(game.themes) &&
-     game.themes.length > 0
-   )
+   if (options.includeThemes && Array.isArray(game.themes) && game.themes.length > 0)
      parts.push(`Themes: ${(game.themes as string[]).join(', ')}`);
    if (Array.isArray(game.keywords) && game.keywords.length > 0)
      parts.push(`Keywords: ${(game.keywords as string[]).join(', ')}`);

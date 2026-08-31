@@ -76,14 +76,15 @@ Before writing any code:
 
 ## Self-Verification Checklist
 
-- [ ] All Zod schemas defined and exported.
-- [ ] All procedures (queries + mutations) in contract router.
-- [ ] Every procedure has a service method and router handler.
-- [ ] Module registered in app.
-- [ ] Every procedure has a frontend hook.
-- [ ] All components are purely presentational.
+- [ ] All DTO classes defined with @ApiProperty / @ApiPropertyOptional and Swagger decorators.
+- [ ] Controller endpoints defined with @ApiOperation, @ApiResponse, and HTTP method decorators.
+- [ ] Every endpoint has a service method and controller handler.
+- [ ] Codegen executed (`pnpm codegen`) to update @workspace/api-client schema.
+- [ ] Module registered in app module.
+- [ ] Frontend hooks created in `lib/hooks/` using `apiClient` or service layer.
+- [ ] All components in `components/` are purely presentational.
 - [ ] All conditional classNames use `cn()`.
-- [ ] View is a client component; page is a server component.
+- [ ] View is in `views/`; page is a minimal entry point in `app/`.
 - [ ] Types flow end-to-end; no manual type duplication; no `any`.
 
 ## Edge Cases & Escalation

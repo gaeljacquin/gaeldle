@@ -65,21 +65,22 @@ Before writing any code:
 
 ## Code Quality Standards
 
-- **TypeScript**: strict, no `any`; infer types from Zod with `z.infer<>`.
+- **TypeScript**: strict, no `any`; use types generated from `@workspace/api-client` schema.d.ts — never duplicate manually.
 - **Imports**: use project aliases, never deep relative paths.
 - **Naming**: match existing game modes exactly.
 
 ## Self-Verification Checklist
 
-- [ ] All Zod schemas defined and exported.
-- [ ] All procedures (queries + mutations) in contract router.
-- [ ] Every procedure has a service method and router handler.
-- [ ] Module registered in app.
-- [ ] Every procedure has a frontend hook.
+- [ ] NestJS DTOs defined in `dto/` with `@ApiProperty` / `@ApiPropertyOptional` decorators.
+- [ ] Controller decorated with `@Controller`, `@ApiTags`, `@ApiOperation`, `@ApiBody`, `@ApiResponse`.
+- [ ] Every controller method has a corresponding service method.
+- [ ] Module registered in `app.module.ts`.
+- [ ] `pnpm codegen` run successfully — `openapi.json` and `schema.d.ts` updated.
+- [ ] Every NestJS endpoint has a frontend hook using `apiClient` from `@workspace/api-client`.
 - [ ] All components are purely presentational.
 - [ ] All conditional classNames use `cn()`.
 - [ ] View is a client component; page is a server component.
-- [ ] Types flow end-to-end; no manual type duplication; no `any`.
+- [ ] Types flow end-to-end from DTO → schema.d.ts → hook → component props; no `any`.
 
 ## Edge Cases & Escalation
 

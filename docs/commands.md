@@ -15,8 +15,8 @@ turbo dev
 nr dev
 
 # Specific projects
-turbo dev --filter @gaeldle/web
-turbo dev --filter @gaeldle/api
+turbo dev --filter @workspace/web
+turbo dev --filter @workspace/api
 
 # Direct commands
 cd apps/api && nr dev
@@ -32,12 +32,40 @@ turbo build
 nr build
 
 # Build specific project
-turbo build --filter @gaeldle/api
-turbo build --filter @gaeldle/web
+turbo build --filter @workspace/api
+turbo build --filter @workspace/web
 
 # Direct build commands
 cd apps/api && nr build
 cd apps/web && nr build
+```
+
+## OpenAPI Codegen
+
+```bash
+# Generate OpenAPI spec from NestJS controllers and update @workspace/api-client
+nr codegen
+# or
+pnpm codegen
+```
+
+## Database (Drizzle ORM)
+
+```bash
+# Generate SQL migrations from schema
+pnpm db:generate
+
+# Apply pending migrations to PostgreSQL
+pnpm db:migrate
+
+# Push schema directly to database
+pnpm db:push
+
+# Open Drizzle Studio UI
+pnpm db:studio
+
+# Refresh all materialized views
+pnpm db:refresh-all-mat-views
 ```
 
 ## Testing
@@ -48,24 +76,24 @@ turbo test
 # or
 nr test
 
-# Test API
-turbo test --filter @gaeldle/api
-cd apps/api && nr test
+# Test Web / API specifically
+turbo test --filter @workspace/web
+turbo test --filter @workspace/api
 ```
 
 ## Type Checking & Linting
 
 ```bash
 # All projects
-turbo type-check
-turbo lint
+turbo typecheck # or nr typecheck
+turbo lint      # or nr lint
 
 # API
-cd apps/api && nr typecheck
+turbo typecheck --filter @workspace/api
 
 # Web
-cd apps/web && nr typecheck
-cd apps/web && nr lint
+turbo typecheck --filter @workspace/web
+turbo lint --filter @workspace/web
 ```
 
 ## Cleaning

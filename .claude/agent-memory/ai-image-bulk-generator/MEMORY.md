@@ -25,12 +25,13 @@
 
 ### Prompt Building Logic
 
-The script uses the same `buildImagePrompt()` function as `games.router.ts`:
+The script uses the same `buildImagePrompt()` function as `apps/api/src/games/games.service.ts`. Art styles are **NOT** hardcoded constants — they live in the `art_style` DB table, queried via the `active_art_styles` materialized view.
 
-- Base: `Cinematic video game key art for "{gameName}"`
-- Add game summary if available
-- Conditionally add: storyline, genres, themes (all false by default)
-- Always include: keywords (if available)
+- Query `active_art_styles` to get all active styles (fields: `value`, `label`, `description`, `isDefault`).
+- Match `IMAGE_STYLE` env var against `value` (case-insensitive); fall back to the row where `isDefault = 1`.
+- Pass the matched `description` as `artStyleDescription` to `buildImagePrompt`.
+- Prompt base: `${artStyleDescription} of iconic characters from "${game.name}" set within the game's distinct world`
+- Conditionally append: summary, storyline, genres, themes, keywords.
 
 ### Default Prompt Options
 
@@ -39,6 +40,7 @@ includeStoryline: false;
 includeGenres: false;
 includeThemes: false;
 ```
+
 
 ## Execution Notes
 

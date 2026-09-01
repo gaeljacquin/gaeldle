@@ -149,11 +149,7 @@ function TimelineContent() {
   );
 
   function handleDragStart(e: DragStartEvent) {
-    if (!(e.active?.id && typeof e.active.id === 'number')) {
-      return;
-    }
-
-    setActiveId(e.active.id);
+    setActiveId(e.active.id as number);
   }
 
   function handleDragOver(e: DragOverEvent) {

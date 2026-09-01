@@ -20,6 +20,82 @@ interface GameListPlusImageProps {
   gameModeSlug: string;
 }
 
+function ImageDisplay({
+  slug,
+  targetGame,
+  currentPixelSize,
+  selectedArtworkUrl,
+  selectedAiImage,
+  isGameOver,
+  clueText,
+}: {
+  slug: string;
+  targetGame: ReturnType<typeof useCoverArtGame>['targetGame'];
+  currentPixelSize: number;
+  selectedArtworkUrl: string | null;
+  selectedAiImage: { url: string } | null;
+  isGameOver: boolean;
+  clueText: string | undefined;
+}) {
+  switch (slug) {
+    case 'artwork':
+      return (
+        <ArtworkDisplay
+          imageUrl={selectedArtworkUrl}
+          pixelSize={currentPixelSize}
+          isGameOver={isGameOver}
+          className="size-full"
+        />
+      );
+    case 'image-gen':
+      return (
+        <CoverDisplay
+          game={targetGame}
+          pixelSize={0}
+          usePixelation={false}
+          isGameOver={isGameOver}
+          className="size-full"
+          sourceImageUrl={selectedAiImage?.url ?? targetGame?.aiImageUrl}
+          objectFit="cover"
+        />
+      );
+    case 'clue':
+      if (!isGameOver) {
+        return (
+          <div className="size-full flex flex-col justify-center items-center p-8 bg-card select-text relative">
+            <p className="font-serif text-lg md:text-xl leading-relaxed text-foreground text-center italic">
+              &ldquo;{clueText ?? 'No clue available for this game.'}&rdquo;
+            </p>
+          </div>
+        );
+      } else {
+        return (
+          <CoverDisplay
+            game={targetGame}
+            pixelSize={0}
+            usePixelation={false}
+            isGameOver={isGameOver}
+            className="size-full"
+            sourceImageUrl={targetGame?.imageUrl}
+            objectFit="cover"
+          />
+        );
+      }
+    default:
+      return (
+        <CoverDisplay
+          game={targetGame}
+          pixelSize={currentPixelSize}
+          usePixelation={true}
+          isGameOver={isGameOver}
+          className="size-full"
+          sourceImageUrl={targetGame?.imageUrl}
+          objectFit="cover"
+        />
+      );
+  }
+}
+
 export default function GameListPlusImage(props: GameListPlusImageProps) {
   const { data: gameMode } = useSuspenseQuery(
     gameModeSlugQueryOptions(props.gameModeSlug),
@@ -60,76 +136,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
     .filter((g): g is NonNullable<typeof g> => g !== null)
     .map((g) => g.id);
 
-  const imageDisplayComp = () => {
-    let imageDisplayed;
-
-    switch (props.gameModeSlug) {
-      case 'artwork':
-        imageDisplayed = (
-          <ArtworkDisplay
-            imageUrl={selectedArtworkUrl}
-            pixelSize={currentPixelSize}
-            isGameOver={isGameOver}
-            className="size-full"
-          />
-        );
-        break;
-      case 'image-gen':
-        imageDisplayed = (
-          <CoverDisplay
-            game={targetGame}
-            pixelSize={0}
-            usePixelation={false}
-            isGameOver={isGameOver}
-            className="size-full"
-            sourceImageUrl={selectedAiImage?.url ?? targetGame?.aiImageUrl}
-            objectFit="cover"
-          />
-        );
-        break;
-      case 'clue':
-        if (!isGameOver) {
-          const clueText =
-            (targetGame?.clue as { clue?: string } | null)?.clue ??
-            'No clue available for this game.';
-          imageDisplayed = (
-            <div className="size-full flex flex-col justify-center items-center p-8 bg-card select-text relative">
-              <p className="font-serif text-lg md:text-xl leading-relaxed text-foreground text-center italic">
-                &ldquo;{clueText}&rdquo;
-              </p>
-            </div>
-          );
-        } else {
-          imageDisplayed = (
-            <CoverDisplay
-              game={targetGame}
-              pixelSize={0}
-              usePixelation={false}
-              isGameOver={isGameOver}
-              className="size-full"
-              sourceImageUrl={targetGame?.imageUrl}
-              objectFit="cover"
-            />
-          );
-        }
-        break;
-      default:
-        imageDisplayed = (
-          <CoverDisplay
-            game={targetGame}
-            pixelSize={currentPixelSize}
-            usePixelation={true}
-            isGameOver={isGameOver}
-            className="size-full"
-            sourceImageUrl={targetGame?.imageUrl}
-            objectFit="cover"
-          />
-        );
-        break;
-    }
-
-    return imageDisplayed;
-  };
+  const clueText = (targetGame?.clue as { clue?: string } | null)?.clue;
 
   if (error) {
     return (
@@ -166,7 +173,15 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
             <div className="flex flex-col gap-4 w-full max-w-120 mx-auto lg:max-w-none">
               <Card className="p-0 border shadow-none bg-muted/20">
                 <div className="relative aspect-4/5 w-full">
-                  {imageDisplayComp()}
+                  <ImageDisplay
+                    slug={props.gameModeSlug}
+                    targetGame={targetGame}
+                    currentPixelSize={currentPixelSize}
+                    selectedArtworkUrl={selectedArtworkUrl}
+                    selectedAiImage={selectedAiImage}
+                    isGameOver={isGameOver}
+                    clueText={clueText}
+                  />
                 </div>
               </Card>
             </div>
@@ -288,8 +303,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                     Clue
                   </p>
                   &ldquo;
-                  {(targetGame?.clue as { clue?: string } | null)?.clue ??
-                    'No clue available.'}
+                  {clueText ?? 'No clue available.'}
                   &rdquo;
                 </div>
               )}

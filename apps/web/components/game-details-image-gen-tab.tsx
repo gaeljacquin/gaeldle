@@ -118,14 +118,11 @@ export default function GameDetailsImageGenTab({
   const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
 
   const generatedImage = useMemo(() => {
-    if (!game || !Array.isArray(game.imageGen)) {
-      return null;
-    }
-
-    const entry = game.imageGen.find(
-      (item) => item && typeof item === 'object' && artStyleValue in item,
-    );
-
+    const entry = Array.isArray(game.imageGen)
+      ? game.imageGen.find(
+          (item) => item && typeof item === 'object' && artStyleValue in item,
+        )
+      : null;
     return entry
       ? (entry[artStyleValue] as {
           url: string;
@@ -133,7 +130,7 @@ export default function GameDetailsImageGenTab({
           provider: string;
         })
       : null;
-  }, [game, artStyleValue]);
+  }, [game.imageGen, artStyleValue]);
 
   const generateImageMutation = useMutation({
     mutationFn: () =>
@@ -196,47 +193,37 @@ export default function GameDetailsImageGenTab({
   const provider = generatedImage?.provider ?? 'N/A';
   const artStyleLabel = artStyles.find((s) => s.value === artStyleValue)?.label;
 
-  const savedPromptRows = useMemo(() => {
-    if (!savedPrompt) {
-      return MIN_PREVIEW_PROMPT_ROWS;
-    }
+  const savedPromptRows = !savedPrompt
+    ? MIN_PREVIEW_PROMPT_ROWS
+    : Math.min(
+        15,
+        Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(savedPrompt.length / 28)),
+      );
 
-    return Math.min(
-      15,
-      Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(savedPrompt.length / 28)),
-    );
-  }, [savedPrompt]);
-
-  const previewPrompt = useMemo(() => {
-    if (!game) {
-      return '';
-    }
-
-    return buildPromptPreview(game, artStyles, {
+  const previewPrompt = useMemo(
+    () =>
+      buildPromptPreview(game, artStyles, {
+        includeStoryline,
+        includeGenres,
+        includeThemes,
+        artStyleValue,
+      }),
+    [
+      game,
+      artStyles,
       includeStoryline,
       includeGenres,
       includeThemes,
       artStyleValue,
-    });
-  }, [
-    game,
-    artStyles,
-    includeStoryline,
-    includeGenres,
-    includeThemes,
-    artStyleValue,
-  ]);
+    ],
+  );
 
-  const previewPromptRows = useMemo(() => {
-    if (!previewPrompt) {
-      return MIN_PREVIEW_PROMPT_ROWS;
-    }
-
-    return Math.min(
-      15,
-      Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(previewPrompt.length / 50)),
-    );
-  }, [previewPrompt]);
+  const previewPromptRows = !previewPrompt
+    ? MIN_PREVIEW_PROMPT_ROWS
+    : Math.min(
+        15,
+        Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(previewPrompt.length / 50)),
+      );
 
   const imageGenButtonText =
     generateImageMutation.isPending || isPolling

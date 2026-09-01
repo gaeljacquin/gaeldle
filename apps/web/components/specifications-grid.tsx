@@ -85,15 +85,9 @@ function CellValueDisplay({ value }: { value: CellValue }) {
 }
 
 function hasData(value: string | string[] | null): boolean {
-  if (!value) {
-    return false;
-  }
-
-  if (Array.isArray(value)) {
-    return value.length > 0;
-  }
-
-  return value !== 'No data' && value !== '';
+  if (!value) return false;
+  if (Array.isArray(value)) return value.length > 0;
+  return value !== '';
 }
 
 function getBestMatch(

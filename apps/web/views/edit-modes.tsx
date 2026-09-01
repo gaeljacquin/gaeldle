@@ -285,6 +285,22 @@ function SortableGameModeItem({
   );
 }
 
+function EditModesShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col min-h-full bg-background">
+      <DashboardHeader
+        title="Edit Modes"
+        icon={IconPlayerPlay}
+        dashboardBacklinkProps={{
+          text: 'Utilities',
+          href: '/dashboard/utilities',
+        }}
+      />
+      {children}
+    </div>
+  );
+}
+
 export default function EditModesView() {
   const queryClient = useQueryClient();
   const reorderModeUpdateToastId = 'reorder-mode-update';
@@ -561,32 +577,26 @@ export default function EditModesView() {
   const getFormValue = <K extends keyof EditFormValues>(
     key: K,
   ): EditFormValues[K] => {
-    if (!selectedMode || !currentSlug) {
-      if (key === 'isActive' || key === 'isCoverArt') {
-        return false as unknown as EditFormValues[K];
-      }
-
-      if (key === 'maxAttempts') {
-        return 3 as unknown as EditFormValues[K];
-      }
-
-      if (key === 'level') {
-        return 'easy' as unknown as EditFormValues[K];
-      }
-
-      return '' as unknown as EditFormValues[K];
-    }
-
-    if (formEdits[currentSlug] && formEdits[currentSlug][key] !== undefined) {
+    if (currentSlug && formEdits[currentSlug]?.[key] !== undefined) {
       return formEdits[currentSlug][key];
     }
-
+    if (!selectedMode) {
+      const defaults: EditFormValues = {
+        slug: '',
+        title: '',
+        description: '',
+        level: 'easy',
+        maxAttempts: 3,
+        gradient: '',
+        isActive: false,
+        isCoverArt: false,
+      };
+      return defaults[key];
+    }
     const val = selectedMode[key as keyof typeof selectedMode];
-
     if (key === 'isActive' || key === 'isCoverArt') {
       return (val === 1) as unknown as EditFormValues[K];
     }
-
     return (val ?? '') as unknown as EditFormValues[K];
   };
 
@@ -718,15 +728,7 @@ export default function EditModesView() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader
-          title="Edit Modes"
-          icon={IconPlayerPlay}
-          dashboardBacklinkProps={{
-            text: 'Utilities',
-            href: '/dashboard/utilities',
-          }}
-        />
+      <EditModesShell>
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row gap-8">
             <div className="w-full md:w-80 lg:w-96 shrink-0 space-y-4">
@@ -743,21 +745,13 @@ export default function EditModesView() {
             <div className="flex-1 h-96 bg-muted animate-pulse rounded-xl" />
           </div>
         </div>
-      </div>
+      </EditModesShell>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader
-          title="Edit Modes"
-          icon={IconPlayerPlay}
-          dashboardBacklinkProps={{
-            text: 'Utilities',
-            href: '/dashboard/utilities',
-          }}
-        />
+      <EditModesShell>
         <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center h-96 text-destructive gap-3">
           <IconAlertCircle size={40} />
           <h2 className="text-lg font-bold">Failed to load game modes</h2>
@@ -765,23 +759,14 @@ export default function EditModesView() {
             {(error as Error).message}
           </p>
         </div>
-      </div>
+      </EditModesShell>
     );
   }
 
   return (
     <>
       <ViewTransition>
-        <div className="flex flex-col min-h-full bg-background">
-          <DashboardHeader
-            title="Edit Modes"
-            icon={IconPlayerPlay}
-            dashboardBacklinkProps={{
-              text: 'Utilities',
-              href: '/dashboard/utilities',
-            }}
-          />
-
+        <EditModesShell>
           <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col md:flex-row gap-8 items-start">
               <div className="w-full md:w-80 lg:w-96 shrink-0 space-y-4">
@@ -1376,33 +1361,31 @@ export default function EditModesView() {
               </div>
             </div>
           </div>
-        </div>
+        </EditModesShell>
       </ViewTransition>
 
-      {isConfirmOpen && (
-        <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-              <AlertDialogDescription>
-                You have unsaved changes to the game mode order. Do you want to
-                proceed?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="cursor-pointer">
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleConfirmSwitch}
-                className="cursor-pointer bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              >
-                Switch without saving
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes to the game mode order. Do you want to
+              proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmSwitch}
+              className="cursor-pointer bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              Switch without saving
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import {
   useSuspenseQuery,
   useQuery,
@@ -67,19 +67,15 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
     queryFn: () => getClueHistory(Number.parseInt(igdbId, 10)),
   });
 
-  const generatedClue = useMemo(() => {
-    if (!game || !game.clue) {
-      return null;
-    }
-
-    return game.clue as {
-      clue: string;
-      prompt: string;
-      provider: string;
-      model: string;
-      createdAt?: string;
-    };
-  }, [game]);
+  const generatedClue = game.clue
+    ? (game.clue as {
+        clue: string;
+        prompt: string;
+        provider: string;
+        model: string;
+        createdAt?: string;
+      })
+    : null;
 
   const generateClueMutation = useMutation({
     mutationFn: () => generateClue(Number.parseInt(igdbId, 10), providerVal),
@@ -364,7 +360,7 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
-          {!Array.isArray(clueHistory) || clueHistory.length === 0 ? (
+          {!clueHistory?.length ? (
             <div className="text-center py-8 border border-dashed rounded-none bg-muted/10">
               <p className="text-sm text-muted-foreground font-medium">
                 No clue history found.
@@ -497,10 +493,8 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
             <AlertDialogAction
               className="bg-slate-600 hover:bg-slate-700 text-white font-bold rounded-none flex-1 cursor-pointer"
               onClick={() => {
-                if (clueToRestore) {
-                  restoreClueMutation.mutate(clueToRestore.id);
-                  setClueToRestore(null);
-                }
+                restoreClueMutation.mutate(clueToRestore!.id);
+                setClueToRestore(null);
               }}
             >
               Restore

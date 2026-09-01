@@ -1,7 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, ViewTransition } from 'react';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  ViewTransition,
+  type MutableRefObject,
+} from 'react';
+import {
+  useSearchParams,
+  useRouter,
+  usePathname,
+  type ReadonlyURLSearchParams,
+} from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 import { useSelector } from '@tanstack/react-store';
@@ -60,6 +72,236 @@ import {
   SortDir,
   SortField,
 } from '@/lib/stores/dashboard-store';
+
+interface GameListContentProps {
+  data: PaginatedResponse<Game> | undefined;
+  isLoading: boolean;
+  view: string;
+  parsedPageSize: number;
+  formSearch: string;
+  formSearchIgdbId: string;
+  isMultiSelect: boolean;
+  selectedIds: Set<number>;
+  toggleSelect: (id: number) => void;
+  searchParams: URLSearchParams | ReadonlyURLSearchParams;
+  skipDebounceSearchRef: MutableRefObject<boolean>;
+  skipDebounceSearchIgdbIdRef: MutableRefObject<boolean>;
+  onClearSearch: () => void;
+}
+
+function GameListContent({
+  data,
+  isLoading,
+  view,
+  parsedPageSize,
+  formSearch,
+  formSearchIgdbId,
+  isMultiSelect,
+  selectedIds,
+  toggleSelect,
+  searchParams,
+  onClearSearch,
+}: GameListContentProps) {
+  if (!data || isLoading) {
+    if (view === 'list') {
+      return (
+        <div className="grid gap-6 grid-cols-1">
+          {Array.from({ length: parsedPageSize }).map((_, i) => (
+            <div
+              key={i}
+              className="flex gap-8 p-6 border border-border bg-card animate-pulse"
+            >
+              {/* Left side card skeleton */}
+              <div className="flex flex-col items-center gap-3 shrink-0">
+                <div className="relative overflow-hidden border-2 border-border bg-muted w-32 h-44 shadow-sm">
+                  <div className="absolute inset-x-0 bottom-0 h-6 border-t bg-muted-foreground/10" />
+                </div>
+              </div>
+
+              {/* Right side info skeleton */}
+              <div className="flex flex-col justify-start pt-1 min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="h-8 w-1/3 bg-muted rounded" />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <div className="h-5 w-24 bg-muted rounded-none" />
+                  <div className="h-5 w-20 bg-muted rounded-none" />
+                </div>
+
+                <div className="space-y-2 mt-4">
+                  <div className="h-4 w-full bg-muted rounded" />
+                  <div className="h-4 w-11/12 bg-muted rounded" />
+                  <div className="h-4 w-4/5 bg-muted rounded" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className={cn(
+          'grid gap-6',
+          view === 'grid'
+            ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 justify-items-start'
+            : 'grid-cols-1',
+        )}
+      >
+        {Array.from({ length: parsedPageSize }).map((_, i) => (
+          <Timeline2CardSkeleton
+            key={i}
+            className="sm:w-36 sm:h-56"
+            showTopBanner={false}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (data.data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="rounded-full bg-muted p-6 mb-4">
+          <IconSearch size={48} className="text-muted-foreground/40" />
+        </div>
+        <h3 className="text-lg font-semibold">No games found</h3>
+        <p className="text-muted-foreground max-w-xs mx-auto">
+          {formSearch || formSearchIgdbId
+            ? `We couldn't find any games matching your search criteria.`
+            : 'The library is currently empty.'}
+        </p>
+        {(formSearch || formSearchIgdbId) && (
+          <Button variant="link" onClick={onClearSearch} className="mt-2">
+            Clear search
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      <div
+        className={cn(
+          'grid gap-6',
+          view === 'grid'
+            ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 justify-items-start'
+            : 'grid-cols-1',
+        )}
+      >
+        {data?.data.map((game: Game) => (
+          <div
+            key={game.id}
+            className={cn(
+              'transition-opacity duration-200 relative group/game',
+              view === 'list' &&
+                'flex gap-8 p-6 border border-border bg-card hover:bg-accent/50 transition-colors',
+            )}
+          >
+            <div
+              className={cn(
+                view === 'list'
+                  ? 'flex flex-col items-center gap-3 shrink-0'
+                  : 'contents',
+              )}
+            >
+              {isMultiSelect && view === 'grid' && (
+                <div className="absolute top-2 right-2 z-20">
+                  <Checkbox
+                    checked={selectedIds.has(game.id)}
+                    onCheckedChange={() => toggleSelect(game.id)}
+                    className="size-5"
+                  />
+                </div>
+              )}
+              <Link
+                href={
+                  isMultiSelect
+                    ? '#'
+                    : `/dashboard/games/${game.igdbId}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+                }
+                onClick={(e: React.MouseEvent) => {
+                  if (isMultiSelect) {
+                    e.preventDefault();
+                    toggleSelect(game.id);
+                  }
+                }}
+                className={cn(
+                  view === 'grid'
+                    ? 'block hover:scale-105 transition-transform'
+                    : 'shrink-0',
+                )}
+              >
+                <ViewTransition name={`game-details-${game.igdbId}`}>
+                  <Timeline2Card
+                    game={game}
+                    showTopBanner={false}
+                    bannerColor={selectedIds.has(game.id) ? 'red' : 'none'}
+                    className={cn(view === 'grid' && 'sm:w-36 sm:h-52')}
+                  />
+                </ViewTransition>
+              </Link>
+            </div>
+
+            {view === 'list' && (
+              <div className="flex flex-col justify-start pt-1 min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-4">
+                  <Link
+                    href={
+                      isMultiSelect
+                        ? '#'
+                        : `/dashboard/games/${game.igdbId}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+                    }
+                    onClick={(e: React.MouseEvent) => {
+                      if (isMultiSelect) {
+                        e.preventDefault();
+                        toggleSelect(game.id);
+                      }
+                    }}
+                    className="hover:text-primary transition-colors min-w-0 flex-1"
+                  >
+                    <h3 className="text-2xl font-black uppercase tracking-tight truncate">
+                      {game.name}
+                    </h3>
+                  </Link>
+                  {isMultiSelect && (
+                    <Checkbox
+                      checked={selectedIds.has(game.id)}
+                      onCheckedChange={() => toggleSelect(game.id)}
+                      className="size-5 shrink-0 z-20"
+                    />
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  {game.firstReleaseDate && (
+                    <Badge className="flex items-center gap-1.5 bg-muted px-2 py-0.5 rounded-none text-[10px] font-bold uppercase tracking-wider text-black h-auto">
+                      <IconCalendar aria-hidden="true" size={12} />
+                      {new Date(
+                        game.firstReleaseDate * 1000,
+                      ).toLocaleDateString()}
+                    </Badge>
+                  )}
+                  <Badge className="flex items-center gap-1.5 bg-muted px-2 py-0.5 rounded-none text-[10px] font-bold uppercase tracking-wider text-black h-auto">
+                    <IconDeviceGamepad aria-hidden="true" size={12} />
+                    ID: {game.igdbId}
+                  </Badge>
+                </div>
+
+                <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed mt-4">
+                  {game.summary || 'No description available for this game.'}
+                </p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const [isMultiSelect, setIsMultiSelect] = useState(false);
@@ -248,23 +490,9 @@ export default function Dashboard() {
       params.delete('searchIgdbId');
     }
 
-    if (formValues.sortOption) {
-      params.set('sortOption', formValues.sortOption);
-    } else {
-      params.delete('sortOption');
-    }
-
-    if (formValues.pageSize) {
-      params.set('pageSize', formValues.pageSize);
-    } else {
-      params.delete('pageSize');
-    }
-
-    if (formValues.page) {
-      params.set('page', String(formValues.page));
-    } else {
-      params.delete('page');
-    }
+    params.set('sortOption', formValues.sortOption);
+    params.set('pageSize', formValues.pageSize);
+    params.set('page', String(formValues.page));
 
     const newSearch = params.toString();
     const currentSearch = window.location.search.replace(/^\?/, '');
@@ -447,222 +675,6 @@ export default function Dashboard() {
     return range;
   }, [totalPages, formValues.page]);
 
-  const dataLengthZero = () => {
-    if (!data || isLoading) {
-      if (view === 'list') {
-        return (
-          <div className="grid gap-6 grid-cols-1">
-            {Array.from({
-              length: Number.parseInt(formValues.pageSize, 10),
-            }).map((_, i) => (
-              <div
-                key={i}
-                className="flex gap-8 p-6 border border-border bg-card animate-pulse"
-              >
-                {/* Left side card skeleton */}
-                <div className="flex flex-col items-center gap-3 shrink-0">
-                  <div className="relative overflow-hidden border-2 border-border bg-muted w-32 h-44 shadow-sm">
-                    <div className="absolute inset-x-0 bottom-0 h-6 border-t bg-muted-foreground/10" />
-                  </div>
-                </div>
-
-                {/* Right side info skeleton */}
-                <div className="flex flex-col justify-start pt-1 min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="h-8 w-1/3 bg-muted rounded" />
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 mt-2">
-                    <div className="h-5 w-24 bg-muted rounded-none" />
-                    <div className="h-5 w-20 bg-muted rounded-none" />
-                  </div>
-
-                  <div className="space-y-2 mt-4">
-                    <div className="h-4 w-full bg-muted rounded" />
-                    <div className="h-4 w-11/12 bg-muted rounded" />
-                    <div className="h-4 w-4/5 bg-muted rounded" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        );
-      }
-
-      return (
-        <div
-          className={cn(
-            'grid gap-6',
-            view === 'grid'
-              ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 justify-items-start'
-              : 'grid-cols-1',
-          )}
-        >
-          {Array.from({ length: Number.parseInt(formValues.pageSize, 10) }).map(
-            (_, i) => (
-              <Timeline2CardSkeleton
-                key={i}
-                className="sm:w-36 sm:h-56"
-                showTopBanner={false}
-              />
-            ),
-          )}
-        </div>
-      );
-    }
-
-    if (data.data.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="rounded-full bg-muted p-6 mb-4">
-            <IconSearch size={48} className="text-muted-foreground/40" />
-          </div>
-          <h3 className="text-lg font-semibold">No games found</h3>
-          <p className="text-muted-foreground max-w-xs mx-auto">
-            {formValues.search || formValues.searchIgdbId
-              ? `We couldn't find any games matching your search criteria.`
-              : 'The library is currently empty.'}
-          </p>
-          {(formValues.search || formValues.searchIgdbId) && (
-            <Button
-              variant="link"
-              onClick={() => {
-                skipDebounceSearchRef.current = true;
-                skipDebounceSearchIgdbIdRef.current = true;
-                form.setFieldValue('search', '');
-                form.setFieldValue('searchIgdbId', '');
-                form.setFieldValue('page', 1);
-              }}
-              className="mt-2"
-            >
-              Clear search
-            </Button>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-8">
-        <div
-          className={cn(
-            'grid gap-6',
-            view === 'grid'
-              ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 justify-items-start'
-              : 'grid-cols-1',
-          )}
-        >
-          {data?.data.map((game: Game) => (
-            <div
-              key={game.id}
-              className={cn(
-                'transition-opacity duration-200 relative group/game',
-                view === 'list' &&
-                  'flex gap-8 p-6 border border-border bg-card hover:bg-accent/50 transition-colors',
-              )}
-            >
-              <div
-                className={cn(
-                  view === 'list'
-                    ? 'flex flex-col items-center gap-3 shrink-0'
-                    : 'contents',
-                )}
-              >
-                {isMultiSelect && view === 'grid' && (
-                  <div className="absolute top-2 right-2 z-20">
-                    <Checkbox
-                      checked={selectedIds.has(game.id)}
-                      onCheckedChange={() => toggleSelect(game.id)}
-                      className="size-5"
-                    />
-                  </div>
-                )}
-                <Link
-                  href={
-                    isMultiSelect
-                      ? '#'
-                      : `/dashboard/games/${game.igdbId}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-                  }
-                  onClick={(e: React.MouseEvent) => {
-                    if (isMultiSelect) {
-                      e.preventDefault();
-                      toggleSelect(game.id);
-                    }
-                  }}
-                  className={cn(
-                    view === 'grid'
-                      ? 'block hover:scale-105 transition-transform'
-                      : 'shrink-0',
-                  )}
-                >
-                  <ViewTransition name={`game-details-${game.igdbId}`}>
-                    <Timeline2Card
-                      game={game}
-                      showTopBanner={false}
-                      bannerColor={selectedIds.has(game.id) ? 'red' : 'none'}
-                      className={cn(view === 'grid' && 'sm:w-36 sm:h-52')}
-                    />
-                  </ViewTransition>
-                </Link>
-              </div>
-
-              {view === 'list' && (
-                <div className="flex flex-col justify-start pt-1 min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-4">
-                    <Link
-                      href={
-                        isMultiSelect
-                          ? '#'
-                          : `/dashboard/games/${game.igdbId}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-                      }
-                      onClick={(e: React.MouseEvent) => {
-                        if (isMultiSelect) {
-                          e.preventDefault();
-                          toggleSelect(game.id);
-                        }
-                      }}
-                      className="hover:text-primary transition-colors min-w-0 flex-1"
-                    >
-                      <h3 className="text-2xl font-black uppercase tracking-tight truncate">
-                        {game.name}
-                      </h3>
-                    </Link>
-                    {isMultiSelect && (
-                      <Checkbox
-                        checked={selectedIds.has(game.id)}
-                        onCheckedChange={() => toggleSelect(game.id)}
-                        className="size-5 shrink-0 z-20"
-                      />
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 mt-2">
-                    {game.firstReleaseDate && (
-                      <Badge className="flex items-center gap-1.5 bg-muted px-2 py-0.5 rounded-none text-[10px] font-bold uppercase tracking-wider text-black h-auto">
-                        <IconCalendar aria-hidden="true" size={12} />
-                        {new Date(
-                          game.firstReleaseDate * 1000,
-                        ).toLocaleDateString()}
-                      </Badge>
-                    )}
-                    <Badge className="flex items-center gap-1.5 bg-muted px-2 py-0.5 rounded-none text-[10px] font-bold uppercase tracking-wider text-black h-auto">
-                      <IconDeviceGamepad aria-hidden="true" size={12} />
-                      ID: {game.igdbId}
-                    </Badge>
-                  </div>
-
-                  <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed mt-4">
-                    {game.summary || 'No description available for this game.'}
-                  </p>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <ViewTransition>
       <div className="flex flex-col min-h-full bg-background">
@@ -778,10 +790,8 @@ export default function Dashboard() {
                           <DropdownMenuRadioGroup
                             value={field.state.value}
                             onValueChange={(val) => {
-                              if (val !== field.state.value) {
-                                field.handleChange(val as SortOption);
-                                form.setFieldValue('page', 1);
-                              }
+                              field.handleChange(val as SortOption);
+                              form.setFieldValue('page', 1);
                             }}
                           >
                             {sortOptions.map((opt) => (
@@ -822,24 +832,20 @@ export default function Dashboard() {
                           <DropdownMenuRadioGroup
                             value={field.state.value}
                             onValueChange={(val) => {
-                              if (val !== field.state.value) {
-                                field.handleChange(val as NumericString);
-                                form.setFieldValue('page', 1);
-                              }
+                              field.handleChange(val as NumericString);
+                              form.setFieldValue('page', 1);
                             }}
                           >
-                            {pageSizes.map((sz, index) => {
-                              return (
-                                <DropdownMenuRadioItem
-                                  key={index + '-' + sz}
-                                  value={sz}
-                                  className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
-                                  closeOnClick={true}
-                                >
-                                  {sz}
-                                </DropdownMenuRadioItem>
-                              );
-                            })}
+                            {pageSizes.map((sz, index) => (
+                              <DropdownMenuRadioItem
+                                key={index + '-' + sz}
+                                value={sz}
+                                className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
+                                closeOnClick={true}
+                              >
+                                {sz}
+                              </DropdownMenuRadioItem>
+                            ))}
                           </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -1055,7 +1061,27 @@ export default function Dashboard() {
               'opacity-50 pointer-events-none',
           )}
         >
-          {dataLengthZero()}
+          <GameListContent
+            data={data}
+            isLoading={isLoading}
+            view={view}
+            parsedPageSize={Number.parseInt(formValues.pageSize, 10)}
+            formSearch={formValues.search}
+            formSearchIgdbId={formValues.searchIgdbId}
+            isMultiSelect={isMultiSelect}
+            selectedIds={selectedIds}
+            toggleSelect={toggleSelect}
+            searchParams={searchParams}
+            skipDebounceSearchRef={skipDebounceSearchRef}
+            skipDebounceSearchIgdbIdRef={skipDebounceSearchIgdbIdRef}
+            onClearSearch={() => {
+              skipDebounceSearchRef.current = true;
+              skipDebounceSearchIgdbIdRef.current = true;
+              form.setFieldValue('search', '');
+              form.setFieldValue('searchIgdbId', '');
+              form.setFieldValue('page', 1);
+            }}
+          />
         </div>
       </div>
     </ViewTransition>

@@ -44,15 +44,13 @@ const defaultFormValues: FormValues = {
   isCoverArt: false,
 };
 
-const slugify = (text: string) => {
-  return text
-    .toString()
+const slugify = (text: string) =>
+  text
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
-    .replace(/\-\-+/g, '-'); // Replace multiple - with single -
-};
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/--+/g, '-');
 
 export default function NewModeView() {
   const queryClient = useQueryClient();
@@ -109,16 +107,13 @@ export default function NewModeView() {
     mutation.mutate(formValues);
   };
 
-  const isFormDirty = () => {
-    return (
-      formValues.title !== defaultFormValues.title ||
-      formValues.slug !== defaultFormValues.slug ||
-      formValues.description !== defaultFormValues.description ||
-      formValues.level !== defaultFormValues.level ||
-      formValues.maxAttempts !== defaultFormValues.maxAttempts ||
-      formValues.isCoverArt !== defaultFormValues.isCoverArt
-    );
-  };
+  const isFormDirty =
+    formValues.title !== defaultFormValues.title ||
+    formValues.slug !== defaultFormValues.slug ||
+    formValues.description !== defaultFormValues.description ||
+    formValues.level !== defaultFormValues.level ||
+    formValues.maxAttempts !== defaultFormValues.maxAttempts ||
+    formValues.isCoverArt !== defaultFormValues.isCoverArt;
 
   const handleDiscard = () => {
     setFormValues(defaultFormValues);
@@ -313,7 +308,7 @@ export default function NewModeView() {
                     <Button
                       type="button"
                       variant="outline"
-                      disabled={!isFormDirty() || mutation.isPending}
+                      disabled={!isFormDirty || mutation.isPending}
                       onClick={handleDiscard}
                       className="h-11 flex items-center justify-center gap-2 cursor-pointer"
                     >

@@ -17,8 +17,6 @@
         "ms-vscode.remote-tunnels",
         "ms-vscode.remote-explorer",
         "bradlc.vscode-tailwindcss",
-        // "ms-azuretools.vscode-docker",
-        // "kilocode.kilo-code",
         "ms-playwright.playwright",
         "alefragnani.Bookmarks",
         "streetsidesoftware.code-spell-checker",
@@ -27,7 +25,10 @@
         "Google.gemini-code-assist",
         "kisstkondoros.vscode-gutter-preview",
         "IBM.output-colorizer",
-        "quicktype.quicktype"
+        "quicktype.quicktype",
+        "YoavBls.pretty-ts-errors",
+        "ms-vscode.remote-server",
+        "ms-vscode-remote.remote-containers"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",

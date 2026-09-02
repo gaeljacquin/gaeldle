@@ -42,7 +42,7 @@ export class ClueRouter {
     @Body() body: GenerateClueDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<GenerateClueResponseDto> {
-    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+    const actorId = req.hexclave?.sub ?? 'unknown';
     const updatedGame = await this.clueService.generateClue(
       body.igdbId,
       body.provider,
@@ -77,7 +77,7 @@ export class ClueRouter {
     @Body() body: RestoreClueDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<GenerateClueResponseDto> {
-    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+    const actorId = req.hexclave?.sub ?? 'unknown';
     const updatedGame = await this.clueService.restoreClue(
       body.igdbId,
       body.historyId,

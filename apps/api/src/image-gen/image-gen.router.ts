@@ -50,7 +50,7 @@ export class ImageGenRouter {
     @Body() body: GenerateImageDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<GenerateImageResponseDto> {
-    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+    const actorId = req.hexclave?.sub ?? 'unknown';
     const result = await this.imageGenService.generateImage(body, actorId);
 
     if (!result) {
@@ -69,7 +69,7 @@ export class ImageGenRouter {
     @Body() body: GenerateImagesDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<GenerateImagesResponseDto> {
-    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+    const actorId = req.hexclave?.sub ?? 'unknown';
     const { imageGenId, gamesQueued } =
       await this.imageGenService.generateImages(body, actorId);
 

@@ -368,9 +368,6 @@ export interface components {
             releaseDates?: Record<string, never>;
             themes?: Record<string, never>;
         };
-        UpdateGameDto: {
-            updates: components["schemas"]["GameUpdateInputDto"];
-        };
         GameResponseDto: {
             success: boolean;
             data: Record<string, never>;
@@ -634,7 +631,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateGameDto"];
+                "application/json": components["schemas"]["GameUpdateInputDto"];
             };
         };
         responses: {

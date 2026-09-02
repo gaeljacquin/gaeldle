@@ -173,8 +173,7 @@ export class GamesService {
 
         if (latestEvent) {
           const payload = latestEvent.payload as { gameInfo?: GameInsert };
-
-          if (payload && payload.gameInfo) {
+          if (payload?.gameInfo) {
             gameData = payload.gameInfo;
           }
         }
@@ -187,7 +186,6 @@ export class GamesService {
 
         if (!igdbGame) {
           errorMessage = 'Game not found on IGDB';
-
           return null;
         }
 
@@ -218,10 +216,7 @@ export class GamesService {
         syncedGame = updatedGame;
         success = true;
 
-        return {
-          game: syncedGame,
-          operation,
-        };
+        return { game: updatedGame, operation };
       }
 
       const [newGame] = await this.databaseService.db
@@ -237,10 +232,7 @@ export class GamesService {
       syncedGame = newGame;
       success = true;
 
-      return {
-        game: syncedGame,
-        operation,
-      };
+      return { game: newGame, operation };
     } catch (e) {
       errorMessage = e instanceof Error ? e.message : String(e);
       throw e;
@@ -536,9 +528,7 @@ export class GamesService {
     await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
 
     const publicUrl = `${this.r2Service.r2PublicUrl}/${key}`;
-    const list = Array.isArray(game.imageGen)
-      ? JSON.parse(JSON.stringify(game.imageGen))
-      : [];
+    const list = game.imageGen ? [...game.imageGen] : [];
     const newItem = {
       [artStyleValue]: {
         url: publicUrl,
@@ -546,9 +536,7 @@ export class GamesService {
         provider,
       },
     };
-    const existingIndex = list.findIndex(
-      (item: any) => item && typeof item === 'object' && artStyleValue in item,
-    );
+    const existingIndex = list.findIndex((item) => artStyleValue in item);
 
     if (existingIndex >= 0) {
       list[existingIndex] = newItem;
@@ -595,23 +583,15 @@ export class GamesService {
       parts.push(game.storyline);
     }
 
-    if (
-      options.includeGenres &&
-      Array.isArray(game.genres) &&
-      game.genres.length > 0
-    ) {
+    if (options.includeGenres && (game.genres as string[])?.length > 0) {
       parts.push(`Genre: ${(game.genres as string[]).join(', ')}`);
     }
 
-    if (
-      options.includeThemes &&
-      Array.isArray(game.themes) &&
-      game.themes.length > 0
-    ) {
+    if (options.includeThemes && (game.themes as string[])?.length > 0) {
       parts.push(`Themes: ${(game.themes as string[]).join(', ')}`);
     }
 
-    if (Array.isArray(game.keywords) && game.keywords.length > 0) {
+    if ((game.keywords as string[])?.length > 0) {
       parts.push(`Keywords: ${(game.keywords as string[]).join(', ')}`);
     }
 

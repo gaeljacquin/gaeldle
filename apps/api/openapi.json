@@ -79,7 +79,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateGameDto"
+                "$ref": "#/components/schemas/GameUpdateInputDto"
               }
             }
           }
@@ -858,17 +858,6 @@
             "type": "object"
           }
         }
-      },
-      "UpdateGameDto": {
-        "type": "object",
-        "properties": {
-          "updates": {
-            "$ref": "#/components/schemas/GameUpdateInputDto"
-          }
-        },
-        "required": [
-          "updates"
-        ]
       },
       "GameResponseDto": {
         "type": "object",

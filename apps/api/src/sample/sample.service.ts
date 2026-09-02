@@ -26,57 +26,46 @@ export class SampleService {
   ) {}
 
   async uploadImage(input: uploadImageProps, actorId: string) {
-    let success = false;
-    let errorMessage = '';
-    let url = '';
+    const { image, extension } = input;
+    const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    const timestamp = Date.now();
+    const fileName = `${SAMPLE_DIR}/placeholder_${timestamp}.${extension}`;
 
     try {
-      const { image, extension } = input;
-
-      // Remove base64 prefix if present
-      const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
-      const buffer = Buffer.from(base64Data, 'base64');
-
-      const timestamp = Date.now();
-      const fileName = `${SAMPLE_DIR}/placeholder_${timestamp}.${extension}`;
-
       await this.s3Service.uploadImage(
         fileName,
         buffer,
         `image/${extension === 'jpg' ? 'jpeg' : extension}`,
       );
 
-      url = `${this.r2Service.r2PublicUrl}/${fileName}`;
-      success = true;
+      const url = `${this.r2Service.r2PublicUrl}/${fileName}`;
 
-      return {
-        success,
-        url,
-      };
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'upload_sample_image_r2',
+        actorId,
+        payload: { success: true, error: '', url },
+      });
+
+      return { success: true, url };
     } catch (error) {
-      errorMessage = error instanceof Error ? error.message : String(error);
-
       console.error('Sample image upload failed:', error);
-      throw error;
-    } finally {
+
       await this.databaseService.db.insert(domainEvents).values({
         eventType: 'upload_sample_image_r2',
         actorId,
         payload: {
-          success,
-          error: errorMessage,
-          url,
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+          url: '',
         },
       });
+
+      throw error;
     }
   }
 
   async sendMessage(input: sendMessageProps, actorId: string) {
-    let success = false;
-    let errorMessage = '';
-    let messageId = '';
-    let message = '';
-
     try {
       const res = await this.sqsService.sendMessage(
         configuration().sampleSqsQueueUrl,
@@ -87,39 +76,37 @@ export class SampleService {
         throw new Error('Failed to send sample message');
       }
 
-      success = true;
-      messageId = res.MessageId ?? '';
-      message = input.message + ' Acknowledged!';
+      const messageId = res.MessageId ?? '';
+      const message = input.message + ' Acknowledged!';
 
-      return {
-        success,
-        messageId,
-        message,
-      };
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'send_sample_sqs_message',
+        actorId,
+        payload: { success: true, error: '', messageId, message },
+      });
+
+      return { success: true, messageId, message };
     } catch (error) {
-      errorMessage = error instanceof Error ? error.message : String(error);
-
       console.error('Sending sample message failed:', error);
-      throw error;
-    } finally {
+
       await this.databaseService.db.insert(domainEvents).values({
         eventType: 'send_sample_sqs_message',
         actorId,
         payload: {
-          success,
-          error: errorMessage,
-          messageId,
-          message,
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+          messageId: '',
+          message: '',
         },
       });
+
+      throw error;
     }
   }
 
   async clearQueue(actorId: string) {
-    let success = false;
-    let errorMessage = '';
     const queueUrl = configuration().sampleSqsQueueUrl;
-    const queueId = queueUrl.split('/').pop() || queueUrl;
+    const queueId = queueUrl.split('/').pop() ?? queueUrl;
 
     try {
       const res = await this.sqsService.clearQueue(queueUrl);
@@ -128,32 +115,28 @@ export class SampleService {
         throw new Error('Clearing SQS queue failed');
       }
 
-      success = true;
+      await this.databaseService.db.insert(domainEvents).values({
+        eventType: 'clear_sample_sqs_queue',
+        actorId,
+        payload: { success: true, error: '', queueUrl, queueId },
+      });
 
-      return {
-        success,
-        message: 'Cleared sample SQS queue.',
-      };
+      return { success: true, message: 'Cleared sample SQS queue.' };
     } catch (error) {
-      errorMessage = error instanceof Error ? error.message : String(error);
-
       console.error('Clearing sample queue failed:', error);
-      throw error;
-    } finally {
+
       await this.databaseService.db.insert(domainEvents).values({
         eventType: 'clear_sample_sqs_queue',
         actorId,
         payload: {
-          success,
-          error: errorMessage,
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
           queueUrl,
           queueId,
         },
       });
+
+      throw error;
     }
   }
-
-  // private throwDummyError() {
-  //   throw new Error('failed!');
-  // }
 }

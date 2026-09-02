@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { DEFAULT_PROVIDER, MIN_PREVIEW_PROMPT_ROWS } from '@workspace/shared';
+import { DEFAULT_PROVIDER } from '@workspace/shared';
 import {
   useSuspenseQuery,
   useMutation,
@@ -10,7 +10,6 @@ import {
 import { getGameByIgdbId, generateImage } from '@/lib/services/game.service';
 import Image from 'next/image';
 import { Button } from '@workspace/ui/button';
-import { Textarea } from '@workspace/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -18,8 +17,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@workspace/ui/dialog';
+import { Collapsible, CollapsibleTrigger } from '@workspace/ui/collapsible';
 import { toast } from 'sonner';
-import { IconExternalLink, IconBrush } from '@tabler/icons-react';
+import {
+  IconExternalLink,
+  IconBrush,
+  IconChevronDown,
+} from '@tabler/icons-react';
 import { Game, type ArtStyleValue } from '@workspace/api/db';
 import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
@@ -193,13 +197,6 @@ export default function GameDetailsImageGenTab({
   const provider = generatedImage?.provider ?? 'N/A';
   const artStyleLabel = artStyles.find((s) => s.value === artStyleValue)?.label;
 
-  const savedPromptRows = !savedPrompt
-    ? MIN_PREVIEW_PROMPT_ROWS
-    : Math.min(
-        15,
-        Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(savedPrompt.length / 28)),
-      );
-
   const previewPrompt = useMemo(
     () =>
       buildPromptPreview(game, artStyles, {
@@ -217,13 +214,6 @@ export default function GameDetailsImageGenTab({
       artStyleValue,
     ],
   );
-
-  const previewPromptRows = !previewPrompt
-    ? MIN_PREVIEW_PROMPT_ROWS
-    : Math.min(
-        15,
-        Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(previewPrompt.length / 50)),
-      );
 
   const imageGenButtonText =
     generateImageMutation.isPending || isPolling
@@ -281,18 +271,51 @@ export default function GameDetailsImageGenTab({
           </div>
         )}
 
+        <Button
+          variant="outline"
+          className={cn(
+            'w-full font-bold h-10 rounded-none text-white hover:text-white',
+            generateImageMutation.isPending || isPolling
+              ? 'bg-slate-500 hover:bg-slate-500 cursor-not-allowed'
+              : 'bg-slate-600 hover:bg-slate-700 cursor-pointer',
+          )}
+          onClick={() => generateImageMutation.mutate()}
+          disabled={generateImageMutation.isPending || isPolling}
+        >
+          <IconBrush
+            aria-hidden="true"
+            className={cn(
+              'mr-2 size-4',
+              (generateImageMutation.isPending || isPolling) && 'animate-pulse',
+            )}
+          />
+          {imageGenButtonText}
+        </Button>
+
         {/* Saved Prompt */}
         <div className="flex flex-col gap-2 min-h-32 mt-2">
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
             Saved Prompt
           </h3>
+          <span className="text-sm">
+            <span className="font-bold text-muted-foreground">Provider: </span>
+            <span className="capitalize">{provider}</span>
+          </span>
           {savedPrompt ? (
-            <Textarea
-              readOnly
-              value={savedPrompt}
-              rows={savedPromptRows}
-              className="rounded-none resize-none w-full text-sm text-muted-foreground italic bg-muted/30 border-dashed h-40 lg:h-auto"
-            />
+            <Collapsible
+              defaultOpen={false}
+              className="group/saved-prompt border border-dashed border-muted-foreground/30 bg-muted/30 flex flex-col rounded-none overflow-hidden"
+            >
+              <div className="p-3 text-sm text-muted-foreground italic select-text whitespace-pre-wrap wrap-break-word line-clamp-3 group-data-open/saved-prompt:line-clamp-none">
+                {savedPrompt}
+              </div>
+              <CollapsibleTrigger
+                className="w-full h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-white rounded-none cursor-pointer transition-colors group mt-auto"
+                aria-label="Toggle saved prompt"
+              >
+                <IconChevronDown className="size-4 text-white transition-transform duration-200 group-data-open/saved-prompt:rotate-180 group-data-panel-open:rotate-180" />
+              </CollapsibleTrigger>
+            </Collapsible>
           ) : (
             <div className="flex-1 flex items-center justify-center border border-dashed border-muted-foreground/20 bg-muted/5 min-h-32 py-8">
               <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/40">
@@ -300,10 +323,6 @@ export default function GameDetailsImageGenTab({
               </span>
             </div>
           )}
-          <span className="text-sm">
-            <span className="font-bold">Provider: </span>
-            <span className="capitalize">{provider}</span>
-          </span>
         </div>
       </div>
 
@@ -477,34 +496,21 @@ export default function GameDetailsImageGenTab({
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
             Preview Prompt
           </h3>
-          <Textarea
-            readOnly
-            value={previewPrompt}
-            rows={previewPromptRows}
-            className="rounded-none resize-none w-full text-sm text-muted-foreground italic bg-muted/30 border-dashed h-32 lg:h-auto"
-          />
+          <Collapsible
+            defaultOpen={false}
+            className="group/preview-prompt border border-dashed border-muted-foreground/30 bg-muted/30 flex flex-col rounded-none overflow-hidden"
+          >
+            <div className="p-3 text-sm text-muted-foreground italic select-text whitespace-pre-wrap wrap-break-word line-clamp-3 group-data-open/preview-prompt:line-clamp-none">
+              {previewPrompt}
+            </div>
+            <CollapsibleTrigger
+              className="w-full h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-white rounded-none cursor-pointer transition-colors group mt-auto"
+              aria-label="Toggle preview prompt"
+            >
+              <IconChevronDown className="size-4 text-white transition-transform duration-200 group-data-open/preview-prompt:rotate-180 group-data-panel-open:rotate-180" />
+            </CollapsibleTrigger>
+          </Collapsible>
         </div>
-
-        <Button
-          variant="outline"
-          className={cn(
-            'w-full font-bold h-10 rounded-none text-white hover:text-white',
-            generateImageMutation.isPending || isPolling
-              ? 'bg-slate-500 hover:bg-slate-500 cursor-not-allowed'
-              : 'bg-slate-600 hover:bg-slate-700 cursor-pointer',
-          )}
-          onClick={() => generateImageMutation.mutate()}
-          disabled={generateImageMutation.isPending || isPolling}
-        >
-          <IconBrush
-            aria-hidden="true"
-            className={cn(
-              'mr-2 size-4',
-              (generateImageMutation.isPending || isPolling) && 'animate-pulse',
-            )}
-          />
-          {imageGenButtonText}
-        </Button>
       </div>
     </div>
   );

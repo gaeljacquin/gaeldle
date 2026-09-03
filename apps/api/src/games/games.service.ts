@@ -536,9 +536,22 @@ export class GamesService {
         provider,
       },
     };
-    const existingIndex = list.findIndex((item) => artStyleValue in item);
+    const existingIndex = list.findIndex(
+      (item) =>
+        item &&
+        typeof item === 'object' &&
+        Object.keys(item).some(
+          (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+        ),
+    );
+
+    let replacedImageUrl: string | null = null;
 
     if (existingIndex >= 0) {
+      const matchedKey = Object.keys(list[existingIndex]).find(
+        (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+      )!;
+      replacedImageUrl = list[existingIndex][matchedKey]?.url ?? null;
       list[existingIndex] = newItem;
     } else {
       list.push(newItem);
@@ -552,6 +565,34 @@ export class GamesService {
 
     if (!updatedGame) {
       throw new NotFoundException('Failed to update game record');
+    }
+
+    if (replacedImageUrl) {
+      try {
+        let oldKey = replacedImageUrl;
+        if (
+          this.r2Service.r2PublicUrl &&
+          replacedImageUrl.startsWith(this.r2Service.r2PublicUrl)
+        ) {
+          oldKey = replacedImageUrl
+            .slice(this.r2Service.r2PublicUrl.length)
+            .replace(/^\/+/, '');
+        } else {
+          try {
+            const urlObj = new URL(replacedImageUrl);
+            oldKey = urlObj.pathname.replace(/^\/+/, '');
+          } catch {
+            oldKey = replacedImageUrl.replace(/^\/+/, '');
+          }
+        }
+        oldKey = decodeURIComponent(oldKey);
+        await this.s3Service.deleteFile(oldKey);
+      } catch (err) {
+        console.error(
+          `Failed to delete replaced image file from R2 for igdbId ${igdbId}:`,
+          err,
+        );
+      }
     }
 
     return { success: true, url: publicUrl, data: updatedGame };

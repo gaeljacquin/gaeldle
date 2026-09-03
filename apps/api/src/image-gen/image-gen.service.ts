@@ -193,9 +193,22 @@ export class ImageGenService {
             provider,
           },
         };
-        const existingIndex = list.findIndex((item) => artStyleValue in item);
+        const existingIndex = list.findIndex(
+          (item) =>
+            item &&
+            typeof item === 'object' &&
+            Object.keys(item).some(
+              (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+            ),
+        );
+
+        let replacedImageUrl: string | null = null;
 
         if (existingIndex >= 0) {
+          const matchedKey = Object.keys(list[existingIndex]).find(
+            (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+          )!;
+          replacedImageUrl = list[existingIndex][matchedKey]?.url ?? null;
           list[existingIndex] = newItem;
         } else {
           list.push(newItem);
@@ -209,6 +222,10 @@ export class ImageGenService {
             imageGen: list,
           })
           .where(eq(games.id, game.id));
+
+        if (replacedImageUrl) {
+          await this.deleteR2ImageByUrl(replacedImageUrl, game.igdbId);
+        }
 
         succeeded++;
       } catch (err) {
@@ -469,9 +486,22 @@ export class ImageGenService {
         provider,
       },
     };
-    const existingIndex = list.findIndex((item) => artStyleValue in item);
+    const existingIndex = list.findIndex(
+      (item) =>
+        item &&
+        typeof item === 'object' &&
+        Object.keys(item).some(
+          (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+        ),
+    );
+
+    let replacedImageUrl: string | null = null;
 
     if (existingIndex >= 0) {
+      const matchedKey = Object.keys(list[existingIndex]).find(
+        (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+      )!;
+      replacedImageUrl = list[existingIndex][matchedKey]?.url ?? null;
       list[existingIndex] = newItem;
     } else {
       list.push(newItem);
@@ -485,6 +515,11 @@ export class ImageGenService {
 
     if (!updatedGame) {
       throw new NotFoundException('Failed to update game record');
+    }
+
+    // Delete the replaced image from Cloudflare R2 bucket only after new image is generated and saved
+    if (replacedImageUrl) {
+      await this.deleteR2ImageByUrl(replacedImageUrl, igdbId);
     }
 
     // Insert the domain event for single image generation
@@ -544,30 +579,7 @@ export class ImageGenService {
     const imageUrl = entry?.url;
 
     if (imageUrl) {
-      try {
-        let key = imageUrl;
-        if (
-          this.r2Service.r2PublicUrl &&
-          imageUrl.startsWith(this.r2Service.r2PublicUrl)
-        ) {
-          key = imageUrl
-            .slice(this.r2Service.r2PublicUrl.length)
-            .replace(/^\/+/, '');
-        } else {
-          try {
-            const urlObj = new URL(imageUrl);
-            key = urlObj.pathname.replace(/^\/+/, '');
-          } catch {
-            key = imageUrl.replace(/^\/+/, '');
-          }
-        }
-        await this.s3Service.deleteFile(key);
-      } catch (err) {
-        console.error(
-          `Failed to delete image file from R2 for igdbId ${igdbId}:`,
-          err,
-        );
-      }
+      await this.deleteR2ImageByUrl(imageUrl, igdbId);
     }
 
     const updatedList = list.filter((_, idx) => idx !== entryIndex);
@@ -650,5 +662,37 @@ export class ImageGenService {
     }
 
     return parts.join('. ');
+  }
+
+  private async deleteR2ImageByUrl(
+    imageUrl: string,
+    igdbId?: number,
+  ): Promise<void> {
+    if (!imageUrl) return;
+    try {
+      let key = imageUrl;
+      if (
+        this.r2Service.r2PublicUrl &&
+        imageUrl.startsWith(this.r2Service.r2PublicUrl)
+      ) {
+        key = imageUrl
+          .slice(this.r2Service.r2PublicUrl.length)
+          .replace(/^\/+/, '');
+      } else {
+        try {
+          const urlObj = new URL(imageUrl);
+          key = urlObj.pathname.replace(/^\/+/, '');
+        } catch {
+          key = imageUrl.replace(/^\/+/, '');
+        }
+      }
+      key = decodeURIComponent(key);
+      await this.s3Service.deleteFile(key);
+    } catch (err) {
+      console.error(
+        `Failed to delete image file from R2${igdbId ? ` for igdbId ${igdbId}` : ''}:`,
+        err,
+      );
+    }
   }
 }

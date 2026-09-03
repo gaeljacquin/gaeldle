@@ -227,6 +227,38 @@
         ]
       }
     },
+    "/api/image-gen/delete-image": {
+      "post": {
+        "operationId": "ImageGenRouter_deleteGeneratedImage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteGeneratedImageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteGeneratedImageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Delete a generated AI image for a game",
+        "tags": [
+          "imageGen"
+        ]
+      }
+    },
     "/api/image-gen/generate-images": {
       "post": {
         "operationId": "ImageGenRouter_generateImages",
@@ -1021,6 +1053,35 @@
           },
           "messageId": {
             "type": "string"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "DeleteGeneratedImageDto": {
+        "type": "object",
+        "properties": {
+          "igdbId": {
+            "type": "number"
+          },
+          "artStyle": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "igdbId",
+          "artStyle"
+        ]
+      },
+      "DeleteGeneratedImageResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
           }
         },
         "required": [

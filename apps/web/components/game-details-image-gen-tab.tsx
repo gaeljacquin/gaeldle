@@ -7,7 +7,11 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { getGameByIgdbId, generateImage } from '@/lib/services/game.service';
+import {
+  getGameByIgdbId,
+  generateImage,
+  deleteGeneratedImage,
+} from '@/lib/services/game.service';
 import Image from 'next/image';
 import { Button } from '@workspace/ui/button';
 import {
@@ -17,11 +21,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@workspace/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@workspace/ui/alert-dialog';
 import { Collapsible, CollapsibleTrigger } from '@workspace/ui/collapsible';
 import { toast } from 'sonner';
 import {
   IconExternalLink,
   IconBrush,
+  IconTrash,
   IconChevronDown,
 } from '@tabler/icons-react';
 import { Game, type ArtStyleValue } from '@workspace/api/db';
@@ -111,6 +126,7 @@ export default function GameDetailsImageGenTab({
   const [isPolling, setIsPolling] = useState(false);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [providerVal, setProviderVal] = useState<string>(DEFAULT_PROVIDER);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const queryClient = useQueryClient();
   const { data: game } = useSuspenseQuery({
@@ -160,6 +176,25 @@ export default function GameDetailsImageGenTab({
     onError: (err) => {
       console.error(err);
       toast.error('Failed to generate image', { id: generateImageToastId });
+    },
+  });
+
+  const deleteImageMutation = useMutation({
+    mutationFn: () =>
+      deleteGeneratedImage(Number.parseInt(igdbId, 10), artStyleValue),
+    onMutate: () => {
+      toast.loading('Deleting generated image...', { id: 'delete-image' });
+    },
+    onSuccess: () => {
+      toast.success('Generated image deleted successfully!', {
+        id: 'delete-image',
+      });
+      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+    },
+    onError: (err) => {
+      console.error(err);
+      toast.error('Failed to delete generated image', { id: 'delete-image' });
     },
   });
 
@@ -214,6 +249,11 @@ export default function GameDetailsImageGenTab({
       artStyleValue,
     ],
   );
+
+  const isBusy =
+    generateImageMutation.isPending ||
+    isPolling ||
+    deleteImageMutation.isPending;
 
   const imageGenButtonText =
     generateImageMutation.isPending || isPolling
@@ -275,12 +315,12 @@ export default function GameDetailsImageGenTab({
           variant="outline"
           className={cn(
             'w-full font-bold h-10 rounded-none text-white hover:text-white',
-            generateImageMutation.isPending || isPolling
+            isBusy
               ? 'bg-slate-500 hover:bg-slate-500 cursor-not-allowed'
               : 'bg-slate-600 hover:bg-slate-700 cursor-pointer',
           )}
           onClick={() => generateImageMutation.mutate()}
-          disabled={generateImageMutation.isPending || isPolling}
+          disabled={isBusy}
         >
           <IconBrush
             aria-hidden="true"
@@ -290,6 +330,28 @@ export default function GameDetailsImageGenTab({
             )}
           />
           {imageGenButtonText}
+        </Button>
+
+        <Button
+          className={cn(
+            'w-full font-bold h-10 rounded-none text-white',
+            !generatedImage || isBusy
+              ? 'bg-destructive/40 text-white/50 cursor-not-allowed'
+              : 'bg-destructive hover:bg-destructive/80 cursor-pointer',
+          )}
+          onClick={() => setIsDeleteDialogOpen(true)}
+          disabled={!generatedImage || isBusy}
+        >
+          <IconTrash
+            aria-hidden="true"
+            className={cn(
+              'mr-2 size-4',
+              deleteImageMutation.isPending && 'animate-pulse',
+            )}
+          />
+          {deleteImageMutation.isPending
+            ? 'Deleting...'
+            : 'Delete Generated Image'}
         </Button>
 
         {/* Saved Prompt */}
@@ -345,7 +407,7 @@ export default function GameDetailsImageGenTab({
                   key={style.value}
                   type="button"
                   onClick={() => setArtStyleValue(style.value as ArtStyleValue)}
-                  disabled={generateImageMutation.isPending || isPolling}
+                  disabled={isBusy}
                   className={cn(
                     'w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between',
                     isSelected
@@ -379,7 +441,7 @@ export default function GameDetailsImageGenTab({
           <Select
             value={providerVal}
             onValueChange={(val) => val && setProviderVal(val)}
-            disabled={generateImageMutation.isPending || isPolling}
+            disabled={isBusy}
           >
             <SelectTrigger className="w-full h-10 rounded-none bg-card/50 border-border text-sm flex">
               <SelectValue placeholder="Select provider">
@@ -471,9 +533,7 @@ export default function GameDetailsImageGenTab({
               <Checkbox
                 id={id}
                 checked={hasValue ? checked : false}
-                disabled={
-                  !hasValue || generateImageMutation.isPending || isPolling
-                }
+                disabled={!hasValue || isBusy}
                 onCheckedChange={(v) => onCheckedChange(v === true)}
               />
               <Label
@@ -512,6 +572,42 @@ export default function GameDetailsImageGenTab({
           </Collapsible>
         </div>
       </div>
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent className="rounded-none">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black uppercase">
+              Delete Generated Image?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              This action cannot be undone. This will permanently delete the{' '}
+              <strong>{artStyleLabel ?? artStyleValue}</strong> generated image
+              for <strong>{game.name}</strong> from Cloudflare storage and update
+              the game.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 gap-3">
+            <AlertDialogCancel
+              className="font-bold rounded-none flex-1 cursor-pointer"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                deleteImageMutation.mutate();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-bold rounded-none flex-1 cursor-pointer"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

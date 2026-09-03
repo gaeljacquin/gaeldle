@@ -1,6 +1,10 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { AppConfiguration } from '@/config/configuration';
 
 @Injectable()
@@ -56,5 +60,14 @@ export class S3Service {
     await this.client.send(command);
 
     return key;
+  }
+
+  async deleteFile(key: string): Promise<void> {
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    await this.client.send(command);
   }
 }

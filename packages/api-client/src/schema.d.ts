@@ -122,6 +122,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/image-gen/delete-image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete a generated AI image for a game */
+        post: operations["ImageGenRouter_deleteGeneratedImage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/image-gen/generate-images": {
         parameters: {
             query?: never;
@@ -415,6 +432,14 @@ export interface components {
         GenerateImageResponseDto: {
             success: boolean;
             messageId?: string;
+        };
+        DeleteGeneratedImageDto: {
+            igdbId: number;
+            artStyle: string;
+        };
+        DeleteGeneratedImageResponseDto: {
+            success: boolean;
+            data?: Record<string, never>;
         };
         GenerateImagesDto: {
             numGames: number;
@@ -710,6 +735,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GenerateImageResponseDto"];
+                };
+            };
+        };
+    };
+    ImageGenRouter_deleteGeneratedImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteGeneratedImageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeleteGeneratedImageResponseDto"];
                 };
             };
         };

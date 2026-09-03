@@ -508,6 +508,109 @@ export class ImageGenService {
     return { success: true, url: publicUrl, data: updatedGame };
   }
 
+  async deleteGeneratedImage(
+    dto: { igdbId: number; artStyle: string },
+    actorId: string,
+  ): Promise<{ success: boolean; data: Game } | null> {
+    const { igdbId, artStyle: artStyleValue } = dto;
+    const game = await this.gamesService.getGameByIgdbId(igdbId);
+
+    if (!game) {
+      throw new NotFoundException(`Game with igdbId ${igdbId} not found`);
+    }
+
+    const list = (game.imageGen ?? []) as Array<
+      Record<string, { url: string; prompt: string; provider: string }>
+    >;
+    const entryIndex = list.findIndex(
+      (item) =>
+        item &&
+        typeof item === 'object' &&
+        Object.keys(item).some(
+          (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+        ),
+    );
+
+    if (entryIndex < 0) {
+      throw new NotFoundException(
+        `Generated image for art style "${artStyleValue}" not found for game ${igdbId}`,
+      );
+    }
+
+    const matchedKey = Object.keys(list[entryIndex]).find(
+      (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+    )!;
+    const entry = list[entryIndex][matchedKey];
+    const imageUrl = entry?.url;
+
+    if (imageUrl) {
+      try {
+        let key = imageUrl;
+        if (
+          this.r2Service.r2PublicUrl &&
+          imageUrl.startsWith(this.r2Service.r2PublicUrl)
+        ) {
+          key = imageUrl
+            .slice(this.r2Service.r2PublicUrl.length)
+            .replace(/^\/+/, '');
+        } else {
+          try {
+            const urlObj = new URL(imageUrl);
+            key = urlObj.pathname.replace(/^\/+/, '');
+          } catch {
+            key = imageUrl.replace(/^\/+/, '');
+          }
+        }
+        await this.s3Service.deleteFile(key);
+      } catch (err) {
+        console.error(
+          `Failed to delete image file from R2 for igdbId ${igdbId}:`,
+          err,
+        );
+      }
+    }
+
+    const updatedList = list.filter((_, idx) => idx !== entryIndex);
+
+    let newAiImageUrl = game.aiImageUrl;
+    let newAiPrompt = game.aiPrompt;
+
+    if (game.aiImageUrl === imageUrl) {
+      if (updatedList.length > 0) {
+        const firstRemainingKey = Object.keys(updatedList[0])[0];
+        const firstRemaining = updatedList[0][firstRemainingKey];
+        newAiImageUrl = firstRemaining.url;
+        newAiPrompt = firstRemaining.prompt;
+      } else {
+        newAiImageUrl = null;
+        newAiPrompt = null;
+      }
+    }
+
+    const updatedGame = await this.gamesService.updateGame(game.id, {
+      imageGen: updatedList,
+      aiImageUrl: newAiImageUrl,
+      aiPrompt: newAiPrompt,
+    });
+
+    if (!updatedGame) {
+      throw new NotFoundException('Failed to update game record');
+    }
+
+    await this.databaseService.db.insert(domainEvents).values({
+      eventType: 'image_gen.deleted',
+      actorId,
+      payload: {
+        igdbId,
+        gameId: game.id,
+        url: imageUrl,
+        artStyle: artStyleValue,
+      },
+    });
+
+    return { success: true, data: updatedGame };
+  }
+
   private buildImagePrompt(
     game: Pick<
       Game,

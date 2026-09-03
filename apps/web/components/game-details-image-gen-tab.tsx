@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { DEFAULT_PROVIDER } from '@workspace/shared';
 import {
   useSuspenseQuery,
@@ -53,7 +53,7 @@ import {
   SelectValue,
 } from '@workspace/ui/select';
 
-const generateImageToastId = 'generate-image';
+export const generateImageToastId = 'generate-image';
 
 function buildPromptPreview(
   game: Game,
@@ -112,6 +112,10 @@ export default function GameDetailsImageGenTab({
   setIncludeGenres,
   includeThemes,
   setIncludeThemes,
+  isPolling,
+  setIsPolling,
+  setPrevUrl,
+  setGeneratingStyle,
 }: {
   igdbId: string;
   artStyleValue: ArtStyleValue;
@@ -122,9 +126,11 @@ export default function GameDetailsImageGenTab({
   setIncludeGenres: (v: boolean) => void;
   includeThemes: boolean;
   setIncludeThemes: (v: boolean) => void;
+  isPolling: boolean;
+  setIsPolling: (v: boolean) => void;
+  setPrevUrl: (v: string | null) => void;
+  setGeneratingStyle: (v: string | null) => void;
 }) {
-  const [isPolling, setIsPolling] = useState(false);
-  const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [providerVal, setProviderVal] = useState<string>(DEFAULT_PROVIDER);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -164,6 +170,7 @@ export default function GameDetailsImageGenTab({
     onMutate: () => {
       toast.loading('Generating image...', { id: generateImageToastId });
       setPrevUrl(generatedImage?.url ?? null);
+      setGeneratingStyle(artStyleValue);
     },
     onSuccess: () => {
       toast.info('Image generation queued! It will appear in one moment.', {
@@ -176,6 +183,8 @@ export default function GameDetailsImageGenTab({
     onError: (err) => {
       console.error(err);
       toast.error('Failed to generate image', { id: generateImageToastId });
+      setIsPolling(false);
+      setGeneratingStyle(null);
     },
   });
 
@@ -197,36 +206,6 @@ export default function GameDetailsImageGenTab({
       toast.error('Failed to delete generated image', { id: 'delete-image' });
     },
   });
-
-  useEffect(() => {
-    if (isPolling) {
-      const currentUrl = generatedImage?.url ?? null;
-
-      if (currentUrl && currentUrl !== prevUrl) {
-        setTimeout(() => {
-          setIsPolling(false);
-        }, 0);
-        toast.success('Image generated successfully!', {
-          id: generateImageToastId,
-        });
-      }
-    }
-  }, [generatedImage?.url, isPolling, prevUrl]);
-
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-
-    if (isPolling) {
-      timeoutId = setTimeout(() => {
-        setIsPolling(false);
-        toast.error('Image generation timed out. Please check again later.', {
-          id: generateImageToastId,
-        });
-      }, 60000);
-    }
-
-    return () => clearTimeout(timeoutId);
-  }, [isPolling]);
 
   const savedPrompt = generatedImage?.prompt;
   const provider = generatedImage?.provider ?? 'N/A';
@@ -585,8 +564,8 @@ export default function GameDetailsImageGenTab({
             <AlertDialogDescription className="text-base">
               This action cannot be undone. This will permanently delete the{' '}
               <strong>{artStyleLabel ?? artStyleValue}</strong> generated image
-              for <strong>{game.name}</strong> from Cloudflare storage and update
-              the game.
+              for <strong>{game.name}</strong> from Cloudflare storage and
+              update the game.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4 gap-3">

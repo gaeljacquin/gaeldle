@@ -57,12 +57,12 @@ export class ClueService {
     };
 
     const userPrompt = JSON.stringify(gameData, null, 2);
-    let responseText: string;
+    let rawResponse: unknown;
     let model: string;
 
     if (provider === 'cloudflare') {
       model = '@cf/meta/llama-3.1-8b-instruct';
-      responseText = await this.aiService.generateText(
+      rawResponse = await this.aiService.generateText(
         model,
         [
           { role: 'system', content: systemPrompt },
@@ -83,24 +83,35 @@ export class ClueService {
       );
     } else {
       model = 'us.amazon.nova-2-lite-v1:0';
-      responseText = await this.aiService.generateTextBedrock(model, [
+      rawResponse = await this.aiService.generateTextBedrock(model, [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ]);
     }
 
-    const cleaned = responseText
-      .trim()
-      .replace(/^```(?:json)?\n?/, '')
-      .replace(/\n?```$/, '')
-      .trim();
-
     let clueString: string;
 
-    try {
-      clueString = this.extractClue(JSON.parse(cleaned)) ?? responseText;
-    } catch {
-      clueString = responseText;
+    if (typeof rawResponse === 'object' && rawResponse !== null) {
+      clueString = this.extractClue(rawResponse) ?? JSON.stringify(rawResponse);
+    } else if (typeof rawResponse === 'string') {
+      const cleaned = rawResponse
+        .trim()
+        .replace(/^```(?:json)?\n?/, '')
+        .replace(/\n?```$/, '')
+        .trim();
+
+      try {
+        clueString = this.extractClue(JSON.parse(cleaned)) ?? cleaned;
+      } catch {
+        clueString = cleaned;
+      }
+    } else if (
+      typeof rawResponse === 'number' ||
+      typeof rawResponse === 'boolean'
+    ) {
+      clueString = String(rawResponse);
+    } else {
+      clueString = '';
     }
 
     const newItem = {

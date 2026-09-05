@@ -272,6 +272,7 @@ export async function generateClue(igdbId: number, provider: string) {
   });
 
   if (error || !data) {
+    console.error(error);
     throw new Error('Failed to generate clue');
   }
 

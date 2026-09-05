@@ -689,10 +689,15 @@ export class ImageGenService {
       key = decodeURIComponent(key);
       await this.s3Service.deleteFile(key);
     } catch (err) {
-      console.error(
-        `Failed to delete image file from R2${igdbId ? ` for igdbId ${igdbId}` : ''}:`,
-        err,
-      );
+      if (igdbId) {
+        console.error(
+          'Failed to delete image file from R2 for igdbId %s:',
+          igdbId,
+          err,
+        );
+      } else {
+        console.error('Failed to delete image file from R2:', err);
+      }
     }
   }
 }

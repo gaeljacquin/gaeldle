@@ -37,13 +37,15 @@
           "source.fixAll.eslint": "explicit"
         },
         "js/ts.tsdk": "node_modules/typescript/lib",
-        "npm.packageManager": "pnpm"
+        "npm.packageManager": "pnpm",
+        "terminal.integrated.defaultProfile.linux": "zsh"
       }
     }
   },
   "forwardPorts": [3000, 8080],
   "remoteUser": "root",
   "containerEnv": {
+    "SHELL": "/bin/zsh",
     "PYTHON_KEYRING_BACKEND": "keyrings.alt.file.PlaintextKeyring"
   },
   "mounts": [

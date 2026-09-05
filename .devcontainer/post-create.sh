@@ -21,6 +21,9 @@ mkdir -p ~/.config/herdr
 cat <<'EOF' > ~/.config/herdr/config.toml
 onboarding = false
 
+[terminal]
+default_shell = "/bin/zsh"
+
 [ui]
 agent_panel_sort = "spaces"
 EOF

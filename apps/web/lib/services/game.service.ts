@@ -211,6 +211,24 @@ export async function generateImage(
   return data;
 }
 
+export async function deleteGeneratedImage(
+  igdbId: number,
+  artStyleValue: ArtStyleValue,
+) {
+  const { data, error } = await apiClient.POST('/api/image-gen/delete-image', {
+    body: {
+      igdbId,
+      artStyle: artStyleValue,
+    },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to delete generated image');
+  }
+
+  return data;
+}
+
 export async function generateImages(params: {
   numGames: number;
   artStyle: ArtStyleValue;
@@ -254,6 +272,7 @@ export async function generateClue(igdbId: number, provider: string) {
   });
 
   if (error || !data) {
+    console.error(error);
     throw new Error('Failed to generate clue');
   }
 

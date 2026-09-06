@@ -30,11 +30,6 @@ export class GameUpdateInputDto {
   @ApiPropertyOptional({ type: Object }) themes?: any;
 }
 
-export class UpdateGameDto {
-  @ApiProperty({ type: GameUpdateInputDto })
-  updates!: GameUpdateInputDto;
-}
-
 export class DeleteBulkDto {
   @ApiProperty({ type: [Number], description: 'Array of game IDs to delete' })
   ids!: number[];

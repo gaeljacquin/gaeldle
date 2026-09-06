@@ -4,9 +4,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "turbo run build --filter=!@workspace/newapi",
+    "build": "turbo run build",
     "codegen": "pnpm --filter @workspace/api generate:openapi && pnpm --filter @workspace/api-client generate",
-    "dev": "turbo run dev --filter=!@workspace/newapi",
+    "dev": "turbo run dev",
     "lint": "turbo lint --filter '!@workspace/ui'",
     "lint:fix": "turbo lint --filter '!@workspace/ui' -- --fix",
     "lint:web": "turbo lint --filter @workspace/web",
@@ -34,21 +34,21 @@
     "prepare": "husky"
   },
   "keywords": [],
-  "packageManager": "pnpm@11.21.0",
+  "packageManager": "pnpm@12.3.4",
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.4.1",
     "husky": "^9.1.7",
     "prettier": "^3.9.6",
-    "turbo": "^2.10.10"
+    "turbo": "^2.10.12"
   },
   "dependencies": {
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "motion": "^13.1.0",
+    "@types/react-dom": "^19.2.7",
+    "motion": "^13.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   }
 }

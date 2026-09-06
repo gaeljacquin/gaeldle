@@ -20,7 +20,7 @@ import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';
 import { ImageGenStore } from '@/image-gen/image-gen.store';
-import { IMAGE_GEN_DIR, IMAGE_PROMPT_SUFFIX } from '@workspace/shared';
+import { IMAGE_GEN_DIR } from '@workspace/shared';
 import { GamesService } from '@/games/games.service';
 import { SqsService } from '@/lib/sqs.service';
 import configuration from '@/config/configuration';
@@ -185,37 +185,47 @@ export class ImageGenService {
         await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
 
         const publicUrl = `${this.r2Service.r2PublicUrl}/${key}`;
-        const list = Array.isArray(game.imageGen)
-          ? JSON.parse(JSON.stringify(game.imageGen))
-          : [];
-        const asvKey = artStyleValue;
+        const list = game.imageGen ? [...game.imageGen] : [];
         const newItem = {
-          [asvKey]: {
+          [artStyleValue]: {
             url: publicUrl,
             prompt,
             provider,
           },
         };
         const existingIndex = list.findIndex(
-          (item: any) => item && typeof item === 'object' && asvKey in item,
+          (item) =>
+            item &&
+            typeof item === 'object' &&
+            Object.keys(item).some(
+              (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+            ),
         );
 
+        let replacedImageUrl: string | null = null;
+
         if (existingIndex >= 0) {
+          const matchedKey = Object.keys(list[existingIndex]).find(
+            (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+          )!;
+          replacedImageUrl = list[existingIndex][matchedKey]?.url ?? null;
           list[existingIndex] = newItem;
         } else {
           list.push(newItem);
         }
-
-        const updatedImageGen = list;
 
         await this.databaseService.db
           .update(games)
           .set({
             aiImageUrl: publicUrl,
             aiPrompt: prompt,
-            imageGen: updatedImageGen,
+            imageGen: list,
           })
           .where(eq(games.id, game.id));
+
+        if (replacedImageUrl) {
+          await this.deleteR2ImageByUrl(replacedImageUrl, game.igdbId);
+        }
 
         succeeded++;
       } catch (err) {
@@ -468,9 +478,7 @@ export class ImageGenService {
     await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
 
     const publicUrl = `${this.r2Service.r2PublicUrl}/${key}`;
-    const list = Array.isArray(game.imageGen)
-      ? JSON.parse(JSON.stringify(game.imageGen))
-      : [];
+    const list = game.imageGen ? [...game.imageGen] : [];
     const newItem = {
       [artStyleValue]: {
         url: publicUrl,
@@ -479,10 +487,21 @@ export class ImageGenService {
       },
     };
     const existingIndex = list.findIndex(
-      (item: any) => item && typeof item === 'object' && artStyleValue in item,
+      (item) =>
+        item &&
+        typeof item === 'object' &&
+        Object.keys(item).some(
+          (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+        ),
     );
 
+    let replacedImageUrl: string | null = null;
+
     if (existingIndex >= 0) {
+      const matchedKey = Object.keys(list[existingIndex]).find(
+        (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+      )!;
+      replacedImageUrl = list[existingIndex][matchedKey]?.url ?? null;
       list[existingIndex] = newItem;
     } else {
       list.push(newItem);
@@ -496,6 +515,11 @@ export class ImageGenService {
 
     if (!updatedGame) {
       throw new NotFoundException('Failed to update game record');
+    }
+
+    // Delete the replaced image from Cloudflare R2 bucket only after new image is generated and saved
+    if (replacedImageUrl) {
+      await this.deleteR2ImageByUrl(replacedImageUrl, igdbId);
     }
 
     // Insert the domain event for single image generation
@@ -517,6 +541,86 @@ export class ImageGenService {
     });
 
     return { success: true, url: publicUrl, data: updatedGame };
+  }
+
+  async deleteGeneratedImage(
+    dto: { igdbId: number; artStyle: string },
+    actorId: string,
+  ): Promise<{ success: boolean; data: Game } | null> {
+    const { igdbId, artStyle: artStyleValue } = dto;
+    const game = await this.gamesService.getGameByIgdbId(igdbId);
+
+    if (!game) {
+      throw new NotFoundException(`Game with igdbId ${igdbId} not found`);
+    }
+
+    const list = (game.imageGen ?? []) as Array<
+      Record<string, { url: string; prompt: string; provider: string }>
+    >;
+    const entryIndex = list.findIndex(
+      (item) =>
+        item &&
+        typeof item === 'object' &&
+        Object.keys(item).some(
+          (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+        ),
+    );
+
+    if (entryIndex < 0) {
+      throw new NotFoundException(
+        `Generated image for art style "${artStyleValue}" not found for game ${igdbId}`,
+      );
+    }
+
+    const matchedKey = Object.keys(list[entryIndex]).find(
+      (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+    )!;
+    const entry = list[entryIndex][matchedKey];
+    const imageUrl = entry?.url;
+
+    if (imageUrl) {
+      await this.deleteR2ImageByUrl(imageUrl, igdbId);
+    }
+
+    const updatedList = list.filter((_, idx) => idx !== entryIndex);
+
+    let newAiImageUrl = game.aiImageUrl;
+    let newAiPrompt = game.aiPrompt;
+
+    if (game.aiImageUrl === imageUrl) {
+      if (updatedList.length > 0) {
+        const firstRemainingKey = Object.keys(updatedList[0])[0];
+        const firstRemaining = updatedList[0][firstRemainingKey];
+        newAiImageUrl = firstRemaining.url;
+        newAiPrompt = firstRemaining.prompt;
+      } else {
+        newAiImageUrl = null;
+        newAiPrompt = null;
+      }
+    }
+
+    const updatedGame = await this.gamesService.updateGame(game.id, {
+      imageGen: updatedList,
+      aiImageUrl: newAiImageUrl,
+      aiPrompt: newAiPrompt,
+    });
+
+    if (!updatedGame) {
+      throw new NotFoundException('Failed to update game record');
+    }
+
+    await this.databaseService.db.insert(domainEvents).values({
+      eventType: 'image_gen.deleted',
+      actorId,
+      payload: {
+        igdbId,
+        gameId: game.id,
+        url: imageUrl,
+        artStyle: artStyleValue,
+      },
+    });
+
+    return { success: true, data: updatedGame };
   }
 
   private buildImagePrompt(
@@ -545,28 +649,55 @@ export class ImageGenService {
       parts.push(game.storyline);
     }
 
-    if (
-      options.includeGenres &&
-      Array.isArray(game.genres) &&
-      game.genres.length > 0
-    ) {
+    if (options.includeGenres && (game.genres as string[])?.length > 0) {
       parts.push(`Genre: ${(game.genres as string[]).join(', ')}`);
     }
 
-    if (
-      options.includeThemes &&
-      Array.isArray(game.themes) &&
-      game.themes.length > 0
-    ) {
+    if (options.includeThemes && (game.themes as string[])?.length > 0) {
       parts.push(`Themes: ${(game.themes as string[]).join(', ')}`);
     }
 
-    if (Array.isArray(game.keywords) && game.keywords.length > 0) {
+    if ((game.keywords as string[])?.length > 0) {
       parts.push(`Keywords: ${(game.keywords as string[]).join(', ')}`);
     }
 
-    parts.push(IMAGE_PROMPT_SUFFIX);
-
     return parts.join('. ');
+  }
+
+  private async deleteR2ImageByUrl(
+    imageUrl: string,
+    igdbId?: number,
+  ): Promise<void> {
+    if (!imageUrl) return;
+    try {
+      let key = imageUrl;
+      if (
+        this.r2Service.r2PublicUrl &&
+        imageUrl.startsWith(this.r2Service.r2PublicUrl)
+      ) {
+        key = imageUrl
+          .slice(this.r2Service.r2PublicUrl.length)
+          .replace(/^\/+/, '');
+      } else {
+        try {
+          const urlObj = new URL(imageUrl);
+          key = urlObj.pathname.replace(/^\/+/, '');
+        } catch {
+          key = imageUrl.replace(/^\/+/, '');
+        }
+      }
+      key = decodeURIComponent(key);
+      await this.s3Service.deleteFile(key);
+    } catch (err) {
+      if (igdbId) {
+        console.error(
+          'Failed to delete image file from R2 for igdbId %s:',
+          igdbId,
+          err,
+        );
+      } else {
+        console.error('Failed to delete image file from R2:', err);
+      }
+    }
   }
 }

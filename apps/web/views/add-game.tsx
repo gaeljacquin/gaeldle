@@ -167,6 +167,30 @@ function ResultsTable({ results, onAddMore }: ResultsTableProps) {
   );
 }
 
+function getDuplicateEntryIds(
+  games: AddGameEntryData[],
+  validationMap: Record<string, IgdbIdAddValidationState>,
+): Set<string> {
+  const idToEntryIds = new Map<number, string[]>();
+
+  for (const entry of games) {
+    const n = Number.parseInt(entry.igdbId, 10);
+    if (Number.isNaN(n)) continue;
+
+    const state = validationMap[entry.id];
+    if (!state?.isReady || state.existsOnIgdb !== true) continue;
+
+    if (!idToEntryIds.has(n)) idToEntryIds.set(n, []);
+    idToEntryIds.get(n)!.push(entry.id);
+  }
+
+  const dupes = new Set<string>();
+  for (const entryIds of idToEntryIds.values()) {
+    if (entryIds.length > 1) entryIds.forEach((id) => dupes.add(id));
+  }
+  return dupes;
+}
+
 const igdbIdValidators = {
   onChange: z
     .string()
@@ -276,38 +300,10 @@ export function NewGame() {
           <form.Subscribe selector={(state) => [state.isSubmitting] as const}>
             {([isSubmitting]) => {
               const games = gamesField.state.value;
-              const duplicateEntryIds = (() => {
-                const idToEntryIds = new Map<number, string[]>();
-
-                for (const entry of games) {
-                  const n = Number.parseInt(entry.igdbId, 10);
-
-                  if (Number.isNaN(n)) {
-                    continue;
-                  }
-
-                  const state = validationMap[entry.id];
-
-                  if (!state?.isReady || state.existsOnIgdb !== true) {
-                    continue;
-                  }
-
-                  if (!idToEntryIds.has(n)) {
-                    idToEntryIds.set(n, []);
-                  }
-
-                  idToEntryIds.get(n)!.push(entry.id);
-                }
-                const dupes = new Set<string>();
-
-                for (const entryIds of idToEntryIds.values()) {
-                  if (entryIds.length > 1) {
-                    entryIds.forEach((id) => dupes.add(id));
-                  }
-                }
-
-                return dupes;
-              })();
+              const duplicateEntryIds = getDuplicateEntryIds(
+                games,
+                validationMap,
+              );
 
               const hasDuplicates = duplicateEntryIds.size > 0;
 

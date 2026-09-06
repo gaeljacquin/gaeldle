@@ -1,6 +1,5 @@
 'use client';
 
-import { IconX } from '@tabler/icons-react';
 import Image from 'next/image';
 import { type Game } from '@workspace/api/db';
 import { cn } from '@workspace/ui/lib/utils';
@@ -14,7 +13,6 @@ interface SelectedGameDisplayProps {
 
 export default function SelectedGameDisplay({
   selectedGame,
-  onClearSelection,
   className,
   mode = 'cover-art',
 }: SelectedGameDisplayProps) {
@@ -48,16 +46,6 @@ export default function SelectedGameDisplay({
           {selectedGame?.name ? 'Selected' : 'No selection'}
         </p>
       </div>
-
-      {onClearSelection ? (
-        <button
-          onClick={onClearSelection}
-          className="absolute top-1 right-1 p-1 text-muted-foreground transition-all opacity-0 group-hover:opacity-100 hover:text-foreground cursor-pointer"
-          aria-label="Clear selection"
-        >
-          <IconX className="size-3" />
-        </button>
-      ) : null}
     </div>
   );
 }

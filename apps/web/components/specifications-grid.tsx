@@ -11,16 +11,13 @@ import type {
   MatchKey,
 } from '@workspace/api/db';
 import Image from 'next/image';
-import {
-  IconArrowUp,
-  IconArrowDown,
-  IconArrowRight,
-} from '@tabler/icons-react';
+import { IconArrowUp, IconArrowDown } from '@tabler/icons-react';
 import {
   extractArray,
   extractPublisher,
   extractReleaseYear,
 } from '@workspace/shared';
+import { Badge } from '@/components/badge';
 
 interface SpecificationsGridProps {
   guesses: SpecificationGuess[];
@@ -88,15 +85,9 @@ function CellValueDisplay({ value }: { value: CellValue }) {
 }
 
 function hasData(value: string | string[] | null): boolean {
-  if (!value) {
-    return false;
-  }
-
-  if (Array.isArray(value)) {
-    return value.length > 0;
-  }
-
-  return value !== 'No data' && value !== '';
+  if (!value) return false;
+  if (Array.isArray(value)) return value.length > 0;
+  return value !== '';
 }
 
 function getBestMatch(
@@ -132,8 +123,7 @@ function renderHintRow(revealedClue: RevealedClue) {
     <tr key="hint-row" className="bg-muted/70 text-center">
       <td className="border border-border/50 px-3 py-2 text-xs w-32 text-foreground font-bold">
         <div className="flex gap-1 items-center justify-center">
-          <span>Hint</span>
-          <IconArrowRight className="size-4" />
+          <Badge variant="secondary">Hint</Badge>
         </div>
       </td>
       {columnHeaders.slice(1).map((header) => (

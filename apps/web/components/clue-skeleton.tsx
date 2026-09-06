@@ -10,6 +10,11 @@ export default function ClueSkeleton() {
           <div className="text-center pt-8 md:pt-0">
             <Skeleton className="h-10 w-64 mx-auto" />
             <Skeleton className="h-4 w-80 mx-auto mt-2" />
+            <div className="mt-4 flex gap-2 justify-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="size-3 rounded-none" />
+              ))}
+            </div>
           </div>
         </div>
 
@@ -21,29 +26,13 @@ export default function ClueSkeleton() {
             <Skeleton className="h-4 w-8/12" />
           </Card>
 
-          {/* Controls & Attempts */}
-          <div className="grid gap-6 md:grid-cols-3">
-            {/* Guess & Search panel */}
-            <div className="md:col-span-2 space-y-4">
-              <div className="flex flex-col gap-3 sm:flex-row items-stretch">
-                <Skeleton className="flex-1 h-10" />
-                <Skeleton className="h-10 w-24" />
-              </div>
-              <Skeleton className="h-14 w-full" />
+          {/* Controls */}
+          <div className="space-y-4">
+            <div className="flex flex-col gap-3 sm:flex-row items-stretch">
+              <Skeleton className="flex-1 h-10" />
+              <Skeleton className="h-10 w-24" />
             </div>
-
-            {/* Attempts & Hints panel */}
-            <div className="md:col-span-1 space-y-4">
-              <div className="flex flex-col items-center gap-3 border p-4">
-                <Skeleton className="h-3 w-20" />
-                <div className="flex gap-2">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="size-8 rounded-full" />
-                  ))}
-                </div>
-              </div>
-              <Skeleton className="h-9 w-full" />
-            </div>
+            <Skeleton className="h-14 w-full" />
           </div>
         </div>
       </div>

@@ -223,14 +223,40 @@ Query key: `['game-search', debouncedQuery, mode]`. Stale time: 30 s. Query is d
 
 `GameSearch` (`apps/web/components/game-search.tsx`) contains a `highlightMatch(name, query)` helper that bolds the first case-insensitive occurrence of the debounced query within a result name. It wraps the matched substring in `<strong>` and returns a `<span>` with surrounding text as plain text nodes. No match is highlighted when `query.length < GAME_SEARCH_MIN_CHARS`.
 
-## Game Mode Behavioral Contracts
+## Game Mode Behavioral Contracts & UI Patterns
 
-### Skip Button (Cover Art and Artwork)
+### Skip Button (Cover Art, Artwork, Image Gen, Clue)
 
-The Cover Art and Artwork game modes expose a **Skip** button in `GameListPlusImage` (`apps/web/components/game-list-plus-image.tsx`). The skip button is absent in Image Gen (same component, different `gameModeSlug`).
+The guessing game modes expose a **Skip** button in `GameListPlusImage` (`apps/web/components/game-list-plus-image.tsx`) and game hooks (`useCoverArtGame`, `useClueGame`):
 
-- Clicking Skip calls `handleSkip()` from `useCoverArtGame` (`apps/web/lib/hooks/use-cover-art-game.ts`), then clears the search input.
+- Clicking Skip calls `handleSkip()`, then clears the search input.
 - `handleSkip` appends `null` to the `wrongGuesses` array (instead of a `Game` object) and decrements `attemptsLeft`. This preserves attempt-slot alignment while recording that a guess was skipped.
 - If decrementing brings `attemptsLeft` to 0, `isGameOver` is set to `true` immediately.
 - The `wrongGuesses` array type is `(Game | null)[]`. Code that derives `wrongGuessIds` from this array must filter out `null` entries before mapping to `.id`.
 - The Skip button is disabled when `isGameOver` is `true`.
+
+### Guess History & Contextual Badges
+
+`apps/web/components/guess-history-inline.tsx` displays past attempts in reverse chronological order:
+- **Skipped Guess**: Renders a dedicated `-` placeholder card.
+- **Franchise Badge**: If a guessed game shares a franchise with the target game (`targetGame.franchises`), an Indigo `Franchise` badge is displayed.
+- **Series Badge**: If a guessed game shares a collection with the target game (`targetGame.collections`), a Cyan `Series` badge is displayed.
+
+### Selection and Search Interaction
+
+In `GameListPlusImage` and `Specifications`:
+- When no game is selected, the search input and Action buttons (Submit/Skip) are embedded directly within the active guess card.
+- When a game is selected, the search box transforms into a pill-shaped badge displaying the game name with a clear button (X) that unselects the game and re-opens the search box.
+- The attempts counter is positioned directly under the mode description without borders, rendering used attempts in red.
+
+### Timeline Mode Mechanics
+
+`apps/web/views/timeline.tsx` provides chronological ordering with two interaction modes:
+- **Shift Mode**: Drags cards to insert and slide neighboring cards.
+- **Swap Mode**: Exposes drag-and-drop swapping between movable cards, with hovered target cards dynamically highlighted.
+- **Visual Feedback**: The container's dashed border dynamically matches the active toggle color (Shift vs. Swap).
+- **Locking & Reset**: Correctly placed cards lock into place and cannot be swapped. If a previously placed card is moved, the Reset button is enabled.
+
+### Mode Gradient Color Picker
+
+`apps/web/views/edit-modes.tsx` includes an interactive gradient editor allowing administrators to customize game mode card gradients with Start Color, End Color native color pickers, and direct CSS gradient string inputs.

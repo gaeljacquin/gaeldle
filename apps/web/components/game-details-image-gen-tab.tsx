@@ -1,20 +1,19 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import {
-  DEFAULT_PROVIDER,
-  IMAGE_PROMPT_SUFFIX,
-  MIN_PREVIEW_PROMPT_ROWS,
-} from '@workspace/shared';
+import { useState, useMemo } from 'react';
+import { DEFAULT_PROVIDER } from '@workspace/shared';
 import {
   useSuspenseQuery,
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { getGameByIgdbId, generateImage } from '@/lib/services/game.service';
+import {
+  getGameByIgdbId,
+  generateImage,
+  deleteGeneratedImage,
+} from '@/lib/services/game.service';
 import Image from 'next/image';
 import { Button } from '@workspace/ui/button';
-import { Textarea } from '@workspace/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -22,8 +21,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@workspace/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@workspace/ui/alert-dialog';
+import { Collapsible, CollapsibleTrigger } from '@workspace/ui/collapsible';
 import { toast } from 'sonner';
-import { IconExternalLink, IconBrush } from '@tabler/icons-react';
+import {
+  IconExternalLink,
+  IconBrush,
+  IconTrash,
+  IconChevronDown,
+} from '@tabler/icons-react';
 import { Game, type ArtStyleValue } from '@workspace/api/db';
 import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
@@ -38,7 +53,7 @@ import {
   SelectValue,
 } from '@workspace/ui/select';
 
-const generateImageToastId = 'generate-image';
+export const generateImageToastId = 'generate-image';
 
 function buildPromptPreview(
   game: Game,
@@ -84,8 +99,6 @@ function buildPromptPreview(
     parts.push(`Keywords: ${keywords.join(', ')}`);
   }
 
-  parts.push(IMAGE_PROMPT_SUFFIX);
-
   return parts.join('. ');
 }
 
@@ -99,6 +112,10 @@ export default function GameDetailsImageGenTab({
   setIncludeGenres,
   includeThemes,
   setIncludeThemes,
+  isPolling,
+  setIsPolling,
+  setPrevUrl,
+  setGeneratingStyle,
 }: {
   igdbId: string;
   artStyleValue: ArtStyleValue;
@@ -109,10 +126,13 @@ export default function GameDetailsImageGenTab({
   setIncludeGenres: (v: boolean) => void;
   includeThemes: boolean;
   setIncludeThemes: (v: boolean) => void;
+  isPolling: boolean;
+  setIsPolling: (v: boolean) => void;
+  setPrevUrl: (v: string | null) => void;
+  setGeneratingStyle: (v: string | null) => void;
 }) {
-  const [isPolling, setIsPolling] = useState(false);
-  const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [providerVal, setProviderVal] = useState<string>(DEFAULT_PROVIDER);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const queryClient = useQueryClient();
   const { data: game } = useSuspenseQuery({
@@ -124,14 +144,11 @@ export default function GameDetailsImageGenTab({
   const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
 
   const generatedImage = useMemo(() => {
-    if (!game || !Array.isArray(game.imageGen)) {
-      return null;
-    }
-
-    const entry = game.imageGen.find(
-      (item) => item && typeof item === 'object' && artStyleValue in item,
-    );
-
+    const entry = Array.isArray(game.imageGen)
+      ? game.imageGen.find(
+          (item) => item && typeof item === 'object' && artStyleValue in item,
+        )
+      : null;
     return entry
       ? (entry[artStyleValue] as {
           url: string;
@@ -139,7 +156,7 @@ export default function GameDetailsImageGenTab({
           provider: string;
         })
       : null;
-  }, [game, artStyleValue]);
+  }, [game.imageGen, artStyleValue]);
 
   const generateImageMutation = useMutation({
     mutationFn: () =>
@@ -153,6 +170,7 @@ export default function GameDetailsImageGenTab({
     onMutate: () => {
       toast.loading('Generating image...', { id: generateImageToastId });
       setPrevUrl(generatedImage?.url ?? null);
+      setGeneratingStyle(artStyleValue);
     },
     onSuccess: () => {
       toast.info('Image generation queued! It will appear in one moment.', {
@@ -165,84 +183,56 @@ export default function GameDetailsImageGenTab({
     onError: (err) => {
       console.error(err);
       toast.error('Failed to generate image', { id: generateImageToastId });
+      setIsPolling(false);
+      setGeneratingStyle(null);
     },
   });
 
-  useEffect(() => {
-    if (isPolling) {
-      const currentUrl = generatedImage?.url ?? null;
-
-      if (currentUrl && currentUrl !== prevUrl) {
-        setTimeout(() => {
-          setIsPolling(false);
-        }, 0);
-        toast.success('Image generated successfully!', {
-          id: generateImageToastId,
-        });
-      }
-    }
-  }, [generatedImage?.url, isPolling, prevUrl]);
-
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-
-    if (isPolling) {
-      timeoutId = setTimeout(() => {
-        setIsPolling(false);
-        toast.error('Image generation timed out. Please check again later.', {
-          id: generateImageToastId,
-        });
-      }, 60000);
-    }
-
-    return () => clearTimeout(timeoutId);
-  }, [isPolling]);
+  const deleteImageMutation = useMutation({
+    mutationFn: () =>
+      deleteGeneratedImage(Number.parseInt(igdbId, 10), artStyleValue),
+    onMutate: () => {
+      toast.loading('Deleting generated image...', { id: 'delete-image' });
+    },
+    onSuccess: () => {
+      toast.success('Generated image deleted successfully!', {
+        id: 'delete-image',
+      });
+      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+    },
+    onError: (err) => {
+      console.error(err);
+      toast.error('Failed to delete generated image', { id: 'delete-image' });
+    },
+  });
 
   const savedPrompt = generatedImage?.prompt;
   const provider = generatedImage?.provider ?? 'N/A';
   const artStyleLabel = artStyles.find((s) => s.value === artStyleValue)?.label;
 
-  const savedPromptRows = useMemo(() => {
-    if (!savedPrompt) {
-      return MIN_PREVIEW_PROMPT_ROWS;
-    }
-
-    return Math.min(
-      15,
-      Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(savedPrompt.length / 28)),
-    );
-  }, [savedPrompt]);
-
-  const previewPrompt = useMemo(() => {
-    if (!game) {
-      return '';
-    }
-
-    return buildPromptPreview(game, artStyles, {
+  const previewPrompt = useMemo(
+    () =>
+      buildPromptPreview(game, artStyles, {
+        includeStoryline,
+        includeGenres,
+        includeThemes,
+        artStyleValue,
+      }),
+    [
+      game,
+      artStyles,
       includeStoryline,
       includeGenres,
       includeThemes,
       artStyleValue,
-    });
-  }, [
-    game,
-    artStyles,
-    includeStoryline,
-    includeGenres,
-    includeThemes,
-    artStyleValue,
-  ]);
+    ],
+  );
 
-  const previewPromptRows = useMemo(() => {
-    if (!previewPrompt) {
-      return MIN_PREVIEW_PROMPT_ROWS;
-    }
-
-    return Math.min(
-      15,
-      Math.max(MIN_PREVIEW_PROMPT_ROWS, Math.ceil(previewPrompt.length / 50)),
-    );
-  }, [previewPrompt]);
+  const isBusy =
+    generateImageMutation.isPending ||
+    isPolling ||
+    deleteImageMutation.isPending;
 
   const imageGenButtonText =
     generateImageMutation.isPending || isPolling
@@ -300,18 +290,73 @@ export default function GameDetailsImageGenTab({
           </div>
         )}
 
+        <Button
+          variant="outline"
+          className={cn(
+            'w-full font-bold h-10 rounded-none text-white hover:text-white',
+            isBusy
+              ? 'bg-slate-500 hover:bg-slate-500 cursor-not-allowed'
+              : 'bg-slate-600 hover:bg-slate-700 cursor-pointer',
+          )}
+          onClick={() => generateImageMutation.mutate()}
+          disabled={isBusy}
+        >
+          <IconBrush
+            aria-hidden="true"
+            className={cn(
+              'mr-2 size-4',
+              (generateImageMutation.isPending || isPolling) && 'animate-pulse',
+            )}
+          />
+          {imageGenButtonText}
+        </Button>
+
+        <Button
+          className={cn(
+            'w-full font-bold h-10 rounded-none text-white',
+            !generatedImage || isBusy
+              ? 'bg-destructive/40 text-white/50 cursor-not-allowed'
+              : 'bg-destructive hover:bg-destructive/80 cursor-pointer',
+          )}
+          onClick={() => setIsDeleteDialogOpen(true)}
+          disabled={!generatedImage || isBusy}
+        >
+          <IconTrash
+            aria-hidden="true"
+            className={cn(
+              'mr-2 size-4',
+              deleteImageMutation.isPending && 'animate-pulse',
+            )}
+          />
+          {deleteImageMutation.isPending
+            ? 'Deleting...'
+            : 'Delete Generated Image'}
+        </Button>
+
         {/* Saved Prompt */}
         <div className="flex flex-col gap-2 min-h-32 mt-2">
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
             Saved Prompt
           </h3>
+          <span className="text-sm">
+            <span className="font-bold text-muted-foreground">Provider: </span>
+            <span className="capitalize">{provider}</span>
+          </span>
           {savedPrompt ? (
-            <Textarea
-              readOnly
-              value={savedPrompt}
-              rows={savedPromptRows}
-              className="rounded-none resize-none w-full text-sm text-muted-foreground italic bg-muted/30 border-dashed h-40 lg:h-auto"
-            />
+            <Collapsible
+              defaultOpen={false}
+              className="group/saved-prompt border border-dashed border-muted-foreground/30 bg-muted/30 flex flex-col rounded-none overflow-hidden"
+            >
+              <div className="p-3 text-sm text-muted-foreground italic select-text whitespace-pre-wrap wrap-break-word line-clamp-3 group-data-open/saved-prompt:line-clamp-none">
+                {savedPrompt}
+              </div>
+              <CollapsibleTrigger
+                className="w-full h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-white rounded-none cursor-pointer transition-colors group mt-auto"
+                aria-label="Toggle saved prompt"
+              >
+                <IconChevronDown className="size-4 text-white transition-transform duration-200 group-data-open/saved-prompt:rotate-180 group-data-panel-open:rotate-180" />
+              </CollapsibleTrigger>
+            </Collapsible>
           ) : (
             <div className="flex-1 flex items-center justify-center border border-dashed border-muted-foreground/20 bg-muted/5 min-h-32 py-8">
               <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/40">
@@ -319,10 +364,6 @@ export default function GameDetailsImageGenTab({
               </span>
             </div>
           )}
-          <span className="text-sm">
-            <span className="font-bold">Provider: </span>
-            <span className="capitalize">{provider}</span>
-          </span>
         </div>
       </div>
 
@@ -345,7 +386,7 @@ export default function GameDetailsImageGenTab({
                   key={style.value}
                   type="button"
                   onClick={() => setArtStyleValue(style.value as ArtStyleValue)}
-                  disabled={generateImageMutation.isPending || isPolling}
+                  disabled={isBusy}
                   className={cn(
                     'w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between',
                     isSelected
@@ -379,7 +420,7 @@ export default function GameDetailsImageGenTab({
           <Select
             value={providerVal}
             onValueChange={(val) => val && setProviderVal(val)}
-            disabled={generateImageMutation.isPending || isPolling}
+            disabled={isBusy}
           >
             <SelectTrigger className="w-full h-10 rounded-none bg-card/50 border-border text-sm flex">
               <SelectValue placeholder="Select provider">
@@ -471,9 +512,7 @@ export default function GameDetailsImageGenTab({
               <Checkbox
                 id={id}
                 checked={hasValue ? checked : false}
-                disabled={
-                  !hasValue || generateImageMutation.isPending || isPolling
-                }
+                disabled={!hasValue || isBusy}
                 onCheckedChange={(v) => onCheckedChange(v === true)}
               />
               <Label
@@ -496,35 +535,58 @@ export default function GameDetailsImageGenTab({
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">
             Preview Prompt
           </h3>
-          <Textarea
-            readOnly
-            value={previewPrompt}
-            rows={previewPromptRows}
-            className="rounded-none resize-none w-full text-sm text-muted-foreground italic bg-muted/30 border-dashed h-32 lg:h-auto"
-          />
+          <Collapsible
+            defaultOpen={false}
+            className="group/preview-prompt border border-dashed border-muted-foreground/30 bg-muted/30 flex flex-col rounded-none overflow-hidden"
+          >
+            <div className="p-3 text-sm text-muted-foreground italic select-text whitespace-pre-wrap wrap-break-word line-clamp-3 group-data-open/preview-prompt:line-clamp-none">
+              {previewPrompt}
+            </div>
+            <CollapsibleTrigger
+              className="w-full h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-white rounded-none cursor-pointer transition-colors group mt-auto"
+              aria-label="Toggle preview prompt"
+            >
+              <IconChevronDown className="size-4 text-white transition-transform duration-200 group-data-open/preview-prompt:rotate-180 group-data-panel-open:rotate-180" />
+            </CollapsibleTrigger>
+          </Collapsible>
         </div>
-
-        <Button
-          variant="outline"
-          className={cn(
-            'w-full font-bold h-10 rounded-none text-white hover:text-white',
-            generateImageMutation.isPending || isPolling
-              ? 'bg-slate-500 hover:bg-slate-500 cursor-not-allowed'
-              : 'bg-slate-600 hover:bg-slate-700 cursor-pointer',
-          )}
-          onClick={() => generateImageMutation.mutate()}
-          disabled={generateImageMutation.isPending || isPolling}
-        >
-          <IconBrush
-            aria-hidden="true"
-            className={cn(
-              'mr-2 size-4',
-              (generateImageMutation.isPending || isPolling) && 'animate-pulse',
-            )}
-          />
-          {imageGenButtonText}
-        </Button>
       </div>
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent className="rounded-none">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black uppercase">
+              Delete Generated Image?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              This action cannot be undone. This will permanently delete the{' '}
+              <strong>{artStyleLabel ?? artStyleValue}</strong> generated image
+              for <strong>{game.name}</strong> from Cloudflare storage and
+              update the game.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 gap-3">
+            <AlertDialogCancel
+              className="font-bold rounded-none flex-1 cursor-pointer"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                deleteImageMutation.mutate();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-bold rounded-none flex-1 cursor-pointer"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

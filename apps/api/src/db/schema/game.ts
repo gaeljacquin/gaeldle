@@ -59,6 +59,7 @@ export const games = pgTable(
     artworks: json('artworks').$type<any>(),
     keywords: json('keywords').$type<any>(),
     franchises: json('franchises').$type<any>(),
+    collections: json('collections').$type<any>(),
     gameEngines: json('game_engines').$type<any>(),
     gameModes: json('game_modes').$type<any>(),
     genres: json('genres').$type<any>(),
@@ -86,6 +87,7 @@ export const gameObject = {
   artworks: games.artworks,
   keywords: games.keywords,
   franchises: games.franchises,
+  collections: games.collections,
   gameEngines: games.gameEngines,
   gameModes: games.gameModes,
   genres: games.genres,
@@ -233,6 +235,7 @@ export type IgdbGame = {
   artworks?: Array<{ image_id?: string; url?: string }>;
   keywords?: Array<{ name?: string }>;
   franchises?: Array<{ name?: string }>;
+  collections?: Array<{ name?: string }>;
   game_engines?: Array<{ name?: string }>;
   game_modes?: Array<{ name?: string }>;
   genres?: Array<{ name?: string }>;

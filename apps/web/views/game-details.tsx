@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, Suspense, ViewTransition } from 'react';
+import { use, useState, useEffect, Suspense, ViewTransition } from 'react';
 import {
   useQuery,
   useSuspenseQuery,
@@ -43,7 +43,9 @@ import {
 } from '@/components/game-details-tab-skeleton';
 import GameDetailsSidebar from '@/components/game-details-sidebar';
 import GameDetailsInfoTab from '@/components/game-details-info-tab';
-import GameDetailsImageGenTab from '@/components/game-details-image-gen-tab';
+import GameDetailsImageGenTab, {
+  generateImageToastId,
+} from '@/components/game-details-image-gen-tab';
 import GameDetailsCover from '@/components/game-details-cover';
 import GameDetailsHeaderTitle from '@/components/game-details-header-title';
 import GameDetailsClueTab from '@/components/game-details-clue';
@@ -67,11 +69,59 @@ export default function GameDetails({
     () => (artStyles.find((s) => s.isDefault === 1) ?? artStyles[0]).value,
   );
 
-  // Still needed for the delete dialog — reads from cache after GameDetailsSidebar populates it
+  const [isPolling, setIsPolling] = useState(false);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [generatingStyle, setGeneratingStyle] = useState<string | null>(null);
+
+  // Read game from cache and poll in background when an image is generating
   const { data: game } = useQuery({
     queryKey: ['game', igdbId],
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
+    refetchInterval: isPolling ? 2000 : false,
   });
+
+  useEffect(() => {
+    if (isPolling && game) {
+      let currentUrl: string | null = null;
+
+      if (generatingStyle && Array.isArray(game.imageGen)) {
+        const entry = game.imageGen.find(
+          (item) => item && typeof item === 'object' && generatingStyle in item,
+        );
+
+        if (entry && entry[generatingStyle]) {
+          currentUrl = (entry[generatingStyle] as { url: string }).url ?? null;
+        }
+      }
+
+      if (currentUrl && currentUrl !== prevUrl) {
+        setTimeout(() => {
+          setIsPolling(false);
+          setGeneratingStyle(null);
+        }, 0);
+        toast.success('Image generated successfully!', {
+          id: generateImageToastId,
+        });
+        queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+      }
+    }
+  }, [game, isPolling, prevUrl, generatingStyle, queryClient, igdbId]);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    if (isPolling) {
+      timeoutId = setTimeout(() => {
+        setIsPolling(false);
+        setGeneratingStyle(null);
+        toast.error('Image generation timed out. Please check again later.', {
+          id: generateImageToastId,
+        });
+      }, 60000);
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [isPolling]);
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteGame(id),
@@ -228,6 +278,10 @@ export default function GameDetails({
                       setIncludeGenres={setIncludeGenres}
                       includeThemes={includeThemes}
                       setIncludeThemes={setIncludeThemes}
+                      isPolling={isPolling}
+                      setIsPolling={setIsPolling}
+                      setPrevUrl={setPrevUrl}
+                      setGeneratingStyle={setGeneratingStyle}
                     />
                   )}
                 </Suspense>

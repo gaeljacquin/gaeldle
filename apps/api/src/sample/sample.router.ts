@@ -27,17 +27,11 @@ export class SampleRouter {
     @Body() body: SampleUploadImageDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<UploadImageResponseDto> {
-    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
-    const res = await this.sampleService.uploadImage(
+    const actorId = req.hexclave?.sub ?? 'unknown';
+    return this.sampleService.uploadImage(
       { image: body.image, extension: body.extension ?? 'jpg' },
       actorId,
     );
-
-    if (!res.success) {
-      throw new Error('Unable to upload sample image...');
-    }
-
-    return res;
   }
 
   @Post('send-message')
@@ -49,14 +43,8 @@ export class SampleRouter {
     @Body() body: SampleSendMessageDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<SampleSendMessageResponseDto> {
-    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
-    const res = await this.sampleService.sendMessage(body, actorId);
-
-    if (!res.success) {
-      throw new Error('Unable to send sample message...');
-    }
-
-    return res;
+    const actorId = req.hexclave?.sub ?? 'unknown';
+    return this.sampleService.sendMessage(body, actorId);
   }
 
   @Post('clear-queue')
@@ -66,13 +54,7 @@ export class SampleRouter {
   async clearQueue(
     @Req() req: AuthenticatedRequest,
   ): Promise<SampleClearQueueResponseDto> {
-    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
-    const res = await this.sampleService.clearQueue(actorId);
-
-    if (!res.success) {
-      throw new Error('Unable to clear sample queue...');
-    }
-
-    return res;
+    const actorId = req.hexclave?.sub ?? 'unknown';
+    return this.sampleService.clearQueue(actorId);
   }
 }

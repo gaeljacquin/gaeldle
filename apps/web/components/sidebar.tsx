@@ -220,8 +220,7 @@ function SidebarUserFooter({ isCollapsed, user }: SidebarUserFooterProps) {
       <div
         className={cn(
           'flex items-center gap-3',
-          isCollapsed ? 'justify-center' : null,
-          isCollapsed ? null : 'w-full',
+          isCollapsed ? 'justify-center' : 'w-full',
         )}
       >
         <UserButton />

@@ -19,7 +19,7 @@ import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';
 import type { AppConfiguration } from '@/config/configuration';
-import { IMAGE_GEN_DIR, IMAGE_PROMPT_SUFFIX } from '@workspace/shared';
+import { IMAGE_GEN_DIR } from '@workspace/shared';
 
 interface GenerateImageInput {
   igdbId: number;
@@ -173,8 +173,7 @@ export class GamesService {
 
         if (latestEvent) {
           const payload = latestEvent.payload as { gameInfo?: GameInsert };
-
-          if (payload && payload.gameInfo) {
+          if (payload?.gameInfo) {
             gameData = payload.gameInfo;
           }
         }
@@ -187,7 +186,6 @@ export class GamesService {
 
         if (!igdbGame) {
           errorMessage = 'Game not found on IGDB';
-
           return null;
         }
 
@@ -218,10 +216,7 @@ export class GamesService {
         syncedGame = updatedGame;
         success = true;
 
-        return {
-          game: syncedGame,
-          operation,
-        };
+        return { game: updatedGame, operation };
       }
 
       const [newGame] = await this.databaseService.db
@@ -237,10 +232,7 @@ export class GamesService {
       syncedGame = newGame;
       success = true;
 
-      return {
-        game: syncedGame,
-        operation,
-      };
+      return { game: newGame, operation };
     } catch (e) {
       errorMessage = e instanceof Error ? e.message : String(e);
       throw e;
@@ -479,6 +471,15 @@ export class GamesService {
       })),
       keywords: igdbGame.keywords?.map((k) => k.name),
       franchises: igdbGame.franchises?.map((f) => f.name),
+      collections: (() => {
+        const list = igdbGame.collections
+          ?.map((c) => c.name)
+          .filter(
+            (name): name is string =>
+              typeof name === 'string' && name.trim().length > 0,
+          );
+        return list && list.length > 0 ? list : undefined;
+      })(),
       releaseDates: igdbGame.release_dates?.map((rd) => ({
         date: rd.date,
         platform: rd.platform?.name,
@@ -527,9 +528,7 @@ export class GamesService {
     await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
 
     const publicUrl = `${this.r2Service.r2PublicUrl}/${key}`;
-    const list = Array.isArray(game.imageGen)
-      ? JSON.parse(JSON.stringify(game.imageGen))
-      : [];
+    const list = game.imageGen ? [...game.imageGen] : [];
     const newItem = {
       [artStyleValue]: {
         url: publicUrl,
@@ -538,10 +537,21 @@ export class GamesService {
       },
     };
     const existingIndex = list.findIndex(
-      (item: any) => item && typeof item === 'object' && artStyleValue in item,
+      (item) =>
+        item &&
+        typeof item === 'object' &&
+        Object.keys(item).some(
+          (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+        ),
     );
 
+    let replacedImageUrl: string | null = null;
+
     if (existingIndex >= 0) {
+      const matchedKey = Object.keys(list[existingIndex]).find(
+        (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
+      )!;
+      replacedImageUrl = list[existingIndex][matchedKey]?.url ?? null;
       list[existingIndex] = newItem;
     } else {
       list.push(newItem);
@@ -555,6 +565,34 @@ export class GamesService {
 
     if (!updatedGame) {
       throw new NotFoundException('Failed to update game record');
+    }
+
+    if (replacedImageUrl) {
+      try {
+        let oldKey = replacedImageUrl;
+        if (
+          this.r2Service.r2PublicUrl &&
+          replacedImageUrl.startsWith(this.r2Service.r2PublicUrl)
+        ) {
+          oldKey = replacedImageUrl
+            .slice(this.r2Service.r2PublicUrl.length)
+            .replace(/^\/+/, '');
+        } else {
+          try {
+            const urlObj = new URL(replacedImageUrl);
+            oldKey = urlObj.pathname.replace(/^\/+/, '');
+          } catch {
+            oldKey = replacedImageUrl.replace(/^\/+/, '');
+          }
+        }
+        oldKey = decodeURIComponent(oldKey);
+        await this.s3Service.deleteFile(oldKey);
+      } catch (err) {
+        console.error(
+          `Failed to delete replaced image file from R2 for igdbId ${igdbId}:`,
+          err,
+        );
+      }
     }
 
     return { success: true, url: publicUrl, data: updatedGame };
@@ -586,27 +624,17 @@ export class GamesService {
       parts.push(game.storyline);
     }
 
-    if (
-      options.includeGenres &&
-      Array.isArray(game.genres) &&
-      game.genres.length > 0
-    ) {
+    if (options.includeGenres && (game.genres as string[])?.length > 0) {
       parts.push(`Genre: ${(game.genres as string[]).join(', ')}`);
     }
 
-    if (
-      options.includeThemes &&
-      Array.isArray(game.themes) &&
-      game.themes.length > 0
-    ) {
+    if (options.includeThemes && (game.themes as string[])?.length > 0) {
       parts.push(`Themes: ${(game.themes as string[]).join(', ')}`);
     }
 
-    if (Array.isArray(game.keywords) && game.keywords.length > 0) {
+    if ((game.keywords as string[])?.length > 0) {
       parts.push(`Keywords: ${(game.keywords as string[]).join(', ')}`);
     }
-
-    parts.push(IMAGE_PROMPT_SUFFIX);
 
     return parts.join('. ');
   }

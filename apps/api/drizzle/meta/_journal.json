@@ -197,6 +197,13 @@
       "when": 1784242955246,
       "tag": "0027_breezy_marrow",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1788036997590,
+      "tag": "0028_reflective_blizzard",
+      "breakpoints": true
     }
   ]
 }

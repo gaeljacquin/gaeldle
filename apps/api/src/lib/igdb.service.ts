@@ -39,7 +39,7 @@ export class IgdbService {
     const query = `
       fields id, name, summary, storyline, url, total_rating, total_rating_count,
              first_release_date, cover.image_id, cover.url,
-             artworks.image_id, artworks.url, keywords.name, franchises.name,
+             artworks.image_id, artworks.url, keywords.name, franchises.name, collections.name,
              game_engines.name, game_modes.name, genres.name,
              involved_companies.company.name, involved_companies.publisher, involved_companies.developer,
              platforms.name, player_perspectives.name, release_dates.human, release_dates.date, release_dates.platform.name,
@@ -71,7 +71,7 @@ export class IgdbService {
     const query = `
       fields id, name, summary, storyline, url, total_rating, total_rating_count,
              first_release_date, cover.image_id, cover.url,
-             artworks.image_id, artworks.url, keywords.name, franchises.name,
+             artworks.image_id, artworks.url, keywords.name, franchises.name, collections.name,
              game_engines.name, game_modes.name, genres.name,
              involved_companies.company.name, involved_companies.publisher, involved_companies.developer,
              platforms.name, player_perspectives.name, release_dates.human, release_dates.date, release_dates.platform.name,

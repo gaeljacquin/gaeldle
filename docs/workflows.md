@@ -29,7 +29,7 @@ Dashboard pages that perform write operations (add, replace, delete) follow a co
 6. **Service functions**: Add the API call wrappers to `apps/web/lib/services/game.service.ts`. Validation calls go to NestJS via `apiClient`.
 7. **Controller**: Add the NestJS route and DTO in `apps/api/src/games/`, implement business logic in `apps/api/src/games/games.service.ts`, and run `pnpm codegen`.
 8. **Utilities hub**: Add a `MenuCard` entry in `apps/web/views/utilities.tsx` linking to the new page. The sidebar exposes a single **Utilities** link (`/dashboard/utilities`, icon `IconTools`) that routes to this hub — do not add individual `<SidebarLink>` entries for each admin tool page.
-9. **Shared constants**: If the feature needs a max-rows limit or other shareable constant, add it to `packages/constants/src/index.ts` and import from `@workspace/constants` in both web and API code.
+9. **Shared constants & utils**: If the feature needs a max-rows limit, prompt utility, or other shareable constant/helper, add it to `packages/shared/src/` and import from `@workspace/shared` in both web and API code.
 
 ## Validate-then-Commit Pattern
 

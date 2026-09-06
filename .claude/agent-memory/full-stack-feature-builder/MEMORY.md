@@ -138,3 +138,23 @@ export default function SomePage() {
 ## Details File
 
 See `patterns.md` for extended notes including SSE auth, background jobs, Drizzle migration commands, and Checkbox usage.
+
+## Shared Package (`@workspace/shared`)
+
+- All shared constants (`CLUE_SYSTEM_PROMPT`, `DISCOVER_GAMES_MAX`, `ADD_GAME_MAX_ROWS`, `GAME_SEARCH_MIN_CHARS`, `TIMELINE_GAMES_COUNT`, `IMAGE_GEN_DIR`, `IMAGE_GEN_MIN`, `IMAGE_GEN_MAX`, etc.) live in `packages/shared/src/index.ts`.
+- Shared helper functions: `extractArray`, `extractPublisher`, `extractReleaseYear`, `timelineFormatDate` — also in `packages/shared/src/index.ts`.
+- Import as: `import { CONSTANT_NAME } from '@workspace/shared'`.
+- Do NOT reference `@workspace/constants` — it no longer exists.
+- Art styles (previously `IMAGE_STYLES`) are **NOT** in this package. They are stored in the `art_style` DB table, queried via the `active_art_styles` materialized view (Drizzle schema: `artStyles` from `@/db/schema`). Each record has `value`, `label`, `description`, `isDefault`.
+
+## game Table: collections Column
+
+- `collections` column added to Drizzle schema — IGDB collection memberships (JSON array alongside `franchises`).
+- Guess history badges: `franchises` → indigo Franchise badge, `collections` → cyan Series badge.
+
+## Clue Mode Hook Pattern
+
+- `apps/web/lib/hooks/use-clue-game.ts` — manages clue text, revealed hints, attempt count.
+- Hints (Release Year, Genres, Platforms, Publisher) each cost one attempt.
+- Backend Clue endpoints: `POST /api/clue/generate-clue`, `GET /api/clue/history`, `POST /api/clue/restore`.
+

@@ -8,20 +8,21 @@
 - Game hook files: `apps/web/lib/hooks/use-<mode>-game.ts` — contain `MAX_ATTEMPTS` and game logic.
 - Docs: `docs/` contains architecture.md, backend-conventions.md, commands.md, frontend-conventions.md, workflows.md.
 - Game modes user-facing doc: `docs/game-modes.md` (full rules and mechanics for all six modes).
-- Public README at repo root `/Users/gael/Documents/projects/gaeldle/README.md` is a glossary/doc index only.
+- Public README at repo root `README.md` is a glossary/doc index only.
 
-## Game Modes (as of 2026-02-20)
+## Game Modes (as of 2026-08-31)
 
 | Slug           | Title          | Difficulty | Max Attempts | Hook file                      |
 | -------------- | -------------- | ---------- | ------------ | ------------------------------ |
 | cover-art      | Cover Art      | Easy       | 5            | use-cover-art-game.ts          |
 | artwork        | Artwork        | Medium     | 5            | use-cover-art-game.ts (shared) |
 | image-gen      | Image Gen      | Medium     | 5            | use-cover-art-game.ts (shared) |
+| clue           | Clue           | Medium     | 5            | use-clue-game.ts               |
 | timeline       | Timeline       | Medium     | 3            | use-timeline-game.ts           |
 | timeline-2     | Timeline 2     | Hard       | 7            | use-timeline-2-game.ts         |
 | specifications | Specifications | Hard       | 10           | use-specifications-game.ts     |
 
-Cover Art, Artwork, and Image Gen all use the `GameListPlusImage` component and `useCoverArtGame` hook.
+Cover Art, Artwork, and Image Gen all use the `GameListPlusImage` component and `useCoverArtGame` hook. All three modes support a Skip button.
 
 ## README Convention
 
@@ -73,16 +74,18 @@ Shared dashboard UI components:
 - `MenuCard` in `apps/web/components/menu-card.tsx` — generic gradient card tile with optional badge slot. `GameModeCard` extends it with a difficulty badge.
 - `Stuck` in `apps/web/components/stuck.tsx` — loading/stuck-state display. Props: `stuckState: 'none' | 'loading'`, `className?`.
 
-Shared constants in `packages/constants/src/index.ts` (import from `@workspace/constants`):
-`TEST_DIR`, `IMAGE_GEN_DIR`, `REPLACE_GAME_MAX_ROWS`, `ADD_GAME_MAX_ROWS`, `PLACEHOLDER_IMAGE`, `PLACEHOLDER_IMAGE_R2`, `FILE_SIZE_LIMIT`, `DISCOVER_GAMES_MAX`, `DISCOVER_GAMES_DEFAULT`, `GAME_SEARCH_MIN_CHARS` (= 3).
+Shared constants in `packages/shared/src/index.ts` (import from `@workspace/shared`):
+`IMAGE_GEN_DIR`, `IMAGE_GEN_MIN`, `IMAGE_GEN_MAX`, `REPLACE_GAME_MAX_ROWS`, `ADD_GAME_MAX_ROWS`, `PLACEHOLDER_IMAGE`, `FILE_SIZE_LIMIT`, `DISCOVER_GAMES_MAX`, `DISCOVER_GAMES_DEFAULT`, `GAME_SEARCH_MIN_CHARS` (= 3), `CLUE_SYSTEM_PROMPT`, `TIMELINE_GAMES_COUNT`.
+Note: **art styles** (`IMAGE_STYLES`, `DEFAULT_IMAGE_GEN_STYLE`) no longer exist as constants — they are stored in the `art_style` DB table and queried via the `active_art_styles` materialized view.
 
 Timeline swap-mode visual indicator (green line on drag-over) was reverted (commit 64beaa8) because the green line was inaccurate and broke shift mode. `DragOverEvent` handler and `overId` state were removed from `apps/web/views/timeline.tsx`.
 
 ## Key Behavioral Details (for README accuracy)
 
 - Cover Art / Artwork: pixelated image that clears with each wrong guess. Both modes have a Skip button — skipping pushes `null` into `wrongGuesses` and costs 1 attempt. `wrongGuesses` type is `(Game | null)[]`; filter nulls before mapping to `.id`.
-- Image Gen: AI-generated image, no pixelation, image never changes. No skip button.
-- Timeline: 10 random games, drag-and-drop to sort chronologically; Shift/Swap drag modes; correctly placed cards lock.
+- Image Gen: AI-generated image, no pixelation, image never changes. Has a Skip button (same as Cover Art / Artwork).
+- Clue: AI-generated mystery text description (no title mentioned). Hints cost attempts: Release Year, Genres, Platforms, Publisher. Has a Skip button.
+- Timeline: 10 random games, drag-and-drop to sort chronologically; Shift/Swap drag modes; correctly placed cards lock. Timeline canvas color is customizable via gradient color picker in edit-modes.tsx.
 - Timeline 2: growing timeline, one card dealt at a time, drag into correct slot; wrong placements add card at correct position and cost an attempt; score = correct placements.
 - Specifications: 8 fields compared (Platforms, Genres, Themes, Release Year, Game Modes, Game Engines, Publisher, Player Perspective); green/yellow/red feedback; one hint available per game (costs 1 attempt).
 
@@ -94,3 +97,4 @@ Timeline swap-mode visual indicator (green line on drag-over) was reverted (comm
 - Paginated list: `GET /api/games` — when `q` is present, also ordered by `similarity(name, q) DESC`; `sortBy`/`sortDir` are ignored.
 - DB index: GIN trigram index `game_name_trgm_idx` on `game.name` (migration 0012). Extension pre-installed on all envs.
 - No barrel index in `apps/web/lib/hooks/` — import hooks by direct file path.
+

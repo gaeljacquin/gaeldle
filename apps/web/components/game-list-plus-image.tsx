@@ -1,21 +1,99 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useCoverArtGame } from '@/lib/hooks/use-cover-art-game';
 import ArtworkDisplay from '@/components/artwork-display';
 import CoverDisplay from '@/components/cover-display';
 import GameSearch from '@/components/game-search';
-import SelectedGameDisplay from '@/components/selected-game-display';
 import GuessHistoryInline from '@/components/guess-history-inline';
 import { Button } from '@workspace/ui/button';
 import { Card } from '@workspace/ui/card';
+import { Badge } from '@workspace/ui/badge';
+import { IconX } from '@tabler/icons-react';
 import Attempts from '@/components/attempts';
 import DevModeToggle from '@/components/dev-mode-toggle';
 import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 
 interface GameListPlusImageProps {
   gameModeSlug: string;
+}
+
+function ImageDisplay({
+  slug,
+  targetGame,
+  currentPixelSize,
+  selectedArtworkUrl,
+  selectedAiImage,
+  isGameOver,
+  clueText,
+}: {
+  slug: string;
+  targetGame: ReturnType<typeof useCoverArtGame>['targetGame'];
+  currentPixelSize: number;
+  selectedArtworkUrl: string | null;
+  selectedAiImage: { url: string } | null;
+  isGameOver: boolean;
+  clueText: string | undefined;
+}) {
+  switch (slug) {
+    case 'artwork':
+      return (
+        <ArtworkDisplay
+          imageUrl={selectedArtworkUrl}
+          pixelSize={currentPixelSize}
+          isGameOver={isGameOver}
+          className="size-full"
+        />
+      );
+    case 'image-gen':
+      return (
+        <CoverDisplay
+          game={targetGame}
+          pixelSize={0}
+          usePixelation={false}
+          isGameOver={isGameOver}
+          className="size-full"
+          sourceImageUrl={selectedAiImage?.url ?? targetGame?.aiImageUrl}
+          objectFit="cover"
+        />
+      );
+    case 'clue':
+      if (!isGameOver) {
+        return (
+          <div className="size-full flex flex-col justify-center items-center p-8 bg-card select-text relative">
+            <p className="font-serif text-lg md:text-xl leading-relaxed text-foreground text-center italic">
+              &ldquo;{clueText ?? 'No clue available for this game.'}&rdquo;
+            </p>
+          </div>
+        );
+      } else {
+        return (
+          <CoverDisplay
+            game={targetGame}
+            pixelSize={0}
+            usePixelation={false}
+            isGameOver={isGameOver}
+            className="size-full"
+            sourceImageUrl={targetGame?.imageUrl}
+            objectFit="cover"
+          />
+        );
+      }
+    default:
+      return (
+        <CoverDisplay
+          game={targetGame}
+          pixelSize={currentPixelSize}
+          usePixelation={true}
+          isGameOver={isGameOver}
+          className="size-full"
+          sourceImageUrl={targetGame?.imageUrl}
+          objectFit="cover"
+        />
+      );
+  }
 }
 
 export default function GameListPlusImage(props: GameListPlusImageProps) {
@@ -58,76 +136,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
     .filter((g): g is NonNullable<typeof g> => g !== null)
     .map((g) => g.id);
 
-  const imageDisplayComp = () => {
-    let imageDisplayed;
-
-    switch (props.gameModeSlug) {
-      case 'artwork':
-        imageDisplayed = (
-          <ArtworkDisplay
-            imageUrl={selectedArtworkUrl}
-            pixelSize={currentPixelSize}
-            isGameOver={isGameOver}
-            className="size-full"
-          />
-        );
-        break;
-      case 'image-gen':
-        imageDisplayed = (
-          <CoverDisplay
-            game={targetGame}
-            pixelSize={0}
-            usePixelation={false}
-            isGameOver={isGameOver}
-            className="size-full"
-            sourceImageUrl={selectedAiImage?.url ?? targetGame?.aiImageUrl}
-            objectFit="cover"
-          />
-        );
-        break;
-      case 'clue':
-        if (!isGameOver) {
-          const clueText =
-            (targetGame?.clue as { clue?: string } | null)?.clue ??
-            'No clue available for this game.';
-          imageDisplayed = (
-            <div className="size-full flex flex-col justify-center items-center p-8 bg-card select-text relative">
-              <p className="font-serif text-lg md:text-xl leading-relaxed text-foreground text-center italic">
-                &ldquo;{clueText}&rdquo;
-              </p>
-            </div>
-          );
-        } else {
-          imageDisplayed = (
-            <CoverDisplay
-              game={targetGame}
-              pixelSize={0}
-              usePixelation={false}
-              isGameOver={isGameOver}
-              className="size-full"
-              sourceImageUrl={targetGame?.imageUrl}
-              objectFit="cover"
-            />
-          );
-        }
-        break;
-      default:
-        imageDisplayed = (
-          <CoverDisplay
-            game={targetGame}
-            pixelSize={currentPixelSize}
-            usePixelation={true}
-            isGameOver={isGameOver}
-            className="size-full"
-            sourceImageUrl={targetGame?.imageUrl}
-            objectFit="cover"
-          />
-        );
-        break;
-    }
-
-    return imageDisplayed;
-  };
+  const clueText = (targetGame?.clue as { clue?: string } | null)?.clue;
 
   if (error) {
     return (
@@ -149,6 +158,13 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
             <p className="mt-2 text-muted-foreground">
               {gameMode?.description}
             </p>
+            <div className="mt-4 flex justify-center">
+              <Attempts
+                maxAttempts={gameMode.maxAttempts}
+                attemptsLeft={attemptsLeft}
+                variant="primary"
+              />
+            </div>
           </div>
         </div>
 
@@ -157,71 +173,20 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
             <div className="flex flex-col gap-4 w-full max-w-120 mx-auto lg:max-w-none">
               <Card className="p-0 border shadow-none bg-muted/20">
                 <div className="relative aspect-4/5 w-full">
-                  {imageDisplayComp()}
+                  <ImageDisplay
+                    slug={props.gameModeSlug}
+                    targetGame={targetGame}
+                    currentPixelSize={currentPixelSize}
+                    selectedArtworkUrl={selectedArtworkUrl}
+                    selectedAiImage={selectedAiImage}
+                    isGameOver={isGameOver}
+                    clueText={clueText}
+                  />
                 </div>
               </Card>
             </div>
 
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col items-center gap-4 border p-4">
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Attempts
-                  </p>
-                  <Attempts
-                    maxAttempts={gameMode.maxAttempts}
-                    attemptsLeft={attemptsLeft}
-                    variant="primary"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-3 sm:flex-row items-stretch">
-                  <div className="flex-1">
-                    <GameSearch
-                      key={searchKey}
-                      selectedGameId={selectedGameId}
-                      wrongGuesses={wrongGuessIds}
-                      onSelectGame={handleSelectGame}
-                      disabled={isGameOver}
-                      mode={props.gameModeSlug}
-                    />
-                  </div>
-                  <Button
-                    onClick={handleSubmitWithClear}
-                    disabled={selectedGameId === null || isGameOver}
-                    className="cursor-pointer h-10 font-bold"
-                    size="lg"
-                  >
-                    Submit
-                  </Button>
-                  {(props.gameModeSlug === 'cover-art' ||
-                    props.gameModeSlug === 'artwork' ||
-                    props.gameModeSlug === 'clue') && (
-                    <Button
-                      onClick={handleSkipWithClear}
-                      disabled={isGameOver}
-                      className="cursor-pointer h-10 font-bold bg-blue-600 hover:bg-blue-700 text-white"
-                      size="lg"
-                    >
-                      Skip
-                    </Button>
-                  )}
-                </div>
-                {isGameOver ? null : (
-                  <SelectedGameDisplay
-                    selectedGame={selectedGame}
-                    onClearSelection={clearSelection}
-                    className="w-full bg-muted/10 border-dashed"
-                    mode={props.gameModeSlug}
-                  />
-                )}
-              </div>
-
-              <GuessHistoryInline
-                guesses={wrongGuesses}
-                className="max-h-full"
-              />
-
               {isGameOver ? (
                 <div className="border border-border bg-card/60 p-4 text-center animate-in fade-in zoom-in duration-300">
                   {isCorrect ? (
@@ -251,7 +216,86 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                     {isCorrect ? 'Keep Playing' : 'Play Again'}
                   </Button>
                 </div>
-              ) : null}
+              ) : (
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border border-dashed bg-muted/10 p-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {selectedGame?.imageUrl &&
+                    props.gameModeSlug !== 'cover-art' ? (
+                      <Image
+                        src={selectedGame.imageUrl}
+                        alt={selectedGame.name}
+                        className="h-14 w-10 object-cover border shrink-0"
+                        width={48}
+                        height={64}
+                        sizes="10vw"
+                      />
+                    ) : (
+                      <div className="h-14 w-10 bg-muted flex items-center justify-center border shrink-0">
+                        <span className="text-xs text-muted-foreground font-mono">
+                          ?
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex-1 min-w-0">
+                      {selectedGame ? (
+                        <Badge
+                          variant="secondary"
+                          className="h-10 rounded-full px-4 py-2 w-full flex items-center justify-between gap-2 max-w-full text-xs font-bold uppercase tracking-tight bg-muted/80 text-foreground border border-border"
+                        >
+                          <span className="truncate flex-1 min-w-0 text-left">
+                            {selectedGame.name}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            onClick={clearSelection}
+                            className="size-6 rounded-full cursor-pointer hover:bg-foreground/15 text-muted-foreground hover:text-foreground shrink-0"
+                            aria-label="Clear selection"
+                          >
+                            <IconX className="size-3.5 pointer-events-none" />
+                          </Button>
+                        </Badge>
+                      ) : (
+                        <GameSearch
+                          key={searchKey}
+                          selectedGameId={selectedGameId}
+                          wrongGuesses={wrongGuessIds}
+                          onSelectGame={handleSelectGame}
+                          disabled={isGameOver}
+                          mode={props.gameModeSlug}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <Button
+                      onClick={handleSubmitWithClear}
+                      disabled={selectedGameId === null || isGameOver}
+                      className="cursor-pointer h-10 font-bold"
+                      size="lg"
+                    >
+                      Submit
+                    </Button>
+                    <Button
+                      onClick={handleSkipWithClear}
+                      disabled={isGameOver}
+                      className="cursor-pointer h-10 font-bold bg-blue-600 hover:bg-blue-700 text-white"
+                      size="lg"
+                    >
+                      Skip
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <GuessHistoryInline
+                guesses={wrongGuesses}
+                targetGame={targetGame}
+                className="max-h-full"
+              />
 
               {isGameOver && props.gameModeSlug === 'clue' && (
                 <div className="p-4 bg-muted/30 border border-border text-sm italic text-muted-foreground font-serif">
@@ -259,8 +303,7 @@ export default function GameListPlusImage(props: GameListPlusImageProps) {
                     Clue
                   </p>
                   &ldquo;
-                  {(targetGame?.clue as { clue?: string } | null)?.clue ??
-                    'No clue available.'}
+                  {clueText ?? 'No clue available.'}
                   &rdquo;
                 </div>
               )}

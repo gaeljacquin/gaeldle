@@ -26,7 +26,6 @@ import {
   SyncGameDto,
   SyncGameResponseDto,
   GameUpdateInputDto,
-  UpdateGameDto,
   GameResponseDto,
   DeleteGameResponseDto,
   DeleteBulkDto,
@@ -49,7 +48,7 @@ export class GamesRouter {
     @Body() body: SyncGameDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<SyncGameResponseDto> {
-    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+    const actorId = req.hexclave?.sub ?? 'unknown';
     const result = await this.gamesService.syncGameByIgdbId(
       body.igdb_id,
       true,
@@ -72,17 +71,13 @@ export class GamesRouter {
   @UseGuards(HexclaveGuard)
   @ApiOperation({ summary: 'Update game details' })
   @ApiParam({ name: 'id', type: Number })
-  @ApiBody({ type: UpdateGameDto })
+  @ApiBody({ type: GameUpdateInputDto })
   @ApiResponse({ status: 200, type: GameResponseDto })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateGameDto | GameUpdateInputDto,
+    @Body() body: GameUpdateInputDto,
   ): Promise<GameResponseDto> {
-    const updates =
-      'updates' in body && body.updates
-        ? body.updates
-        : (body as GameUpdateInputDto);
-    const updatedGame = await this.gamesService.updateGame(id, updates);
+    const updatedGame = await this.gamesService.updateGame(id, body);
 
     if (!updatedGame) {
       throw new NotFoundException('Game not found');
@@ -100,10 +95,9 @@ export class GamesRouter {
   @ApiBody({ type: DeleteBulkDto })
   @ApiResponse({ status: 200, type: DeleteBulkGamesResponseDto })
   async deleteBulk(
-    @Body() body: DeleteBulkDto | number[],
+    @Body() body: DeleteBulkDto,
   ): Promise<DeleteBulkGamesResponseDto> {
-    const ids = Array.isArray(body) ? body : body.ids;
-    const deletedIds = await this.gamesService.deleteGames(ids);
+    const deletedIds = await this.gamesService.deleteGames(body.ids);
     return {
       success: true,
       data: {
@@ -141,7 +135,7 @@ export class GamesRouter {
     @Body() body: ValidateIgdbIdAddDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<ValidateIgdbIdAddResponseDto> {
-    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+    const actorId = req.hexclave?.sub ?? 'unknown';
     return this.gamesService.validateGameForAdd(body.igdbId, actorId);
   }
 }

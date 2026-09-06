@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       conditions.push(sql`first_release_date IS NOT NULL`);
     }
 
-    // Uncomment the line below to hardcode a specific game for testing (e.g. The Legend of Zelda: Tears of the Kingdom, IGDB ID 119388)
+    // Uncomment the line below to hardcode a specific game for testing (e.g. The Legend of Zelda: Tears of the Kingdom - 119388, Super Mario Galaxy - 1077)
     // conditions.push(eq(games.igdbId, 119388));
 
     const gamesList = await db

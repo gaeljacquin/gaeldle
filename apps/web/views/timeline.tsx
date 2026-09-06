@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, ViewTransition, useState } from 'react';
+import { Suspense, ViewTransition, useState, useEffect } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useTimelineGame } from '@/lib/hooks/use-timeline-game';
 import { TimelineCard } from '@/components/timeline-card';
@@ -16,6 +16,7 @@ import {
   DragOverlay,
   DragStartEvent,
   DragEndEvent,
+  DragOverEvent,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -46,14 +47,20 @@ function SortableCard({
   game,
   isCorrect,
   showDate,
+  isMovedFound,
   disabled,
   isGameOver,
+  isSwapTarget,
+  shouldAnimateLayout = true,
 }: {
   game: Game;
   isCorrect?: boolean;
   showDate?: boolean;
+  isMovedFound?: boolean;
   disabled?: boolean;
   isGameOver?: boolean;
+  isSwapTarget?: boolean;
+  shouldAnimateLayout?: boolean;
 }) {
   const {
     attributes,
@@ -73,7 +80,7 @@ function SortableCard({
     <motion.div
       ref={setNodeRef}
       style={style}
-      layout
+      layout={shouldAnimateLayout}
       transition={{ duration: 0.3 }}
       {...attributes}
       {...(disabled ? {} : listeners)}
@@ -82,9 +89,14 @@ function SortableCard({
         game={game}
         isCorrect={isCorrect}
         showDate={showDate}
+        isMovedFound={isMovedFound}
         isDragging={isDragging}
         isGameOver={isGameOver}
-        className={disabled ? 'cursor-default' : 'cursor-grab'}
+        className={cn(
+          disabled ? 'cursor-default' : 'cursor-grab',
+          isSwapTarget &&
+            'ring-2 ring-offset-2 ring-offset-background ring-primary/90 z-10',
+        )}
       />
     </motion.div>
   );
@@ -96,7 +108,19 @@ function TimelineContent() {
   );
 
   const [activeId, setActiveId] = useState<number | null>(null);
+  const [overId, setOverId] = useState<number | null>(null);
+  const [justDroppedId, setJustDroppedId] = useState<number | null>(null);
   const { swapMode, setSwapMode } = useTimelineStore();
+
+  useEffect(() => {
+    if (justDroppedId !== null) {
+      const timer = setTimeout(() => {
+        setJustDroppedId(null);
+      }, 350);
+
+      return () => clearTimeout(timer);
+    }
+  }, [justDroppedId]);
 
   const {
     userOrder,
@@ -125,44 +149,95 @@ function TimelineContent() {
   );
 
   function handleDragStart(e: DragStartEvent) {
-    if (!(e.active?.id && typeof e.active.id === 'number')) {
+    setActiveId(e.active.id as number);
+  }
+
+  function handleDragOver(e: DragOverEvent) {
+    if (!e.over) {
+      setOverId(null);
       return;
     }
 
-    setActiveId(e.active.id);
+    const overIdNum = Number(e.over.id);
+
+    if (swapMode) {
+      const overIndex = userOrder.findIndex((game) => game.id === overIdNum);
+      const isOverLocked =
+        hasSubmitted &&
+        correctGameIds.has(overIdNum) &&
+        correctPositionMap.get(overIndex) === overIdNum;
+
+      if (isOverLocked) {
+        setOverId(null);
+
+        return;
+      }
+
+      setOverId(overIdNum);
+    } else {
+      setOverId(overIdNum);
+
+      if (e.active && e.over && e.active.id !== e.over.id) {
+        const oldIndex = userOrder.findIndex((game) => game.id === e.active.id);
+        const newIndex = userOrder.findIndex((game) => game.id === e.over?.id);
+
+        if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+          const newOrder = arrayMove(userOrder, oldIndex, newIndex);
+          handleReorder(newOrder);
+        }
+      }
+    }
   }
 
   function handleDragEnd(event: DragEndEvent) {
     if (!event.over) {
+      setActiveId(null);
+      setOverId(null);
+
       return;
     }
 
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
+    if (swapMode && active.id !== over?.id) {
       const oldIndex = userOrder.findIndex((game) => game.id === active.id);
       const newIndex = userOrder.findIndex((game) => game.id === over.id);
 
-      let newOrder: Game[];
+      if (oldIndex === -1 || newIndex === -1) {
+        setActiveId(null);
+        setOverId(null);
 
-      if (swapMode) {
-        newOrder = [...userOrder];
-        [newOrder[oldIndex], newOrder[newIndex]] = [
-          newOrder[newIndex],
-          newOrder[oldIndex],
-        ];
-      } else {
-        newOrder = arrayMove(userOrder, oldIndex, newIndex);
+        return;
       }
 
+      const isOverLocked =
+        hasSubmitted &&
+        correctGameIds.has(over.id as number) &&
+        correctPositionMap.get(newIndex) === over.id;
+
+      if (isOverLocked) {
+        setActiveId(null);
+        setOverId(null);
+
+        return;
+      }
+
+      const newOrder = [...userOrder];
+      [newOrder[oldIndex], newOrder[newIndex]] = [
+        newOrder[newIndex],
+        newOrder[oldIndex],
+      ];
+      setJustDroppedId(active.id as number);
       handleReorder(newOrder);
     }
 
     setActiveId(null);
+    setOverId(null);
   }
 
   function handleDragCancel() {
     setActiveId(null);
+    setOverId(null);
   }
 
   if (error) {
@@ -186,7 +261,8 @@ function TimelineContent() {
       return wasCorrect && !isInCorrectPosition;
     });
 
-  const buttonsDisabled = isOrderSameAsSaved() || hasMovedCorrectCard;
+  const submitDisabled = isOrderSameAsSaved() || hasMovedCorrectCard;
+  const resetDisabled = isOrderSameAsSaved();
 
   return (
     <ViewTransition enter="slide-up">
@@ -200,17 +276,61 @@ function TimelineContent() {
               <p className="mt-2 text-muted-foreground">
                 {gameMode.description}
               </p>
+              <div className="mt-4 flex justify-center">
+                <Attempts
+                  maxAttempts={gameMode.maxAttempts}
+                  attemptsLeft={attemptsLeft}
+                  variant="primary"
+                />
+              </div>
             </div>
           </div>
 
           <Card className="border shadow-none bg-muted/5">
             <CardContent>
               <div className="space-y-8">
-                <div className="rounded-none border-2 border-dashed border-border py-4 overflow-x-auto scrollbar-x bg-card/50">
+                <div className="flex justify-center">
+                  <div className="flex items-center gap-2 border p-1 bg-muted/20 h-9">
+                    <button
+                      onClick={() => setSwapMode(false)}
+                      className={cn(
+                        'h-full flex items-center justify-center px-6 text-sm font-bold transition-colors cursor-pointer disabled:pointer-events-none disabled:opacity-50',
+                        swapMode
+                          ? 'text-muted-foreground hover:text-foreground'
+                          : 'bg-indigo-600 text-white hover:bg-indigo-700',
+                      )}
+                      disabled={isGameOver}
+                    >
+                      Shift
+                    </button>
+                    <button
+                      onClick={() => setSwapMode(true)}
+                      className={cn(
+                        'h-full flex items-center justify-center px-6 text-sm font-bold transition-colors cursor-pointer disabled:pointer-events-none disabled:opacity-50',
+                        swapMode
+                          ? 'bg-amber-600 text-white hover:bg-amber-700'
+                          : 'text-muted-foreground hover:text-foreground',
+                      )}
+                      disabled={isGameOver}
+                    >
+                      Swap
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  className={cn(
+                    'rounded-none border-2 border-dashed border-border py-4 overflow-x-auto scrollbar-x transition-colors duration-300',
+                    swapMode
+                      ? 'border-amber-600 dark:border-amber-400'
+                      : 'border-indigo-400 dark:border-indigo-200',
+                  )}
+                >
                   <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
                     onDragEnd={handleDragEnd}
                     onDragCancel={handleDragCancel}
                   >
@@ -229,6 +349,7 @@ function TimelineContent() {
                               let isCorrect: boolean | undefined = undefined;
                               let showDate = false;
                               let isLocked = false;
+                              let isMovedFound = false;
 
                               if (hasSubmitted) {
                                 const wasCorrect = correctGameIds.has(game.id);
@@ -242,6 +363,7 @@ function TimelineContent() {
                                 } else if (wasCorrect && !isInCorrectPosition) {
                                   isCorrect = undefined;
                                   showDate = true;
+                                  isMovedFound = true;
                                 } else {
                                   isCorrect = false;
                                 }
@@ -253,63 +375,40 @@ function TimelineContent() {
                                   game={game}
                                   isCorrect={isCorrect}
                                   showDate={showDate}
+                                  isMovedFound={isMovedFound}
                                   disabled={isLocked || isGameOver}
                                   isGameOver={isGameOver}
+                                  shouldAnimateLayout={
+                                    game.id !== justDroppedId
+                                  }
+                                  isSwapTarget={
+                                    swapMode &&
+                                    !isLocked &&
+                                    activeId !== null &&
+                                    overId === game.id &&
+                                    activeId !== game.id
+                                  }
                                 />
                               );
                             })}
                       </div>
                     </SortableContext>
 
-                    <DragOverlay>
+                    <DragOverlay dropAnimation={null}>
                       {activeGame ? (
                         <TimelineCard
                           game={activeGame}
-                          className="opacity-100 ring-2 ring-primary"
+                          showDate={
+                            hasSubmitted && correctGameIds.has(activeGame.id)
+                          }
+                          isMovedFound={
+                            hasSubmitted && correctGameIds.has(activeGame.id)
+                          }
+                          className="opacity-100 shadow-xl"
                         />
                       ) : null}
                     </DragOverlay>
                   </DndContext>
-                </div>
-
-                <div className="flex flex-col items-center gap-6">
-                  <div className="flex items-center gap-2 border p-1 bg-muted/20">
-                    <button
-                      onClick={() => setSwapMode(false)}
-                      className={cn(
-                        'px-6 py-2 text-sm font-bold transition-colors cursor-pointer',
-                        swapMode
-                          ? 'text-muted-foreground hover:text-foreground'
-                          : 'bg-primary text-primary-foreground',
-                      )}
-                      disabled={isGameOver}
-                    >
-                      Shift
-                    </button>
-                    <button
-                      onClick={() => setSwapMode(true)}
-                      className={cn(
-                        'px-6 py-2 text-sm font-bold transition-colors cursor-pointer',
-                        swapMode
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:text-foreground',
-                      )}
-                      disabled={isGameOver}
-                    >
-                      Swap
-                    </button>
-                  </div>
-
-                  <div className="flex flex-col items-center gap-2">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                      Attempts
-                    </p>
-                    <Attempts
-                      maxAttempts={gameMode.maxAttempts}
-                      attemptsLeft={attemptsLeft}
-                      variant="primary"
-                    />
-                  </div>
                 </div>
 
                 {isGameOver ? null : (
@@ -317,8 +416,8 @@ function TimelineContent() {
                     <Button
                       onClick={handleSubmit}
                       size="lg"
-                      className="cursor-pointer font-bold px-8 py-4"
-                      disabled={buttonsDisabled}
+                      className="cursor-pointer font-bold px-8 text-sm"
+                      disabled={submitDisabled}
                     >
                       Submit
                     </Button>
@@ -326,8 +425,8 @@ function TimelineContent() {
                       onClick={handleResetToSaved}
                       size="lg"
                       variant="outline"
-                      className="cursor-pointer font-bold px-8 py-4"
-                      disabled={buttonsDisabled}
+                      className="cursor-pointer font-bold px-8 text-sm"
+                      disabled={resetDisabled}
                     >
                       Reset
                     </Button>

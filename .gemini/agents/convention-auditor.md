@@ -51,7 +51,7 @@ Document every SonarQube finding with:
 - Severity
 - Proposed fix
 
-### Step 3: Run Linting
+### Step 4: Run Linting
 
 Execute: `nr lint`
 
@@ -62,10 +62,9 @@ Capture all output. For each linting error or warning:
 - Cross-reference with `frontend-conventions.md` or `backend-conventions.md` for the correct pattern
 - Apply the fix
 
-### Step 4: Run Type Checking
+### Step 5: Run Type Checking
 
 Execute: `nr typecheck`
-
 
 Capture all TypeScript errors. For each error:
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState, ViewTransition } from 'react';
+import Image from 'next/image';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useSpecificationsGame } from '@/lib/hooks/use-specifications-game';
 import SpecificationsGrid from '@/components/specifications-grid';
@@ -9,9 +10,10 @@ import DevModeToggle from '@/components/dev-mode-toggle';
 import SpecificationsGameOver from '@/components/specifications-game-over';
 import { Button } from '@workspace/ui/button';
 import { Card, CardContent } from '@workspace/ui/card';
+import { Badge } from '@workspace/ui/badge';
+import { IconX } from '@tabler/icons-react';
 import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 import Attempts from '@/components/attempts';
-import SelectedGameDisplay from '@/components/selected-game-display';
 import HintConfirmationModal from '@/components/hint-confirmation-modal';
 import { ErrorBoundary } from '@/components/error-boundary';
 import SpecificationsSkeleton from '@/components/specifications-skeleton';
@@ -70,22 +72,69 @@ function SpecificationsContent() {
               <p className="mt-2 text-muted-foreground">
                 {gameMode?.description}
               </p>
+              <div className="mt-4 flex justify-center">
+                <Attempts
+                  maxAttempts={gameMode.maxAttempts}
+                  attemptsLeft={attemptsLeft}
+                  variant="primary"
+                />
+              </div>
             </div>
           </div>
 
           <div className="mx-auto max-w-screen-2xl space-y-8">
             {isGameOver ? null : (
-              <div className="mx-auto flex max-w-2xl flex-col gap-4">
-                <div className="flex flex-col gap-3 sm:flex-row items-stretch">
-                  <div className="flex-1">
-                    <GameSearch
-                      selectedGameId={selectedGameId}
-                      wrongGuesses={wrongGuesses}
-                      onSelectGame={handleSelectGame}
-                      disabled={isGameOver}
+              <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border border-dashed bg-muted/10 p-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  {selectedGame?.imageUrl ? (
+                    <Image
+                      src={selectedGame.imageUrl}
+                      alt={selectedGame.name}
+                      className="h-14 w-10 object-cover border shrink-0"
+                      width={48}
+                      height={64}
+                      sizes="10vw"
                     />
-                  </div>
+                  ) : (
+                    <div className="h-14 w-10 bg-muted flex items-center justify-center border shrink-0">
+                      <span className="text-xs text-muted-foreground font-mono">
+                        ?
+                      </span>
+                    </div>
+                  )}
 
+                  <div className="flex-1 min-w-0">
+                    {selectedGame ? (
+                      <Badge
+                        variant="secondary"
+                        className="h-10 rounded-full px-4 py-2 w-full flex items-center justify-between gap-2 max-w-full text-xs font-bold uppercase tracking-tight bg-muted/80 text-foreground border border-border"
+                      >
+                        <span className="truncate flex-1 min-w-0 text-left">
+                          {selectedGame.name}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={clearSelection}
+                          className="size-6 rounded-full cursor-pointer hover:bg-foreground/15 text-muted-foreground hover:text-foreground shrink-0"
+                          aria-label="Clear selection"
+                        >
+                          <IconX className="size-3.5 pointer-events-none" />
+                        </Button>
+                      </Badge>
+                    ) : (
+                      <GameSearch
+                        selectedGameId={selectedGameId}
+                        wrongGuesses={wrongGuesses}
+                        onSelectGame={handleSelectGame}
+                        disabled={isGameOver}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
                   <Button
                     onClick={handleSubmit}
                     disabled={selectedGameId === null || isGameOver}
@@ -94,41 +143,20 @@ function SpecificationsContent() {
                   >
                     Submit
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => setIsHintModalOpen(true)}
+                    disabled={attemptsLeft <= 1 || !!revealedClue}
+                    className="font-bold h-10 cursor-pointer"
+                  >
+                    {revealedClue
+                      ? 'Hint revealed'
+                      : 'Reveal Hint (-1 attempt)'}
+                  </Button>
                 </div>
-
-                <SelectedGameDisplay
-                  selectedGame={selectedGame}
-                  onClearSelection={clearSelection}
-                  className="w-full bg-muted/10 border-dashed"
-                  mode="specifications"
-                />
               </div>
             )}
-
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex flex-col items-center gap-2">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Attempts
-                </p>
-                <Attempts
-                  maxAttempts={gameMode.maxAttempts}
-                  attemptsLeft={attemptsLeft}
-                  variant="primary"
-                />
-              </div>
-
-              {isGameOver ? null : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsHintModalOpen(true)}
-                  disabled={attemptsLeft <= 1 || !!revealedClue}
-                  className="font-bold h-8 cursor-pointer"
-                >
-                  {revealedClue ? 'Hint revealed' : 'Reveal Hint (-1 attempt)'}
-                </Button>
-              )}
-            </div>
 
             <HintConfirmationModal
               isOpen={isHintModalOpen}

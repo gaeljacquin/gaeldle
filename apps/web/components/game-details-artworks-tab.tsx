@@ -31,7 +31,7 @@ export default function GameDetailsArtworksTab({ igdbId }: { igdbId: string }) {
 
   return (
     <div className="space-y-10">
-      {artworks && artworks.length > 0 && (
+      {artworks?.length ? (
         <div className="space-y-6">
           <h2 className="text-md font-black uppercase tracking-widest border-l-4 border-primary pl-4 flex items-center gap-2">
             <IconLayersIntersect aria-hidden="true" size={20} />
@@ -85,7 +85,7 @@ export default function GameDetailsArtworksTab({ igdbId }: { igdbId: string }) {
             ))}
           </div>
         </div>
-      )}
+      ) : null}
 
       {Array.isArray(game.imageGen) && game.imageGen.length > 0 && (
         <div className="space-y-6">

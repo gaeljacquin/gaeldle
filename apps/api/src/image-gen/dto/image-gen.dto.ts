@@ -57,3 +57,13 @@ export class ImageGenStatusResponseDto {
     string | null;
   @ApiProperty({ type: String }) createdAt!: string;
 }
+
+export class DeleteGeneratedImageDto {
+  @ApiProperty({ type: Number }) igdbId!: number;
+  @ApiProperty({ type: String }) artStyle!: string;
+}
+
+export class DeleteGeneratedImageResponseDto {
+  @ApiProperty({ type: Boolean }) success!: boolean;
+  @ApiPropertyOptional({ type: Object }) data?: any;
+}

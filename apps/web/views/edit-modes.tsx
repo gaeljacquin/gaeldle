@@ -71,9 +71,109 @@ type EditFormValues = {
   description: string;
   level: 'easy' | 'medium' | 'hard';
   maxAttempts: number;
+  gradient: string;
   isActive: boolean;
   isCoverArt: boolean;
 };
+
+function hslToHex(h: number, s: number, l: number): string {
+  const light = l / 100;
+  const a = (s * Math.min(light, 1 - light)) / 100;
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = light - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function parseColorToHex(color: string): string {
+  if (!color) return '#000000';
+  const c = color.trim().toLowerCase();
+  if (/^#[0-9a-f]{6}$/i.test(c)) return c;
+  if (/^#[0-9a-f]{3}$/i.test(c)) {
+    return `#${c[1]}${c[1]}${c[2]}${c[2]}${c[3]}${c[3]}`;
+  }
+
+  const hslMatch = c.match(
+    /hsla?\(\s*([\d.]+)(?:deg)?[\s,]+([\d.]+)%?[\s,]+([\d.]+)%?/,
+  );
+  if (hslMatch) {
+    const h = parseFloat(hslMatch[1]);
+    const s = parseFloat(hslMatch[2]);
+    const l = parseFloat(hslMatch[3]);
+    return hslToHex(h, s, l);
+  }
+
+  const rgbMatch = c.match(/rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/);
+  if (rgbMatch) {
+    const r = Math.min(255, Math.max(0, parseInt(rgbMatch[1], 10)));
+    const g = Math.min(255, Math.max(0, parseInt(rgbMatch[2], 10)));
+    const b = Math.min(255, Math.max(0, parseInt(rgbMatch[3], 10)));
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+  }
+
+  return '#000000';
+}
+
+function parseGradientParts(gradientStr: string) {
+  if (!gradientStr || !gradientStr.includes('(')) {
+    return { angle: '135deg', startColor: '', endColor: '' };
+  }
+
+  const content = gradientStr.substring(
+    gradientStr.indexOf('(') + 1,
+    gradientStr.lastIndexOf(')'),
+  );
+
+  const parts: string[] = [];
+  let depth = 0;
+  let current = '';
+
+  for (let i = 0; i < content.length; i++) {
+    const char = content[i];
+    if (char === '(') depth++;
+    else if (char === ')') depth--;
+
+    if (char === ',' && depth === 0) {
+      parts.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  if (current.trim()) {
+    parts.push(current.trim());
+  }
+
+  let angle = '135deg';
+  let colorStops = parts;
+
+  if (parts.length > 0) {
+    const first = parts[0].toLowerCase();
+    if (
+      first.includes('deg') ||
+      first.includes('to ') ||
+      first.includes('turn') ||
+      first.includes('rad')
+    ) {
+      angle = parts[0];
+      colorStops = parts.slice(1);
+    }
+  }
+
+  const cleanStop = (stop: string) => stop.replace(/\s+\d+%\s*$/, '').trim();
+
+  const startColor = colorStops.length > 0 ? cleanStop(colorStops[0]) : '';
+  const endColor =
+    colorStops.length > 1
+      ? cleanStop(colorStops[colorStops.length - 1])
+      : startColor;
+
+  return { angle, startColor, endColor };
+}
 
 interface SortableGameModeItemProps {
   mode: GameModePlus & { id: number };
@@ -81,6 +181,7 @@ interface SortableGameModeItemProps {
   hasEdits: boolean;
   isReorderMode: boolean;
   isOrderConflict: boolean;
+  currentGradient?: string;
   onClick: () => void;
 }
 
@@ -90,6 +191,7 @@ function SortableGameModeItem({
   hasEdits,
   isReorderMode,
   isOrderConflict,
+  currentGradient,
   onClick,
 }: SortableGameModeItemProps) {
   const {
@@ -104,7 +206,7 @@ function SortableGameModeItem({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    background: mode.gradient,
+    background: currentGradient || mode.gradient,
   };
 
   return (
@@ -180,6 +282,22 @@ function SortableGameModeItem({
         )}
       </div>
     </motion.button>
+  );
+}
+
+function EditModesShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col min-h-full bg-background">
+      <DashboardHeader
+        title="Edit Modes"
+        icon={IconPlayerPlay}
+        dashboardBacklinkProps={{
+          text: 'Utilities',
+          href: '/dashboard/utilities',
+        }}
+      />
+      {children}
+    </div>
   );
 }
 
@@ -281,6 +399,7 @@ export default function EditModesView() {
             mode.description === prevMode.description &&
             mode.level === prevMode.level &&
             mode.maxAttempts === prevMode.maxAttempts &&
+            mode.gradient === prevMode.gradient &&
             mode.isActive === prevMode.isActive &&
             mode.isCoverArt === prevMode.isCoverArt;
 
@@ -458,33 +577,27 @@ export default function EditModesView() {
   const getFormValue = <K extends keyof EditFormValues>(
     key: K,
   ): EditFormValues[K] => {
-    if (!selectedMode || !currentSlug) {
-      if (key === 'isActive' || key === 'isCoverArt') {
-        return false as unknown as EditFormValues[K];
-      }
-
-      if (key === 'maxAttempts') {
-        return 3 as unknown as EditFormValues[K];
-      }
-
-      if (key === 'level') {
-        return 'easy' as unknown as EditFormValues[K];
-      }
-
-      return '' as unknown as EditFormValues[K];
-    }
-
-    if (formEdits[currentSlug] && formEdits[currentSlug][key] !== undefined) {
+    if (currentSlug && formEdits[currentSlug]?.[key] !== undefined) {
       return formEdits[currentSlug][key];
     }
-
+    if (!selectedMode) {
+      const defaults: EditFormValues = {
+        slug: '',
+        title: '',
+        description: '',
+        level: 'easy',
+        maxAttempts: 3,
+        gradient: '',
+        isActive: false,
+        isCoverArt: false,
+      };
+      return defaults[key];
+    }
     const val = selectedMode[key as keyof typeof selectedMode];
-
     if (key === 'isActive' || key === 'isCoverArt') {
       return (val === 1) as unknown as EditFormValues[K];
     }
-
-    return val as unknown as EditFormValues[K];
+    return (val ?? '') as unknown as EditFormValues[K];
   };
 
   const setFormValue = <K extends keyof EditFormValues>(
@@ -502,6 +615,7 @@ export default function EditModesView() {
         description: selectedMode.description,
         level: selectedMode.level as 'easy' | 'medium' | 'hard',
         maxAttempts: selectedMode.maxAttempts,
+        gradient: selectedMode.gradient,
         isActive: selectedMode.isActive === 1,
         isCoverArt: selectedMode.isCoverArt === 1,
       };
@@ -539,6 +653,7 @@ export default function EditModesView() {
       edits.description !== mode.description ||
       edits.level !== mode.level ||
       edits.maxAttempts !== mode.maxAttempts ||
+      edits.gradient !== mode.gradient ||
       edits.isActive !== (mode.isActive === 1) ||
       edits.isCoverArt !== (mode.isCoverArt === 1)
     );
@@ -565,6 +680,7 @@ export default function EditModesView() {
         description: edits.description,
         level: edits.level,
         maxAttempts: edits.maxAttempts,
+        gradient: edits.gradient,
         isActive: edits.isActive ? 1 : 0,
         isCoverArt: edits.isCoverArt ? 1 : 0,
       });
@@ -612,15 +728,7 @@ export default function EditModesView() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader
-          title="Edit Modes"
-          icon={IconPlayerPlay}
-          dashboardBacklinkProps={{
-            text: 'Utilities',
-            href: '/dashboard/utilities',
-          }}
-        />
+      <EditModesShell>
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row gap-8">
             <div className="w-full md:w-80 lg:w-96 shrink-0 space-y-4">
@@ -637,21 +745,13 @@ export default function EditModesView() {
             <div className="flex-1 h-96 bg-muted animate-pulse rounded-xl" />
           </div>
         </div>
-      </div>
+      </EditModesShell>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col min-h-full bg-background">
-        <DashboardHeader
-          title="Edit Modes"
-          icon={IconPlayerPlay}
-          dashboardBacklinkProps={{
-            text: 'Utilities',
-            href: '/dashboard/utilities',
-          }}
-        />
+      <EditModesShell>
         <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center h-96 text-destructive gap-3">
           <IconAlertCircle size={40} />
           <h2 className="text-lg font-bold">Failed to load game modes</h2>
@@ -659,23 +759,14 @@ export default function EditModesView() {
             {(error as Error).message}
           </p>
         </div>
-      </div>
+      </EditModesShell>
     );
   }
 
   return (
     <>
       <ViewTransition>
-        <div className="flex flex-col min-h-full bg-background">
-          <DashboardHeader
-            title="Edit Modes"
-            icon={IconPlayerPlay}
-            dashboardBacklinkProps={{
-              text: 'Utilities',
-              href: '/dashboard/utilities',
-            }}
-          />
-
+        <EditModesShell>
           <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col md:flex-row gap-8 items-start">
               <div className="w-full md:w-80 lg:w-96 shrink-0 space-y-4">
@@ -703,6 +794,9 @@ export default function EditModesView() {
                             hasEdits={hasEdits}
                             isReorderMode={isReorderMode}
                             isOrderConflict={isOrderConflict}
+                            currentGradient={
+                              isSelected ? getFormValue('gradient') : undefined
+                            }
                             onClick={() => {
                               setSelectedModeSlug(mode.slug);
                               setIsSlugEditable(false);
@@ -760,11 +854,11 @@ export default function EditModesView() {
                 </DndContext>
               </div>
 
-              <div className="flex-1 w-full space-y-4">
+              <div className="flex-1 min-w-0 w-full space-y-4">
                 {selectedMode ? (
                   <>
-                    <Card className="shadow-lg border-border bg-card">
-                      <form onSubmit={handleSubmit}>
+                    <Card className="shadow-lg border-border bg-card w-full">
+                      <form onSubmit={handleSubmit} className="w-full">
                         <div className="relative">
                           {isReorderMode && (
                             <Item
@@ -784,7 +878,7 @@ export default function EditModesView() {
                           </CardHeader>
                           <CardContent className="space-y-6 mt-3">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <div className="flex flex-col gap-1.5">
+                              <div className="flex flex-col gap-1.5 min-w-0">
                                 <Label
                                   htmlFor="title"
                                   className="text-xs font-semibold"
@@ -805,7 +899,7 @@ export default function EditModesView() {
                                 />
                               </div>
 
-                              <div className="flex flex-col gap-1.5">
+                              <div className="flex flex-col gap-1.5 min-w-0">
                                 <Label
                                   htmlFor="slug"
                                   className="text-xs font-semibold"
@@ -849,7 +943,7 @@ export default function EditModesView() {
                               </div>
                             </div>
 
-                            <div className="flex flex-col gap-1.5">
+                            <div className="flex flex-col gap-1.5 min-w-0">
                               <Label
                                 htmlFor="description"
                                 className="text-xs font-semibold"
@@ -863,14 +957,14 @@ export default function EditModesView() {
                                   setFormValue('description', e.target.value)
                                 }
                                 placeholder="Provide a description of the game mode..."
-                                className="min-h-24 resize-y"
+                                className="min-h-24 resize-y w-full"
                                 required
                                 disabled={isReorderMode}
                               />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                              <div className="flex flex-col gap-2 md:col-span-2">
+                              <div className="flex flex-col gap-2 md:col-span-2 min-w-0">
                                 <Label className="text-xs font-semibold">
                                   Difficulty Level
                                 </Label>
@@ -908,7 +1002,7 @@ export default function EditModesView() {
                               </div>
 
                               {/* Max Attempts */}
-                              <div className="flex flex-col gap-1.5 md:col-span-1">
+                              <div className="flex flex-col gap-1.5 md:col-span-1 min-w-0">
                                 <Label
                                   htmlFor="maxAttempts"
                                   className="text-xs font-semibold"
@@ -927,9 +1021,184 @@ export default function EditModesView() {
                                       parseInt(e.target.value) || 1,
                                     )
                                   }
-                                  className="h-10"
+                                  className="h-10 w-full"
                                   required
                                   disabled={isReorderMode}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Gradient Color Picker */}
+                            <div className="flex flex-col gap-3 min-w-0">
+                              <Label
+                                htmlFor="gradient"
+                                className="text-xs font-semibold"
+                              >
+                                Gradient
+                              </Label>
+                              <div
+                                className="h-10 w-full rounded-xl border border-border shadow-xs relative overflow-hidden flex items-center justify-between px-3 transition-all"
+                                style={{
+                                  background:
+                                    getFormValue('gradient') || 'transparent',
+                                }}
+                              >
+                                <div
+                                  className="absolute inset-0 pointer-events-none"
+                                  style={{
+                                    background: 'var(--gradient-card-overlay)',
+                                  }}
+                                />
+                                <span className="relative z-10 text-[11px] font-mono font-medium text-white drop-shadow-sm truncate min-w-0 flex-1 pr-2">
+                                  {getFormValue('gradient')}
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* Start color */}
+                                <div className="flex flex-col gap-1.5 min-w-0">
+                                  <Label className="text-xs text-muted-foreground font-medium">
+                                    Start Color
+                                  </Label>
+                                  <div className="flex items-center gap-2 min-w-0 w-full">
+                                    <div className="relative size-10 rounded-lg border border-border overflow-hidden shrink-0 shadow-xs">
+                                      <input
+                                        type="color"
+                                        value={parseColorToHex(
+                                          parseGradientParts(
+                                            getFormValue('gradient'),
+                                          ).startColor,
+                                        )}
+                                        disabled={isReorderMode}
+                                        onChange={(e) => {
+                                          const currentGrad =
+                                            getFormValue('gradient');
+                                          const { endColor, angle } =
+                                            parseGradientParts(currentGrad);
+                                          setFormValue(
+                                            'gradient',
+                                            `linear-gradient(${angle}, ${e.target.value} 0%, ${endColor || e.target.value} 100%)`,
+                                          );
+                                        }}
+                                        className="absolute -inset-2 size-14 cursor-pointer disabled:cursor-not-allowed opacity-0 z-10"
+                                      />
+                                      <div
+                                        className="size-full"
+                                        style={{
+                                          backgroundColor: parseColorToHex(
+                                            parseGradientParts(
+                                              getFormValue('gradient'),
+                                            ).startColor,
+                                          ),
+                                        }}
+                                      />
+                                    </div>
+                                    <Input
+                                      type="text"
+                                      value={
+                                        parseGradientParts(
+                                          getFormValue('gradient'),
+                                        ).startColor
+                                      }
+                                      disabled={isReorderMode}
+                                      onChange={(e) => {
+                                        const currentGrad =
+                                          getFormValue('gradient');
+                                        const { endColor, angle } =
+                                          parseGradientParts(currentGrad);
+                                        setFormValue(
+                                          'gradient',
+                                          `linear-gradient(${angle}, ${e.target.value} 0%, ${endColor || e.target.value} 100%)`,
+                                        );
+                                      }}
+                                      className="h-10 font-mono text-xs flex-1 min-w-0 w-full"
+                                      placeholder="#000000"
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* End color */}
+                                <div className="flex flex-col gap-1.5 min-w-0">
+                                  <Label className="text-xs text-muted-foreground font-medium">
+                                    End Color
+                                  </Label>
+                                  <div className="flex items-center gap-2 min-w-0 w-full">
+                                    <div className="relative size-10 rounded-lg border border-border overflow-hidden shrink-0 shadow-xs">
+                                      <input
+                                        type="color"
+                                        value={parseColorToHex(
+                                          parseGradientParts(
+                                            getFormValue('gradient'),
+                                          ).endColor,
+                                        )}
+                                        disabled={isReorderMode}
+                                        onChange={(e) => {
+                                          const currentGrad =
+                                            getFormValue('gradient');
+                                          const { startColor, angle } =
+                                            parseGradientParts(currentGrad);
+                                          setFormValue(
+                                            'gradient',
+                                            `linear-gradient(${angle}, ${startColor || e.target.value} 0%, ${e.target.value} 100%)`,
+                                          );
+                                        }}
+                                        className="absolute -inset-2 size-14 cursor-pointer disabled:cursor-not-allowed opacity-0 z-10"
+                                      />
+                                      <div
+                                        className="size-full"
+                                        style={{
+                                          backgroundColor: parseColorToHex(
+                                            parseGradientParts(
+                                              getFormValue('gradient'),
+                                            ).endColor,
+                                          ),
+                                        }}
+                                      />
+                                    </div>
+                                    <Input
+                                      type="text"
+                                      value={
+                                        parseGradientParts(
+                                          getFormValue('gradient'),
+                                        ).endColor
+                                      }
+                                      disabled={isReorderMode}
+                                      onChange={(e) => {
+                                        const currentGrad =
+                                          getFormValue('gradient');
+                                        const { startColor, angle } =
+                                          parseGradientParts(currentGrad);
+                                        setFormValue(
+                                          'gradient',
+                                          `linear-gradient(${angle}, ${startColor || e.target.value} 0%, ${e.target.value} 100%)`,
+                                        );
+                                      }}
+                                      className="h-10 font-mono text-xs flex-1 min-w-0 w-full"
+                                      placeholder="#000000"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Full CSS Gradient Input */}
+                              <div className="flex flex-col gap-1.5 min-w-0">
+                                <Label
+                                  htmlFor="gradient"
+                                  className="text-xs text-muted-foreground font-medium"
+                                >
+                                  CSS Gradient
+                                </Label>
+                                <Input
+                                  id="gradient"
+                                  type="text"
+                                  value={getFormValue('gradient')}
+                                  disabled={isReorderMode}
+                                  onChange={(e) =>
+                                    setFormValue('gradient', e.target.value)
+                                  }
+                                  className="h-10 font-mono text-xs w-full min-w-0"
+                                  placeholder="linear-gradient(135deg, ...)"
+                                  required
                                 />
                               </div>
                             </div>
@@ -1092,33 +1361,31 @@ export default function EditModesView() {
               </div>
             </div>
           </div>
-        </div>
+        </EditModesShell>
       </ViewTransition>
 
-      {isConfirmOpen && (
-        <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-              <AlertDialogDescription>
-                You have unsaved changes to the game mode order. Do you want to
-                proceed?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="cursor-pointer">
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleConfirmSwitch}
-                className="cursor-pointer bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              >
-                Switch without saving
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes to the game mode order. Do you want to
+              proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmSwitch}
+              className="cursor-pointer bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              Switch without saving
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

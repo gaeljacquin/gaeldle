@@ -97,7 +97,7 @@ export class AiService {
     messages: Array<{ role: string; content: string }>,
     responseFormat?:
       { type: 'json_object' } | { type: 'json_schema'; json_schema: any },
-  ): Promise<string> {
+  ): Promise<any> {
     const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/ai/run/${model}`;
 
     const response = await fetch(url, {

@@ -31,6 +31,8 @@ import {
   GenerateImagesDto,
   GenerateImagesResponseDto,
   ImageGenStatusResponseDto,
+  DeleteGeneratedImageDto,
+  DeleteGeneratedImageResponseDto,
 } from '@/image-gen/dto/image-gen.dto';
 
 @ApiTags('imageGen')
@@ -50,11 +52,33 @@ export class ImageGenRouter {
     @Body() body: GenerateImageDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<GenerateImageResponseDto> {
-    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+    const actorId = req.hexclave?.sub ?? 'unknown';
     const result = await this.imageGenService.generateImage(body, actorId);
 
     if (!result) {
       throw new NotFoundException('Game not found');
+    }
+
+    return result;
+  }
+
+  @Post('delete-image')
+  @UseGuards(HexclaveGuard)
+  @ApiOperation({ summary: 'Delete a generated AI image for a game' })
+  @ApiBody({ type: DeleteGeneratedImageDto })
+  @ApiResponse({ status: 200, type: DeleteGeneratedImageResponseDto })
+  async deleteGeneratedImage(
+    @Body() body: DeleteGeneratedImageDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<DeleteGeneratedImageResponseDto> {
+    const actorId = req.hexclave?.sub ?? 'unknown';
+    const result = await this.imageGenService.deleteGeneratedImage(
+      body,
+      actorId,
+    );
+
+    if (!result) {
+      throw new NotFoundException('Game or generated image not found');
     }
 
     return result;
@@ -69,7 +93,7 @@ export class ImageGenRouter {
     @Body() body: GenerateImagesDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<GenerateImagesResponseDto> {
-    const actorId = req.hexclave?.sub || req.hexclaveAuth?.sub || 'unknown';
+    const actorId = req.hexclave?.sub ?? 'unknown';
     const { imageGenId, gamesQueued } =
       await this.imageGenService.generateImages(body, actorId);
 

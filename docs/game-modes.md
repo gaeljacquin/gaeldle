@@ -7,9 +7,10 @@ Identify the mystery game from its cover art. The image starts fully pixelated a
 **How to play:**
 
 - A pixelated cover image is shown on screen
-- Search for a game by name and select it from the list
+- Search for a game by name and select it from the list, or click **Skip**
 - Submit your guess
-- A wrong guess costs one attempt and sharpens the image
+- A wrong guess or skip costs one attempt and sharpens the image
+- Incorrect guesses matching the target game's franchise or collection show contextual **Franchise** and **Series** badges in history
 - You have **5 attempts** to identify the game
 
 ---
@@ -21,9 +22,10 @@ Similar to Cover Art, but instead of a box cover you are shown in-game artwork o
 **How to play:**
 
 - A pixelated artwork image is shown
-- Search for a game by name and select it from the list
+- Search for a game by name and select it from the list, or click **Skip**
 - Submit your guess
-- A wrong guess costs one attempt and sharpens the image
+- A wrong guess or skip costs one attempt and sharpens the image
+- Incorrect guesses matching the target game's franchise or collection show contextual **Franchise** and **Series** badges in history
 - You have **5 attempts** to identify the game
 
 ---
@@ -35,9 +37,26 @@ An AI-generated image representing the mystery game is shown in full from the st
 **How to play:**
 
 - An AI-generated image is shown on screen (no pixelation)
-- Search for a game by name and select it from the list
+- Search for a game by name and select it from the list, or click **Skip**
 - Submit your guess
-- A wrong guess costs one attempt; the image does not change
+- A wrong guess or skip costs one attempt; the image does not change
+- Incorrect guesses matching the target game's franchise or collection show contextual **Franchise** and **Series** badges in history
+- You have **5 attempts** to identify the game
+
+---
+
+## Clue (Medium)
+
+Identify the mystery game from an AI-generated textual clue. Read the cryptic description carefully to deduce the game.
+
+**How to play:**
+
+- An AI-generated description/clue of the mystery game is displayed
+- Search for a game by name and select it from the list, or click **Skip**
+- Submit your guess
+- A wrong guess or skip costs one attempt
+- You can reveal additional hints (Release Year, Genres, Platforms, Publisher) at the cost of **1 attempt per hint**
+- Incorrect guesses matching the target game's franchise or collection show contextual **Franchise** and **Series** badges in history
 - You have **5 attempts** to identify the game
 
 ---
@@ -50,9 +69,10 @@ Ten games are dealt to you in a random order. Arrange them all into the correct 
 
 - Ten game cards are displayed in a row
 - Drag and drop the cards to rearrange them from oldest to newest
-- Use the **Shift** mode (default) to slide cards into a new position, or switch to **Swap** mode to exchange two cards directly
+- Switch between **Shift** mode (slide cards into position) and **Swap** mode (exchange two card positions directly with hover highlighting)
 - When you are happy with your order, click **Submit**
 - Cards placed in the correct position turn green and become locked; incorrectly placed cards turn red and remain movable
+- If you move a previously placed card, the **Reset** button becomes enabled to revert to the validated state
 - You have **3 attempts** to get the full order right
 - Win by placing all ten games in the correct chronological order
 

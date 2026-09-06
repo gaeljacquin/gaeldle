@@ -22,31 +22,25 @@ export default function SpecificationsSkeleton() {
           <div className="text-center pt-8 md:pt-0">
             <Skeleton className="h-10 w-64 mx-auto" />
             <Skeleton className="h-4 w-80 mx-auto mt-2" />
+            <div className="mt-4 flex gap-2 justify-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="size-3 rounded-none" />
+              ))}
+            </div>
           </div>
         </div>
 
         <div className="mx-auto max-w-screen-2xl space-y-8">
-          {/* Search + Submit input row */}
-          <div className="mx-auto flex max-w-2xl flex-col gap-4">
-            <div className="flex flex-col gap-3 sm:flex-row items-stretch">
+          {/* Unified Search & Selection Card placeholder */}
+          <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border border-dashed bg-muted/10 p-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Skeleton className="h-14 w-10 shrink-0" />
               <Skeleton className="flex-1 h-10" />
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
               <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-44" />
             </div>
-            <Skeleton className="h-14 w-full" />
-          </div>
-
-          {/* Attempts tracker */}
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex flex-col items-center gap-2">
-              <Skeleton className="h-3 w-16" />
-              <div className="flex gap-1.5 justify-center">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="size-8 rounded-full" />
-                ))}
-              </div>
-            </div>
-            {/* Reveal hint button */}
-            <Skeleton className="h-8 w-40" />
           </div>
 
           {/* Specifications table card placeholder */}

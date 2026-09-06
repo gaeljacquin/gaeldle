@@ -76,6 +76,13 @@ export const games = pgTable(
     epic: boolean('epic').default(false),
     gog: boolean('gog').default(false),
     nintendo: boolean('nintendo').default(false),
+    amazon: boolean('amazon').default(false),
+    microsoft: boolean('microsoft').default(false),
+    xbox: boolean('xbox').default(false),
+    steamDemo: boolean('steam_demo').default(false),
+    epicDemo: boolean('epic_demo').default(false),
+    nintendoDemo: boolean('nintendo_demo').default(false),
+    hidden: boolean('hidden').default(false),
   },
   (table) => [index('game_name_idx').on(table.name)],
 );
@@ -108,6 +115,13 @@ export const gameObject = {
   epic: games.epic,
   gog: games.gog,
   nintendo: games.nintendo,
+  amazon: games.amazon,
+  microsoft: games.microsoft,
+  xbox: games.xbox,
+  steamDemo: games.steamDemo,
+  epicDemo: games.epicDemo,
+  nintendoDemo: games.nintendoDemo,
+  hidden: games.hidden,
   createdAt: games.createdAt,
 };
 

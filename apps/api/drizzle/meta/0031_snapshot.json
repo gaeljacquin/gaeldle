@@ -1,6 +1,6 @@
 {
-  "id": "2c92bbf5-3bfb-4341-becf-94932e6a142d",
-  "prevId": "e7039d5f-69f6-4c56-b5e3-17a5f637d73b",
+  "id": "e694bc4b-c029-4abe-a8a8-485e633cea93",
+  "prevId": "937cdac5-62b0-4446-99ce-d242b445d59a",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -183,6 +183,90 @@
         },
         "nintendo": {
           "name": "nintendo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "amazon": {
+          "name": "amazon",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "microsoft": {
+          "name": "microsoft",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "xbox": {
+          "name": "xbox",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "steam_demo": {
+          "name": "steam_demo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "epic_demo": {
+          "name": "epic_demo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "nintendo_demo": {
+          "name": "nintendo_demo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "steam_wishlist": {
+          "name": "steam_wishlist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "epic_wishlist": {
+          "name": "epic_wishlist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "nintendo_wishlist": {
+          "name": "nintendo_wishlist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "xbox_wishlist": {
+          "name": "xbox_wishlist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "humble_bundle_wishlist": {
+          "name": "humble_bundle_wishlist",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
@@ -713,6 +797,90 @@
           "notNull": false,
           "default": false
         },
+        "amazon": {
+          "name": "amazon",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "microsoft": {
+          "name": "microsoft",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "xbox": {
+          "name": "xbox",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "steam_demo": {
+          "name": "steam_demo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "epic_demo": {
+          "name": "epic_demo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "nintendo_demo": {
+          "name": "nintendo_demo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "steam_wishlist": {
+          "name": "steam_wishlist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "epic_wishlist": {
+          "name": "epic_wishlist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "nintendo_wishlist": {
+          "name": "nintendo_wishlist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "xbox_wishlist": {
+          "name": "xbox_wishlist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "humble_bundle_wishlist": {
+          "name": "humble_bundle_wishlist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -721,7 +889,7 @@
           "default": "now()"
         }
       },
-      "definition": "select \"id\", \"igdb_id\", \"name\", \"image_url\", \"ai_image_url\", \"ai_prompt\", \"image_gen\", \"clue\", \"artworks\", \"keywords\", \"franchises\", \"collections\", \"game_engines\", \"game_modes\", \"genres\", \"involved_companies\", \"platforms\", \"player_perspectives\", \"release_dates\", \"themes\", \"first_release_date\", \"summary\", \"storyline\", \"steam\", \"epic\", \"gog\", \"nintendo\", \"created_at\" from \"game\" order by \"game\".\"name\"",
+      "definition": "select \"id\", \"igdb_id\", \"name\", \"image_url\", \"ai_image_url\", \"ai_prompt\", \"image_gen\", \"clue\", \"artworks\", \"keywords\", \"franchises\", \"collections\", \"game_engines\", \"game_modes\", \"genres\", \"involved_companies\", \"platforms\", \"player_perspectives\", \"release_dates\", \"themes\", \"first_release_date\", \"summary\", \"storyline\", \"steam\", \"epic\", \"gog\", \"nintendo\", \"amazon\", \"microsoft\", \"xbox\", \"steam_demo\", \"epic_demo\", \"nintendo_demo\", \"hidden\", \"steam_wishlist\", \"epic_wishlist\", \"nintendo_wishlist\", \"xbox_wishlist\", \"humble_bundle_wishlist\", \"created_at\" from \"game\" order by \"game\".\"name\"",
       "name": "all_games",
       "schema": "public",
       "isExisting": false,

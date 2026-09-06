@@ -218,6 +218,13 @@
       "when": 1788723702889,
       "tag": "0030_violet_lizard",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1788728005320,
+      "tag": "0031_blue_sphinx",
+      "breakpoints": true
     }
   ]
 }

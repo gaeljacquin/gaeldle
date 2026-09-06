@@ -83,6 +83,11 @@ export const games = pgTable(
     epicDemo: boolean('epic_demo').default(false),
     nintendoDemo: boolean('nintendo_demo').default(false),
     hidden: boolean('hidden').default(false),
+    steamWishlist: boolean('steam_wishlist').default(false),
+    epicWishlist: boolean('epic_wishlist').default(false),
+    nintendoWishlist: boolean('nintendo_wishlist').default(false),
+    xboxWishlist: boolean('xbox_wishlist').default(false),
+    humbleBundleWishlist: boolean('humble_bundle_wishlist').default(false),
   },
   (table) => [index('game_name_idx').on(table.name)],
 );
@@ -122,6 +127,11 @@ export const gameObject = {
   epicDemo: games.epicDemo,
   nintendoDemo: games.nintendoDemo,
   hidden: games.hidden,
+  steamWishlist: games.steamWishlist,
+  epicWishlist: games.epicWishlist,
+  nintendoWishlist: games.nintendoWishlist,
+  xboxWishlist: games.xboxWishlist,
+  humbleBundleWishlist: games.humbleBundleWishlist,
   createdAt: games.createdAt,
 };
 

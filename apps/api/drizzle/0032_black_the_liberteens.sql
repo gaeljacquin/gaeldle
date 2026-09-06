@@ -1,0 +1,10 @@
+CREATE INDEX "game_steam_idx" ON "game" USING btree ("id") WHERE "game"."steam" = true;--> statement-breakpoint
+CREATE INDEX "game_amazon_idx" ON "game" USING btree ("id") WHERE "game"."amazon" = true;--> statement-breakpoint
+CREATE INDEX "game_gog_idx" ON "game" USING btree ("id") WHERE "game"."gog" = true;--> statement-breakpoint
+CREATE INDEX "game_epic_idx" ON "game" USING btree ("id") WHERE "game"."epic" = true;--> statement-breakpoint
+CREATE INDEX "game_xbox_idx" ON "game" USING btree ("id") WHERE "game"."xbox" = true;--> statement-breakpoint
+CREATE INDEX "game_nintendo_idx" ON "game" USING btree ("id") WHERE "game"."nintendo" = true;--> statement-breakpoint
+CREATE INDEX "game_steam_wishlist_idx" ON "game" USING btree ("id") WHERE "game"."steam_wishlist" = true;--> statement-breakpoint
+CREATE INDEX "game_epic_wishlist_idx" ON "game" USING btree ("id") WHERE "game"."epic_wishlist" = true;--> statement-breakpoint
+CREATE INDEX "game_nintendo_wishlist_idx" ON "game" USING btree ("id") WHERE "game"."nintendo_wishlist" = true;--> statement-breakpoint
+CREATE INDEX "game_humble_bundle_wishlist_idx" ON "game" USING btree ("id") WHERE "game"."humble_bundle_wishlist" = true;

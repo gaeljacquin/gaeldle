@@ -51,6 +51,28 @@ export class GamesService {
     return game || null;
   }
 
+  async getGamesByFilter(
+    filterColumn:
+      | 'steam'
+      | 'amazon'
+      | 'gog'
+      | 'epic'
+      | 'xbox'
+      | 'nintendo'
+      | 'steamWishlist'
+      | 'epicWishlist'
+      | 'nintendoWishlist'
+      | 'humbleBundleWishlist',
+  ): Promise<Game[]> {
+    const col = games[filterColumn];
+
+    return this.databaseService.db
+      .select(gameObject)
+      .from(games)
+      .where(eq(col, true))
+      .orderBy(games.name);
+  }
+
   private refreshTimeout: NodeJS.Timeout | null = null;
   private pendingRefresh: Promise<void> | null = null;
 

@@ -72,6 +72,11 @@ export class GameResponseDto {
   @ApiProperty({ type: Object }) data!: any;
 }
 
+export class GameListResponseDto {
+  @ApiProperty({ type: Boolean }) success!: boolean;
+  @ApiProperty({ type: [Object] }) data!: any[];
+}
+
 export class DeleteGameDataDto {
   @ApiProperty({ type: Number }) id!: number;
 }

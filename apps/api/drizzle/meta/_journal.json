@@ -225,6 +225,13 @@
       "when": 1788728005320,
       "tag": "0031_blue_sphinx",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1788736770113,
+      "tag": "0032_black_the_liberteens",
+      "breakpoints": true
     }
   ]
 }

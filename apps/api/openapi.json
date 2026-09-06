@@ -195,6 +195,226 @@
         ]
       }
     },
+    "/api/libraries/steam": {
+      "get": {
+        "operationId": "LibrariesRouter_getSteamGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Steam games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/libraries/amazon": {
+      "get": {
+        "operationId": "LibrariesRouter_getAmazonGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Amazon games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/libraries/gog": {
+      "get": {
+        "operationId": "LibrariesRouter_getGogGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all GOG games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/libraries/epic": {
+      "get": {
+        "operationId": "LibrariesRouter_getEpicGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Epic games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/libraries/xbox": {
+      "get": {
+        "operationId": "LibrariesRouter_getXboxGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Xbox games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/libraries/nintendo": {
+      "get": {
+        "operationId": "LibrariesRouter_getNintendoGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Nintendo games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/wishlists/steam": {
+      "get": {
+        "operationId": "WishlistsRouter_getSteamWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Steam wishlist games",
+        "tags": [
+          "wishlists"
+        ]
+      }
+    },
+    "/api/wishlists/epic": {
+      "get": {
+        "operationId": "WishlistsRouter_getEpicWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Epic wishlist games",
+        "tags": [
+          "wishlists"
+        ]
+      }
+    },
+    "/api/wishlists/nintendo": {
+      "get": {
+        "operationId": "WishlistsRouter_getNintendoWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Nintendo wishlist games",
+        "tags": [
+          "wishlists"
+        ]
+      }
+    },
+    "/api/wishlists/humble-bundle": {
+      "get": {
+        "operationId": "WishlistsRouter_getHumbleBundleWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Humble Bundle wishlist games",
+        "tags": [
+          "wishlists"
+        ]
+      }
+    },
     "/api/image-gen/generate-image": {
       "post": {
         "operationId": "ImageGenRouter_generateImage",
@@ -1013,6 +1233,24 @@
           "existsOnIgdb",
           "alreadyInDb",
           "canAdd"
+        ]
+      },
+      "GameListResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "data"
         ]
       },
       "GenerateImageDto": {

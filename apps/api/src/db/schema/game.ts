@@ -89,7 +89,39 @@ export const games = pgTable(
     xboxWishlist: boolean('xbox_wishlist').default(false),
     humbleBundleWishlist: boolean('humble_bundle_wishlist').default(false),
   },
-  (table) => [index('game_name_idx').on(table.name)],
+  (table) => [
+    index('game_name_idx').on(table.name),
+    index('game_steam_idx')
+      .on(table.id)
+      .where(sql`${table.steam} = true`),
+    index('game_amazon_idx')
+      .on(table.id)
+      .where(sql`${table.amazon} = true`),
+    index('game_gog_idx')
+      .on(table.id)
+      .where(sql`${table.gog} = true`),
+    index('game_epic_idx')
+      .on(table.id)
+      .where(sql`${table.epic} = true`),
+    index('game_xbox_idx')
+      .on(table.id)
+      .where(sql`${table.xbox} = true`),
+    index('game_nintendo_idx')
+      .on(table.id)
+      .where(sql`${table.nintendo} = true`),
+    index('game_steam_wishlist_idx')
+      .on(table.id)
+      .where(sql`${table.steamWishlist} = true`),
+    index('game_epic_wishlist_idx')
+      .on(table.id)
+      .where(sql`${table.epicWishlist} = true`),
+    index('game_nintendo_wishlist_idx')
+      .on(table.id)
+      .where(sql`${table.nintendoWishlist} = true`),
+    index('game_humble_bundle_wishlist_idx')
+      .on(table.id)
+      .where(sql`${table.humbleBundleWishlist} = true`),
+  ],
 );
 
 export const gameObject = {

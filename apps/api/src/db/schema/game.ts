@@ -9,6 +9,7 @@ import {
   pgMaterializedView,
   index,
   text,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import { createSelectSchema, createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -71,6 +72,10 @@ export const games = pgTable(
     firstReleaseDate: integer('first_release_date'),
     summary: text('summary'),
     storyline: text('storyline'),
+    steam: boolean('steam').default(false),
+    epic: boolean('epic').default(false),
+    gog: boolean('gog').default(false),
+    nintendo: boolean('nintendo').default(false),
   },
   (table) => [index('game_name_idx').on(table.name)],
 );
@@ -99,6 +104,10 @@ export const gameObject = {
   firstReleaseDate: games.firstReleaseDate,
   summary: games.summary,
   storyline: games.storyline,
+  steam: games.steam,
+  epic: games.epic,
+  gog: games.gog,
+  nintendo: games.nintendo,
   createdAt: games.createdAt,
 };
 

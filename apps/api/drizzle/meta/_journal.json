@@ -204,6 +204,13 @@
       "when": 1788036997590,
       "tag": "0028_reflective_blizzard",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1788713898401,
+      "tag": "0029_tan_dark_phoenix",
+      "breakpoints": true
     }
   ]
 }

@@ -3,14 +3,14 @@ import { persist } from 'zustand/middleware';
 import { type Icon, IconLayoutGrid, IconList } from '@tabler/icons-react';
 import { type NumericString } from '@workspace/api/db';
 
-type SelectOption<T> = { value: T; label: string };
+export type SelectOption<T> = { value: T; label: string };
 
 export type SortField = 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt';
 export type SortDir = 'asc' | 'desc';
 export type SortOption = `${SortField}-${SortDir}`;
 export type ViewOption = 'grid' | 'list';
 
-interface DashboardStore {
+export interface GameListStore {
   sortOption: SortOption;
   setSortOption: (sortOption: SortOption) => void;
   pageSize: NumericString;
@@ -18,6 +18,8 @@ interface DashboardStore {
   view: ViewOption;
   setView: (view: ViewOption) => void;
 }
+
+export type DashboardStore = GameListStore;
 
 export const sortOptions: SelectOption<SortOption>[] = [
   { value: 'name-asc', label: 'Title A → Z' },
@@ -30,25 +32,29 @@ export const sortOptions: SelectOption<SortOption>[] = [
   { value: 'createdAt-desc', label: 'Added ↓' },
 ];
 
-export const pageSizes: NumericString[] = ['10', '25', '50'];
+export const pageSizes: NumericString[] = ['10', '25', '50', '100'];
 
 export const viewOptions: (SelectOption<ViewOption> & { icon: Icon })[] = [
   { value: 'grid', label: 'Grid view', icon: IconLayoutGrid },
   { value: 'list', label: 'List view', icon: IconList },
 ];
 
-export const useDashboardStore = create<DashboardStore>()(
-  persist(
-    (set) => ({
-      sortOption: 'name-asc',
-      setSortOption: (newSortOption) => set({ sortOption: newSortOption }),
-      pageSize: '10',
-      setPageSize: (newPageSize) => set({ pageSize: newPageSize }),
-      view: 'grid',
-      setView: (newView) => set({ view: newView }),
-    }),
-    {
-      name: 'dashboard-settings',
-    },
-  ),
-);
+export function createGameListStore(storageKey: string) {
+  return create<GameListStore>()(
+    persist(
+      (set) => ({
+        sortOption: 'name-asc',
+        setSortOption: (newSortOption) => set({ sortOption: newSortOption }),
+        pageSize: '10',
+        setPageSize: (newPageSize) => set({ pageSize: newPageSize }),
+        view: 'grid',
+        setView: (newView) => set({ view: newView }),
+      }),
+      {
+        name: storageKey,
+      },
+    ),
+  );
+}
+
+export const useDashboardStore = createGameListStore('dashboard-settings');

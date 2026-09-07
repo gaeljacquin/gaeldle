@@ -16,7 +16,7 @@ import {
   IconExternalLink,
   IconBrush,
 } from '@tabler/icons-react';
-import { type ArtworkImage } from '@workspace/api/db';
+import { type ArtworkImage } from '@workspace/db';
 import { artStylesQueryOptions } from '@/lib/services/art-style.service';
 
 export default function GameDetailsArtworksTab({ igdbId }: { igdbId: string }) {

@@ -13,7 +13,7 @@ import {
   GameInsert,
   domainEvents,
   queriedGames,
-} from '@/db/schema';
+} from '@workspace/db';
 import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';

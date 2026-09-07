@@ -5,6 +5,7 @@
 - `apps/api`: NestJS API exposing OpenAPI spec, default port 8080.
 - `apps/web`: Next.js 16 App Router app (TypeScript, Tailwind v4), default port 3000.
 - `packages/api-client`: Generated `openapi-fetch` client typed against `apps/api/openapi.json`. Package name: `@workspace/api-client`.
+- `packages/db`: Drizzle ORM schema, migrations, and database scripts. Package name: `@workspace/db`.
 - `packages/shared`: Shared constants and utility functions consumed across monorepo apps and packages. Package name: `@workspace/shared`.
 - `packages/ui`: Shared UI component library. Package name: `@workspace/ui`.
 - Monorepo: Turborepo workspace with apps under `apps/` and packages under `packages/`.

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { games, gameObject } from '@workspace/api/db';
+import { games, gameObject } from '@workspace/db';
 
 export async function GET() {
   try {

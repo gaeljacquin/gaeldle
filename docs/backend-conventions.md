@@ -19,7 +19,8 @@ apps/api/src/
 │   ├── [resource].controller.ts (or router) # NestJS Controller decorated with @Controller, @ApiTags, @ApiOperation, @ApiBody
 │   └── [resource].service.ts  # Business logic
 ├── db/
-│   └── schema/       # Drizzle schema exported at @workspace/api/db
+│   ├── database.module.ts  # NestJS Database module
+│   └── database.service.ts # NestJS Database service (imports schema from @workspace/db)
 └── scripts/
     └── generate-openapi.ts    # Standalone script booting Nest context to write apps/api/openapi.json
 ```
@@ -54,7 +55,7 @@ A GIN trigram index (`game_name_trgm_idx`) exists on `game.name` (migration `001
 - Extension: `pg_trgm` is pre-installed on all environments (local, dev, prod/Neon). No `CREATE EXTENSION` migration is needed.
 - Ordering: both `GET /api/games` (when `q` is present) and `GET /api/games/search` use `similarity(name, q) DESC` from `pg_trgm` so the most relevant matches appear first.
 - Minimum query length: `GAME_SEARCH_MIN_CHARS = 3` — `pg_trgm` needs at least 3 characters to generate trigrams, so queries shorter than 3 chars return an empty result immediately without hitting the DB.
-- Migration note: the index is created with plain `CREATE INDEX` (not `CONCURRENTLY`) so it can run inside a Drizzle transaction. Drizzle Kit cannot generate this migration automatically — it was written by hand and registered in `apps/api/drizzle/meta/_journal.json`.
+- Migration note: the index is created with plain `CREATE INDEX` (not `CONCURRENTLY`) so it can run inside a Drizzle transaction. Drizzle Kit cannot generate this migration automatically — it was written by hand and registered in `packages/db/drizzle/meta/_journal.json`.
 
 ### DB client
 

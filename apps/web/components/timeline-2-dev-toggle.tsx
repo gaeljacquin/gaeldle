@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
 import { IconPlus, IconMinus } from '@tabler/icons-react';
-import type { Game } from '@workspace/api/db';
+import type { Game } from '@workspace/db';
 import { timelineFormatDate } from '@workspace/shared';
 
 interface Timeline2DevToggleProps {

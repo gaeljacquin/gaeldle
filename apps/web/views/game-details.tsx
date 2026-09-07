@@ -32,7 +32,7 @@ import {
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { IconDeviceGamepad2 } from '@tabler/icons-react';
-import { type ArtStyleValue } from '@workspace/api/db';
+import { type ArtStyleValue } from '@workspace/db';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/tabs';
 import { artStylesQueryOptions } from '@/lib/services/art-style.service';
 import {

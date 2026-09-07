@@ -13,7 +13,7 @@ import {
   IconDeviceGamepad,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
-import type { Game } from '@workspace/api/db';
+import type { Game } from '@workspace/db';
 import type { PaginatedResponse } from '@/lib/services/game.service';
 import type { ViewOption } from '@/lib/stores/game-list-store';
 import Link from 'next/link';

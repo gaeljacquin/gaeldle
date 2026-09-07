@@ -1,9 +1,6 @@
 {
   "name": "@workspace/api",
   "private": true,
-  "exports": {
-    "./db": "./src/db/schema/index.ts"
-  },
   "scripts": {
     "build": "nest build",
     "codegen": "pnpm generate:openapi",
@@ -15,12 +12,8 @@
     "start:prod": "node dist/main",
     "format": "prettier --check .",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "typecheck": "tsc --noEmit",
     "type-check": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "INFISICAL_DISABLE_KEYRING=true ../../scripts/infisical-dev.sh run --path=/api --env=dev -- drizzle-kit migrate || drizzle-kit migrate",
-    "db:push": "INFISICAL_DISABLE_KEYRING=true ../../scripts/infisical-dev.sh run --path=/api --env=dev -- drizzle-kit push || drizzle-kit push",
-    "db:studio": "INFISICAL_DISABLE_KEYRING=true ../../scripts/infisical-dev.sh run --path=/api --env=dev -- drizzle-kit studio || drizzle-kit studio",
-    "db:refresh-all-mat-views": "INFISICAL_DISABLE_KEYRING=true ../../scripts/infisical-dev.sh run --path=/api --env=dev -- ts-node --compiler-options '{\"module\": \"commonjs\"}' src/db/refresh-all-mat-views.ts || ts-node --compiler-options '{\"module\": \"commonjs\"}' src/db/refresh-all-mat-views.ts",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
     "test:cov": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
@@ -38,11 +31,11 @@
     "@nestjs/platform-express": "^11.2.3",
     "@nestjs/swagger": "^11.4.7",
     "@nestjs/terminus": "^11.1.1",
+    "@workspace/db": "workspace:*",
     "@workspace/shared": "workspace:*",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
-    "drizzle-zod": "^0.8.3",
-    "jose": "^6.2.11",
+    "jose": "^6.2.12",
     "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
@@ -62,7 +55,6 @@
     "@types/pg": "^8.23.1",
     "@types/sharp": "^0.32.0",
     "@types/supertest": "^7.2.1",
-    "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
@@ -102,7 +94,7 @@
     "coverageDirectory": "../coverage",
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
-      "^@workspace/api/db$": "<rootDir>/db/schema/index.ts",
+      "^@workspace/db$": "<rootDir>/../../../packages/db/src/schema/index.ts",
       "^@workspace/shared$": "<rootDir>/../../../packages/shared/src/index.ts"
     },
     "extensionsToTreatAsEsm": [

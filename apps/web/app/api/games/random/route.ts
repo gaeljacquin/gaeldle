@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq, notInArray, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { games, gameModeGameObject } from '@workspace/api/db';
+import { games, gameModeGameObject } from '@workspace/db';
 
 export async function GET(request: NextRequest) {
   try {

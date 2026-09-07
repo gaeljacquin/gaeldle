@@ -6,7 +6,7 @@ import {
   getRandomGame,
   randomGameQueryOptions,
 } from '@/lib/services/game.service';
-import type { Game } from '@workspace/api/db';
+import type { Game } from '@workspace/db';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
 import { gameModeSlugQueryOptions } from '@/lib/services/game-mode.service';
 import {

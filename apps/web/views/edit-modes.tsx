@@ -63,7 +63,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { GameModePlus } from '@workspace/api/db';
+import type { GameModePlus } from '@workspace/db';
 
 type EditFormValues = {
   slug: string;

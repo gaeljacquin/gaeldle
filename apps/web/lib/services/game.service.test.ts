@@ -10,7 +10,7 @@ import {
   searchGames,
   getPaginatedGames,
 } from './game.service';
-import { gameObject, gameModeGameObject } from '@workspace/api/db';
+import { gameObject, gameModeGameObject } from '@workspace/db';
 
 const EXCLUDED_FIELDS = [
   'steam',

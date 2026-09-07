@@ -25,7 +25,7 @@ import {
   IconRestore,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
-import type { Game } from '@workspace/api/db';
+import type { Game } from '@workspace/db';
 import { toast } from 'sonner';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { useDashboardStore } from '@/lib/stores/game-list-store';

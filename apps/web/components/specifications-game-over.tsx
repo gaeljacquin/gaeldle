@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { Button } from '@workspace/ui/button';
-import type { Game } from '@workspace/api/db';
+import type { Game } from '@workspace/db';
 
 interface SpecificationsGameOverProps {
   isCorrect: boolean;

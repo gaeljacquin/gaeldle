@@ -91,7 +91,7 @@ The script must:
    ```typescript
    import { Pool } from 'pg';
    import { drizzle } from 'drizzle-orm/node-postgres';
-   import * as schema from '@workspace/api/db';
+   import * as schema from '@workspace/db';
    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
    const db = drizzle(pool, { schema });
    ```

@@ -15,7 +15,7 @@ import {
   artStyles as artStylesView,
   type ArtStyleValue,
   ImageGenStatus,
-} from '@/db/schema';
+} from '@workspace/db';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';

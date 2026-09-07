@@ -7,7 +7,7 @@ import {
   type SQL,
 } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { games, gameObject } from '@workspace/api/db';
+import { games, gameModeGameObject } from '@workspace/api/db';
 
 export async function GET(request: NextRequest) {
   try {
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     // conditions.push(eq(games.igdbId, 119388));
 
     const gamesList = await db
-      .select(gameObject)
+      .select(gameModeGameObject)
       .from(games)
       .where(and(...conditions))
       .orderBy(sql`RANDOM()`)

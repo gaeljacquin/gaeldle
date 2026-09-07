@@ -232,6 +232,13 @@
       "when": 1788736770113,
       "tag": "0032_black_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1788800966771,
+      "tag": "0033_furry_jazinda",
+      "breakpoints": true
     }
   ]
 }

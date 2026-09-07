@@ -121,6 +121,9 @@ export const games = pgTable(
     index('game_humble_bundle_wishlist_idx')
       .on(table.id)
       .where(sql`${table.humbleBundleWishlist} = true`),
+    index('game_hidden_idx')
+      .on(table.id)
+      .where(sql`${table.hidden} = false`),
   ],
 );
 

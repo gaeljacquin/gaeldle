@@ -1,0 +1,1 @@
+CREATE INDEX "game_hidden_idx" ON "game" USING btree ("id") WHERE "game"."hidden" = false;

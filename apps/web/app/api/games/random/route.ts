@@ -1,11 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  and,
-  // eq,
-  notInArray,
-  sql,
-  type SQL,
-} from 'drizzle-orm';
+import { and, eq, notInArray, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { games, gameModeGameObject } from '@workspace/api/db';
 
@@ -25,6 +19,8 @@ export async function GET(request: NextRequest) {
     const mode = (searchParams.get('mode') ?? undefined) as string | undefined;
 
     const conditions: (SQL | undefined)[] = [];
+
+    conditions.push(eq(games.hidden, false));
 
     if (excludeIds.length > 0) {
       conditions.push(notInArray(games.id, excludeIds));

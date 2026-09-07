@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { type Icon, IconLayoutGrid, IconList } from '@tabler/icons-react';
-import { type NumericString } from '@workspace/api/db';
+import { type NumericString } from '@workspace/shared';
 
 export type SelectOption<T> = { value: T; label: string };
 

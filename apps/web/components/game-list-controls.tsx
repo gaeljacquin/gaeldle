@@ -18,7 +18,7 @@ import {
   IconSelector,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
-import { NumericString } from '@workspace/api/db';
+import { NumericString } from '@workspace/shared';
 import {
   type SortOption,
   type ViewOption,

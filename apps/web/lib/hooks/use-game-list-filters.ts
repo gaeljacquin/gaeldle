@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useForm } from '@tanstack/react-form';
 import { useSelector } from '@tanstack/react-store';
-import { type NumericString } from '@workspace/api/db';
+import { type NumericString } from '@workspace/shared';
 import {
   type SortOption,
   type SortField,

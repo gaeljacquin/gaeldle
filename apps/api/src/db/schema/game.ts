@@ -13,7 +13,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createSelectSchema, createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { DotPaths } from './other';
+import { DotPaths } from '@workspace/shared';
 
 export const SyncOperationSchema = z.enum(['created', 'updated']);
 

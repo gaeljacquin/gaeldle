@@ -32,7 +32,7 @@ import {
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { IconDeviceGamepad2 } from '@tabler/icons-react';
-import { type ArtStyleValue } from '@workspace/db';
+import { type ArtStyleValue, type Game } from '@workspace/db';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/tabs';
 import { artStylesQueryOptions } from '@/lib/services/art-style.service';
 import {
@@ -53,13 +53,19 @@ import GameDetailsArtworksTab from '@/components/game-details-artworks-tab';
 
 export default function GameDetails({
   params,
+  initialGame,
 }: {
   params: Promise<{ igdbId: string }>;
+  initialGame?: Game;
 }) {
   const { igdbId } = use(params);
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
+
+  if (initialGame && !queryClient.getQueryData(['game', igdbId])) {
+    queryClient.setQueryData(['game', igdbId], initialGame);
+  }
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [includeStoryline, setIncludeStoryline] = useState(false);
@@ -77,6 +83,7 @@ export default function GameDetails({
   const { data: game } = useQuery({
     queryKey: ['game', igdbId],
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
+    initialData: initialGame,
     refetchInterval: isPolling ? 2000 : false,
   });
 

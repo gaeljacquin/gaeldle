@@ -9,8 +9,9 @@ export async function GET(
 ) {
   const { igdbId: igdbIdStr } = await params;
   const igdbId = Number(igdbIdStr);
+  const MAX_INT32 = 2_147_483_647;
 
-  if (!Number.isInteger(igdbId) || igdbId <= 0) {
+  if (!Number.isInteger(igdbId) || igdbId <= 0 || igdbId > MAX_INT32) {
     return NextResponse.json({ error: 'Invalid igdbId' }, { status: 400 });
   }
 

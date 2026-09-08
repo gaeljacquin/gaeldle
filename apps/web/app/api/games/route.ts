@@ -1,6 +1,6 @@
 // When q is present, ORDER BY uses similarity() from the pg_trgm extension (GIN index: game_name_trgm_idx)
 import { NextRequest, NextResponse } from 'next/server';
-import { and, asc, desc, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { games, gameObject } from '@workspace/db';
 
@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const pageSize = Math.max(1, Number(searchParams.get('pageSize') ?? 10));
     const q = searchParams.get('q') ?? undefined;
     const igdbId = searchParams.get('igdbId') ?? undefined;
+    const filter = searchParams.get('filter') ?? undefined;
 
     const sortBy = (searchParams.get('sortBy') ?? 'name') as
       'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt';
@@ -18,9 +19,38 @@ export async function GET(request: NextRequest) {
     const sortDir = (searchParams.get('sortDir') ?? 'asc') as 'asc' | 'desc';
     const offset = (page - 1) * pageSize;
 
+    const VALID_FILTERS = [
+      'steam',
+      'epic',
+      'gog',
+      'nintendo',
+      'amazon',
+      'microsoft',
+      'xbox',
+      'steamDemo',
+      'epicDemo',
+      'nintendoDemo',
+      'steamWishlist',
+      'epicWishlist',
+      'nintendoWishlist',
+      'xboxWishlist',
+      'humbleBundleWishlist',
+    ] as const;
+
+    type ValidFilter = (typeof VALID_FILTERS)[number];
+
+    const filterCondition = (() => {
+      if (!filter || !VALID_FILTERS.includes(filter as ValidFilter)) {
+        return undefined;
+      }
+      const col = games[filter as ValidFilter];
+      return eq(col, true);
+    })();
+
     const where = and(
       q ? sql`name ILIKE ${'%' + q + '%'}` : undefined,
       igdbId ? sql`igdb_id::text ILIKE ${'%' + igdbId + '%'}` : undefined,
+      filterCondition,
     );
 
     const orderBy = (() => {

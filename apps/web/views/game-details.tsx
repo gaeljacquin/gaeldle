@@ -1,6 +1,13 @@
 'use client';
 
-import { use, useState, useEffect, Suspense, ViewTransition } from 'react';
+import {
+  use,
+  useState,
+  useEffect,
+  useMemo,
+  Suspense,
+  ViewTransition,
+} from 'react';
 import {
   useQuery,
   useSuspenseQuery,
@@ -9,6 +16,7 @@ import {
 } from '@tanstack/react-query';
 import { getGameByIgdbId, deleteGame } from '@/lib/services/game.service';
 import { DashboardHeader } from '@/components/dashboard-header';
+import { getBacklinkDetails } from '@/components/dashboard-backlink';
 import Image from 'next/image';
 import { Button } from '@workspace/ui/button';
 import { Card } from '@workspace/ui/card';
@@ -30,7 +38,7 @@ import {
   DialogTrigger,
 } from '@workspace/ui/dialog';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { IconDeviceGamepad2 } from '@tabler/icons-react';
 import { type ArtStyleValue, type Game } from '@workspace/db';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/tabs';
@@ -60,8 +68,19 @@ export default function GameDetails({
 }) {
   const { igdbId } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
+
+  const from = searchParams.get('from');
+  const backlink = useMemo(() => getBacklinkDetails(from), [from]);
+
+  const getReturnUrl = () => {
+    const returnParams = new URLSearchParams(searchParams.toString());
+    returnParams.delete('from');
+    const search = returnParams.toString();
+    return search ? `${backlink.href}?${search}` : backlink.href;
+  };
 
   if (initialGame && !queryClient.getQueryData(['game', igdbId])) {
     queryClient.setQueryData(['game', igdbId], initialGame);
@@ -135,9 +154,7 @@ export default function GameDetails({
     onSuccess: () => {
       toast.success('Game deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['games'] });
-      const search =
-        typeof window !== 'undefined' ? window.location.search : '';
-      router.push(`/dashboard${search}`);
+      router.push(getReturnUrl());
     },
     onError: (err) => {
       toast.error('Failed to delete game');
@@ -152,7 +169,7 @@ export default function GameDetails({
         <DashboardHeader
           title="Game Not Found"
           icon={IconDeviceGamepad2}
-          dashboardBacklinkProps={{ text: 'Dashboard', href: '/dashboard' }}
+          dashboardBacklinkProps={backlink}
         />
         <div className="container mx-auto px-4 py-10 flex-1">
           <div className="text-center py-20 border border-dashed rounded-none bg-muted/5">
@@ -167,12 +184,10 @@ export default function GameDetails({
               variant="outline"
               className="mt-8 font-black uppercase tracking-widest rounded-none px-8 h-12 cursor-pointer border-2 hover:bg-primary hover:text-primary-foreground transition-all"
               onClick={() => {
-                const search =
-                  typeof window !== 'undefined' ? window.location.search : '';
-                router.push(`/dashboard${search}`);
+                router.push(getReturnUrl());
               }}
             >
-              Return to Dashboard
+              Return to {backlink.text}
             </Button>
           </div>
         </div>
@@ -189,7 +204,7 @@ export default function GameDetails({
           </Suspense>
         }
         icon={IconDeviceGamepad2}
-        dashboardBacklinkProps={{ text: 'Dashboard', href: '/dashboard' }}
+        dashboardBacklinkProps={backlink}
       />
 
       <div className="container mx-auto px-4 py-8 flex-1">

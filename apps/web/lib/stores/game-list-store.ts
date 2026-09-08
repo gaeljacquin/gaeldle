@@ -58,3 +58,30 @@ export function createGameListStore(storageKey: string) {
 }
 
 export const useDashboardStore = createGameListStore('dashboard-settings');
+export const useAmazonLibraryStore = createGameListStore(
+  'amazon-library-settings',
+);
+export const useLibraryGogStore = createGameListStore('library-gog-settings');
+export const useLibraryXboxStore = createGameListStore('library-xbox-settings');
+export const useLibraryNintendoStore = createGameListStore(
+  'library-nintendo-settings',
+);
+export const useSteamLibraryStore = createGameListStore(
+  'steam-library-settings',
+);
+export const useEpicLibraryStore = createGameListStore('epic-library-settings');
+export const useWishlistSteamStore = createGameListStore(
+  'wishlist-steam-settings',
+);
+export const useWishlistEpicStore = createGameListStore(
+  'wishlist-epic-settings',
+);
+export const useWishlistNintendoStore = createGameListStore(
+  'wishlist-nintendo-settings',
+);
+export const useWishlistHumbleBundleStore = createGameListStore(
+  'wishlist-humble-bundle-settings',
+);
+export const useWishlistXboxStore = createGameListStore(
+  'wishlist-xbox-settings',
+);

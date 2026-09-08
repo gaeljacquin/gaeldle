@@ -180,7 +180,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all Xbox games */
+        /** Get all XBOX games */
         get: operations["LibrariesRouter_getXboxGames"];
         put?: never;
         post?: never;
@@ -267,6 +267,23 @@ export interface paths {
         };
         /** Get all Humble Bundle wishlist games */
         get: operations["WishlistsRouter_getHumbleBundleWishlist"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/wishlists/xbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all XBOX wishlist games */
+        get: operations["WishlistsRouter_getXboxWishlist"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1062,6 +1079,25 @@ export interface operations {
         };
     };
     WishlistsRouter_getHumbleBundleWishlist: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameListResponseDto"];
+                };
+            };
+        };
+    };
+    WishlistsRouter_getXboxWishlist: {
         parameters: {
             query?: never;
             header?: never;

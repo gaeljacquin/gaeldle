@@ -26,19 +26,26 @@ import {
   pageSizes,
   viewOptions,
 } from '@/lib/stores/game-list-store';
-import type { UseGameListFiltersReturn } from '@/lib/hooks/use-game-list-filters';
+import type {
+  UseGameListFiltersReturn,
+  GameListFilterFormValues,
+} from '@/lib/hooks/use-game-list-filters';
 
 export interface GameListControlsProps {
   form: UseGameListFiltersReturn['form'];
-  formValues: UseGameListFiltersReturn['formValues'];
+  formValues: GameListFilterFormValues;
   skipDebounceSearchRef: UseGameListFiltersReturn['skipDebounceSearchRef'];
   skipDebounceSearchIgdbIdRef: UseGameListFiltersReturn['skipDebounceSearchIgdbIdRef'];
   clearSearch: UseGameListFiltersReturn['clearSearch'];
+
   totalPages: number;
   totalItems: number;
   view?: ViewOption;
   onViewChange?: (view: ViewOption) => void;
   extraControls?: ReactNode;
+  isFiltered?: boolean;
+  filterControl?: ReactNode;
+  isClearDisabled?: boolean;
 }
 
 export function GameListControls({
@@ -52,6 +59,9 @@ export function GameListControls({
   view,
   onViewChange,
   extraControls,
+  isFiltered,
+  filterControl,
+  isClearDisabled,
 }: GameListControlsProps) {
   const paginationRange = useMemo(() => {
     if (!totalPages) {
@@ -167,17 +177,6 @@ export function GameListControls({
               </div>
             )}
           </form.Field>
-
-          <Button
-            variant="outline"
-            onClick={clearSearch}
-            disabled={!formValues.search && !formValues.searchIgdbId}
-            className="w-full sm:w-auto cursor-pointer gap-2"
-            title="Clear search and filters"
-          >
-            <IconX size={16} />
-            Clear search and filters
-          </Button>
         </div>
 
         <div className="flex items-center gap-4 justify-between sm:justify-end">
@@ -270,6 +269,26 @@ export function GameListControls({
               </DropdownMenu>
             )}
           </form.Field>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+        {filterControl ? <div>{filterControl}</div> : null}
+
+        <div className="flex items-center justify-end sm:ml-auto">
+          <Button
+            variant="outline"
+            onClick={clearSearch}
+            disabled={
+              isClearDisabled ??
+              (!formValues.search && !formValues.searchIgdbId && !isFiltered)
+            }
+            className="w-full sm:w-auto cursor-pointer gap-2"
+            title="Clear search and filters"
+          >
+            <IconX size={16} />
+            Clear search and filters
+          </Button>
         </div>
       </div>
 

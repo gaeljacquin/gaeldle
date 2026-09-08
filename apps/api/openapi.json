@@ -299,7 +299,7 @@
             }
           }
         },
-        "summary": "Get all Xbox games",
+        "summary": "Get all XBOX games",
         "tags": [
           "libraries"
         ]
@@ -410,6 +410,28 @@
           }
         },
         "summary": "Get all Humble Bundle wishlist games",
+        "tags": [
+          "wishlists"
+        ]
+      }
+    },
+    "/api/wishlists/xbox": {
+      "get": {
+        "operationId": "WishlistsRouter_getXboxWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all XBOX wishlist games",
         "tags": [
           "wishlists"
         ]

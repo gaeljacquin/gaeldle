@@ -1,14 +1,28 @@
-import { NextResponse } from 'next/server';
-import { eq } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server';
+import { and, eq, isNull, or } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { games, gameObject } from '@workspace/db';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = request.nextUrl;
+    const filter = searchParams.get('filter'); // 'all' | 'owned' | 'demos'
+
+    let whereClause = or(eq(games.steam, true), eq(games.steamDemo, true));
+
+    if (filter === 'owned') {
+      whereClause = and(
+        eq(games.steam, true),
+        or(eq(games.steamDemo, false), isNull(games.steamDemo)),
+      );
+    } else if (filter === 'demos') {
+      whereClause = eq(games.steamDemo, true);
+    }
+
     const data = await db
       .select(gameObject)
       .from(games)
-      .where(eq(games.steam, true))
+      .where(whereClause)
       .orderBy(games.name);
 
     return NextResponse.json({ success: true, data });

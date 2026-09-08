@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { eq } from 'drizzle-orm';
+import { eq, or } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { games, gameObject } from '@workspace/db';
 
@@ -8,7 +8,7 @@ export async function GET() {
     const data = await db
       .select(gameObject)
       .from(games)
-      .where(eq(games.epic, true))
+      .where(or(eq(games.epic, true), eq(games.epicDemo, true)))
       .orderBy(games.name);
 
     return NextResponse.json({ success: true, data });

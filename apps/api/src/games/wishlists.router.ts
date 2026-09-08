@@ -43,4 +43,12 @@ export class WishlistsRouter {
     );
     return { success: true, data };
   }
+
+  @Get('xbox')
+  @ApiOperation({ summary: 'Get all XBOX wishlist games' })
+  @ApiResponse({ status: 200, type: GameListResponseDto })
+  async getXboxWishlist(): Promise<GameListResponseDto> {
+    const data = await this.gamesService.getGamesByFilter('xboxWishlist');
+    return { success: true, data };
+  }
 }

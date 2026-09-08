@@ -17,12 +17,36 @@ import {
   IconTools,
   IconHealthRecognition,
   IconPlayerPlay,
+  IconLibrary,
+  IconHeart,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { appInfo } from '@/lib/app-info';
 import { Separator } from '@workspace/ui/separator';
 import { gameModesQueryOptions } from '@/lib/services/game-mode.service';
 import { GameModePlus } from '@workspace/db';
+
+interface SidebarNavItem {
+  label: string;
+  href: string;
+}
+
+const LIBRARY_ITEMS: SidebarNavItem[] = [
+  { label: 'Steam', href: '/dashboard/library/steam' },
+  { label: 'Epic', href: '/dashboard/library/epic' },
+  { label: 'GOG', href: '/dashboard/library/gog' },
+  { label: 'Nintendo', href: '/dashboard/library/nintendo' },
+  { label: 'Amazon', href: '/dashboard/library/amazon' },
+  { label: 'XBOX', href: '/dashboard/library/xbox' },
+];
+
+const WISHLIST_ITEMS: SidebarNavItem[] = [
+  { label: 'Steam', href: '/dashboard/wishlist/steam' },
+  { label: 'Epic', href: '/dashboard/wishlist/epic' },
+  { label: 'Nintendo', href: '/dashboard/wishlist/nintendo' },
+  { label: 'XBOX', href: '/dashboard/wishlist/xbox' },
+  { label: 'Humble Bundle', href: '/dashboard/wishlist/humble-bundle' },
+];
 
 interface SidebarLinkProps {
   href: string;
@@ -143,6 +167,76 @@ function SidebarGamesSection({
   );
 }
 
+interface SidebarMenuSectionProps {
+  title: string;
+  icon: ElementType;
+  items: SidebarNavItem[];
+  isCollapsed: boolean;
+  isExpanded: boolean;
+  onToggle: () => void;
+  pathname: string;
+}
+
+function SidebarMenuSection({
+  title,
+  icon: Icon,
+  items,
+  isCollapsed,
+  isExpanded,
+  onToggle,
+  pathname,
+}: SidebarMenuSectionProps) {
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        className={cn(
+          'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer',
+          isCollapsed ? 'justify-center px-0' : null,
+        )}
+        title={isCollapsed ? title : undefined}
+      >
+        <Icon size={20} />
+        {isCollapsed ? null : (
+          <>
+            <span>{title}</span>
+            <span className="ml-auto">
+              {isExpanded ? (
+                <IconChevronDown size={16} />
+              ) : (
+                <IconChevronRight size={16} />
+              )}
+            </span>
+          </>
+        )}
+      </button>
+      {isExpanded && (
+        <div className={cn('mt-1 space-y-1', isCollapsed ? null : 'ml-4')}>
+          {items.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                  isCollapsed ? 'justify-center px-0' : null,
+                  isActive
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
+                    : 'text-muted-foreground',
+                )}
+                title={isCollapsed ? item.label : undefined}
+              >
+                {isCollapsed ? null : <span>{item.label}</span>}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface SidebarHeaderProps {
   isCollapsed: boolean;
   onToggle: () => void;
@@ -242,12 +336,20 @@ export function Sidebar() {
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isGamesExpanded, setIsGamesExpanded] = useState(false);
+  const [isLibraryExpanded, setIsLibraryExpanded] = useState(() =>
+    pathname.startsWith('/dashboard/library'),
+  );
+  const [isWishlistExpanded, setIsWishlistExpanded] = useState(() =>
+    pathname.startsWith('/dashboard/wishlist'),
+  );
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => {
       const nextCollapsed = !prev;
       if (nextCollapsed) {
         setIsGamesExpanded(false);
+        setIsLibraryExpanded(false);
+        setIsWishlistExpanded(false);
       }
       return nextCollapsed;
     });
@@ -262,6 +364,24 @@ export function Sidebar() {
     }
   };
 
+  const toggleLibrary = () => {
+    if (isCollapsed) {
+      setIsCollapsed(false);
+      setIsLibraryExpanded(true);
+    } else {
+      setIsLibraryExpanded((prev) => !prev);
+    }
+  };
+
+  const toggleWishlist = () => {
+    if (isCollapsed) {
+      setIsCollapsed(false);
+      setIsWishlistExpanded(true);
+    } else {
+      setIsWishlistExpanded((prev) => !prev);
+    }
+  };
+
   return (
     <aside
       className={cn(
@@ -271,13 +391,33 @@ export function Sidebar() {
     >
       <SidebarHeader isCollapsed={isCollapsed} onToggle={toggleSidebar} />
 
-      <nav className="flex-1 space-y-1 p-2">
+      <nav className="flex-1 space-y-1 p-2 overflow-y-auto">
         <SidebarLink
           href="/dashboard"
           icon={IconDashboard}
           label="Dashboard"
           isCollapsed={isCollapsed}
           isActive={pathname === '/dashboard'}
+        />
+
+        <SidebarMenuSection
+          title="Library"
+          icon={IconLibrary}
+          items={LIBRARY_ITEMS}
+          isCollapsed={isCollapsed}
+          isExpanded={isLibraryExpanded}
+          onToggle={toggleLibrary}
+          pathname={pathname}
+        />
+
+        <SidebarMenuSection
+          title="Wishlist"
+          icon={IconHeart}
+          items={WISHLIST_ITEMS}
+          isCollapsed={isCollapsed}
+          isExpanded={isWishlistExpanded}
+          onToggle={toggleWishlist}
+          pathname={pathname}
         />
 
         <SidebarLink

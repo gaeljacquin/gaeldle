@@ -1,7 +1,7 @@
 'use client';
 
 import { ViewTransition } from 'react';
-import type { ReadonlyURLSearchParams } from 'next/navigation';
+import { usePathname, type ReadonlyURLSearchParams } from 'next/navigation';
 import { Timeline2Card } from '@/components/timeline-2-card';
 import { Timeline2CardSkeleton } from '@/components/timeline-2-card-skeleton';
 import { Button } from '@workspace/ui/button';
@@ -30,6 +30,7 @@ export interface GameListContentProps {
   toggleSelect?: (id: number) => void;
   searchParams?: URLSearchParams | ReadonlyURLSearchParams;
   onClearSearch?: () => void;
+  emptyMessage?: string;
 }
 
 const EMPTY_SET = new Set<number>();
@@ -46,7 +47,10 @@ export function GameListContent({
   toggleSelect = () => {},
   searchParams,
   onClearSearch,
+  emptyMessage = 'The library is currently empty.',
 }: GameListContentProps) {
+  const pathname = usePathname();
+
   if (!data || isLoading) {
     if (view === 'list') {
       return (
@@ -116,7 +120,7 @@ export function GameListContent({
         <p className="text-muted-foreground max-w-xs mx-auto">
           {formSearch || formSearchIgdbId
             ? `We couldn't find any games matching your search criteria.`
-            : 'The library is currently empty.'}
+            : (emptyMessage ?? 'The library is currently empty.')}
         </p>
         {(formSearch || formSearchIgdbId) && onClearSearch && (
           <Button variant="link" onClick={onClearSearch} className="mt-2">
@@ -127,10 +131,11 @@ export function GameListContent({
     );
   }
 
-  const querySuffix =
-    searchParams && searchParams.toString()
-      ? `?${searchParams.toString()}`
-      : '';
+  const gameParams = new URLSearchParams(searchParams?.toString() || '');
+  if (pathname && pathname !== '/dashboard') {
+    gameParams.set('from', pathname);
+  }
+  const querySuffix = gameParams.toString() ? `?${gameParams.toString()}` : '';
 
   return (
     <div className="space-y-8">

@@ -43,7 +43,7 @@ export class LibrariesRouter {
   }
 
   @Get('xbox')
-  @ApiOperation({ summary: 'Get all Xbox games' })
+  @ApiOperation({ summary: 'Get all XBOX games' })
   @ApiResponse({ status: 200, type: GameListResponseDto })
   async getXboxGames(): Promise<GameListResponseDto> {
     const data = await this.gamesService.getGamesByFilter('xbox');

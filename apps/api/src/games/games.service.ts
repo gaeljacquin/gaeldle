@@ -62,6 +62,7 @@ export class GamesService {
       | 'steamWishlist'
       | 'epicWishlist'
       | 'nintendoWishlist'
+      | 'xboxWishlist'
       | 'humbleBundleWishlist',
   ): Promise<Game[]> {
     const col = games[filterColumn];

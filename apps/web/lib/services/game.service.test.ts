@@ -9,6 +9,11 @@ import {
   getRandomGames,
   searchGames,
   getPaginatedGames,
+  getPaginatedAmazonGames,
+  getPaginatedGogGames,
+  getNintendoGames,
+  getPaginatedNintendoWishlistGames,
+  getPaginatedEpicWishlistGames,
 } from './game.service';
 import { gameObject, gameModeGameObject } from '@workspace/db';
 
@@ -106,6 +111,46 @@ describe('game fetching in game modes vs admin', () => {
               }),
           });
         }
+        if (url.startsWith('/api/private/libraries/amazon?')) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                data: [{ ...mockGameModeGame, amazon: true }],
+                meta: { total: 1, page: 1, pageSize: 10 },
+              }),
+          });
+        }
+        if (url.startsWith('/api/private/libraries/gog?')) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                data: [{ ...mockGameModeGame, gog: true }],
+                meta: { total: 1, page: 1, pageSize: 10 },
+              }),
+          });
+        }
+        if (url.startsWith('/api/private/wishlists/nintendo?')) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                data: [{ ...mockGameModeGame, nintendoWishlist: true }],
+                meta: { total: 1, page: 1, pageSize: 10 },
+              }),
+          });
+        }
+        if (url.startsWith('/api/private/wishlists/epic?')) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                data: [{ ...mockGameModeGame, epicWishlist: true }],
+                meta: { total: 1, page: 1, pageSize: 10 },
+              }),
+          });
+        }
         return Promise.reject(new Error('Unknown fetch URL: ' + url));
       }),
     );
@@ -149,5 +194,99 @@ describe('game fetching in game modes vs admin', () => {
     const response = await getPaginatedGames(1, 10);
 
     expect(response.data[0]).toHaveProperty('nintendo', true);
+  });
+
+  it('should allow fetching paginated amazon games with amazon field', async () => {
+    const response = await getPaginatedAmazonGames(1, 10);
+
+    expect(response.data[0]).toHaveProperty('amazon', true);
+    expect(response.meta.total).toBe(1);
+  });
+
+  it('should fetch paginated GOG library games with gog property', async () => {
+    const response = await getPaginatedGogGames(1, 10);
+
+    expect(response.data[0]).toHaveProperty('gog', true);
+    expect(response.meta.total).toBe(1);
+  });
+
+  it('should fetch Nintendo library games with default parameters', async () => {
+    let requestedUrl = '';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((url: string) => {
+        requestedUrl = url;
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: [
+                { ...mockGameModeGame, nintendo: true, nintendoDemo: false },
+              ],
+              meta: { total: 1, page: 1, pageSize: 10 },
+            }),
+        });
+      }),
+    );
+
+    const response = await getNintendoGames();
+
+    expect(requestedUrl).toContain('/api/private/libraries/nintendo');
+    expect(requestedUrl).toContain('page=1');
+    expect(requestedUrl).toContain('pageSize=10');
+    expect(requestedUrl).toContain('filter=all');
+    expect(response.data).toHaveLength(1);
+    expect(response.data[0].nintendo).toBe(true);
+  });
+
+  it('should fetch Nintendo library games with custom filter and query', async () => {
+    let requestedUrl = '';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((url: string) => {
+        requestedUrl = url;
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: [
+                { ...mockGameModeGame, nintendo: true, nintendoDemo: true },
+              ],
+              meta: { total: 1, page: 2, pageSize: 25 },
+            }),
+        });
+      }),
+    );
+
+    const response = await getNintendoGames(
+      2,
+      25,
+      'Zelda',
+      'firstReleaseDate',
+      'desc',
+      '123',
+      'demos',
+    );
+
+    expect(requestedUrl).toContain('page=2');
+    expect(requestedUrl).toContain('pageSize=25');
+    expect(requestedUrl).toContain('q=Zelda');
+    expect(requestedUrl).toContain('sortBy=firstReleaseDate');
+    expect(requestedUrl).toContain('sortDir=desc');
+    expect(requestedUrl).toContain('igdbId=123');
+    expect(requestedUrl).toContain('filter=demos');
+    expect(response.data[0].nintendoDemo).toBe(true);
+  });
+
+  it('should allow fetching paginated nintendo wishlist games', async () => {
+    const response = await getPaginatedNintendoWishlistGames(1, 10);
+
+    expect(response.data[0]).toHaveProperty('nintendoWishlist', true);
+  });
+
+  it('should allow fetching paginated epic wishlist games', async () => {
+    const response = await getPaginatedEpicWishlistGames(1, 10);
+
+    expect(response.data[0]).toHaveProperty('epicWishlist', true);
   });
 });

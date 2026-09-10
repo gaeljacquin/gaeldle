@@ -11,6 +11,7 @@ import { GameListContent } from '@/components/game-list-content';
 import { steamGamesQueryOptions } from '@/lib/services/game.service';
 import { useSteamLibraryStore } from '@/lib/stores/game-list-store';
 import { useSteamLibraryFilters } from '@/lib/hooks/use-steam-library-filters';
+import { calcTotalPages } from '@/lib/utils/pagination';
 
 export function LibrarySteamView() {
   const store = useSteamLibraryStore();
@@ -100,7 +101,7 @@ export function LibrarySteamView() {
 
   // 4. Paginate
   const pageSize = Number.parseInt(filters.formValues.pageSize, 10);
-  const totalPages = Math.ceil(sortedGames.length / pageSize);
+  const totalPages = calcTotalPages(sortedGames.length, pageSize);
   const currentPage = Math.max(1, filters.formValues.page);
 
   const paginatedGames = useMemo(() => {

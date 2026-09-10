@@ -57,31 +57,48 @@ export function createGameListStore(storageKey: string) {
   );
 }
 
-export const useDashboardStore = createGameListStore('dashboard-settings');
-export const useAmazonLibraryStore = createGameListStore(
-  'amazon-library-settings',
+export const GAME_LIST_STORAGE_KEYS = {
+  dashboard: 'dashboard-settings',
+  'library-amazon': 'amazon-library-settings',
+  'library-gog': 'library-gog-settings',
+  'library-xbox': 'library-xbox-settings',
+  'library-nintendo': 'library-nintendo-settings',
+  'library-steam': 'steam-library-settings',
+  'library-epic': 'epic-library-settings',
+  'wishlist-steam': 'wishlist-steam-settings',
+  'wishlist-epic': 'wishlist-epic-settings',
+  'wishlist-nintendo': 'wishlist-nintendo-settings',
+  'wishlist-humble-bundle': 'wishlist-humble-bundle-settings',
+  'wishlist-xbox': 'wishlist-xbox-settings',
+} as const;
+
+export type GameListStoreKey = keyof typeof GAME_LIST_STORAGE_KEYS;
+
+const storeRegistry = new Map<
+  GameListStoreKey,
+  ReturnType<typeof createGameListStore>
+>();
+
+export function getGameListStore(key: GameListStoreKey) {
+  let store = storeRegistry.get(key);
+  if (!store) {
+    store = createGameListStore(GAME_LIST_STORAGE_KEYS[key]);
+    storeRegistry.set(key, store);
+  }
+  return store;
+}
+
+export const useDashboardStore = getGameListStore('dashboard');
+export const useAmazonLibraryStore = getGameListStore('library-amazon');
+export const useLibraryGogStore = getGameListStore('library-gog');
+export const useLibraryXboxStore = getGameListStore('library-xbox');
+export const useLibraryNintendoStore = getGameListStore('library-nintendo');
+export const useSteamLibraryStore = getGameListStore('library-steam');
+export const useEpicLibraryStore = getGameListStore('library-epic');
+export const useWishlistSteamStore = getGameListStore('wishlist-steam');
+export const useWishlistEpicStore = getGameListStore('wishlist-epic');
+export const useWishlistNintendoStore = getGameListStore('wishlist-nintendo');
+export const useWishlistHumbleBundleStore = getGameListStore(
+  'wishlist-humble-bundle',
 );
-export const useLibraryGogStore = createGameListStore('library-gog-settings');
-export const useLibraryXboxStore = createGameListStore('library-xbox-settings');
-export const useLibraryNintendoStore = createGameListStore(
-  'library-nintendo-settings',
-);
-export const useSteamLibraryStore = createGameListStore(
-  'steam-library-settings',
-);
-export const useEpicLibraryStore = createGameListStore('epic-library-settings');
-export const useWishlistSteamStore = createGameListStore(
-  'wishlist-steam-settings',
-);
-export const useWishlistEpicStore = createGameListStore(
-  'wishlist-epic-settings',
-);
-export const useWishlistNintendoStore = createGameListStore(
-  'wishlist-nintendo-settings',
-);
-export const useWishlistHumbleBundleStore = createGameListStore(
-  'wishlist-humble-bundle-settings',
-);
-export const useWishlistXboxStore = createGameListStore(
-  'wishlist-xbox-settings',
-);
+export const useWishlistXboxStore = getGameListStore('wishlist-xbox');

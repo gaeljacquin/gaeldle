@@ -1,118 +1,45 @@
 'use client';
 
-import { useState, ViewTransition } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  getPaginatedGogGames,
-  deleteBulkGames,
-  type PaginatedResponse,
-} from '@/lib/services/game.service';
-import { Button } from '@workspace/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@workspace/ui/alert-dialog';
-import {
-  IconChecklist,
-  IconTrash,
-  IconLibrary,
-  IconRestore,
-} from '@tabler/icons-react';
+import { ViewTransition } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { paginatedGogGamesQueryOptions } from '@/lib/services/game.service';
+import { IconLibrary } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
-import type { Game } from '@workspace/db';
-import { toast } from 'sonner';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { useLibraryGogStore } from '@/lib/stores/game-list-store';
 import { useGameListFilters } from '@/lib/hooks/use-game-list-filters';
+import { useBulkDelete } from '@/lib/hooks/use-bulk-delete';
+import { BulkDeleteControls } from '@/components/bulk-delete-controls';
 import { GameListControls } from '@/components/game-list-controls';
 import { GameListContent } from '@/components/game-list-content';
+import { calcTotalPages } from '@/lib/utils/pagination';
 
 export function LibraryGogView() {
-  const [isMultiSelect, setIsMultiSelect] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
   const store = useLibraryGogStore();
   const { view, setView } = store;
   const filters = useGameListFilters({ store });
-  const queryClient = useQueryClient();
 
-  const deleteMutation = useMutation({
-    mutationFn: (ids: number[]) => deleteBulkGames(ids),
-    onSuccess: () => {
-      const successMessage = `${selectedIds.size} ${selectedIds.size === 1 ? 'game' : 'games'} deleted successfully`;
-
-      queryClient.invalidateQueries({ queryKey: ['gog-games'] });
-      queryClient.invalidateQueries({ queryKey: ['games'] });
-      toast.success(successMessage);
-      setSelectedIds(new Set());
-      setIsMultiSelect(false);
-    },
-    onError: () => {
-      toast.error('An error occurred while deleting games');
-    },
+  const bulkDelete = useBulkDelete({
+    queryKeysToInvalidate: ['gog-games', 'games'],
+    locationName: 'your library',
   });
 
-  const toggleSelect = (id: number) => {
-    const newSelected = new Set(selectedIds);
-
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-
-    setSelectedIds(newSelected);
-  };
-
-  const handleBulkDelete = () => {
-    if (selectedIds.size === 0) {
-      return;
-    }
-
-    deleteMutation.mutate(Array.from(selectedIds));
-    setIsDeleteDialogOpen(false);
-  };
-
-  const clearSelection = () => {
-    setSelectedIds(new Set());
-  };
-
-  const { data, isLoading, isPlaceholderData, isFetching } = useQuery<
-    PaginatedResponse<Game>
-  >({
-    queryKey: [
-      'gog-games',
+  const { data, isLoading, isPlaceholderData, isFetching } = useQuery({
+    ...paginatedGogGamesQueryOptions(
       filters.formValues.page,
-      filters.formValues.pageSize,
+      Number.parseInt(filters.formValues.pageSize, 10),
       filters.debouncedSearch,
-      filters.debouncedSearchIgdbId,
       filters.sortBy,
       filters.sortDir,
-    ],
-    queryFn: () =>
-      getPaginatedGogGames(
-        filters.formValues.page,
-        Number.parseInt(filters.formValues.pageSize, 10),
-        filters.debouncedSearch,
-        filters.sortBy,
-        filters.sortDir,
-        filters.debouncedSearchIgdbId,
-      ),
+      filters.debouncedSearchIgdbId,
+    ),
     placeholderData: (previousData) => previousData,
   });
 
-  const totalPages = data?.meta?.total
-    ? Math.ceil(
-        data.meta.total / Number.parseInt(filters.formValues.pageSize, 10),
-      )
-    : 0;
+  const totalPages = calcTotalPages(
+    data?.meta?.total,
+    filters.formValues.pageSize,
+  );
 
   return (
     <ViewTransition>
@@ -131,94 +58,7 @@ export function LibraryGogView() {
               totalItems={data?.meta?.total ?? 0}
               view={view}
               onViewChange={setView}
-              extraControls={
-                <div className="flex flex-row-reverse md:flex-row items-center gap-4">
-                  <Button
-                    variant={isMultiSelect ? 'default' : 'outline'}
-                    size="icon-lg"
-                    onClick={() => {
-                      setIsMultiSelect(!isMultiSelect);
-                      if (isMultiSelect) clearSelection();
-                    }}
-                    title="Multi-select"
-                    className={cn(
-                      'cursor-pointer size-10',
-                      isMultiSelect && 'bg-primary text-primary-foreground',
-                    )}
-                  >
-                    <IconChecklist size={22} />
-                  </Button>
-
-                  {isMultiSelect ? (
-                    <div className="flex items-center gap-4 animate-in fade-in md:slide-in-from-left-4 slide-in-from-right-4 duration-300">
-                      <AlertDialog
-                        open={isDeleteDialogOpen}
-                        onOpenChange={setIsDeleteDialogOpen}
-                      >
-                        <Button
-                          variant="default"
-                          size="sm"
-                          disabled={
-                            selectedIds.size === 0 || deleteMutation.isPending
-                          }
-                          onClick={() => setIsDeleteDialogOpen(true)}
-                          className={cn(
-                            'h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90',
-                            selectedIds.size === 0 || deleteMutation.isPending
-                              ? 'cursor-not-allowed'
-                              : 'cursor-pointer',
-                          )}
-                        >
-                          <IconTrash size={16} className="mr-2" />
-                          Delete ({selectedIds.size})
-                        </Button>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Are you absolutely sure?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will
-                              permanently delete {selectedIds.size}{' '}
-                              {selectedIds.size === 1 ? 'game' : 'games'} from
-                              your library.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="cursor-pointer">
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              variant="destructive"
-                              onClick={handleBulkDelete}
-                              className="cursor-pointer"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={clearSelection}
-                        disabled={selectedIds.size === 0}
-                        className={cn(
-                          'h-10',
-                          selectedIds.size === 0 || deleteMutation.isPending
-                            ? 'cursor-not-allowed'
-                            : 'cursor-pointer',
-                        )}
-                      >
-                        <span className="flex flex-row gap-2">
-                          <IconRestore size={16} />
-                          Clear
-                        </span>
-                      </Button>
-                    </div>
-                  ) : null}
-                </div>
-              }
+              extraControls={<BulkDeleteControls bulkDelete={bulkDelete} />}
             />
           }
         />
@@ -240,9 +80,9 @@ export function LibraryGogView() {
             parsedPageSize={Number.parseInt(filters.formValues.pageSize, 10)}
             formSearch={filters.formValues.search}
             formSearchIgdbId={filters.formValues.searchIgdbId}
-            isMultiSelect={isMultiSelect}
-            selectedIds={selectedIds}
-            toggleSelect={toggleSelect}
+            isMultiSelect={bulkDelete.isMultiSelect}
+            selectedIds={bulkDelete.selectedIds}
+            toggleSelect={bulkDelete.toggleSelect}
             searchParams={filters.searchParams}
             onClearSearch={filters.clearSearch}
           />

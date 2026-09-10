@@ -2,53 +2,37 @@
 
 import { ViewTransition } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  getXboxWishlistGames,
-  type PaginatedResponse,
-} from '@/lib/services/game.service';
+import { paginatedXboxWishlistGamesQueryOptions } from '@/lib/services/game.service';
 import { IconBrandXbox } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
-import type { Game } from '@workspace/db';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { useWishlistXboxStore } from '@/lib/stores/game-list-store';
 import { useGameListFilters } from '@/lib/hooks/use-game-list-filters';
 import { GameListControls } from '@/components/game-list-controls';
 import { GameListContent } from '@/components/game-list-content';
+import { calcTotalPages } from '@/lib/utils/pagination';
 
 export function WishlistXboxView() {
   const store = useWishlistXboxStore();
   const { view, setView } = store;
   const filters = useGameListFilters({ store });
 
-  const { data, isLoading, isPlaceholderData, isFetching } = useQuery<
-    PaginatedResponse<Game>
-  >({
-    queryKey: [
-      'wishlist-xbox',
+  const { data, isLoading, isPlaceholderData, isFetching } = useQuery({
+    ...paginatedXboxWishlistGamesQueryOptions(
       filters.formValues.page,
-      filters.formValues.pageSize,
+      Number.parseInt(filters.formValues.pageSize, 10),
       filters.debouncedSearch,
-      filters.debouncedSearchIgdbId,
       filters.sortBy,
       filters.sortDir,
-    ],
-    queryFn: () =>
-      getXboxWishlistGames(
-        filters.formValues.page,
-        Number.parseInt(filters.formValues.pageSize, 10),
-        filters.debouncedSearch,
-        filters.sortBy,
-        filters.sortDir,
-        filters.debouncedSearchIgdbId,
-      ),
+      filters.debouncedSearchIgdbId,
+    ),
     placeholderData: (previousData) => previousData,
   });
 
-  const totalPages = data?.meta?.total
-    ? Math.ceil(
-        data.meta.total / Number.parseInt(filters.formValues.pageSize, 10),
-      )
-    : 0;
+  const totalPages = calcTotalPages(
+    data?.meta?.total,
+    filters.formValues.pageSize,
+  );
 
   return (
     <ViewTransition>

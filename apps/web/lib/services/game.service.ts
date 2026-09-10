@@ -53,220 +53,238 @@ export interface PaginatedResponse<T> {
   };
 }
 
+export type SortField = 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt';
+
+export function buildPaginatedGamesUrl(
+  endpoint: string,
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+  extraParams?: Record<string, string | undefined>,
+): string {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+    sortBy,
+    sortDir,
+  });
+
+  if (query) {
+    params.set('q', query);
+  }
+
+  if (igdbId) {
+    params.set('igdbId', igdbId);
+  }
+
+  if (extraParams) {
+    for (const [key, value] of Object.entries(extraParams)) {
+      if (value !== undefined) {
+        params.set(key, value);
+      }
+    }
+  }
+
+  return endpoint + '?' + params.toString();
+}
+
+export async function fetchPaginatedGames(
+  endpoint: string,
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+  extraParams?: Record<string, string | undefined>,
+): Promise<PaginatedResponse<Game>> {
+  const url = buildPaginatedGamesUrl(
+    endpoint,
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+    extraParams,
+  );
+  const response = await fetchWithTimeout(url);
+
+  return handleResponse<PaginatedResponse<Game>>(response);
+}
+
+export function makePaginatedPlatformQueryOptions(
+  queryKey: string,
+  endpoint: string,
+) {
+  return (
+    page: number = 1,
+    pageSize: number = 10,
+    query?: string,
+    sortBy: SortField = 'name',
+    sortDir: 'asc' | 'desc' = 'asc',
+    igdbId?: string,
+    extraParams?: Record<string, string | undefined>,
+  ) => ({
+    queryKey: [
+      queryKey,
+      { page, pageSize, query, sortBy, sortDir, igdbId, ...extraParams },
+    ],
+    queryFn: () =>
+      fetchPaginatedGames(
+        endpoint,
+        page,
+        pageSize,
+        query,
+        sortBy,
+        sortDir,
+        igdbId,
+        extraParams,
+      ),
+  });
+}
+
 export async function getPaginatedGames(
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
   filter?: string,
 ): Promise<PaginatedResponse<Game>> {
-  const params = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
+  return fetchPaginatedGames(
+    '/api/games',
+    page,
+    pageSize,
+    query,
     sortBy,
     sortDir,
-  });
-
-  if (query) {
-    params.set('q', query);
-  }
-
-  if (igdbId) {
-    params.set('igdbId', igdbId);
-  }
-
-  if (filter) {
-    params.set('filter', filter);
-  }
-
-  const url = '/api/games?' + params.toString();
-  const response = await fetchWithTimeout(url);
-
-  return handleResponse<PaginatedResponse<Game>>(response);
+    igdbId,
+    filter ? { filter } : undefined,
+  );
 }
 
-export async function getPaginatedGogGames(
+export const getPaginatedGogGames = (
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
-): Promise<PaginatedResponse<Game>> {
-  const params = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
+) =>
+  fetchPaginatedGames(
+    '/api/private/libraries/gog',
+    page,
+    pageSize,
+    query,
     sortBy,
     sortDir,
-  });
+    igdbId,
+  );
 
-  if (query) {
-    params.set('q', query);
-  }
-
-  if (igdbId) {
-    params.set('igdbId', igdbId);
-  }
-
-  const url = '/api/private/libraries/gog?' + params.toString();
-  const response = await fetchWithTimeout(url);
-
-  return handleResponse<PaginatedResponse<Game>>(response);
-}
-
-export async function getPaginatedHumbleBundleWishlist(
+export const getPaginatedHumbleBundleWishlist = (
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
-): Promise<PaginatedResponse<Game>> {
-  const params = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
+) =>
+  fetchPaginatedGames(
+    '/api/private/wishlists/humble-bundle',
+    page,
+    pageSize,
+    query,
     sortBy,
     sortDir,
-  });
+    igdbId,
+  );
 
-  if (query) {
-    params.set('q', query);
-  }
-
-  if (igdbId) {
-    params.set('igdbId', igdbId);
-  }
-
-  const url = '/api/private/wishlists/humble-bundle?' + params.toString();
-  const response = await fetchWithTimeout(url);
-
-  return handleResponse<PaginatedResponse<Game>>(response);
-}
-export async function getPaginatedNintendoWishlistGames(
+export const getPaginatedNintendoWishlistGames = (
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
-): Promise<PaginatedResponse<Game>> {
-  const params = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
+) =>
+  fetchPaginatedGames(
+    '/api/private/wishlists/nintendo',
+    page,
+    pageSize,
+    query,
     sortBy,
     sortDir,
-  });
+    igdbId,
+  );
 
-  if (query) {
-    params.set('q', query);
-  }
-
-  if (igdbId) {
-    params.set('igdbId', igdbId);
-  }
-
-  const url = '/api/private/wishlists/nintendo?' + params.toString();
-  const response = await fetchWithTimeout(url);
-
-  return handleResponse<PaginatedResponse<Game>>(response);
-}
-export async function getPaginatedSteamWishlistGames(
+export const getPaginatedSteamWishlistGames = (
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
-): Promise<PaginatedResponse<Game>> {
-  const params = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
+) =>
+  fetchPaginatedGames(
+    '/api/private/wishlists/steam',
+    page,
+    pageSize,
+    query,
     sortBy,
     sortDir,
-  });
+    igdbId,
+  );
 
-  if (query) {
-    params.set('q', query);
-  }
-
-  if (igdbId) {
-    params.set('igdbId', igdbId);
-  }
-
-  const url = '/api/private/wishlists/steam?' + params.toString();
-  const response = await fetchWithTimeout(url);
-
-  return handleResponse<PaginatedResponse<Game>>(response);
-}
-
-export async function getPaginatedEpicWishlistGames(
+export const getPaginatedEpicWishlistGames = (
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
-): Promise<PaginatedResponse<Game>> {
-  const params = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
+) =>
+  fetchPaginatedGames(
+    '/api/private/wishlists/epic',
+    page,
+    pageSize,
+    query,
     sortBy,
     sortDir,
-  });
+    igdbId,
+  );
 
-  if (query) {
-    params.set('q', query);
-  }
-
-  if (igdbId) {
-    params.set('igdbId', igdbId);
-  }
-
-  const url = '/api/private/wishlists/epic?' + params.toString();
-  const response = await fetchWithTimeout(url);
-
-  return handleResponse<PaginatedResponse<Game>>(response);
-}
-export async function getPaginatedXboxGames(
+export const getPaginatedXboxGames = (
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
-): Promise<PaginatedResponse<Game>> {
-  const params = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
+) =>
+  fetchPaginatedGames(
+    '/api/private/libraries/xbox',
+    page,
+    pageSize,
+    query,
     sortBy,
     sortDir,
-  });
+    igdbId,
+  );
 
-  if (query) {
-    params.set('q', query);
-  }
-
-  if (igdbId) {
-    params.set('igdbId', igdbId);
-  }
-
-  const url = '/api/private/libraries/xbox?' + params.toString();
-  const response = await fetchWithTimeout(url);
-
-  return handleResponse<PaginatedResponse<Game>>(response);
-}
-
-export async function getXboxWishlistGames(
+export const getXboxWishlistGames = (
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
-): Promise<PaginatedResponse<Game>> {
-  return getPaginatedGames(
+) =>
+  getPaginatedGames(
     page,
     pageSize,
     query,
@@ -275,7 +293,6 @@ export async function getXboxWishlistGames(
     igdbId,
     'xboxWishlist',
   );
-}
 
 export async function getRandomGame(
   excludeIds: number[] = [],
@@ -533,87 +550,28 @@ export const paginatedGamesQueryOptions = (
     getPaginatedGames(page, pageSize, query, sortBy, sortDir, igdbId),
 });
 
-export const paginatedGogGamesQueryOptions = (
-  page: number = 1,
-  pageSize: number = 10,
-  query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' = 'name',
-  sortDir: 'asc' | 'desc' = 'asc',
-  igdbId?: string,
-) => ({
-  queryKey: ['gog-games', { page, pageSize, query, sortBy, sortDir, igdbId }],
-  queryFn: () =>
-    getPaginatedGogGames(page, pageSize, query, sortBy, sortDir, igdbId),
-});
+export const paginatedGogGamesQueryOptions = makePaginatedPlatformQueryOptions(
+  'gog-games',
+  '/api/private/libraries/gog',
+);
 
-export const paginatedNintendoWishlistGamesQueryOptions = (
-  page: number = 1,
-  pageSize: number = 10,
-  query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
-  sortDir: 'asc' | 'desc' = 'asc',
-  igdbId?: string,
-) => ({
-  queryKey: [
+export const paginatedNintendoWishlistGamesQueryOptions =
+  makePaginatedPlatformQueryOptions(
     'nintendoWishlistGames',
-    { page, pageSize, query, sortBy, sortDir, igdbId },
-  ],
-  queryFn: () =>
-    getPaginatedNintendoWishlistGames(
-      page,
-      pageSize,
-      query,
-      sortBy,
-      sortDir,
-      igdbId,
-    ),
-});
+    '/api/private/wishlists/nintendo',
+  );
 
-export const humbleBundleWishlistQueryOptions = (
-  page: number = 1,
-  pageSize: number = 10,
-  query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
-  sortDir: 'asc' | 'desc' = 'asc',
-  igdbId?: string,
-) => ({
-  queryKey: [
+export const humbleBundleWishlistQueryOptions =
+  makePaginatedPlatformQueryOptions(
     'wishlist-humble-bundle',
-    { page, pageSize, query, sortBy, sortDir, igdbId },
-  ],
-  queryFn: () =>
-    getPaginatedHumbleBundleWishlist(
-      page,
-      pageSize,
-      query,
-      sortBy,
-      sortDir,
-      igdbId,
-    ),
-});
+    '/api/private/wishlists/humble-bundle',
+  );
 
-export const paginatedEpicWishlistGamesQueryOptions = (
-  page: number = 1,
-  pageSize: number = 10,
-  query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
-  sortDir: 'asc' | 'desc' = 'asc',
-  igdbId?: string,
-) => ({
-  queryKey: [
+export const paginatedEpicWishlistGamesQueryOptions =
+  makePaginatedPlatformQueryOptions(
     'epicWishlistGames',
-    { page, pageSize, query, sortBy, sortDir, igdbId },
-  ],
-  queryFn: () =>
-    getPaginatedEpicWishlistGames(
-      page,
-      pageSize,
-      query,
-      sortBy,
-      sortDir,
-      igdbId,
-    ),
-});
+    '/api/private/wishlists/epic',
+  );
 export const randomGameQueryOptions = (
   excludeIds: number[] = [],
   mode?: string,
@@ -640,105 +598,78 @@ export const searchGamesQueryOptions = (
   queryFn: () => searchGames(query, limit, mode),
 });
 
-export async function getPaginatedAmazonGames(
+export const getPaginatedAmazonGames = (
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
-): Promise<PaginatedResponse<Game>> {
-  const params = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
+): Promise<PaginatedResponse<Game>> =>
+  fetchPaginatedGames(
+    '/api/private/libraries/amazon',
+    page,
+    pageSize,
+    query,
     sortBy,
     sortDir,
-  });
+    igdbId,
+  );
 
-  if (query) {
-    params.set('q', query);
-  }
-
-  if (igdbId) {
-    params.set('igdbId', igdbId);
-  }
-
-  const url = '/api/private/libraries/amazon?' + params.toString();
-  const response = await fetchWithTimeout(url);
-
-  return handleResponse<PaginatedResponse<Game>>(response);
-}
-
-export const paginatedAmazonGamesQueryOptions = (
-  page: number = 1,
-  pageSize: number = 10,
-  query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
-  sortDir: 'asc' | 'desc' = 'asc',
-  igdbId?: string,
-) => ({
-  queryKey: [
+export const paginatedAmazonGamesQueryOptions =
+  makePaginatedPlatformQueryOptions(
     'amazon-games',
-    { page, pageSize, query, sortBy, sortDir, igdbId },
-  ],
-  queryFn: () =>
-    getPaginatedAmazonGames(page, pageSize, query, sortBy, sortDir, igdbId),
-});
+    '/api/private/libraries/amazon',
+  );
 
-export const paginatedXboxGamesQueryOptions = (
+export const paginatedXboxGamesQueryOptions = makePaginatedPlatformQueryOptions(
+  'library-xbox-games',
+  '/api/private/libraries/xbox',
+);
+
+export const paginatedXboxWishlistGamesQueryOptions = (
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
 ) => ({
   queryKey: [
-    'library-xbox-games',
+    'wishlist-xbox',
     { page, pageSize, query, sortBy, sortDir, igdbId },
   ],
   queryFn: () =>
-    getPaginatedXboxGames(page, pageSize, query, sortBy, sortDir, igdbId),
+    getXboxWishlistGames(page, pageSize, query, sortBy, sortDir, igdbId),
 });
 
 export type NintendoFilter = 'all' | 'owned' | 'demos';
 
-export async function getNintendoGames(
+export const getNintendoGames = (
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
   filter: NintendoFilter = 'all',
-): Promise<PaginatedResponse<Game>> {
-  const params = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
+): Promise<PaginatedResponse<Game>> =>
+  fetchPaginatedGames(
+    '/api/private/libraries/nintendo',
+    page,
+    pageSize,
+    query,
     sortBy,
     sortDir,
-    filter,
-  });
-
-  if (query) {
-    params.set('q', query);
-  }
-
-  if (igdbId) {
-    params.set('igdbId', igdbId);
-  }
-
-  const url = '/api/private/libraries/nintendo?' + params.toString();
-  const response = await fetchWithTimeout(url);
-
-  return handleResponse<PaginatedResponse<Game>>(response);
-}
+    igdbId,
+    { filter },
+  );
 
 export const nintendoGamesQueryOptions = (
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
   filter: NintendoFilter = 'all',
@@ -774,25 +705,8 @@ export const steamGamesQueryOptions = (filter?: SteamFilter) => ({
   queryFn: () => getSteamGames(filter),
 });
 
-export const paginatedSteamWishlistGamesQueryOptions = (
-  page: number = 1,
-  pageSize: number = 10,
-  query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' = 'name',
-  sortDir: 'asc' | 'desc' = 'asc',
-  igdbId?: string,
-) => ({
-  queryKey: [
+export const paginatedSteamWishlistGamesQueryOptions =
+  makePaginatedPlatformQueryOptions(
     'steamWishlistGames',
-    { page, pageSize, query, sortBy, sortDir, igdbId },
-  ],
-  queryFn: () =>
-    getPaginatedSteamWishlistGames(
-      page,
-      pageSize,
-      query,
-      sortBy,
-      sortDir,
-      igdbId,
-    ),
-});
+    '/api/private/wishlists/steam',
+  );

@@ -51,6 +51,8 @@ pnpm codegen
 
 ## Database (Drizzle ORM)
 
+Database commands target `@workspace/db` (`packages/db`):
+
 ```bash
 # Generate SQL migrations from schema
 pnpm db:generate
@@ -66,6 +68,15 @@ pnpm db:studio
 
 # Refresh all materialized views
 pnpm db:refresh-all-mat-views
+```
+
+## Adding Dependencies
+
+```bash
+pnpm add:web <package>   # Add to apps/web
+pnpm add:api <package>   # Add to apps/api
+pnpm add:db <package>    # Add to packages/db
+pnpm add:ui <package>    # Add to packages/ui
 ```
 
 ## Testing
@@ -88,13 +99,19 @@ turbo test --filter @workspace/api
 turbo typecheck # or nr typecheck
 turbo lint      # or nr lint
 
-# API
+# Specific workspace packages
 turbo typecheck --filter @workspace/api
-
-# Web
 turbo typecheck --filter @workspace/web
+turbo typecheck --filter @workspace/db
 turbo lint --filter @workspace/web
 ```
+
+## Devcontainer Environment
+
+The devcontainer environment is pre-configured with:
+- **Zsh**: Default interactive shell displaying the current working directory in the prompt.
+- **Herdr**: Automatic tab and pane layout arrangement for services and commands.
+- **Antigravity CLI (`agy`)**: Integrated directly in devcontainer zsh.
 
 ## Cleaning
 

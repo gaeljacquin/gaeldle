@@ -109,3 +109,12 @@ Deduce the mystery game by guessing games and comparing their specifications aga
 - Use the results to narrow down your next guess
 - You may reveal one hint at any time for **-1 attempt**; the hint reveals the correct value of a randomly chosen unmatched specification
 - You have **10 attempts** to guess the correct game
+
+---
+
+## Data Access & Game Mode Filtering
+
+All game mode backend queries (e.g. `/api/games/random`, `/api/games/search`) follow strict data filtering rules:
+
+1. **Hidden Game Exclusion**: Only games where `hidden = false` are eligible for gameplay. Games marked as hidden are filtered out of all random pools and search results for game modes.
+2. **Field Omission (`gameModeGameObject`)**: Queries use `gameModeGameObject` and the `GameModeGame` type from `@workspace/db`. This strips internal catalogue and platform flags (`steam`, `epic`, `gog`, `nintendo`, `amazon`, `microsoft`, `xbox`, `steamDemo`, `epicDemo`, `nintendoDemo`, `hidden`, and wishlist flags) from the game object delivered to players.

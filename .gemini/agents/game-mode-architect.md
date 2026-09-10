@@ -70,7 +70,8 @@ Before writing any code:
 
 ## Code Quality Standards
 
-- **TypeScript**: strict, no `any`; infer types from Zod with `z.infer<>`.
+- **TypeScript**: strict, no `any`; infer types from Zod with `z.infer<>` or use `@workspace/db` types.
+- **Data Filtering**: Game modes must select `gameModeGameObject` and filter `eq(games.hidden, false)` so hidden games and store/wishlist flags are excluded from gameplay.
 - **Imports**: use project aliases, never deep relative paths.
 - **Naming**: match existing game modes exactly.
 
@@ -81,6 +82,7 @@ Before writing any code:
 - [ ] Every endpoint has a service method and controller handler.
 - [ ] Codegen executed (`pnpm codegen`) to update @workspace/api-client schema.
 - [ ] Module registered in app module.
+- [ ] Game mode queries select `gameModeGameObject` and filter `hidden = false`.
 - [ ] Frontend hooks created in `lib/hooks/` using `apiClient` or service layer.
 - [ ] All components in `components/` are purely presentational.
 - [ ] All conditional classNames use `cn()`.

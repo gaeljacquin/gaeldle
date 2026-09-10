@@ -14,12 +14,20 @@
 
 Game operations are split across two APIs:
 
-| Operation type                                                             | API                  | Transport                     |
-| -------------------------------------------------------------------------- | -------------------- | ----------------------------- |
-| Read (list, search, random, artwork, get by IGDB ID)                       | Next.js (`apps/web`) | plain `fetch` to local routes |
-| Write (delete, sync, image gen, add game, replace game, validate IGDB IDs) | NestJS (`apps/api`)  | OpenAPI client (`apiClient`)  |
+| Operation type                                                                       | API                  | Transport                     |
+| ------------------------------------------------------------------------------------ | -------------------- | ----------------------------- |
+| Read (list, search, random, artwork, get by IGDB ID)                                 | Next.js (`apps/web`) | plain `fetch` to local routes |
+| Store libraries & wishlists (paginated, sorted, filtered per platform)               | Next.js (`apps/web`) | plain `fetch` to `/api/private/libraries/*` & `/api/private/wishlists/*` |
+| Store libraries & wishlists (unpaginated full lists)                                 | NestJS (`apps/api`)  | OpenAPI client (`apiClient`) (`/api/libraries/*`, `/api/wishlists/*`) |
+| Write (delete, delete image, sync, image gen, add game, replace game, validate IDs)  | NestJS (`apps/api`)  | OpenAPI client (`apiClient`)  |
 
-Read operations are implemented as Next.js App Router API route handlers under `apps/web/app/api/games/`. They query the database directly using a Drizzle client (`apps/web/lib/db.ts`). Write operations remain in the NestJS API and are called via `@workspace/api-client`.
+Read operations are implemented as Next.js App Router API route handlers under `apps/web/app/api/games/`, `apps/web/app/api/private/libraries/`, and `apps/web/app/api/private/wishlists/`. They query the database directly using a Drizzle client (`apps/web/lib/db.ts`) with schema from `@workspace/db`. Write operations remain in the NestJS API and are called via `@workspace/api-client`.
+
+### Game Mode Data Filtering
+
+All game modes (`/api/games/random`, etc.) enforce:
+- Visibility filtering: only games where `hidden = false` are eligible.
+- Field selection: game queries use `gameModeGameObject` (typed as `GameModeGame` from `@workspace/db`), which excludes store library and wishlist boolean flags.
 
 ## Data & Auth
 

@@ -65,22 +65,24 @@ Before writing any code:
 
 ## Code Quality Standards
 
-- **TypeScript**: strict, no `any`; use types generated from `@workspace/api-client` schema.d.ts — never duplicate manually.
+- **TypeScript**: strict, no `any`; infer types from Zod with `z.infer<>` or use `@workspace/db` types.
+- **Data Filtering**: Game modes must select `gameModeGameObject` and filter `eq(games.hidden, false)` so hidden games and store/wishlist flags are excluded from gameplay.
 - **Imports**: use project aliases, never deep relative paths.
 - **Naming**: match existing game modes exactly.
 
 ## Self-Verification Checklist
 
-- [ ] NestJS DTOs defined in `dto/` with `@ApiProperty` / `@ApiPropertyOptional` decorators.
-- [ ] Controller decorated with `@Controller`, `@ApiTags`, `@ApiOperation`, `@ApiBody`, `@ApiResponse`.
-- [ ] Every controller method has a corresponding service method.
-- [ ] Module registered in `app.module.ts`.
-- [ ] `pnpm codegen` run successfully — `openapi.json` and `schema.d.ts` updated.
-- [ ] Every NestJS endpoint has a frontend hook using `apiClient` from `@workspace/api-client`.
-- [ ] All components are purely presentational.
+- [ ] All DTO classes defined with @ApiProperty / @ApiPropertyOptional and Swagger decorators.
+- [ ] Controller endpoints defined with @ApiOperation, @ApiResponse, and HTTP method decorators.
+- [ ] Every endpoint has a service method and controller handler.
+- [ ] Codegen executed (`pnpm codegen`) to update @workspace/api-client schema.
+- [ ] Module registered in app module.
+- [ ] Game mode queries select `gameModeGameObject` and filter `hidden = false`.
+- [ ] Frontend hooks created in `lib/hooks/` using `apiClient` or service layer.
+- [ ] All components in `components/` are purely presentational.
 - [ ] All conditional classNames use `cn()`.
-- [ ] View is a client component; page is a server component.
-- [ ] Types flow end-to-end from DTO → schema.d.ts → hook → component props; no `any`.
+- [ ] View is in `views/`; page is a minimal entry point in `app/`.
+- [ ] Types flow end-to-end; no manual type duplication; no `any`.
 
 ## Edge Cases & Escalation
 

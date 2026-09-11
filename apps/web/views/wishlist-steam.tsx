@@ -22,6 +22,7 @@ export function WishlistSteamView() {
   const bulkDelete = useBulkDelete({
     queryKeysToInvalidate: ['steamWishlistGames', 'games'],
     locationName: 'your wishlist',
+    wishlistKey: 'steamWishlist',
   });
 
   const { data, isLoading, isPlaceholderData, isFetching } = useQuery({

@@ -22,6 +22,7 @@ export function WishlistEpicView() {
   const bulkDelete = useBulkDelete({
     queryKeysToInvalidate: ['epicWishlistGames', 'wishlist-epic', 'games'],
     locationName: 'your wishlist',
+    wishlistKey: 'epicWishlist',
   });
 
   const { data, isLoading, isPlaceholderData, isFetching } = useQuery({

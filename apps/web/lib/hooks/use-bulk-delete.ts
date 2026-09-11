@@ -5,6 +5,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   deleteBulkGames,
   updateBulkGamesHidden,
+  updateBulkGamesWishlist,
+  type WishlistKey,
 } from '@/lib/services/game.service';
 import { toast } from 'sonner';
 
@@ -12,18 +14,22 @@ export interface UseBulkDeleteOptions {
   queryKeysToInvalidate: (string | unknown[])[];
   entityName?: string;
   locationName?: string;
+  wishlistKey?: WishlistKey;
 }
 
 export function useBulkDelete({
   queryKeysToInvalidate,
   entityName = 'game',
   locationName = 'your library',
+  wishlistKey,
 }: UseBulkDeleteOptions) {
   const [isMultiSelect, setIsMultiSelect] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSetHiddenDialogOpen, setIsSetHiddenDialogOpen] = useState(false);
   const [isUnsetHiddenDialogOpen, setIsUnsetHiddenDialogOpen] = useState(false);
+  const [isRemoveWishlistDialogOpen, setIsRemoveWishlistDialogOpen] =
+    useState(false);
 
   const queryClient = useQueryClient();
 
@@ -93,6 +99,41 @@ export function useBulkDelete({
     setIsDeleteDialogOpen(false);
   };
 
+  const removeWishlistMutation = useMutation({
+    mutationFn: (ids: number[]) => {
+      if (!wishlistKey) {
+        throw new Error('No wishlist specified');
+      }
+      return updateBulkGamesWishlist(ids, wishlistKey, false);
+    },
+    onSuccess: () => {
+      const count = selectedIds.size;
+      const successMessage = `${count} ${count === 1 ? entityName : `${entityName}s`} removed from wishlist successfully`;
+
+      for (const queryKey of queryKeysToInvalidate) {
+        queryClient.invalidateQueries({
+          queryKey: Array.isArray(queryKey) ? queryKey : [queryKey],
+        });
+      }
+
+      toast.success(successMessage);
+      setSelectedIds(new Set());
+      setIsMultiSelect(false);
+    },
+    onError: () => {
+      toast.error('An error occurred while removing games from wishlist');
+    },
+  });
+
+  const handleBulkRemoveWishlist = () => {
+    if (selectedIds.size === 0 || !wishlistKey) {
+      return;
+    }
+
+    removeWishlistMutation.mutate(Array.from(selectedIds));
+    setIsRemoveWishlistDialogOpen(false);
+  };
+
   const handleBulkSetHidden = (hidden: boolean) => {
     if (selectedIds.size === 0) {
       return;
@@ -138,7 +179,15 @@ export function useBulkDelete({
     setIsUnsetHiddenDialogOpen,
     handleBulkSetHidden,
     setHiddenMutation,
-    isPending: deleteMutation.isPending || setHiddenMutation.isPending,
+    wishlistKey,
+    isRemoveWishlistDialogOpen,
+    setIsRemoveWishlistDialogOpen,
+    handleBulkRemoveWishlist,
+    removeWishlistMutation,
+    isPending:
+      deleteMutation.isPending ||
+      setHiddenMutation.isPending ||
+      removeWishlistMutation.isPending,
     locationName,
   };
 }

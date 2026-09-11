@@ -22,6 +22,7 @@ export function WishlistNintendoView() {
   const bulkDelete = useBulkDelete({
     queryKeysToInvalidate: ['nintendoWishlistGames', 'games'],
     locationName: 'your wishlist',
+    wishlistKey: 'nintendoWishlist',
   });
 
   const { data, isLoading, isPlaceholderData, isFetching } = useQuery({

@@ -22,6 +22,7 @@ export function WishlistXboxView() {
   const bulkDelete = useBulkDelete({
     queryKeysToInvalidate: ['wishlist-xbox-games', 'games'],
     locationName: 'your Xbox wishlist',
+    wishlistKey: 'xboxWishlist',
   });
 
   const { data, isLoading, isPlaceholderData, isFetching } = useQuery({

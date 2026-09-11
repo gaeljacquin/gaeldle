@@ -18,6 +18,7 @@ import {
   getPaginatedNintendoWishlistGames,
   getPaginatedEpicWishlistGames,
   updateGameWishlist,
+  updateBulkGamesWishlist,
 } from './game.service';
 import { gameObject, gameModeGameObject } from '@workspace/db';
 
@@ -321,9 +322,9 @@ describe('updateGameWishlist', () => {
       error: { message: 'Something went wrong' },
     } as unknown as Awaited<ReturnType<typeof apiClient.PATCH>>);
 
-    await expect(
-      updateGameWishlist(42, 'epicWishlist', false),
-    ).rejects.toThrow('Failed to update game wishlist status');
+    await expect(updateGameWishlist(42, 'epicWishlist', false)).rejects.toThrow(
+      'Failed to update game wishlist status',
+    );
   });
 
   it('should work for all wishlist types', async () => {
@@ -352,3 +353,37 @@ describe('updateGameWishlist', () => {
   });
 });
 
+describe('updateBulkGamesWishlist', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should call apiClient.PATCH with correct body to update bulk wishlist status', async () => {
+    vi.mocked(apiClient.PATCH).mockResolvedValue({
+      data: { success: true },
+      error: undefined,
+    } as unknown as Awaited<ReturnType<typeof apiClient.PATCH>>);
+
+    const result = await updateBulkGamesWishlist(
+      [1, 2, 3],
+      'steamWishlist',
+      false,
+    );
+
+    expect(apiClient.PATCH).toHaveBeenCalledWith('/api/games/bulk', {
+      body: { ids: [1, 2, 3], steamWishlist: false },
+    });
+    expect(result).toBe(true);
+  });
+
+  it('should throw an error when bulk update fails', async () => {
+    vi.mocked(apiClient.PATCH).mockResolvedValue({
+      data: undefined,
+      error: { message: 'Bulk update failed' },
+    } as unknown as Awaited<ReturnType<typeof apiClient.PATCH>>);
+
+    await expect(
+      updateBulkGamesWishlist([1, 2], 'epicWishlist', false),
+    ).rejects.toThrow('Failed to bulk update games wishlist status');
+  });
+});

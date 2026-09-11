@@ -17,6 +17,7 @@ import {
   IconRestore,
   IconEye,
   IconEyeOff,
+  IconHeartOff,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import type { UseBulkDeleteReturn } from '@/lib/hooks/use-bulk-delete';
@@ -39,6 +40,10 @@ export function BulkDeleteControls({ bulkDelete }: BulkDeleteControlsProps) {
     isUnsetHiddenDialogOpen,
     setIsUnsetHiddenDialogOpen,
     handleBulkSetHidden,
+    isRemoveWishlistDialogOpen,
+    setIsRemoveWishlistDialogOpen,
+    handleBulkRemoveWishlist,
+    wishlistKey,
     isPending,
     locationName,
   } = bulkDelete;
@@ -142,6 +147,52 @@ export function BulkDeleteControls({ bulkDelete }: BulkDeleteControlsProps) {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+
+          {wishlistKey ? (
+            <AlertDialog
+              open={isRemoveWishlistDialogOpen}
+              onOpenChange={setIsRemoveWishlistDialogOpen}
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={selectedIds.size === 0 || isPending}
+                onClick={() => setIsRemoveWishlistDialogOpen(true)}
+                className={cn(
+                  'h-10',
+                  selectedIds.size === 0 || isPending
+                    ? 'cursor-not-allowed'
+                    : 'cursor-pointer',
+                )}
+              >
+                <IconHeartOff size={16} className="mr-2" />
+                Remove from wishlist ({selectedIds.size})
+              </Button>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Remove games from wishlist?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will remove {selectedIds.size}{' '}
+                    {selectedIds.size === 1 ? 'game' : 'games'} from{' '}
+                    {locationName}.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="cursor-pointer">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleBulkRemoveWishlist}
+                    className="cursor-pointer"
+                  >
+                    Remove
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : null}
 
           <AlertDialog
             open={isDeleteDialogOpen}

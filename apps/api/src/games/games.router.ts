@@ -77,10 +77,8 @@ export class GamesRouter {
   async updateBulk(
     @Body() body: UpdateBulkGamesDto,
   ): Promise<UpdateBulkGamesResponseDto> {
-    const updatedIds = await this.gamesService.updateGamesHidden(
-      body.ids,
-      body.hidden,
-    );
+    const { ids, ...updates } = body;
+    const updatedIds = await this.gamesService.updateBulkGames(ids, updates);
     return {
       success: true,
       data: {

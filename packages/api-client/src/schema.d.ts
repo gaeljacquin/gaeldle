@@ -557,7 +557,12 @@ export interface components {
             /** @description Array of game IDs to update */
             ids: number[];
             /** @description Whether games are hidden */
-            hidden: boolean;
+            hidden?: boolean;
+            steamWishlist?: boolean;
+            epicWishlist?: boolean;
+            nintendoWishlist?: boolean;
+            xboxWishlist?: boolean;
+            humbleBundleWishlist?: boolean;
         };
         UpdateBulkGamesDataDto: {
             updatedIds: number[];

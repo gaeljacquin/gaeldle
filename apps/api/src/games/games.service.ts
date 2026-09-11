@@ -322,15 +322,15 @@ export class GamesService {
     return deletedRows.map((row) => row.id);
   }
 
-  async updateGamesHidden(
+  async updateBulkGames(
     ids: number[],
-    hidden: boolean,
+    updates: Partial<GameInsert>,
     shouldRefresh = true,
   ): Promise<number[]> {
     const updatedRows = await this.databaseService.db
       .update(games)
       .set({
-        hidden,
+        ...updates,
         updatedAt: new Date(),
       })
       .where(inArray(games.id, ids))
@@ -341,6 +341,14 @@ export class GamesService {
     }
 
     return updatedRows.map((row) => row.id);
+  }
+
+  async updateGamesHidden(
+    ids: number[],
+    hidden: boolean,
+    shouldRefresh = true,
+  ): Promise<number[]> {
+    return this.updateBulkGames(ids, { hidden }, shouldRefresh);
   }
 
   async validateGameForAdd(

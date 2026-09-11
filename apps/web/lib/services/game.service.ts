@@ -99,6 +99,22 @@ export async function updateBulkGamesHidden(
   return data.success;
 }
 
+export async function updateBulkGamesWishlist(
+  ids: number[],
+  wishlistKey: WishlistKey,
+  value: boolean,
+): Promise<boolean> {
+  const { data, error } = await apiClient.PATCH('/api/games/bulk', {
+    body: { ids, [wishlistKey]: value },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to bulk update games wishlist status');
+  }
+
+  return data.success;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {

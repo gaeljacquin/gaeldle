@@ -744,6 +744,34 @@ describe('GamesService', () => {
     });
   });
 
+  describe('updateBulkGames', () => {
+    it('should update multiple games with arbitrary updates and refresh view', async () => {
+      const updatedRows = [{ id: 1 }, { id: 2 }];
+      resolveValue = updatedRows;
+
+      const refreshSpy = jest
+        .spyOn(service, 'refreshAllGamesView' as any)
+        .mockResolvedValue(undefined);
+
+      const result = await service.updateBulkGames([1, 2], {
+        steamWishlist: false,
+      });
+
+      expect(mockDb.update).toHaveBeenCalled();
+      expect(mockDb.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          steamWishlist: false,
+          updatedAt: expect.any(Date),
+        }),
+      );
+      expect(mockDb.where).toHaveBeenCalled();
+      expect(result).toEqual([1, 2]);
+      expect(refreshSpy).toHaveBeenCalled();
+
+      refreshSpy.mockRestore();
+    });
+  });
+
   describe('mapIgdbToGame (tested indirectly via syncGameByIgdbId)', () => {
     const setupSyncMock = (initialResolve: unknown, secondResolve: unknown) => {
       const syncSpies: ChainableMock = {

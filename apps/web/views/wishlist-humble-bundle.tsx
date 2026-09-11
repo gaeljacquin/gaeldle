@@ -21,7 +21,8 @@ export function WishlistHumbleBundleView() {
 
   const bulkDelete = useBulkDelete({
     queryKeysToInvalidate: ['wishlist-humble-bundle', 'games'],
-    locationName: 'your library',
+    locationName: 'your Humble Bundle wishlist',
+    wishlistKey: 'humbleBundleWishlist',
   });
 
   const { data, isLoading, isPlaceholderData, isFetching } = useQuery({

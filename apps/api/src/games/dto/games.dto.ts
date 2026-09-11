@@ -40,8 +40,26 @@ export class UpdateBulkGamesDto {
   @ApiProperty({ type: [Number], description: 'Array of game IDs to update' })
   ids!: number[];
 
-  @ApiProperty({ type: Boolean, description: 'Whether games are hidden' })
-  hidden!: boolean;
+  @ApiPropertyOptional({
+    type: Boolean,
+    description: 'Whether games are hidden',
+  })
+  hidden?: boolean;
+
+  @ApiPropertyOptional({ type: Boolean })
+  steamWishlist?: boolean;
+
+  @ApiPropertyOptional({ type: Boolean })
+  epicWishlist?: boolean;
+
+  @ApiPropertyOptional({ type: Boolean })
+  nintendoWishlist?: boolean;
+
+  @ApiPropertyOptional({ type: Boolean })
+  xboxWishlist?: boolean;
+
+  @ApiPropertyOptional({ type: Boolean })
+  humbleBundleWishlist?: boolean;
 }
 
 export class DeleteBulkDto {

@@ -1117,11 +1117,25 @@
           "hidden": {
             "type": "boolean",
             "description": "Whether games are hidden"
+          },
+          "steamWishlist": {
+            "type": "boolean"
+          },
+          "epicWishlist": {
+            "type": "boolean"
+          },
+          "nintendoWishlist": {
+            "type": "boolean"
+          },
+          "xboxWishlist": {
+            "type": "boolean"
+          },
+          "humbleBundleWishlist": {
+            "type": "boolean"
           }
         },
         "required": [
-          "ids",
-          "hidden"
+          "ids"
         ]
       },
       "UpdateBulkGamesDataDto": {

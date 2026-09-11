@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { and, eq, isNull, or } from 'drizzle-orm';
+import { and, eq, or } from 'drizzle-orm';
 import { games } from '@workspace/db';
 import { runPaginatedGamesRoute } from '@/lib/server/paginated-games-route';
 
@@ -15,10 +15,7 @@ export async function GET(request: NextRequest) {
           return eq(games.nintendoDemo, true);
         }
         if (filter === 'owned') {
-          return and(
-            eq(games.nintendo, true),
-            or(eq(games.nintendoDemo, false), isNull(games.nintendoDemo)),
-          );
+          return and(eq(games.nintendo, true), eq(games.nintendoDemo, false));
         }
         // 'all' includes games owned or demo on Nintendo
         return or(eq(games.nintendo, true), eq(games.nintendoDemo, true));

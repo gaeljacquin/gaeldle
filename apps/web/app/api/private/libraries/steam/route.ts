@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { and, eq, isNull, or } from 'drizzle-orm';
+import { and, eq, or } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { games, gameObject } from '@workspace/db';
 
@@ -11,10 +11,7 @@ export async function GET(request: NextRequest) {
     let whereClause = or(eq(games.steam, true), eq(games.steamDemo, true));
 
     if (filter === 'owned') {
-      whereClause = and(
-        eq(games.steam, true),
-        or(eq(games.steamDemo, false), isNull(games.steamDemo)),
-      );
+      whereClause = and(eq(games.steam, true), eq(games.steamDemo, false));
     } else if (filter === 'demos') {
       whereClause = eq(games.steamDemo, true);
     }

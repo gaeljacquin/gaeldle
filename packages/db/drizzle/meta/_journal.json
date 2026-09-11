@@ -239,6 +239,13 @@
       "when": 1788800966771,
       "tag": "0033_furry_jazinda",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1789163248070,
+      "tag": "0034_bored_karen_page",
+      "breakpoints": true
     }
   ]
 }

@@ -60,6 +60,30 @@ export async function updateGameHidden(
   return data.success;
 }
 
+export type WishlistKey =
+  | 'steamWishlist'
+  | 'epicWishlist'
+  | 'nintendoWishlist'
+  | 'xboxWishlist'
+  | 'humbleBundleWishlist';
+
+export async function updateGameWishlist(
+  id: number,
+  wishlistKey: WishlistKey,
+  value: boolean,
+): Promise<boolean> {
+  const { data, error } = await apiClient.PATCH('/api/games/{id}', {
+    params: { path: { id } },
+    body: { [wishlistKey]: value },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to update game wishlist status');
+  }
+
+  return data.success;
+}
+
 export async function updateBulkGamesHidden(
   ids: number[],
   hidden: boolean,

@@ -247,6 +247,7 @@ export default function GameDetails({
               {/* Badges + Actions suspend together */}
               <Suspense fallback={<SidebarContentSkeleton />}>
                 <GameDetailsSidebar
+                  key={igdbId}
                   igdbId={igdbId}
                   onDeleteDialogOpen={setIsDeleteDialogOpen}
                 />

@@ -1,9 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 vi.mock('@/lib/api-client', () => ({
-  apiClient: {},
+  apiClient: {
+    PATCH: vi.fn(),
+  },
 }));
 
+import { apiClient } from '@/lib/api-client';
 import {
   getRandomGame,
   getRandomGames,
@@ -14,6 +17,7 @@ import {
   getNintendoGames,
   getPaginatedNintendoWishlistGames,
   getPaginatedEpicWishlistGames,
+  updateGameWishlist,
 } from './game.service';
 import { gameObject, gameModeGameObject } from '@workspace/db';
 
@@ -290,3 +294,61 @@ describe('game fetching in game modes vs admin', () => {
     expect(response.data[0]).toHaveProperty('epicWishlist', true);
   });
 });
+
+describe('updateGameWishlist', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should call apiClient.PATCH with correct path and body to update wishlist status', async () => {
+    vi.mocked(apiClient.PATCH).mockResolvedValue({
+      data: { success: true },
+      error: undefined,
+    } as unknown as Awaited<ReturnType<typeof apiClient.PATCH>>);
+
+    const result = await updateGameWishlist(42, 'steamWishlist', false);
+
+    expect(apiClient.PATCH).toHaveBeenCalledWith('/api/games/{id}', {
+      params: { path: { id: 42 } },
+      body: { steamWishlist: false },
+    });
+    expect(result).toBe(true);
+  });
+
+  it('should throw an error when apiClient returns an error', async () => {
+    vi.mocked(apiClient.PATCH).mockResolvedValue({
+      data: undefined,
+      error: { message: 'Something went wrong' },
+    } as unknown as Awaited<ReturnType<typeof apiClient.PATCH>>);
+
+    await expect(
+      updateGameWishlist(42, 'epicWishlist', false),
+    ).rejects.toThrow('Failed to update game wishlist status');
+  });
+
+  it('should work for all wishlist types', async () => {
+    vi.mocked(apiClient.PATCH).mockResolvedValue({
+      data: { success: true },
+      error: undefined,
+    } as unknown as Awaited<ReturnType<typeof apiClient.PATCH>>);
+
+    await updateGameWishlist(1, 'nintendoWishlist', false);
+    expect(apiClient.PATCH).toHaveBeenCalledWith('/api/games/{id}', {
+      params: { path: { id: 1 } },
+      body: { nintendoWishlist: false },
+    });
+
+    await updateGameWishlist(2, 'xboxWishlist', false);
+    expect(apiClient.PATCH).toHaveBeenCalledWith('/api/games/{id}', {
+      params: { path: { id: 2 } },
+      body: { xboxWishlist: false },
+    });
+
+    await updateGameWishlist(3, 'humbleBundleWishlist', false);
+    expect(apiClient.PATCH).toHaveBeenCalledWith('/api/games/{id}', {
+      params: { path: { id: 3 } },
+      body: { humbleBundleWishlist: false },
+    });
+  });
+});
+

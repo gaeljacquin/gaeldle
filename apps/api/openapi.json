@@ -1212,6 +1212,21 @@
           },
           "hidden": {
             "type": "boolean"
+          },
+          "steamWishlist": {
+            "type": "boolean"
+          },
+          "epicWishlist": {
+            "type": "boolean"
+          },
+          "nintendoWishlist": {
+            "type": "boolean"
+          },
+          "xboxWishlist": {
+            "type": "boolean"
+          },
+          "humbleBundleWishlist": {
+            "type": "boolean"
           }
         }
       },

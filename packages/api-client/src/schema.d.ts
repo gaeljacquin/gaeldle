@@ -586,6 +586,11 @@ export interface components {
             releaseDates?: Record<string, never>;
             themes?: Record<string, never>;
             hidden?: boolean;
+            steamWishlist?: boolean;
+            epicWishlist?: boolean;
+            nintendoWishlist?: boolean;
+            xboxWishlist?: boolean;
+            humbleBundleWishlist?: boolean;
         };
         GameResponseDto: {
             success: boolean;

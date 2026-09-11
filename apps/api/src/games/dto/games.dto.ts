@@ -29,6 +29,11 @@ export class GameUpdateInputDto {
   @ApiPropertyOptional({ type: Object }) releaseDates?: any;
   @ApiPropertyOptional({ type: Object }) themes?: any;
   @ApiPropertyOptional({ type: Boolean }) hidden?: boolean;
+  @ApiPropertyOptional({ type: Boolean }) steamWishlist?: boolean;
+  @ApiPropertyOptional({ type: Boolean }) epicWishlist?: boolean;
+  @ApiPropertyOptional({ type: Boolean }) nintendoWishlist?: boolean;
+  @ApiPropertyOptional({ type: Boolean }) xboxWishlist?: boolean;
+  @ApiPropertyOptional({ type: Boolean }) humbleBundleWishlist?: boolean;
 }
 
 export class UpdateBulkGamesDto {

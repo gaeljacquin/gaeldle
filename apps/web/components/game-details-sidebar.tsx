@@ -10,6 +10,8 @@ import {
   getGameByIgdbId,
   syncGame,
   updateGameHidden,
+  updateGameWishlist,
+  type WishlistKey,
 } from '@/lib/services/game.service';
 import { Button } from '@workspace/ui/button';
 import {
@@ -30,9 +32,45 @@ import {
   IconDeviceGamepad,
   IconEye,
   IconEyeOff,
+  IconHeartOff,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { Badge } from '@/components/badge';
+import type { Game } from '@workspace/db';
+
+interface WishlistConfig {
+  key: WishlistKey;
+  name: string;
+  queryKeys: string[];
+}
+
+const WISHLISTS: WishlistConfig[] = [
+  {
+    key: 'steamWishlist',
+    name: 'Steam',
+    queryKeys: ['steamWishlistGames'],
+  },
+  {
+    key: 'epicWishlist',
+    name: 'Epic',
+    queryKeys: ['epicWishlistGames', 'wishlist-epic'],
+  },
+  {
+    key: 'nintendoWishlist',
+    name: 'Nintendo',
+    queryKeys: ['nintendoWishlistGames'],
+  },
+  {
+    key: 'xboxWishlist',
+    name: 'XBOX',
+    queryKeys: ['wishlist-xbox', 'wishlist-xbox-games'],
+  },
+  {
+    key: 'humbleBundleWishlist',
+    name: 'Humble Bundle',
+    queryKeys: ['wishlist-humble-bundle'],
+  },
+];
 
 export default function GameDetailsSidebar({
   igdbId,
@@ -84,6 +122,43 @@ export default function GameDetailsSidebar({
   });
 
   const isHidden = Boolean(game.hidden);
+
+  const [initialWishlistKeys] = useState<WishlistKey[]>(() =>
+    WISHLISTS.filter((w) => Boolean(game[w.key])).map((w) => w.key),
+  );
+  const [removedWishlists, setRemovedWishlists] = useState<Set<WishlistKey>>(
+    () => new Set(),
+  );
+  const [activeWishlistToRemove, setActiveWishlistToRemove] =
+    useState<WishlistConfig | null>(null);
+
+  const removeWishlistMutation = useMutation({
+    mutationFn: (wishlist: WishlistConfig) =>
+      updateGameWishlist(game.id, wishlist.key, false),
+    onSuccess: (_, wishlist) => {
+      toast.success(`Removed from ${wishlist.name} wishlist`);
+      setRemovedWishlists((prev) => new Set(prev).add(wishlist.key));
+      setActiveWishlistToRemove(null);
+      for (const qk of wishlist.queryKeys) {
+        queryClient.invalidateQueries({ queryKey: [qk] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+      queryClient.setQueryData(
+        ['game', igdbId],
+        (oldGame: Game | undefined) => {
+          if (!oldGame) return oldGame;
+          return {
+            ...oldGame,
+            [wishlist.key]: false,
+          };
+        },
+      );
+    },
+    onError: (err, wishlist) => {
+      toast.error(`Failed to remove from ${wishlist.name} wishlist`);
+      console.error(err);
+    },
+  });
 
   return (
     <>
@@ -189,6 +264,80 @@ export default function GameDetailsSidebar({
           <IconTrash aria-hidden="true" className="mr-2 size-4" />
           Delete Game
         </Button>
+
+        {initialWishlistKeys.map((key) => {
+          const wishlist = WISHLISTS.find((w) => w.key === key)!;
+          const isRemoved = removedWishlists.has(key) || !game[key];
+          const isPending =
+            removeWishlistMutation.isPending &&
+            removeWishlistMutation.variables?.key === key;
+
+          return (
+            <Button
+              key={key}
+              variant="outline"
+              className={cn(
+                'w-full font-bold h-10 rounded-none',
+                isRemoved || isPending
+                  ? 'cursor-not-allowed opacity-70'
+                  : 'cursor-pointer',
+              )}
+              disabled={isRemoved || isPending}
+              onClick={() => setActiveWishlistToRemove(wishlist)}
+            >
+              {isPending ? (
+                <IconRefresh
+                  aria-hidden="true"
+                  className="mr-2 size-4 animate-spin"
+                />
+              ) : (
+                <IconHeartOff aria-hidden="true" className="mr-2 size-4" />
+              )}
+              {isPending
+                ? 'Removing...'
+                : `Remove from ${wishlist.name} wishlist`}
+            </Button>
+          );
+        })}
+
+        {activeWishlistToRemove && (
+          <AlertDialog
+            open={activeWishlistToRemove !== null}
+            onOpenChange={(open) => {
+              if (!open) setActiveWishlistToRemove(null);
+            }}
+          >
+            <AlertDialogContent className="rounded-none">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-2xl font-black uppercase">
+                  Remove from {activeWishlistToRemove.name} wishlist?
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-base">
+                  Are you sure you want to remove &quot;{game.name}&quot; from
+                  your {activeWishlistToRemove.name} wishlist?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="mt-4 gap-3">
+                <AlertDialogCancel
+                  className="font-bold rounded-none flex-1 cursor-pointer"
+                  onClick={() => setActiveWishlistToRemove(null)}
+                >
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    const targetWishlist = activeWishlistToRemove;
+                    setActiveWishlistToRemove(null);
+                    removeWishlistMutation.mutate(targetWishlist);
+                  }}
+                  className="font-bold rounded-none flex-1 cursor-pointer"
+                >
+                  Remove
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
     </>
   );

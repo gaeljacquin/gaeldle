@@ -273,7 +273,28 @@ export function GameListControls({
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
-        {filterControl ? <div>{filterControl}</div> : null}
+        {(Boolean(view && onViewChange) || Boolean(extraControls)) && (
+          <div className="flex flex-row items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+            {view && onViewChange ? (
+              <div className="flex bg-muted p-1 border border-border">
+                {viewOptions.map((viewOption) => (
+                  <Button
+                    key={viewOption.value}
+                    variant={view === viewOption.value ? 'default' : 'ghost'}
+                    size="icon"
+                    onClick={() => onViewChange(viewOption.value)}
+                    title={viewOption.label}
+                    className="cursor-pointer"
+                  >
+                    <viewOption.icon size={20} />
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+
+            {extraControls}
+          </div>
+        )}
 
         <div className="flex items-center justify-end sm:ml-auto">
           <Button
@@ -292,107 +313,90 @@ export function GameListControls({
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-          {view && onViewChange ? (
-            <div className="flex bg-muted p-1 border border-border">
-              {viewOptions.map((viewOption) => (
-                <Button
-                  key={viewOption.value}
-                  variant={view === viewOption.value ? 'default' : 'ghost'}
-                  size="icon"
-                  onClick={() => onViewChange(viewOption.value)}
-                  title={viewOption.label}
-                  className="cursor-pointer"
-                >
-                  <viewOption.icon size={20} />
-                </Button>
-              ))}
-            </div>
-          ) : null}
+      {(filterControl || totalPages > 1) && (
+        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+          {filterControl ? <div>{filterControl}</div> : null}
 
-          {extraControls}
-        </div>
+          {totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-end md:ml-auto">
+              <div className="text-sm text-muted-foreground whitespace-nowrap order-2 sm:order-1">
+                Showing{' '}
+                <span className="font-medium text-foreground">
+                  {(formValues.page - 1) *
+                    Number.parseInt(formValues.pageSize, 10) +
+                    1}
+                </span>{' '}
+                to{' '}
+                <span className="font-medium text-foreground">
+                  {Math.min(
+                    formValues.page * Number.parseInt(formValues.pageSize, 10),
+                    totalItems || 0,
+                  )}
+                </span>{' '}
+                of{' '}
+                <span className="font-medium text-foreground">
+                  {totalItems || 0}
+                </span>
+              </div>
 
-        {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-            <div className="text-sm text-muted-foreground whitespace-nowrap order-2 sm:order-1">
-              Showing{' '}
-              <span className="font-medium text-foreground">
-                {(formValues.page - 1) *
-                  Number.parseInt(formValues.pageSize, 10) +
-                  1}
-              </span>{' '}
-              to{' '}
-              <span className="font-medium text-foreground">
-                {Math.min(
-                  formValues.page * Number.parseInt(formValues.pageSize, 10),
-                  totalItems || 0,
-                )}
-              </span>{' '}
-              of{' '}
-              <span className="font-medium text-foreground">
-                {totalItems || 0}
-              </span>
-            </div>
+              <form.Field name="page">
+                {(field) => (
+                  <div className="flex items-center gap-1 order-1 sm:order-2">
+                    <Button
+                      variant="outline"
+                      size="icon-xs"
+                      disabled={field.state.value === 1}
+                      onClick={() => field.handleChange(field.state.value - 1)}
+                      className="size-8 cursor-pointer"
+                    >
+                      <IconChevronLeft size={16} />
+                    </Button>
 
-            <form.Field name="page">
-              {(field) => (
-                <div className="flex items-center gap-1 order-1 sm:order-2">
-                  <Button
-                    variant="outline"
-                    size="icon-xs"
-                    disabled={field.state.value === 1}
-                    onClick={() => field.handleChange(field.state.value - 1)}
-                    className="size-8 cursor-pointer"
-                  >
-                    <IconChevronLeft size={16} />
-                  </Button>
+                    <div className="flex items-center gap-1 mx-1">
+                      {paginationRange.map((p, i) =>
+                        p === '...' ? (
+                          <span
+                            key={`dots-${i + 1}`}
+                            className="w-8 flex justify-center text-muted-foreground select-none"
+                            aria-hidden="true"
+                          >
+                            ...
+                          </span>
+                        ) : (
+                          <Button
+                            key={p}
+                            variant={
+                              field.state.value === p ? 'default' : 'ghost'
+                            }
+                            size="icon-xs"
+                            className={cn(
+                              'size-8 cursor-pointer',
+                              field.state.value === p && 'pointer-events-none',
+                            )}
+                            onClick={() => field.handleChange(p as number)}
+                          >
+                            {p}
+                          </Button>
+                        ),
+                      )}
+                    </div>
 
-                  <div className="flex items-center gap-1 mx-1">
-                    {paginationRange.map((p, i) =>
-                      p === '...' ? (
-                        <span
-                          key={`dots-${i + 1}`}
-                          className="w-8 flex justify-center text-muted-foreground select-none"
-                          aria-hidden="true"
-                        >
-                          ...
-                        </span>
-                      ) : (
-                        <Button
-                          key={p}
-                          variant={
-                            field.state.value === p ? 'default' : 'ghost'
-                          }
-                          size="icon-xs"
-                          className={cn(
-                            'size-8 cursor-pointer',
-                            field.state.value === p && 'pointer-events-none',
-                          )}
-                          onClick={() => field.handleChange(p as number)}
-                        >
-                          {p}
-                        </Button>
-                      ),
-                    )}
+                    <Button
+                      variant="outline"
+                      size="icon-xs"
+                      disabled={field.state.value === totalPages}
+                      onClick={() => field.handleChange(field.state.value + 1)}
+                      className="size-8 cursor-pointer"
+                    >
+                      <IconChevronRight size={16} />
+                    </Button>
                   </div>
-
-                  <Button
-                    variant="outline"
-                    size="icon-xs"
-                    disabled={field.state.value === totalPages}
-                    onClick={() => field.handleChange(field.state.value + 1)}
-                    className="size-8 cursor-pointer"
-                  >
-                    <IconChevronRight size={16} />
-                  </Button>
-                </div>
-              )}
-            </form.Field>
-          </div>
-        )}
-      </div>
+                )}
+              </form.Field>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

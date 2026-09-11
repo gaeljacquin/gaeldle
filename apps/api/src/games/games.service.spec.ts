@@ -706,6 +706,44 @@ describe('GamesService', () => {
     });
   });
 
+  describe('updateGamesHidden', () => {
+    it('should update multiple games hidden status and return ids when rows updated', async () => {
+      const updatedRows = [{ id: 1 }, { id: 2 }];
+      resolveValue = updatedRows;
+
+      const refreshSpy = jest
+        .spyOn(service, 'refreshAllGamesView' as any)
+        .mockResolvedValue(undefined);
+
+      const result = await service.updateGamesHidden([1, 2], true);
+
+      expect(mockDb.update).toHaveBeenCalled();
+      expect(mockDb.set).toHaveBeenCalledWith(
+        expect.objectContaining({ hidden: true }),
+      );
+      expect(mockDb.where).toHaveBeenCalled();
+      expect(result).toEqual([1, 2]);
+      expect(refreshSpy).toHaveBeenCalled();
+
+      refreshSpy.mockRestore();
+    });
+
+    it('should not refresh view when no rows updated', async () => {
+      resolveValue = [];
+
+      const refreshSpy = jest
+        .spyOn(service, 'refreshAllGamesView' as any)
+        .mockResolvedValue(undefined);
+
+      const result = await service.updateGamesHidden([1, 2], false);
+
+      expect(result).toEqual([]);
+      expect(refreshSpy).not.toHaveBeenCalled();
+
+      refreshSpy.mockRestore();
+    });
+  });
+
   describe('mapIgdbToGame (tested indirectly via syncGameByIgdbId)', () => {
     const setupSyncMock = (initialResolve: unknown, secondResolve: unknown) => {
       const syncSpies: ChainableMock = {

@@ -11,6 +11,7 @@ import {
   IconSearch,
   IconCalendar,
   IconDeviceGamepad,
+  IconEyeOff,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import type { Game } from '@workspace/db';
@@ -244,6 +245,12 @@ export function GameListContent({
                     <IconDeviceGamepad aria-hidden="true" size={12} />
                     ID: {game.igdbId}
                   </Badge>
+                  {game.hidden && (
+                    <Badge className="flex items-center gap-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-none text-[10px] font-bold uppercase tracking-wider h-auto">
+                      <IconEyeOff aria-hidden="true" size={12} />
+                      Hidden
+                    </Badge>
+                  )}
                 </div>
 
                 <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed mt-4">

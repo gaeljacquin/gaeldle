@@ -28,6 +28,15 @@ export class GameUpdateInputDto {
   @ApiPropertyOptional({ type: Object }) playerPerspectives?: any;
   @ApiPropertyOptional({ type: Object }) releaseDates?: any;
   @ApiPropertyOptional({ type: Object }) themes?: any;
+  @ApiPropertyOptional({ type: Boolean }) hidden?: boolean;
+}
+
+export class UpdateBulkGamesDto {
+  @ApiProperty({ type: [Number], description: 'Array of game IDs to update' })
+  ids!: number[];
+
+  @ApiProperty({ type: Boolean, description: 'Whether games are hidden' })
+  hidden!: boolean;
 }
 
 export class DeleteBulkDto {
@@ -93,6 +102,15 @@ export class DeleteBulkGamesDataDto {
 export class DeleteBulkGamesResponseDto {
   @ApiProperty({ type: Boolean }) success!: boolean;
   @ApiProperty({ type: DeleteBulkGamesDataDto }) data!: DeleteBulkGamesDataDto;
+}
+
+export class UpdateBulkGamesDataDto {
+  @ApiProperty({ type: [Number] }) updatedIds!: number[];
+}
+
+export class UpdateBulkGamesResponseDto {
+  @ApiProperty({ type: Boolean }) success!: boolean;
+  @ApiProperty({ type: UpdateBulkGamesDataDto }) data!: UpdateBulkGamesDataDto;
 }
 
 export class UploadResponseDto {

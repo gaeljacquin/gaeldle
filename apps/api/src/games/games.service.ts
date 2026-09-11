@@ -322,6 +322,27 @@ export class GamesService {
     return deletedRows.map((row) => row.id);
   }
 
+  async updateGamesHidden(
+    ids: number[],
+    hidden: boolean,
+    shouldRefresh = true,
+  ): Promise<number[]> {
+    const updatedRows = await this.databaseService.db
+      .update(games)
+      .set({
+        hidden,
+        updatedAt: new Date(),
+      })
+      .where(inArray(games.id, ids))
+      .returning({ id: games.id });
+
+    if (updatedRows.length > 0 && shouldRefresh) {
+      void this.refreshAllGamesView();
+    }
+
+    return updatedRows.map((row) => row.id);
+  }
+
   async validateGameForAdd(
     igdbId: number,
     actorId = 'unknown',

@@ -8,6 +8,8 @@ import { cn } from '@workspace/ui/lib/utils';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { useWishlistXboxStore } from '@/lib/stores/game-list-store';
 import { useGameListFilters } from '@/lib/hooks/use-game-list-filters';
+import { useBulkDelete } from '@/lib/hooks/use-bulk-delete';
+import { BulkDeleteControls } from '@/components/bulk-delete-controls';
 import { GameListControls } from '@/components/game-list-controls';
 import { GameListContent } from '@/components/game-list-content';
 import { calcTotalPages } from '@/lib/utils/pagination';
@@ -16,6 +18,11 @@ export function WishlistXboxView() {
   const store = useWishlistXboxStore();
   const { view, setView } = store;
   const filters = useGameListFilters({ store });
+
+  const bulkDelete = useBulkDelete({
+    queryKeysToInvalidate: ['wishlist-xbox-games', 'games'],
+    locationName: 'your Xbox wishlist',
+  });
 
   const { data, isLoading, isPlaceholderData, isFetching } = useQuery({
     ...paginatedXboxWishlistGamesQueryOptions(
@@ -51,6 +58,7 @@ export function WishlistXboxView() {
               totalItems={data?.meta?.total ?? 0}
               view={view}
               onViewChange={setView}
+              extraControls={<BulkDeleteControls bulkDelete={bulkDelete} />}
             />
           }
         />
@@ -72,6 +80,9 @@ export function WishlistXboxView() {
             parsedPageSize={Number.parseInt(filters.formValues.pageSize, 10)}
             formSearch={filters.formValues.search}
             formSearchIgdbId={filters.formValues.searchIgdbId}
+            isMultiSelect={bulkDelete.isMultiSelect}
+            selectedIds={bulkDelete.selectedIds}
+            toggleSelect={bulkDelete.toggleSelect}
             searchParams={filters.searchParams}
             onClearSearch={filters.clearSearch}
           />

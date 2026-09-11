@@ -61,6 +61,68 @@
         ]
       }
     },
+    "/api/games/bulk": {
+      "patch": {
+        "operationId": "GamesRouter_updateBulk",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBulkGamesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateBulkGamesResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Update multiple games",
+        "tags": [
+          "games"
+        ]
+      },
+      "delete": {
+        "operationId": "GamesRouter_deleteBulk",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteBulkDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteBulkGamesResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Delete multiple games by ID",
+        "tags": [
+          "games"
+        ]
+      }
+    },
     "/api/games/{id}": {
       "patch": {
         "operationId": "GamesRouter_update",
@@ -126,38 +188,6 @@
           }
         },
         "summary": "Delete game by ID",
-        "tags": [
-          "games"
-        ]
-      }
-    },
-    "/api/games/bulk": {
-      "delete": {
-        "operationId": "GamesRouter_deleteBulk",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteBulkDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteBulkGamesResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Delete multiple games by ID",
         "tags": [
           "games"
         ]
@@ -1074,6 +1104,55 @@
           "data"
         ]
       },
+      "UpdateBulkGamesDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "description": "Array of game IDs to update",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "hidden": {
+            "type": "boolean",
+            "description": "Whether games are hidden"
+          }
+        },
+        "required": [
+          "ids",
+          "hidden"
+        ]
+      },
+      "UpdateBulkGamesDataDto": {
+        "type": "object",
+        "properties": {
+          "updatedIds": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "updatedIds"
+        ]
+      },
+      "UpdateBulkGamesResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UpdateBulkGamesDataDto"
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      },
       "GameUpdateInputDto": {
         "type": "object",
         "properties": {
@@ -1130,6 +1209,9 @@
           },
           "themes": {
             "type": "object"
+          },
+          "hidden": {
+            "type": "boolean"
           }
         }
       },

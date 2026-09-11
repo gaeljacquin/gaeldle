@@ -24,10 +24,7 @@ export async function GET(request: NextRequest) {
         return or(eq(games.nintendo, true), eq(games.nintendoDemo, true));
       })();
 
-      return and(
-        filterCondition,
-        or(eq(games.hidden, false), isNull(games.hidden)),
-      );
+      return filterCondition;
     },
     { errorMessage: 'Failed to fetch Nintendo library' },
   );

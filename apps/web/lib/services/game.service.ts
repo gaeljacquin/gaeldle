@@ -44,6 +44,37 @@ export async function deleteBulkGames(ids: number[]): Promise<boolean> {
   return data.success;
 }
 
+export async function updateGameHidden(
+  id: number,
+  hidden: boolean,
+): Promise<boolean> {
+  const { data, error } = await apiClient.PATCH('/api/games/{id}', {
+    params: { path: { id } },
+    body: { hidden },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to update game hidden status');
+  }
+
+  return data.success;
+}
+
+export async function updateBulkGamesHidden(
+  ids: number[],
+  hidden: boolean,
+): Promise<boolean> {
+  const { data, error } = await apiClient.PATCH('/api/games/bulk', {
+    body: { ids, hidden },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to bulk update games hidden status');
+  }
+
+  return data.success;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {

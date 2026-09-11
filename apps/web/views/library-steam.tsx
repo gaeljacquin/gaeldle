@@ -11,12 +11,19 @@ import { GameListContent } from '@/components/game-list-content';
 import { steamGamesQueryOptions } from '@/lib/services/game.service';
 import { useSteamLibraryStore } from '@/lib/stores/game-list-store';
 import { useSteamLibraryFilters } from '@/lib/hooks/use-steam-library-filters';
+import { useBulkDelete } from '@/lib/hooks/use-bulk-delete';
+import { BulkDeleteControls } from '@/components/bulk-delete-controls';
 import { calcTotalPages } from '@/lib/utils/pagination';
 
 export function LibrarySteamView() {
   const store = useSteamLibraryStore();
   const { view, setView } = store;
   const filters = useSteamLibraryFilters({ store });
+
+  const bulkDelete = useBulkDelete({
+    queryKeysToInvalidate: ['steam-games', 'games'],
+    locationName: 'your Steam library',
+  });
 
   const { data, isLoading, isFetching } = useQuery(steamGamesQueryOptions());
 
@@ -151,6 +158,7 @@ export function LibrarySteamView() {
                   counts={data ? counts : undefined}
                 />
               }
+              extraControls={<BulkDeleteControls bulkDelete={bulkDelete} />}
             />
           }
         />
@@ -169,6 +177,9 @@ export function LibrarySteamView() {
             parsedPageSize={pageSize}
             formSearch={filters.formValues.search}
             formSearchIgdbId={filters.formValues.searchIgdbId}
+            isMultiSelect={bulkDelete.isMultiSelect}
+            selectedIds={bulkDelete.selectedIds}
+            toggleSelect={bulkDelete.toggleSelect}
             searchParams={filters.searchParams}
             onClearSearch={filters.clearSearch}
           />

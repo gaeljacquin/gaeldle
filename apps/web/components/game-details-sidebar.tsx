@@ -1,18 +1,35 @@
 'use client';
 
+import { useState } from 'react';
 import {
   useSuspenseQuery,
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { getGameByIgdbId, syncGame } from '@/lib/services/game.service';
+import {
+  getGameByIgdbId,
+  syncGame,
+  updateGameHidden,
+} from '@/lib/services/game.service';
 import { Button } from '@workspace/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@workspace/ui/alert-dialog';
 import { toast } from 'sonner';
 import {
   IconTrash,
   IconRefresh,
   IconCalendar,
   IconDeviceGamepad,
+  IconEye,
+  IconEyeOff,
 } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { Badge } from '@/components/badge';
@@ -24,6 +41,7 @@ export default function GameDetailsSidebar({
   igdbId: string;
   onDeleteDialogOpen: (open: boolean) => void;
 }) {
+  const [isHideDialogOpen, setIsHideDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { data: game } = useSuspenseQuery({
     queryKey: ['game', igdbId],
@@ -42,6 +60,30 @@ export default function GameDetailsSidebar({
       console.error(err);
     },
   });
+
+  const setHiddenMutation = useMutation({
+    mutationFn: (hidden: boolean) => updateGameHidden(game.id, hidden),
+    onSuccess: (_, hidden) => {
+      toast.success(
+        hidden
+          ? 'Game set as hidden successfully'
+          : 'Game unset as hidden successfully',
+      );
+      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+      setIsHideDialogOpen(false);
+    },
+    onError: (err, hidden) => {
+      toast.error(
+        hidden
+          ? 'Failed to set game as hidden'
+          : 'Failed to unset game as hidden',
+      );
+      console.error(err);
+    },
+  });
+
+  const isHidden = Boolean(game.hidden);
 
   return (
     <>
@@ -76,6 +118,68 @@ export default function GameDetailsSidebar({
           />
           {syncMutation.isPending ? 'Syncing...' : 'Sync with IGDB'}
         </Button>
+
+        <AlertDialog open={isHideDialogOpen} onOpenChange={setIsHideDialogOpen}>
+          <Button
+            variant="outline"
+            className={cn(
+              'w-full font-bold h-10 rounded-none',
+              setHiddenMutation.isPending
+                ? 'cursor-not-allowed opacity-70'
+                : 'cursor-pointer',
+            )}
+            disabled={setHiddenMutation.isPending}
+            onClick={() => setIsHideDialogOpen(true)}
+          >
+            {setHiddenMutation.isPending ? (
+              <IconRefresh
+                aria-hidden="true"
+                className="mr-2 size-4 animate-spin"
+              />
+            ) : isHidden ? (
+              <IconEye aria-hidden="true" className="mr-2 size-4" />
+            ) : (
+              <IconEyeOff aria-hidden="true" className="mr-2 size-4" />
+            )}
+            {setHiddenMutation.isPending
+              ? isHidden
+                ? 'Unsetting...'
+                : 'Setting...'
+              : isHidden
+                ? 'Unset as hidden'
+                : 'Set as hidden'}
+          </Button>
+          <AlertDialogContent className="rounded-none">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-2xl font-black uppercase">
+                {isHidden ? 'Unset game as hidden?' : 'Set game as hidden?'}
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-base">
+                {isHidden
+                  ? `Are you sure you want to unset "${game.name}" as hidden? It will be visible in game modes again.`
+                  : `Are you sure you want to set "${game.name}" as hidden? It will be hidden from game modes.`}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-4 gap-3">
+              <AlertDialogCancel
+                className="font-bold rounded-none flex-1 cursor-pointer"
+                onClick={() => setIsHideDialogOpen(false)}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  setIsHideDialogOpen(false);
+                  setHiddenMutation.mutate(!isHidden);
+                }}
+                className="font-bold rounded-none flex-1 cursor-pointer"
+              >
+                {isHidden ? 'Unset as hidden' : 'Set as hidden'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         <Button
           variant="destructive"
           className="w-full font-bold h-10 rounded-none cursor-pointer"

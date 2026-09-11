@@ -53,6 +53,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete multiple games by ID */
+        delete: operations["GamesRouter_deleteBulk"];
+        options?: never;
+        head?: never;
+        /** Update multiple games */
+        patch: operations["GamesRouter_updateBulk"];
+        trace?: never;
+    };
     "/api/games/{id}": {
         parameters: {
             query?: never;
@@ -69,23 +87,6 @@ export interface paths {
         head?: never;
         /** Update game details */
         patch: operations["GamesRouter_update"];
-        trace?: never;
-    };
-    "/api/games/bulk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete multiple games by ID */
-        delete: operations["GamesRouter_deleteBulk"];
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/api/games/add/validate-one": {
@@ -552,6 +553,19 @@ export interface components {
             operation: "created" | "updated";
             data: components["schemas"]["SyncGameDataDto"];
         };
+        UpdateBulkGamesDto: {
+            /** @description Array of game IDs to update */
+            ids: number[];
+            /** @description Whether games are hidden */
+            hidden: boolean;
+        };
+        UpdateBulkGamesDataDto: {
+            updatedIds: number[];
+        };
+        UpdateBulkGamesResponseDto: {
+            success: boolean;
+            data: components["schemas"]["UpdateBulkGamesDataDto"];
+        };
         GameUpdateInputDto: {
             name?: string;
             imageUrl?: string;
@@ -571,6 +585,7 @@ export interface components {
             playerPerspectives?: Record<string, never>;
             releaseDates?: Record<string, never>;
             themes?: Record<string, never>;
+            hidden?: boolean;
         };
         GameResponseDto: {
             success: boolean;
@@ -815,6 +830,52 @@ export interface operations {
             };
         };
     };
+    GamesRouter_deleteBulk: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteBulkDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeleteBulkGamesResponseDto"];
+                };
+            };
+        };
+    };
+    GamesRouter_updateBulk: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateBulkGamesDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpdateBulkGamesResponseDto"];
+                };
+            };
+        };
+    };
     GamesRouter_delete: {
         parameters: {
             query?: never;
@@ -857,29 +918,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GameResponseDto"];
-                };
-            };
-        };
-    };
-    GamesRouter_deleteBulk: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DeleteBulkDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeleteBulkGamesResponseDto"];
                 };
             };
         };

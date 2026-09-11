@@ -11,6 +11,8 @@ import { cn } from '@workspace/ui/lib/utils';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { useLibraryNintendoStore } from '@/lib/stores/game-list-store';
 import { useGameListFilters } from '@/lib/hooks/use-game-list-filters';
+import { useBulkDelete } from '@/lib/hooks/use-bulk-delete';
+import { BulkDeleteControls } from '@/components/bulk-delete-controls';
 import { GameListControls } from '@/components/game-list-controls';
 import { GameListContent } from '@/components/game-list-content';
 import { LibraryFilterToggleGroup } from '@/components/library-filter-toggle-group';
@@ -25,6 +27,11 @@ export function LibraryNintendoView() {
       default: 'all',
       validValues: ['all', 'owned', 'demos'],
     },
+  });
+
+  const bulkDelete = useBulkDelete({
+    queryKeysToInvalidate: ['nintendo-games', 'games'],
+    locationName: 'your Nintendo library',
   });
 
   const { data, isLoading, isPlaceholderData, isFetching } = useQuery({
@@ -69,6 +76,7 @@ export function LibraryNintendoView() {
                   onValueChange={filters.setFilter}
                 />
               }
+              extraControls={<BulkDeleteControls bulkDelete={bulkDelete} />}
             />
           }
         />
@@ -90,6 +98,9 @@ export function LibraryNintendoView() {
             parsedPageSize={Number.parseInt(filters.formValues.pageSize, 10)}
             formSearch={filters.formValues.search}
             formSearchIgdbId={filters.formValues.searchIgdbId}
+            isMultiSelect={bulkDelete.isMultiSelect}
+            selectedIds={bulkDelete.selectedIds}
+            toggleSelect={bulkDelete.toggleSelect}
             searchParams={filters.searchParams}
             onClearSearch={filters.clearSearch}
           />

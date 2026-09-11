@@ -82,7 +82,7 @@ export function BulkDeleteControls({ bulkDelete }: BulkDeleteControlsProps) {
               )}
             >
               <IconEyeOff size={16} className="mr-2" />
-              Set as hidden ({selectedIds.size})
+              Set as hidden
             </Button>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -123,7 +123,7 @@ export function BulkDeleteControls({ bulkDelete }: BulkDeleteControlsProps) {
               )}
             >
               <IconEye size={16} className="mr-2" />
-              Unset as hidden ({selectedIds.size})
+              Unset as hidden
             </Button>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -166,7 +166,7 @@ export function BulkDeleteControls({ bulkDelete }: BulkDeleteControlsProps) {
                 )}
               >
                 <IconHeartOff size={16} className="mr-2" />
-                Remove from wishlist ({selectedIds.size})
+                Remove from wishlist
               </Button>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -211,7 +211,7 @@ export function BulkDeleteControls({ bulkDelete }: BulkDeleteControlsProps) {
               )}
             >
               <IconTrash size={16} className="mr-2" />
-              Delete ({selectedIds.size})
+              Delete
             </Button>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -251,7 +251,7 @@ export function BulkDeleteControls({ bulkDelete }: BulkDeleteControlsProps) {
           >
             <span className="flex flex-row gap-2">
               <IconRestore size={16} />
-              Clear
+              Clear ({selectedIds.size})
             </span>
           </Button>
         </div>

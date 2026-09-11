@@ -152,7 +152,7 @@ export function GameListContent({
           <div
             key={game.id}
             className={cn(
-              'transition-opacity duration-200 relative group/game',
+              'transition-opacity duration-200 relative group/game isolate',
               view === 'list' &&
                 'flex gap-8 p-6 border border-border bg-card hover:bg-accent/50 transition-colors',
             )}

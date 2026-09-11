@@ -118,200 +118,192 @@ export function GameListControls({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
-        <div className="flex flex-col sm:flex-row flex-1 gap-4">
-          <form.Field name="search">
-            {(field) => (
-              <div className="relative flex-1 group">
-                <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
-                <Input
-                  placeholder="Search games by title..."
-                  className="px-9"
-                  value={field.state.value}
-                  onChange={(e) => {
-                    field.handleChange(e.target.value);
+      <div className="flex flex-wrap items-center gap-4">
+        <form.Field name="search">
+          {(field) => (
+            <div className="relative w-60 max-w-full group">
+              <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
+              <Input
+                placeholder="Search by title..."
+                className="px-9"
+                value={field.state.value}
+                onChange={(e) => {
+                  field.handleChange(e.target.value);
+                }}
+              />
+              {field.state.value ? (
+                <button
+                  onClick={() => {
+                    skipDebounceSearchRef.current = true;
+                    field.handleChange('');
+                    form.setFieldValue('page', 1);
                   }}
-                />
-                {field.state.value ? (
-                  <button
-                    onClick={() => {
-                      skipDebounceSearchRef.current = true;
-                      field.handleChange('');
-                      form.setFieldValue('page', 1);
-                    }}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 cursor-pointer"
-                    title="Clear search"
-                  >
-                    <IconX size={14} />
-                  </button>
-                ) : null}
-              </div>
-            )}
-          </form.Field>
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 cursor-pointer"
+                  title="Clear search"
+                >
+                  <IconX size={14} />
+                </button>
+              ) : null}
+            </div>
+          )}
+        </form.Field>
 
-          <form.Field name="searchIgdbId">
-            {(field) => (
-              <div className="relative w-full sm:w-64 group">
-                <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
-                <Input
-                  placeholder="Search games by IGDB ID..."
-                  className="pl-9 pr-9"
-                  value={field.state.value}
-                  onChange={(e) => {
-                    field.handleChange(e.target.value);
+        <form.Field name="searchIgdbId">
+          {(field) => (
+            <div className="relative w-56 max-w-full group">
+              <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary" />
+              <Input
+                placeholder="Search by IGDB ID..."
+                className="pl-9 pr-9"
+                value={field.state.value}
+                onChange={(e) => {
+                  field.handleChange(e.target.value);
+                }}
+              />
+              {field.state.value ? (
+                <button
+                  onClick={() => {
+                    skipDebounceSearchIgdbIdRef.current = true;
+                    field.handleChange('');
+                    form.setFieldValue('page', 1);
                   }}
-                />
-                {field.state.value ? (
-                  <button
-                    onClick={() => {
-                      skipDebounceSearchIgdbIdRef.current = true;
-                      field.handleChange('');
-                      form.setFieldValue('page', 1);
-                    }}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 cursor-pointer"
-                    title="Clear search"
-                  >
-                    <IconX size={14} />
-                  </button>
-                ) : null}
-              </div>
-            )}
-          </form.Field>
-        </div>
-
-        <div className="flex items-center gap-4 justify-between sm:justify-end">
-          <form.Field name="sortOption">
-            {(field) => (
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      variant="outline"
-                      size="default"
-                      className="flex-1 sm:w-40 sm:flex-none justify-between px-4 font-normal cursor-pointer"
-                    >
-                      <span className="truncate">
-                        {
-                          sortOptions.find(
-                            (opt) => opt.value === field.state.value,
-                          )?.label
-                        }
-                      </span>
-                      <IconSelector className="text-muted-foreground size-4 shrink-0" />
-                    </Button>
-                  }
-                />
-                <DropdownMenuContent
-                  className="w-(--anchor-width) min-w-0 p-1 bg-muted"
-                  align="end"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 cursor-pointer"
+                  title="Clear search"
                 >
-                  <DropdownMenuRadioGroup
-                    value={field.state.value}
-                    onValueChange={(val) => {
-                      field.handleChange(val as SortOption);
-                      form.setFieldValue('page', 1);
-                    }}
-                  >
-                    {sortOptions.map((opt) => (
-                      <DropdownMenuRadioItem
-                        key={opt.value}
-                        value={opt.value}
-                        className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
-                        closeOnClick={true}
-                      >
-                        {opt.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </form.Field>
+                  <IconX size={14} />
+                </button>
+              ) : null}
+            </div>
+          )}
+        </form.Field>
 
-          <form.Field name="pageSize">
-            {(field) => (
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      variant="outline"
-                      size="default"
-                      className="flex-1 sm:w-20 sm:flex-none justify-between px-4 font-normal cursor-pointer"
-                    >
-                      <span>{field.state.value}</span>
-                      <IconSelector className="text-muted-foreground size-4 shrink-0" />
-                    </Button>
-                  }
-                />
-                <DropdownMenuContent
-                  className="w-(--anchor-width) min-w-0 p-1 bg-muted"
-                  align="end"
-                >
-                  <DropdownMenuRadioGroup
-                    value={field.state.value}
-                    onValueChange={(val) => {
-                      field.handleChange(val as NumericString);
-                      form.setFieldValue('page', 1);
-                    }}
-                  >
-                    {pageSizes.map((sz, index) => (
-                      <DropdownMenuRadioItem
-                        key={index + '-' + sz}
-                        value={sz}
-                        className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
-                        closeOnClick={true}
-                      >
-                        {sz}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </form.Field>
-        </div>
-      </div>
-
-      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
-        {(Boolean(view && onViewChange) || Boolean(extraControls)) && (
-          <div className="flex flex-row items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
-            {view && onViewChange ? (
-              <div className="flex bg-muted p-1 border border-border">
-                {viewOptions.map((viewOption) => (
+        <form.Field name="sortOption">
+          {(field) => (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
                   <Button
-                    key={viewOption.value}
-                    variant={view === viewOption.value ? 'default' : 'ghost'}
-                    size="icon"
-                    onClick={() => onViewChange(viewOption.value)}
-                    title={viewOption.label}
-                    className="cursor-pointer"
+                    variant="outline"
+                    size="default"
+                    className="w-36 justify-between px-3 font-normal cursor-pointer shrink-0"
                   >
-                    <viewOption.icon size={20} />
+                    <span className="truncate">
+                      {
+                        sortOptions.find(
+                          (opt) => opt.value === field.state.value,
+                        )?.label
+                      }
+                    </span>
+                    <IconSelector className="text-muted-foreground size-4 shrink-0" />
                   </Button>
-                ))}
-              </div>
-            ) : null}
+                }
+              />
+              <DropdownMenuContent
+                className="w-auto min-w-(--anchor-width) p-1 bg-muted"
+                align="end"
+              >
+                <DropdownMenuRadioGroup
+                  value={field.state.value}
+                  onValueChange={(val) => {
+                    field.handleChange(val as SortOption);
+                    form.setFieldValue('page', 1);
+                  }}
+                >
+                  {sortOptions.map((opt) => (
+                    <DropdownMenuRadioItem
+                      key={opt.value}
+                      value={opt.value}
+                      className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
+                      closeOnClick={true}
+                    >
+                      {opt.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </form.Field>
 
-            {extraControls}
-          </div>
-        )}
+        <form.Field name="pageSize">
+          {(field) => (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="default"
+                    className="w-20 justify-between px-4 font-normal cursor-pointer shrink-0"
+                  >
+                    <span>{field.state.value}</span>
+                    <IconSelector className="text-muted-foreground size-4 shrink-0" />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent
+                className="w-(--anchor-width) min-w-0 p-1 bg-muted"
+                align="end"
+              >
+                <DropdownMenuRadioGroup
+                  value={field.state.value}
+                  onValueChange={(val) => {
+                    field.handleChange(val as NumericString);
+                    form.setFieldValue('page', 1);
+                  }}
+                >
+                  {pageSizes.map((sz, index) => (
+                    <DropdownMenuRadioItem
+                      key={index + '-' + sz}
+                      value={sz}
+                      className="pl-4 cursor-pointer data-unchecked:focus:bg-accent data-unchecked:focus:text-accent-foreground"
+                      closeOnClick={true}
+                    >
+                      {sz}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </form.Field>
 
-        <div className="flex items-center justify-end sm:ml-auto">
-          <Button
-            variant="outline"
-            onClick={clearSearch}
-            disabled={
-              isClearDisabled ??
-              (!formValues.search && !formValues.searchIgdbId && !isFiltered)
-            }
-            className="w-full sm:w-auto cursor-pointer gap-2"
-            title="Clear search and filters"
-          >
-            <IconX size={16} />
-            Clear search and filters
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          onClick={clearSearch}
+          disabled={
+            isClearDisabled ??
+            (!formValues.search && !formValues.searchIgdbId && !isFiltered)
+          }
+          className="cursor-pointer gap-2 shrink-0"
+          title="Clear search and filters"
+        >
+          <IconX size={16} />
+          Clear search and filters
+        </Button>
       </div>
+
+      {(Boolean(view && onViewChange) || Boolean(extraControls)) && (
+        <div className="flex flex-row items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+          {view && onViewChange ? (
+            <div className="flex bg-muted p-1 border border-border">
+              {viewOptions.map((viewOption) => (
+                <Button
+                  key={viewOption.value}
+                  variant={view === viewOption.value ? 'default' : 'ghost'}
+                  size="icon"
+                  onClick={() => onViewChange(viewOption.value)}
+                  title={viewOption.label}
+                  className="cursor-pointer"
+                >
+                  <viewOption.icon size={20} />
+                </Button>
+              ))}
+            </div>
+          ) : null}
+
+          {extraControls}
+        </div>
+      )}
 
       {(filterControl || totalPages > 1) && (
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">

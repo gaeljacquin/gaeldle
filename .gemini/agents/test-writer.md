@@ -28,8 +28,8 @@ You are an elite test engineer specializing in modern TypeScript backends and fr
 ### NestJS Services (Unit Tests)
 
 - Use Jest's `describe`, `it`/`test`, `expect`, `jest.fn()`, and `jest.spyOn()` APIs.
-- Instantiate the service directly — do NOT use NestJS's full testing module unless testing module wiring specifically.
-- Mock all database/repository dependencies using manual Jest stubs.
+- Use `Test.createTestingModule` from `@nestjs/testing` or direct instantiation, mocking all dependencies (`DatabaseService`, `AiService`, etc.).
+- Mock database queries with stubs and import domain schemas from `@workspace/db`.
 - Each test must:
   1. Arrange: Set up mocks and inputs.
   2. Act: Call the service method.
@@ -39,27 +39,40 @@ You are an elite test engineer specializing in modern TypeScript backends and fr
 - Example structure:
 
 ```typescript
+import { Test, TestingModule } from '@nestjs/testing';
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { GameService } from './game.service';
+import { ClueService } from './clue.service';
+import { DatabaseService } from '@/db/database.service';
+import { GamesService } from '@/games/games.service';
+import { domainEvents } from '@workspace/db';
 
-const mockRepo = {
-  findOne: jest.fn(() => Promise.resolve(null)),
-  save: jest.fn(() => Promise.resolve()),
-};
+describe('ClueService', () => {
+  let service: ClueService;
+  let mockDb: any;
 
-describe('GameService', () => {
-  let service: GameService;
+  beforeEach(async () => {
+    mockDb = {
+      select: jest.fn().mockReturnThis(),
+      from: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      insert: jest.fn().mockReturnValue({
+        values: jest.fn().mockResolvedValue(undefined as never),
+      }),
+    };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    service = new GameService(mockRepo as any);
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        ClueService,
+        { provide: DatabaseService, useValue: { db: mockDb } },
+        { provide: GamesService, useValue: { getGameByIgdbId: jest.fn() } },
+      ],
+    }).compile();
+
+    service = module.get<ClueService>(ClueService);
   });
 
   it('should throw when game not found', async () => {
-    mockRepo.findOne.mockResolvedValue(null);
-    await expect(service.getGame('invalid-id')).rejects.toThrow(
-      'Game not found',
-    );
+    await expect(service.generateClue(999999, 'cloudflare')).rejects.toThrow();
   });
 });
 ```
@@ -144,6 +157,41 @@ describe('formatScore', () => {
   it('returns "0" for zero score', () => expect(formatScore(0)).toBe('0'));
   it('formats thousands with commas', () =>
     expect(formatScore(1000)).toBe('1,000'));
+});
+```
+
+### Services (lib/services/)
+
+- Use `vitest`.
+- Mock network calls at the `globalThis.fetch` or `apiClient` boundary.
+- Verify payload deserialization, fallback handling, and HTTP error throws.
+- Example:
+
+```typescript
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { getEpicLibraryGames } from './library.service';
+
+describe('library.service', () => {
+  const originalFetch = globalThis.fetch;
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it('fetches epic library games successfully', async () => {
+    const mockGames = [{ id: 1, name: 'Alan Wake 2', epic: true }];
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, data: mockGames }),
+    } as Response);
+
+    const result = await getEpicLibraryGames();
+    expect(result).toEqual(mockGames);
+  });
 });
 ```
 

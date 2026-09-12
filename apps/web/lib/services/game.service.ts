@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api-client';
-import type { Game, ArtStyleValue } from '@workspace/api/db';
+import type { Game, ArtStyleValue } from '@workspace/db';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -44,6 +44,77 @@ export async function deleteBulkGames(ids: number[]): Promise<boolean> {
   return data.success;
 }
 
+export async function updateGameHidden(
+  id: number,
+  hidden: boolean,
+): Promise<boolean> {
+  const { data, error } = await apiClient.PATCH('/api/games/{id}', {
+    params: { path: { id } },
+    body: { hidden },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to update game hidden status');
+  }
+
+  return data.success;
+}
+
+export type WishlistKey =
+  | 'steamWishlist'
+  | 'epicWishlist'
+  | 'nintendoWishlist'
+  | 'xboxWishlist'
+  | 'humbleBundleWishlist';
+
+export async function updateGameWishlist(
+  id: number,
+  wishlistKey: WishlistKey,
+  value: boolean,
+): Promise<boolean> {
+  const { data, error } = await apiClient.PATCH('/api/games/{id}', {
+    params: { path: { id } },
+    body: { [wishlistKey]: value },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to update game wishlist status');
+  }
+
+  return data.success;
+}
+
+export async function updateBulkGamesHidden(
+  ids: number[],
+  hidden: boolean,
+): Promise<boolean> {
+  const { data, error } = await apiClient.PATCH('/api/games/bulk', {
+    body: { ids, hidden },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to bulk update games hidden status');
+  }
+
+  return data.success;
+}
+
+export async function updateBulkGamesWishlist(
+  ids: number[],
+  wishlistKey: WishlistKey,
+  value: boolean,
+): Promise<boolean> {
+  const { data, error } = await apiClient.PATCH('/api/games/bulk', {
+    body: { ids, [wishlistKey]: value },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to bulk update games wishlist status');
+  }
+
+  return data.success;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {
@@ -53,14 +124,18 @@ export interface PaginatedResponse<T> {
   };
 }
 
-export async function getPaginatedGames(
+export type SortField = 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt';
+
+export function buildPaginatedGamesUrl(
+  endpoint: string,
   page: number = 1,
   pageSize: number = 10,
   query?: string,
-  sortBy: 'name' | 'firstReleaseDate' | 'igdbId' | 'createdAt' = 'name',
+  sortBy: SortField = 'name',
   sortDir: 'asc' | 'desc' = 'asc',
   igdbId?: string,
-): Promise<PaginatedResponse<Game>> {
+  extraParams?: Record<string, string | undefined>,
+): string {
   const params = new URLSearchParams({
     page: String(page),
     pageSize: String(pageSize),
@@ -76,11 +151,219 @@ export async function getPaginatedGames(
     params.set('igdbId', igdbId);
   }
 
-  const url = '/api/games?' + params.toString();
+  if (extraParams) {
+    for (const [key, value] of Object.entries(extraParams)) {
+      if (value !== undefined) {
+        params.set(key, value);
+      }
+    }
+  }
+
+  return endpoint + '?' + params.toString();
+}
+
+export async function fetchPaginatedGames(
+  endpoint: string,
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+  extraParams?: Record<string, string | undefined>,
+): Promise<PaginatedResponse<Game>> {
+  const url = buildPaginatedGamesUrl(
+    endpoint,
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+    extraParams,
+  );
   const response = await fetchWithTimeout(url);
 
   return handleResponse<PaginatedResponse<Game>>(response);
 }
+
+export function makePaginatedPlatformQueryOptions(
+  queryKey: string,
+  endpoint: string,
+) {
+  return (
+    page: number = 1,
+    pageSize: number = 10,
+    query?: string,
+    sortBy: SortField = 'name',
+    sortDir: 'asc' | 'desc' = 'asc',
+    igdbId?: string,
+    extraParams?: Record<string, string | undefined>,
+  ) => ({
+    queryKey: [
+      queryKey,
+      { page, pageSize, query, sortBy, sortDir, igdbId, ...extraParams },
+    ],
+    queryFn: () =>
+      fetchPaginatedGames(
+        endpoint,
+        page,
+        pageSize,
+        query,
+        sortBy,
+        sortDir,
+        igdbId,
+        extraParams,
+      ),
+  });
+}
+
+export async function getPaginatedGames(
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+  filter?: string,
+): Promise<PaginatedResponse<Game>> {
+  return fetchPaginatedGames(
+    '/api/games',
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+    filter ? { filter } : undefined,
+  );
+}
+
+export const getPaginatedGogGames = (
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+) =>
+  fetchPaginatedGames(
+    '/api/private/libraries/gog',
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+  );
+
+export const getPaginatedHumbleBundleWishlist = (
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+) =>
+  fetchPaginatedGames(
+    '/api/private/wishlists/humble-bundle',
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+  );
+
+export const getPaginatedNintendoWishlistGames = (
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+) =>
+  fetchPaginatedGames(
+    '/api/private/wishlists/nintendo',
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+  );
+
+export const getPaginatedSteamWishlistGames = (
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+) =>
+  fetchPaginatedGames(
+    '/api/private/wishlists/steam',
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+  );
+
+export const getPaginatedEpicWishlistGames = (
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+) =>
+  fetchPaginatedGames(
+    '/api/private/wishlists/epic',
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+  );
+
+export const getPaginatedXboxGames = (
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+) =>
+  fetchPaginatedGames(
+    '/api/private/libraries/xbox',
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+  );
+
+export const getXboxWishlistGames = (
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+) =>
+  getPaginatedGames(
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+    'xboxWishlist',
+  );
 
 export async function getRandomGame(
   excludeIds: number[] = [],
@@ -338,6 +621,28 @@ export const paginatedGamesQueryOptions = (
     getPaginatedGames(page, pageSize, query, sortBy, sortDir, igdbId),
 });
 
+export const paginatedGogGamesQueryOptions = makePaginatedPlatformQueryOptions(
+  'gog-games',
+  '/api/private/libraries/gog',
+);
+
+export const paginatedNintendoWishlistGamesQueryOptions =
+  makePaginatedPlatformQueryOptions(
+    'nintendoWishlistGames',
+    '/api/private/wishlists/nintendo',
+  );
+
+export const humbleBundleWishlistQueryOptions =
+  makePaginatedPlatformQueryOptions(
+    'wishlist-humble-bundle',
+    '/api/private/wishlists/humble-bundle',
+  );
+
+export const paginatedEpicWishlistGamesQueryOptions =
+  makePaginatedPlatformQueryOptions(
+    'epicWishlistGames',
+    '/api/private/wishlists/epic',
+  );
 export const randomGameQueryOptions = (
   excludeIds: number[] = [],
   mode?: string,
@@ -363,3 +668,148 @@ export const searchGamesQueryOptions = (
   queryKey: ['searchGames', { query, limit, mode }],
   queryFn: () => searchGames(query, limit, mode),
 });
+
+export const getPaginatedAmazonGames = (
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+): Promise<PaginatedResponse<Game>> =>
+  fetchPaginatedGames(
+    '/api/private/libraries/amazon',
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+  );
+
+export const paginatedAmazonGamesQueryOptions =
+  makePaginatedPlatformQueryOptions(
+    'amazon-games',
+    '/api/private/libraries/amazon',
+  );
+
+export const paginatedXboxGamesQueryOptions = makePaginatedPlatformQueryOptions(
+  'library-xbox-games',
+  '/api/private/libraries/xbox',
+);
+
+export const paginatedXboxWishlistGamesQueryOptions = (
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+) => ({
+  queryKey: [
+    'wishlist-xbox',
+    { page, pageSize, query, sortBy, sortDir, igdbId },
+  ],
+  queryFn: () =>
+    getXboxWishlistGames(page, pageSize, query, sortBy, sortDir, igdbId),
+});
+
+export type NintendoFilter = 'all' | 'owned' | 'demos';
+
+export const getNintendoGames = (
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+  filter: NintendoFilter = 'all',
+): Promise<PaginatedResponse<Game>> =>
+  fetchPaginatedGames(
+    '/api/private/libraries/nintendo',
+    page,
+    pageSize,
+    query,
+    sortBy,
+    sortDir,
+    igdbId,
+    { filter },
+  );
+
+export const nintendoGamesQueryOptions = (
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  sortBy: SortField = 'name',
+  sortDir: 'asc' | 'desc' = 'asc',
+  igdbId?: string,
+  filter: NintendoFilter = 'all',
+) => ({
+  queryKey: [
+    'nintendo-games',
+    { page, pageSize, query, sortBy, sortDir, igdbId, filter },
+  ],
+  queryFn: () =>
+    getNintendoGames(page, pageSize, query, sortBy, sortDir, igdbId, filter),
+});
+
+export type SteamFilter = 'all' | 'owned' | 'demos';
+
+export async function getSteamGames(filter?: SteamFilter): Promise<Game[]> {
+  const params = new URLSearchParams();
+  if (filter && filter !== 'all') {
+    params.set('filter', filter);
+  }
+  const queryString = params.toString();
+  const url =
+    '/api/private/libraries/steam' + (queryString ? `?${queryString}` : '');
+  const response = await fetchWithTimeout(url);
+  const result = await handleResponse<{ success: boolean; data: Game[] }>(
+    response,
+  );
+
+  return result.data;
+}
+
+export const steamGamesQueryOptions = (filter?: SteamFilter) => ({
+  queryKey: ['steamGames', filter ?? 'all'],
+  queryFn: () => getSteamGames(filter),
+});
+
+export const paginatedSteamWishlistGamesQueryOptions =
+  makePaginatedPlatformQueryOptions(
+    'steamWishlistGames',
+    '/api/private/wishlists/steam',
+  );
+
+export async function getWishlistLastUpdated(
+  wishlist: WishlistKey | string,
+): Promise<string | null> {
+  const url = `/api/private/wishlists/last-updated?wishlist=${encodeURIComponent(wishlist)}`;
+  const response = await fetchWithTimeout(url);
+  const result = await handleResponse<{
+    success: boolean;
+    lastUpdatedAt: string | null;
+  }>(response);
+
+  return result.lastUpdatedAt ?? null;
+}
+
+export const wishlistLastUpdatedQueryOptions = (
+  wishlist: WishlistKey | string,
+) => ({
+  queryKey: ['wishlist-last-updated', wishlist],
+  queryFn: () => getWishlistLastUpdated(wishlist),
+});
+
+export function formatWishlistLastUpdated(
+  date: Date | string | null | undefined,
+): string | null {
+  if (!date) return null;
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (Number.isNaN(d.getTime())) return null;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `Last updated at ${yyyy}/${mm}/${dd}`;
+}

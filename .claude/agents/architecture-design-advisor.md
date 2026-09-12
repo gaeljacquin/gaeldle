@@ -68,11 +68,12 @@ Once you have enough context, always propose exactly **three options**:
 
 ## CONVENTIONS YOU MUST ENFORCE
 
-- **Monorepo structure**: Respect existing package boundaries. New features go in the right package — don't sprawl.
-- **OpenAPI**: All API surface is defined as NestJS Controllers with DTOs and Swagger annotations (`@ApiProperty`).
+- **Monorepo structure**: Respect existing package boundaries (`apps/api`, `apps/web`, `packages/db`, `packages/shared`, `packages/api-client`, `packages/ui`). New features go in the right package — don't sprawl. Database schemas and migrations belong in `packages/db`.
+- **OpenAPI**: All API surface is defined as NestJS Controllers with DTOs and Swagger annotations (`@ApiProperty`, `@ApiOperation`, `@ApiResponse`, `@ApiBody`).
 - **Next.js App Router**: Route groups, server components, and server actions follow established patterns. No pages router patterns.
 - **Data access**: Drizzle ORM only. No raw SQL in application code.
-- **Auth boundaries**: Always call out which procedures require authentication and at what role level.
+- **Game Mode Data Filtering**: Game modes must query `gameModeGameObject` and enforce `eq(games.hidden, false)`. Store and wishlist flags are excluded.
+- **Auth boundaries**: Always call out which procedures require authentication and at what role level (e.g. `HexclaveGuard`).
 - **cn utility**: Note in any UI-related design that conditional classNames must use `cn()` with conditionals on separate lines.
 - **No pnpm type-check**: Do not recommend or reference `pnpm type-check` in any workflow steps.
 

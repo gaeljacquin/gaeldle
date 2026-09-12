@@ -22,6 +22,13 @@ Before writing any code, read `AGENTS.md` at the project root. All project rules
 
 You ALWAYS follow this sequence.
 
+### Step 0 — Database Schema & Migrations (`packages/db`) (If Applicable)
+
+- If the feature requires schema modifications or new columns/tables, update schemas in `packages/db/src/schema/`.
+- Export typed schemas, selection objects, and inferred types from `@workspace/db`.
+- Run migrations or generation via `pnpm db:generate` / `pnpm db:migrate`.
+- For game mode features, ensure game mode queries select `gameModeGameObject` and filter `eq(games.hidden, false)`.
+
 ### Step 1 — Implement NestJS Controller & DTOs (`apps/api`)
 
 - Create or update DTO classes in `apps/api/src/[resource]/dto/` decorated with `@ApiProperty` / `@ApiPropertyOptional`.

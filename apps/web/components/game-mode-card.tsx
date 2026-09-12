@@ -1,5 +1,5 @@
 import { MenuCard, type MenuCardProps } from '@/components/menu-card';
-import { GameModeLevel } from '@workspace/api/db';
+import { GameModeLevel } from '@workspace/db';
 
 interface GameModeCardProps extends Omit<MenuCardProps, 'badge'> {
   level: GameModeLevel;

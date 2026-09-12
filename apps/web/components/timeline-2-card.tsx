@@ -2,9 +2,10 @@
 
 import { forwardRef } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
-import type { Game } from '@workspace/api/db';
+import type { Game } from '@workspace/db';
 import Image from 'next/image';
 import { timelineFormatDate } from '@workspace/shared';
+import { IconEyeOff } from '@tabler/icons-react';
 
 interface Timeline2CardProps {
   game: Game;
@@ -30,7 +31,7 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
       <div
         ref={ref}
         className={cn(
-          'relative overflow-hidden border-2 border-border bg-card shadow-sm select-none shrink-0',
+          'relative overflow-hidden border-2 border-border bg-card shadow-sm select-none shrink-0 isolate',
           'w-32 h-44',
           className,
         )}
@@ -53,6 +54,13 @@ export const Timeline2Card = forwardRef<HTMLDivElement, Timeline2CardProps>(
             </div>
           )}
         </div>
+
+        {game.hidden && (
+          <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 bg-black/80 text-amber-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider backdrop-blur-xs border border-amber-500/30">
+            <IconEyeOff size={10} aria-hidden="true" />
+            <span>Hidden</span>
+          </div>
+        )}
 
         {showTopBanner && (
           <div

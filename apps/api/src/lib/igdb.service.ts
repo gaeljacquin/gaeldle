@@ -1,7 +1,7 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { fetchWithTimeout } from '@/lib/utils';
-import type { IgdbGame } from '@/db/schema';
+import type { IgdbGame } from '@workspace/db';
 
 export type { IgdbGame };
 

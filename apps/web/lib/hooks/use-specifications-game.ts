@@ -11,7 +11,7 @@ import type {
   SpecificationGuess,
   RevealedClue,
   MatchType,
-} from '@workspace/api/db';
+} from '@workspace/db';
 import { getFriendlyErrorMessage } from '@workspace/ui/lib/utils';
 import {
   extractArray,

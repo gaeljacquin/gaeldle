@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  and,
-  // eq,
-  notInArray,
-  sql,
-  type SQL,
-} from 'drizzle-orm';
+import { and, eq, notInArray, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { games, gameObject } from '@workspace/api/db';
+import { games, gameModeGameObject } from '@workspace/db';
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,6 +19,8 @@ export async function GET(request: NextRequest) {
     const mode = (searchParams.get('mode') ?? undefined) as string | undefined;
 
     const conditions: (SQL | undefined)[] = [];
+
+    conditions.push(eq(games.hidden, false));
 
     if (excludeIds.length > 0) {
       conditions.push(notInArray(games.id, excludeIds));
@@ -52,7 +48,7 @@ export async function GET(request: NextRequest) {
     // conditions.push(eq(games.igdbId, 119388));
 
     const gamesList = await db
-      .select(gameObject)
+      .select(gameModeGameObject)
       .from(games)
       .where(and(...conditions))
       .orderBy(sql`RANDOM()`)

@@ -204,6 +204,48 @@
       "when": 1788036997590,
       "tag": "0028_reflective_blizzard",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1788713898401,
+      "tag": "0029_tan_dark_phoenix",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1788723702889,
+      "tag": "0030_violet_lizard",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1788728005320,
+      "tag": "0031_blue_sphinx",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1788736770113,
+      "tag": "0032_black_the_liberteens",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1788800966771,
+      "tag": "0033_furry_jazinda",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1789163248070,
+      "tag": "0034_bored_karen_page",
+      "breakpoints": true
     }
   ]
 }

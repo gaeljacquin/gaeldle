@@ -5,7 +5,7 @@ import configuration from '@/config/configuration';
 import { SqsService } from '@/lib/sqs.service';
 import { R2Service } from '@/lib/r2.service';
 import { DatabaseService } from '@/db/database.service';
-import { domainEvents } from '@/db/schema';
+import { domainEvents } from '@workspace/db';
 
 interface uploadImageProps {
   image: string;

@@ -21,7 +21,7 @@ RUN chsh -s /bin/zsh root
 RUN pip3 install --break-system-packages keyrings.alt
 
 # Install Antigravity CLI
-RUN curl -fsSL https://antigravity.google/cli/install.sh | bash
+RUN curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- --dir /usr/local/bin
 
 # Install Herdr CLI
 RUN curl -fsSL https://herdr.dev/install.sh | HERDR_INSTALL_DIR=/usr/local/bin bash

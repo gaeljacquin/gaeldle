@@ -61,6 +61,68 @@
         ]
       }
     },
+    "/api/games/bulk": {
+      "patch": {
+        "operationId": "GamesRouter_updateBulk",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBulkGamesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateBulkGamesResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Update multiple games",
+        "tags": [
+          "games"
+        ]
+      },
+      "delete": {
+        "operationId": "GamesRouter_deleteBulk",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteBulkDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteBulkGamesResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Delete multiple games by ID",
+        "tags": [
+          "games"
+        ]
+      }
+    },
     "/api/games/{id}": {
       "patch": {
         "operationId": "GamesRouter_update",
@@ -131,38 +193,6 @@
         ]
       }
     },
-    "/api/games/bulk": {
-      "delete": {
-        "operationId": "GamesRouter_deleteBulk",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteBulkDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteBulkGamesResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Delete multiple games by ID",
-        "tags": [
-          "games"
-        ]
-      }
-    },
     "/api/games/add/validate-one": {
       "post": {
         "operationId": "GamesRouter_validateIgdbIdAdd",
@@ -192,6 +222,248 @@
         "summary": "Validate IGDB ID before adding",
         "tags": [
           "games"
+        ]
+      }
+    },
+    "/api/libraries/steam": {
+      "get": {
+        "operationId": "LibrariesRouter_getSteamGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Steam games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/libraries/amazon": {
+      "get": {
+        "operationId": "LibrariesRouter_getAmazonGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Amazon games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/libraries/gog": {
+      "get": {
+        "operationId": "LibrariesRouter_getGogGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all GOG games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/libraries/epic": {
+      "get": {
+        "operationId": "LibrariesRouter_getEpicGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Epic games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/libraries/xbox": {
+      "get": {
+        "operationId": "LibrariesRouter_getXboxGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all XBOX games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/libraries/nintendo": {
+      "get": {
+        "operationId": "LibrariesRouter_getNintendoGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Nintendo games",
+        "tags": [
+          "libraries"
+        ]
+      }
+    },
+    "/api/wishlists/steam": {
+      "get": {
+        "operationId": "WishlistsRouter_getSteamWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Steam wishlist games",
+        "tags": [
+          "wishlists"
+        ]
+      }
+    },
+    "/api/wishlists/epic": {
+      "get": {
+        "operationId": "WishlistsRouter_getEpicWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Epic wishlist games",
+        "tags": [
+          "wishlists"
+        ]
+      }
+    },
+    "/api/wishlists/nintendo": {
+      "get": {
+        "operationId": "WishlistsRouter_getNintendoWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Nintendo wishlist games",
+        "tags": [
+          "wishlists"
+        ]
+      }
+    },
+    "/api/wishlists/humble-bundle": {
+      "get": {
+        "operationId": "WishlistsRouter_getHumbleBundleWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Humble Bundle wishlist games",
+        "tags": [
+          "wishlists"
+        ]
+      }
+    },
+    "/api/wishlists/xbox": {
+      "get": {
+        "operationId": "WishlistsRouter_getXboxWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all XBOX wishlist games",
+        "tags": [
+          "wishlists"
         ]
       }
     },
@@ -832,6 +1104,69 @@
           "data"
         ]
       },
+      "UpdateBulkGamesDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "description": "Array of game IDs to update",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "hidden": {
+            "type": "boolean",
+            "description": "Whether games are hidden"
+          },
+          "steamWishlist": {
+            "type": "boolean"
+          },
+          "epicWishlist": {
+            "type": "boolean"
+          },
+          "nintendoWishlist": {
+            "type": "boolean"
+          },
+          "xboxWishlist": {
+            "type": "boolean"
+          },
+          "humbleBundleWishlist": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "UpdateBulkGamesDataDto": {
+        "type": "object",
+        "properties": {
+          "updatedIds": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "updatedIds"
+        ]
+      },
+      "UpdateBulkGamesResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UpdateBulkGamesDataDto"
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      },
       "GameUpdateInputDto": {
         "type": "object",
         "properties": {
@@ -888,6 +1223,24 @@
           },
           "themes": {
             "type": "object"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "steamWishlist": {
+            "type": "boolean"
+          },
+          "epicWishlist": {
+            "type": "boolean"
+          },
+          "nintendoWishlist": {
+            "type": "boolean"
+          },
+          "xboxWishlist": {
+            "type": "boolean"
+          },
+          "humbleBundleWishlist": {
+            "type": "boolean"
           }
         }
       },
@@ -1013,6 +1366,24 @@
           "existsOnIgdb",
           "alreadyInDb",
           "canAdd"
+        ]
+      },
+      "GameListResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "data"
         ]
       },
       "GenerateImageDto": {

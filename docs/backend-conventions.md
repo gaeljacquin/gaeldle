@@ -19,7 +19,8 @@ apps/api/src/
 │   ├── [resource].controller.ts (or router) # NestJS Controller decorated with @Controller, @ApiTags, @ApiOperation, @ApiBody
 │   └── [resource].service.ts  # Business logic
 ├── db/
-│   └── schema/       # Drizzle schema exported at @workspace/api/db
+│   ├── database.module.ts  # NestJS Database module
+│   └── database.service.ts # NestJS Database service (imports schema from @workspace/db)
 └── scripts/
     └── generate-openapi.ts    # Standalone script booting Nest context to write apps/api/openapi.json
 ```
@@ -39,13 +40,15 @@ Read-only game operations are implemented as Next.js App Router route handlers, 
 
 ### Route handlers
 
-| Route                     | Auth                       | Description                                                                                                                                                                                                                                                          |
-| ------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /api/games`          | Public                     | Paginated game list. Params: `page`, `pageSize`, `q` (ILIKE), `sortBy` (`name`\|`firstReleaseDate`\|`igdbId`\|`createdAt`), `sortDir` (`asc`\|`desc`). When `q` is present, results are ordered by `similarity(name, q) DESC` via `pg_trgm` (ignores `sortBy`/`sortDir`).         |
-| `GET /api/games/artwork`  | Public                     | All games that have at least one artwork entry.                                                                                                                                                                                                                      |
-| `GET /api/games/search`   | Public                     | Trigram similarity search with optional game-mode filter. Params: `q` (min `GAME_SEARCH_MIN_CHARS` = 3 chars), `limit` (default 20, min 1), `mode` (GameModeSlug). Results ordered by `similarity(name, q) DESC`. Returns empty array when `q` is below the minimum. |
-| `GET /api/games/random`   | Public                     | One random game. Params: `excludeIds` (comma-separated), `mode` (GameModeSlug).                                                                                                                                                                                      |
-| `GET /api/games/[igdbId]` | Stack Auth (user required) | Single game by IGDB ID. Returns 401 if not authenticated.                                                                                                                                                                                                            |
+| Route                                    | Auth                       | Description                                                                                                                                                                                                                                                          |
+| ---------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/games`                         | Public                     | Paginated game list. Params: `page`, `pageSize`, `q` (ILIKE), `filter` (store or wishlist flag), `sortBy` (`name`\|`firstReleaseDate`\|`igdbId`\|`createdAt`), `sortDir` (`asc`\|`desc`). When `q` is present, results are ordered by `similarity(name, q) DESC` via `pg_trgm` (ignores `sortBy`/`sortDir`). |
+| `GET /api/games/artwork`                 | Public                     | All games that have at least one artwork entry.                                                                                                                                                                                                                      |
+| `GET /api/games/search`                  | Public                     | Trigram similarity search with optional game-mode filter. Params: `q` (min `GAME_SEARCH_MIN_CHARS` = 3 chars), `limit` (default 20, min 1), `mode` (GameModeSlug). Results ordered by `similarity(name, q) DESC`. Returns empty array when `q` is below the minimum. |
+| `GET /api/games/random`                  | Public                     | One random game. Filters for `hidden = false` and selects `gameModeGameObject`. Params: `excludeIds` (comma-separated), `mode` (GameModeSlug).                                                                                                                     |
+| `GET /api/private/games/[igdbId]`        | Stack Auth / User          | Single game by IGDB ID. Validates positive 32-bit integer (400 if invalid), returns 404 if not found, 200 with `{ success: true, data: Game }`.                                                                                                                      |
+| `GET /api/private/libraries/[platform]`  | Stack Auth / User          | Paginated library games for platform (`amazon`, `epic`, `gog`, `nintendo`, `steam`, `xbox`). Supports `page`, `pageSize`, `q`, `igdbId`, `sortBy`, `sortDir`. Nintendo and Steam support `filter=owned\|demos\|all`.                                            |
+| `GET /api/private/wishlists/[platform]`  | Stack Auth / User          | Paginated wishlist games for platform (`epic`, `humble-bundle`, `nintendo`, `steam`, `xbox`). Supports `page`, `pageSize`, `q`, `igdbId`, `sortBy`, `sortDir`.                                                                                                      |
 
 ### pg_trgm Trigram Index
 
@@ -54,7 +57,7 @@ A GIN trigram index (`game_name_trgm_idx`) exists on `game.name` (migration `001
 - Extension: `pg_trgm` is pre-installed on all environments (local, dev, prod/Neon). No `CREATE EXTENSION` migration is needed.
 - Ordering: both `GET /api/games` (when `q` is present) and `GET /api/games/search` use `similarity(name, q) DESC` from `pg_trgm` so the most relevant matches appear first.
 - Minimum query length: `GAME_SEARCH_MIN_CHARS = 3` — `pg_trgm` needs at least 3 characters to generate trigrams, so queries shorter than 3 chars return an empty result immediately without hitting the DB.
-- Migration note: the index is created with plain `CREATE INDEX` (not `CONCURRENTLY`) so it can run inside a Drizzle transaction. Drizzle Kit cannot generate this migration automatically — it was written by hand and registered in `apps/api/drizzle/meta/_journal.json`.
+- Migration note: the index is created with plain `CREATE INDEX` (not `CONCURRENTLY`) so it can run inside a Drizzle transaction. Drizzle Kit cannot generate this migration automatically — it was written by hand and registered in `packages/db/drizzle/meta/_journal.json`.
 
 ### DB client
 
@@ -88,10 +91,14 @@ All write, admin, and AI generation operations are implemented in `apps/api` con
 | -------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/api/games/sync`                                  | POST   | Sync (upsert) a single game from IGDB by `igdb_id`. Used by the Add Game feature to commit a validated game.                                                                                                                                   |
 | `/api/games/:id`                                   | DELETE | Delete a single game by ID.                                                                                                                                                                                                                    |
+| `/api/games/:id`                                   | PATCH  | Update game details with `GameUpdateInputDto`.                                                                                                                                                                                                 |
 | `/api/games/bulk`                                  | DELETE | Bulk delete games by ID array.                                                                                                                                                                                                                 |
-| `/api/image-gen/generate-image`                    | POST   | Generate an AI image for a single game.                                                                                                                                                                                                        |
+| `/api/image-gen/generate-image`                    | POST   | Generate an AI image for a single game. If an image previously existed in that art style, it is deleted from Cloudflare R2 upon replacement. Updates `imageGen` JSON array.                                                                     |
+| `/api/image-gen/delete-image`                      | POST   | Delete a generated AI image for a game by `igdbId` and `artStyle`. Removes image from Cloudflare R2 bucket and deletes entry from `imageGen` JSON array in the database.                                                                     |
 | `/api/image-gen/generate-images`                   | POST   | Start a bulk AI image generation job.                                                                                                                                                                                                          |
 | `/api/image-gen/generate-images/:imageGenId/status` | GET    | Poll the status of an in-progress bulk image job.                                                                                                                                                                                              |
+| `/api/libraries/:platform`                         | GET    | Get all games for a library platform (`steam`, `amazon`, `gog`, `epic`, `xbox`, `nintendo`).                                                                                                                                                   |
+| `/api/wishlists/:platform`                         | GET    | Get all games for a wishlist platform (`steam`, `epic`, `nintendo`, `humble-bundle`, `xbox`).                                                                                                                                                  |
 | `/api/games/add/validate-one`                      | POST   | Validate a single IGDB ID before adding: checks IGDB existence and DB duplicate. Returns `{ igdbId, existsOnIgdb, alreadyInDb, gameName, canAdd }`.                                                                                            |
 | `/api/games/replace-game/validate-one`              | POST   | Validate a current/replacement IGDB ID pair before replacing: checks both DB and IGDB. Returns `{ current, replacement, currentExistsInDb, currentGameName, replacementExistsOnIgdb, replacementAlreadyInDb, replacementGameName, canApply }`. |
 | `/api/games/replace-games`                         | POST   | Replace up to 20 games by swapping their IGDB IDs. Input: array of `{ current, replacement }` pairs. Output: `{ success, results[] }` where each result has `status: 'updated' \| 'skipped' \| 'error'`.                                    |
@@ -99,13 +106,27 @@ All write, admin, and AI generation operations are implemented in `apps/api` con
 | `/api/clue/history`                                | GET    | Get clue generation history for a game by `igdbId`.                                                                                                                                                                                            |
 | `/api/clue/restore`                                | POST   | Restore a previously generated clue from history by `historyId`.                                                                                                                                                                               |
 
+## Database Package (`@workspace/db`)
+
+Database schemas, migrations, and database administration scripts live in `packages/db`:
+
+- **Schema definition**: `packages/db/src/schema/game.ts` defines the `games` table with columns for store libraries (`steam`, `epic`, `gog`, `nintendo`, `amazon`, `microsoft`, `xbox`), store demos (`steamDemo`, `epicDemo`, `nintendoDemo`), wishlists (`steamWishlist`, `epicWishlist`, `nintendoWishlist`, `xboxWishlist`, `humbleBundleWishlist`), and visibility (`hidden`).
+- **Partial indexes**: Created on `id` where each respective store flag is `true`, and where `hidden = false`.
+- **Field selection objects**:
+  - `gameObject`: Selects all game columns including store and wishlist flags.
+  - `gameModeGameObject`: Selects standard game metadata while excluding all store and wishlist boolean flags.
+- **Exported types**:
+  - `Game`: Full game record (`typeof allGames.$inferSelect`).
+  - `GameModeGame`: Omitted type stripping store and wishlist flags, used for game mode sessions.
+  - `GameInsert`: Insert model for games.
+
 ## AI & External Services
 
 ### AiService (`apps/api/src/lib/ai.service.ts`)
 Injectable service providing multi-provider AI text and image generation:
 - **Image Generation**: Cloudflare AI (`@cf/stabilityai/stable-diffusion-xl-base-1.0`).
-- **Text Generation (Cloudflare)**: Cloudflare Workers AI for JSON and prompt completions.
-- **Text Generation (AWS Bedrock)**: AWS Bedrock runtime (`@aws-sdk/client-bedrock-runtime`) using `ConverseCommand` for high-quality game clues.
+- **Text Generation (Cloudflare)**: Cloudflare Workers AI for JSON and prompt completions (`@cf/meta/llama-3.1-8b-instruct`).
+- **Text Generation (AWS Bedrock)**: AWS Bedrock runtime (`@aws-sdk/client-bedrock-runtime`) using `ConverseCommand` with model `us.amazon.nova-2-lite-v1:0` for high-quality game clues.
 
 ### IgdbService (`apps/api/src/lib/igdb.service.ts`)
 Injectable service that communicates with the IGDB API (via Twitch OAuth2 credentials):

@@ -2,11 +2,11 @@
 
 ## Moving Parts
 
-- **Monorepo**: Turborepo + `ni` (pnpm workspaces)
+- **Monorepo**: Turborepo + `ni` (pnpm@12.3.4 workspaces)
 - **Backend**: NestJS (API)
 - **Frontend**: Next.js 16 (App Router)
 - **API Protocol**: OpenAPI + openapi-typescript + openapi-fetch (Type-safe communication)
-- **Database**: PostgreSQL 17 + Drizzle ORM
+- **Database**: PostgreSQL 17 + Drizzle ORM (`@workspace/db`)
 - **Authentication**: Stack Auth
 - **AI Providers**: Cloudflare Workers AI (Image Gen, Text) & AWS Bedrock (Clue Text Generation)
 - **Storage**: Cloudflare R2 (S3-compatible)
@@ -24,6 +24,7 @@ apps/
   web/        # Next.js App (Read operations, Game views)
 packages/
   api-client/ # Generated openapi-fetch client and TypeScript schema (@workspace/api-client)
+  db/         # Drizzle ORM schema, migrations, and database scripts (@workspace/db)
   shared/     # Shared constants and utility functions (@workspace/shared)
   ui/         # Shared UI component library (@workspace/ui)
 docs/         # Developer documentation

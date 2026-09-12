@@ -123,19 +123,49 @@ Props:
 - `stuckState: 'none' | 'loading'` — `'loading'` renders a full-screen centered layout; `'none'` renders a compact inline block suitable for embedding inside a card or image placeholder.
 - `className?: string` — forwarded to the wrapper `div` when `stuckState === 'none'`.
 
-Usage: import `Stuck` from `@/components/stuck` and render `<Stuck stuckState='loading' />` for game loading states, or `<Stuck stuckState='none' className="..." />` when embedding inside a fixed-size container.
+### GameListControls & GameListContent
+
+The game catalogue and list views are decomposed into reusable presentation components and hooks:
+
+- **`GameListControls`** (`apps/web/components/game-list-controls.tsx`): Shared search, filter, and pagination bar. Encapsulates title search input, IGDB ID search, sorting dropdowns, page size selector (supports 10, 25, 50, 100), view mode toggles (grid, table, compact), multi-select toggle, and bulk deletion confirmation dialog.
+- **`GameListContent`** (`apps/web/components/game-list-content.tsx`): Renders game listings across grid, table, or compact layout with multi-selection checkboxes, empty state handling, and clear search actions.
+- **`LibraryFilterToggleGroup`** (`apps/web/components/library-filter-toggle-group.tsx`): Platform filter toggles (`all`, `owned`, `demos`) used in platform-specific views such as Steam and Nintendo.
+- **`DashboardBacklink`** (`apps/web/components/dashboard-backlink.tsx`): Smart back button that returns to the user's previous origin page (e.g. library or wishlist), defaulting safely to `/dashboard`.
+
+### Catalogue Filtering & Store Architecture
+
+- **`useGameListFilters`** (`apps/web/lib/hooks/use-game-list-filters.ts`): Reusable hook handling query parameters, debounced input, and TanStack Form state for search, sorting, and pagination.
+- **`useGameListStore`** (`apps/web/lib/stores/game-list-store.ts`): Replaces `dashboard-store.ts`. Manages client-side list state: active view mode (`grid` | `table` | `compact`), `isMultiSelect`, and `selectedIds` set for bulk actions.
+
+## Store Library & Wishlist Pages
+
+The sidebar exposes dedicated, collapsible **Library** and **Wishlist** sections allowing users to browse their synced game collections by platform:
+
+| Section  | Route                               | View file                                      |
+| -------- | ----------------------------------- | ---------------------------------------------- |
+| Library  | `/dashboard/library/steam`          | `apps/web/views/library-steam.tsx`             |
+| Library  | `/dashboard/library/epic`           | `apps/web/views/library-epic.tsx`              |
+| Library  | `/dashboard/library/gog`            | `apps/web/views/library-gog.tsx`               |
+| Library  | `/dashboard/library/nintendo`       | `apps/web/views/library-nintendo.tsx`          |
+| Library  | `/dashboard/library/amazon`         | `apps/web/views/library-amazon.tsx`            |
+| Library  | `/dashboard/library/xbox`           | `apps/web/views/library-xbox.tsx`              |
+| Wishlist | `/dashboard/wishlist/steam`         | `apps/web/views/wishlist-steam.tsx`            |
+| Wishlist | `/dashboard/wishlist/epic`          | `apps/web/views/wishlist-epic.tsx`             |
+| Wishlist | `/dashboard/wishlist/nintendo`      | `apps/web/views/wishlist-nintendo.tsx`         |
+| Wishlist | `/dashboard/wishlist/xbox`          | `apps/web/views/wishlist-xbox.tsx`             |
+| Wishlist | `/dashboard/wishlist/humble-bundle` | `apps/web/views/wishlist-humble-bundle.tsx`     |
 
 ## Admin Dashboard Pages
 
 Dashboard pages for game catalogue management and utilities. The sidebar exposes a single **Utilities** link (`/dashboard/utilities`) that acts as a hub for all admin tool pages.
 
-| Route                       | View file                           | Description                                                                                         |
-| --------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `/dashboard/utilities`      | `apps/web/views/utilities.tsx`      | Hub page listing all admin utility tools as `MenuCard` tiles.                                       |
-| `/dashboard/add-game`       | `apps/web/views/add-game.tsx`       | Add one or more new games to the DB by IGDB ID. Max `ADD_GAME_MAX_ROWS` (20) entries per submission. |
-| `/dashboard/replace-game`   | `apps/web/views/replace-game.tsx`   | Replace existing games by swapping IGDB IDs. Max `REPLACE_GAME_MAX_ROWS` (20) pairs per submission. |
-| `/dashboard/image-gen`      | `apps/web/views/image-gen.tsx`      | Bulk AI image generation for games.                                                                 |
-| `/dashboard/discover-games` | `apps/web/views/discover-games.tsx` | Browse and discover games from IGDB; select games to add to the library.                            |
+| Route                       | View file                           | Description                                                                                            |
+| --------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `/dashboard/utilities`      | `apps/web/views/utilities.tsx`      | Hub page listing all admin utility tools as `MenuCard` tiles.                                          |
+| `/dashboard/add-game`       | `apps/web/views/add-game.tsx`       | Add one or more new games to the DB by IGDB ID. Max `ADD_GAME_MAX_ROWS` (20) entries per submission.    |
+| `/dashboard/replace-game`   | `apps/web/views/replace-game.tsx`   | Replace existing games by swapping IGDB IDs. Max `REPLACE_GAME_MAX_ROWS` (20) pairs per submission.    |
+| `/dashboard/image-gen`      | `apps/web/views/image-gen.tsx`      | Bulk AI image generation for games.                                                                    |
+| `/dashboard/discover-games` | `apps/web/views/discover-games.tsx` | Browse and discover games from IGDB; select games to add to the library.                               |
 
 The Add Game and Replace Game pages use a validate-then-commit pattern: each entry or row validates in real time via a debounced TanStack Query call, and the submit button is only enabled when all entries/rows pass validation.
 
@@ -260,3 +290,19 @@ In `GameListPlusImage` and `Specifications`:
 ### Mode Gradient Color Picker
 
 `apps/web/views/edit-modes.tsx` includes an interactive gradient editor allowing administrators to customize game mode card gradients with Start Color, End Color native color pickers, and direct CSS gradient string inputs.
+
+### Game Details Image Generation Tab
+
+`apps/web/components/game-details-image-gen-tab.tsx` provides interactive AI image generation for game details:
+- **Layout**: The "Generate image" action button is positioned directly under the generated image container.
+- **Collapsible Prompts**: Saved prompts and live prompt preview can be expanded or collapsed via `@workspace/ui`'s `Collapsible` primitive.
+- **Delete Generated Image**: Allows deleting a generated image for a selected art style via `deleteGeneratedImage(igdbId, artStyleValue)` (`POST /api/image-gen/delete-image`), which purges the image file from Cloudflare R2 and removes the style entry from the DB `imageGen` array.
+- **Replacement Behavior**: When generating an image for an art style that already has an existing image, the old file is deleted from Cloudflare R2 automatically upon successful generation and save.
+- **Cross-tab Notifications**: Toast notifications appear even if the user has navigated to other tabs while image generation is in flight.
+
+## UI Primitives (`packages/ui`)
+
+Shared components in `packages/ui/src/components/` include:
+- `collapsible.tsx`: Accessible collapsible disclosure primitives (`Collapsible`, `CollapsibleTrigger`, `CollapsibleContent`).
+- `toggle.tsx`: Two-state toggle button primitive.
+- `toggle-group.tsx`: Grouped toggle buttons (`ToggleGroup`, `ToggleGroupItem`) with single or multiple selection support.

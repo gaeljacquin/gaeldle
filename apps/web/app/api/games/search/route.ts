@@ -1,8 +1,8 @@
 // ORDER BY uses similarity() from the pg_trgm extension (GIN index: game_name_trgm_idx)
 import { NextRequest, NextResponse } from 'next/server';
-import { and, sql, type SQL } from 'drizzle-orm';
+import { and, eq, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { games, gameObject } from '@workspace/api/db';
+import { games, gameModeGameObject } from '@workspace/db';
 import { GAME_SEARCH_MIN_CHARS } from '@workspace/shared';
 
 export async function GET(request: NextRequest) {
@@ -16,7 +16,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: [] });
     }
 
-    const whereClause: SQL[] = [sql`name ILIKE ${'%' + q + '%'}`];
+    const whereClause: (SQL | undefined)[] = [
+      sql`name ILIKE ${'%' + q + '%'}`,
+      eq(games.hidden, false),
+    ];
 
     if (mode === 'artwork') {
       whereClause.push(
@@ -35,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     const gamesList = await db
-      .select(gameObject)
+      .select(gameModeGameObject)
       .from(games)
       .where(and(...whereClause))
       .limit(limit)

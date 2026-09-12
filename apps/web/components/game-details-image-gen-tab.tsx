@@ -39,12 +39,12 @@ import {
   IconTrash,
   IconChevronDown,
 } from '@tabler/icons-react';
-import { Game, type ArtStyleValue } from '@workspace/api/db';
+import { Game, type ArtStyleValue } from '@workspace/db';
 import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
 import { artStylesQueryOptions } from '@/lib/services/art-style.service';
-import type { ArtStyle } from '@workspace/api/db';
+import type { ArtStyle } from '@workspace/db';
 import {
   Select,
   SelectContent,

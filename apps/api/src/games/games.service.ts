@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { eq, inArray, sql, and, desc } from 'drizzle-orm';
+import { eq, inArray, sql, and, desc, or } from 'drizzle-orm';
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { DatabaseService } from '@/db/database.service';
@@ -13,7 +13,7 @@ import {
   GameInsert,
   domainEvents,
   queriedGames,
-} from '@/db/schema';
+} from '@workspace/db';
 import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
@@ -49,6 +49,29 @@ export class GamesService {
       .limit(1);
 
     return game || null;
+  }
+
+  async getGamesByFilter(
+    filterColumn:
+      | 'steam'
+      | 'amazon'
+      | 'gog'
+      | 'epic'
+      | 'xbox'
+      | 'nintendo'
+      | 'steamWishlist'
+      | 'epicWishlist'
+      | 'nintendoWishlist'
+      | 'xboxWishlist'
+      | 'humbleBundleWishlist',
+  ): Promise<Game[]> {
+    const col = games[filterColumn];
+
+    return this.databaseService.db
+      .select(gameObject)
+      .from(games)
+      .where(eq(col, true))
+      .orderBy(games.name);
   }
 
   private refreshTimeout: NodeJS.Timeout | null = null;
@@ -266,6 +289,10 @@ export class GamesService {
       .where(eq(games.id, id))
       .returning();
 
+    if (updatedGame) {
+      await this.recordWishlistRemovalEvents([updatedGame], updates);
+    }
+
     if (updatedGame && shouldRefresh) {
       void this.refreshAllGamesView();
     }
@@ -297,6 +324,110 @@ export class GamesService {
     }
 
     return deletedRows.map((row) => row.id);
+  }
+
+  async updateBulkGames(
+    ids: number[],
+    updates: Partial<GameInsert>,
+    shouldRefresh = true,
+  ): Promise<number[]> {
+    const updatedRows = await this.databaseService.db
+      .update(games)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(inArray(games.id, ids))
+      .returning({ id: games.id, name: games.name });
+
+    if (updatedRows.length > 0) {
+      await this.recordWishlistRemovalEvents(updatedRows, updates);
+    }
+
+    if (updatedRows.length > 0 && shouldRefresh) {
+      void this.refreshAllGamesView();
+    }
+
+    return updatedRows.map((row) => row.id);
+  }
+
+  private async recordWishlistRemovalEvents(
+    rows: Array<{ id: number; name?: string }>,
+    updates: Partial<GameInsert>,
+  ): Promise<void> {
+    const wishlistKeys = [
+      'steamWishlist',
+      'epicWishlist',
+      'nintendoWishlist',
+      'xboxWishlist',
+      'humbleBundleWishlist',
+    ] as const;
+
+    const wishlistMap: Record<string, string> = {
+      steamWishlist: 'steam',
+      epicWishlist: 'epic',
+      nintendoWishlist: 'nintendo',
+      xboxWishlist: 'xbox',
+      humbleBundleWishlist: 'humble-bundle',
+    };
+
+    const removedKeys = wishlistKeys.filter((key) => updates[key] === false);
+    if (removedKeys.length === 0 || rows.length === 0) {
+      return;
+    }
+
+    const events: Array<{
+      eventType: string;
+      actorId: string;
+      payload: Record<string, unknown>;
+    }> = [];
+    for (const row of rows) {
+      for (const key of removedKeys) {
+        events.push({
+          eventType: 'wishlist.game_removed',
+          actorId: 'system',
+          payload: {
+            gameId: row.id,
+            gameName: row.name,
+            wishlist: wishlistMap[key],
+            wishlistKey: key,
+          },
+        });
+      }
+    }
+
+    try {
+      await this.databaseService.db.insert(domainEvents).values(events);
+    } catch (error) {
+      console.error('Failed to record wishlist removal event:', error);
+    }
+  }
+
+  async getWishlistLastRemovedAt(wishlistOrKey: string): Promise<Date | null> {
+    const [latest] = await this.databaseService.db
+      .select({ occurredAt: domainEvents.occurredAt })
+      .from(domainEvents)
+      .where(
+        and(
+          eq(domainEvents.eventType, 'wishlist.game_removed'),
+          or(
+            sql`${domainEvents.payload}->>'wishlist' = ${wishlistOrKey}`,
+            sql`${domainEvents.payload}->>'wishlistKey' = ${wishlistOrKey}`,
+          ),
+        ),
+      )
+      .orderBy(desc(domainEvents.occurredAt))
+      .limit(1);
+
+    return latest?.occurredAt ?? null;
+  }
+
+  async updateGamesHidden(
+    ids: number[],
+    hidden: boolean,
+    shouldRefresh = true,
+  ): Promise<number[]> {
+    return this.updateBulkGames(ids, { hidden }, shouldRefresh);
   }
 
   async validateGameForAdd(

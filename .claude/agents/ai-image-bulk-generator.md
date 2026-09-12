@@ -91,7 +91,7 @@ The script must:
    ```typescript
    import { Pool } from 'pg';
    import { drizzle } from 'drizzle-orm/node-postgres';
-   import * as schema from '@workspace/api/db';
+   import * as schema from '@workspace/db';
    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
    const db = drizzle(pool, { schema });
    ```
@@ -146,7 +146,7 @@ The script must:
    });
    const rawBuffer = Buffer.from(await response.arrayBuffer());
    ```
-6. **Optimize with sharp** (jpeg, quality 85) — same as `games.router.ts`:
+6. **Optimize with sharp** (jpeg, quality 85) — same as `apps/api/src/image-gen/image-gen.service.ts`:
    ```typescript
    import sharp from 'sharp';
    const imageBuffer = await sharp(rawBuffer).jpeg({ quality: 85 }).toBuffer();
@@ -172,16 +172,29 @@ The script must:
      }),
    );
    ```
-8. **Build public URL** and **update DB** — same pattern as `games.router.ts`:
+8. **Build public URL** and **update DB** — same pattern as `apps/api/src/image-gen/image-gen.service.ts`:
    ```typescript
    import { eq } from 'drizzle-orm';
    const r2PublicUrl = process.env.R2_PUBLIC_URL!.startsWith('http')
      ? process.env.R2_PUBLIC_URL!
      : `https://${process.env.R2_PUBLIC_URL}`;
    const publicUrl = `${r2PublicUrl}/${key}`;
+   const imageGenList = game.imageGen ? [...game.imageGen] : [];
+   imageGenList.push({
+     [resolvedStyle.value]: {
+       url: publicUrl,
+       prompt,
+       provider: 'cloudflare',
+     },
+   });
    await db
      .update(schema.games)
-     .set({ aiImageUrl: publicUrl, aiPrompt: prompt, updatedAt: new Date() })
+     .set({
+       aiImageUrl: publicUrl,
+       aiPrompt: prompt,
+       imageGen: imageGenList,
+       updatedAt: new Date(),
+     })
      .where(eq(schema.games.id, game.id));
    ```
 9. **Handle errors per game**: if a game fails, log it and continue to the next
@@ -217,7 +230,7 @@ After the script exits, provide a summary:
 
 - **Never overwrite** an existing `ai_image_url` — the query filters `IS NULL` only
 - If image generation or upload fails for a game, skip the DB write for that game
-- Do not modify `games.router.ts`, `ai.service.ts`, `s3.service.ts`, or any existing service — the script is standalone
+- Do not modify `image-gen.service.ts`, `ai.service.ts`, `s3.service.ts`, or any existing service — the script is standalone
 
 ---
 

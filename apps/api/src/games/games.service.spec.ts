@@ -14,7 +14,7 @@ import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';
-import { domainEvents, queriedGames } from '@/db/schema';
+import { domainEvents, queriedGames } from '@workspace/db';
 
 type AsyncMock = jest.Mock<(...args: unknown[]) => Promise<unknown>>;
 
@@ -607,6 +607,28 @@ describe('GamesService', () => {
         }),
       );
     });
+
+    it('should record wishlist.game_removed domain event when removing game from wishlist', async () => {
+      const updatedGame = { id: 1, name: 'Hades', steamWishlist: false };
+      resolveValue = [updatedGame];
+
+      await service.updateGame(1, { steamWishlist: false });
+
+      expect(mockDb.insert).toHaveBeenCalledWith(domainEvents);
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            eventType: 'wishlist.game_removed',
+            payload: expect.objectContaining({
+              gameId: 1,
+              gameName: 'Hades',
+              wishlist: 'steam',
+              wishlistKey: 'steamWishlist',
+            }),
+          }),
+        ]),
+      );
+    });
   });
 
   describe('deleteGame', () => {
@@ -703,6 +725,125 @@ describe('GamesService', () => {
       const result = await service.deleteGames([10, 20]);
 
       expect(result).toEqual([10, 20]);
+    });
+  });
+
+  describe('updateGamesHidden', () => {
+    it('should update multiple games hidden status and return ids when rows updated', async () => {
+      const updatedRows = [{ id: 1 }, { id: 2 }];
+      resolveValue = updatedRows;
+
+      const refreshSpy = jest
+        .spyOn(service, 'refreshAllGamesView' as any)
+        .mockResolvedValue(undefined);
+
+      const result = await service.updateGamesHidden([1, 2], true);
+
+      expect(mockDb.update).toHaveBeenCalled();
+      expect(mockDb.set).toHaveBeenCalledWith(
+        expect.objectContaining({ hidden: true }),
+      );
+      expect(mockDb.where).toHaveBeenCalled();
+      expect(result).toEqual([1, 2]);
+      expect(refreshSpy).toHaveBeenCalled();
+
+      refreshSpy.mockRestore();
+    });
+
+    it('should not refresh view when no rows updated', async () => {
+      resolveValue = [];
+
+      const refreshSpy = jest
+        .spyOn(service, 'refreshAllGamesView' as any)
+        .mockResolvedValue(undefined);
+
+      const result = await service.updateGamesHidden([1, 2], false);
+
+      expect(result).toEqual([]);
+      expect(refreshSpy).not.toHaveBeenCalled();
+
+      refreshSpy.mockRestore();
+    });
+  });
+
+  describe('updateBulkGames', () => {
+    it('should update multiple games with arbitrary updates and refresh view', async () => {
+      const updatedRows = [{ id: 1 }, { id: 2 }];
+      resolveValue = updatedRows;
+
+      const refreshSpy = jest
+        .spyOn(service, 'refreshAllGamesView' as any)
+        .mockResolvedValue(undefined);
+
+      const result = await service.updateBulkGames([1, 2], {
+        steamWishlist: false,
+      });
+
+      expect(mockDb.update).toHaveBeenCalled();
+      expect(mockDb.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          steamWishlist: false,
+          updatedAt: expect.any(Date),
+        }),
+      );
+      expect(mockDb.where).toHaveBeenCalled();
+      expect(result).toEqual([1, 2]);
+      expect(refreshSpy).toHaveBeenCalled();
+
+      refreshSpy.mockRestore();
+    });
+
+    it('should record wishlist.game_removed domain event for each game when removing bulk from wishlist', async () => {
+      const updatedRows = [
+        { id: 1, name: 'Game 1' },
+        { id: 2, name: 'Game 2' },
+      ];
+      resolveValue = updatedRows;
+
+      await service.updateBulkGames([1, 2], { epicWishlist: false });
+
+      expect(mockDb.insert).toHaveBeenCalledWith(domainEvents);
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            eventType: 'wishlist.game_removed',
+            payload: expect.objectContaining({
+              gameId: 1,
+              wishlist: 'epic',
+              wishlistKey: 'epicWishlist',
+            }),
+          }),
+          expect.objectContaining({
+            eventType: 'wishlist.game_removed',
+            payload: expect.objectContaining({
+              gameId: 2,
+              wishlist: 'epic',
+              wishlistKey: 'epicWishlist',
+            }),
+          }),
+        ]),
+      );
+    });
+  });
+
+  describe('getWishlistLastRemovedAt', () => {
+    it('should query domain events and return occurredAt when found', async () => {
+      const mockDate = new Date('2026-09-11T12:00:00Z');
+      resolveValue = [{ occurredAt: mockDate }];
+
+      const result = await service.getWishlistLastRemovedAt('steamWishlist');
+
+      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.from).toHaveBeenCalledWith(domainEvents);
+      expect(result).toEqual(mockDate);
+    });
+
+    it('should return null when no domain event found', async () => {
+      resolveValue = [];
+
+      const result = await service.getWishlistLastRemovedAt('epicWishlist');
+
+      expect(result).toBeNull();
     });
   });
 

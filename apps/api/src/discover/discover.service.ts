@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { inArray } from 'drizzle-orm';
 import { DatabaseService } from '@/db/database.service';
-import { games, domainEvents } from '@/db/schema';
+import { games, domainEvents } from '@workspace/db';
 import type {
   DiscoverCandidateDto as DiscoverCandidate,
   DiscoverApplyResultDto as DiscoverApplyResult,

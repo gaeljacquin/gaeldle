@@ -12,7 +12,7 @@ import { DatabaseService } from '@/db/database.service';
 import { GamesService } from '@/games/games.service';
 import { AiService } from '@/lib/ai.service';
 import { NotFoundException } from '@nestjs/common';
-import { domainEvents } from '@/db/schema';
+import { domainEvents } from '@workspace/db';
 
 describe('ClueService', () => {
   let service: ClueService;

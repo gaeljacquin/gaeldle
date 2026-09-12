@@ -9,7 +9,7 @@ import type {
   CellMatch,
   MatchType,
   MatchKey,
-} from '@workspace/api/db';
+} from '@workspace/db';
 import Image from 'next/image';
 import { IconArrowUp, IconArrowDown } from '@tabler/icons-react';
 import {

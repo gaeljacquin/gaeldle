@@ -9,10 +9,11 @@ import {
   pgMaterializedView,
   index,
   text,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import { createSelectSchema, createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { DotPaths } from './other';
+import { DotPaths } from '@workspace/shared';
 
 export const SyncOperationSchema = z.enum(['created', 'updated']);
 
@@ -71,11 +72,107 @@ export const games = pgTable(
     firstReleaseDate: integer('first_release_date'),
     summary: text('summary'),
     storyline: text('storyline'),
+    steam: boolean('steam').default(false).notNull(),
+    epic: boolean('epic').default(false).notNull(),
+    gog: boolean('gog').default(false).notNull(),
+    nintendo: boolean('nintendo').default(false).notNull(),
+    amazon: boolean('amazon').default(false).notNull(),
+    microsoft: boolean('microsoft').default(false).notNull(),
+    xbox: boolean('xbox').default(false).notNull(),
+    steamDemo: boolean('steam_demo').default(false).notNull(),
+    epicDemo: boolean('epic_demo').default(false).notNull(),
+    nintendoDemo: boolean('nintendo_demo').default(false).notNull(),
+    hidden: boolean('hidden').default(false).notNull(),
+    steamWishlist: boolean('steam_wishlist').default(false).notNull(),
+    epicWishlist: boolean('epic_wishlist').default(false).notNull(),
+    nintendoWishlist: boolean('nintendo_wishlist').default(false).notNull(),
+    xboxWishlist: boolean('xbox_wishlist').default(false).notNull(),
+    humbleBundleWishlist: boolean('humble_bundle_wishlist')
+      .default(false)
+      .notNull(),
   },
-  (table) => [index('game_name_idx').on(table.name)],
+  (table) => [
+    index('game_name_idx').on(table.name),
+    index('game_steam_idx')
+      .on(table.id)
+      .where(sql`${table.steam} = true`),
+    index('game_amazon_idx')
+      .on(table.id)
+      .where(sql`${table.amazon} = true`),
+    index('game_gog_idx')
+      .on(table.id)
+      .where(sql`${table.gog} = true`),
+    index('game_epic_idx')
+      .on(table.id)
+      .where(sql`${table.epic} = true`),
+    index('game_xbox_idx')
+      .on(table.id)
+      .where(sql`${table.xbox} = true`),
+    index('game_nintendo_idx')
+      .on(table.id)
+      .where(sql`${table.nintendo} = true`),
+    index('game_steam_wishlist_idx')
+      .on(table.id)
+      .where(sql`${table.steamWishlist} = true`),
+    index('game_epic_wishlist_idx')
+      .on(table.id)
+      .where(sql`${table.epicWishlist} = true`),
+    index('game_nintendo_wishlist_idx')
+      .on(table.id)
+      .where(sql`${table.nintendoWishlist} = true`),
+    index('game_humble_bundle_wishlist_idx')
+      .on(table.id)
+      .where(sql`${table.humbleBundleWishlist} = true`),
+    index('game_hidden_idx')
+      .on(table.id)
+      .where(sql`${table.hidden} = false`),
+  ],
 );
 
 export const gameObject = {
+  id: games.id,
+  igdbId: games.igdbId,
+  name: games.name,
+  imageUrl: games.imageUrl,
+  aiImageUrl: games.aiImageUrl,
+  aiPrompt: games.aiPrompt,
+  imageGen: games.imageGen,
+  clue: games.clue,
+  artworks: games.artworks,
+  keywords: games.keywords,
+  franchises: games.franchises,
+  collections: games.collections,
+  gameEngines: games.gameEngines,
+  gameModes: games.gameModes,
+  genres: games.genres,
+  involvedCompanies: games.involvedCompanies,
+  platforms: games.platforms,
+  playerPerspectives: games.playerPerspectives,
+  releaseDates: games.releaseDates,
+  themes: games.themes,
+  firstReleaseDate: games.firstReleaseDate,
+  summary: games.summary,
+  storyline: games.storyline,
+  steam: games.steam,
+  epic: games.epic,
+  gog: games.gog,
+  nintendo: games.nintendo,
+  amazon: games.amazon,
+  microsoft: games.microsoft,
+  xbox: games.xbox,
+  steamDemo: games.steamDemo,
+  epicDemo: games.epicDemo,
+  nintendoDemo: games.nintendoDemo,
+  hidden: games.hidden,
+  steamWishlist: games.steamWishlist,
+  epicWishlist: games.epicWishlist,
+  nintendoWishlist: games.nintendoWishlist,
+  xboxWishlist: games.xboxWishlist,
+  humbleBundleWishlist: games.humbleBundleWishlist,
+  createdAt: games.createdAt,
+};
+
+export const gameModeGameObject = {
   id: games.id,
   igdbId: games.igdbId,
   name: games.name,
@@ -116,7 +213,28 @@ export const GameUpdateInputSchema = GameInsertSchema.omit({
 }).partial();
 
 export type GameInsert = InferInsertModel<typeof games>;
+
 export type Game = typeof allGames.$inferSelect;
+
+export type GameModeGame = Omit<
+  Game,
+  | 'steam'
+  | 'epic'
+  | 'gog'
+  | 'nintendo'
+  | 'amazon'
+  | 'microsoft'
+  | 'xbox'
+  | 'steamDemo'
+  | 'epicDemo'
+  | 'nintendoDemo'
+  | 'hidden'
+  | 'steamWishlist'
+  | 'epicWishlist'
+  | 'nintendoWishlist'
+  | 'xboxWishlist'
+  | 'humbleBundleWishlist'
+>;
 
 export const queriedGames = pgMaterializedView('queried_games', {
   igdbId: integer('igdb_id'),

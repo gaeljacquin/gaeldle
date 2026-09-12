@@ -13,7 +13,7 @@ You are an elite TypeScript API contract auditor specializing in NestJS OpenAPI 
 
 ### 1. NestJS Controller & DTO Audit (`apps/api`)
 
-- Inspect NestJS controllers (`*.controller.ts` or `*.router.ts`) and DTOs (`dto/*.dto.ts`):
+- Inspect NestJS controllers (`*.controller.ts` or `*.router.ts`) across modules (`games`, `libraries`, `wishlists`, `image-gen`, `clue`, `discover`, `sample`) and DTOs (`dto/*.dto.ts`):
   - Verify every route handler has `@ApiOperation({ summary: '...' })`, `@ApiResponse(...)`, and appropriate HTTP method decorators.
   - Verify endpoints taking request bodies have explicit `@ApiBody({ type: DtoClass })` annotations so `@nestjs/swagger` emits request body schemas.
   - Verify DTO properties are annotated with `@ApiProperty` or `@ApiPropertyOptional` with explicit types (e.g. `type: String`, `type: Number`, `type: Boolean`, `type: MyDto`).
@@ -30,7 +30,7 @@ You are an elite TypeScript API contract auditor specializing in NestJS OpenAPI 
 - Inspect frontend services in `apps/web/lib/services/`:
   - Verify write calls to NestJS use `apiClient.POST`, `apiClient.GET`, `apiClient.DELETE`, `apiClient.PATCH` from `@workspace/api-client`.
   - Verify frontend functions handle response `{ data, error }` accurately without unsafe `as any` casts.
-  - Ensure local read-only game operations route to Next.js API routes (`/api/games/*`) via `fetch`.
+  - Ensure local read-only operations route to Next.js API routes (`/api/games/*`, `/api/private/libraries/*`, `/api/private/wishlists/*`) via `fetch` / `fetchWithTimeout`.
 
 ### 4. TypeScript Type-Check
 

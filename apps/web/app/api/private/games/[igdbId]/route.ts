@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { games, gameObject } from '@workspace/api/db';
+import { games, gameObject } from '@workspace/db';
 
 export async function GET(
   _request: NextRequest,
@@ -9,8 +9,9 @@ export async function GET(
 ) {
   const { igdbId: igdbIdStr } = await params;
   const igdbId = Number(igdbIdStr);
+  const MAX_INT32 = 2_147_483_647;
 
-  if (!Number.isInteger(igdbId) || igdbId <= 0) {
+  if (!Number.isInteger(igdbId) || igdbId <= 0 || igdbId > MAX_INT32) {
     return NextResponse.json({ error: 'Invalid igdbId' }, { status: 400 });
   }
 

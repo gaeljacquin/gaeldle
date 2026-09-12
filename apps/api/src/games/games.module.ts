@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '@/auth/auth.module';
 import { DatabaseModule } from '@/db/database.module';
 import { GamesRouter } from '@/games/games.router';
+import { LibrariesRouter } from '@/games/libraries.router';
+import { WishlistsRouter } from '@/games/wishlists.router';
 import { GamesService } from '@/games/games.service';
 import { IgdbService } from '@/lib/igdb.service';
 import { S3Service } from '@/lib/s3.service';
@@ -17,7 +19,13 @@ import { ClueService } from '@/clue/clue.service';
 
 @Module({
   imports: [DatabaseModule, AuthModule],
-  controllers: [GamesRouter, ImageGenRouter, ClueRouter],
+  controllers: [
+    GamesRouter,
+    LibrariesRouter,
+    WishlistsRouter,
+    ImageGenRouter,
+    ClueRouter,
+  ],
   providers: [
     GamesService,
     IgdbService,

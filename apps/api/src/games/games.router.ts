@@ -30,6 +30,8 @@ import {
   DeleteGameResponseDto,
   DeleteBulkDto,
   DeleteBulkGamesResponseDto,
+  UpdateBulkGamesDto,
+  UpdateBulkGamesResponseDto,
   ValidateIgdbIdAddDto,
   ValidateIgdbIdAddResponseDto,
 } from '@/games/dto/games.dto';
@@ -64,6 +66,24 @@ export class GamesRouter {
       message: `Game ${result.operation}`,
       operation: result.operation,
       data: result.game,
+    };
+  }
+
+  @Patch('bulk')
+  @UseGuards(HexclaveGuard)
+  @ApiOperation({ summary: 'Update multiple games' })
+  @ApiBody({ type: UpdateBulkGamesDto })
+  @ApiResponse({ status: 200, type: UpdateBulkGamesResponseDto })
+  async updateBulk(
+    @Body() body: UpdateBulkGamesDto,
+  ): Promise<UpdateBulkGamesResponseDto> {
+    const { ids, ...updates } = body;
+    const updatedIds = await this.gamesService.updateBulkGames(ids, updates);
+    return {
+      success: true,
+      data: {
+        updatedIds,
+      },
     };
   }
 

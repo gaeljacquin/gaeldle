@@ -607,6 +607,28 @@ describe('GamesService', () => {
         }),
       );
     });
+
+    it('should record wishlist.game_removed domain event when removing game from wishlist', async () => {
+      const updatedGame = { id: 1, name: 'Hades', steamWishlist: false };
+      resolveValue = [updatedGame];
+
+      await service.updateGame(1, { steamWishlist: false });
+
+      expect(mockDb.insert).toHaveBeenCalledWith(domainEvents);
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            eventType: 'wishlist.game_removed',
+            payload: expect.objectContaining({
+              gameId: 1,
+              gameName: 'Hades',
+              wishlist: 'steam',
+              wishlistKey: 'steamWishlist',
+            }),
+          }),
+        ]),
+      );
+    });
   });
 
   describe('deleteGame', () => {
@@ -769,6 +791,59 @@ describe('GamesService', () => {
       expect(refreshSpy).toHaveBeenCalled();
 
       refreshSpy.mockRestore();
+    });
+
+    it('should record wishlist.game_removed domain event for each game when removing bulk from wishlist', async () => {
+      const updatedRows = [
+        { id: 1, name: 'Game 1' },
+        { id: 2, name: 'Game 2' },
+      ];
+      resolveValue = updatedRows;
+
+      await service.updateBulkGames([1, 2], { epicWishlist: false });
+
+      expect(mockDb.insert).toHaveBeenCalledWith(domainEvents);
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            eventType: 'wishlist.game_removed',
+            payload: expect.objectContaining({
+              gameId: 1,
+              wishlist: 'epic',
+              wishlistKey: 'epicWishlist',
+            }),
+          }),
+          expect.objectContaining({
+            eventType: 'wishlist.game_removed',
+            payload: expect.objectContaining({
+              gameId: 2,
+              wishlist: 'epic',
+              wishlistKey: 'epicWishlist',
+            }),
+          }),
+        ]),
+      );
+    });
+  });
+
+  describe('getWishlistLastRemovedAt', () => {
+    it('should query domain events and return occurredAt when found', async () => {
+      const mockDate = new Date('2026-09-11T12:00:00Z');
+      resolveValue = [{ occurredAt: mockDate }];
+
+      const result = await service.getWishlistLastRemovedAt('steamWishlist');
+
+      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.from).toHaveBeenCalledWith(domainEvents);
+      expect(result).toEqual(mockDate);
+    });
+
+    it('should return null when no domain event found', async () => {
+      resolveValue = [];
+
+      const result = await service.getWishlistLastRemovedAt('epicWishlist');
+
+      expect(result).toBeNull();
     });
   });
 

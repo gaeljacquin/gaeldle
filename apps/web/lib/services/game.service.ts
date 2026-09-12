@@ -781,3 +781,35 @@ export const paginatedSteamWishlistGamesQueryOptions =
     'steamWishlistGames',
     '/api/private/wishlists/steam',
   );
+
+export async function getWishlistLastUpdated(
+  wishlist: WishlistKey | string,
+): Promise<string | null> {
+  const url = `/api/private/wishlists/last-updated?wishlist=${encodeURIComponent(wishlist)}`;
+  const response = await fetchWithTimeout(url);
+  const result = await handleResponse<{
+    success: boolean;
+    lastUpdatedAt: string | null;
+  }>(response);
+
+  return result.lastUpdatedAt ?? null;
+}
+
+export const wishlistLastUpdatedQueryOptions = (
+  wishlist: WishlistKey | string,
+) => ({
+  queryKey: ['wishlist-last-updated', wishlist],
+  queryFn: () => getWishlistLastUpdated(wishlist),
+});
+
+export function formatWishlistLastUpdated(
+  date: Date | string | null | undefined,
+): string | null {
+  if (!date) return null;
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (Number.isNaN(d.getTime())) return null;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `Last updated at ${yyyy}/${mm}/${dd}`;
+}

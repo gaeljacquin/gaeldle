@@ -142,6 +142,9 @@ export default function GameDetailsSidebar({
       for (const qk of wishlist.queryKeys) {
         queryClient.invalidateQueries({ queryKey: [qk] });
       }
+      queryClient.invalidateQueries({
+        queryKey: ['wishlist-last-updated', wishlist.key],
+      });
       queryClient.invalidateQueries({ queryKey: ['games'] });
       queryClient.setQueryData(
         ['game', igdbId],

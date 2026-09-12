@@ -19,6 +19,8 @@ import {
   getPaginatedEpicWishlistGames,
   updateGameWishlist,
   updateBulkGamesWishlist,
+  getWishlistLastUpdated,
+  formatWishlistLastUpdated,
 } from './game.service';
 import { gameObject, gameModeGameObject } from '@workspace/db';
 
@@ -385,5 +387,61 @@ describe('updateBulkGamesWishlist', () => {
     await expect(
       updateBulkGamesWishlist([1, 2], 'epicWishlist', false),
     ).rejects.toThrow('Failed to bulk update games wishlist status');
+  });
+});
+
+describe('getWishlistLastUpdated', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should fetch last updated timestamp for wishlist', async () => {
+    const mockTimestamp = '2026-09-11T21:35:00.000Z';
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, lastUpdatedAt: mockTimestamp }),
+    } as Response);
+
+    const result = await getWishlistLastUpdated('steamWishlist');
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      '/api/private/wishlists/last-updated?wishlist=steamWishlist',
+      expect.any(Object),
+    );
+    expect(result).toBe(mockTimestamp);
+  });
+
+  it('should return null when no event exists', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, lastUpdatedAt: null }),
+    } as Response);
+
+    const result = await getWishlistLastUpdated('epicWishlist');
+    expect(result).toBeNull();
+  });
+
+  it('should throw error when fetch fails', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 500,
+    } as Response);
+
+    await expect(getWishlistLastUpdated('steamWishlist')).rejects.toThrow();
+  });
+});
+
+describe('formatWishlistLastUpdated', () => {
+  it('should format date string to Last updated at yyyy/mm/dd', () => {
+    const result = formatWishlistLastUpdated('2026-09-11T12:00:00.000Z');
+    expect(result).toBe('Last updated at 2026/09/11');
+  });
+
+  it('should return null for null or undefined input', () => {
+    expect(formatWishlistLastUpdated(null)).toBeNull();
+    expect(formatWishlistLastUpdated(undefined)).toBeNull();
+  });
+
+  it('should return null for invalid date string', () => {
+    expect(formatWishlistLastUpdated('invalid-date')).toBeNull();
   });
 });

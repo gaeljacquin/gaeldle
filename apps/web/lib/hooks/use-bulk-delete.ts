@@ -116,6 +116,12 @@ export function useBulkDelete({
         });
       }
 
+      if (wishlistKey) {
+        queryClient.invalidateQueries({
+          queryKey: ['wishlist-last-updated', wishlistKey],
+        });
+      }
+
       toast.success(successMessage);
       setSelectedIds(new Set());
       setIsMultiSelect(false);

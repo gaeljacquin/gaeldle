@@ -2,7 +2,11 @@
 
 import { ViewTransition } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { paginatedSteamWishlistGamesQueryOptions } from '@/lib/services/game.service';
+import {
+  paginatedSteamWishlistGamesQueryOptions,
+  wishlistLastUpdatedQueryOptions,
+  formatWishlistLastUpdated,
+} from '@/lib/services/game.service';
 import { IconBrandSteam } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { DashboardHeader } from '@/components/dashboard-header';
@@ -37,6 +41,11 @@ export function WishlistSteamView() {
     placeholderData: (previousData) => previousData,
   });
 
+  const { data: lastUpdatedData } = useQuery(
+    wishlistLastUpdatedQueryOptions('steamWishlist'),
+  );
+  const lastUpdatedText = formatWishlistLastUpdated(lastUpdatedData);
+
   const totalPages = calcTotalPages(
     data?.meta?.total,
     filters.formValues.pageSize,
@@ -48,6 +57,13 @@ export function WishlistSteamView() {
         <DashboardHeader
           title="Steam Wishlist"
           icon={IconBrandSteam}
+          rightElement={
+            lastUpdatedText ? (
+              <span className="text-sm text-muted-foreground">
+                {lastUpdatedText}
+              </span>
+            ) : null
+          }
           extraElements={
             <GameListControls
               form={filters.form}

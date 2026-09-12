@@ -2,7 +2,11 @@
 
 import { ViewTransition } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { paginatedEpicWishlistGamesQueryOptions } from '@/lib/services/game.service';
+import {
+  paginatedEpicWishlistGamesQueryOptions,
+  wishlistLastUpdatedQueryOptions,
+  formatWishlistLastUpdated,
+} from '@/lib/services/game.service';
 import { IconHeart } from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { DashboardHeader } from '@/components/dashboard-header';
@@ -37,6 +41,11 @@ export function WishlistEpicView() {
     placeholderData: (previousData) => previousData,
   });
 
+  const { data: lastUpdatedData } = useQuery(
+    wishlistLastUpdatedQueryOptions('epicWishlist'),
+  );
+  const lastUpdatedText = formatWishlistLastUpdated(lastUpdatedData);
+
   const totalPages = calcTotalPages(
     data?.meta?.total,
     filters.formValues.pageSize,
@@ -48,6 +57,13 @@ export function WishlistEpicView() {
         <DashboardHeader
           title="Epic Wishlist"
           icon={IconHeart}
+          rightElement={
+            lastUpdatedText ? (
+              <span className="text-sm text-muted-foreground">
+                {lastUpdatedText}
+              </span>
+            ) : null
+          }
           extraElements={
             <GameListControls
               form={filters.form}

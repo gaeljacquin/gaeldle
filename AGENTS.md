@@ -29,3 +29,27 @@ The project uses Vercel's agent skills for high-quality React and design impleme
 - **Composition Patterns**: Located in `apps/web/.agents/skills/vercel-composition-patterns`
 - **Web Design Guidelines**: Located in `apps/web/.agents/skills/web-design-guidelines`
 
+## Specialist Agent Roles
+
+The following role names are shared across agent runtimes. When a task clearly matches a role, use only the definition directory for the runtime currently handling the task; do not read or apply another runtime's agent configuration.
+
+| Runtime | Agent definitions |
+| --- | --- |
+| Codex | `.codex/agents/` |
+| Claude | `.claude/agents/` |
+| Gemini | `.gemini/agents/` |
+
+| Role | Purpose |
+| --- | --- |
+| `accessibility-auditor` | WCAG review of recently changed project-owned UI |
+| `ai-image-bulk-generator` | Generation and persistence of missing game artwork |
+| `architecture-design-advisor` | Architecture decisions before implementation |
+| `convention-auditor` | Focused convention and quality review |
+| `docs-writer` | Documentation synchronized with implementation |
+| `full-stack-feature-builder` | End-to-end product feature work |
+| `game-finder` | Game-catalogue gap analysis and import preparation |
+| `game-mode-architect` | Game-mode design and implementation |
+| `openapi-contract-auditor` | NestJS/OpenAPI/client contract audit |
+| `test-writer` | Focused API and web test coverage |
+
+Codex must read the selected brief in `.codex/agents/` before delegating the bounded task to a Codex subagent. Include the user request, exact scope, and the brief's instructions in the delegation prompt.

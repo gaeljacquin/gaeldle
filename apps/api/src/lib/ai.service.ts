@@ -1,6 +1,7 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { AppConfiguration } from '@/config/configuration';
+import { getAiProvider } from '@workspace/shared';
 import {
   BedrockRuntimeClient,
   ConverseCommand,
@@ -42,16 +43,18 @@ export class AiService {
   }
 
   async generateImage(prompt: string, provider: string): Promise<Buffer> {
-    switch (provider) {
-      case 'cloudflare':
-        return this.generateImageCloudflare(prompt);
-      default:
-        throw new Error(`Unsupported model/provider: ${provider}`);
+    const providerDefinition = getAiProvider(provider);
+    if (!providerDefinition?.imageModel) {
+      throw new Error(`Unsupported image provider: ${provider}`);
     }
+
+    return this.generateImageCloudflare(prompt, providerDefinition.imageModel);
   }
 
-  private async generateImageCloudflare(prompt: string): Promise<Buffer> {
-    const model = '@cf/stabilityai/stable-diffusion-xl-base-1.0';
+  private async generateImageCloudflare(
+    prompt: string,
+    model: string,
+  ): Promise<Buffer> {
     const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/ai/run/${model}`;
 
     const response = await fetch(url, {

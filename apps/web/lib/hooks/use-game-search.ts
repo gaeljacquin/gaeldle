@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { searchGames } from '@/lib/services/game.service';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import { type Game } from '@workspace/db';
-import { GAME_SEARCH_MIN_CHARS } from '@workspace/shared';
 
 interface GameSearchOptions {
   mode?: string;
@@ -24,7 +23,7 @@ export function useGameSearch(
 ): GameSearchResult {
   const { mode, limit } = options;
   const debouncedQuery = useDebounce(query, 300);
-  const isIdle = debouncedQuery.length < GAME_SEARCH_MIN_CHARS;
+  const isIdle = !debouncedQuery.trim();
 
   const { data, isFetching } = useQuery({
     queryKey: ['game-search', debouncedQuery, mode],

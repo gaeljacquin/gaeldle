@@ -1,16 +1,20 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { GameModeCard } from '@/components/game-mode-card';
 import { GameModeCardSkeleton } from '@/components/game-mode-card-skeleton';
 import { gameModesQueryOptions } from '@/lib/services/game-mode.service';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { GAME_MODE_SKELETON_COUNT } from '@workspace/shared';
+import { useGameModeStore } from '@/lib/stores/game-mode-store';
 
 function GameModeCardSkeletonGrid() {
+  const activeGameModeCount = useGameModeStore(
+    (state) => state.activeGameModeCount,
+  );
+
   return (
     <>
-      {Array.from({ length: GAME_MODE_SKELETON_COUNT }).map((_, i) => (
+      {Array.from({ length: activeGameModeCount }).map((_, i) => (
         <GameModeCardSkeleton key={i} />
       ))}
     </>
@@ -19,6 +23,13 @@ function GameModeCardSkeletonGrid() {
 
 function GameModeContent() {
   const { data: gameModes } = useSuspenseQuery(gameModesQueryOptions);
+  const setActiveGameModeCount = useGameModeStore(
+    (state) => state.setActiveGameModeCount,
+  );
+
+  useEffect(() => {
+    setActiveGameModeCount(gameModes.length);
+  }, [gameModes.length, setActiveGameModeCount]);
 
   return (
     <>

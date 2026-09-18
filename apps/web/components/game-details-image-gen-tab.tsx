@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { DEFAULT_PROVIDER } from '@workspace/shared';
+import {
+  AI_PROVIDERS,
+  IMAGE_AI_PROVIDERS,
+  isImageAiProvider,
+  type ImageAiProvider,
+} from '@workspace/shared';
 import {
   useSuspenseQuery,
   useMutation,
@@ -131,7 +136,9 @@ export default function GameDetailsImageGenTab({
   setPrevUrl: (v: string | null) => void;
   setGeneratingStyle: (v: string | null) => void;
 }) {
-  const [providerVal, setProviderVal] = useState<string>(DEFAULT_PROVIDER);
+  const [providerVal, setProviderVal] = useState<ImageAiProvider>(
+    AI_PROVIDERS.default,
+  );
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const queryClient = useQueryClient();
@@ -419,31 +426,31 @@ export default function GameDetailsImageGenTab({
           </h3>
           <Select
             value={providerVal}
-            onValueChange={(val) => val && setProviderVal(val)}
+            onValueChange={(val) => {
+              if (val && isImageAiProvider(val)) {
+                setProviderVal(val);
+              }
+            }}
             disabled={isBusy}
           >
             <SelectTrigger className="w-full h-10 rounded-none bg-card/50 border-border text-sm flex">
               <SelectValue placeholder="Select provider">
                 {(value) =>
-                  value === 'cloudflare'
-                    ? 'Cloudflare Workers AI'
-                    : value === 'stable-image-core'
-                      ? 'Stable Image Core'
-                      : ''
+                  AI_PROVIDERS.options.find((provider) => provider.id === value)
+                    ?.label ?? ''
                 }
               </SelectValue>
             </SelectTrigger>
             <SelectContent className="border border-border bg-popover rounded-none">
-              <SelectItem value="cloudflare" className="text-sm">
-                Cloudflare Workers AI
-              </SelectItem>
-              <SelectItem
-                value="stable-image-core"
-                disabled
-                className="text-sm"
-              >
-                Stable Image Core
-              </SelectItem>
+              {IMAGE_AI_PROVIDERS.map((provider) => (
+                <SelectItem
+                  key={provider.id}
+                  value={provider.id}
+                  className="text-sm"
+                >
+                  {provider.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

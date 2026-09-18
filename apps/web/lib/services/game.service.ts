@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import type { Game, ArtStyleValue } from '@workspace/db';
+import type { AiProvider, ImageAiProvider } from '@workspace/shared';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -415,7 +416,7 @@ export async function searchGames(
   limit: number = 100,
   mode?: string,
 ): Promise<Game[]> {
-  if (query.length < 2) {
+  if (!query.trim()) {
     return [];
   }
 
@@ -463,7 +464,7 @@ export async function generateImage(
     includeGenres?: boolean;
     includeThemes?: boolean;
     artStyleValue: ArtStyleValue;
-    provider: string;
+    provider: ImageAiProvider;
   },
 ) {
   const {
@@ -518,7 +519,7 @@ export async function generateImages(params: {
   includeStoryline: boolean;
   includeGenres: boolean;
   includeThemes: boolean;
-  provider: string;
+  provider: ImageAiProvider;
 }) {
   const { data, error } = await apiClient.POST(
     '/api/image-gen/generate-images',
@@ -549,7 +550,7 @@ export async function getImageGenStatus(imageGenId: string) {
   return data;
 }
 
-export async function generateClue(igdbId: number, provider: string) {
+export async function generateClue(igdbId: number, provider: AiProvider) {
   const { data, error } = await apiClient.POST('/api/clue/generate-clue', {
     body: { igdbId, provider },
   });

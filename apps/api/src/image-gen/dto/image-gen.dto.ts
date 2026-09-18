@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IMAGE_AI_PROVIDERS } from '@workspace/shared';
 
 export class GenerateImageDto {
   @ApiProperty({ type: Number }) igdbId!: number;
@@ -9,7 +10,8 @@ export class GenerateImageDto {
   @ApiPropertyOptional({ type: Boolean, default: false })
   includeThemes?: boolean;
   @ApiPropertyOptional({ type: String }) artStyle?: string;
-  @ApiProperty({ type: String }) provider!: string;
+  @ApiProperty({ enum: IMAGE_AI_PROVIDERS.map((provider) => provider.id) })
+  provider!: string;
 }
 
 export class GenerateImageResponseDto {
@@ -26,7 +28,8 @@ export class GenerateImagesDto {
   includeGenres?: boolean;
   @ApiPropertyOptional({ type: Boolean, default: false })
   includeThemes?: boolean;
-  @ApiProperty({ type: String }) provider!: string;
+  @ApiProperty({ enum: IMAGE_AI_PROVIDERS.map((provider) => provider.id) })
+  provider!: string;
 }
 
 export class GenerateImagesResponseDto {

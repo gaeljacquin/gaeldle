@@ -37,7 +37,7 @@ All game modes (`/api/games/random`, etc.) enforce:
 
 ## Ports
 
-- API: `8080` (`PORT` or `SERVER_PORT`).
+- API: `3000` by default (`PORT` overrides it; local development uses `8080`).
 - Web: `3000` (`CLIENT_PORT`).
 - DB: `5432` (`DB_PORT`).
 
@@ -68,7 +68,7 @@ These standards apply across the entire monorepo (API, Web, and Packages).
 
 ### API (`apps/api`)
 
-- `PORT` or `SERVER_PORT`
+- `PORT` (set to `8080` for local development, or `8090` on the home-server VM)
 - `CLIENT_PORT`
 - `CORS_ALLOWED_ORIGINS`
 - `DATABASE_URL`

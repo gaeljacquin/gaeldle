@@ -8,7 +8,7 @@ import {
   type Game,
   type GameClueHistory,
 } from '@workspace/db';
-import { CLUE_SYSTEM_PROMPT as systemPrompt } from '@workspace/shared';
+import { getAiProvider } from '@workspace/shared';
 import { eq, desc } from 'drizzle-orm';
 
 @Injectable()
@@ -24,14 +24,12 @@ export class ClueService {
     provider: string,
     actorId = 'unknown',
   ): Promise<Game | null> {
-    switch (provider) {
-      case 'cloudflare':
-      case 'bedrock':
-      case 'nova-2-lite-v1':
-        return this.generateClueInternal(igdbId, provider, actorId);
-      default:
-        throw new Error(`Unsupported model/provider: ${provider}`);
+    const providerDefinition = getAiProvider(provider);
+    if (!providerDefinition?.clueModel) {
+      throw new Error(`Unsupported clue provider: ${provider}`);
     }
+
+    return this.generateClueInternal(igdbId, provider, actorId);
   }
 
   private async generateClueInternal(
@@ -58,16 +56,18 @@ export class ClueService {
 
     const userPrompt = JSON.stringify(gameData, null, 2);
     let rawResponse: unknown;
-    let model: string;
+    const providerDefinition = getAiProvider(provider);
 
-    if (provider === 'cloudflare') {
-      model = '@cf/meta/llama-3.1-8b-instruct';
+    if (!providerDefinition?.clueModel) {
+      throw new Error(`Unsupported clue provider: ${provider}`);
+    }
+
+    const model = providerDefinition.clueModel;
+
+    if (providerDefinition.id === 'cloudflare') {
       rawResponse = await this.aiService.generateText(
         model,
-        [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
+        [{ role: 'user', content: userPrompt }],
         {
           type: 'json_schema',
           json_schema: {
@@ -82,9 +82,7 @@ export class ClueService {
         },
       );
     } else {
-      model = 'us.amazon.nova-2-lite-v1:0';
       rawResponse = await this.aiService.generateTextBedrock(model, [
-        { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ]);
     }
@@ -116,7 +114,7 @@ export class ClueService {
 
     const newItem = {
       clue: clueString,
-      prompt: `System: ${systemPrompt}\nUser: ${userPrompt}`,
+      prompt: userPrompt,
       provider,
       model,
       createdAt: new Date().toISOString(),

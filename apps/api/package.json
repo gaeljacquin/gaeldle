@@ -6,7 +6,7 @@
     "codegen": "pnpm generate:openapi",
     "generate:openapi": "tsx scripts/generate-openapi.ts",
     "start": "nest start",
-    "dev": "INFISICAL_DISABLE_KEYRING=true ../../scripts/infisical-dev.sh run --path=/api --env=dev -- nest start --watch || nest start --watch",
+    "dev": "INFISICAL_DISABLE_KEYRING=true ../../scripts/infisical-dev.sh run --path=/api --env=dev -- nest start --watch",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",

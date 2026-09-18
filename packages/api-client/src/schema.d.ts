@@ -643,7 +643,8 @@ export interface components {
             /** @default false */
             includeThemes: boolean;
             artStyle?: string;
-            provider: string;
+            /** @enum {string} */
+            provider: "cloudflare";
         };
         GenerateImageResponseDto: {
             success: boolean;
@@ -666,7 +667,8 @@ export interface components {
             includeGenres: boolean;
             /** @default false */
             includeThemes: boolean;
-            provider: string;
+            /** @enum {string} */
+            provider: "cloudflare";
         };
         GenerateImagesResponseDto: {
             success: boolean;
@@ -694,7 +696,8 @@ export interface components {
         };
         GenerateClueDto: {
             igdbId: number;
-            provider: string;
+            /** @enum {string} */
+            provider: "cloudflare" | "nova-2-lite-v1";
         };
         GenerateClueResponseDto: {
             success: boolean;

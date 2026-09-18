@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AI_PROVIDERS } from '@workspace/shared';
 
 export class GenerateClueDto {
   @ApiProperty({ type: Number }) igdbId!: number;
-  @ApiProperty({ type: String }) provider!: string;
+  @ApiProperty({ enum: AI_PROVIDERS.options.map((provider) => provider.id) })
+  provider!: string;
 }
 
 export class GenerateClueResponseDto {

@@ -1408,7 +1408,10 @@
             "type": "string"
           },
           "provider": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "cloudflare"
+            ]
           }
         },
         "required": [
@@ -1481,7 +1484,10 @@
             "default": false
           },
           "provider": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "cloudflare"
+            ]
           }
         },
         "required": [
@@ -1593,7 +1599,11 @@
             "type": "number"
           },
           "provider": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "cloudflare",
+              "nova-2-lite-v1"
+            ]
           }
         },
         "required": [

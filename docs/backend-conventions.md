@@ -44,7 +44,7 @@ Read-only game operations are implemented as Next.js App Router route handlers, 
 | ---------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET /api/games`                         | Public                     | Paginated game list. Params: `page`, `pageSize`, `q` (ILIKE), `filter` (store or wishlist flag), `sortBy` (`name`\|`firstReleaseDate`\|`igdbId`\|`createdAt`), `sortDir` (`asc`\|`desc`). When `q` is present, results are ordered by `similarity(name, q) DESC` via `pg_trgm` (ignores `sortBy`/`sortDir`). |
 | `GET /api/games/artwork`                 | Public                     | All games that have at least one artwork entry.                                                                                                                                                                                                                      |
-| `GET /api/games/search`                  | Public                     | Trigram similarity search with optional game-mode filter. Params: `q` (min `GAME_SEARCH_MIN_CHARS` = 3 chars), `limit` (default 20, min 1), `mode` (GameModeSlug). Results ordered by `similarity(name, q) DESC`. Returns empty array when `q` is below the minimum. |
+| `GET /api/games/search`                  | Public                     | Trigram similarity search with optional game-mode filter. Params: `q` (non-empty), `limit` (default 20, min 1), `mode` (GameModeSlug). Results ordered by `similarity(name, q) DESC`. Returns an empty array for an empty query. |
 | `GET /api/games/random`                  | Public                     | One random game. Filters for `hidden = false` and selects `gameModeGameObject`. Params: `excludeIds` (comma-separated), `mode` (GameModeSlug).                                                                                                                     |
 | `GET /api/private/games/[igdbId]`        | Stack Auth / User          | Single game by IGDB ID. Validates positive 32-bit integer (400 if invalid), returns 404 if not found, 200 with `{ success: true, data: Game }`.                                                                                                                      |
 | `GET /api/private/libraries/[platform]`  | Stack Auth / User          | Paginated library games for platform (`amazon`, `epic`, `gog`, `nintendo`, `steam`, `xbox`). Supports `page`, `pageSize`, `q`, `igdbId`, `sortBy`, `sortDir`. Nintendo and Steam support `filter=owned\|demos\|all`.                                            |
@@ -56,7 +56,7 @@ A GIN trigram index (`game_name_trgm_idx`) exists on `game.name` (migration `001
 
 - Extension: `pg_trgm` is pre-installed on all environments (local, dev, prod/Neon). No `CREATE EXTENSION` migration is needed.
 - Ordering: both `GET /api/games` (when `q` is present) and `GET /api/games/search` use `similarity(name, q) DESC` from `pg_trgm` so the most relevant matches appear first.
-- Minimum query length: `GAME_SEARCH_MIN_CHARS = 3` — `pg_trgm` needs at least 3 characters to generate trigrams, so queries shorter than 3 chars return an empty result immediately without hitting the DB.
+- Query length: any non-empty query is searched. The trigram index supports relevance ordering, while the `ILIKE` predicate preserves correct results for short queries.
 - Migration note: the index is created with plain `CREATE INDEX` (not `CONCURRENTLY`) so it can run inside a Drizzle transaction. Drizzle Kit cannot generate this migration automatically — it was written by hand and registered in `packages/db/drizzle/meta/_journal.json`.
 
 ### DB client
@@ -102,7 +102,7 @@ All write, admin, and AI generation operations are implemented in `apps/api` con
 | `/api/games/add/validate-one`                      | POST   | Validate a single IGDB ID before adding: checks IGDB existence and DB duplicate. Returns `{ igdbId, existsOnIgdb, alreadyInDb, gameName, canAdd }`.                                                                                            |
 | `/api/games/replace-game/validate-one`              | POST   | Validate a current/replacement IGDB ID pair before replacing: checks both DB and IGDB. Returns `{ current, replacement, currentExistsInDb, currentGameName, replacementExistsOnIgdb, replacementAlreadyInDb, replacementGameName, canApply }`. |
 | `/api/games/replace-games`                         | POST   | Replace up to 20 games by swapping their IGDB IDs. Input: array of `{ current, replacement }` pairs. Output: `{ success, results[] }` where each result has `status: 'updated' \| 'skipped' \| 'error'`.                                    |
-| `/api/clue/generate-clue`                          | POST   | Generate an AI textual clue for a game by `igdbId` using the specified AI provider (`cloudflare` or `bedrock`).                                                                                                                               |
+| `/api/clue/generate-clue`                          | POST   | Generate an AI textual clue for a game by `igdbId` using the specified AI provider (`cloudflare` or `nova-2-lite-v1`).                                                                                                                       |
 | `/api/clue/history`                                | GET    | Get clue generation history for a game by `igdbId`.                                                                                                                                                                                            |
 | `/api/clue/restore`                                | POST   | Restore a previously generated clue from history by `historyId`.                                                                                                                                                                               |
 
@@ -138,13 +138,13 @@ Injectable service that communicates with the IGDB API (via Twitch OAuth2 creden
 
 Shared constants and utility functions are consolidated in `packages/shared/src/index.ts`:
 
+`AI_PROVIDERS` is the code-owned registry for provider IDs, display labels, and the models available for image and clue generation. It is the single source of truth for provider selection in the API and web app.
+
 ### Constants
 
 | Constant                 | Value                     | Purpose                                                                                                                         |
 | ------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `DEFAULT_PROVIDER`       | `'cloudflare'`            | Default AI provider slug.                                                                                                       |
-| `IMAGE_GEN_MIN`          | `1`                       | Minimum count for bulk image generation.                                                                                        |
-| `IMAGE_GEN_MAX`          | `50`                      | Maximum count for bulk image generation.                                                                                        |
+| `AI_PROVIDERS`           | provider registry         | Default provider ID plus provider IDs, labels, and image/clue model capabilities.                                               |
 | `FILE_SIZE_LIMIT`        | `'10mb'`                  | Body size limit for the NestJS API.                                                                                             |
 | `SAMPLE_DIR`             | `'sample-dir'`            | Sample directory identifier.                                                                                                    |
 | `IMAGE_GEN_DIR`          | `'res'`                   | Directory for AI-generated images in R2.                                                                                        |
@@ -152,9 +152,7 @@ Shared constants and utility functions are consolidated in `packages/shared/src/
 | `PLACEHOLDER_IMAGE`      | `'placeholder.jpg'`       | Filename of the placeholder image.                                                                                              |
 | `DISCOVER_GAMES_MAX`     | `50`                      | Maximum number of games returnable by Discover Games.                                                                           |
 | `DISCOVER_GAMES_DEFAULT` | `10`                      | Default count for Discover Games.                                                                                               |
-| `GAME_SEARCH_MIN_CHARS`  | `3`                       | Minimum query length for `GET /api/games/search` and `useGameSearch`. Matches `pg_trgm`'s trigram requirement.                  |
 | `TIMELINE_GAMES_COUNT`   | `10`                      | Number of games in a Timeline game session.                                                                                     |
-| `CLUE_SYSTEM_PROMPT`     | `string`                  | System prompt for generating single mystery game clues without leaking the game title.                                          |
 
 ### Helper Functions
 

@@ -29,7 +29,7 @@ const configuration = (): AppConfiguration => {
     process.env.NODE_ENV ||
     'development'
   ).toLowerCase();
-  const portRaw = process.env.PORT || '3000';
+  const portRaw = process.env.PORT ?? '3000';
   const port = Number.parseInt(portRaw, 10);
   const corsAllowedOrigins = process.env.CORS_ALLOWED_ORIGINS
     ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((origin) => origin.trim())

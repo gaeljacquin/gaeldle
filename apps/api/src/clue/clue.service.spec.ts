@@ -97,7 +97,7 @@ describe('ClueService', () => {
     it('should throw for unsupported provider', async () => {
       await expect(
         service.generateClue(1942, 'invalid-provider'),
-      ).rejects.toThrow('Unsupported model/provider: invalid-provider');
+      ).rejects.toThrow('Unsupported clue provider: invalid-provider');
     });
 
     it('should return null when game not found', async () => {
@@ -152,14 +152,14 @@ describe('ClueService', () => {
         'A plain text clue string without json formatting.' as never,
       );
 
-      await service.generateClue(1942, 'bedrock', 'user-1');
+      await service.generateClue(1942, 'nova-2-lite-v1', 'user-1');
 
       expect(mockGamesService.updateGame).toHaveBeenCalledWith(
         1,
         expect.objectContaining({
           clue: expect.objectContaining({
             clue: 'A plain text clue string without json formatting.',
-            provider: 'bedrock',
+            provider: 'nova-2-lite-v1',
             model: 'us.amazon.nova-2-lite-v1:0',
           }),
         }),

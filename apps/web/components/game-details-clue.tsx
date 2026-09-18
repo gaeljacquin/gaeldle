@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AI_PROVIDERS, isAiProvider, type AiProvider } from '@workspace/shared';
 import {
   useSuspenseQuery,
   useQuery,
@@ -54,7 +55,9 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
     id: number;
     clue: string;
   } | null>(null);
-  const [providerVal, setProviderVal] = useState<string>('cloudflare');
+  const [providerVal, setProviderVal] = useState<AiProvider>(
+    AI_PROVIDERS.default,
+  );
 
   const queryClient = useQueryClient();
   const { data: game } = useSuspenseQuery({
@@ -225,27 +228,34 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
             </Label>
             <Select
               value={providerVal}
-              onValueChange={(val) => val && setProviderVal(val)}
+              onValueChange={(val) => {
+                if (val && isAiProvider(val)) {
+                  setProviderVal(val);
+                }
+              }}
               disabled={generateClueMutation.isPending}
             >
               <SelectTrigger className="w-full h-10 rounded-none bg-card/50 border-border text-sm flex">
                 <SelectValue placeholder="Select provider">
                   {(value) =>
-                    value === 'cloudflare'
-                      ? 'Cloudflare Workers AI'
-                      : value === 'nova-2-lite-v1'
-                        ? 'Nova 2 Lite'
-                        : ''
+                    AI_PROVIDERS.options.find(
+                      (provider) => provider.id === value,
+                    )?.label ?? ''
                   }
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="border border-border bg-popover rounded-none">
-                <SelectItem value="cloudflare" className="text-sm">
-                  Cloudflare Workers AI
-                </SelectItem>
-                <SelectItem value="nova-2-lite-v1" className="text-sm">
-                  Nova 2 Lite
-                </SelectItem>
+                {AI_PROVIDERS.options
+                  .filter((provider) => provider.clueModel)
+                  .map((provider) => (
+                    <SelectItem
+                      key={provider.id}
+                      value={provider.id}
+                      className="text-sm"
+                    >
+                      {provider.label}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>

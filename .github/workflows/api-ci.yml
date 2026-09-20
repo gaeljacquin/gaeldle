@@ -1,0 +1,56 @@
+name: API CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - apps/api/**
+      - packages/db/**
+      - packages/shared/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - turbo.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: API checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint API
+        run: pnpm --filter @workspace/api lint
+
+      - name: Typecheck API
+        run: pnpm --filter @workspace/api typecheck
+
+      - name: Test API
+        run: pnpm --filter @workspace/api test
+
+      - name: Build API
+        run: pnpm --filter @workspace/api build

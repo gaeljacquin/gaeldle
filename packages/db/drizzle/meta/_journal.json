@@ -246,6 +246,20 @@
       "when": 1789163248070,
       "tag": "0034_bored_karen_page",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1789924774000,
+      "tag": "0035_remove_simpsons_art_style",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1789926479000,
+      "tag": "0036_remove_legacy_image_gen_entries",
+      "breakpoints": true
     }
   ]
 }

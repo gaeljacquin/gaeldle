@@ -51,8 +51,8 @@ Always read `AGENTS.md` before starting.
 **Overrides accepted as:**
 
 - Plain text keywords: `includeStoryline`, `includeGenres`, `includeThemes`
-- Plain text style (value slug or label): e.g. `simpsons`, `Simpsons Style`, `lego`, `Lego Style`
-- JSON object: `{"includeStoryline": true, "imageStyle": "simpsons"}`
+- Plain text style (value slug or label): e.g. `lego`, `Lego Style`
+- JSON object: `{"includeStoryline": true, "imageStyle": "lego"}`
 
 Parse the user's invocation input to extract any overrides before running.
 
@@ -208,7 +208,7 @@ NUM_GAMES=5 \
   pnpm exec tsx apps/api/scripts/bulk-generate-images.ts
 ```
 
-Set `NUM_GAMES` to the resolved `num_games` value (clamped to [1, 50], default 5). Set `INCLUDE_*` variables to `true` based on the user's override input. Set `IMAGE_STYLE` to the resolved style value slug (e.g. `simpsons`). Omit or leave empty to use the default (`funko-pop-chibi`).
+Set `NUM_GAMES` to the resolved `num_games` value (clamped to [1, 50], default 5). Set `INCLUDE_*` variables to `true` based on the user's override input. Set `IMAGE_STYLE` to the resolved style value slug (e.g. `lego`). Omit or leave empty to use the default (`funko-pop-chibi`).
 
 ### Step 3: Report Results
 

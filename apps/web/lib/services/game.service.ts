@@ -602,6 +602,33 @@ export async function restoreClue(igdbId: number, historyId: number) {
   return data;
 }
 
+export async function archiveActiveClue(igdbId: number) {
+  const { data, error } = await apiClient.POST('/api/clue/archive', {
+    body: { igdbId },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to archive active clue');
+  }
+
+  return data;
+}
+
+export async function deleteClueHistoryEntry(
+  igdbId: number,
+  historyId: number,
+) {
+  const { data, error } = await apiClient.DELETE('/api/clue/history', {
+    body: { igdbId, historyId },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to delete clue from history');
+  }
+
+  return data;
+}
+
 export async function validateIgdbIdAdd(igdbId: number, signal?: AbortSignal) {
   const { data, error } = await apiClient.POST('/api/games/add/validate-one', {
     body: { igdbId },

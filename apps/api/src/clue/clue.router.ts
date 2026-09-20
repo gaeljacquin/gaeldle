@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Delete,
   Get,
   Body,
   Query,
@@ -25,6 +26,8 @@ import {
   GenerateClueDto,
   GenerateClueResponseDto,
   RestoreClueDto,
+  ArchiveClueDto,
+  DeleteClueHistoryDto,
   GameClueHistoryDto,
 } from '@/clue/dto/clue.dto';
 
@@ -91,6 +94,57 @@ export class ClueRouter {
     return {
       success: true,
       data: updatedGame,
+    };
+  }
+
+  @Post('archive')
+  @UseGuards(HexclaveGuard)
+  @ApiOperation({ summary: 'Archive the active clue for a game' })
+  @ApiBody({ type: ArchiveClueDto })
+  @ApiResponse({ status: 200, type: GenerateClueResponseDto })
+  async archiveActiveClue(
+    @Body() body: ArchiveClueDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<GenerateClueResponseDto> {
+    const actorId = req.hexclave?.sub ?? 'unknown';
+    const updatedGame = await this.clueService.archiveActiveClue(
+      body.igdbId,
+      actorId,
+    );
+
+    if (!updatedGame) {
+      throw new NotFoundException('Game not found');
+    }
+
+    return {
+      success: true,
+      data: updatedGame,
+    };
+  }
+
+  @Delete('history')
+  @UseGuards(HexclaveGuard)
+  @ApiOperation({ summary: 'Delete a clue from a game history' })
+  @ApiBody({ type: DeleteClueHistoryDto })
+  @ApiResponse({ status: 200, type: GenerateClueResponseDto })
+  async deleteClueHistoryEntry(
+    @Body() body: DeleteClueHistoryDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<GenerateClueResponseDto> {
+    const actorId = req.hexclave?.sub ?? 'unknown';
+    const deleted = await this.clueService.deleteClueHistoryEntry(
+      body.igdbId,
+      body.historyId,
+      actorId,
+    );
+
+    if (!deleted) {
+      throw new NotFoundException('Clue history entry not found');
+    }
+
+    return {
+      success: true,
+      data: deleted,
     };
   }
 }

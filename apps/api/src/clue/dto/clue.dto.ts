@@ -17,6 +17,15 @@ export class RestoreClueDto {
   @ApiProperty({ type: Number }) historyId!: number;
 }
 
+export class ArchiveClueDto {
+  @ApiProperty({ type: Number }) igdbId!: number;
+}
+
+export class DeleteClueHistoryDto {
+  @ApiProperty({ type: Number }) igdbId!: number;
+  @ApiProperty({ type: Number }) historyId!: number;
+}
+
 export class GameClueHistoryDto {
   @ApiProperty({ type: Number }) id!: number;
   @ApiProperty({ type: Number }) gameId!: number;

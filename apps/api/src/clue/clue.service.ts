@@ -54,7 +54,14 @@ export class ClueService {
       genres: game.genres,
     };
 
-    const userPrompt = JSON.stringify(gameData, null, 2);
+    const systemPrompt = [
+      'You write concise, evocative clues for a video-game guessing game.',
+      'Use the supplied game facts as inspiration, but do not describe the input data or mention JSON, objects, fields, metadata, or timestamps.',
+      'Do not name the game, quote its title, or state an exact release date.',
+      'Return one or two natural-language sentences that hint at the game without giving it away.',
+    ].join(' ');
+    const userPrompt = `Game facts:\n${JSON.stringify(gameData, null, 2)}`;
+    const prompt = `System instructions:\n${systemPrompt}\n\n${userPrompt}`;
     let rawResponse: unknown;
     const providerDefinition = getAiProvider(provider);
 
@@ -67,7 +74,10 @@ export class ClueService {
     if (providerDefinition.id === 'cloudflare') {
       rawResponse = await this.aiService.generateText(
         model,
-        [{ role: 'user', content: userPrompt }],
+        [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
         {
           type: 'json_schema',
           json_schema: {
@@ -83,6 +93,7 @@ export class ClueService {
       );
     } else {
       rawResponse = await this.aiService.generateTextBedrock(model, [
+        { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ]);
     }
@@ -114,7 +125,7 @@ export class ClueService {
 
     const newItem = {
       clue: clueString,
-      prompt: userPrompt,
+      prompt,
       provider,
       model,
       createdAt: new Date().toISOString(),

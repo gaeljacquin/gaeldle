@@ -126,6 +126,21 @@ describe('ClueService', () => {
 
       expect(mockDb.insert).toHaveBeenCalledWith(domainEvents);
       expect(mockGamesService.refreshAllGamesView).toHaveBeenCalledWith(true);
+
+      expect(mockAiService.generateText).toHaveBeenCalledWith(
+        '@cf/meta/llama-3.1-8b-instruct',
+        [
+          expect.objectContaining({
+            role: 'system',
+            content: expect.stringContaining('video-game guessing game'),
+          }),
+          expect.objectContaining({
+            role: 'user',
+            content: expect.stringContaining('Game facts:'),
+          }),
+        ],
+        expect.any(Object),
+      );
     });
 
     it('should handle markdown JSON string responses from Bedrock', async () => {
@@ -144,6 +159,17 @@ describe('ClueService', () => {
             model: 'us.amazon.nova-2-lite-v1:0',
           }),
         }),
+      );
+
+      expect(mockAiService.generateTextBedrock).toHaveBeenCalledWith(
+        'us.amazon.nova-2-lite-v1:0',
+        [
+          expect.objectContaining({ role: 'system' }),
+          expect.objectContaining({
+            role: 'user',
+            content: expect.stringContaining('Game facts:'),
+          }),
+        ],
       );
     });
 

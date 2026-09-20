@@ -260,6 +260,13 @@
       "when": 1789926479000,
       "tag": "0036_remove_legacy_image_gen_entries",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1789938398281,
+      "tag": "0037_massive_wolf_cub",
+      "breakpoints": true
     }
   ]
 }

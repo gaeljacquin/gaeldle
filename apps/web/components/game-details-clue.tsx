@@ -72,12 +72,12 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
 
   const generatedClue = game.clue
     ? (game.clue as {
-        clue: string;
-        prompt: string;
-        provider: string;
-        model: string;
-        createdAt?: string;
-      })
+      clue: string;
+      prompt: string;
+      provider: string;
+      model: string;
+      createdAt?: string;
+    })
     : null;
 
   const generateClueMutation = useMutation({
@@ -86,7 +86,7 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
       toast.loading('Generating clue...', { id: generateClueToastId });
     },
     onSuccess: () => {
-      toast.success('Clue generated successfully!', {
+      toast.success(`Clue generated successfully for ${game.name}!`, {
         id: generateClueToastId,
       });
       queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
@@ -167,12 +167,12 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
                   Generated:{' '}
                   {generatedClue.createdAt
                     ? new Date(generatedClue.createdAt).toLocaleString(
-                        undefined,
-                        {
-                          dateStyle: 'medium',
-                          timeStyle: 'short',
-                        },
-                      )
+                      undefined,
+                      {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      },
+                    )
                     : 'N/A'}
                 </span>
                 <Button
@@ -398,12 +398,12 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
                         <span>
                           {item.occurredAt
                             ? new Date(item.occurredAt).toLocaleString(
-                                undefined,
-                                {
-                                  dateStyle: 'medium',
-                                  timeStyle: 'short',
-                                },
-                              )
+                              undefined,
+                              {
+                                dateStyle: 'medium',
+                                timeStyle: 'short',
+                              },
+                            )
                             : 'N/A'}
                         </span>
                         <span>•</span>

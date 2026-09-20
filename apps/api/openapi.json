@@ -499,6 +499,37 @@
         ]
       }
     },
+    "/api/image-gen/generate-image/{jobId}/status": {
+      "get": {
+        "operationId": "ImageGenRouter_getSingleImageGenStatus",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleImageGenStatusResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get single AI image generation status",
+        "tags": [
+          "imageGen"
+        ]
+      }
+    },
     "/api/image-gen/delete-image": {
       "post": {
         "operationId": "ImageGenRouter_deleteGeneratedImage",
@@ -1425,12 +1456,73 @@
           "success": {
             "type": "boolean"
           },
+          "jobId": {
+            "type": "string"
+          },
           "messageId": {
             "type": "string"
           }
         },
         "required": [
-          "success"
+          "success",
+          "jobId"
+        ]
+      },
+      "SingleImageGenStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "jobId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "running",
+              "completed",
+              "failed"
+            ]
+          },
+          "igdbId": {
+            "type": "number"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "resultUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "attempts": {
+            "type": "number"
+          },
+          "maxAttempts": {
+            "type": "number"
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "jobId",
+          "status",
+          "igdbId",
+          "attempts",
+          "maxAttempts",
+          "createdAt"
         ]
       },
       "DeleteGeneratedImageDto": {

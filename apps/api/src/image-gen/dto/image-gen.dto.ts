@@ -16,7 +16,26 @@ export class GenerateImageDto {
 
 export class GenerateImageResponseDto {
   @ApiProperty({ type: Boolean }) success!: boolean;
+  @ApiProperty({ type: String }) jobId!: string;
   @ApiPropertyOptional({ type: String }) messageId?: string;
+}
+
+export class SingleImageGenStatusResponseDto {
+  @ApiProperty({ type: Boolean }) success!: boolean;
+  @ApiProperty({ type: String }) jobId!: string;
+  @ApiProperty({ enum: ['pending', 'running', 'completed', 'failed'] })
+  status!: string;
+  @ApiProperty({ type: Number }) igdbId!: number;
+  @ApiPropertyOptional({ type: String, nullable: true }) error!: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true }) resultUrl!:
+    string | null;
+  @ApiProperty({ type: Number }) attempts!: number;
+  @ApiProperty({ type: Number }) maxAttempts!: number;
+  @ApiPropertyOptional({ type: String, nullable: true }) startedAt!:
+    string | null;
+  @ApiPropertyOptional({ type: String, nullable: true }) completedAt!:
+    string | null;
+  @ApiProperty({ type: String }) createdAt!: string;
 }
 
 export class GenerateImagesDto {

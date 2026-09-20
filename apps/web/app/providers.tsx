@@ -8,10 +8,16 @@ import { Toaster } from 'sonner';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { TooltipProvider } from '@workspace/ui/tooltip';
+import { useImageGenerationNotifications } from '@/lib/hooks/use-image-generation-notifications';
 
 type ProvidersProps = {
   children: ReactNode;
 };
+
+function ImageGenerationNotifications() {
+  useImageGenerationNotifications();
+  return null;
+}
 
 export default function Providers({ children }: ProvidersProps) {
   const [queryClient] = useState(
@@ -31,6 +37,7 @@ export default function Providers({ children }: ProvidersProps) {
     <HexclaveProvider app={hexclaveClientApp}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+          <ImageGenerationNotifications />
           {children}
           <Toaster position="bottom-right" closeButton richColors />
           <ReactQueryDevtools initialIsOpen={false} />

@@ -49,6 +49,10 @@ import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
 import { artStylesQueryOptions } from '@/lib/services/art-style.service';
+import {
+  imageGenerationToastId,
+  useImageGenerationJobsStore,
+} from '@/lib/stores/image-generation-jobs-store';
 import type { ArtStyle } from '@workspace/db';
 import {
   Select,
@@ -58,7 +62,7 @@ import {
   SelectValue,
 } from '@workspace/ui/select';
 
-export const generateImageToastId = 'generate-image';
+const generateImageRequestToastId = 'generate-image-request';
 
 function buildPromptPreview(
   game: Game,
@@ -117,10 +121,6 @@ export default function GameDetailsImageGenTab({
   setIncludeGenres,
   includeThemes,
   setIncludeThemes,
-  isPolling,
-  setIsPolling,
-  setPrevUrl,
-  setGeneratingStyle,
 }: {
   igdbId: string;
   artStyleValue: ArtStyleValue;
@@ -131,21 +131,20 @@ export default function GameDetailsImageGenTab({
   setIncludeGenres: (v: boolean) => void;
   includeThemes: boolean;
   setIncludeThemes: (v: boolean) => void;
-  isPolling: boolean;
-  setIsPolling: (v: boolean) => void;
-  setPrevUrl: (v: string | null) => void;
-  setGeneratingStyle: (v: string | null) => void;
 }) {
   const [providerVal, setProviderVal] = useState<ImageAiProvider>(
     AI_PROVIDERS.default,
   );
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const addJob = useImageGenerationJobsStore((state) => state.addJob);
+  const isGenerating = useImageGenerationJobsStore((state) =>
+    state.jobs.some((job) => job.igdbId === Number.parseInt(igdbId, 10)),
+  );
 
   const queryClient = useQueryClient();
   const { data: game } = useSuspenseQuery({
     queryKey: ['game', igdbId],
     queryFn: () => getGameByIgdbId(Number.parseInt(igdbId, 10)),
-    refetchInterval: isPolling ? 2000 : false,
   });
 
   const { data: artStyles } = useSuspenseQuery(artStylesQueryOptions);
@@ -175,23 +174,25 @@ export default function GameDetailsImageGenTab({
         provider: providerVal,
       }),
     onMutate: () => {
-      toast.loading('Generating image...', { id: generateImageToastId });
-      setPrevUrl(generatedImage?.url ?? null);
-      setGeneratingStyle(artStyleValue);
+      toast.loading('Generating image...', { id: generateImageRequestToastId });
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      toast.dismiss(generateImageRequestToastId);
       toast.info('Image generation queued! It will appear in one moment.', {
-        id: generateImageToastId,
+        id: imageGenerationToastId(result.jobId),
         duration: Infinity,
       });
-      setIsPolling(true);
-      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+      addJob({
+        jobId: result.jobId,
+        igdbId: Number.parseInt(igdbId, 10),
+        gameName: game.name,
+      });
     },
     onError: (err) => {
       console.error(err);
-      toast.error('Failed to generate image', { id: generateImageToastId });
-      setIsPolling(false);
-      setGeneratingStyle(null);
+      toast.error('Failed to generate image', {
+        id: generateImageRequestToastId,
+      });
     },
   });
 
@@ -238,11 +239,11 @@ export default function GameDetailsImageGenTab({
 
   const isBusy =
     generateImageMutation.isPending ||
-    isPolling ||
+    isGenerating ||
     deleteImageMutation.isPending;
 
   const imageGenButtonText =
-    generateImageMutation.isPending || isPolling
+    generateImageMutation.isPending || isGenerating
       ? 'Generating...'
       : generatedImage
         ? 'Regenerate Image'
@@ -312,7 +313,8 @@ export default function GameDetailsImageGenTab({
             aria-hidden="true"
             className={cn(
               'mr-2 size-4',
-              (generateImageMutation.isPending || isPolling) && 'animate-pulse',
+              (generateImageMutation.isPending || isGenerating) &&
+                'animate-pulse',
             )}
           />
           {imageGenButtonText}

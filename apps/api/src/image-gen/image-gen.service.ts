@@ -15,6 +15,7 @@ import {
   artStyles as artStylesView,
   type ArtStyleValue,
   ImageGenStatus,
+  singleImageGenJobs,
 } from '@workspace/db';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
@@ -401,7 +402,7 @@ export class ImageGenService {
   async generateImage(
     input: GenerateImageInput,
     actorId: string,
-  ): Promise<{ success: boolean; messageId?: string } | null> {
+  ): Promise<{ success: boolean; jobId: string; messageId?: string } | null> {
     const { igdbId } = input;
     const game = await this.gamesService.getGameByIgdbId(igdbId);
 
@@ -409,16 +410,48 @@ export class ImageGenService {
       return null;
     }
 
-    const queueUrl = configuration().imageGenSqsQueueUrl;
-    const res = await this.sqsService.sendMessage(queueUrl, {
-      type: 'image-gen',
-      input,
+    const jobId = randomUUID();
+
+    await this.databaseService.db.insert(singleImageGenJobs).values({
+      jobId,
       actorId,
+      igdbId,
+      artStyle: input.artStyle,
+      provider: input.provider,
     });
 
+    const queueUrl = configuration().imageGenSqsQueueUrl;
+    let res: Awaited<ReturnType<SqsService['sendMessage']>>;
+
+    try {
+      res = await this.sqsService.sendMessage(queueUrl, {
+        type: 'image-gen',
+        jobId,
+        input,
+        actorId,
+      });
+    } catch (err) {
+      await this.failSingleImageGenJob(
+        jobId,
+        err instanceof Error ? err.message : String(err),
+        true,
+      );
+      throw err;
+    }
+
     if (!res.ok) {
+      await this.failSingleImageGenJob(
+        jobId,
+        'Failed to send image generation job to SQS queue',
+        true,
+      );
       throw new Error('Failed to send image generation job to SQS queue');
     }
+
+    await this.databaseService.db
+      .update(singleImageGenJobs)
+      .set({ sqsMessageId: res.MessageId })
+      .where(eq(singleImageGenJobs.jobId, jobId));
 
     // Insert the queued domain event
     await this.databaseService.db.insert(domainEvents).values({
@@ -426,19 +459,122 @@ export class ImageGenService {
       actorId,
       payload: {
         igdbId,
+        jobId,
         artStyle: input.artStyle,
         messageId: res.MessageId,
         queueUrl,
       },
     });
 
-    return { success: true, messageId: res.MessageId };
+    return { success: true, jobId, messageId: res.MessageId };
+  }
+
+  async getSingleImageGenStatus(jobId: string, actorId: string) {
+    const [job] = await this.databaseService.db
+      .select()
+      .from(singleImageGenJobs)
+      .where(
+        and(
+          eq(singleImageGenJobs.jobId, jobId),
+          eq(singleImageGenJobs.actorId, actorId),
+        ),
+      )
+      .limit(1);
+
+    if (!job) {
+      throw new NotFoundException(`Image generation ${jobId} not found`);
+    }
+
+    return job;
+  }
+
+  async startSingleImageGenJob(jobId: string): Promise<boolean> {
+    const [existingJob] = await this.databaseService.db
+      .select({ status: singleImageGenJobs.status })
+      .from(singleImageGenJobs)
+      .where(eq(singleImageGenJobs.jobId, jobId))
+      .limit(1);
+
+    if (!existingJob) {
+      throw new NotFoundException(`Image generation ${jobId} not found`);
+    }
+
+    if (existingJob.status === 'completed' || existingJob.status === 'failed') {
+      return false;
+    }
+
+    const [job] = await this.databaseService.db
+      .update(singleImageGenJobs)
+      .set({
+        status: 'running',
+        attempts: sql`${singleImageGenJobs.attempts} + 1`,
+        startedAt: sql`COALESCE(${singleImageGenJobs.startedAt}, NOW())`,
+        error: null,
+      })
+      .where(eq(singleImageGenJobs.jobId, jobId))
+      .returning({ jobId: singleImageGenJobs.jobId });
+
+    return Boolean(job);
+  }
+
+  async completeSingleImageGenJob(
+    jobId: string,
+    resultUrl: string,
+  ): Promise<void> {
+    await this.databaseService.db
+      .update(singleImageGenJobs)
+      .set({
+        status: 'completed',
+        resultUrl,
+        error: null,
+        completedAt: new Date(),
+      })
+      .where(eq(singleImageGenJobs.jobId, jobId));
+  }
+
+  async retryOrFailSingleImageGenJob(
+    jobId: string,
+    error: string,
+  ): Promise<{ shouldRetry: boolean }> {
+    const [job] = await this.databaseService.db
+      .select({
+        attempts: singleImageGenJobs.attempts,
+        maxAttempts: singleImageGenJobs.maxAttempts,
+      })
+      .from(singleImageGenJobs)
+      .where(eq(singleImageGenJobs.jobId, jobId))
+      .limit(1);
+
+    if (!job) {
+      throw new NotFoundException(`Image generation ${jobId} not found`);
+    }
+
+    const shouldRetry = job.attempts < job.maxAttempts;
+    await this.failSingleImageGenJob(jobId, error, !shouldRetry);
+
+    return { shouldRetry };
+  }
+
+  private async failSingleImageGenJob(
+    jobId: string,
+    error: string,
+    terminal: boolean,
+  ): Promise<void> {
+    await this.databaseService.db
+      .update(singleImageGenJobs)
+      .set({
+        status: terminal ? 'failed' : 'pending',
+        error,
+        completedAt: terminal ? new Date() : null,
+      })
+      .where(eq(singleImageGenJobs.jobId, jobId));
   }
 
   async runSingleGeneration(
     input: GenerateImageInput,
     actorId: string,
-  ): Promise<{ success: boolean; url: string; data: Game } | null> {
+    jobId?: string,
+  ): Promise<{ success: boolean; url: string; data: Game }> {
     const {
       igdbId,
       includeStoryline,
@@ -452,14 +588,22 @@ export class ImageGenService {
       .select()
       .from(artStylesView);
 
-    if (!game || !artStyleValue) {
-      return null;
+    if (!game) {
+      throw new NotFoundException(`Game with igdbId ${igdbId} not found`);
+    }
+
+    if (!artStyleValue) {
+      throw new Error('An art style is required to generate an image');
     }
 
     const artStyleDescription = artStyles.find(
       (artStyle) =>
         artStyle.value.toLowerCase() === artStyleValue.toLowerCase(),
     )?.description;
+
+    if (!artStyleDescription) {
+      throw new Error(`No art style description found for ${artStyleValue}`);
+    }
     const prompt = this.buildImagePrompt(
       game,
       {
@@ -467,7 +611,7 @@ export class ImageGenService {
         includeGenres: includeGenres ?? false,
         includeThemes: includeThemes ?? false,
       },
-      artStyleDescription!,
+      artStyleDescription,
     );
 
     const rawBuffer = await this.aiService.generateImage(prompt, provider);
@@ -527,6 +671,7 @@ export class ImageGenService {
       eventType: 'image_gen.generated',
       actorId,
       payload: {
+        jobId,
         igdbId,
         gameId: game.id,
         url: publicUrl,

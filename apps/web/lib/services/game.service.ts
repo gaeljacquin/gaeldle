@@ -495,6 +495,21 @@ export async function generateImage(
   return data;
 }
 
+export async function getSingleImageGenStatus(jobId: string) {
+  const { data, error } = await apiClient.GET(
+    '/api/image-gen/generate-image/{jobId}/status',
+    {
+      params: { path: { jobId } },
+    },
+  );
+
+  if (error || !data) {
+    throw new Error('Failed to get image generation status');
+  }
+
+  return data;
+}
+
 export async function deleteGeneratedImage(
   igdbId: number,
   artStyleValue: ArtStyleValue,

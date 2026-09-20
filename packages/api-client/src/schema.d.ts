@@ -310,6 +310,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/image-gen/generate-image/{jobId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get single AI image generation status */
+        get: operations["ImageGenRouter_getSingleImageGenStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/image-gen/delete-image": {
         parameters: {
             query?: never;
@@ -648,7 +665,22 @@ export interface components {
         };
         GenerateImageResponseDto: {
             success: boolean;
+            jobId: string;
             messageId?: string;
+        };
+        SingleImageGenStatusResponseDto: {
+            success: boolean;
+            jobId: string;
+            /** @enum {string} */
+            status: "pending" | "running" | "completed" | "failed";
+            igdbId: number;
+            error?: string | null;
+            resultUrl?: string | null;
+            attempts: number;
+            maxAttempts: number;
+            startedAt?: string | null;
+            completedAt?: string | null;
+            createdAt: string;
         };
         DeleteGeneratedImageDto: {
             igdbId: number;
@@ -1186,6 +1218,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GenerateImageResponseDto"];
+                };
+            };
+        };
+    };
+    ImageGenRouter_getSingleImageGenStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SingleImageGenStatusResponseDto"];
                 };
             };
         };

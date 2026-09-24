@@ -4,6 +4,7 @@ Gaeldle is a Turborepo monorepo with a Next.js web app and a NestJS API.
 
 ## Essentials
 
+- Authentication: Hexclave. The web app uses `@hexclave/next`, configured in `apps/web/hexclave/`; the API uses `HexclaveGuard` in `apps/api/src/auth/hexclave.guard.ts`. Authenticated handlers read `req.hexclave?.sub` for the user ID.
 - Package manager: `nr` (unified for root and apps).
 - Commands:
   - `nr build` (or `turbo build`)

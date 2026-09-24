@@ -1,6 +1,6 @@
 # Agent Guide
 
-This repository is a NestJS backend API for games data and Stack Auth-protected endpoints, with Postgres via Drizzle ORM.
+This repository is a NestJS backend API for games data and Hexclave-protected endpoints, with Postgres via Drizzle ORM.
 
 - Package manager: `nr` (unified for root and apps).
 - Core checks used across tasks: `nr typecheck`, `nr lint`, `nr test`.

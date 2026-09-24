@@ -1,5 +1,7 @@
 # Discover Games — Final Architecture Design (2026-03-03)
 
+> Auth update (2026-09-24): The design below records historical names. Current code uses `HexclaveGuard` and `AuthenticatedRequest` from `apps/api/src/auth/hexclave.guard.ts`; handlers read `req.hexclave?.sub` for `actorId`.
+
 ## Status: APPROVED, ready for handoff to @full-stack-feature-builder
 
 ## Key Decisions

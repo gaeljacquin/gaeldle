@@ -7,7 +7,7 @@
 - **Frontend**: Next.js 16 (App Router)
 - **API Protocol**: OpenAPI + openapi-typescript + openapi-fetch (Type-safe communication)
 - **Database**: PostgreSQL 17 + Drizzle ORM (`@workspace/db`)
-- **Authentication**: Stack Auth
+- **Authentication**: Hexclave
 - **AI Providers**: Cloudflare Workers AI (Image Gen, Text) & AWS Bedrock (Clue Text Generation)
 - **Storage**: Cloudflare R2 (S3-compatible)
 - **Styling**: Tailwind CSS v4 + Vanilla CSS

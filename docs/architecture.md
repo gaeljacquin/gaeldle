@@ -33,7 +33,7 @@ All game modes (`/api/games/random`, etc.) enforce:
 
 - Database: PostgreSQL 17 (default port 5432).
 - OpenAPI + Codegen: OpenAPI spec generated from NestJS controllers (`pnpm codegen`), providing `openapi-fetch` client typed via `packages/api-client/src/schema.d.ts` (write operations).
-- Auth: Stack Auth used in both frontend and backend.
+- Auth: Hexclave used in both frontend and backend.
 
 ## Ports
 

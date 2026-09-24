@@ -95,8 +95,8 @@ export default function SomePage() {
 
 ### actorId injection in NestJS Controllers
 
-- Use `@Req() req: AuthenticatedRequest` on the controller method to access Stack Auth payload
-- Extract `req.stackAuth?.sub` for `actorId`
+- Use `@Req() req: AuthenticatedRequest` on the controller method to access Hexclave payload
+- Extract `req.hexclave?.sub` for `actorId`
 
 ### GamesModule exports
 

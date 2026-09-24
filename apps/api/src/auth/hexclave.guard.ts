@@ -78,12 +78,7 @@ export class HexclaveGuard implements CanActivate {
       request.hexclave = payload;
 
       return true;
-    } catch (err) {
-      console.error(
-        '[HexclaveGuard] Invalid token verification failed for token:',
-        JSON.stringify(token),
-        err,
-      );
+    } catch {
       throw new UnauthorizedException('Invalid Hexclave access token');
     }
   }

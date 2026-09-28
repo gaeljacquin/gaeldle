@@ -232,7 +232,7 @@ export class GamesService {
           .returning();
 
         if (shouldRefresh) {
-          void this.refreshAllGamesView();
+          await this.refreshAllGamesView(true);
         }
 
         operation = 'updated';
@@ -248,7 +248,7 @@ export class GamesService {
         .returning();
 
       if (shouldRefresh) {
-        void this.refreshAllGamesView();
+        await this.refreshAllGamesView(true);
       }
 
       operation = 'created';
@@ -294,7 +294,7 @@ export class GamesService {
     }
 
     if (updatedGame && shouldRefresh) {
-      void this.refreshAllGamesView();
+      await this.refreshAllGamesView(true);
     }
 
     return updatedGame || null;
@@ -307,7 +307,7 @@ export class GamesService {
       .returning({ id: games.id });
 
     if (deletedGame && shouldRefresh) {
-      void this.refreshAllGamesView();
+      await this.refreshAllGamesView(true);
     }
 
     return deletedGame?.id ?? null;
@@ -320,7 +320,7 @@ export class GamesService {
       .returning({ id: games.id });
 
     if (deletedRows.length > 0 && shouldRefresh) {
-      void this.refreshAllGamesView();
+      await this.refreshAllGamesView(true);
     }
 
     return deletedRows.map((row) => row.id);
@@ -345,7 +345,7 @@ export class GamesService {
     }
 
     if (updatedRows.length > 0 && shouldRefresh) {
-      void this.refreshAllGamesView();
+      await this.refreshAllGamesView(true);
     }
 
     return updatedRows.map((row) => row.id);
@@ -536,7 +536,7 @@ export class GamesService {
         },
       });
 
-      void this.refreshQueriedGamesView();
+      await this.refreshQueriedGamesView();
 
       return {
         igdbId,

@@ -205,12 +205,16 @@ export const allGames = pgMaterializedView('all_games').as((qb) => {
 
 export const GameSelectSchema = createSelectSchema(allGames);
 export const GameInsertSchema = createInsertSchema(games);
-export const GameUpdateInputSchema = GameInsertSchema.omit({
+const gameUpdateExcludedFields = {
   id: true,
   createdAt: true,
   updatedAt: true,
   igdbId: true,
-}).partial();
+} as const;
+
+export const GameUpdateInputSchema = GameInsertSchema.omit(
+  gameUpdateExcludedFields as any,
+).partial();
 
 export type GameInsert = InferInsertModel<typeof games>;
 

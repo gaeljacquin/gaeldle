@@ -482,7 +482,7 @@
           }
         },
         "responses": {
-          "200": {
+          "202": {
             "description": "",
             "content": {
               "application/json": {
@@ -577,7 +577,7 @@
           }
         },
         "responses": {
-          "200": {
+          "202": {
             "description": "",
             "content": {
               "application/json": {
@@ -620,30 +620,6 @@
           }
         },
         "summary": "Get bulk image generation status",
-        "tags": [
-          "imageGen"
-        ]
-      }
-    },
-    "/api/image-gen/generate-images/{imageGenId}/stream": {
-      "get": {
-        "operationId": "ImageGenRouter_stream",
-        "parameters": [
-          {
-            "name": "imageGenId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Stream image generation progress via SSE",
         "tags": [
           "imageGen"
         ]

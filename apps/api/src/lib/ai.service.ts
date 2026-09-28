@@ -125,7 +125,11 @@ export class AiService {
       throw new Error(`Cloudflare AI failed: ${response.status} ${errorText}`);
     }
 
-    const json = await response.json();
+    const json = (await response.json()) as {
+      success: boolean;
+      errors?: unknown;
+      result: { response: unknown };
+    };
 
     if (!json.success) {
       console.error('[AiService] Cloudflare Workers AI success=false:', json);

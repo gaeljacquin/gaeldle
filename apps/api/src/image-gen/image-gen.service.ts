@@ -3,7 +3,7 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { eq, sql, desc, and } from 'drizzle-orm';
+import { eq, sql, and, isNull } from 'drizzle-orm';
 import sharp from 'sharp';
 import { randomUUID } from 'node:crypto';
 import { DatabaseService } from '@/db/database.service';
@@ -11,20 +11,19 @@ import {
   games,
   domainEvents,
   type Game,
-  gameObject,
   artStyles as artStylesView,
   type ArtStyleValue,
-  ImageGenStatus,
+  imageGenBatches,
   singleImageGenJobs,
 } from '@workspace/db';
+import type { ImageGenStatus } from '@workspace/db';
 import { AiService } from '@/lib/ai.service';
 import { S3Service } from '@/lib/s3.service';
 import { R2Service } from '@/lib/r2.service';
-import { ImageGenStore } from '@/image-gen/image-gen.store';
 import { IMAGE_GEN_DIR } from '@workspace/shared';
 import { GamesService } from '@/games/games.service';
-import { SqsService } from '@/lib/sqs.service';
 import configuration from '@/config/configuration';
+import { QueueClient } from '@workspace/queue';
 
 interface GenerateImageInput {
   igdbId: number;
@@ -42,9 +41,7 @@ export class ImageGenService {
     private readonly databaseService: DatabaseService,
     private readonly aiService: AiService,
     private readonly s3Service: S3Service,
-    private readonly imageGenStore: ImageGenStore,
     private readonly r2Service: R2Service,
-    private readonly sqsService: SqsService,
   ) {}
 
   async generateImages(
@@ -58,37 +55,9 @@ export class ImageGenService {
     },
     actorId: string,
   ): Promise<{ imageGenId: string; gamesQueued: number }> {
-    // Check if an image generation process is already active
-    const [latestStarted] = await this.databaseService.db
-      .select()
-      .from(domainEvents)
-      .where(eq(domainEvents.eventType, 'image_gen.started'))
-      .orderBy(desc(domainEvents.occurredAt))
-      .limit(1);
-
-    if (latestStarted) {
-      const payload = latestStarted.payload as { imageGenId: string };
-      const [finished] = await this.databaseService.db
-        .select()
-        .from(domainEvents)
-        .where(
-          and(
-            eq(domainEvents.eventType, 'image_gen.finished'),
-            sql`${domainEvents.payload}->>'imageGenId' = ${payload.imageGenId}`,
-          ),
-        )
-        .limit(1);
-
-      if (!finished) {
-        throw new ConflictException(
-          'An image generation is already active. Please wait for it to finish.',
-        );
-      }
-    }
-
-    // Query games where ai_image_url IS NULL
+    // Select jobs before publishing so the worker can recover from API restarts.
     const pendingGames = await this.databaseService.db
-      .select(gameObject)
+      .select({ igdbId: games.igdbId })
       .from(games)
       .where(sql`${games.aiImageUrl} IS NULL`)
       .limit(params.numGames);
@@ -103,299 +72,88 @@ export class ImageGenService {
 
     const imageGenId = randomUUID();
 
-    // Insert the started domain event
-    await this.databaseService.db.insert(domainEvents).values({
-      eventType: 'image_gen.started',
+    const input = {
+      includeStoryline: params.includeStoryline,
+      includeGenres: params.includeGenres,
+      includeThemes: params.includeThemes,
+      artStyle: params.artStyle,
+      provider: params.provider,
+    };
+
+    const jobs = pendingGames.map((game) => ({
+      jobId: randomUUID(),
+      batchId: imageGenId,
       actorId,
-      payload: {
-        imageGenId,
+      igdbId: game.igdbId,
+      artStyle: input.artStyle,
+      provider: input.provider,
+      input: { ...input, igdbId: game.igdbId },
+    }));
+
+    await this.databaseService.db.transaction(async (tx) => {
+      await tx.insert(imageGenBatches).values({
+        batchId: imageGenId,
+        actorId,
+        params: input,
         total,
-        params,
-      },
+      });
+      await tx.insert(singleImageGenJobs).values(jobs);
     });
 
-    // Run the generation loop asynchronously (fire-and-forget)
-    this.runGenerationLoop(imageGenId, pendingGames, params, actorId).catch(
-      (err) => {
-        console.error(
-          `[ImageGen] Fatal error for generation ${imageGenId}:`,
-          err,
-        );
-      },
-    );
+    await this.dispatchPendingJobs();
 
     return { imageGenId, gamesQueued: total };
   }
 
-  private async runGenerationLoop(
-    imageGenId: string,
-    pendingGames: Game[],
-    params: {
-      numGames: number;
-      artStyle: string;
-      includeStoryline?: boolean;
-      includeGenres?: boolean;
-      includeThemes?: boolean;
-      provider: string;
-    },
-    actorId: string,
-  ): Promise<void> {
-    const total = pendingGames.length;
-    const failures: Array<{ igdbId: number; gameName: string; error: string }> =
-      [];
-    const { artStyle: artStyleValue, provider } = params;
-    let processed = 0;
-    let succeeded = 0;
-    let failed = 0;
+  async getImageGenStatus(imageGenId: string, actorId: string) {
+    const [batch] = await this.databaseService.db
+      .select()
+      .from(imageGenBatches)
+      .where(
+        and(
+          eq(imageGenBatches.batchId, imageGenId),
+          eq(imageGenBatches.actorId, actorId),
+        ),
+      )
+      .limit(1);
 
-    // Set initial progress in the in-memory store
-    this.imageGenStore.setProgress(imageGenId, {
+    if (!batch) {
+      throw new NotFoundException(`Image generation ${imageGenId} not found`);
+    }
+    const jobs = await this.databaseService.db
+      .select()
+      .from(singleImageGenJobs)
+      .where(eq(singleImageGenJobs.batchId, imageGenId));
+    const succeeded = jobs.filter((job) => job.status === 'completed').length;
+    const failedJobs = jobs.filter((job) => job.status === 'failed');
+    const failed = failedJobs.length;
+    const processed = succeeded + failed;
+    const status: ImageGenStatus =
+      processed === 0
+        ? 'pending'
+        : processed < batch.total
+          ? 'running'
+          : failed === batch.total
+            ? 'failed'
+            : 'completed';
+
+    return {
+      imageGenId,
+      status,
+      total: batch.total,
       processed,
       succeeded,
       failed,
-      failures,
-    });
-
-    const artStyle = await this.databaseService.db
-      .select({
-        value: artStylesView.value,
-        description: artStylesView.description,
-      })
-      .from(artStylesView)
-      .where(eq(artStylesView.value, artStyleValue))
-      .then((rows) => rows[0]);
-
-    if (!artStyle?.description) {
-      throw new Error('No art style description found.');
-    }
-
-    for (const game of pendingGames) {
-      try {
-        const prompt = this.buildImagePrompt(
-          game,
-          params,
-          artStyle?.description,
-        );
-        const rawBuffer = await this.aiService.generateImage(prompt, provider);
-        const imageBuffer = await sharp(rawBuffer)
-          .jpeg({ quality: 85 })
-          .toBuffer();
-        const timestamp = Date.now();
-        const key = `${IMAGE_GEN_DIR}/${game.igdbId}_${timestamp}.jpg`;
-
-        await this.s3Service.uploadImage(key, imageBuffer, 'image/jpeg');
-
-        const publicUrl = `${this.r2Service.r2PublicUrl}/${key}`;
-        const list = game.imageGen ? [...game.imageGen] : [];
-        const newItem = {
-          [artStyleValue]: {
-            url: publicUrl,
-            prompt,
-            provider,
-          },
-        };
-        const existingIndex = list.findIndex(
-          (item) =>
-            item &&
-            typeof item === 'object' &&
-            Object.keys(item).some(
-              (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
-            ),
-        );
-
-        let replacedImageUrl: string | null = null;
-
-        if (existingIndex >= 0) {
-          const matchedKey = Object.keys(list[existingIndex]).find(
-            (k) => k.toLowerCase() === artStyleValue.toLowerCase(),
-          )!;
-          replacedImageUrl = list[existingIndex][matchedKey]?.url ?? null;
-          list[existingIndex] = newItem;
-        } else {
-          list.push(newItem);
-        }
-
-        await this.databaseService.db
-          .update(games)
-          .set({
-            aiImageUrl: publicUrl,
-            aiPrompt: prompt,
-            imageGen: list,
-          })
-          .where(eq(games.id, game.id));
-
-        if (replacedImageUrl) {
-          await this.deleteR2ImageByUrl(replacedImageUrl, game.igdbId);
-        }
-
-        succeeded++;
-      } catch (err) {
-        failed++;
-
-        const errorMessage = err instanceof Error ? err.message : String(err);
-
-        failures.push({
-          igdbId: game.igdbId,
-          gameName: game.name,
-          error: errorMessage,
-        });
-
-        console.error(
-          `[ImageGen] Failed to process game ${game.name} (${game.igdbId}):`,
-          errorMessage,
-        );
-      }
-
-      processed++;
-
-      // Update progress in the store
-      this.imageGenStore.setProgress(imageGenId, {
-        processed,
-        succeeded,
-        failed,
-        failures,
-      });
-
-      this.imageGenStore.emit(imageGenId, {
-        type: 'progress',
-        data: {
-          processed,
-          succeeded,
-          failed,
-          total,
-          latestGame: game.name,
-        },
-      });
-    }
-
-    const finalStatus = failed === total ? 'failed' : 'completed';
-
-    // Insert finished domain event
-    await this.databaseService.db.insert(domainEvents).values({
-      eventType: 'image_gen.finished',
-      actorId,
-      payload: {
-        imageGenId,
-        status: finalStatus,
-        total,
-        processed,
-        succeeded,
-        failed,
-        failures,
-      },
-    });
-
-    this.imageGenStore.emit(imageGenId, {
-      type: 'completed',
-      data: { succeeded, failed, failures },
-    });
-
-    // Clean up store for this generation
-    this.imageGenStore.destroy(imageGenId);
-
-    await this.gamesService.refreshAllGamesView();
-  }
-
-  async getImageGenStatus(imageGenId: string) {
-    const [startedEvent] = await this.databaseService.db
-      .select()
-      .from(domainEvents)
-      .where(
-        and(
-          eq(domainEvents.eventType, 'image_gen.started'),
-          sql`${domainEvents.payload}->>'imageGenId' = ${imageGenId}`,
-        ),
-      )
-      .limit(1);
-
-    if (!startedEvent) {
-      throw new NotFoundException(`Image generation ${imageGenId} not found`);
-    }
-
-    const startPayload = startedEvent.payload as {
-      imageGenId: string;
-      total: number;
-      params: any;
-    };
-
-    const [finishedEvent] = await this.databaseService.db
-      .select()
-      .from(domainEvents)
-      .where(
-        and(
-          eq(domainEvents.eventType, 'image_gen.finished'),
-          sql`${domainEvents.payload}->>'imageGenId' = ${imageGenId}`,
-        ),
-      )
-      .limit(1);
-
-    if (finishedEvent) {
-      const finishPayload = finishedEvent.payload as {
-        status: 'completed' | 'failed';
-        total: number;
-        processed: number;
-        succeeded: number;
-        failed: number;
-        failures: Array<{ igdbId: number; gameName: string; error: string }>;
-      };
-
-      return {
-        imageGenId,
-        status: finishPayload.status as ImageGenStatus,
-        total: finishPayload.total,
-        processed: finishPayload.processed,
-        succeeded: finishPayload.succeeded,
-        failed: finishPayload.failed,
-        failures: (finishPayload.failures ?? []) as Array<{
-          igdbId: number;
-          gameName: string;
-          error: string;
-        }>,
-        params: startPayload.params,
-        startedAt: startedEvent.occurredAt,
-        completedAt: finishedEvent.occurredAt,
-        createdAt: startedEvent.occurredAt!,
-      };
-    }
-
-    // Check if it's currently running in memory
-    const activeProgress = this.imageGenStore.getProgress(imageGenId);
-
-    if (activeProgress) {
-      return {
-        imageGenId,
-        status: 'running' as ImageGenStatus,
-        total: startPayload.total,
-        processed: activeProgress.processed,
-        succeeded: activeProgress.succeeded,
-        failed: activeProgress.failed,
-        failures: activeProgress.failures,
-        params: startPayload.params,
-        startedAt: startedEvent.occurredAt,
-        completedAt: null,
-        createdAt: startedEvent.occurredAt!,
-      };
-    }
-
-    // Fallback: If not running in memory and no finished event, treat as failed/stopped
-    return {
-      imageGenId,
-      status: 'failed' as ImageGenStatus,
-      total: startPayload.total,
-      processed: startPayload.total,
-      succeeded: 0,
-      failed: startPayload.total,
-      failures: [
-        {
-          igdbId: 0,
-          gameName: 'All games',
-          error: 'Generation stopped or server restarted',
-        },
-      ],
-      params: startPayload.params,
-      startedAt: startedEvent.occurredAt,
-      completedAt: startedEvent.occurredAt,
-      createdAt: startedEvent.occurredAt!,
+      failures: failedJobs.map((job) => ({
+        igdbId: job.igdbId,
+        gameName: String(job.igdbId),
+        error: job.error ?? 'Image generation failed',
+      })),
+      params: batch.params,
+      startedAt: batch.startedAt,
+      completedAt:
+        status === 'completed' || status === 'failed' ? new Date() : null,
+      createdAt: batch.createdAt,
     };
   }
 
@@ -410,6 +168,11 @@ export class ImageGenService {
       return null;
     }
 
+    const queueUrl = configuration().imageGenSqsQueueUrl;
+    if (!queueUrl) {
+      throw new Error('IMAGE_GEN_SQS_QUEUE_URL is required');
+    }
+
     const jobId = randomUUID();
 
     await this.databaseService.db.insert(singleImageGenJobs).values({
@@ -418,18 +181,16 @@ export class ImageGenService {
       igdbId,
       artStyle: input.artStyle,
       provider: input.provider,
+      input,
     });
 
-    const queueUrl = configuration().imageGenSqsQueueUrl;
-    let res: Awaited<ReturnType<SqsService['sendMessage']>>;
+    let res: { MessageId?: string };
 
     try {
-      res = await this.sqsService.sendMessage(queueUrl, {
-        type: 'image-gen',
+      res = await this.createQueueClient().publishImageGeneration(
+        queueUrl,
         jobId,
-        input,
-        actorId,
-      });
+      );
     } catch (err) {
       await this.failSingleImageGenJob(
         jobId,
@@ -437,15 +198,6 @@ export class ImageGenService {
         true,
       );
       throw err;
-    }
-
-    if (!res.ok) {
-      await this.failSingleImageGenJob(
-        jobId,
-        'Failed to send image generation job to SQS queue',
-        true,
-      );
-      throw new Error('Failed to send image generation job to SQS queue');
     }
 
     await this.databaseService.db
@@ -488,6 +240,49 @@ export class ImageGenService {
     return job;
   }
 
+  async getWorkerInput(jobId: string) {
+    const [job] = await this.databaseService.db
+      .select({
+        input: singleImageGenJobs.input,
+        actorId: singleImageGenJobs.actorId,
+      })
+      .from(singleImageGenJobs)
+      .where(eq(singleImageGenJobs.jobId, jobId))
+      .limit(1);
+
+    if (!job?.input) {
+      throw new NotFoundException(`Image generation ${jobId} has no input`);
+    }
+
+    return { input: job.input as GenerateImageInput, actorId: job.actorId };
+  }
+
+  async dispatchPendingJobs(): Promise<void> {
+    const jobs = await this.databaseService.db
+      .select({ jobId: singleImageGenJobs.jobId })
+      .from(singleImageGenJobs)
+      .where(
+        and(
+          eq(singleImageGenJobs.status, 'pending'),
+          isNull(singleImageGenJobs.sqsMessageId),
+        ),
+      )
+      .limit(100);
+    const queue = this.createQueueClient();
+    const queueUrl = configuration().imageGenSqsQueueUrl;
+    if (!queueUrl) {
+      throw new Error('IMAGE_GEN_SQS_QUEUE_URL is required');
+    }
+
+    for (const job of jobs) {
+      const message = await queue.publishImageGeneration(queueUrl, job.jobId);
+      await this.databaseService.db
+        .update(singleImageGenJobs)
+        .set({ sqsMessageId: message.MessageId })
+        .where(eq(singleImageGenJobs.jobId, job.jobId));
+    }
+  }
+
   async startSingleImageGenJob(jobId: string): Promise<boolean> {
     const [existingJob] = await this.databaseService.db
       .select({ status: singleImageGenJobs.status })
@@ -511,7 +306,12 @@ export class ImageGenService {
         startedAt: sql`COALESCE(${singleImageGenJobs.startedAt}, NOW())`,
         error: null,
       })
-      .where(eq(singleImageGenJobs.jobId, jobId))
+      .where(
+        and(
+          eq(singleImageGenJobs.jobId, jobId),
+          eq(singleImageGenJobs.status, 'pending'),
+        ),
+      )
       .returning({ jobId: singleImageGenJobs.jobId });
 
     return Boolean(job);
@@ -844,5 +644,14 @@ export class ImageGenService {
         console.error('Failed to delete image file from R2:', err);
       }
     }
+  }
+
+  private createQueueClient(): QueueClient {
+    const config = configuration();
+    return new QueueClient({
+      region: config.awsRegion || 'us-east-1',
+      accessKeyId: config.awsAccessKeyId || undefined,
+      secretAccessKey: config.awsSecretAccessKey || undefined,
+    });
   }
 }

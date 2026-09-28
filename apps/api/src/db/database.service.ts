@@ -15,7 +15,12 @@ export class DatabaseService implements OnModuleDestroy {
       process.env.DATABASE_URL ||
       'postgres://postgres:postgres@localhost:5432/postgres';
 
-    this.pool = new Pool({ connectionString: databaseUrl });
+    this.pool = new Pool({
+      connectionString: databaseUrl,
+      max: 5,
+      idleTimeoutMillis: 5_000,
+      connectionTimeoutMillis: 10_000,
+    });
     this.db = drizzle(this.pool, { schema });
   }
 

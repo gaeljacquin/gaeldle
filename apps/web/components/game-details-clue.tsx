@@ -86,12 +86,12 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
 
   const generatedClue = game.clue
     ? (game.clue as {
-      clue: string;
-      prompt: string;
-      provider: string;
-      model: string;
-      createdAt?: string;
-    })
+        clue: string;
+        prompt: string;
+        provider: string;
+        model: string;
+        createdAt?: string;
+      })
     : null;
 
   const generateClueMutation = useMutation({
@@ -149,10 +149,14 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
     mutationFn: (historyId: number) =>
       deleteClueHistoryEntry(Number.parseInt(igdbId, 10), historyId),
     onMutate: () => {
-      toast.loading('Deleting clue from history...', { id: 'delete-history-clue' });
+      toast.loading('Deleting clue from history...', {
+        id: 'delete-history-clue',
+      });
     },
     onSuccess: () => {
-      toast.success('Clue deleted from history!', { id: 'delete-history-clue' });
+      toast.success('Clue deleted from history!', {
+        id: 'delete-history-clue',
+      });
       refetchClueHistory();
     },
     onError: (err) => {
@@ -219,12 +223,12 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
                   Generated:{' '}
                   {generatedClue.createdAt
                     ? new Date(generatedClue.createdAt).toLocaleString(
-                      undefined,
-                      {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                      },
-                    )
+                        undefined,
+                        {
+                          dateStyle: 'medium',
+                          timeStyle: 'short',
+                        },
+                      )
                     : 'N/A'}
                 </span>
                 <Button
@@ -461,12 +465,12 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
                         <span>
                           {item.occurredAt
                             ? new Date(item.occurredAt).toLocaleString(
-                              undefined,
-                              {
-                                dateStyle: 'medium',
-                                timeStyle: 'short',
-                              },
-                            )
+                                undefined,
+                                {
+                                  dateStyle: 'medium',
+                                  timeStyle: 'short',
+                                },
+                              )
                             : 'N/A'}
                         </span>
                         <span>•</span>

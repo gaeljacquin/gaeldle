@@ -39,6 +39,12 @@
     },
     {
       "path": "./packages/db"
+    },
+    {
+      "path": "./packages/queue"
+    },
+    {
+      "path": "./apps/worker"
     }
   ]
 }

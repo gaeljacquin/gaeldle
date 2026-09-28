@@ -1,4 +1,12 @@
 import { z } from 'zod';
+import {
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { artStyleSelectSchema } from './art-style';
 
 export const ImageGenFailureSchema = z.object({
@@ -46,4 +54,49 @@ export const activeImageGenStatus = (
 ).filter(
   (key): key is ImageGenStatus =>
     key in imageGenStatus && imageGenStatusPlus[key].active,
+);
+
+export const singleImageGenJobs = pgTable(
+  'single_image_gen_job',
+  {
+    jobId: varchar('job_id', { length: 36 }).primaryKey(),
+    actorId: varchar('actor_id', { length: 255 }).notNull(),
+    igdbId: integer('igdb_id').notNull(),
+    artStyle: varchar('art_style', { length: 255 }),
+    provider: varchar('provider', { length: 255 }).notNull(),
+    status: varchar('status', { length: 16 })
+      .$type<ImageGenStatus>()
+      .notNull()
+      .default('pending'),
+    attempts: integer('attempts').notNull().default(0),
+    maxAttempts: integer('max_attempts').notNull().default(3),
+    sqsMessageId: varchar('sqs_message_id', { length: 255 }),
+    error: text('error'),
+    resultUrl: varchar('result_url', { length: 2048 }),
+    startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }),
+    completedAt: timestamp('completed_at', {
+      withTimezone: true,
+      mode: 'date',
+    }),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'date',
+    })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('single_image_gen_job_actor_status_idx').on(
+      table.actorId,
+      table.status,
+    ),
+    index('single_image_gen_job_igdb_idx').on(table.igdbId),
+  ],
 );

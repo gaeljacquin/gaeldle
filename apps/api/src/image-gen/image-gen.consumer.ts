@@ -7,6 +7,13 @@ import { SqsService } from '@/lib/sqs.service';
 import { ImageGenService } from '@/image-gen/image-gen.service';
 import configuration from '@/config/configuration';
 
+type SingleImageGenQueueMessage = {
+  type?: string;
+  jobId?: string;
+  input: Parameters<ImageGenService['runSingleGeneration']>[0];
+  actorId: string;
+};
+
 @Injectable()
 export class ImageGenConsumer
   implements OnApplicationBootstrap, OnApplicationShutdown
@@ -65,32 +72,45 @@ export class ImageGenConsumer
               continue;
             }
 
+            let job: SingleImageGenQueueMessage | undefined;
+
+            let shouldDelete = true;
+
             try {
-              const job = JSON.parse(message.Body);
+              job = JSON.parse(message.Body) as SingleImageGenQueueMessage;
+
+              if (!job) {
+                throw new Error('Image generation job payload is empty');
+              }
+
               if (job.type === 'image-gen') {
                 console.log(
                   `[ImageGenConsumer] Received single image gen job for igdbId ${job.input.igdbId}`,
                 );
 
-                // Process the job
-                await this.imageGenService.runSingleGeneration(
-                  job.input,
-                  job.actorId,
-                );
+                const shouldProcess =
+                  !job.jobId ||
+                  (await this.imageGenService.startSingleImageGenJob(
+                    job.jobId,
+                  ));
+
+                if (shouldProcess) {
+                  const result = await this.imageGenService.runSingleGeneration(
+                    job.input,
+                    job.actorId,
+                    job.jobId,
+                  );
+
+                  if (job.jobId) {
+                    await this.imageGenService.completeSingleImageGenJob(
+                      job.jobId,
+                      result.url,
+                    );
+                  }
+                }
               } else {
                 console.warn(
                   `[ImageGenConsumer] Received unknown job type: ${job.type}`,
-                );
-              }
-
-              // Delete the message from SQS upon successful processing
-              if (message.ReceiptHandle) {
-                await this.sqsService.deleteMessage(
-                  queueUrl,
-                  message.ReceiptHandle,
-                );
-                console.log(
-                  `[ImageGenConsumer] Successfully processed and deleted job`,
                 );
               }
             } catch (err) {
@@ -98,7 +118,29 @@ export class ImageGenConsumer
                 `[ImageGenConsumer] Failed to process message:`,
                 err,
               );
-              // Leave message in SQS for visibility timeout/retry
+
+              if (job?.jobId) {
+                const errorMessage =
+                  err instanceof Error ? err.message : String(err);
+                const { shouldRetry } =
+                  await this.imageGenService.retryOrFailSingleImageGenJob(
+                    job.jobId,
+                    errorMessage,
+                  );
+                shouldDelete = !shouldRetry;
+              } else {
+                shouldDelete = false;
+              }
+            }
+
+            if (shouldDelete && message.ReceiptHandle) {
+              await this.sqsService.deleteMessage(
+                queueUrl,
+                message.ReceiptHandle,
+              );
+              console.log(
+                `[ImageGenConsumer] Processed and deleted image generation job`,
+              );
             }
           }
         }

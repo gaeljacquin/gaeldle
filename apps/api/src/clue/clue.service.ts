@@ -8,7 +8,7 @@ import {
   type Game,
   type GameClueHistory,
 } from '@workspace/db';
-import { CLUE_SYSTEM_PROMPT as systemPrompt } from '@workspace/shared';
+import { getAiProvider } from '@workspace/shared';
 import { eq, desc } from 'drizzle-orm';
 
 @Injectable()
@@ -24,14 +24,12 @@ export class ClueService {
     provider: string,
     actorId = 'unknown',
   ): Promise<Game | null> {
-    switch (provider) {
-      case 'cloudflare':
-      case 'bedrock':
-      case 'nova-2-lite-v1':
-        return this.generateClueInternal(igdbId, provider, actorId);
-      default:
-        throw new Error(`Unsupported model/provider: ${provider}`);
+    const providerDefinition = getAiProvider(provider);
+    if (!providerDefinition?.clueModel) {
+      throw new Error(`Unsupported clue provider: ${provider}`);
     }
+
+    return this.generateClueInternal(igdbId, provider, actorId);
   }
 
   private async generateClueInternal(
@@ -56,12 +54,24 @@ export class ClueService {
       genres: game.genres,
     };
 
-    const userPrompt = JSON.stringify(gameData, null, 2);
+    const systemPrompt = [
+      'You write concise, evocative clues for a video-game guessing game.',
+      'Use the supplied game facts as inspiration, but do not describe the input data or mention JSON, objects, fields, metadata, or timestamps.',
+      'Do not name the game, quote its title, or state an exact release date.',
+      'Return one or two natural-language sentences that hint at the game without giving it away.',
+    ].join(' ');
+    const userPrompt = `Game facts:\n${JSON.stringify(gameData, null, 2)}`;
+    const prompt = `System instructions:\n${systemPrompt}\n\n${userPrompt}`;
     let rawResponse: unknown;
-    let model: string;
+    const providerDefinition = getAiProvider(provider);
 
-    if (provider === 'cloudflare') {
-      model = '@cf/meta/llama-3.1-8b-instruct';
+    if (!providerDefinition?.clueModel) {
+      throw new Error(`Unsupported clue provider: ${provider}`);
+    }
+
+    const model = providerDefinition.clueModel;
+
+    if (providerDefinition.id === 'cloudflare') {
       rawResponse = await this.aiService.generateText(
         model,
         [
@@ -82,7 +92,6 @@ export class ClueService {
         },
       );
     } else {
-      model = 'us.amazon.nova-2-lite-v1:0';
       rawResponse = await this.aiService.generateTextBedrock(model, [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -116,7 +125,7 @@ export class ClueService {
 
     const newItem = {
       clue: clueString,
-      prompt: `System: ${systemPrompt}\nUser: ${userPrompt}`,
+      prompt,
       provider,
       model,
       createdAt: new Date().toISOString(),
@@ -150,11 +159,112 @@ export class ClueService {
   }
 
   async getClueHistory(igdbId: number): Promise<GameClueHistory[]> {
+    const [history, game] = await Promise.all([
+      this.getClueHistoryEntries(igdbId),
+      this.gamesService.getGameByIgdbId(igdbId),
+    ]);
+    const activeHistoryEntry = this.findActiveHistoryEntry(history, game?.clue);
+
+    return activeHistoryEntry?.id === null || !activeHistoryEntry
+      ? history
+      : history.filter((entry) => entry.id !== activeHistoryEntry.id);
+  }
+
+  private getClueHistoryEntries(igdbId: number): Promise<GameClueHistory[]> {
     return this.databaseService.db
       .select()
       .from(gamesClueHistory)
       .where(eq(gamesClueHistory.igdbId, igdbId))
       .orderBy(desc(gamesClueHistory.occurredAt));
+  }
+
+  async archiveActiveClue(
+    igdbId: number,
+    actorId = 'unknown',
+  ): Promise<Game | null> {
+    const game = await this.gamesService.getGameByIgdbId(igdbId);
+
+    if (!game) {
+      return null;
+    }
+
+    if (!game.clue) {
+      throw new NotFoundException('Game has no active clue');
+    }
+
+    const archivedClue = game.clue;
+    const clueHistory = await this.getClueHistoryEntries(igdbId);
+    const activeHistoryEntry = this.findActiveHistoryEntry(
+      clueHistory,
+      archivedClue,
+    );
+    const updatedGame = await this.gamesService.updateGame(game.id, {
+      clue: null,
+    });
+
+    if (!updatedGame) {
+      throw new NotFoundException('Failed to update game record');
+    }
+
+    await this.databaseService.db.insert(domainEvents).values({
+      eventType: 'clue.archived',
+      actorId,
+      payload: {
+        igdbId,
+        gameId: game.id,
+        clue: archivedClue.clue,
+        prompt: archivedClue.prompt,
+        model: archivedClue.model,
+        provider: archivedClue.provider,
+        archivedHistoryId: activeHistoryEntry?.id,
+      },
+    });
+
+    await this.gamesService.refreshAllGamesView(true);
+
+    return updatedGame;
+  }
+
+  async deleteClueHistoryEntry(
+    igdbId: number,
+    historyId: number,
+    actorId = 'unknown',
+  ): Promise<GameClueHistory | null> {
+    const [historyEntry] = await this.databaseService.db
+      .select()
+      .from(gamesClueHistory)
+      .where(eq(gamesClueHistory.id, historyId))
+      .limit(1);
+
+    if (!historyEntry || historyEntry.igdbId !== igdbId) {
+      return null;
+    }
+
+    const game = await this.gamesService.getGameByIgdbId(igdbId);
+    if (game?.clue) {
+      const activeHistoryEntry = this.findActiveHistoryEntry(
+        await this.getClueHistoryEntries(igdbId),
+        game.clue,
+      );
+      if (activeHistoryEntry?.id === historyId) {
+        throw new NotFoundException('Cannot delete the active clue');
+      }
+    }
+
+    await this.databaseService.db.insert(domainEvents).values({
+      eventType: 'clue.history_deleted',
+      actorId,
+      payload: {
+        igdbId,
+        gameId: historyEntry.gameId,
+        deletedHistoryId: historyId,
+        clue: historyEntry.clue,
+      },
+    });
+
+    await this.gamesService.refreshAllGamesView(true);
+
+    return historyEntry;
   }
 
   async restoreClue(
@@ -222,6 +332,25 @@ export class ClueService {
     await this.gamesService.refreshAllGamesView(true);
 
     return updatedGame;
+  }
+
+  private findActiveHistoryEntry(
+    history: GameClueHistory[],
+    activeClue: Game['clue'] | null | undefined,
+  ): GameClueHistory | null {
+    if (!activeClue) {
+      return null;
+    }
+
+    return (
+      history.find(
+        (entry) =>
+          entry.clue === activeClue.clue &&
+          entry.prompt === activeClue.prompt &&
+          entry.provider === activeClue.provider &&
+          entry.model === activeClue.model,
+      ) ?? null
+    );
   }
 
   private extractClue(value: unknown): string | null {

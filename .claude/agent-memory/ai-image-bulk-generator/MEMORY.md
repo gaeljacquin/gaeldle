@@ -77,11 +77,11 @@ pnpm exec tsx apps/api/scripts/bulk-generate-images.ts
 
 - 47 total games in database (after batches 1 & 2)
 - 47 games initially missing `ai_image_url` before run
-- Batch 3: 7 games processed successfully with Simpsons style
+- Batch 3: 7 games processed successfully with the selected style
 - Prompt options: INCLUDE_GENRES=true (genres added to prompts)
 - 40 games remaining for future batches
 
-### Generated Games (Batch 3 - Simpsons Style + Genres)
+### Generated Games (Batch 3 - Selected Style + Genres)
 
 1. Hollow Knight - 1,592 char prompt (249 KB optimized)
 2. Stardew Valley - 2,110 char prompt (251 KB optimized)

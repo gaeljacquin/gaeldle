@@ -12,7 +12,7 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 
 ## Auth Pattern
 
-- `HexclaveGuard` / `StackAuthGuard` in `apps/api` - validates JWT / auth headers.
+- `HexclaveGuard` in `apps/api` - validates JWT / auth headers.
 - All mutating/privileged endpoints use `@UseGuards(HexclaveGuard)`.
 - Dashboard layout at `apps/web/app/dashboard/layout.tsx` gates all routes behind auth layout gate.
 
@@ -42,7 +42,7 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 
 ## Existing Image Gen Feature
 
-- Single-game: `contract.games.generateImage` — POST, `@UseGuards(StackAuthGuard)`, takes `igdbId + options`, calls Cloudflare AI, uploads to R2, updates DB.
+- Single-game: `contract.games.generateImage` — POST, `@UseGuards(HexclaveGuard)`, takes `igdbId + options`, calls Cloudflare AI, uploads to R2, updates DB.
 - Bulk: currently a CLI script only (`apps/api/scripts/bulk-generate-images.ts`). No API endpoint. Iterates games where `ai_image_url IS NULL`, processes serially, reports summary.
 - Script params: `NUM_GAMES` (1-50), `IMAGE_STYLE`, `INCLUDE_STORYLINE`, `INCLUDE_GENRES`, `INCLUDE_THEMES` (env vars).
 
@@ -125,9 +125,9 @@ Gaeldle: Turborepo monorepo. NestJS API (`apps/api`, port 8080) + Next.js 16 App
 
 ## actorId Extraction Pattern (confirmed 2026-03-03)
 
-- StackAuthGuard sets `request.stackAuth = JWTPayload` on the Express request after verifying the JWT.
-- JWT `sub` claim = Stack Auth user ID (actorId).
-- Approach: inject `@Req()` NestJS decorator on the controller method, read `req.stackAuth?.sub`.
+- HexclaveGuard sets `request.hexclave = JWTPayload` on the Express request after verifying the JWT.
+- JWT `sub` claim = Hexclave user ID (actorId).
+- Approach: inject `@Req()` NestJS decorator on the controller method, read `req.hexclave?.sub`.
 
 ## Discover Games Feature (final design 2026-03-03, approved for handoff)
 

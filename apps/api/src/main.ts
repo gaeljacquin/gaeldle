@@ -28,7 +28,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const port = configService.get<number>('port') ?? 3000;
+  const port = configService.getOrThrow<number>('port');
 
   await app.listen(port);
 }

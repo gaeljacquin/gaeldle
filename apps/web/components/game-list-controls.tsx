@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Input } from '@workspace/ui/input';
 import { Button } from '@workspace/ui/button';
 import {
@@ -13,6 +13,7 @@ import {
 import {
   IconChevronLeft,
   IconChevronRight,
+  IconArrowRight,
   IconSearch,
   IconX,
   IconSelector,
@@ -63,6 +64,24 @@ export function GameListControls({
   filterControl,
   isClearDisabled,
 }: GameListControlsProps) {
+  const [pageToGoTo, setPageToGoTo] = useState('');
+  const requestedPage = Number(pageToGoTo);
+  const isPageToGoToInBounds =
+    pageToGoTo === '' ||
+    (Number.isInteger(requestedPage) &&
+      requestedPage >= 1 &&
+      requestedPage <= totalPages);
+
+  const goToPage = () => {
+    if (!isPageToGoToInBounds || pageToGoTo === '') {
+      setPageToGoTo('');
+
+      return;
+    }
+
+    form.setFieldValue('page', requestedPage);
+  };
+
   const paginationRange = useMemo(() => {
     if (!totalPages) {
       return [];
@@ -306,85 +325,128 @@ export function GameListControls({
       )}
 
       {(filterControl || totalPages > 1) && (
-        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+        <div className="flex flex-col gap-4">
           {filterControl ? <div>{filterControl}</div> : null}
 
           {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-end md:ml-auto">
-              <div className="text-sm text-muted-foreground whitespace-nowrap order-2 sm:order-1">
-                Showing{' '}
-                <span className="font-medium text-foreground">
-                  {(formValues.page - 1) *
-                    Number.parseInt(formValues.pageSize, 10) +
-                    1}
-                </span>{' '}
-                to{' '}
-                <span className="font-medium text-foreground">
-                  {Math.min(
-                    formValues.page * Number.parseInt(formValues.pageSize, 10),
-                    totalItems || 0,
-                  )}
-                </span>{' '}
-                of{' '}
-                <span className="font-medium text-foreground">
-                  {totalItems || 0}
-                </span>
-              </div>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <form
+                className="flex items-center gap-2"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  goToPage();
+                }}
+              >
+                <label
+                  className="text-sm text-muted-foreground whitespace-nowrap"
+                  htmlFor="go-to-page"
+                >
+                  Go to page
+                </label>
+                <Input
+                  id="go-to-page"
+                  type="number"
+                  min={1}
+                  step={1}
+                  inputMode="numeric"
+                  value={pageToGoTo}
+                  onChange={(event) => setPageToGoTo(event.target.value)}
+                  className="h-8 w-18"
+                  aria-label={`Go to page, from 1 to ${totalPages}`}
+                />
+                <Button
+                  type="submit"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-10 cursor-pointer"
+                  aria-label="Go to page"
+                >
+                  <IconArrowRight size={16} />
+                </Button>
+              </form>
 
-              <form.Field name="page">
-                {(field) => (
-                  <div className="flex items-center gap-1 order-1 sm:order-2">
-                    <Button
-                      variant="outline"
-                      size="icon-xs"
-                      disabled={field.state.value === 1}
-                      onClick={() => field.handleChange(field.state.value - 1)}
-                      className="size-8 cursor-pointer"
-                    >
-                      <IconChevronLeft size={16} />
-                    </Button>
+              <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-end">
+                <div className="text-sm text-muted-foreground whitespace-nowrap">
+                  Showing{' '}
+                  <span className="font-medium text-foreground">
+                    {(formValues.page - 1) *
+                      Number.parseInt(formValues.pageSize, 10) +
+                      1}
+                  </span>{' '}
+                  to{' '}
+                  <span className="font-medium text-foreground">
+                    {Math.min(
+                      formValues.page *
+                        Number.parseInt(formValues.pageSize, 10),
+                      totalItems || 0,
+                    )}
+                  </span>{' '}
+                  of{' '}
+                  <span className="font-medium text-foreground">
+                    {totalItems || 0}
+                  </span>
+                </div>
 
-                    <div className="flex items-center gap-1 mx-1">
-                      {paginationRange.map((p, i) =>
-                        p === '...' ? (
-                          <span
-                            key={`dots-${i + 1}`}
-                            className="w-8 flex justify-center text-muted-foreground select-none"
-                            aria-hidden="true"
-                          >
-                            ...
-                          </span>
-                        ) : (
-                          <Button
-                            key={p}
-                            variant={
-                              field.state.value === p ? 'default' : 'ghost'
-                            }
-                            size="icon-xs"
-                            className={cn(
-                              'size-8 cursor-pointer',
-                              field.state.value === p && 'pointer-events-none',
-                            )}
-                            onClick={() => field.handleChange(p as number)}
-                          >
-                            {p}
-                          </Button>
-                        ),
-                      )}
+                <form.Field name="page">
+                  {(field) => (
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="icon-xs"
+                        disabled={field.state.value === 1}
+                        onClick={() =>
+                          field.handleChange(field.state.value - 1)
+                        }
+                        className="size-8 cursor-pointer"
+                      >
+                        <IconChevronLeft size={16} />
+                      </Button>
+
+                      <div className="flex items-center gap-1 mx-1">
+                        {paginationRange.map((p, i) =>
+                          p === '...' ? (
+                            <span
+                              key={`dots-${i + 1}`}
+                              className="w-8 flex justify-center text-muted-foreground select-none"
+                              aria-hidden="true"
+                            >
+                              ...
+                            </span>
+                          ) : (
+                            <Button
+                              key={p}
+                              variant={
+                                field.state.value === p ? 'default' : 'ghost'
+                              }
+                              size="icon-xs"
+                              className={cn(
+                                'size-8 cursor-pointer',
+                                field.state.value === p &&
+                                  'pointer-events-none',
+                              )}
+                              onClick={() => field.handleChange(p as number)}
+                            >
+                              {p}
+                            </Button>
+                          ),
+                        )}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="icon-xs"
+                        disabled={field.state.value === totalPages}
+                        onClick={() =>
+                          field.handleChange(field.state.value + 1)
+                        }
+                        className="size-8 cursor-pointer"
+                      >
+                        <IconChevronRight size={16} />
+                      </Button>
                     </div>
-
-                    <Button
-                      variant="outline"
-                      size="icon-xs"
-                      disabled={field.state.value === totalPages}
-                      onClick={() => field.handleChange(field.state.value + 1)}
-                      className="size-8 cursor-pointer"
-                    >
-                      <IconChevronRight size={16} />
-                    </Button>
-                  </div>
-                )}
-              </form.Field>
+                  )}
+                </form.Field>
+              </div>
             </div>
           )}
         </div>

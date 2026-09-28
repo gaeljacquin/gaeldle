@@ -33,11 +33,11 @@ All game modes (`/api/games/random`, etc.) enforce:
 
 - Database: PostgreSQL 17 (default port 5432).
 - OpenAPI + Codegen: OpenAPI spec generated from NestJS controllers (`pnpm codegen`), providing `openapi-fetch` client typed via `packages/api-client/src/schema.d.ts` (write operations).
-- Auth: Stack Auth used in both frontend and backend.
+- Auth: Hexclave used in both frontend and backend.
 
 ## Ports
 
-- API: `8080` (`PORT` or `SERVER_PORT`).
+- API: `3000` by default (`PORT` overrides it; local development uses `8080`).
 - Web: `3000` (`CLIENT_PORT`).
 - DB: `5432` (`DB_PORT`).
 
@@ -68,7 +68,7 @@ These standards apply across the entire monorepo (API, Web, and Packages).
 
 ### API (`apps/api`)
 
-- `PORT` or `SERVER_PORT`
+- `PORT` (set to `8080` for local development, or `8090` on the home-server VM)
 - `CLIENT_PORT`
 - `CORS_ALLOWED_ORIGINS`
 - `DATABASE_URL`

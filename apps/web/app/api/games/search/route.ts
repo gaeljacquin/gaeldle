@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { and, eq, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { games, gameModeGameObject } from '@workspace/db';
-import { GAME_SEARCH_MIN_CHARS } from '@workspace/shared';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +11,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.max(1, Number(searchParams.get('limit') ?? 20));
     const mode = (searchParams.get('mode') ?? undefined) as string | undefined;
 
-    if (q.length < GAME_SEARCH_MIN_CHARS) {
+    if (!q.trim()) {
       return NextResponse.json({ success: true, data: [] });
     }
 

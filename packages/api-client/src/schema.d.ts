@@ -310,6 +310,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/image-gen/generate-image/{jobId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get single AI image generation status */
+        get: operations["ImageGenRouter_getSingleImageGenStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/image-gen/delete-image": {
         parameters: {
             query?: never;
@@ -406,7 +423,8 @@ export interface paths {
         get: operations["ClueRouter_getClueHistory"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Delete a clue from a game history */
+        delete: operations["ClueRouter_deleteClueHistoryEntry"];
         options?: never;
         head?: never;
         patch?: never;
@@ -423,6 +441,23 @@ export interface paths {
         put?: never;
         /** Restore a previous clue from history */
         post: operations["ClueRouter_restoreClue"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clue/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archive the active clue for a game */
+        post: operations["ClueRouter_archiveActiveClue"];
         delete?: never;
         options?: never;
         head?: never;
@@ -643,11 +678,27 @@ export interface components {
             /** @default false */
             includeThemes: boolean;
             artStyle?: string;
-            provider: string;
+            /** @enum {string} */
+            provider: "cloudflare";
         };
         GenerateImageResponseDto: {
             success: boolean;
+            jobId: string;
             messageId?: string;
+        };
+        SingleImageGenStatusResponseDto: {
+            success: boolean;
+            jobId: string;
+            /** @enum {string} */
+            status: "pending" | "running" | "completed" | "failed";
+            igdbId: number;
+            error?: string | null;
+            resultUrl?: string | null;
+            attempts: number;
+            maxAttempts: number;
+            startedAt?: string | null;
+            completedAt?: string | null;
+            createdAt: string;
         };
         DeleteGeneratedImageDto: {
             igdbId: number;
@@ -666,7 +717,8 @@ export interface components {
             includeGenres: boolean;
             /** @default false */
             includeThemes: boolean;
-            provider: string;
+            /** @enum {string} */
+            provider: "cloudflare";
         };
         GenerateImagesResponseDto: {
             success: boolean;
@@ -694,7 +746,8 @@ export interface components {
         };
         GenerateClueDto: {
             igdbId: number;
-            provider: string;
+            /** @enum {string} */
+            provider: "cloudflare" | "nova-2-lite-v1";
         };
         GenerateClueResponseDto: {
             success: boolean;
@@ -712,6 +765,13 @@ export interface components {
             occurredAt: string;
         };
         RestoreClueDto: {
+            igdbId: number;
+            historyId: number;
+        };
+        ArchiveClueDto: {
+            igdbId: number;
+        };
+        DeleteClueHistoryDto: {
             igdbId: number;
             historyId: number;
         };
@@ -1187,6 +1247,27 @@ export interface operations {
             };
         };
     };
+    ImageGenRouter_getSingleImageGenStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SingleImageGenStatusResponseDto"];
+                };
+            };
+        };
+    };
     ImageGenRouter_deleteGeneratedImage: {
         parameters: {
             query?: never;
@@ -1317,6 +1398,29 @@ export interface operations {
             };
         };
     };
+    ClueRouter_deleteClueHistoryEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteClueHistoryDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerateClueResponseDto"];
+                };
+            };
+        };
+    };
     ClueRouter_restoreClue: {
         parameters: {
             query?: never;
@@ -1327,6 +1431,29 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["RestoreClueDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerateClueResponseDto"];
+                };
+            };
+        };
+    };
+    ClueRouter_archiveActiveClue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArchiveClueDto"];
             };
         };
         responses: {

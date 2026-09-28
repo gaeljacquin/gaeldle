@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AI_PROVIDERS, isAiProvider, type AiProvider } from '@workspace/shared';
 import {
   useSuspenseQuery,
   useQuery,
@@ -12,6 +13,8 @@ import {
   generateClue,
   getClueHistory,
   restoreClue,
+  archiveActiveClue,
+  deleteClueHistoryEntry,
 } from '@/lib/services/game.service';
 import { Button } from '@workspace/ui/button';
 import {
@@ -22,7 +25,14 @@ import {
   CardContent,
 } from '@workspace/ui/card';
 import { toast } from 'sonner';
-import { IconCopy, IconCheck, IconRefresh } from '@tabler/icons-react';
+import {
+  IconCopy,
+  IconCheck,
+  IconRefresh,
+  IconTrash,
+  IconArchive,
+  IconRotateClockwise,
+} from '@tabler/icons-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { Checkbox } from '@workspace/ui/checkbox';
 import { Label } from '@workspace/ui/label';
@@ -50,11 +60,18 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
   const [copiedActive, setCopiedActive] = useState(false);
   const [isPromptExpanded, setIsPromptExpanded] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
+  const [clueToDelete, setClueToDelete] = useState<{
+    id: number;
+    clue: string;
+  } | null>(null);
   const [clueToRestore, setClueToRestore] = useState<{
     id: number;
     clue: string;
   } | null>(null);
-  const [providerVal, setProviderVal] = useState<string>('cloudflare');
+  const [providerVal, setProviderVal] = useState<AiProvider>(
+    AI_PROVIDERS.default,
+  );
 
   const queryClient = useQueryClient();
   const { data: game } = useSuspenseQuery({
@@ -69,12 +86,12 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
 
   const generatedClue = game.clue
     ? (game.clue as {
-        clue: string;
-        prompt: string;
-        provider: string;
-        model: string;
-        createdAt?: string;
-      })
+      clue: string;
+      prompt: string;
+      provider: string;
+      model: string;
+      createdAt?: string;
+    })
     : null;
 
   const generateClueMutation = useMutation({
@@ -83,7 +100,7 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
       toast.loading('Generating clue...', { id: generateClueToastId });
     },
     onSuccess: () => {
-      toast.success('Clue generated successfully!', {
+      toast.success(`Clue generated successfully for ${game.name}!`, {
         id: generateClueToastId,
       });
       queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
@@ -111,6 +128,43 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
       toast.error('Failed to restore clue', { id: 'restore-clue' });
     },
   });
+
+  const archiveActiveClueMutation = useMutation({
+    mutationFn: () => archiveActiveClue(Number.parseInt(igdbId, 10)),
+    onMutate: () => {
+      toast.loading('Archiving clue...', { id: 'archive-clue' });
+    },
+    onSuccess: () => {
+      toast.success('Clue archived successfully!', { id: 'archive-clue' });
+      queryClient.invalidateQueries({ queryKey: ['game', igdbId] });
+      refetchClueHistory();
+    },
+    onError: (err) => {
+      console.error(err);
+      toast.error('Failed to archive clue', { id: 'archive-clue' });
+    },
+  });
+
+  const deleteClueHistoryMutation = useMutation({
+    mutationFn: (historyId: number) =>
+      deleteClueHistoryEntry(Number.parseInt(igdbId, 10), historyId),
+    onMutate: () => {
+      toast.loading('Deleting clue from history...', { id: 'delete-history-clue' });
+    },
+    onSuccess: () => {
+      toast.success('Clue deleted from history!', { id: 'delete-history-clue' });
+      refetchClueHistory();
+    },
+    onError: (err) => {
+      console.error(err);
+      toast.error('Failed to delete clue from history', {
+        id: 'delete-history-clue',
+      });
+    },
+  });
+
+  const isChangingClues =
+    archiveActiveClueMutation.isPending || deleteClueHistoryMutation.isPending;
 
   const handleCopyActive = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -149,6 +203,7 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleCopyActive(generatedClue.clue)}
+                  disabled={isChangingClues}
                   className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity size-8 rounded-none border hover:bg-background cursor-pointer"
                 >
                   {copiedActive ? (
@@ -164,18 +219,19 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
                   Generated:{' '}
                   {generatedClue.createdAt
                     ? new Date(generatedClue.createdAt).toLocaleString(
-                        undefined,
-                        {
-                          dateStyle: 'medium',
-                          timeStyle: 'short',
-                        },
-                      )
+                      undefined,
+                      {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      },
+                    )
                     : 'N/A'}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleCopyActive(generatedClue.clue)}
+                  disabled={isChangingClues}
                   className="h-8 rounded-none px-3 font-semibold uppercase tracking-wider border-2 cursor-pointer flex items-center gap-1.5"
                 >
                   {copiedActive ? (
@@ -186,9 +242,19 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
                   ) : (
                     <>
                       <IconCopy className="size-3.5" />
-                      Copy Clue
+                      Copy
                     </>
                   )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsArchiveConfirmOpen(true)}
+                  disabled={isChangingClues}
+                  className="h-8 rounded-none px-3 font-semibold uppercase tracking-wider border-2 cursor-pointer flex items-center gap-1.5"
+                >
+                  <IconArchive className="size-3.5" />
+                  Archive
                 </Button>
               </div>
 
@@ -225,27 +291,34 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
             </Label>
             <Select
               value={providerVal}
-              onValueChange={(val) => val && setProviderVal(val)}
+              onValueChange={(val) => {
+                if (val && isAiProvider(val)) {
+                  setProviderVal(val);
+                }
+              }}
               disabled={generateClueMutation.isPending}
             >
               <SelectTrigger className="w-full h-10 rounded-none bg-card/50 border-border text-sm flex">
                 <SelectValue placeholder="Select provider">
                   {(value) =>
-                    value === 'cloudflare'
-                      ? 'Cloudflare Workers AI'
-                      : value === 'nova-2-lite-v1'
-                        ? 'Nova 2 Lite'
-                        : ''
+                    AI_PROVIDERS.options.find(
+                      (provider) => provider.id === value,
+                    )?.label ?? ''
                   }
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="border border-border bg-popover rounded-none">
-                <SelectItem value="cloudflare" className="text-sm">
-                  Cloudflare Workers AI
-                </SelectItem>
-                <SelectItem value="nova-2-lite-v1" className="text-sm">
-                  Nova 2 Lite
-                </SelectItem>
+                {AI_PROVIDERS.options
+                  .filter((provider) => provider.clueModel)
+                  .map((provider) => (
+                    <SelectItem
+                      key={provider.id}
+                      value={provider.id}
+                      className="text-sm"
+                    >
+                      {provider.label}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -259,7 +332,7 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
                 : 'bg-slate-600 hover:bg-slate-700 cursor-pointer',
             )}
             onClick={handleButtonClick}
-            disabled={generateClueMutation.isPending}
+            disabled={generateClueMutation.isPending || isChangingClues}
           >
             <IconRefresh
               aria-hidden="true"
@@ -388,40 +461,61 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
                         <span>
                           {item.occurredAt
                             ? new Date(item.occurredAt).toLocaleString(
-                                undefined,
-                                {
-                                  dateStyle: 'medium',
-                                  timeStyle: 'short',
-                                },
-                              )
+                              undefined,
+                              {
+                                dateStyle: 'medium',
+                                timeStyle: 'short',
+                              },
+                            )
                             : 'N/A'}
                         </span>
                         <span>•</span>
                         <span>Model: {item.model ?? 'N/A'}</span>
                         <span>•</span>
                         <span>Provider: {item.provider ?? 'N/A'}</span>
-                        {isActive && (
-                          <>
-                            <span>•</span>
-                            <span className="text-primary font-bold uppercase tracking-wider text-[10px]">
-                              Active
-                            </span>
-                          </>
-                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 self-end md:self-start">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={isActive || restoreClueMutation.isPending}
-                        onClick={() =>
-                          setClueToRestore({ id: historyId, clue: historyClue })
-                        }
-                        className="h-8 rounded-none px-3 font-semibold uppercase tracking-wider border-2 cursor-pointer text-xs"
-                      >
-                        Restore Clue
-                      </Button>
+                      {isActive ? (
+                        <span className="inline-flex h-8 items-center rounded-none border-2 border-input px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground opacity-50">
+                          Current Clue
+                        </span>
+                      ) : (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={
+                              restoreClueMutation.isPending || isChangingClues
+                            }
+                            onClick={() =>
+                              setClueToRestore({
+                                id: historyId,
+                                clue: historyClue,
+                              })
+                            }
+                            className="h-8 rounded-none px-3 font-semibold uppercase tracking-wider border-2 cursor-pointer text-xs"
+                          >
+                            <IconRotateClockwise className="mr-1 size-3.5" />
+                            Restore
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={isChangingClues}
+                            onClick={() =>
+                              setClueToDelete({
+                                id: historyId,
+                                clue: historyClue,
+                              })
+                            }
+                            className="h-8 rounded-none px-3 font-semibold uppercase tracking-wider border-2 cursor-pointer text-xs text-destructive hover:text-destructive"
+                          >
+                            <IconTrash className="mr-1 size-3.5" />
+                            Delete
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -458,6 +552,82 @@ export default function GameDetailsClueTab({ igdbId }: { igdbId: string }) {
               }}
             >
               Regenerate
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmation Dialog for Archiving */}
+      <AlertDialog
+        open={isArchiveConfirmOpen}
+        onOpenChange={setIsArchiveConfirmOpen}
+      >
+        <AlertDialogContent className="rounded-none">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black uppercase">
+              Archive Clue?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              Are you sure you want to archive the active clue? It will be
+              removed from the clue generator and kept in clue history.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 gap-3">
+            <AlertDialogCancel
+              className="font-bold rounded-none flex-1 cursor-pointer"
+              disabled={isChangingClues}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-slate-600 hover:bg-slate-700 text-white font-bold rounded-none flex-1 cursor-pointer"
+              disabled={isChangingClues}
+              onClick={() => {
+                archiveActiveClueMutation.mutate();
+                setIsArchiveConfirmOpen(false);
+              }}
+            >
+              {isChangingClues ? 'Archiving...' : 'Archive Clue'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmation Dialog for History Deletion */}
+      <AlertDialog
+        open={clueToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setClueToDelete(null);
+        }}
+      >
+        <AlertDialogContent className="rounded-none">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black uppercase">
+              Delete History Clue?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              Are you sure you want to remove this clue from history?
+              <span className="block mt-3 p-4 bg-muted font-serif italic text-sm border-l-4 border-destructive select-text">
+                &ldquo;{clueToDelete?.clue}&rdquo;
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 gap-3">
+            <AlertDialogCancel
+              className="font-bold rounded-none flex-1 cursor-pointer"
+              disabled={isChangingClues}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold rounded-none flex-1 cursor-pointer"
+              disabled={isChangingClues}
+              onClick={() => {
+                deleteClueHistoryMutation.mutate(clueToDelete!.id);
+                setClueToDelete(null);
+              }}
+            >
+              {isChangingClues ? 'Deleting...' : 'Delete Clue'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

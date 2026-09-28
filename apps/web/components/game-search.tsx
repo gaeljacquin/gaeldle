@@ -4,7 +4,6 @@ import { useState, useRef, ChangeEvent } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@workspace/ui/lib/utils';
 import { type Game } from '@workspace/db';
-import { GAME_SEARCH_MIN_CHARS } from '@workspace/shared';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import {
   InputGroup,
@@ -25,7 +24,7 @@ interface GameSearchProps {
 }
 
 function highlightMatch(name: string, query: string) {
-  if (!query || query.length < GAME_SEARCH_MIN_CHARS) {
+  if (!query) {
     return <span>{name}</span>;
   }
 
@@ -100,7 +99,7 @@ export default function GameSearch({
     if (isIdle) {
       return (
         <div className="py-4 text-center text-xs text-muted-foreground">
-          Type at least {GAME_SEARCH_MIN_CHARS} characters to search...
+          Start typing to search...
         </div>
       );
     }

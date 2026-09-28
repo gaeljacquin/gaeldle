@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import type { Game, ArtStyleValue } from '@workspace/db';
+import type { AiProvider, ImageAiProvider } from '@workspace/shared';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -415,7 +416,7 @@ export async function searchGames(
   limit: number = 100,
   mode?: string,
 ): Promise<Game[]> {
-  if (query.length < 2) {
+  if (!query.trim()) {
     return [];
   }
 
@@ -463,7 +464,7 @@ export async function generateImage(
     includeGenres?: boolean;
     includeThemes?: boolean;
     artStyleValue: ArtStyleValue;
-    provider: string;
+    provider: ImageAiProvider;
   },
 ) {
   const {
@@ -494,6 +495,21 @@ export async function generateImage(
   return data;
 }
 
+export async function getSingleImageGenStatus(jobId: string) {
+  const { data, error } = await apiClient.GET(
+    '/api/image-gen/generate-image/{jobId}/status',
+    {
+      params: { path: { jobId } },
+    },
+  );
+
+  if (error || !data) {
+    throw new Error('Failed to get image generation status');
+  }
+
+  return data;
+}
+
 export async function deleteGeneratedImage(
   igdbId: number,
   artStyleValue: ArtStyleValue,
@@ -518,7 +534,7 @@ export async function generateImages(params: {
   includeStoryline: boolean;
   includeGenres: boolean;
   includeThemes: boolean;
-  provider: string;
+  provider: ImageAiProvider;
 }) {
   const { data, error } = await apiClient.POST(
     '/api/image-gen/generate-images',
@@ -549,7 +565,7 @@ export async function getImageGenStatus(imageGenId: string) {
   return data;
 }
 
-export async function generateClue(igdbId: number, provider: string) {
+export async function generateClue(igdbId: number, provider: AiProvider) {
   const { data, error } = await apiClient.POST('/api/clue/generate-clue', {
     body: { igdbId, provider },
   });
@@ -581,6 +597,33 @@ export async function restoreClue(igdbId: number, historyId: number) {
 
   if (error || !data) {
     throw new Error('Failed to restore clue');
+  }
+
+  return data;
+}
+
+export async function archiveActiveClue(igdbId: number) {
+  const { data, error } = await apiClient.POST('/api/clue/archive', {
+    body: { igdbId },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to archive active clue');
+  }
+
+  return data;
+}
+
+export async function deleteClueHistoryEntry(
+  igdbId: number,
+  historyId: number,
+) {
+  const { data, error } = await apiClient.DELETE('/api/clue/history', {
+    body: { igdbId, historyId },
+  });
+
+  if (error || !data) {
+    throw new Error('Failed to delete clue from history');
   }
 
   return data;

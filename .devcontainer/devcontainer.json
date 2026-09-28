@@ -21,8 +21,7 @@
         "alefragnani.Bookmarks",
         "streetsidesoftware.code-spell-checker",
         "dbaeumer.vscode-eslint",
-        "Google.gemini-cli-companion",
-        "Google.gemini-code-assist",
+        "openai.chatgpt",
         "kisstkondoros.vscode-gutter-preview",
         "IBM.output-colorizer",
         "quicktype.quicktype",
@@ -45,13 +44,10 @@
   "forwardPorts": [3000, 8080],
   "remoteUser": "root",
   "containerEnv": {
-    "SHELL": "/bin/zsh",
-    "PYTHON_KEYRING_BACKEND": "keyrings.alt.file.PlaintextKeyring"
+    "SHELL": "/bin/zsh"
   },
   "mounts": [
-    "source=${localEnv:HOME}/.gemini,target=/root/.gemini,type=bind",
-    // Mount a host directory to persist the container's keyring file
-    "source=${localEnv:HOME}/.gemini/devcontainer-keyring,target=/root/.local/share/python_keyring,type=bind"
+    "source=${localEnv:HOME}/.codex/auth.json,target=/root/.codex/auth.json,type=bind,consistency=cached"
   ],
   "postCreateCommand": "bash .devcontainer/post-create.sh"
 }

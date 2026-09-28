@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AI_PROVIDERS } from '@workspace/shared';
 
 export class GenerateClueDto {
   @ApiProperty({ type: Number }) igdbId!: number;
-  @ApiProperty({ type: String }) provider!: string;
+  @ApiProperty({ enum: AI_PROVIDERS.options.map((provider) => provider.id) })
+  provider!: string;
 }
 
 export class GenerateClueResponseDto {
@@ -11,6 +13,15 @@ export class GenerateClueResponseDto {
 }
 
 export class RestoreClueDto {
+  @ApiProperty({ type: Number }) igdbId!: number;
+  @ApiProperty({ type: Number }) historyId!: number;
+}
+
+export class ArchiveClueDto {
+  @ApiProperty({ type: Number }) igdbId!: number;
+}
+
+export class DeleteClueHistoryDto {
   @ApiProperty({ type: Number }) igdbId!: number;
   @ApiProperty({ type: Number }) historyId!: number;
 }

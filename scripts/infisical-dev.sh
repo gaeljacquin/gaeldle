@@ -46,13 +46,21 @@ elif [ -n "$INFISICAL_CLIENT_ID" ] && [ -n "$INFISICAL_CLIENT_SECRET" ]; then
     fi
 fi
 
-# 3. Execute Infisical OR fail silently to allow local fallback
+# 3. Execute Infisical, or run the requested command directly when credentials
+# are unavailable for local development.
 if [ "$HAS_TOKEN" = true ]; then
-    export INFISICAL_DISABLE_KEYRING=true
-    export INFISICAL_DISABLE_UPDATE_CHECK=true
-    exec infisical "$@"
+  export INFISICAL_DISABLE_KEYRING=true
+  export INFISICAL_DISABLE_UPDATE_CHECK=true
+  exec infisical "$@"
 else
-    # No valid credentials found.
-    # Exit with 1 so that the '||' in package.json triggers the fallback command.
+    while [ "$#" -gt 0 ]; do
+        if [ "$1" = "--" ]; then
+            shift
+            exec "$@"
+        fi
+        shift
+    done
+
+    echo "Unable to determine the local development command." >&2
     exit 1
 fi

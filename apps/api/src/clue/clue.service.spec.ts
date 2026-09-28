@@ -97,7 +97,7 @@ describe('ClueService', () => {
     it('should throw for unsupported provider', async () => {
       await expect(
         service.generateClue(1942, 'invalid-provider'),
-      ).rejects.toThrow('Unsupported model/provider: invalid-provider');
+      ).rejects.toThrow('Unsupported clue provider: invalid-provider');
     });
 
     it('should return null when game not found', async () => {
@@ -126,6 +126,21 @@ describe('ClueService', () => {
 
       expect(mockDb.insert).toHaveBeenCalledWith(domainEvents);
       expect(mockGamesService.refreshAllGamesView).toHaveBeenCalledWith(true);
+
+      expect(mockAiService.generateText).toHaveBeenCalledWith(
+        '@cf/meta/llama-3.1-8b-instruct',
+        [
+          expect.objectContaining({
+            role: 'system',
+            content: expect.stringContaining('video-game guessing game'),
+          }),
+          expect.objectContaining({
+            role: 'user',
+            content: expect.stringContaining('Game facts:'),
+          }),
+        ],
+        expect.any(Object),
+      );
     });
 
     it('should handle markdown JSON string responses from Bedrock', async () => {
@@ -145,6 +160,17 @@ describe('ClueService', () => {
           }),
         }),
       );
+
+      expect(mockAiService.generateTextBedrock).toHaveBeenCalledWith(
+        'us.amazon.nova-2-lite-v1:0',
+        [
+          expect.objectContaining({ role: 'system' }),
+          expect.objectContaining({
+            role: 'user',
+            content: expect.stringContaining('Game facts:'),
+          }),
+        ],
+      );
     });
 
     it('should handle raw plain text responses gracefully', async () => {
@@ -152,14 +178,14 @@ describe('ClueService', () => {
         'A plain text clue string without json formatting.' as never,
       );
 
-      await service.generateClue(1942, 'bedrock', 'user-1');
+      await service.generateClue(1942, 'nova-2-lite-v1', 'user-1');
 
       expect(mockGamesService.updateGame).toHaveBeenCalledWith(
         1,
         expect.objectContaining({
           clue: expect.objectContaining({
             clue: 'A plain text clue string without json formatting.',
-            provider: 'bedrock',
+            provider: 'nova-2-lite-v1',
             model: 'us.amazon.nova-2-lite-v1:0',
           }),
         }),
@@ -210,6 +236,162 @@ describe('ClueService', () => {
       expect(mockDb.insert).toHaveBeenCalledWith(domainEvents);
       expect(mockGamesService.refreshAllGamesView).toHaveBeenCalledWith(true);
       expect(result).toEqual(mockGame);
+    });
+  });
+
+  describe('archiveActiveClue', () => {
+    it('should return null when game is missing', async () => {
+      mockGamesService.getGameByIgdbId.mockResolvedValue(null as never);
+
+      await expect(service.archiveActiveClue(1942)).resolves.toBeNull();
+    });
+
+    it('should reject archiving when there is no active clue', async () => {
+      await expect(service.archiveActiveClue(1942)).rejects.toThrow(
+        'Game has no active clue',
+      );
+    });
+
+    it('should clear the active clue and record an archive event', async () => {
+      const gameWithClue = {
+        ...mockGame,
+        clue: {
+          clue: 'A clue to delete',
+          prompt: 'A prompt to delete',
+          provider: 'cloudflare',
+          model: '@cf/meta/llama-3.1-8b-instruct',
+          createdAt: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      mockGamesService.getGameByIgdbId.mockResolvedValue(gameWithClue as never);
+      mockDb.orderBy.mockResolvedValue([
+        {
+          id: 456,
+          igdbId: 1942,
+          clue: 'A clue to delete',
+          prompt: 'A prompt to delete',
+          provider: 'cloudflare',
+          model: '@cf/meta/llama-3.1-8b-instruct',
+        },
+      ] as never);
+
+      await service.archiveActiveClue(1942, 'admin-user');
+
+      expect(mockGamesService.updateGame).toHaveBeenCalledWith(1, {
+        clue: null,
+      });
+      expect(mockDb.insert).toHaveBeenCalledWith(domainEvents);
+      expect(mockDb.insert.mock.results[0].value.values).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: 'clue.archived',
+          actorId: 'admin-user',
+          payload: expect.objectContaining({
+            igdbId: 1942,
+            gameId: 1,
+            clue: 'A clue to delete',
+            archivedHistoryId: 456,
+          }),
+        }),
+      );
+      expect(mockGamesService.refreshAllGamesView).toHaveBeenCalledWith(true);
+    });
+  });
+
+  describe('getClueHistory', () => {
+    it('should omit the current clue and keep prior clues in history', async () => {
+      const activeClue = {
+        clue: 'Current clue',
+        prompt: 'Current prompt',
+        provider: 'cloudflare',
+        model: '@cf/meta/llama-3.1-8b-instruct',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      };
+      mockGamesService.getGameByIgdbId.mockResolvedValue({
+        ...mockGame,
+        clue: activeClue,
+      } as never);
+      mockDb.orderBy.mockResolvedValue([
+        {
+          id: 456,
+          igdbId: 1942,
+          ...activeClue,
+        },
+        {
+          id: 123,
+          igdbId: 1942,
+          clue: 'Archived clue',
+          prompt: 'Archived prompt',
+          provider: 'cloudflare',
+          model: '@cf/meta/llama-3.1-8b-instruct',
+        },
+      ] as never);
+
+      await expect(service.getClueHistory(1942)).resolves.toEqual([
+        expect.objectContaining({ id: 123, clue: 'Archived clue' }),
+      ]);
+    });
+  });
+
+  describe('deleteClueHistoryEntry', () => {
+    it('should reject deletion of the active clue', async () => {
+      const activeClue = {
+        clue: 'Current clue',
+        prompt: 'Current prompt',
+        provider: 'cloudflare',
+        model: '@cf/meta/llama-3.1-8b-instruct',
+      };
+      const historyEntry = { id: 123, igdbId: 1942, gameId: 1, ...activeClue };
+      mockDb.limit.mockResolvedValue([historyEntry] as never);
+      mockDb.orderBy.mockResolvedValue([historyEntry] as never);
+      mockGamesService.getGameByIgdbId.mockResolvedValue({
+        ...mockGame,
+        clue: activeClue,
+      } as never);
+
+      await expect(service.deleteClueHistoryEntry(1942, 123)).rejects.toThrow(
+        'Cannot delete the active clue',
+      );
+    });
+
+    it('should record a history deletion event and return the deleted entry', async () => {
+      const historyEntry = {
+        id: 123,
+        igdbId: 1942,
+        gameId: 1,
+        clue: 'A historical clue',
+      };
+      mockDb.limit.mockResolvedValue([historyEntry] as never);
+
+      await expect(
+        service.deleteClueHistoryEntry(1942, 123, 'admin-user'),
+      ).resolves.toEqual(historyEntry);
+
+      expect(mockDb.insert.mock.results[0].value.values).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: 'clue.history_deleted',
+          actorId: 'admin-user',
+          payload: expect.objectContaining({
+            igdbId: 1942,
+            gameId: 1,
+            deletedHistoryId: 123,
+          }),
+        }),
+      );
+      expect(mockGamesService.refreshAllGamesView).toHaveBeenCalledWith(true);
+    });
+
+    it('should return null when the history entry is missing or belongs to another game', async () => {
+      mockDb.limit.mockResolvedValue([] as never);
+      await expect(
+        service.deleteClueHistoryEntry(1942, 123),
+      ).resolves.toBeNull();
+
+      mockDb.limit.mockResolvedValue([
+        { id: 123, igdbId: 9999, gameId: 1, clue: 'Another clue' },
+      ] as never);
+      await expect(
+        service.deleteClueHistoryEntry(1942, 123),
+      ).resolves.toBeNull();
     });
   });
 });

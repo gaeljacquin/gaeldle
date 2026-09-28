@@ -44,7 +44,7 @@ The project uses `<span className="sr-only">` for visually hidden text (confirme
 ## Scope Exclusions
 
 - `packages/ui/src/components/**` — third-party, do not audit
-- Auth handler pages (`/handler/**`) — third-party Stack Auth
+- Auth handler pages (`/handler/**`) — third-party Hexclave
 - `dev-mode-toggle.tsx` — production-invisible, low priority
 
 ## Key Files for Future Audits

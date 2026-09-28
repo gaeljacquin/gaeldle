@@ -1,8 +1,55 @@
-export const DEFAULT_PROVIDER = 'cloudflare';
+type AiProviderDefinition = {
+  id: string;
+  label: string;
+  imageModel?: string;
+  clueModel?: string;
+};
 
-export const IMAGE_GEN_MIN = 1;
+export const AI_PROVIDERS = {
+  default: 'cloudflare',
+  options: [
+    {
+      id: 'cloudflare',
+      label: 'Cloudflare Workers AI',
+      imageModel: '@cf/stabilityai/stable-diffusion-xl-base-1.0',
+      clueModel: '@cf/meta/llama-3.1-8b-instruct',
+    },
+    {
+      id: 'nova-2-lite-v1',
+      label: 'Nova 2 Lite',
+      imageModel: undefined,
+      clueModel: 'us.amazon.nova-2-lite-v1:0',
+    },
+  ],
+} as const satisfies {
+  default: string;
+  options: readonly AiProviderDefinition[];
+};
 
-export const IMAGE_GEN_MAX = 50;
+export type AiProvider = (typeof AI_PROVIDERS.options)[number]['id'];
+type AiProviderConfig = (typeof AI_PROVIDERS.options)[number];
+type ImageAiProviderConfig = Extract<AiProviderConfig, { imageModel: string }>;
+
+export type ImageAiProvider = ImageAiProviderConfig['id'];
+
+export const IMAGE_AI_PROVIDERS = AI_PROVIDERS.options.filter(
+  (provider): provider is ImageAiProviderConfig =>
+    typeof provider.imageModel === 'string',
+);
+
+export function getAiProvider(provider: string) {
+  return AI_PROVIDERS.options.find((candidate) => candidate.id === provider);
+}
+
+export function isAiProvider(provider: string): provider is AiProvider {
+  return getAiProvider(provider) !== undefined;
+}
+
+export function isImageAiProvider(
+  provider: string,
+): provider is ImageAiProvider {
+  return IMAGE_AI_PROVIDERS.some((candidate) => candidate.id === provider);
+}
 
 export const FILE_SIZE_LIMIT = '10mb';
 
@@ -18,31 +65,12 @@ export const DISCOVER_GAMES_MAX = 50;
 
 export const DISCOVER_GAMES_DEFAULT = 10;
 
-export const GAME_SEARCH_MIN_CHARS = 3;
-
 export const TIMELINE_GAMES_COUNT = 10;
 
 export const HOLD_DURATION = 3000;
-
-export const MIN_PREVIEW_PROMPT_ROWS = 4;
 
 export const GAME_MODE_SKELETON_COUNT = 6;
 
 export const VIEWPORT_DIMENSIONS_FALLBACK = '0:0:16';
 
 export const PLACEHOLDER_IGDB_IDS = [1942, 348330].join(',');
-
-export const CLUE_SYSTEM_PROMPT = `
-  You are an expert quiz master.
-
-  Your task is to generate exactly 1 clue for the game provided in the user request.
-
-  Rules:
-  1. Do NOT mention the name of the game in the clue.
-  2. Rely only on the fields provided in the game JSON (name, summary, storyline, first_release_date, themes, keywords, game_modes, genres) to derive the clue. Do not make up facts outside the provided context, but rephrase them creatively.
-  3. The resulting clue should NOT simply list or contain every provided input field. Choose the most interesting aspects to create a cohesive, single clue.
-  4. You must respond with a JSON object in this format:
-  {
-    "clue": "Your clue here"
-  }
-`;

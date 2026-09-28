@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IMAGE_AI_PROVIDERS } from '@workspace/shared';
 
 export class GenerateImageDto {
   @ApiProperty({ type: Number }) igdbId!: number;
@@ -9,12 +10,32 @@ export class GenerateImageDto {
   @ApiPropertyOptional({ type: Boolean, default: false })
   includeThemes?: boolean;
   @ApiPropertyOptional({ type: String }) artStyle?: string;
-  @ApiProperty({ type: String }) provider!: string;
+  @ApiProperty({ enum: IMAGE_AI_PROVIDERS.map((provider) => provider.id) })
+  provider!: string;
 }
 
 export class GenerateImageResponseDto {
   @ApiProperty({ type: Boolean }) success!: boolean;
+  @ApiProperty({ type: String }) jobId!: string;
   @ApiPropertyOptional({ type: String }) messageId?: string;
+}
+
+export class SingleImageGenStatusResponseDto {
+  @ApiProperty({ type: Boolean }) success!: boolean;
+  @ApiProperty({ type: String }) jobId!: string;
+  @ApiProperty({ enum: ['pending', 'running', 'completed', 'failed'] })
+  status!: string;
+  @ApiProperty({ type: Number }) igdbId!: number;
+  @ApiPropertyOptional({ type: String, nullable: true }) error!: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true }) resultUrl!:
+    string | null;
+  @ApiProperty({ type: Number }) attempts!: number;
+  @ApiProperty({ type: Number }) maxAttempts!: number;
+  @ApiPropertyOptional({ type: String, nullable: true }) startedAt!:
+    string | null;
+  @ApiPropertyOptional({ type: String, nullable: true }) completedAt!:
+    string | null;
+  @ApiProperty({ type: String }) createdAt!: string;
 }
 
 export class GenerateImagesDto {
@@ -26,7 +47,8 @@ export class GenerateImagesDto {
   includeGenres?: boolean;
   @ApiPropertyOptional({ type: Boolean, default: false })
   includeThemes?: boolean;
-  @ApiProperty({ type: String }) provider!: string;
+  @ApiProperty({ enum: IMAGE_AI_PROVIDERS.map((provider) => provider.id) })
+  provider!: string;
 }
 
 export class GenerateImagesResponseDto {

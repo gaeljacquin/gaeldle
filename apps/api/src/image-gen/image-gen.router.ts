@@ -28,6 +28,7 @@ import {
 import {
   GenerateImageDto,
   GenerateImageResponseDto,
+  SingleImageGenStatusResponseDto,
   GenerateImagesDto,
   GenerateImagesResponseDto,
   ImageGenStatusResponseDto,
@@ -60,6 +61,30 @@ export class ImageGenRouter {
     }
 
     return result;
+  }
+
+  @Get('generate-image/:jobId/status')
+  @UseGuards(HexclaveGuard)
+  @ApiOperation({ summary: 'Get single AI image generation status' })
+  @ApiParam({ name: 'jobId', type: String })
+  @ApiResponse({ status: 200, type: SingleImageGenStatusResponseDto })
+  async getSingleImageGenStatus(
+    @Param('jobId') jobId: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<SingleImageGenStatusResponseDto> {
+    const actorId = req.hexclave?.sub ?? 'unknown';
+    const result = await this.imageGenService.getSingleImageGenStatus(
+      jobId,
+      actorId,
+    );
+
+    return {
+      success: true,
+      ...result,
+      startedAt: result.startedAt ? result.startedAt.toISOString() : null,
+      completedAt: result.completedAt ? result.completedAt.toISOString() : null,
+      createdAt: result.createdAt.toISOString(),
+    };
   }
 
   @Post('delete-image')

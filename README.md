@@ -2,6 +2,8 @@
 
 A collection of video game guessing challenges. Test your gaming knowledge across six different modes, each with its own mechanics and difficulty level.
 
+Built with Next.js and NestJS in a Turborepo monorepo. Authentication uses Hexclave (`@hexclave/next` in the web app and `HexclaveGuard` in the API). See the [architecture overview](docs/architecture.md) for details.
+
 ---
 
 ## Getting Started

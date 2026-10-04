@@ -20,13 +20,14 @@ apps/api/src/
 │   └── [resource].service.ts  # Business logic
 ├── db/
 │   ├── database.module.ts  # NestJS Database module
-│   └── database.service.ts # NestJS Database service (imports schema from @workspace/db)
+│   └── database.service.ts # NestJS Database service (imports the shared database schema)
 └── scripts/
     └── generate-openapi.ts    # Standalone script booting Nest context to write apps/api/openapi.json
 ```
 
 ### Rules
 
+- **API imports and deployment**: Use `@/` for API-local imports and `@workspace/*` for shared packages. The Nest webpack build resolves the aliases and bundles workspace TypeScript sources. `apps/api/vercel.json` configures Vercel's NestJS builder to run the build and package `dist/main.js`; deploying `src/main.ts` directly bypasses this bundling and can leave unresolved aliases or workspace `.ts` exports in the function.
 - **OpenAPI First with NestJS Decorators**: Define API endpoints using standard NestJS controllers decorated with `@Controller`, `@ApiTags`, `@ApiOperation`, `@ApiBody`, `@ApiParam`, `@ApiQuery`, and `@ApiResponse`.
 - **DTO Validation & Schema Specs**: Annotate DTO properties with `@ApiProperty` or `@ApiPropertyOptional` so `@nestjs/swagger` accurately reflects property types in `openapi.json`.
 - **Codegen Pipeline**: Run `pnpm codegen` (or `pnpm --filter @workspace/api generate:openapi && pnpm --filter @workspace/api-client generate`) whenever backend endpoints change. This updates `apps/api/openapi.json` and regenerates `packages/api-client/src/schema.d.ts`. Both generated files are committed to git.

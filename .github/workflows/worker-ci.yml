@@ -1,11 +1,12 @@
-name: API CI
+name: Worker CI
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - .github/workflows/api-ci.yml
+      - .github/workflows/worker-ci.yml
+      - apps/worker/**
       - apps/api/**
       - packages/db/**
       - packages/queue/**
@@ -20,12 +21,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: api-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: worker-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   checks:
-    name: API checks
+    name: Worker checks
     runs-on: ubuntu-latest
 
     steps:
@@ -46,14 +47,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint API
-        run: pnpm --filter @workspace/api lint
+      - name: Typecheck queue
+        run: pnpm --filter @workspace/queue typecheck
 
-      - name: Typecheck API
-        run: pnpm --filter @workspace/api typecheck
-
-      - name: Test API
-        run: pnpm --filter @workspace/api test
-
-      - name: Build API
-        run: pnpm --filter @workspace/api build
+      - name: Typecheck worker
+        run: pnpm --filter @workspace/worker typecheck

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { S3Service } from '../lib/s3.service';
-import { SAMPLE_DIR } from '@workspace/shared';
+import { SAMPLE_DIR } from '../../../../packages/shared/src/index';
 import configuration from '../config/configuration';
 import { SqsService } from '../lib/sqs.service';
 import { R2Service } from '../lib/r2.service';
 import { DatabaseService } from '../db/database.service';
-import { domainEvents } from '@workspace/db';
+import { domainEvents } from '../../../../packages/db/src/schema/index';
 
 interface uploadImageProps {
   image: string;

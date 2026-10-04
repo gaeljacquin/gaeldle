@@ -12,8 +12,5 @@
       }
     ]
   },
-  "moduleNameMapper": {
-    "^@workspace/db$": "<rootDir>/../../../packages/db/src/schema/index.ts"
-  },
   "extensionsToTreatAsEsm": [".ts"]
 }

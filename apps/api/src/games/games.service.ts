@@ -13,13 +13,13 @@ import {
   GameInsert,
   domainEvents,
   queriedGames,
-} from '@workspace/db';
+} from '../../../../packages/db/src/schema/index';
 import { IgdbService, type IgdbGame } from '../lib/igdb.service';
 import { AiService } from '../lib/ai.service';
 import { S3Service } from '../lib/s3.service';
 import { R2Service } from '../lib/r2.service';
 import type { AppConfiguration } from '../config/configuration';
-import { IMAGE_GEN_DIR } from '@workspace/shared';
+import { IMAGE_GEN_DIR } from '../../../../packages/shared/src/index';
 
 interface GenerateImageInput {
   igdbId: number;

@@ -22,12 +22,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "allowJs": true,
-    "paths": {
-      "@workspace/db": ["../../packages/db/src/schema/index.ts"],
-      "@workspace/shared": ["../../packages/shared/src/index.ts"],
-      "@workspace/queue": ["../../packages/queue/src/index.ts"]
-    }
+    "allowJs": true
   },
   "include": [
     "src/**/*",

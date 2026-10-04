@@ -15,15 +15,15 @@ import {
   type ArtStyleValue,
   imageGenBatches,
   singleImageGenJobs,
-} from '@workspace/db';
-import type { ImageGenStatus } from '@workspace/db';
+} from '../../../../packages/db/src/schema/index';
+import type { ImageGenStatus } from '../../../../packages/db/src/schema/index';
 import { AiService } from '../lib/ai.service';
 import { S3Service } from '../lib/s3.service';
 import { R2Service } from '../lib/r2.service';
-import { IMAGE_GEN_DIR } from '@workspace/shared';
+import { IMAGE_GEN_DIR } from '../../../../packages/shared/src/index';
 import { GamesService } from '../games/games.service';
 import configuration from '../config/configuration';
-import { QueueClient } from '@workspace/queue';
+import { QueueClient } from '../../../../packages/queue/src/index';
 
 interface GenerateImageInput {
   igdbId: number;

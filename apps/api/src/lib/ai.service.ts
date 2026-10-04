@@ -1,7 +1,7 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { AppConfiguration } from '../config/configuration';
-import { getAiProvider } from '@workspace/shared';
+import { getAiProvider } from '../../../../packages/shared/src/index';
 import {
   BedrockRuntimeClient,
   ConverseCommand,

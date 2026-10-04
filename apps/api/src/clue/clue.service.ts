@@ -7,8 +7,8 @@ import {
   gamesClueHistory,
   type Game,
   type GameClueHistory,
-} from '@workspace/db';
-import { getAiProvider } from '@workspace/shared';
+} from '../../../../packages/db/src/schema/index';
+import { getAiProvider } from '../../../../packages/shared/src/index';
 import { eq, desc } from 'drizzle-orm';
 
 @Injectable()

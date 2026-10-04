@@ -1,16 +1,16 @@
 import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { DiscoverService } from '@/discover/discover.service';
+import { DiscoverService } from './discover.service';
 import {
   HexclaveGuard,
   type AuthenticatedRequest,
-} from '@/auth/hexclave.guard';
+} from '../auth/hexclave.guard';
 import {
   DiscoverScanDto,
   DiscoverScanResponseDto,
   DiscoverApplyDto,
   DiscoverApplyResponseDto,
-} from '@/discover/dto/discover.dto';
+} from './dto/discover.dto';
 
 @ApiTags('discover')
 @Controller('api/discover')

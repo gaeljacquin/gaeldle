@@ -24,7 +24,6 @@
     "noFallthroughCasesInSwitch": false,
     "allowJs": true,
     "paths": {
-      "@/*": ["./src/*"],
       "@workspace/db": ["../../packages/db/src/schema/index.ts"],
       "@workspace/shared": ["../../packages/shared/src/index.ts"],
       "@workspace/queue": ["../../packages/queue/src/index.ts"]

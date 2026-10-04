@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DatabaseService } from '@/db/database.service';
-import { GamesService } from '@/games/games.service';
-import { AiService } from '@/lib/ai.service';
+import { DatabaseService } from '../db/database.service';
+import { GamesService } from '../games/games.service';
+import { AiService } from '../lib/ai.service';
 import {
   domainEvents,
   gamesClueHistory,

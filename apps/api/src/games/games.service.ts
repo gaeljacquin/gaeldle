@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { eq, inArray, sql, and, desc, or } from 'drizzle-orm';
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
-import { DatabaseService } from '@/db/database.service';
+import { DatabaseService } from '../db/database.service';
 import {
   games,
   type Game,
@@ -14,11 +14,11 @@ import {
   domainEvents,
   queriedGames,
 } from '@workspace/db';
-import { IgdbService, type IgdbGame } from '@/lib/igdb.service';
-import { AiService } from '@/lib/ai.service';
-import { S3Service } from '@/lib/s3.service';
-import { R2Service } from '@/lib/r2.service';
-import type { AppConfiguration } from '@/config/configuration';
+import { IgdbService, type IgdbGame } from '../lib/igdb.service';
+import { AiService } from '../lib/ai.service';
+import { S3Service } from '../lib/s3.service';
+import { R2Service } from '../lib/r2.service';
+import type { AppConfiguration } from '../config/configuration';
 import { IMAGE_GEN_DIR } from '@workspace/shared';
 
 interface GenerateImageInput {

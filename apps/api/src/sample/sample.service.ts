@@ -71,10 +71,9 @@ export class SampleService {
       if (!queueUrl) {
         throw new Error('SAMPLE_SQS_QUEUE_URL is required');
       }
-      const res = await this.sqsService.sendMessage(
-        queueUrl,
-        { message: input.message },
-      );
+      const res = await this.sqsService.sendMessage(queueUrl, {
+        message: input.message,
+      });
 
       if (!res.ok) {
         throw new Error('Failed to send sample message');

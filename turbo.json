@@ -18,6 +18,10 @@
       "dependsOn": ["transit"],
       "outputs": []
     },
+    "lint:fix": {
+      "dependsOn": ["transit"],
+      "cache": false
+    },
     "format": {
       "dependsOn": ["transit"]
     },

@@ -8,7 +8,7 @@
     "codegen": "pnpm --filter @workspace/api generate:openapi && pnpm --filter @workspace/api-client generate",
     "dev": "turbo run dev",
     "lint": "turbo lint --filter '!@workspace/ui'",
-    "lint:fix": "turbo lint --filter '!@workspace/ui' -- --fix",
+    "lint:fix": "turbo run lint:fix --filter '!@workspace/ui'",
     "lint:web": "turbo lint --filter @workspace/web",
     "db:generate": "pnpm --filter ./packages/db db:generate",
     "db:migrate": "pnpm --filter ./packages/db db:migrate",

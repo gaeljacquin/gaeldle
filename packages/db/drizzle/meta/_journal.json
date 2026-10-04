@@ -281,6 +281,13 @@
       "when": 1789947540045,
       "tag": "0039_red_tiger_shark",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1790553600000,
+      "tag": "0040_durable_image_generation",
+      "breakpoints": true
     }
   ]
 }

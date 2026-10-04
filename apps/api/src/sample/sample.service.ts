@@ -67,10 +67,13 @@ export class SampleService {
 
   async sendMessage(input: sendMessageProps, actorId: string) {
     try {
-      const res = await this.sqsService.sendMessage(
-        configuration().sampleSqsQueueUrl,
-        { message: input.message },
-      );
+      const queueUrl = configuration().sampleSqsQueueUrl;
+      if (!queueUrl) {
+        throw new Error('SAMPLE_SQS_QUEUE_URL is required');
+      }
+      const res = await this.sqsService.sendMessage(queueUrl, {
+        message: input.message,
+      });
 
       if (!res.ok) {
         throw new Error('Failed to send sample message');
@@ -106,6 +109,9 @@ export class SampleService {
 
   async clearQueue(actorId: string) {
     const queueUrl = configuration().sampleSqsQueueUrl;
+    if (!queueUrl) {
+      throw new Error('SAMPLE_SQS_QUEUE_URL is required');
+    }
     const queueId = queueUrl.split('/').pop() ?? queueUrl;
 
     try {

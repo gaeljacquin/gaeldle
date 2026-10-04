@@ -378,23 +378,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/image-gen/generate-images/{imageGenId}/stream": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Stream image generation progress via SSE */
-        get: operations["ImageGenRouter_stream"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/clue/generate-clue": {
         parameters: {
             query?: never;
@@ -1237,7 +1220,7 @@ export interface operations {
             };
         };
         responses: {
-            200: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1304,7 +1287,7 @@ export interface operations {
             };
         };
         responses: {
-            200: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1332,25 +1315,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ImageGenStatusResponseDto"];
                 };
-            };
-        };
-    };
-    ImageGenRouter_stream: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                imageGenId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

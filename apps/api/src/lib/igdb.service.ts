@@ -63,7 +63,7 @@ export class IgdbService {
       throw new Error(`IGDB API error: ${response.statusText}`);
     }
 
-    return response.json();
+    return (await response.json()) as IgdbGame[];
   }
 
   async discoverCandidates(limit = 20): Promise<IgdbGame[]> {
@@ -96,7 +96,7 @@ export class IgdbService {
       throw new Error(`IGDB API error: ${response.statusText}`);
     }
 
-    return response.json();
+    return (await response.json()) as IgdbGame[];
   }
 
   private async getAccessToken(): Promise<string> {
@@ -119,7 +119,7 @@ export class IgdbService {
       throw new Error(`Twitch token error: ${response.statusText}`);
     }
 
-    const data: TwitchTokenResponse = await response.json();
+    const data = (await response.json()) as TwitchTokenResponse;
     this.accessToken = data.access_token;
     // Buffer by 60 seconds
     this.accessTokenExpiresAt = Date.now() + (data.expires_in - 60) * 1000;

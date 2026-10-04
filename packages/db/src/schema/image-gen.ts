@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   index,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -60,10 +61,12 @@ export const singleImageGenJobs = pgTable(
   'single_image_gen_job',
   {
     jobId: varchar('job_id', { length: 36 }).primaryKey(),
+    batchId: varchar('batch_id', { length: 36 }),
     actorId: varchar('actor_id', { length: 255 }).notNull(),
     igdbId: integer('igdb_id').notNull(),
     artStyle: varchar('art_style', { length: 255 }),
     provider: varchar('provider', { length: 255 }).notNull(),
+    input: jsonb('input'),
     status: varchar('status', { length: 16 })
       .$type<ImageGenStatus>()
       .notNull()
@@ -98,5 +101,31 @@ export const singleImageGenJobs = pgTable(
       table.status,
     ),
     index('single_image_gen_job_igdb_idx').on(table.igdbId),
+    index('single_image_gen_job_batch_idx').on(table.batchId),
+  ],
+);
+
+export const imageGenBatches = pgTable(
+  'image_gen_batch',
+  {
+    batchId: varchar('batch_id', { length: 36 }).primaryKey(),
+    actorId: varchar('actor_id', { length: 255 }).notNull(),
+    params: jsonb('params').notNull(),
+    status: varchar('status', { length: 16 })
+      .$type<ImageGenStatus>()
+      .notNull()
+      .default('pending'),
+    total: integer('total').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
+      .defaultNow()
+      .notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }),
+    completedAt: timestamp('completed_at', {
+      withTimezone: true,
+      mode: 'date',
+    }),
+  },
+  (table) => [
+    index('image_gen_batch_actor_status_idx').on(table.actorId, table.status),
   ],
 );

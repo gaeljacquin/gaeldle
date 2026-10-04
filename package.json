@@ -8,7 +8,7 @@
     "codegen": "pnpm --filter @workspace/api generate:openapi && pnpm --filter @workspace/api-client generate",
     "dev": "turbo run dev",
     "lint": "turbo lint --filter '!@workspace/ui'",
-    "lint:fix": "turbo lint --filter '!@workspace/ui' -- --fix",
+    "lint:fix": "turbo run lint:fix --filter '!@workspace/ui'",
     "lint:web": "turbo lint --filter @workspace/web",
     "db:generate": "pnpm --filter ./packages/db db:generate",
     "db:migrate": "pnpm --filter ./packages/db db:migrate",
@@ -39,15 +39,15 @@
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
-    "@types/node": "^26.6.2",
+    "@types/node": "^26.6.4",
     "husky": "^9.1.7",
-    "prettier": "^3.9.8",
-    "turbo": "^2.11.2"
+    "prettier": "^3.9.9",
+    "turbo": "^2.11.7"
   },
   "dependencies": {
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "motion": "^13.4.0",
+    "motion": "^13.5.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "zod": "^4.6.5"

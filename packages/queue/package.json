@@ -10,7 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "^3.1136.0",
+    "@aws-sdk/client-sqs": "^3.1146.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {

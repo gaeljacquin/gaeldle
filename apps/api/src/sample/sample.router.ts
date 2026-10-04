@@ -1,17 +1,17 @@
 import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { SampleService } from './sample.service';
+import { SampleService } from '@/sample/sample.service';
 import {
   type AuthenticatedRequest,
   HexclaveGuard,
-} from '../auth/hexclave.guard';
+} from '@/auth/hexclave.guard';
 import {
   SampleUploadImageDto,
   SampleSendMessageDto,
   SampleSendMessageResponseDto,
   SampleClearQueueResponseDto,
   UploadImageResponseDto,
-} from './sample.dto';
+} from '@/sample/sample.dto';
 
 @ApiTags('sample')
 @Controller('api/sample')

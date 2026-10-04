@@ -27,7 +27,7 @@ apps/api/src/
 
 ### Rules
 
-- **Runtime-safe imports**: Use relative paths within `apps/api` (for example, `./app.module` or `../db/database.service`) and for its imports of workspace TypeScript source entrypoints. Vercel compiles and traces the source entrypoint without Nest's webpack alias resolution. TypeScript-only aliases fail at runtime, and workspace package exports that point to `.ts` files can refer to missing files after Vercel emits `.js`. Relative source imports let Vercel trace and compile these dependencies together.
+- **API imports and deployment**: Use `@/` for API-local imports and `@workspace/*` for shared packages. The Nest webpack build resolves the aliases and bundles workspace TypeScript sources. `apps/api/vercel.json` configures Vercel's NestJS builder to run the build and package `dist/main.js`; deploying `src/main.ts` directly bypasses this bundling and can leave unresolved aliases or workspace `.ts` exports in the function.
 - **OpenAPI First with NestJS Decorators**: Define API endpoints using standard NestJS controllers decorated with `@Controller`, `@ApiTags`, `@ApiOperation`, `@ApiBody`, `@ApiParam`, `@ApiQuery`, and `@ApiResponse`.
 - **DTO Validation & Schema Specs**: Annotate DTO properties with `@ApiProperty` or `@ApiPropertyOptional` so `@nestjs/swagger` accurately reflects property types in `openapi.json`.
 - **Codegen Pipeline**: Run `pnpm codegen` (or `pnpm --filter @workspace/api generate:openapi && pnpm --filter @workspace/api-client generate`) whenever backend endpoints change. This updates `apps/api/openapi.json` and regenerates `packages/api-client/src/schema.d.ts`. Both generated files are committed to git.

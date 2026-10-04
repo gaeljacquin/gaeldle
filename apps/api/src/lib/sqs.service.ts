@@ -6,7 +6,7 @@ import {
   ReceiveMessageCommand,
   DeleteMessageCommand,
 } from '@aws-sdk/client-sqs';
-import configuration from '../config/configuration';
+import configuration from '@/config/configuration';
 
 @Injectable()
 export class SqsService {

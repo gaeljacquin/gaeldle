@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DatabaseService } from '../db/database.service';
-import { GamesService } from '../games/games.service';
-import { AiService } from '../lib/ai.service';
+import { DatabaseService } from '@/db/database.service';
+import { GamesService } from '@/games/games.service';
+import { AiService } from '@/lib/ai.service';
 import {
   domainEvents,
   gamesClueHistory,
   type Game,
   type GameClueHistory,
-} from '../../../../packages/db/src/schema/index';
-import { getAiProvider } from '../../../../packages/shared/src/index';
+} from '@workspace/db';
+import { getAiProvider } from '@workspace/shared';
 import { eq, desc } from 'drizzle-orm';
 
 @Injectable()

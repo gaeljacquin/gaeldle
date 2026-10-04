@@ -6,7 +6,7 @@ import {
 import { eq, sql, and, isNull } from 'drizzle-orm';
 import sharp from 'sharp';
 import { randomUUID } from 'node:crypto';
-import { DatabaseService } from '../db/database.service';
+import { DatabaseService } from '@/db/database.service';
 import {
   games,
   domainEvents,
@@ -15,15 +15,15 @@ import {
   type ArtStyleValue,
   imageGenBatches,
   singleImageGenJobs,
-} from '../../../../packages/db/src/schema/index';
-import type { ImageGenStatus } from '../../../../packages/db/src/schema/index';
-import { AiService } from '../lib/ai.service';
-import { S3Service } from '../lib/s3.service';
-import { R2Service } from '../lib/r2.service';
-import { IMAGE_GEN_DIR } from '../../../../packages/shared/src/index';
-import { GamesService } from '../games/games.service';
-import configuration from '../config/configuration';
-import { QueueClient } from '../../../../packages/queue/src/index';
+} from '@workspace/db';
+import type { ImageGenStatus } from '@workspace/db';
+import { AiService } from '@/lib/ai.service';
+import { S3Service } from '@/lib/s3.service';
+import { R2Service } from '@/lib/r2.service';
+import { IMAGE_GEN_DIR } from '@workspace/shared';
+import { GamesService } from '@/games/games.service';
+import configuration from '@/config/configuration';
+import { QueueClient } from '@workspace/queue';
 
 interface GenerateImageInput {
   igdbId: number;

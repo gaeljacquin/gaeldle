@@ -1,8 +1,8 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { GamesService } from './games.service';
-import { HexclaveGuard } from '../auth/hexclave.guard';
-import { GameListResponseDto } from './dto/games.dto';
+import { GamesService } from '@/games/games.service';
+import { HexclaveGuard } from '@/auth/hexclave.guard';
+import { GameListResponseDto } from '@/games/dto/games.dto';
 
 @ApiTags('wishlists')
 @Controller('api/wishlists')

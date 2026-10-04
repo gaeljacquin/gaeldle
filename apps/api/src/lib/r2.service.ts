@@ -1,6 +1,6 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { AppConfiguration } from '../config/configuration';
+import type { AppConfiguration } from '@/config/configuration';
 
 @Injectable()
 export class R2Service {

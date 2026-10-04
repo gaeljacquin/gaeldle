@@ -17,11 +17,11 @@ import {
   ApiBody,
   ApiParam,
 } from '@nestjs/swagger';
-import { GamesService } from './games.service';
+import { GamesService } from '@/games/games.service';
 import {
   HexclaveGuard,
   type AuthenticatedRequest,
-} from '../auth/hexclave.guard';
+} from '@/auth/hexclave.guard';
 import {
   SyncGameDto,
   SyncGameResponseDto,
@@ -34,7 +34,7 @@ import {
   UpdateBulkGamesResponseDto,
   ValidateIgdbIdAddDto,
   ValidateIgdbIdAddResponseDto,
-} from './dto/games.dto';
+} from '@/games/dto/games.dto';
 
 @ApiTags('games')
 @Controller('api/games')

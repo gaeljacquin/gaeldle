@@ -16,11 +16,11 @@ import {
   ApiBody,
   ApiParam,
 } from '@nestjs/swagger';
-import { ImageGenService } from './image-gen.service';
+import { ImageGenService } from '@/image-gen/image-gen.service';
 import {
   type AuthenticatedRequest,
   HexclaveGuard,
-} from '../auth/hexclave.guard';
+} from '@/auth/hexclave.guard';
 import {
   GenerateImageDto,
   GenerateImageResponseDto,
@@ -30,7 +30,7 @@ import {
   ImageGenStatusResponseDto,
   DeleteGeneratedImageDto,
   DeleteGeneratedImageResponseDto,
-} from './dto/image-gen.dto';
+} from '@/image-gen/dto/image-gen.dto';
 
 @ApiTags('imageGen')
 @Controller('api/image-gen')

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IMAGE_AI_PROVIDERS } from '../../../../../packages/shared/src/index';
+import { IMAGE_AI_PROVIDERS } from '@workspace/shared';
 
 export class GenerateImageDto {
   @ApiProperty({ type: Number }) igdbId!: number;

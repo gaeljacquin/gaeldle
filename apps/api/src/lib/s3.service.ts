@@ -5,7 +5,7 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
-import { AppConfiguration } from '../config/configuration';
+import { AppConfiguration } from '@/config/configuration';
 
 @Injectable()
 export class S3Service {

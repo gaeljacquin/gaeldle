@@ -12,5 +12,9 @@
       }
     ]
   },
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/../src/$1",
+    "^@workspace/db$": "<rootDir>/../../../packages/db/src/schema/index.ts"
+  },
   "extensionsToTreatAsEsm": [".ts"]
 }

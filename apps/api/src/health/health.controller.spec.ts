@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, it, expect, jest } from '@jest/globals';
 import { HealthCheckService, HealthCheckResult } from '@nestjs/terminus';
-import { HealthController } from './health.controller';
-import { HealthService } from './health.service';
+import { HealthController } from '@/health/health.controller';
+import { HealthService } from '@/health/health.service';
 
 describe('HealthController', () => {
   let healthController: HealthController;

@@ -95,6 +95,11 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1",
+      "^@workspace/db$": "<rootDir>/../../../packages/db/src/schema/index.ts",
+      "^@workspace/shared$": "<rootDir>/../../../packages/shared/src/index.ts"
+    },
     "extensionsToTreatAsEsm": [
       ".ts"
     ]

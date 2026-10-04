@@ -5,7 +5,7 @@ import {
   HttpCode,
   Post,
 } from '@nestjs/common';
-import { HexclaveService } from './hexclave.service';
+import { HexclaveService } from '@/auth/hexclave.service';
 
 type HexclaveSignInBody = {
   email?: string;

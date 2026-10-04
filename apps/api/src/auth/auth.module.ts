@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { HexclaveAuthController } from './hexclave.controller';
-import { HexclaveGuard } from './hexclave.guard';
-import { HexclaveService } from './hexclave.service';
+import { HexclaveAuthController } from '@/auth/hexclave.controller';
+import { HexclaveGuard } from '@/auth/hexclave.guard';
+import { HexclaveService } from '@/auth/hexclave.service';
 
 @Module({
   controllers: [HexclaveAuthController],

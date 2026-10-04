@@ -8,11 +8,11 @@ import {
   jest,
 } from '@jest/globals';
 import { ClueService } from './clue.service';
-import { DatabaseService } from '../db/database.service';
-import { GamesService } from '../games/games.service';
-import { AiService } from '../lib/ai.service';
+import { DatabaseService } from '@/db/database.service';
+import { GamesService } from '@/games/games.service';
+import { AiService } from '@/lib/ai.service';
 import { NotFoundException } from '@nestjs/common';
-import { domainEvents } from '../../../../packages/db/src/schema/index';
+import { domainEvents } from '@workspace/db';
 
 describe('ClueService', () => {
   let service: ClueService;

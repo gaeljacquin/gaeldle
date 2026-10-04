@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { inArray } from 'drizzle-orm';
-import { DatabaseService } from '../db/database.service';
-import { games, domainEvents } from '../../../../packages/db/src/schema/index';
+import { DatabaseService } from '@/db/database.service';
+import { games, domainEvents } from '@workspace/db';
 import type {
   DiscoverCandidateDto as DiscoverCandidate,
   DiscoverApplyResultDto as DiscoverApplyResult,
-} from './dto/discover.dto';
-import { IgdbService } from '../lib/igdb.service';
-import { GamesService } from '../games/games.service';
+} from '@/discover/dto/discover.dto';
+import { IgdbService } from '@/lib/igdb.service';
+import { GamesService } from '@/games/games.service';
 
 @Injectable()
 export class DiscoverService {

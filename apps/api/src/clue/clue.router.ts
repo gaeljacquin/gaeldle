@@ -21,7 +21,7 @@ import { ClueService } from './clue.service';
 import {
   HexclaveGuard,
   type AuthenticatedRequest,
-} from '../auth/hexclave.guard';
+} from '@/auth/hexclave.guard';
 import {
   GenerateClueDto,
   GenerateClueResponseDto,
@@ -29,7 +29,7 @@ import {
   ArchiveClueDto,
   DeleteClueHistoryDto,
   GameClueHistoryDto,
-} from './dto/clue.dto';
+} from '@/clue/dto/clue.dto';
 
 @ApiTags('clue')
 @Controller('api/clue')

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AI_PROVIDERS } from '../../../../../packages/shared/src/index';
+import { AI_PROVIDERS } from '@workspace/shared';
 
 export class GenerateClueDto {
   @ApiProperty({ type: Number }) igdbId!: number;

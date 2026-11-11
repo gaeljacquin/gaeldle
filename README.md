@@ -1,61 +1,31 @@
 # [Gaeldle](https://gaeldle.gaeljacquin.com)
 
-A collection of video game guessing challenges. Test your gaming knowledge across six different modes, each with its own mechanics and difficulty level.
+Gaeldle is a collection of Wordle-style games inspired by [Gamedle](https://gamedle.wtf/) and [Wikitrivia](https://wikitrivia.tomjwatson.com/).
 
-Built with Next.js and NestJS in a Turborepo monorepo. Authentication uses Hexclave (`@hexclave/next` in the web app and `HexclaveGuard` in the API). See the [architecture overview](docs/architecture.md) for details.
+## Cover Art
 
----
+Identify the game from their cover art.
 
-## Getting Started
+## Artwork
 
-### Prerequisites
+Guess the game from their artwork.
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- [VS Code](https://code.visualstudio.com/download)
-- [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+## Image Gen
 
-### Setup
+Guess the game from a text-to-image rendition.
 
-1. Clone the repository.
-2. Open the folder in VS Code.
-3. When prompted, click **Reopen in Container** (or use the Command Palette: `Dev Containers: Reopen in Container`).
+## Clue
 
-> [!IMPORTANT]
-> **Security Requirement**: Never run `ni` or any development commands on your host machine. All work must happen inside the container to isolate the host from potentially compromised npm packages.
+Guess the game from a textual reimagining.
 
----
+## Timeline
 
-## Documentation Index
+Arrange games in chronological order.
 
-### Game
+## Timeline 2
 
-| File                                     | Description                                                                 |
-| ---------------------------------------- | --------------------------------------------------------------------------- |
-| [docs/game-modes.md](docs/game-modes.md) | All game modes: rules, mechanics, attempt limits, and how to play each one. |
+Place each game in chronological order.
 
-### Developer Docs
+## Specifications
 
-| File                                                                       | Description                                                                                              |
-| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| [docs/tech-stack.md](docs/tech-stack.md)                                   | The technology stack: monorepo tools, frontend/backend frameworks, database, and auth.                   |
-| [docs/architecture.md](docs/architecture.md)                 | Monorepo topology, ports, CORS config, health checks, environment variables, and code quality standards. |
-| [docs/backend-conventions.md](docs/backend-conventions.md)   | NestJS API structure, OpenAPI spec generation, controllers, and service separation rules.             |
-| [docs/frontend-conventions.md](docs/frontend-conventions.md) | Next.js 16 tech stack, theming, component/view/hook separation rules, and agent skills.                  |
-| [docs/commands.md](docs/commands.md)                         | CLI commands for running, building, testing, linting, and cleaning the monorepo.                         |
-| [docs/workflows.md](docs/workflows.md)                       | Step-by-step workflows for common tasks such as adding a new API endpoint or web page.                   |
-
-### OpenAPI Codegen
-
-API contracts are shared between `apps/api` and `apps/web` via `apps/api/openapi.json` and the `@workspace/api-client` package:
-
-```bash
-pnpm codegen
-```
-
-This boots NestJS to dump `apps/api/openapi.json` and generates typed TypeScript bindings in `packages/api-client/src/schema.d.ts`. Both generated files are checked into git and should be committed after backend API changes.
-
----
-
-## License
-
-MIT License
+Deduce the game from their specifications.
